@@ -26,6 +26,18 @@ export class MollieToken extends Model {
     @column({ type: "datetime" })
     expiresOn: Date;
 
+    @column({
+        type: "datetime", beforeSave(old?: any) {
+            if (old !== undefined) {
+                return old;
+            }
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    createdAt: Date
+
     static verbose = true
 
     static knownTokens: Map<string, MollieToken> = new Map()
@@ -66,6 +78,13 @@ export class MollieToken extends Model {
             await sleep(200)
         }
         return this.accessToken
+    }
+
+    async refreshIfNeeded() {
+        if (this.expiresOn < new Date()) {
+            await this.refresh()
+            await sleep(200)
+        }
     }
 
     async authRequest(method: string, path: string, data = {}) {
@@ -130,6 +149,7 @@ export class MollieToken extends Model {
 
                             if (response.statusCode == 204) {
                                 resolve(undefined);
+                                return
                             }
 
                             let json: any;
@@ -208,6 +228,17 @@ export class MollieToken extends Model {
         }
         throw new SimpleError({ code: "", message: "Something went wrong in the response"})
 
+    }
+
+    /**
+    * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
+    */
+    async revoke(): Promise<void> {
+        await MollieToken.request("DELETE", "/oauth2/tokens", {
+            token_type_hint: "refresh_token",
+            token: this.refreshToken,
+        }, "urlencoded")
+        await this.delete()
     }
 
     /**

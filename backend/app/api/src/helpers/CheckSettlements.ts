@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { MolliePayment, Payment } from '@stamhoofd/models';
+import { MolliePayment, MollieToken, Payment } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/structures'
 import axios from 'axios';
 
@@ -22,7 +22,6 @@ type MolliePaymentJSON = {
 
 let lastSettlementCheck: Date | null = null
 
-// Check settlements once a week on tuesday morning/night
 export async function checkSettlements(checkAll = false) {
     if (!checkAll && lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 6 * 24 * 60 * 60 * 1000) || new Date().getDay() != 2)) {
         console.log("Skip settlement check")
@@ -32,19 +31,45 @@ export async function checkSettlements(checkAll = false) {
     console.log("Checking settlements...")
     lastSettlementCheck = new Date()
 
-    // Check last 2 weeks
+    // Mollie payment is required
+    const token = process.env.MOLLIE_ORGANIZATION_TOKEN
+    if (!token) {
+        console.error("Missing mollie organization token")
+        return
+    }
+    await this.checkSettlementsFor(token, checkAll)
+
+    // Loop all mollie tokens created after given date (when settlement permission was added)
+    try {
+        const mollieTokens = await MollieToken.all()
+        for (const token of mollieTokens) {
+            if (token.createdAt < new Date(2021, 8 /* september! */, 8)) {
+                console.log("Skipped mollie token that is too old")
+            } else {
+                try {
+                    await token.refreshIfNeeded()
+                    await this.checkSettlementsFor(token.accessToken, checkAll)
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+        }
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+// Check settlements once a week on tuesday morning/night
+export async function checkSettlementsFor(token: string, checkAll = false) {
+    // Check last 2 weeks, unless we check them all
     const d = new Date()
     d.setDate(d.getDate() - 14)
 
+    console.log("Checking settlements for "+token+"...")
+
     // Loop all organizations with online paymetns the last week
     try {
-        // Mollie payment is required
-        const token = process.env.MOLLIE_ORGANIZATION_TOKEN
-        if (!token) {
-            throw new Error("Missing mollie organization token")
-        }
-        
-        const request = await axios.get("https://api.mollie.com/v2/settlements", {
+        const request = await axios.get("https://api.mollie.com/v2/settlements?limit="+(checkAll ? 250 : 2), {
             headers: {
                 "Authorization": "Bearer "+token
             }
@@ -62,7 +87,6 @@ export async function checkSettlements(checkAll = false) {
 
                     for (const settlement of settlements) {
                         const settledAt = new Date(settlement.settledAt)
-                        // Todo: only check settlements that are less than one week old
 
                         if (checkAll || settledAt > d) {
                             await updateSettlement(token, settlement)
@@ -84,17 +108,13 @@ export async function checkSettlements(checkAll = false) {
     } catch (e) {
         console.error(e)
     }
-
-    // Loop mollie clients
-
-    // Request all settlements
-
-    // Update payments
 }
 
-async function updateSettlement(token: string, settlement: MollieSettlement) {
+async function updateSettlement(token: string, settlement: MollieSettlement, fromPaymentId?: string) {
+    const limit = 250
+
     // Loop all payments of this settlement
-    const request = await axios.get("https://api.mollie.com/v2/settlements/"+settlement.id+"/payments?limit=250", {
+    const request = await axios.get("https://api.mollie.com/v2/settlements/"+settlement.id+"/payments?limit="+limit+(fromPaymentId ? ("&from="+encodeURIComponent(fromPaymentId)) : ""), {
         headers: {
             "Authorization": "Bearer "+token
         }
@@ -125,6 +145,11 @@ async function updateSettlement(token: string, settlement: MollieSettlement) {
             } else {
                 console.log("No mollie payment found for id "+mollie.id)
             }
+        }
+
+        // Check next page
+        if (molliePayments.length >= limit && request.data._links.next) {
+            await this.updateSettlement(token, settlement, molliePayments[molliePayments.length - 1].id)
         }
     } else {
         console.error(request.data)

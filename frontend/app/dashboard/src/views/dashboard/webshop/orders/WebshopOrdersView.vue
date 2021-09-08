@@ -141,7 +141,6 @@
 </template>
 
 <script lang="ts">
-import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
@@ -150,7 +149,7 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { Order, OrderStatus, PaymentStatus, PermissionLevel, WebshopOrdersQuery } from '@stamhoofd/structures';
+import { OrderStatus, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -164,7 +163,7 @@ import OrderView from './OrderView.vue';
 import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus"
 
 class SelectableOrder {
-    order: Order;
+    order: PrivateOrder;
     selected = false;
 
     /**
@@ -172,7 +171,7 @@ class SelectableOrder {
      */
     isRefreshed = false;
 
-    constructor(order: Order, selected = false, isRefreshed = true) {
+    constructor(order: PrivateOrder, selected = false, isRefreshed = true) {
         this.order = order;
         this.selected = selected
         this.isRefreshed = isRefreshed
@@ -232,7 +231,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     /**
      * Insert or update an order
      */
-    putOrder(order: Order) {
+    putOrder(order: PrivateOrder) {
         for (const [index, _order] of this.orders.entries()) {
             if (order.id === _order.order.id) {
                 // replace
@@ -243,7 +242,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.orders.push(new SelectableOrder(order, false, true))
     }
 
-    onNewOrders(orders: Order[]) {
+    onNewOrders(orders: PrivateOrder[]) {
         console.log("Received new orders from network")
         // Search for the orders and replace / add them
         for (const order of orders) {
@@ -359,7 +358,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return val;
     }
 
-    getSelectedOrders(): Order[] {
+    getSelectedOrders(): PrivateOrder[] {
         return this.orders
             .filter((order: SelectableOrder) => {
                 return order.selected;
@@ -460,7 +459,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    getPreviousOrder(order: Order): Order | null {
+    getPreviousOrder(order: PrivateOrder): PrivateOrder | null {
         for (let index = 0; index < this.sortedOrders.length; index++) {
             const _order = this.sortedOrders[index];
             if (_order.order.id == order.id) {
@@ -473,7 +472,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return null;
     }
 
-    getNextOrder(order: Order): Order | null {
+    getNextOrder(order: PrivateOrder): PrivateOrder | null {
         for (let index = 0; index < this.sortedOrders.length; index++) {
             const _order = this.sortedOrders[index];
             if (_order.order.id == order.id) {
@@ -527,7 +526,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
-    showOrderContextMenu(event, order: Order) {
+    showOrderContextMenu(event, order: PrivateOrder) {
         const displayedComponent = new ComponentWithProperties(OrderContextMenu, {
             x: event.clientX,
             y: event.clientY,

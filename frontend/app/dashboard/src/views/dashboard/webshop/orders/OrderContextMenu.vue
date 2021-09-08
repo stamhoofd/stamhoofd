@@ -26,7 +26,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, ContextMenuLine, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Order, OrderStatus, WebshopPreview } from '@stamhoofd/structures';
+import { OrderStatus, PrivateOrder } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../../mail/MailView.vue";
@@ -60,7 +60,7 @@ export default class OrderContextMenu extends Mixins(NavigationMixin) {
     }
 
     @Prop()
-    orders!: Order[];
+    orders!: PrivateOrder[];
 
     markAs(event) {
         const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {

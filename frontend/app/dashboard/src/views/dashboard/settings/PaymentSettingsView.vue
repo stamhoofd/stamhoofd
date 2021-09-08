@@ -143,10 +143,17 @@
                 <p class="st-list-description">
                     <LoadingButton :loading="loadingMollie">
                         <button class="button text" @click="mollieDashboard">
-                            <span class="icon edit" />
-                            <span>Gegevens in Mollie aanvullen of aanpassen</span>
+                            <span class="icon external" />
+                            <span>Ga naar het Mollie dashboard</span>
                         </button>
                     </LoadingButton>
+                </p>
+
+                <p class="st-list-description">
+                    <button class="button text" @click="disconnectMollie">
+                        <span class="icon trash" />
+                        <span>Account loskoppelen van Stamhoofd</span>
+                    </button>
                 </p>
             </template>
         </main>
@@ -463,9 +470,26 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         const state = new Buffer(crypto.getRandomValues(new Uint32Array(16))).toString('base64');
 
         const scope = "payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write settlements.read orders.read orders.write"
-        const url = "https://www.mollie.com/oauth2/authorize?client_id="+encodeURIComponent(client_id)+"&state="+encodeURIComponent(state)+"&scope="+encodeURIComponent(scope)+"&response_type=code&approval_prompt=auto&locale=nl_BE"
+        const url = "https://www.mollie.com/oauth2/authorize?client_id="+encodeURIComponent(client_id)+"&state="+encodeURIComponent(state)+"&scope="+encodeURIComponent(scope)+"&response_type=code&approval_prompt=force&locale=nl_BE"
 
         window.location.href = url;
+    }
+
+    async disconnectMollie() {
+        if (await CenteredMessage.confirm("Ben je zeker dat je Mollie wilt loskoppelen?", "Ja, loskoppelen", "Jouw Mollie account blijft behouden en kan je later terug koppelen als je dat wilt.")) {
+            try {
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/mollie/disconnect",
+                    decoder: Organization as Decoder<Organization>
+                })
+
+                SessionManager.currentSession!.setOrganization(response.data)
+                new Toast("Mollie is losgekoppeld", "success green").show()
+            } catch (e) {
+                new Toast("Loskoppelen mislukt", "error red").show()
+            }
+        }
     }
 
     async doLinkMollie(code: string) {

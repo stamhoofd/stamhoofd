@@ -6,15 +6,15 @@ import { Payment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { getPermissionLevelNumber, Order as OrderStruct, Payment as PaymentStruct, PermissionLevel } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, Payment as PaymentStruct, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
-type Body = AutoEncoderPatchType<OrderStruct>[]
-type ResponseBody = OrderStruct[]
+type Body = AutoEncoderPatchType<PrivateOrder>[]
+type ResponseBody = PrivateOrder[]
 
 export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new ArrayDecoder(OrderStruct.patchType() as Decoder<AutoEncoderPatchType<OrderStruct>>)
+    bodyDecoder = new ArrayDecoder(PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>)
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
@@ -111,9 +111,11 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         }
     
         return new Response(
-            (orders as (Order & { payment: Payment | null })[]).map(order => OrderStruct.create(Object.assign({
-                ...order
-            }, { payment: order.payment ? PaymentStruct.create(order.payment) : null }))),
+            (orders as (Order & { payment: Payment | null })[])
+                .map(order => PrivateOrder.create({
+                    ...order, 
+                    payment: order.payment ? PrivatePayment.create(order.payment) : null }
+                )),
         );
     }
 }

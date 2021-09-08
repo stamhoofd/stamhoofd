@@ -5,12 +5,12 @@ import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { Order as OrderStruct,PaginatedResponse, Payment as PaymentStruct,PermissionLevel,SortDirection, WebshopOrdersQuery } from "@stamhoofd/structures";
+import { PaginatedResponse, Payment as PaymentStruct,PermissionLevel, PrivateOrder, PrivatePayment, WebshopOrdersQuery } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = WebshopOrdersQuery
 type Body = undefined
-type ResponseBody = PaginatedResponse<OrderStruct, Query>
+type ResponseBody = PaginatedResponse<PrivateOrder, Query>
 
 export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = WebshopOrdersQuery as Decoder<WebshopOrdersQuery>
@@ -82,9 +82,10 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
        
         return new Response(
             new PaginatedResponse({ 
-                results: (orders as (Order & { payment: Payment | null })[]).map(order => OrderStruct.create(Object.assign({
-                    ...order
-                }, { payment: order.payment ? PaymentStruct.create(order.payment) : null }))),
+                results: (orders as (Order & { payment: Payment | null })[])
+                    .map(order => PrivateOrder.create({
+                        ...order, payment: order.payment ? PrivatePayment.create(order.payment) : null }
+                    )),
                 next: orders.length >= limit ? WebshopOrdersQuery.create({
                     updatedSince: orders[orders.length - 1].updatedAt ?? undefined,
                     afterNumber: orders[orders.length - 1].number ?? undefined

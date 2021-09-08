@@ -1,4 +1,4 @@
-import { CheckoutMethodType, Order, OrderStatusHelper, PaymentMethod, WebshopField } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PrivateOrder } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -7,7 +7,7 @@ export class OrdersExcelExport {
     /**
      * List of all products for every order
      */
-    static createOrderLines(orders: Order[]): XLSX.WorkSheet {
+    static createOrderLines(orders: PrivateOrder[]): XLSX.WorkSheet {
         /// Should we repeat all the duplicate fields for multiple lines in an order?
         const repeat = true
 
@@ -91,10 +91,7 @@ export class OrdersExcelExport {
     /**
      * List all orders
      */
-    static createOrders(orders: Order[]): XLSX.WorkSheet {
-        /// Should we repeat all the duplicate fields for multiple lines in an order?
-        const repeat = false
-
+    static createOrders(orders: PrivateOrder[], shouldIncludeSettements: boolean): XLSX.WorkSheet {
         const answerColumns = new Map<string, number>()
         const answerNames: string[] = []
 
@@ -124,6 +121,7 @@ export class OrdersExcelExport {
                 "Betaalmethode",
                 "Betaald",
                 "Status",
+                ...(shouldIncludeSettements ? ["Mollie uitbetalingsdatum", "Uitbetalingsmededeling"] : [])
             ],
         ];
 
@@ -161,15 +159,26 @@ export class OrdersExcelExport {
                 order.data.totalPrice / 100,
                 order.data.paymentMethod == PaymentMethod.Transfer ? "Overschrijving" : order.data.paymentMethod,
                 order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald",
-                OrderStatusHelper.getName(order.status)
+                OrderStatusHelper.getName(order.status),
+                ...(shouldIncludeSettements ? 
+                    (order.payment?.settlement ? [Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.payment.settlement.settledAt)), order.payment.settlement.reference] : ["/", "/"])
+                     : []
+                )
             ]);
         }
 
-        this.deleteEmptyColumns(wsData)
+        // Delete after
+        this.deleteEmptyColumns(wsData, shouldIncludeSettements ? 2 : 0)
 
         const ws = XLSX.utils.aoa_to_sheet(wsData, { cellStyles: true });
-        this.formatColumn(wsData[0].length - 4, "€0.00", ws)
-        this.formatColumn(wsData[0].length - 5, "€0.00", ws)
+        const offset = shouldIncludeSettements ? 2 : 0
+        this.formatColumn(wsData[0].length - 4 - offset, "€0.00", ws)
+        this.formatColumn(wsData[0].length - 5 - offset, "€0.00", ws)
+
+        if (shouldIncludeSettements) {
+            this.formatColumn(wsData[0].length - 1, "€0.00", ws)
+        }
+
 
         // Set column width
         ws['!cols'] = []
@@ -189,6 +198,8 @@ export class OrdersExcelExport {
                 ws['!cols'].push({width: 16});
             } else if (column.toLowerCase().includes("product")) {
                 ws['!cols'].push({width: 40});
+            } else if (column.toLowerCase().includes("uitbetaling")) {
+                ws['!cols'].push({width: 25});
             } else {
                 ws['!cols'].push({width: 13});
             }
@@ -200,7 +211,79 @@ export class OrdersExcelExport {
     /**
      * List all amount per product variant
      */
-    static createProducts(orders: Order[]): XLSX.WorkSheet {
+    static createSettlements(orders: PrivateOrder[]): XLSX.WorkSheet {
+        
+        // Columns
+        const wsData: (string | number)[][] = [
+            [
+                "Mededeling",
+                "Datum",
+                "Totaal uitbetaald",
+                "Totaal van deze bestellingen"
+            ],
+        ];
+
+        const counter: Map<string, { reference: string, settledAt: Date, amount: number; total: number}> = new Map()
+
+        for (const order of orders) {
+            if (order.payment?.settlement) {
+                const settlement = order.payment.settlement
+                
+                const existing = counter.get(settlement.reference)
+                if (existing) {
+                    existing.settledAt = settlement.settledAt
+                    existing.total = settlement.amount
+                    existing.amount += order.payment.price
+                } else {
+                    counter.set(settlement.reference, {
+                        reference: settlement.reference,
+                        settledAt: settlement.settledAt,
+                        amount: order.payment.price,
+                        total: settlement.amount
+                    })
+                }
+            }
+        }
+
+        // Sort by date
+        const arr = Array.from(counter.values())
+        arr.sort((a, b) => Sorter.byDateValue(a.settledAt, b.settledAt))
+
+         for (const item of arr) {
+          
+            wsData.push([
+                item.reference,
+                Formatter.capitalizeFirstLetter(Formatter.dateWithDay(item.settledAt)),
+                item.total / 100,
+                item.amount / 100
+            ]);
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        this.formatColumn(wsData[0].length - 1, "€0.00", ws)
+        this.formatColumn(wsData[0].length - 2, "€0.00", ws)
+
+        // Set column width
+        ws['!cols'] = []
+        for (const column of wsData[0]) {
+            if (typeof column != "string") {
+                continue
+            }
+            if (column.toLowerCase().includes("totaal") || column.toLowerCase().includes("datum")) {
+                ws['!cols'].push({width: 25});
+            } else {
+                ws['!cols'].push({width: 20});
+            }
+        }
+
+        return ws
+    }
+
+    /**
+     * List all amount per product variant
+     */
+    static createProducts(orders: PrivateOrder[]): XLSX.WorkSheet {
         
         // Columns
         const wsData: (string | number)[][] = [
@@ -293,9 +376,9 @@ export class OrdersExcelExport {
         }
     }
 
-    static deleteEmptyColumns(wsData: (string | number)[][]) {
+    static deleteEmptyColumns(wsData: (string | number)[][], skipLast = 0) {
         // Delete empty columns
-        for (let index = wsData[0].length - 1; index >= 0; index--) {
+        for (let index = wsData[0].length - 1 - skipLast; index >= 0; index--) {
             let empty = true
             for (const row of wsData.slice(1)) {
                 const value = row[index]
@@ -321,12 +404,26 @@ export class OrdersExcelExport {
         }
     }
 
-    static export(orders: Order[]) {
+    static export(orders: PrivateOrder[]) {
         const wb = XLSX.utils.book_new();
+
+        let shouldIncludeSettements = false
+
+        for (const order of orders) {
+            if (order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.settlement) {
+                shouldIncludeSettements = true
+            }
+        }
+        
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), "Bestellingen + producten");
-        XLSX.utils.book_append_sheet(wb, this.createOrders(orders), "Bestellingen");
+        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), "Bestellingen");
         XLSX.utils.book_append_sheet(wb, this.createProducts(orders), "Producten");
+
+        if (shouldIncludeSettements) {
+            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Mollie uitbetalingen");
+        }
+        
 
         // todo: also add other sheets
         XLSX.writeFile(wb, "bestellingen.xlsx");

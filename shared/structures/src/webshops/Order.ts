@@ -1,6 +1,6 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { Payment } from '../members/Payment';
+import { Payment, PrivatePayment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';
 import { Checkout } from './Checkout';
 
@@ -98,6 +98,11 @@ export class Order extends AutoEncoder {
         } 
     })
     status: OrderStatus
+}
+
+export class PrivateOrder extends Order {
+    @field({ decoder: PrivatePayment, nullable: true })
+    payment: PrivatePayment | null
 }
 
 export class OrderResponse extends AutoEncoder {

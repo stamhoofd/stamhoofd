@@ -19,12 +19,10 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, ContextMenuLine, Spinner, Toast } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
-import { Order, OrderStatus, WebshopPreview } from '@stamhoofd/structures';
+import { OrderStatus, PrivateOrder } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../../mail/MailView.vue";
@@ -55,11 +53,11 @@ export default class OrderStatusContextMenu extends Mixins(NavigationMixin) {
     }
 
     @Prop()
-    orders!: Order[];
+    orders!: PrivateOrder[];
 
     markAs(status: OrderStatus) {
         this.webshopManager.patchOrders(
-            this.orders.map(o => Order.patch({ status, id: o.id }))
+            this.orders.map(o => PrivateOrder.patch({ status, id: o.id }))
         ).then((orders) => {
             new Toast("Status gewijzigd", "success").setHide(1000).show()
 

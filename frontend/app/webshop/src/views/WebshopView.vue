@@ -233,6 +233,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         })
 
         const path = this.webshop.removeSuffix(UrlHelper.shared.getParts());
+        const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
         HistoryManager.setUrl(this.webshop.getUrlSuffix())
 
@@ -243,17 +244,21 @@ export default class WebshopView extends Mixins(NavigationMixin){
             const secret = path[1];
             this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
         } else if (path.length == 1 && path[0] == 'payment') {
-            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { server: WebshopManager.server, finishedHandler: (payment: Payment | null) => {
-                if (payment && payment.status == PaymentStatus.Succeeded) {
-                    this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), false, 1);
-                } else {
-                    this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
-                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
-                    this.resumeStep(CheckoutStepType.Payment).catch(e => {
-                        console.error(e)
-                    })
-                }
-            } }), false);
+            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { 
+                server: WebshopManager.server, 
+                paymentId: params.get("id"),
+                finishedHandler: (payment: Payment | null) => {
+                    if (payment && payment.status == PaymentStatus.Succeeded) {
+                        this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), false, 1);
+                    } else {
+                        this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                        new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                        this.resumeStep(CheckoutStepType.Payment).catch(e => {
+                            console.error(e)
+                        })
+                    }
+                } 
+            }), false);
         } else if (path.length == 2 && path[0] == 'checkout') {
             const stepName = Formatter.capitalizeFirstLetter(path[1])
             if (Object.values(CheckoutStepType).includes(stepName as any)) {

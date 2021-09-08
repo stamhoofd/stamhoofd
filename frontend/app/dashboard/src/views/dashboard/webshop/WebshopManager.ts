@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonb
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { SessionManager } from "@stamhoofd/networking";
-import { Order, PaginatedResponse, PaginatedResponseDecoder, PrivateWebshop, TicketPrivate, Version, Webshop, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { EventBus } from "../../../../../../shared/components";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -35,7 +35,7 @@ export class WebshopManager {
     /**
      * Listen for new orders that are being fetched or loaded
      */
-    ordersEventBus = new EventBus<string, Order[]>()
+    ordersEventBus = new EventBus<string, PrivateOrder[]>()
 
     constructor(preview: WebshopPreview) {
         this.preview = preview
@@ -220,10 +220,10 @@ export class WebshopManager {
             DBOpenRequest.onerror = (event) => {
                 console.error(event)
                 
-                // Try to delete this database
-                if (process.env.NODE_ENV == "development") {
-                    window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
-                }
+                // Try to delete this database if something goes wrong
+                //if (process.env.NODE_ENV == "development") {
+                window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
+                //}
 
                 reject(new SimpleError({
                     code: "not_supported",
@@ -298,7 +298,7 @@ export class WebshopManager {
         })
     }
 
-    async storeOrders(orders: Order[]) {
+    async storeOrders(orders: PrivateOrder[]) {
         const db = await this.getDatabase()
 
         return new Promise<void>((resolve, reject) => {
@@ -358,7 +358,7 @@ export class WebshopManager {
         })
     }
 
-    async streamOrders(callback: (order: Order) => void): Promise<void> {
+    async streamOrders(callback: (order: PrivateOrder) => void): Promise<void> {
         const db = await this.getDatabase()
 
         await new Promise<void>((resolve, reject) => {
@@ -378,7 +378,7 @@ export class WebshopManager {
                 if (cursor) {
                     const rawOrder = cursor.value
                      // Todo: need version fix here
-                    const order = Order.decode(new ObjectData(rawOrder, { version: Version }))
+                    const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
                     callback(order)
                     cursor.continue();
                 } else {
@@ -389,7 +389,7 @@ export class WebshopManager {
         })
 
         const owner = {}
-        this.ordersEventBus.addListener(owner, "fetched", (orders: Order[]) => {
+        this.ordersEventBus.addListener(owner, "fetched", (orders: PrivateOrder[]) => {
             for (const order of orders) {
                 callback(order)
             }
@@ -421,10 +421,10 @@ export class WebshopManager {
         })
     }
 
-    async getOrdersFromDatabase(): Promise<Order[]> {
+    async getOrdersFromDatabase(): Promise<PrivateOrder[]> {
         const db = await this.getDatabase()
 
-        return new Promise<Order[]>((resolve, reject) => {
+        return new Promise<PrivateOrder[]>((resolve, reject) => {
             const transaction = db.transaction(["orders"], "readonly");
 
             transaction.onerror = (event) => {
@@ -440,7 +440,7 @@ export class WebshopManager {
                 const rawOrders = request.result
 
                 // Todo: need version fix here
-                const orders = new ArrayDecoder(Order as Decoder<Order>).decode(new ObjectData(rawOrders, { version: Version }))
+                const orders = new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrders, { version: Version }))
                 resolve(orders)
             }
 
@@ -473,24 +473,24 @@ export class WebshopManager {
         })
     }
 
-    async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<Order, WebshopOrdersQuery>> {
+    async fetchOrders(query: WebshopOrdersQuery, retry = false): Promise<PaginatedResponse<PrivateOrder, WebshopOrdersQuery>> {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id+"/orders",
             query,
             shouldRetry: retry,
-            decoder: new PaginatedResponseDecoder(Order as Decoder<Order>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
+            decoder: new PaginatedResponseDecoder(PrivateOrder as Decoder<PrivateOrder>, WebshopOrdersQuery as Decoder<WebshopOrdersQuery>),
             owner: this
         })
 
         return response.data
     }
 
-    async patchOrders(patches: AutoEncoderPatchType<Order>[]) {
+    async patchOrders(patches: AutoEncoderPatchType<PrivateOrder>[]) {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "PATCH",
             path: "/webshop/"+this.preview.id+"/orders",
-            decoder: new ArrayDecoder(Order as Decoder<Order>),
+            decoder: new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>),
             body: patches,
             shouldRetry: false
         })
@@ -507,7 +507,7 @@ export class WebshopManager {
         return response.data
     }
 
-    async setlastFetchedOrder(order: Order) {
+    async setlastFetchedOrder(order: PrivateOrder) {
         this.lastFetchedOrder = {
             updatedAt: order.updatedAt,
             number: order.number!
@@ -604,7 +604,7 @@ export class WebshopManager {
             })
 
             while (query) {
-                const response: PaginatedResponse<Order, WebshopOrdersQuery> = await this.fetchOrders(query, retry)
+                const response: PaginatedResponse<PrivateOrder, WebshopOrdersQuery> = await this.fetchOrders(query, retry)
 
                 if (reset && !didClear) {
                     // Clear only if we have internet access
@@ -745,10 +745,10 @@ export class WebshopManager {
         })
     }
 
-    async getOrderFromDatabase(id: string): Promise<Order | undefined> {
+    async getOrderFromDatabase(id: string): Promise<PrivateOrder | undefined> {
         const db = await this.getDatabase()
 
-        return new Promise<Order | undefined>((resolve, reject) => {
+        return new Promise<PrivateOrder | undefined>((resolve, reject) => {
             const transaction = db.transaction(["orders"], "readonly");
 
             transaction.onerror = (event) => {
@@ -768,7 +768,7 @@ export class WebshopManager {
                     return
                 }
 
-                const order = (Order as Decoder<Order>).decode(new ObjectData(rawOrder, { version: Version }))
+                const order = (PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrder, { version: Version }))
                 resolve(order)
             }
 
