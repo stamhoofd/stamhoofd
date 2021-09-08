@@ -283,13 +283,10 @@ export class MollieToken extends Model {
                 status: response.status === "needs-data" ? MollieStatus.NeedsData : (response.status === "in-review" ? MollieStatus.InReview : (MollieStatus.Completed))
             });
         } catch (e) {
-            // if unauthorized: return null
-            if ((e.message as string).toLowerCase().includes("unauthorized")) {
-                return null;
-            }
-            throw e;
+            console.error("Error when requesting Mollie onboarding status:")
+            console.error(e)
+            return null;
         }
-       
     }
 
     async getProfileId(): Promise<string | null> {
