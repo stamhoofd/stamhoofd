@@ -2,8 +2,7 @@ import { Migration } from '@simonbackx/simple-database';
 import { column,Model } from '@simonbackx/simple-database';
 import { StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
-import { Country } from '../../../../../shared/structures/dist';
-
+import { Country } from "@stamhoofd/structures";
 import { City } from '../models/addresses/City';
 import { PostalCode } from '../models/addresses/PostalCode';
 import { Province } from '../models/addresses/Province';
