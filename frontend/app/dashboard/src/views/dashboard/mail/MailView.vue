@@ -621,20 +621,23 @@ export default class MailView extends Mixins(NavigationMixin) {
             totalScreenWidth = 0;
         }
         let { html } = await this.getHTML()
+        let subject = this.subject
+
 
         // Replacements
         const recipient = this.recipients[0]
         if (recipient) {
             for (const replacement of recipient.replacements) {
                 if (html) {
-                    html = html.replace("{{"+replacement.token+"}}", replacement.value)
+                    html = html.replaceAll("{{"+replacement.token+"}}", replacement.value)
                 }
+                subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
             }
         }
 
         // Include recipients
         const recipients = this.recipients.map(r => r.email).join(", ")
-        html = html.replace("<body>", "<body><p><strong>Aan (elk afzonderlijke e-mail):</strong> "+recipients+"</p><p><strong>Voorbeeld voor:</strong> "+encodeURI(recipient.email)+"</p><hr>")
+        html = html.replace("<body>", "<body><p><strong>Aan (elk afzonderlijke e-mail):</strong> "+recipients+"</p><p><strong>Onderwerp:</strong> "+subject+"</p><p><strong>Voorbeeld voor:</strong> "+encodeURI(recipient.email)+"</p><hr>")
 
         newWindow.document.write(html);
 

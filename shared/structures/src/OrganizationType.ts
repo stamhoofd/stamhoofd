@@ -30,6 +30,11 @@ export enum OrganizationType {
 }
 
 export class OrganizationTypeHelper {
+    static getName(type: OrganizationType) {
+        const l = this.getList()
+        return l.find(v => v.value === type)?.name ?? type.toString()
+    }
+    
     static getList() {
         return [
             {

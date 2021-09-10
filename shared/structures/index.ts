@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 110
+export const Version = 111
 
 // General
 export * from "./src/addresses/Address"
@@ -119,3 +119,5 @@ export * from "./src/admin/Admin"
 export * from "./src/admin/OrganizationSummary"
 export * from "./src/Graph"
 
+// Email
+export * from "./src/email/EmailAddressSettings"

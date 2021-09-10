@@ -10,9 +10,10 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, GlobalEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
+import { EmailAddress } from '@stamhoofd/email';
 import { Logger } from "@stamhoofd/logger"
 import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Invite, Token } from '@stamhoofd/structures';
+import { EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -103,28 +104,8 @@ export default class App extends Vue {
             const id = queryString.get('id')
             const token = queryString.get('token')
 
-            const toast = new Toast("Bezig met uitschrijven...", "spinner").setHide(null).show()
-
-            try {
-                NetworkManager.server.request({
-                    method: "POST",
-                    path: "/email/manage",
-                    body: {
-                        id,
-                        token,
-                        unsubscribedMarketing: true
-                    }
-                }).then(() => {
-                    toast.hide()
-                    new Toast("Je bent uitgeschreven!", "success green").setHide(10 * 1000).show()
-                }).catch(e => {
-                    console.error(e)
-                    toast.hide()
-                    Toast.fromError(e).show()
-                })
-            } catch (e) {
-                console.error(e)
-                toast.hide()
+            if (id && token) {
+                this.unsubscribe(id, token).catch(console.error)
             }
         }
 
@@ -199,6 +180,64 @@ export default class App extends Vue {
                     })
                 }).setDisplayStyle("popup").setAnimated(false));
             }
+        }
+    }
+
+    async unsubscribe(id: string, token: string) {
+        const toast = new Toast("Bezig met uitschrijven...", "spinner").setHide(null).show()
+
+        try {
+            const response = await NetworkManager.server.request({
+                method: "GET",
+                path: "/email/manage",
+                query: {
+                    id,
+                    token
+                },
+                decoder: EmailAddressSettings as Decoder<EmailAddressSettings>
+            })
+
+            const details = response.data
+            toast.hide()
+
+            let unsubscribe = true
+
+            if (details.unsubscribedMarketing) {
+                if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar klachten@stamhoofd.be")) {
+                    return
+                }
+
+                unsubscribe = false
+            } else {
+                if (!await CenteredMessage.confirm("Wil je dat we jou geen e-mails meer sturen?", "Ja, uitschrijven", "Hierna ontvang je geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email)) {
+                    return
+                }
+                toast.show()
+            }
+
+            
+
+            await NetworkManager.server.request({
+                method: "POST",
+                path: "/email/manage",
+                body: {
+                    id,
+                    token,
+                    unsubscribedMarketing: unsubscribe
+                }
+            })
+            toast.hide()
+
+            if (unsubscribe) {
+                new Toast("Top! Je ontvangt geen e-mails meer.", "success").setHide(15 * 1000).show()
+            } else {
+                new Toast("Je ontvangt vanaf nu terug e-mails.", "success").setHide(15 * 1000).show()
+            }
+            
+        } catch (e) {
+            console.error(e)
+            toast.hide()
+            Toast.fromError(e).show()
         }
     }
 

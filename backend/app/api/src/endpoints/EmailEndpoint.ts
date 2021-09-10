@@ -168,18 +168,20 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             }
 
             let html = email.html
+            let subject = email.subject
 
             for (const replacement of recipient.replacements) {
                 if (html) {
-                    html = html.replace("{{"+replacement.token+"}}", Formatter.escapeHtml(replacement.value))
+                    html = html.replaceAll("{{"+replacement.token+"}}", Formatter.escapeHtml(replacement.value))
                 }
+                subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
             }
 
             return {
                 from,
                 replyTo,
                 to: recipient.email,
-                subject: email.subject,
+                subject,
                 text: email.text ?? undefined,
                 html: html ?? undefined,
                 attachments
