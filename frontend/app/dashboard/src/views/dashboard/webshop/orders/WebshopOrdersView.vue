@@ -358,6 +358,16 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return val;
     }
 
+    get visibleSelectionCount(): number {
+        let val = 0;
+        this.filteredOrders.forEach((order) => {
+            if (order.selected) {
+                val++;
+            }
+        });
+        return val;
+    }
+
     getSelectedOrders(): PrivateOrder[] {
         return this.orders
             .filter((order: SelectableOrder) => {
@@ -439,7 +449,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get selectAll() {
-        return this.selectionCount - this.selectionCountHidden >= this.filteredOrders.length && this.filteredOrders.length > 0
+        return this.visibleSelectionCount >= this.filteredOrders.length && this.filteredOrders.length > 0
     }
 
     set selectAll(selected: boolean) {

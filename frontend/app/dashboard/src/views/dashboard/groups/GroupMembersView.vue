@@ -810,6 +810,16 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return val;
     }
 
+    get visibleSelectionCount(): number {
+        let val = 0;
+        this.filteredMembers.forEach((member) => {
+            if (member.selected) {
+                val++;
+            }
+        });
+        return val;
+    }
+
     toggleSort(field: string) {
         if (this.sortBy == field) {
             if (this.sortDirection == "ASC") {
@@ -875,7 +885,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get selectAll() {
-        return this.selectionCount - this.selectionCountHidden >= this.filteredMembers.length && this.filteredMembers.length > 0
+        return this.visibleSelectionCount >= this.filteredMembers.length && this.filteredMembers.length > 0
     }
 
     set selectAll(selected: boolean) {
