@@ -192,9 +192,9 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip } from "@stamhoofd/components"
+import { CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateWebshop, ProductType, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -219,6 +219,9 @@ import { WebshopManager } from "../WebshopManager";
         dateTime: Formatter.dateTimeWithDay.bind(Formatter),
         minutes: Formatter.minutes.bind(Formatter),
         capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
+    },
+    directives: {
+        tooltip: TooltipDirective
     }
 })
 export default class OrderView extends Mixins(NavigationMixin){
