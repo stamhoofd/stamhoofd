@@ -166,6 +166,14 @@
                     </figure>
                 </STListItem>
             </STList>
+
+            <div v-if="hasTickets" class="container">
+                <hr>
+                <h2>Tickets</h2>
+                <p>Is deze persoon zijn link kwijt, of is er een fout e-mailadres opgegeven? Dan kan je de volgende link bezorgen om de tickets opnieuw te laten downloaden.</p>
+
+                <input v-tooltip="'Klik om te kopiëren'" class="input" :value="orderUrl" readonly @click="copyElement">
+            </div>
         </main>
 
         <STToolbar v-if="hasWrite && order.payment && order.payment.method == 'Transfer'">
@@ -184,9 +192,9 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateWebshop } from '@stamhoofd/structures';
+import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateWebshop, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -267,6 +275,9 @@ export default class OrderView extends Mixins(NavigationMixin){
         return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
     }
 
+    get hasTickets() {
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product)
+    }
 
     goBack() {
         const order = this.getPreviousOrder(this.order!);
@@ -412,6 +423,30 @@ export default class OrderView extends Mixins(NavigationMixin){
             this.loadingPayment = false
             
         }
+    }
+
+    get orderUrl() {
+        return "https://"+this.webshop.getUrl(OrganizationManager.organization)+"/order/"+(this.order?.id ?? this.orderId)
+    }
+
+    copyElement(event) {
+        event.target.contentEditable = true;
+
+        document.execCommand('selectAll', false);
+        document.execCommand('copy')
+
+        event.target.contentEditable = false;
+
+        const displayedComponent = new ComponentWithProperties(Tooltip, {
+            text: "📋 Gekopieerd!",
+            x: event.clientX,
+            y: event.clientY + 10,
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+
+        setTimeout(() => {
+            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
+        }, 1000);
     }
 }
 </script>

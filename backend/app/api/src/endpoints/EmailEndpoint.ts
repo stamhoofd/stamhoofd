@@ -177,10 +177,18 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
                 subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
             }
 
+            let to = recipient.email
+
+            if (recipient.firstName && recipient.lastName) {
+                to = '"'+(recipient.firstName+" "+recipient.lastName).replace("\"", "\\\"")+"\" <"+to+">" 
+            } else if (recipient.firstName) {
+                to = '"'+recipient.firstName.replace("\"", "\\\"")+"\" <"+to+">" 
+            }
+
             return {
                 from,
                 replyTo,
-                to: recipient.email,
+                to,
                 subject,
                 text: email.text ?? undefined,
                 html: html ?? undefined,

@@ -400,3 +400,7 @@ export const crons = () => {
         isRunningCrons = false
     }
 };
+
+export function areCronsRunning(): boolean {
+    return isRunningCrons
+}

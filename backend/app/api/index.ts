@@ -1,9 +1,11 @@
 require('dotenv').config()
 import { Column, Database } from "@simonbackx/simple-database";
 import { CORSPreflightEndpoint, EncodedResponse, Request, Router, RouterServer } from "@simonbackx/simple-endpoints";
+import { Email } from "@stamhoofd/email";
 import { Version } from '@stamhoofd/structures';
+import { sleep } from "@stamhoofd/utility";
 
-import { crons } from './src/crons';
+import { areCronsRunning, crons } from './src/crons';
 import { AppVersionMiddleware } from "./src/helpers/AppVersionMiddleware";
 
 process.on("unhandledRejection", (error: Error) => {
@@ -48,8 +50,8 @@ const start = async () => {
     const cronInterval = setInterval(crons, 5 * 60 * 1000);
     crons()
 
-    const shutdown = () => {
-        console.log("Shutdown...")
+    const shutdown = async () => {
+        console.log("Shutting down...")
         // Disable keep alive
         routerServer.defaultHeaders = Object.assign(routerServer.defaultHeaders, { 'Connection': 'close' })
         if (routerServer.server) {
@@ -59,47 +61,60 @@ const start = async () => {
 
         clearInterval(cronInterval)
 
-        routerServer
-            .close()
-            .then(() => {
-                console.log("Server stopped");
+        try {
+            await routerServer.close()
+            console.log("HTTP server stopped");
+        } catch (err) {
+            console.error("Failed to stop HTTP server:");
+            console.error(err);
+        }
 
-                Database.end()
-                    .then(() => {
-                        console.log("MySQL connections closed");
+        try {
+            while (areCronsRunning()) {
+                console.log("Crons are still running. Waiting 2 seconds...")
+                await sleep(2000)
+            }
+        } catch (err) {
+            console.error("Failed to wait for crons to finish:");
+            console.error(err);
+        }
 
-                        // Should not be needed, but added for security
-                        process.exit(0);
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        process.exit(1);
-                    });
-            })
-            .catch(err => {
-                console.error(err);
-                Database.end()
-                    .then(() => {
-                        console.log("MySQL connections closed");
+        try {
+            while (Email.currentQueue.length > 0) {
+                console.log("Emails still in queue. Waiting 2 seconds...")
+                await sleep(2000)
+            }
+        } catch (err) {
+            console.error("Failed to wait for emails to finish:");
+            console.error(err);
+        }
 
-                        // Should not be needed, but added for security
-                        process.exit(1);
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        process.exit(1);
-                    });
-            });
+        try {
+            await Database.end()
+            console.log("MySQL connections closed");
+        } catch (err) {
+            console.error("Failed to close MySQL connection:")
+            console.error(err);
+        }
+
+        // Should not be needed, but added for security as sometimes a promise hangs somewhere
+        process.exit(0);
     };
 
     process.on("SIGTERM", () => {
         console.info("SIGTERM signal received.");
-        shutdown();
+        shutdown().catch((e) => {
+            console.error(e)
+            process.exit(1);
+        });
     });
 
     process.on("SIGINT", () => {
         console.info("SIGINT signal received.");
-        shutdown();
+        shutdown().catch((e) => {
+            console.error(e)
+            process.exit(1);
+        });
     });
 };
 

@@ -2064,10 +2064,10 @@
     "@sentry/types" "6.0.1"
     tslib "^1.9.3"
 
-"@simonbackx/simple-database@^1.18":
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.18.0.tgz#7bf69574a84080f855f01d5040fa69d0ac6fc60a"
-  integrity sha512-xlKnutNpbaOMVAPX84b4gIIsfhFSK++P+TXQ8/I9iFLozOJS0B4M1/z+Iri74zBr1g+BabAZIfdj97klK34J4w==
+"@simonbackx/simple-database@^1.19":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.19.0.tgz#41779fa7b7fae68ae3e0baaf289308baeb68a9d0"
+  integrity sha512-8t1I3fCL6oq+qV0oMIzbzhgbfPS7yTfhDHnDMTpaJ8Ppc1+tl4KTnmREu+jzONkbMeszW2WZ0rMf/imQ29TlxA==
   dependencies:
     colors "^1.4.0"
     mysql "^2.18.1"

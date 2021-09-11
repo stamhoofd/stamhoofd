@@ -29,6 +29,9 @@ export class Recipient extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     firstName: string | null = null
 
+    @field({ decoder: StringDecoder, nullable: true, version: 112 })
+    lastName: string | null = null
+
     @field({ decoder: EmailDecoder })
     email: string
 
