@@ -9,11 +9,6 @@ import { OrganizationType } from "../OrganizationType";
 import { UmbrellaOrganization } from "../UmbrellaOrganization";
 import { User } from "../User";
 
-export class OrganizationSummary extends Organization {
-    @field({ decoder: STBillingStatus })
-    billingStatus: STBillingStatus
-}
-
 export class OrganizationStats extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     activeWebshops: number;
@@ -29,6 +24,20 @@ export class OrganizationStats extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     activeAdmins: number;
+}
+
+export class OrganizationSummary extends Organization {
+    @field({ decoder: STBillingStatus })
+    billingStatus: STBillingStatus
+
+    @field({ decoder: DateDecoder })
+    createdAt: Date
+
+    @field({ decoder: DateDecoder, nullable: true })
+    lastActiveAt: Date | null = null
+
+    @field({ decoder: OrganizationStats })
+    stats: OrganizationStats
 }
 
 export class OrganizationOverview extends AutoEncoder {
