@@ -24,23 +24,23 @@
 
         <ContextMenuLine />
 
-        <ContextMenuItem v-if="waitingList" @click="acceptWaitingList">
+        <ContextMenuItem v-if="waitingList && hasWrite" @click="acceptWaitingList">
             Schrijf in
         </ContextMenuItem>
-        <ContextMenuItem v-else-if="hasWaitingList" @click="moveToWaitingList">
+        <ContextMenuItem v-else-if="hasWaitingList && hasWrite" @click="moveToWaitingList">
             Verplaatst naar wachtlijst
             <span slot="right" class="icon clock-small" />
         </ContextMenuItem>
 
-        <ContextMenuItem @click="deleteRegistration">
+        <ContextMenuItem v-if="hasWrite" @click="deleteRegistration">
             Uitschrijven
             <span slot="right" class="icon unregister" />
         </ContextMenuItem>
-        <ContextMenuItem @click="deleteRecords">
+        <ContextMenuItem v-if="hasWrite" @click="deleteRecords">
             <span slot="right" class="icon trash" />
             Gegevens gedeeltelijk wissen
         </ContextMenuItem>
-        <ContextMenuItem @click="deleteData">
+        <ContextMenuItem v-if="hasWrite" @click="deleteData">
             <span slot="right" class="icon trash" />
             Verwijderen
         </ContextMenuItem>
@@ -54,10 +54,11 @@ import { CenteredMessage, CenteredMessageButton, ContextMenu, Toast } from "@sta
 import { ContextMenuItem } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
 import { AppManager } from "@stamhoofd/networking";
-import { Group, MemberWithRegistrations } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, Group, MemberWithRegistrations, PermissionLevel } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { MemberManager } from "../../../classes/MemberManager";
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import MemberSummaryView from "../member/MemberSummaryView.vue";
 import SMSView from "../sms/SMSView.vue";
@@ -92,6 +93,25 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
         return AppManager.shared.isNative
     }
 
+    get hasWrite() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if (this.group && (!this.group.privateSettings || getPermissionLevelNumber(this.group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write))) {
+            return false
+        }
+
+        for (const member of this.members) {
+            for (const group of member.groups) {
+                if (!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+                    return false
+                }
+            }
+        }
+        
+        return true
+    }
     sms() {
         const displayedComponent = new ComponentWithProperties(SMSView, {
             members: this.members,
