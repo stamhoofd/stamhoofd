@@ -12,12 +12,9 @@
         ".yalc/@*/*",
         ".yalc/*"
     ],
-    "engines": {
-        "yarn": "1.19.0"
-    },
     "license": "AGPL-3.0-only",
     "scripts": {
-        "build": "cd shared/crypto && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../..",
+        "build": "yarn workspaces foreach run build",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
         "build:backend": "yarn build && cd backend && yarn build:full",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
@@ -102,7 +99,6 @@
     },
     "resolutions": {
         "prosemirror-model": "1.9.1",
-        "**/axios": "^0.21.1",
         "elliptic": "^6.5.4"
     }
 }
