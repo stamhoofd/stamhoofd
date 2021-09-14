@@ -3,18 +3,19 @@
     "version": "1.0.0",
     "private": true,
     "workspaces": [
+        "*",
         "frontend/app/*",
         "frontend/shared/*",
         "backend/app/*",
         "backend/shared/*",
         "shared/*",
-        "*",
         ".yalc/@*/*",
         ".yalc/*"
     ],
     "license": "AGPL-3.0-only",
     "scripts": {
-        "build": "yarn workspaces foreach run build",
+        "setup": "yarn install && yarn build",
+        "build": "yarn workspaces foreach -pt run build",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
         "build:backend": "yarn build && cd backend && yarn build:full",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
