@@ -7,6 +7,7 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Country } from '@stamhoofd/structures';
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
@@ -15,6 +16,9 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
     }
 })
 export default class VATNumberInput extends Vue {
+    @Prop({ required: true }) 
+    country!: Country;
+    
     @Prop({ default: "" }) 
     title: string;
 
@@ -71,8 +75,13 @@ export default class VATNumberInput extends Vue {
             return true
         }
 
+        if (this.VATNumberRaw.substr(0, 2) != this.country) {
+            // Add required country in VAT number
+            this.VATNumberRaw = this.country+this.VATNumberRaw
+        }
+
         const jsvat = await import(/* webpackChunkName: "jsvat" */ 'jsvat');
-        const result = jsvat.checkVAT(this.VATNumberRaw, [jsvat.belgium, jsvat.netherlands]);
+        const result = jsvat.checkVAT(this.VATNumberRaw, this.country === Country.Belgium ? [jsvat.belgium] : [jsvat.netherlands]);
         
         if (!result.isValid) {
             this.errorBox = new ErrorBox(new SimpleError({

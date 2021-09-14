@@ -61,10 +61,10 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox :title="hasCompanyNumber ? 'Bedrijfsnaam en rechtsvorm' : 'Officiële naam vereniging'" error-fields="businessName" :error-box="errorBox">
+                    <STInputBox :title="hasCompanyNumber ? 'Bedrijfsnaam en rechtsvorm' : 'Officiële naam vereniging'" error-fields="companyName" :error-box="errorBox">
                         <input
                             id="business-name"
-                            v-model="businessName"
+                            v-model="companyName"
                             class="input"
                             type="text"
                             :placeholder="country == 'BE' ? 'bv. Ruimtereis VZW' : 'bv. Ruimtereis vereniging'"
@@ -74,11 +74,11 @@
                     <p v-if="hasCompanyNumber && country == 'BE'" class="style-description-small">
                         Vul ook de rechtsvorm in, bv. VZW.
                     </p>
-                    <AddressInput v-if="hasCompanyNumber" v-model="businessAddress" :required="false" title="Maatschappelijke zetel" :validator="validator" />
+                    <AddressInput v-if="hasCompanyNumber" v-model="companyAddress" :required="false" title="Maatschappelijke zetel" :validator="validator" />
                 </div>
                 <div>
                     <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country != 'BE')" v-model="companyNumber" :country="country" placeholder="Jullie ondernemingsnummer" :validator="validator" :required="true" />
-                    <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" title="BTW-nummer" placeholder="Jullie BTW-nummer" :validator="validator" :required="true" />
+                    <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" title="BTW-nummer" placeholder="Jullie BTW-nummer" :country="country" :validator="validator" :required="true" />
                 </div>
             </div>
         </main>
@@ -161,26 +161,26 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
         this.$set(this.organizationPatch, "address", address)
     }
 
-    get businessAddress() {
-        return this.organization.meta.businessAddress
+    get companyAddress() {
+        return this.organization.meta.companyAddress
     }
 
-    set businessAddress(businessAddress: Address | null) {
+    set companyAddress(companyAddress: Address | null) {
         this.organizationPatch = this.organizationPatch.patch({ 
             meta: OrganizationMetaData.patch({
-                businessAddress
+                companyAddress
             })
         })
     }
 
-    get businessName() {
-        return this.organization.meta.businessName
+    get companyName() {
+        return this.organization.meta.companyName
     }
 
-    set businessName(businessName: string | null) {
+    set companyName(companyName: string | null) {
         this.organizationPatch = this.organizationPatch.patch({ 
             meta: OrganizationMetaData.patch({
-                businessName
+                companyName
             })
         })
     }
@@ -208,7 +208,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
             meta: OrganizationMetaData.patch({
                 companyNumber: hasCompanyNumber ? (this.companyNumber ?? "") : null,
                 VATNumber: hasCompanyNumber ? undefined : null,
-                businessAddress: hasCompanyNumber ? (this.businessAddress ?? this.address) : null,
+                companyAddress: hasCompanyNumber ? (this.companyAddress ?? this.address) : null,
             })
         })
     }
@@ -238,7 +238,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     get country() {
-        return this.businessAddress?.country ?? this.address.country
+        return this.companyAddress?.country ?? this.address.country
     }
 
     async save() {

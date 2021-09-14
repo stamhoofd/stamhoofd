@@ -49,11 +49,11 @@
                         <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
                     </template>
                 </main>
-                <aside class="legal-footer">
+                <div class="legal-footer">
                     <hr class="style-hr">
                     <div>
-                        <div>
-                            {{ organization.meta.businessName || organization.name }}{{ organization.meta.VATNumber || organization.meta.companyNumber ? (", "+(organization.meta.VATNumber || organization.meta.companyNumber)) : "" }}
+                        <aside>
+                            {{ organization.meta.companyName || organization.name }}{{ organization.meta.VATNumber || organization.meta.companyNumber ? (", "+(organization.meta.VATNumber || organization.meta.companyNumber)) : "" }}
                             <template v-if="organization.website">
                                 -
                             </template>
@@ -67,14 +67,14 @@
                                 Privacyvoorwaarden
                             </a>
                             <br>
-                            {{ organization.meta.businessAddress || organization.address }}
-                        </div>
+                            {{ organization.meta.companyAddress || organization.address }}
+                        </aside>
                         <div>
                             <a v-if="hasTickets" href="https://www.stamhoofd.be/ticketverkoop">Ticketverkoop via <Logo /></a>
                             <a v-else href="https://www.stamhoofd.be/webshops">Webshop via <Logo /></a>
                         </div>
                     </div>
-                </aside>
+                </div>
             </section>
         </main>
     </section>
@@ -425,7 +425,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                     }
                 }
 
-                > div {
+                > div, > aside {
                     &:first-child {
                         padding-right: 10px;
                     }

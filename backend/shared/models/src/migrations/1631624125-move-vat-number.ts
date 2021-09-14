@@ -14,6 +14,10 @@ export default new Migration(async () => {
             organization.meta.VATNumber = organization.privateMeta.VATNumber
             organization.meta.companyNumber = organization.privateMeta.VATNumber
             await organization.save()
+        } else {
+            // force update and updgrade of structures
+            organization.markAllChanged()
+            await organization.save()
         }
     }
 });

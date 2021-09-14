@@ -93,11 +93,11 @@ export class STPendingInvoice extends Model {
                 pendingInvoice = new STPendingInvoice()
                 pendingInvoice.organizationId = organization.id
                 pendingInvoice.meta = STInvoiceMeta.create({
-                    companyName: organization.meta.businessName ?? organization.name,
+                    companyName: organization.meta.companyName ?? organization.name,
                     companyContact: organization.privateMeta.billingContact ?? "",
-                    companyAddress: organization.meta.businessAddress ?? organization.address,
+                    companyAddress: organization.meta.companyAddress ?? organization.address,
                     companyVATNumber: organization.meta.VATNumber,
-                    VATPercentage: calculateVATPercentage(organization.meta.businessAddress ?? organization.address, organization.meta.VATNumber)
+                    VATPercentage: calculateVATPercentage(organization.meta.companyAddress ?? organization.address, organization.meta.VATNumber)
                 })
             }
             pendingInvoice.meta.items.push(...notYetCreatedItems)

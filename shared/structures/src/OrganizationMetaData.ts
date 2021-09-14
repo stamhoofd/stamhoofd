@@ -417,7 +417,7 @@ export class OrganizationMetaData extends AutoEncoder {
      * Legal name of the organization (optional)
      */
     @field({ decoder: StringDecoder, nullable: true, version: 113 })
-    businessName: string | null = null;
+    companyName: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 113 })
     VATNumber: string | null = null
@@ -429,7 +429,7 @@ export class OrganizationMetaData extends AutoEncoder {
      * Legal name of the organization (optional)
      */
     @field({ decoder: Address, nullable: true, version: 113 })
-    businessAddress: Address | null = null;
+    companyAddress: Address | null = null;
 
     /**
      * All the available categories

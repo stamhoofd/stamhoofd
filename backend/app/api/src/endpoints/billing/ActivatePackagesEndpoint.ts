@@ -96,11 +96,11 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             if (request.request.getVersion() < 113 && request.body.organizationPatch.address) {
-                user.organization.meta.businessAddress = user.organization.address
+                user.organization.meta.companyAddress = user.organization.address
             }
 
             if (request.request.getVersion() < 113 && request.body.organizationPatch.name) {
-                user.organization.meta.businessName = request.body.organizationPatch.name
+                user.organization.meta.companyName = request.body.organizationPatch.name
             }
         }
         if (!request.body.proForma) {
