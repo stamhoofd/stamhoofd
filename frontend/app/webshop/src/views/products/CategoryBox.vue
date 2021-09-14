@@ -3,7 +3,7 @@
         <h2>{{ category.name }}</h2>
 
         <ProductGrid :products="products" />
-        <hr>
+        <hr v-if="!isLast">
     </div>
 </template>
 
@@ -37,6 +37,9 @@ export default class CategoryBox extends Mixins(NavigationMixin){
 
     @Prop({ required: true })
     webshop: Webshop
+
+    @Prop({ default: false })
+    isLast: boolean
 
     get products() {
         return this.category.productIds.flatMap(id => {

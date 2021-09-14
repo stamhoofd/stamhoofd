@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 112
+export const Version = 113
 
 // General
 export * from "./src/addresses/Address"

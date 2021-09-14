@@ -120,6 +120,10 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 88 })
     billingContact: string | null = null
 
+    /**
+     * @deprecated
+     * Moved to public meta data. Do not use.
+     */
     @field({ decoder: StringDecoder, nullable: true, version: 86 })
     VATNumber: string | null = null
 }

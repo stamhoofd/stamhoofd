@@ -14,7 +14,7 @@
 
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam van je vereniging" error-fields="name" :error-box="errorBox">
+                    <STInputBox title="Naam van je vereniging (kort)" error-fields="name" :error-box="errorBox">
                         <input
                             id="organization-name"
                             ref="firstInput"
@@ -38,9 +38,47 @@
                             placeholder="bv. https://www.vereniging.be"
                         >
                     </STInputBox>
-                    <p class="st-list-description">
-                        De link naar de website van jouw vereniging. Dit is de website waar leden terecht komen als ze op 'terug naar website' klikken.
+                    <p class="style-description-small">
+                        De link naar de website van jouw vereniging.
                     </p>
+                </div>
+            </div>
+
+            <hr>
+
+            <h2>Bedrijfsinformatie (optioneel)</h2>
+            <p>Om te voldoen aan sommige wettelijke verplichtingen, vul je deze informatie ook best in. Deze worden minder prominent weergegeven, maar zijn wel publiek beschikbaar.</p>
+
+            <Checkbox v-model="hasCompanyNumber">
+                Onze vereniging heeft een {{ country == 'NL' ? 'KVK-nummer' : 'ondernemingsnummer' }}
+                <p class="style-description-small">
+                    Vink dit aan als je bent geregistreerd als {{ country != 'BE' ? 'vereniging' : 'VZW' }} of stichting
+                </p>
+            </Checkbox>
+            <Checkbox v-if="hasCompanyNumber" v-model="hasVATNumber">
+                Onze vereniging is BTW-plichtig
+            </Checkbox>
+
+            <div class="split-inputs">
+                <div>
+                    <STInputBox :title="hasCompanyNumber ? 'Bedrijfsnaam en rechtsvorm' : 'Officiële naam vereniging'" error-fields="businessName" :error-box="errorBox">
+                        <input
+                            id="business-name"
+                            v-model="businessName"
+                            class="input"
+                            type="text"
+                            :placeholder="country == 'BE' ? 'bv. Ruimtereis VZW' : 'bv. Ruimtereis vereniging'"
+                            autocomplete="organization"
+                        >
+                    </STInputBox>
+                    <p v-if="hasCompanyNumber && country == 'BE'" class="style-description-small">
+                        Vul ook de rechtsvorm in, bv. VZW.
+                    </p>
+                    <AddressInput v-if="hasCompanyNumber" v-model="businessAddress" :required="false" title="Maatschappelijke zetel" :validator="validator" />
+                </div>
+                <div>
+                    <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country != 'BE')" v-model="companyNumber" :country="country" placeholder="Jullie ondernemingsnummer" :validator="validator" :required="true" />
+                    <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" title="BTW-nummer" placeholder="Jullie BTW-nummer" :validator="validator" :required="true" />
                 </div>
             </div>
         </main>
@@ -61,8 +99,8 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { Address, Organization, OrganizationPatch, Version } from "@stamhoofd/structures"
+import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, VATNumberInput } from "@stamhoofd/components";
+import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -80,10 +118,8 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         BackButton,
         AddressInput,
         LoadingButton,
-        IBANInput,
-        ImageInput,
-        ColorInput,
-        FileInput
+        VATNumberInput,
+        CompanyNumberInput
     },
 })
 export default class GeneralSettingsView extends Mixins(NavigationMixin) {
@@ -123,6 +159,86 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
 
     set address(address: Address) {
         this.$set(this.organizationPatch, "address", address)
+    }
+
+    get businessAddress() {
+        return this.organization.meta.businessAddress
+    }
+
+    set businessAddress(businessAddress: Address | null) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                businessAddress
+            })
+        })
+    }
+
+    get businessName() {
+        return this.organization.meta.businessName
+    }
+
+    set businessName(businessName: string | null) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                businessName
+            })
+        })
+    }
+
+    get VATNumber() {
+        return this.organization.meta.VATNumber
+    }
+
+    set VATNumber(VATNumber: string | null) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                VATNumber,
+                // VAT Number is equal to company number in Belgium, so don't ask twice
+                companyNumber: this.country === Country.Belgium ? (VATNumber?.substring(2) ?? null) : undefined
+            })
+        })
+    }
+
+    get hasCompanyNumber() {
+        return this.organization.meta.companyNumber !== null
+    }
+
+    set hasCompanyNumber(hasCompanyNumber: boolean) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                companyNumber: hasCompanyNumber ? (this.companyNumber ?? "") : null,
+                VATNumber: hasCompanyNumber ? undefined : null,
+                businessAddress: hasCompanyNumber ? (this.businessAddress ?? this.address) : null,
+            })
+        })
+    }
+
+    get hasVATNumber() {
+        return this.organization.meta.VATNumber !== null
+    }
+
+    set hasVATNumber(hasVATNumber: boolean) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                VATNumber: hasVATNumber ? (this.VATNumber ?? "") : null
+            })
+        })
+    }
+
+    get companyNumber() {
+        return this.organization.meta.companyNumber
+    }
+
+    set companyNumber(companyNumber: string | null) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                companyNumber
+            })
+        })
+    }
+
+    get country() {
+        return this.businessAddress?.country ?? this.address.country
     }
 
     async save() {

@@ -15,30 +15,36 @@
             <hr>
             <h2>Facturatiegegevens</h2>
 
+            <Checkbox v-model="hasCompanyNumber">
+                Onze vereniging heeft een {{ country == 'NL' ? 'KVK-nummer' : 'ondernemingsnummer' }}
+                <p class="style-description-small">
+                    Vink dit aan als je bent geregistreerd als {{ country != 'BE' ? 'vereniging' : 'VZW' }} of stichting
+                </p>
+            </Checkbox>
+            <Checkbox v-if="hasCompanyNumber" v-model="hasVATNumber">
+                Onze vereniging is BTW-plichtig
+            </Checkbox>
+
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam van je vereniging" error-fields="name" :error-box="errorBox">
+                    <STInputBox :title="hasCompanyNumber ? 'Bedrijfsnaam en rechtsvorm' : 'Officiële naam vereniging'" error-fields="businessName" :error-box="errorBox">
                         <input
-                            id="organization-name"
-                            ref="firstInput"
-                            v-model="name"
+                            id="business-name"
+                            v-model="businessName"
                             class="input"
                             type="text"
-                            placeholder="De naam van je vereniging"
+                            :placeholder="country == 'BE' ? 'bv. Ruimtereis VZW' : 'bv. Ruimtereis vereniging'"
                             autocomplete="organization"
                         >
                     </STInputBox>
-
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
-                </div>
-
-                <div>
-                    <VATNumberInput v-model="VATNumber" title="BTW-nummer" placeholder="Optioneel" :validator="validator" :required="false" />
-                    <p class="style-description-small">
-                        Vul alleen een BTW-nummer in als je die hebt (dan krijg je de BTW terug via je BTW-aangifte)
+                    <p v-if="hasCompanyNumber && country == 'BE'" class="style-description-small">
+                        Vul ook de rechtsvorm in, bv. VZW.
                     </p>
-
-                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <AddressInput v-if="hasCompanyNumber" key="businessAddress" v-model="businessAddress" :required="true" title="Maatschappelijke zetel" :validator="validator" />
+                    <AddressInput v-else key="address" v-model="address" :required="true" title="Adres" :validator="validator" />
+                </div>
+                <div>
+                    <STInputBox v-if="!hasCompanyNumber" title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
@@ -48,6 +54,8 @@
                             </div>
                         </div>
                     </STInputBox>
+                    <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country != 'BE')" v-model="companyNumber" :country="country" placeholder="Jullie ondernemingsnummer" :validator="validator" :required="true" />
+                    <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" title="BTW-nummer" placeholder="Jullie BTW-nummer" :validator="validator" :required="true" />
                 </div>
             </div>
 
@@ -154,9 +162,9 @@
 import { AutoEncoder,AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Organization, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPricingType, User, Version } from "@stamhoofd/structures";
+import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPricingType, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -199,7 +207,8 @@ const throttle = (func, limit) => {
         PaymentSelectionList,
         AddressInput,
         Spinner,
-        VATNumberInput
+        VATNumberInput,
+        CompanyNumberInput
     },
     filters: {
         price: Formatter.price,
@@ -333,20 +342,87 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
         }
     }
 
+    get businessAddress() {
+        return this.organization.meta.businessAddress
+    }
+
+    set businessAddress(businessAddress: Address | null) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                businessAddress
+            })
+        })
+        this.throttledLoadProForma()
+    }
+
+    get businessName() {
+        return this.organization.meta.businessName
+    }
+
+    set businessName(businessName: string | null) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                businessName
+            })
+        })
+    }
+
     get VATNumber() {
-        return this.organization.privateMeta?.VATNumber ?? ""
+        return this.organization.meta.VATNumber
     }
 
     set VATNumber(VATNumber: string | null) {
-        if (this.VATNumber !== VATNumber) {
-            this.organizationPatch = this.organizationPatch.patch(Organization.patch({
-                privateMeta: OrganizationPrivateMetaData.patch({
-                    VATNumber: VATNumber ? VATNumber : null
-                })
-            }))
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                VATNumber,
+                // VAT Number is equal to company number in Belgium, so don't ask twice
+                companyNumber: this.country === Country.Belgium ? (VATNumber?.substring(2) ?? null) : undefined
+            })
+        })
+        this.throttledLoadProForma()
+    }
 
-            this.throttledLoadProForma()
-        }
+    get hasCompanyNumber() {
+        return this.organization.meta.companyNumber !== null
+    }
+
+    set hasCompanyNumber(hasCompanyNumber: boolean) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                companyNumber: hasCompanyNumber ? (this.companyNumber ?? "") : null,
+                VATNumber: hasCompanyNumber ? undefined : null,
+                businessAddress: hasCompanyNumber ? (this.businessAddress ?? this.address) : null,
+            })
+        })
+    }
+
+    get hasVATNumber() {
+        return this.organization.meta.VATNumber !== null
+    }
+
+    set hasVATNumber(hasVATNumber: boolean) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                VATNumber: hasVATNumber ? (this.VATNumber ?? "") : null
+            })
+        })
+        this.throttledLoadProForma()
+    }
+
+    get companyNumber() {
+        return this.organization.meta.companyNumber
+    }
+
+    set companyNumber(companyNumber: string | null) {
+        this.organizationPatch = this.organizationPatch.patch({ 
+            meta: OrganizationMetaData.patch({
+                companyNumber
+            })
+        })
+    }
+
+    get country() {
+        return this.businessAddress?.country ?? this.address.country
     }
 
     get paymentMethods() {

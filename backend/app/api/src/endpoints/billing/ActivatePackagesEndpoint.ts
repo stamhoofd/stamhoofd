@@ -65,7 +65,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 message: "You don't have permissions for this endpoint",
                 statusCode: 403
             })
-        }
+        }        
 
         // Apply patches if needed
         if (request.body.userPatch) {
@@ -87,12 +87,21 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 user.organization.address.patchOrPut(request.body.organizationPatch.address)
             }
 
-            if (request.body.organizationPatch.privateMeta?.VATNumber !== undefined) {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                user.organization.privateMeta.VATNumber = request.body.organizationPatch.privateMeta!.VATNumber
+            if (request.body.organizationPatch.meta) {
+                user.organization.meta.patchOrPut(request.body.organizationPatch.meta)
             }
 
-            user.organization.name = request.body.organizationPatch.name ?? user.organization.name
+            if (request.request.getVersion() < 113 && request.body.organizationPatch.privateMeta?.VATNumber !== undefined) {
+                user.organization.meta.VATNumber = request.body.organizationPatch.privateMeta?.VATNumber
+            }
+
+            if (request.request.getVersion() < 113 && request.body.organizationPatch.address) {
+                user.organization.meta.businessAddress = user.organization.address
+            }
+
+            if (request.request.getVersion() < 113 && request.body.organizationPatch.name) {
+                user.organization.meta.businessName = request.body.organizationPatch.name
+            }
         }
         if (!request.body.proForma) {
             await user.organization.save()

@@ -2,10 +2,16 @@
 @use '../base/text-styles';
 
 .inline-link {
-    &:hover, &:link, &:active, &:visited {
+    &, &:hover, &:link, &:active, &:visited {
         color: $color-primary;
         font-weight: 600;
         text-decoration: none;
+    }
+
+    &.secundary {
+        &, &:hover, &:link, &:active, &:visited {
+            color: $color-gray-dark;
+        }
     }
 
     &:hover {

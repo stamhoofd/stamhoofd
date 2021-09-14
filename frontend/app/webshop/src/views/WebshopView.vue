@@ -6,7 +6,7 @@
             </template>
 
             <template slot="right">
-                <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank">
+                <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank" rel="nofollow noreferrer noopener">
                     <span class="icon privacy" />
                     <span>Privacy</span>
                 </a>
@@ -24,7 +24,7 @@
                         <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
                     </figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
-                    <p v-text="webshop.meta.description" />
+                    <p v-if="webshop.meta.description" v-text="webshop.meta.description" class="description"/>
 
                     <p v-if="isTrial" class="error-box">
                         Dit is een demo webshop
@@ -45,17 +45,36 @@
                     </p>
 
                     <template v-if="!closed">
-                        <CategoryBox v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" />
+                        <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :is-last="index === webshop.categories.length - 1" />
                         <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
                     </template>
-
-                    <p v-if="hasTickets" class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be/ticketverkoop" target="_blank" class="button text">Ticketverkoop door <strong>Stamhoofd</strong>, softwareplatform voor verenigingen</a>
-                    </p>
-                    <p v-else class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be/webshops" target="_blank" class="button text">Webshop door <strong>Stamhoofd</strong>, op maat van verenigingen</a>
-                    </p>
                 </main>
+                <aside class="legal-footer">
+                    <hr class="style-hr">
+                    <div>
+                        <div>
+                            {{ organization.meta.businessName || organization.name }}{{ organization.meta.VATNumber || organization.meta.companyNumber ? (", "+(organization.meta.VATNumber || organization.meta.companyNumber)) : "" }}
+                            <template v-if="organization.website">
+                                -
+                            </template>
+                            <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                                Website
+                            </a>
+                            <template v-if="privacyUrl">
+                                -
+                            </template>
+                            <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                                Privacyvoorwaarden
+                            </a>
+                            <br>
+                            {{ organization.meta.businessAddress || organization.address }}
+                        </div>
+                        <div>
+                            <a v-if="hasTickets" href="https://www.stamhoofd.be/ticketverkoop">Ticketverkoop via <Logo /></a>
+                            <a v-else href="https://www.stamhoofd.be/webshops">Webshop via <Logo /></a>
+                        </div>
+                    </div>
+                </aside>
             </section>
         </main>
     </section>
@@ -65,7 +84,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,GlobalEventBus,LoadingView, OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { CenteredMessage, Checkbox,GlobalEventBus,LoadingView, Logo,OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { UrlHelper } from "@stamhoofd/networking";
 import { Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -90,7 +109,8 @@ import ProductGrid from "./products/ProductGrid.vue"
         Checkbox,
         CategoryBox,
         ProductGrid,
-        OrganizationLogo
+        OrganizationLogo,
+        Logo
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -361,16 +381,16 @@ export default class WebshopView extends Mixins(NavigationMixin){
         .white-top > main > h1 {
             @extend .style-huge-title-1;
             padding-bottom: 15px;
+        }
 
-            + p {
-                @extend .style-description;
-                white-space: pre-wrap;
-            }
+        .white-top > main .description {
+            @extend .style-description;
+            white-space: pre-wrap;
         }
 
         .stamhoofd-footer {
-            padding-top: 30px;
-            @extend .style-description;
+            padding-top: 15px;
+            @extend .style-description-small;
 
             a {
                 white-space: normal;
@@ -381,6 +401,57 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
             strong {
                 color: $color-primary-original;
+            }
+        }
+
+        .legal-footer {
+            @extend .style-description-small;
+            padding-top: 30px;
+            margin-top: auto;
+            line-height: 1.6;
+
+            > div {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+                flex-wrap: wrap-reverse;
+
+                @media (max-width: 500px) {
+                    .stamhoofd-logo-container {
+                        svg {
+                            width: 120px;
+                        }
+                    }
+                }
+
+                > div {
+                    &:first-child {
+                        padding-right: 10px;
+                    }
+
+                    &:last-child {
+                        --color-primary: #{$color-primary-original};
+                        flex-shrink: 0;
+                        text-align: right;
+
+                        a {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+
+                            > :last-child {
+                                margin-left: 10px;
+                            }
+
+                            &, &:hover, &:link, &:active, &:visited {
+                                color: $color-gray;
+                                font-weight: 600;
+                                text-decoration: none;
+                            }
+                        }
+                    }
+                }
             }
         }
     }

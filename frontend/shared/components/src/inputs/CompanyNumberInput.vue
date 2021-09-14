@@ -1,12 +1,13 @@
 <template>
-    <STInputBox :title="title" error-fields="VATNumber" :error-box="errorBox">
-        <input v-model="VATNumberRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
+    <STInputBox :title="calculatedTitle" error-fields="companyNumber" :error-box="errorBox">
+        <input v-model="companyNumberRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
     </STInputBox>
 </template>
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Country } from '@stamhoofd/structures';
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
@@ -14,14 +15,27 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
         STInputBox
     }
 })
-export default class VATNumberInput extends Vue {
-    @Prop({ default: "" }) 
+export default class CompanyNumberInput extends Vue {
+    @Prop({ required: true }) 
+    country!: Country;
+
+    @Prop({ default: "" })
     title: string;
+
+    get calculatedTitle() {
+        if (this.title) {
+            return this.title
+        }
+        if (this.country === Country.Netherlands) {
+            return "KVK-nummer"
+        }
+        return "Ondernemingsnummer"
+    }
 
     @Prop({ default: null }) 
     validator: Validator | null
     
-    VATNumberRaw = "";
+    companyNumberRaw = "";
     valid = true;
 
     @Prop({ default: null })
@@ -43,7 +57,7 @@ export default class VATNumberInput extends Vue {
         if (val === null) {
             return
         }
-        this.VATNumberRaw = val
+        this.companyNumberRaw = val
     }
 
     mounted() {
@@ -53,7 +67,7 @@ export default class VATNumberInput extends Vue {
             })
         }
 
-        this.VATNumberRaw = this.value ?? ""
+        this.companyNumberRaw = this.value ?? ""
     }
 
     destroyed() {
@@ -62,29 +76,25 @@ export default class VATNumberInput extends Vue {
         }
     }
 
-    async validate() {
-        this.VATNumberRaw = this.VATNumberRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
+    validate() {
+        this.companyNumberRaw = this.companyNumberRaw.trim().toUpperCase().replace(/\s/g, " ") // replacement is needed because some apps use non breaking spaces when copying
 
-        if (!this.required && this.VATNumberRaw.length == 0) {
+        if (!this.required && this.companyNumberRaw.length == 0) {
             this.errorBox = null
             this.$emit("input", null)
             return true
         }
 
-        const jsvat = await import(/* webpackChunkName: "jsvat" */ 'jsvat');
-        const result = jsvat.checkVAT(this.VATNumberRaw, [jsvat.belgium, jsvat.netherlands]);
-        
-        if (!result.isValid) {
+        if (this.companyNumberRaw.length == 0) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
-                "message": "Ongeldig BTW-nummer: "+this.VATNumberRaw,
-                "field": "VATNumber"
+                "message": "Verplicht in te vullen",
+                "field": "companyNumber"
             }))
             return false
 
         } else {
-            this.VATNumberRaw = result.value ?? this.VATNumberRaw
-            this.$emit("input", this.VATNumberRaw)
+            this.$emit("input", this.companyNumberRaw)
             this.errorBox = null
             return true
         }

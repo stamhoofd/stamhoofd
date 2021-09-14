@@ -90,11 +90,11 @@ export class STInvoice extends Model {
         const date = new Date()
         invoice.meta = STInvoiceMeta.create({
             date,
-            companyName: organization.name,
+            companyName: organization.meta.businessName ?? organization.name,
             companyContact: organization.privateMeta.billingContact ?? "",
-            companyAddress: organization.address,
-            companyVATNumber: organization.privateMeta.VATNumber,
-            VATPercentage: calculateVATPercentage(organization.address, organization.privateMeta.VATNumber)
+            companyAddress: organization.meta.businessAddress ?? organization.address,
+            companyVATNumber: organization.meta.VATNumber,
+            VATPercentage: calculateVATPercentage(organization.meta.businessAddress ?? organization.address, organization.meta.VATNumber)
         })
 
         return invoice
@@ -408,11 +408,11 @@ export class STInvoice extends Model {
         }
         const pendingInvoiceStruct = pendingInvoice ? STPendingInvoiceStruct.create(pendingInvoice) : (notYetCreatedItems.length > 0 ? STPendingInvoiceStruct.create({
             meta: STInvoiceMeta.create({
-                companyName: organization.name,
+                companyName: organization.meta.businessName ?? organization.name,
                 companyContact: organization.privateMeta.billingContact ?? "",
-                companyAddress: organization.address,
-                companyVATNumber: organization.privateMeta.VATNumber,
-                VATPercentage: calculateVATPercentage(organization.address, organization.privateMeta.VATNumber)
+                companyAddress: organization.meta.businessAddress ?? organization.address,
+                companyVATNumber: organization.meta.VATNumber,
+                VATPercentage: calculateVATPercentage(organization.meta.businessAddress ?? organization.address, organization.meta.VATNumber)
             })
         }) : null)
         

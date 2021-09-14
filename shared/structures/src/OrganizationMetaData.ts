@@ -1,5 +1,6 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
+import { Address } from './addresses/Address';
 import { STPackageStatus, STPackageType } from './billing/STPackage';
 import { File } from './files/File';
 import { Image } from './files/Image';
@@ -411,6 +412,24 @@ export class OrganizationMetaData extends AutoEncoder {
         defaultValue: () => OrganizationRecordsConfiguration.create({})
     })
     recordsConfiguration: OrganizationRecordsConfiguration
+
+    /**
+     * Legal name of the organization (optional)
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 113 })
+    businessName: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 113 })
+    VATNumber: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 113 })
+    companyNumber: string | null = null
+
+    /**
+     * Legal name of the organization (optional)
+     */
+    @field({ decoder: Address, nullable: true, version: 113 })
+    businessAddress: Address | null = null;
 
     /**
      * All the available categories

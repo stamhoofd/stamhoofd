@@ -268,7 +268,7 @@ export function calculateVATPercentage(address: Address, VATNumber: string | nul
     if (address.country === Country.Belgium) {
         VATRate = 21
     } else {
-        if (VATNumber) {
+        if (VATNumber && VATNumber.substr(0, 2).toUpperCase() != "BE") {
             VATRate = 0
         } else {
             // Apply VAT rate of the home country for consumers in the EU

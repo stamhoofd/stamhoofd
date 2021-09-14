@@ -85,6 +85,10 @@ export default class AddressInput extends Vue {
 
     onBlur() {
         this.hasFocus = false
+
+        // Sometimes the blur happens without a onChange event, so we always need to update the address after a blur
+        // it will only make the errors visible if hasFocus is still false after 200ms
+        this.updateAddress()
     }
 
     onFocus() {
@@ -127,17 +131,19 @@ export default class AddressInput extends Vue {
         try {
             address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
 
-            // Do we need to validate on the server?
-            if (this.validateServer) {
-                const response = await this.validateServer.request({
-                    method: "POST",
-                    path: "/address/validate",
-                    body: address,
-                    decoder: ValidatedAddress as Decoder<ValidatedAddress>
-                })
-                this.$emit("input", response.data)
-            } else {
-                this.$emit("input", address)
+            if (!this.value || (this.validateServer && !(this.value instanceof ValidatedAddress)) || address.toString() != this.value.toString()) {
+                 // Do we need to validate on the server?
+                if (this.validateServer) {
+                    const response = await this.validateServer.request({
+                        method: "POST",
+                        path: "/address/validate",
+                        body: address,
+                        decoder: ValidatedAddress as Decoder<ValidatedAddress>
+                    })
+                    this.$emit("input", response.data)
+                } else {
+                    this.$emit("input", address)
+                }
             }
             
             this.errorBox = null
