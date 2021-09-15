@@ -227,12 +227,12 @@ export class WebshopManager {
                 
                 // Try to delete this database if something goes wrong
                 //if (process.env.NODE_ENV == "development") {
-                //window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
+                window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
                 //}
 
                 reject(new SimpleError({
                     code: "not_supported",
-                    message: "Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer in een andere browser te werken."
+                    message: "Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagiana te herladen of in een andere browser te werken."
                 }))
             };
 
