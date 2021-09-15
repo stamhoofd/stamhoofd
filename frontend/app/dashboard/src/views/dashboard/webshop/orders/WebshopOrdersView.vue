@@ -279,6 +279,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     isRefreshingOrders = false
 
     async loadOrders() {
+        console.log("Loading orders...")
         this.orders = []
         this.isLoadingOrders = true
         
@@ -290,6 +291,9 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // Database error. We can ignore this and simply move on.
             console.error(e)
         }
+
+        console.log("Done loading")
+        console.log("Refreshing...")
 
         try {
             // Initiate a refresh
@@ -304,6 +308,9 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // Fetching failed
             Toast.fromError(e).show()
         }
+
+        // And preload the tickets if needed
+        this.webshopManager.fetchNewTickets(false, false).catch(console.error)
 
         this.isRefreshingOrders = false
         this.isLoadingOrders = false

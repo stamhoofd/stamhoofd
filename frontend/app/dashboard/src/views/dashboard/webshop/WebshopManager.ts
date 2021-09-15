@@ -208,21 +208,29 @@ export class WebshopManager {
             return this.databasePromise
         }
 
+        console.log("Getting database...")
+
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
             const version = Version
-            const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
+
+            console.log("Opening database connection... "+'webshop-'+this.preview.id)
+            const DBOpenRequest = window.indexedDB.open('newwebshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
                 resolve(DBOpenRequest.result)
             }
+
+            DBOpenRequest.onblocked = function(e) {
+                console.log("DB open blocked", e);
+            };
 
             DBOpenRequest.onerror = (event) => {
                 console.error(event)
                 
                 // Try to delete this database if something goes wrong
                 //if (process.env.NODE_ENV == "development") {
-                window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
+                //window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
                 //}
 
                 reject(new SimpleError({
@@ -232,26 +240,38 @@ export class WebshopManager {
             };
 
             DBOpenRequest.onupgradeneeded = (event: IDBVersionChangeEvent) => {
+                console.log("On upgrade needed...")
                 const db = DBOpenRequest.result;
 
                 if (event.oldVersion < 1) {
                     // Version 1 is the first version of the database.
                     db.createObjectStore("orders", { keyPath: "id" });
-                    db.createObjectStore("tickets", { keyPath: "secret" });
+                    const ticketStore = db.createObjectStore("tickets", { keyPath: "secret" });
                     db.createObjectStore("ticketPatches", { keyPath: "secret" });
                     db.createObjectStore("settings", {});
+
+                    // Search tickets by order id
+                    ticketStore.createIndex("orderId", "orderId", { unique: false });
+
                 } else {
                     // For now: we clear all stores if we have a version update
                     DBOpenRequest.transaction!.objectStore("orders").clear()
                     DBOpenRequest.transaction!.objectStore("tickets").clear()
                     DBOpenRequest.transaction!.objectStore("ticketPatches").clear()
                     DBOpenRequest.transaction!.objectStore("settings").clear()
+
+                    if (event.oldVersion < 114) {
+                        const ticketStore = DBOpenRequest.transaction!.objectStore("tickets")
+                        ticketStore.createIndex("orderId", "orderId", { unique: false });
+                    }
                 }
+                console.log("Upgrade done")
             };
         })
 
         return this.databasePromise.then(database => {
             this.databasePromise = null
+            console.log("Got database.")
             return database
         })
     }
@@ -320,6 +340,64 @@ export class WebshopManager {
                 objectStore.put(order.encode({ version: Version }));
             }
         })
+    }
+
+    async getTicketsForOrder(orderId: string, withPatches = true): Promise<TicketPrivate[]> {
+        const db = await this.getDatabase()
+
+        const tickets: TicketPrivate[] = []
+
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["tickets", "ticketPatches"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("tickets");
+            const ticketPatches = transaction.objectStore("ticketPatches");
+
+            const orderIndex = objectStore.index("orderId");
+
+            const range = IDBKeyRange.only(orderId);
+            const request = orderIndex.openCursor(range)
+            request.onsuccess = (event: any) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const rawOrder = cursor.value
+                    const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
+
+                    if (withPatches) {
+                        const request2 = ticketPatches.get(ticket.secret)
+                        request2.onsuccess = () => {
+                            const rawPatch = request2.result
+
+                            if (rawPatch === undefined) {
+                                // no patch found
+                                tickets.push(ticket)
+                                cursor.continue();
+                                return
+                            }
+
+                            const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
+                            tickets.push(ticket.patch(patch))
+                            cursor.continue();
+                        }
+                    } else {
+                        tickets.push(ticket)
+                        cursor.continue();
+                    }
+                    
+                } else {
+                    // no more results
+                    resolve()
+                }
+            }
+        })
+        
+        return tickets
     }
 
     async streamTickets(callback: (ticket: TicketPrivate) => void): Promise<void> {

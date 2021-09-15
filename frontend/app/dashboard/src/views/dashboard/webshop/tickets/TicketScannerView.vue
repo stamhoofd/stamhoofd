@@ -563,10 +563,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             }
 
             // Use native QRScanner
-            this.disableWebVideo = false
+            //this.disableWebVideo = false
 
-            // Reset body
-            document.body.style.background = ""
+            // Reset body overflow only
+            //document.body.style.background = ""
             document.body.style.overflow = ""
             return
         }
