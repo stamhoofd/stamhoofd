@@ -455,9 +455,6 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     async startScanning() {
         if (AppManager.shared.QRScanner) {
             // Make document transparent
-
-            // remove other listeners
-            (await (AppManager.shared.QRScanner as any).removeAllListeners())
             
             // Start (if still needed)
             try {
@@ -483,10 +480,12 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             // Disable scrolling (bouncing)
             document.body.style.overflow = "hidden"
 
+            if (!this.nativeListener) {
+                this.nativeListener = await AppManager.shared.QRScanner.addListener("scannedQRCode", (result: { value: string }) => {
+                    this.validateQR(result.value)
+                })
+            }
             
-            await AppManager.shared.QRScanner.addListener("scannedQRCode", (result: { value: string }) => {
-                this.validateQR(result.value)
-            })
 
             return
         }
@@ -525,7 +524,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     stopScanning() {
         if (AppManager.shared.QRScanner) {
             // remove other listeners
-            ((AppManager.shared.QRScanner as any).removeAllListeners())
+            if (this.nativeListener) {
+                this.nativeListener.remove()
+                this.nativeListener = undefined
+            }
 
             // Use native QRScanner
             this.disableWebVideo = false
@@ -555,7 +557,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     pauseScanning() {
         if (AppManager.shared.QRScanner) {
             // remove other listeners
-            ((AppManager.shared.QRScanner as any).removeAllListeners())
+            if (this.nativeListener) {
+                this.nativeListener.remove()
+                this.nativeListener = undefined
+            }
 
             // Use native QRScanner
             this.disableWebVideo = false
