@@ -29,10 +29,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We gebruiken de camera om tickets te kunnen scannen</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We gebruiken de camera om tickets te kunnen scannen</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We hebben toegang nodig om een foto op te slaan bij jouw foto's.</string>
+	<string>We hebben toegang nodig om een foto op te slaan bij jouw foto&apos;s.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
 	<key>UIMainStoryboardFile</key>
@@ -56,7 +54,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-    <key>ITSAppUsesNonExemptEncryption</key>
-    <false/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

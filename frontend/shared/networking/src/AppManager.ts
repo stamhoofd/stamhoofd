@@ -1,3 +1,24 @@
+// todo: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
+type PermissionState = 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied';
+export interface PermissionStatus {
+  receive: PermissionState;
+}
+
+interface PluginListenerHandle {
+    remove: () => Promise<void>;
+}
+
+type QRScannerPlugin = {
+    startScanning(): Promise<void>;
+    stopScanning(): Promise<void>;
+    checkPermissions(): Promise<PermissionStatus>;
+    requestPermissions(): Promise<PermissionStatus>;
+    addListener(
+        eventName: 'scannedQRCode',
+        listenerFunc: (result: { value: string }) => void,
+    ): Promise<PluginListenerHandle>
+}
+
 export class AppManager {
     static shared = new AppManager()
 
@@ -27,4 +48,7 @@ export class AppManager {
             window.navigator.vibrate(100);
         }
     }
+
+    // Optional: if the current platform ahs a native scanner (see QRScannerPlugin in mobile frontend), this pluging will get instered here
+    QRScanner?: QRScannerPlugin
 }
