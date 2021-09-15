@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
+import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
-import { EventBus } from "../../../../../../shared/components";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 /**
@@ -220,6 +220,7 @@ export class WebshopManager {
 
             DBOpenRequest.onblocked = function(e) {
                 console.log("DB open blocked", e);
+                new Toast("Er staat een ander tabblad open van Stamhoofd die werkt in een oudere versie. Sluit die eerst af.", "error red").setHide(15*1000).show()
             };
 
             DBOpenRequest.onerror = (event) => {
