@@ -324,14 +324,16 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     created() {
-        this.webshopManager.getTicketsForOrder(this.order?.id ?? this.orderId!, true).then((tickets) => {
-            this.tickets = tickets
-            this.loadingTickets = false
-        }).catch(e => {
-            console.error(e)
-            new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt", "error red").show()
-            this.loadingTickets = false
-        })
+        if (this.hasTickets) {
+            this.webshopManager.getTicketsForOrder(this.order?.id ?? this.orderId!, true).then((tickets) => {
+                this.tickets = tickets
+                this.loadingTickets = false
+            }).catch(e => {
+                console.error(e)
+                new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt", "error red").show()
+                this.loadingTickets = false
+            })
+        }
     }
 
     goBack() {

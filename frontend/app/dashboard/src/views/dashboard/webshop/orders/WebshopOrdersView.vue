@@ -149,7 +149,7 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { OrderStatus, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery } from '@stamhoofd/structures';
+import { OrderStatus, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -223,10 +223,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     filters = [new NoFilter(), ...StatusFilter.generateAll(), new NotPaidFilter()];
     selectedFilter = 0;
 
-    created() {
-        this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
-        this.loadOrders().catch(console.error)
-    }
 
     /**
      * Insert or update an order
@@ -250,21 +246,39 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         }
     }
 
-    mounted() {
+    created() {
+        this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
         this.reload();
-        
+        this.loadOrders().catch(console.error)
+    }
 
+    mounted() {
         // Set url
         HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/orders")
         document.title = this.preview.meta.name+" - Bestellingen"
     }
 
+    pollInterval: number | null = null
+
     activated() {
         WebshopOrdersEventBus.addListener(this, "deleted", this.onDeleteOrder)
+
+        if (this.hasTickets) {
+            this.pollInterval = window.setInterval(() => {
+                if (!this.isRefreshingOrders) {
+                    this.refresh(false).catch(console.error)
+                }
+            }, 1000*30)
+        }
     }
 
     deactivated() {
         WebshopOrdersEventBus.removeListener(this)
+
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval)
+            this.pollInterval = null
+        }
     }
 
     onDeleteOrder(): Promise<void> {
@@ -273,6 +287,10 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.orders = []
         this.loadOrders().catch(console.error)
         return Promise.resolve()
+    }
+
+    get hasTickets() {
+        return this.preview.meta.ticketType === WebshopTicketType.SingleTicket || this.preview.meta.ticketType === WebshopTicketType.Tickets
     }
 
     isLoadingOrders = true
@@ -292,28 +310,39 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             console.error(e)
         }
 
-        console.log("Done loading")
-        console.log("Refreshing...")
+        await this.refresh(true) 
+    }
 
+    async refresh(reset = false) {
         try {
             // Initiate a refresh
             // don't wait
             this.isRefreshingOrders = true
-            this.isLoadingOrders = false
-            await this.webshopManager.fetchNewOrders(false, true)
+            this.isLoadingOrders = this.orders.length == 0
+            await this.webshopManager.fetchNewOrders(false, reset)
 
-            // Delete all orders that are not refreshed (those are deleted)
-            this.orders = this.orders.filter(o => o.isRefreshed)
+            if (reset) {
+                // Delete all orders that are not refreshed (those are deleted)
+                this.orders = this.orders.filter(o => o.isRefreshed)
+            }
         } catch (e) {
             // Fetching failed
             Toast.fromError(e).show()
         }
 
+        this.isLoadingOrders = false
+
         // And preload the tickets if needed
-        this.webshopManager.fetchNewTickets(false, false).catch(console.error)
+        if (this.hasTickets) {
+            try {
+                await this.webshopManager.fetchNewTickets(false, false).catch(console.error)
+            } catch (e) {
+                // Fetching failed
+                Toast.fromError(e).show()
+            }
+        }
 
         this.isRefreshingOrders = false
-        this.isLoadingOrders = false
     }
 
     get webshopUrl() {
