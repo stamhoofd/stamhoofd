@@ -208,14 +208,11 @@ export class WebshopManager {
             return this.databasePromise
         }
 
-        console.log("Getting database...")
-
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
             const version = Version
 
-            console.log("Opening database connection... "+'webshop-'+this.preview.id)
-            const DBOpenRequest = window.indexedDB.open('newwebshop-'+this.preview.id, version);
+            const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
                 resolve(DBOpenRequest.result)
@@ -240,7 +237,6 @@ export class WebshopManager {
             };
 
             DBOpenRequest.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-                console.log("On upgrade needed...")
                 const db = DBOpenRequest.result;
 
                 if (event.oldVersion < 1) {
@@ -265,13 +261,11 @@ export class WebshopManager {
                         ticketStore.createIndex("orderId", "orderId", { unique: false });
                     }
                 }
-                console.log("Upgrade done")
             };
         })
 
         return this.databasePromise.then(database => {
             this.databasePromise = null
-            console.log("Got database.")
             return database
         })
     }
