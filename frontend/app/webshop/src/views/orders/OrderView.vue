@@ -187,7 +187,7 @@
                         <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
                     </div>
 
-                    <template v-if="!hasTickets || !isPaid">
+                    <template v-if="!hasTickets || hasSingleTicket || !isPaid">
                         <hr>
 
                         <STList>
@@ -338,6 +338,10 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get hasTickets() {
         return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product)
+    }
+
+    get hasSingleTicket() {
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
     }
 
     get publicTickets() {
