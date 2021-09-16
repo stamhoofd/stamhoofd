@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
-import { Option, OptionMenu, Product, ProductPrice } from './Product';
+import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product';
 import { Webshop } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 
@@ -124,6 +124,10 @@ export class CartItem extends AutoEncoder {
 
     get description(): string {
         const descriptions: string[] = []
+
+        if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
+            descriptions.push(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()))
+        }
         if (this.product.prices.length > 1) {
             descriptions.push(this.productPrice.name)
         }
