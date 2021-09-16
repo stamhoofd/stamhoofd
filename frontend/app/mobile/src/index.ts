@@ -11,6 +11,7 @@ import { AppManager, Storage } from '../../../shared/networking';
 // Kick off the app
 import App from "../../dashboard/src/App.vue";
 import { CapacitorStorage } from './CapacitorStorage';
+import QRScanner from './QRScannerPlugin';
 import { WrapperHTTPRequest } from './WrapperHTTPRequest';
 
 Vue.use(VueMeta)
@@ -63,6 +64,9 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
 
         // Disable swipe back animations (or they will play twice)
         HistoryManager.animateHistoryPop = false;
+
+        // Use the iOS scanning plugin
+        AppManager.shared.QRScanner = QRScanner
     }
 
     Keyboard.addListener('keyboardWillShow', info => {

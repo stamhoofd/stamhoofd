@@ -10,6 +10,13 @@
                 <span>Bestelling {{ order.number }}</span>
             </h1>
 
+            <p v-if="order.status == 'Completed'" class="warning-box">
+                Deze bestelling werd al als voltooid gemarkeerd
+            </p>
+            <p v-if="order.status == 'Canceled'" class="error-box">
+                Deze bestelling werd geannuleerd
+            </p>
+
             <STList>
                 <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
                     <h3>
@@ -35,6 +42,18 @@
                         <p>{{ order.data.customer.name }}</p>
                         <p>{{ order.data.customer.phone }}</p>
                         <p>{{ order.data.customer.email }}</p>
+                    </template>
+                </STListItem>
+                <STListItem class="right-description">
+                    Status
+
+                    <template slot="right">
+                        <span v-if="order.status == 'Created'" class="style-tag">Nieuw</span>
+                        <span v-if="order.payment && order.payment.status !== 'Succeeded'" class="style-tag warn">Niet betaald</span>
+                        <span v-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                        <span v-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
+                        <span v-if="order.status == 'Completed'" v-tooltip="'Voltooid'" class="success icon green" />
+                        <span v-if="order.status == 'Canceled'" v-tooltip="'Geannuleerd'" class="error icon canceled" />
                     </template>
                 </STListItem>
                 <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">

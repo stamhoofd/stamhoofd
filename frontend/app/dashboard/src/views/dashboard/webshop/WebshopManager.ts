@@ -1,10 +1,10 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
+import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
-import { EventBus } from "../../../../../../shared/components";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 /**
@@ -211,11 +211,17 @@ export class WebshopManager {
         // Open a connection with our database
         this.databasePromise = new Promise<IDBDatabase>((resolve, reject) => {
             const version = Version
+
             const DBOpenRequest = window.indexedDB.open('webshop-'+this.preview.id, version);
             DBOpenRequest.onsuccess = () => {
                 this.database = DBOpenRequest.result;
                 resolve(DBOpenRequest.result)
             }
+
+            DBOpenRequest.onblocked = function(e) {
+                console.log("DB open blocked", e);
+                new Toast("Er staat een ander tabblad open van Stamhoofd die werkt in een oudere versie. Sluit die eerst af.", "error red").setHide(15*1000).show()
+            };
 
             DBOpenRequest.onerror = (event) => {
                 console.error(event)
@@ -227,7 +233,7 @@ export class WebshopManager {
 
                 reject(new SimpleError({
                     code: "not_supported",
-                    message: "Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer in een andere browser te werken."
+                    message: "Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagiana te herladen of in een andere browser te werken."
                 }))
             };
 
@@ -237,15 +243,24 @@ export class WebshopManager {
                 if (event.oldVersion < 1) {
                     // Version 1 is the first version of the database.
                     db.createObjectStore("orders", { keyPath: "id" });
-                    db.createObjectStore("tickets", { keyPath: "secret" });
+                    const ticketStore = db.createObjectStore("tickets", { keyPath: "secret" });
                     db.createObjectStore("ticketPatches", { keyPath: "secret" });
                     db.createObjectStore("settings", {});
+
+                    // Search tickets by order id
+                    ticketStore.createIndex("orderId", "orderId", { unique: false });
+
                 } else {
                     // For now: we clear all stores if we have a version update
                     DBOpenRequest.transaction!.objectStore("orders").clear()
                     DBOpenRequest.transaction!.objectStore("tickets").clear()
                     DBOpenRequest.transaction!.objectStore("ticketPatches").clear()
                     DBOpenRequest.transaction!.objectStore("settings").clear()
+
+                    if (event.oldVersion < 114) {
+                        const ticketStore = DBOpenRequest.transaction!.objectStore("tickets")
+                        ticketStore.createIndex("orderId", "orderId", { unique: false });
+                    }
                 }
             };
         })
@@ -320,6 +335,64 @@ export class WebshopManager {
                 objectStore.put(order.encode({ version: Version }));
             }
         })
+    }
+
+    async getTicketsForOrder(orderId: string, withPatches = true): Promise<TicketPrivate[]> {
+        const db = await this.getDatabase()
+
+        const tickets: TicketPrivate[] = []
+
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["tickets", "ticketPatches"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("tickets");
+            const ticketPatches = transaction.objectStore("ticketPatches");
+
+            const orderIndex = objectStore.index("orderId");
+
+            const range = IDBKeyRange.only(orderId);
+            const request = orderIndex.openCursor(range)
+            request.onsuccess = (event: any) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const rawOrder = cursor.value
+                    const ticket = TicketPrivate.decode(new ObjectData(rawOrder, { version: Version }))
+
+                    if (withPatches) {
+                        const request2 = ticketPatches.get(ticket.secret)
+                        request2.onsuccess = () => {
+                            const rawPatch = request2.result
+
+                            if (rawPatch === undefined) {
+                                // no patch found
+                                tickets.push(ticket)
+                                cursor.continue();
+                                return
+                            }
+
+                            const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
+                            tickets.push(ticket.patch(patch))
+                            cursor.continue();
+                        }
+                    } else {
+                        tickets.push(ticket)
+                        cursor.continue();
+                    }
+                    
+                } else {
+                    // no more results
+                    resolve()
+                }
+            }
+        })
+        
+        return tickets
     }
 
     async streamTickets(callback: (ticket: TicketPrivate) => void): Promise<void> {

@@ -35,6 +35,40 @@
                         <p>{{ order.data.customer.email }}</p>
                     </template>
                 </STListItem>
+
+                <STListItem class="right-description">
+                    Status
+
+                    <template slot="right">
+                        <span v-if="order.status == 'Created'" class="style-tag">Nieuw</span>
+                        <span v-if="order.payment && order.payment.status !== 'Succeeded'" class="style-tag warn">Niet betaald</span>
+                        <span v-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                        <span v-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
+                        <span v-if="order.status == 'Completed'" v-tooltip="'Voltooid'" class="success icon green" />
+                        <span v-if="order.status == 'Canceled'" v-tooltip="'Geannuleerd'" class="error icon canceled" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="hasTickets" class="right-description">
+                    Ticketstatus
+                    
+                    <template v-if="loadingTickets" slot="right">
+                        -
+                    </template>
+                    <span v-else-if="tickets.length == 0" slot="right" class="style-tag">
+                        Geen tickets
+                    </span>
+                    <span v-else-if="tickets.length == 1 && scannedCount == 1" slot="right" class="style-tag warn">
+                        Gescand
+                    </span>
+                    <span v-else-if="tickets.length == 1 && scannedCount == 0" slot="right" class="style-tag success">
+                        Nog niet gescand
+                    </span>
+                    <span v-else slot="right" class="style-tag" :class="{ warn: scannedCount > 0, success: scannedCount == 0}">
+                        {{ scannedCount }} / {{ tickets.length }} gescand
+                    </span>
+                </STListItem>
+
                 <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
                     {{ a.field.name }}
 
@@ -194,7 +228,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -247,6 +281,9 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     order: Order | null = this.initialOrder
 
+    tickets: TicketPrivate[] = []
+    loadingTickets = false
+    
     @Prop({ default: null })
     getNextOrder!: (order: Order) => Order | null;
 
@@ -280,6 +317,23 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get hasTickets() {
         return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product)
+    }
+
+    get scannedCount() {
+        return this.tickets.reduce((c, ticket) => c + (ticket.scannedAt ? 1 : 0), 0)
+    }
+
+    created() {
+        if (this.hasTickets) {
+            this.webshopManager.getTicketsForOrder(this.order?.id ?? this.orderId!, true).then((tickets) => {
+                this.tickets = tickets
+                this.loadingTickets = false
+            }).catch(e => {
+                console.error(e)
+                new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt", "error red").show()
+                this.loadingTickets = false
+            })
+        }
     }
 
     goBack() {

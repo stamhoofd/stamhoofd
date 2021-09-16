@@ -4,7 +4,7 @@
             <button slot="left" class="icon button close" @click="dismiss" />
         </STNavigationBar>
 
-        <div class="video-container">
+        <div class="video-container" :class="{ native: disableWebVideo }">
             <video ref="video" />
             <div class="scan-overlay" />
 
@@ -45,6 +45,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, Checkbox,Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { AppManager } from "@stamhoofd/networking";
 import { Order, OrderStatus, Product, TicketPrivate } from "@stamhoofd/structures";
+import { sleep } from "@stamhoofd/utility";
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -124,6 +125,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
     currentDate = new Date()
     updateCurrentDateInterval: number | null = null
+
+    disableWebVideo = false
+
+    nativeListener?: any
 
     get isLoading() {
         return this.webshopManager.isLoadingOrders || this.webshopManager.isLoadingTickets
@@ -217,7 +222,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     readingQR = false
     canvas = document.createElement('canvas')
 
-    async pollImage() {
+    pollImage() {
         if (this.checkingTicket || this.readingQR) {
             // Skip. Already working.
             return
@@ -230,7 +235,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         const w = video.offsetWidth
         const h = video.offsetHeight
 
-        const scale = 2/3
+        const scale = 4/5
         const size = w*scale
 
         QrScanner.scanImage(video, {
@@ -241,23 +246,32 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }, undefined, this.canvas) // reusing the worker randomly breaks on ios after a certain amount of scans, so currently not using it ? :/
             .then(result => {
                 this.readingQR = false
-                console.log("QR-code result: "+result)
-                if (this.checkingTicket || (this.cooldown && this.cooldownResult == result && this.cooldown > new Date()) || !result) {
-                    // Skip. Already working.
-                    return
-                }
-
-                // Wait 5 seconds before rescanning
-                this.cooldown = new Date(new Date().getTime() + 5 * 1000)
-                this.cooldownResult = result
-
-                // Go a QR-code with value: result
-                this.checkTicket(result).catch(console.error)
+                this.validateQR(result)
             })
-            .catch(error => {
+            .catch(() => {
                 // ignore
                 this.readingQR = false
             });
+    }
+
+    validateQR(result: string) {
+        console.log("QR-code result: "+result)
+        if (this.checkingTicket || (this.cooldown && this.cooldownResult == result && this.cooldown > new Date()) || !result) {
+            // Skip. Already working.
+            return
+        }
+
+        console.log("Processing result: "+result)
+
+        // Wait 2 seconds before rescanning
+        this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+        this.cooldownResult = result
+
+        // Go a QR-code with value: result
+        this.checkingTicket = true
+        this.checkTicket(result).then(() => { 
+            this.checkingTicket = false 
+        }).catch(console.error)
     }
 
     stopStream() {
@@ -323,7 +337,159 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
     }
 
-    async start() {
+    async checkTicket(result: string) {
+        if (!result.startsWith("https://")) {
+            // Invalid ticket
+            console.error("Not a url")
+            this.invalidTicket();
+            return
+        }
+
+
+        const parts = result.split("/")
+        let next = false
+        let secret: string | null = null
+
+        for (const part of parts) {
+            if (next && part !== "tickets") {
+                secret = part
+                break
+            }
+            if (part === "tickets") {
+                next = true
+            }
+        }
+
+        if (!secret) {
+            console.error("No secret found")
+            this.invalidTicket();
+            return
+        }
+
+        // Fetch ticket from database
+        try {
+            const ticket = await this.webshopManager.getTicketFromDatabase(secret)
+            if (ticket) {
+                const order = await this.webshopManager.getOrderFromDatabase(ticket.orderId)
+                if (!order) {
+                    AppManager.shared.hapticError() 
+                    new Toast("Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.", "error red").show()
+                } else {
+
+                    if (ticket.itemId !== null) {
+                        const item = order.data.cart.items.find(i => i.id === ticket.itemId)
+                        if (item) {
+                            const product = this.disabledProducts.find(p => p.id === item.product.id)
+                            if (product) {
+                                this.disabledTicket(product, ticket.scannedAt)
+                                return
+                            }
+                        }
+                    }
+
+                    if (order.status === OrderStatus.Canceled) {
+                        this.canceledTicket()
+                    } else if (ticket.scannedAt !== null) {
+                        this.alreadyScannedTicket(ticket, order)
+                    } else {
+                        this.validTicket(ticket, order)
+                    }
+                }
+
+            } else {
+                console.error("Ticket not found")
+                this.invalidTicket()
+            }
+        } catch (e) {
+            console.error(e)
+            // database error
+            Toast.fromError(e).show()
+
+            AppManager.shared.hapticError() 
+        }
+    }
+
+    alreadyScannedTicket(ticket: TicketPrivate, order: Order) {
+        AppManager.shared.hapticWarning() 
+
+        // Disable scanning same one for 2 seconds
+        this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+
+        this.show(new ComponentWithProperties(TicketAlreadyScannedView, {
+            webshopManager: this.webshopManager,
+            ticket,
+            order
+        }))
+    }
+
+    validTicket(ticket: TicketPrivate, order: Order) {
+        AppManager.shared.hapticSuccess() 
+
+        // Disable scanning same one for 2 seconds
+        this.cooldown = new Date(new Date().getTime() + 2 * 1000)
+
+        this.show(new ComponentWithProperties(ValidTicketView, {
+            webshopManager: this.webshopManager,
+            ticket,
+            order
+        }))
+    }
+
+    canceledTicket() {
+        new Toast("Oeps! Dit ticket werd geannuleerd en is dus niet geldig.", "error red").show()
+        AppManager.shared.hapticError() 
+    }
+
+    disabledTicket(product: Product, scannedAt: Date | null) {
+        // todo: show invalid ticket
+        new Toast("Dit is een ticket voor: "+product.name+(scannedAt ? ", en werd bovendien al eens gescand." : ""), "error red").show()
+        AppManager.shared.hapticError() 
+    }
+
+    invalidTicket() {
+        // todo: show invalid ticket
+        new Toast("Ongeldig ticket", "error red").show()
+        AppManager.shared.hapticError() 
+    }
+
+    async startScanning() {
+        if (AppManager.shared.QRScanner) {
+            // Make document transparent
+            
+            // Start (if still needed)
+            try {
+                await AppManager.shared.QRScanner.startScanning()
+            } catch (e) {
+                if (e.message && typeof e.message === "string" && e.message.includes("Permission")) {
+                    new Toast("Geen toegang tot jouw camera. Ga naar de instellingen app om terug toegang te geven.", 'error red').show()
+                    return
+                }
+                Toast.fromError(e).show()
+                return
+            }
+
+            // Delay (wait for transition)
+            await sleep(300)
+
+            // Use native QRScanner
+            this.disableWebVideo = true
+
+            // Make background transparent to see the video underlay
+            document.body.style.background = "transparent"
+
+            // Disable scrolling (bouncing)
+            document.body.style.overflow = "hidden"
+
+            if (!this.nativeListener) {
+                this.nativeListener = await AppManager.shared.QRScanner.addListener("scannedQRCode", (result: { value: string }) => {
+                    this.validateQR(result.value)
+                })
+            }
+            
+
+            return
+        }
+
         QrScanner.WORKER_PATH = QrScannerWorkerPath;
 
         if (this.pollInterval) {
@@ -355,125 +521,56 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         this.isFlashOn = this.scanner.isFlashOn()*/
     }
 
-    async checkTicket(result: string) {
+    stopScanning() {
+        if (AppManager.shared.QRScanner) {
+            // remove other listeners
+            if (this.nativeListener) {
+                this.nativeListener.remove()
+                this.nativeListener = undefined
+            }
 
-        if (!result.startsWith("https://")) {
-            // Invalid ticket
-            this.invalidTicket();
+            // Use native QRScanner
+            this.disableWebVideo = false
+
+            // Reset body
+            document.body.style.background = ""
+            document.body.style.overflow = ""
+
+            AppManager.shared.QRScanner.stopScanning().catch(console.error)
             return
         }
 
-
-        const parts = result.split("/")
-        let next = false
-        let secret: string | null = null
-
-        for (const part of parts) {
-            if (next && part !== "tickets") {
-                secret = part
-                break
-            }
-            if (part === "tickets") {
-                next = true
-            }
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval)
+            this.pollInterval = null
         }
 
-        if (!secret) {
-            this.invalidTicket();
+        if (this.updateCurrentDateInterval) {
+            clearInterval(this.updateCurrentDateInterval)
+            this.updateCurrentDateInterval = null
+        }
+
+        // Kill stream
+        this.stopStream()
+    }
+
+    pauseScanning() {
+        if (AppManager.shared.QRScanner) {
+            // remove other listeners
+            if (this.nativeListener) {
+                this.nativeListener.remove()
+                this.nativeListener = undefined
+            }
+
+            // Use native QRScanner
+            //this.disableWebVideo = false
+
+            // Reset body overflow only
+            //document.body.style.background = ""
+            document.body.style.overflow = ""
             return
         }
 
-        this.checkingTicket = true
-
-        // Fetch ticket from database
-        try {
-            const ticket = await this.webshopManager.getTicketFromDatabase(secret)
-            if (ticket) {
-                const order = await this.webshopManager.getOrderFromDatabase(ticket.orderId)
-                if (!order) {
-                    AppManager.shared.hapticError() 
-                    new Toast("Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.", "error red").show()
-                } else {
-
-                    if (ticket.itemId !== null) {
-                        const item = order.data.cart.items.find(i => i.id === ticket.itemId)
-                        if (item) {
-                            const product = this.disabledProducts.find(p => p.id === item.product.id)
-                            if (product) {
-                                this.disabledTicket(product, ticket.scannedAt)
-                                this.checkingTicket = false
-                                return
-                            }
-                        }
-                    }
-
-                    if (order.status === OrderStatus.Canceled) {
-                        this.canceledTicket()
-                    } else if (ticket.scannedAt !== null) {
-                        this.alreadyScannedTicket(ticket, order)
-                    } else {
-                        this.validTicket(ticket, order)
-                    }
-                }
-
-            } else {
-                this.invalidTicket()
-            }
-        } catch (e) {
-            console.error(e)
-            // database error
-            Toast.fromError(e).show()
-
-            AppManager.shared.hapticError() 
-        }
-
-        this.checkingTicket = false
-    }
-
-    alreadyScannedTicket(ticket: TicketPrivate, order: Order) {
-        AppManager.shared.hapticWarning() 
-
-        // Disable scanning same one for 5 seconds
-        this.cooldown = new Date(new Date().getTime() + 5 * 1000)
-
-        this.show(new ComponentWithProperties(TicketAlreadyScannedView, {
-            webshopManager: this.webshopManager,
-            ticket,
-            order
-        }))
-    }
-
-    validTicket(ticket: TicketPrivate, order: Order) {
-        AppManager.shared.hapticSuccess() 
-
-        // Disable scanning same one for 5 seconds
-        this.cooldown = new Date(new Date().getTime() + 5 * 1000)
-
-        this.show(new ComponentWithProperties(ValidTicketView, {
-            webshopManager: this.webshopManager,
-            ticket,
-            order
-        }))
-    }
-
-    canceledTicket() {
-        new Toast("Oeps! Dit ticket werd geannuleerd en is dus niet geldig.", "error red").show()
-        AppManager.shared.hapticError() 
-    }
-
-    disabledTicket(product: Product, scannedAt: Date | null) {
-        // todo: show invalid ticket
-        new Toast("Dit is een ticket voor: "+product.name+(scannedAt ? ", en werd bovendien al eens gescand." : ""), "error red").show()
-        AppManager.shared.hapticError() 
-    }
-
-    invalidTicket() {
-        // todo: show invalid ticket
-        new Toast("Ongeldig ticket", "error red").show()
-        AppManager.shared.hapticError() 
-    }
-
-    deactivated() {
         if (this.pollInterval) {
             clearInterval(this.pollInterval)
             this.pollInterval = null
@@ -486,13 +583,17 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
     }
 
+    deactivated() {
+        this.pauseScanning()
+    }
+
     activated() {
-        // Prevent scanning previous one for 5 seconds
-        this.cooldown = new Date(new Date().getTime() + 5 * 1000)
+        // Prevent scanning previous one for 2 seconds
+        this.cooldown = new Date(new Date().getTime() + 2 * 1000)
 
         // We restart the scanner every time because there is a bug in the qr scanner
         // that randomly breaks the scanning after some time when going back (recreating the video element)
-        this.start().catch(console.error)
+        this.startScanning().catch(console.error)
 
         if (this.updateCurrentDateInterval) {
             clearInterval(this.updateCurrentDateInterval)
@@ -510,18 +611,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     beforeDestroy() {
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval)
-            this.pollInterval = null
-        }
-
-        if (this.updateCurrentDateInterval) {
-            clearInterval(this.updateCurrentDateInterval)
-            this.updateCurrentDateInterval = null
-        }
-
-        // Kill stream
-        this.stopStream()
+        this.stopScanning()
     }
 }
 </script>
@@ -548,14 +638,27 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
 
         .scan-overlay {
-            width: 40%;
+            width: 60%;
             position: absolute;
             left: 50%;
             top: 50%;
-            padding-bottom: 40%;
+            padding-bottom: 60%;
             border: 4px solid white;
             border-radius: 5px;
             transform: translate(-50%, -50%);
+        }
+
+        &.native {
+            background: transparent;
+
+            > video {
+                display: none;
+            }
+
+            // Scan overlay should be centered relative to the whole view, because the scan view is underneath
+            .scan-overlay {
+                position: fixed;
+            }
         }
     }
 
@@ -564,6 +667,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         left: 0;
         bottom: 0;
         right: 0;
+        margin-bottom: calc(-1 * var(--st-safe-area-bottom, 0px));
 
         > .status-bar {
             min-height: 50px;
@@ -576,6 +680,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             color: $color-dark;
             font-size: 14px;
             line-height: 1.4;
+
+            padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 15px);
         }
     }
 
