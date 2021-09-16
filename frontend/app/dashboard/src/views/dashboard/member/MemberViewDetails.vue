@@ -269,7 +269,7 @@
                 <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
                     <span>{{ user.email }}</span>
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
-                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" />
+                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" @click="unlinkUser(user)" />
                 </p>
             </template>
 
@@ -299,15 +299,16 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STList, STListItem,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration } from '@stamhoofd/structures';
+import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
+import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import EditMemberGroupView from './edit/EditMemberGroupView.vue';
@@ -445,12 +446,58 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             // Reset
             this.member.details.isRecovered = true
             console.error(e)
+            Toast.fromError(e).show()
         }
         this.loadingComplete = false
     }
 
     isOldEmail(email: string) {
         return !(this.member.details?.getManagerEmails().includes(email) ?? false)
+    }
+
+    isUnlinkingUser = false
+
+    /**
+     * You can only unlink a user if the e-mail is not in the manager emails of the member (or it will get readded automatically)
+     */
+    async unlinkUser(user: User) {
+        if (this.isUnlinkingUser) {
+            return
+        }
+        if (!await CenteredMessage.confirm("Ben je zeker dat je de toegang tot dit lid wilt intrekken voor dit account?", "Ja, verwijderen", "Toegang intrekken van: "+user.email)) {
+            return
+        }
+
+        this.isUnlinkingUser = true
+
+        try {
+            // Update the users that are connected to these members
+            const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = MemberManager.getMembersAccessPatch([this.member])
+
+            // Add delete user
+            const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
+            missing.addDelete(user.id)
+            encryptedMembers.addPatch(
+                    EncryptedMemberWithRegistrations.patch({
+                        id: this.member.id,
+                        users: missing
+                    })
+                )
+
+            const updated = await MemberManager.patchMembers(encryptedMembers, false)
+
+            const updatedData = updated.find(m => m.id === this.member.id)
+            if (updatedData) {
+                this.member.copyFrom(updatedData)
+            }
+            
+        } catch (e) {
+            // Reset
+            console.error(e)
+            Toast.fromError(e).show()
+        }
+
+        this.isUnlinkingUser = false
     }
 
     gotoMember(member: MemberWithRegistrations) {
