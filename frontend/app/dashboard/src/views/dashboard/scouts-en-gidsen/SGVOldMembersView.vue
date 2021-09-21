@@ -1,34 +1,34 @@
 <template>
-    <div class="st-view" id="sgv-old-members-view">
-        <STNavigationBar title="Importeren of schrappen">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
+    <div id="sgv-old-members-view" class="st-view">
+        <STNavigationBar title="Schrappen">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
 
         <main>
             <h1>
-                Wil je deze leden importeren in Stamhoofd of schrappen in de Groepsadministratie?
+                Wil je deze leden schrappen in de groepsadministratie?
             </h1>
-            <p>Er staan leden in de Groepsadministratie die nog niet in Stamhoofd staan. Je kan deze importeren, ofwel schrappen in de groepsadministratie (omdat ze gestopt zijn).</p>
+            <p>Er staan leden in de groepsadministratie die nog niet in Stamhoofd staan. Je kan deze schrappen (bv. omdat ze gestopt zijn) of behouden (bv. omdat je ze nog even tijd wilt geven om opnieuw in te schrijven). Je schrapt leden best pas net voor de deadline van 15 oktober en daarna, zo blijven ze nog even verzekerd als de inschrijving niet meteen in orde is.</p>
         
             <STList>
                 <STListItem v-for="member in members" :key="member.id">
                     <div>
-                        <h2 class="style-title-list">{{ member.firstName }} {{ member.lastName }}</h2>
-                        <p class="style-description-small">{{ member.birthDay | date }}</p>
+                        <h2 class="style-title-list">
+                            {{ member.firstName }} {{ member.lastName }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ member.birthDay | date }}
+                        </p>
                     </div>
                 </STListItem>
-
             </STList>
         </main>
 
         <STToolbar>
             <template slot="right">
                 <button class="button destructive" @click="doDelete">
-                    <span class="icon trash"/><span>Schrappen</span>
-                </button>
-                <button class="button secundary" @click="doImport">
-                    <span class="icon download"/><span>Importeren</span>
+                    <span class="icon trash" /><span>Schrappen</span>
                 </button>
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click="doNothing">
@@ -41,17 +41,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, STList, STListItem, CenteredMessage} from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import DNSRecordsView from './DNSRecordsView.vue';
-import { SGVLid, SGVLidMatch, SGVLidMatchVerify } from '../../../classes/SGVGroepsadministratie';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox,LoadingButton, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar} from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import { SGVLid } from '../../../classes/SGVGroepsadministratie';
 
 @Component({
     components: {
@@ -96,18 +91,6 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
         this.didSetAction = true;
         this.dismiss({ force: true })
         this.setAction("delete")
-    }
-
-    async doImport() {
-        if (this.loading) {
-            return;
-        }
-        new CenteredMessage("Nog niet beschikbaar", "Het importeren van leden vanaf de groepsadministratie komt er binnenkort aan. Normaal gezien heb je dit nu nog niet echt nodig, omdat alle leden gewoon via Stamhoofd (her)inschrijven. Dit is pas handig al je tijdens het jaar aansluit en niet alle leden via Stamhoofd ingeschreven zijn.", "clock").addCloseButton().show()
-        return;
-        
-        this.didSetAction = true;
-        this.dismiss({ force: true })
-        this.setAction("import")
     }
 
     async doNothing() {
