@@ -41,7 +41,6 @@ class TrimEnumDecoder<E extends { [key: number]: string | number }> implements D
     }
 }
 
-
 export class Record extends AutoEncoder {
     @field({ decoder: new EnumDecoder(RecordType) })
     type: RecordType;
