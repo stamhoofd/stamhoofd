@@ -76,7 +76,7 @@
             <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
                 <button class="menu-button heading">
                     <span class="icon basket" />
-                    <span>Verkopen</span>
+                    <span>Webshops</span>
                     <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
                         <span class="icon add" />
                         <span>Nieuw</span>

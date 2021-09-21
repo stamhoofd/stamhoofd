@@ -275,8 +275,8 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<string, Group[]> {
     const mapping = {
         "KAP": ["kapoenen"],
-        "KW": ["kabouters", "welpen", "wouters", "woudlopers", "kawellen", "wolven"],
-        "JGJV": ["jonggidsen", "jongverkenners", "jonggivers"],
+        "KW": ["kabouters", "welpen", "wouters", "woudlopers", "kawellen", "wolven", "pioniers"],
+        "JGJV": ["jonggidsen", "jongverkenners", "jonggivers", "jong-verkenners", "jong-givers", "jong-gidsen"],
         "GVE": ["gidsen", "verkenners", "givers"],
         "AKAB": ["akabe"],
         "JIN": ["jin"]
@@ -291,6 +291,7 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
     ]
     const looseMatches = [
         ["woudloper", "woudlopers"],
+        ["pionier", "pioniers"],
         ["los lid", "losse leden"]
     ]
     const map = new Map<string, Group[]>()
@@ -353,8 +354,9 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                 }
             }
         }
+
         // And also add based on age if we didn't find a match in groepsadmin
-        if (groep.settings.minAge && groep.settings.minAge <= 18 && groep.settings.maxAge && groep.settings.maxAge <= 18) {
+        if (groep.settings.minAge !== null && groep.settings.minAge <= 18 && groep.settings.maxAge !== null && groep.settings.maxAge <= 18) {
             // find a match for normal members
 
             for (const age of defaultAgeMapping) {
@@ -372,10 +374,8 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                     continue main;
                 }
             }
-
         }
     }
-
 
     return map
 }
