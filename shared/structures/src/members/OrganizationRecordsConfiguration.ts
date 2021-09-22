@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { OrganizationType } from "../OrganizationType"
-import { LegacyRecord } from "./LegacyRecord"
-import { LegacyRecordType } from "./LegacyRecordType"
+import { LegacyRecord } from "./records/LegacyRecord"
+import { LegacyRecordType } from "./records/LegacyRecordType"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",

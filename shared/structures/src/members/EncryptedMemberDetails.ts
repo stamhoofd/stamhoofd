@@ -5,7 +5,7 @@ import { Organization } from "../Organization";
 // eslint bug thinks MemberDetails is not used
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberDetails } from "./MemberDetails";
-import { LegacyRecordTypeHelper } from "./LegacyRecordType";
+import { LegacyRecordTypeHelper } from "./records/LegacyRecordType";
 import { ReviewTimes } from "./ReviewTime";
 
 

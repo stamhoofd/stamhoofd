@@ -2,10 +2,10 @@ import "jest-extended"
 
 import { ObjectData } from "@simonbackx/simple-encoding"
 
-import { LegacyRecord } from "./LegacyRecord"
-import { LegacyRecordType } from "./LegacyRecordType"
 import { MemberDetails } from "./MemberDetails"
 import { Parent } from "./Parent"
+import { LegacyRecord } from "./records/LegacyRecord"
+import { LegacyRecordType } from "./records/LegacyRecordType"
 
 describe("Correctly merge multiple details together", () => {
     test("Delete public records", () => {

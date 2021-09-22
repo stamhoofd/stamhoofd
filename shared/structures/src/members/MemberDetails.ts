@@ -7,9 +7,9 @@ import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
-import { LegacyRecord,OldRecord } from './LegacyRecord';
-import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from './LegacyRecordType';
 import { Parent } from './Parent';
+import { LegacyRecord,OldRecord } from './records/LegacyRecord';
+import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from './records/LegacyRecordType';
 import { ReviewTimes } from './ReviewTime';
 
 /**
@@ -96,7 +96,7 @@ export class MemberDetails extends AutoEncoder {
             return result
         } 
     })
-    records: LegacyRecord[] = [];
+    records: LegacyRecord[] = [];    
 
     @field({ decoder: EmergencyContact, nullable: true })
     doctor: EmergencyContact | null = null;
