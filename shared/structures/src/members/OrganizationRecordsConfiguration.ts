@@ -41,7 +41,7 @@ export class FinancialSupportSettings extends AutoEncoder {
      * E.g. 'Uses financial support'
      */
     @field({ decoder: StringDecoder, optional: true })
-    warningText = FinancialSupportSettings.defaultCheckboxLabel
+    warningText = FinancialSupportSettings.defaultWarningText
 
     static get defaultDescription() {
         return "We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om."
