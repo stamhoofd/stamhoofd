@@ -277,7 +277,7 @@ import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
 import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
-import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
+import LegacyRecordsSettingsView from './modules/members/LegacyRecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
@@ -395,7 +395,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     manageRecords(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(RecordsSettingsView, {})
+            root: new ComponentWithProperties(LegacyRecordsSettingsView, {})
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
@@ -413,7 +413,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     manageLegacyRecords(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(RecordsSettingsView, {})
+            root: new ComponentWithProperties(LegacyRecordsSettingsView, {})
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 

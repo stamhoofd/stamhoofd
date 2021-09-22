@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
-import { RecordChoice, RecordSettings, LegacyRecordType } from "./RecordSettings"
+import { LegacyRecordType, RecordChoice, RecordSettings } from "./RecordSettings"
 
 
 export class RecordAnswer extends AutoEncoder {

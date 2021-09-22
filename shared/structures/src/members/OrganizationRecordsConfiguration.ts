@@ -3,6 +3,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder,field, IntegerDe
 import { OrganizationType } from "../OrganizationType"
 import { LegacyRecord } from "./records/LegacyRecord"
 import { LegacyRecordType } from "./records/LegacyRecordType"
+import { RecordCategory } from "./records/RecordCategory"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",
@@ -76,10 +77,17 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 115 })
     dataPermission = false
 
-    // Old configurations
-    @field({ decoder: new ArrayDecoder(StringDecoder) })
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), upgrade: () => [], version: 55 })
-    enabledRecords: LegacyRecordType[] = []
+    @field({ decoder: new ArrayDecoder(RecordCategory), version: 117 })
+    recordCategories: RecordCategory[] = []
+
+    /**
+     * @deprecated
+     * Moved to recordCategories
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), field: "enabledRecords" })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), upgrade: () => [], version: 55, field: "enabledRecords" })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), version: 117, field: "enabledLegacyRecords" })
+    enabledLegacyRecords: LegacyRecordType[] = []
 
     // General configurations
     @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
@@ -102,11 +110,12 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     emergencyContact = AskRequirement.Optional
 
     /**
+     * @deprecated
      * Return true if at least one from the records should get asked
      */
     shouldAsk(...types: LegacyRecordType[]): boolean {
         for (const type of types) {
-            if (this.enabledRecords.find(r => r === type)) {
+            if (this.enabledLegacyRecords.find(r => r === type)) {
                 return true
             }
 
@@ -120,6 +129,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         return false
     }
 
+    /**
+     * @deprecated
+     */
     filterRecords(records: LegacyRecord[], ...allow: LegacyRecordType[]): LegacyRecord[] {
         return records.filter((r) => {
             if (allow.includes(r.type)) {
@@ -130,17 +142,18 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     }
 
     /**
-     * Return true if we need to ask permissions for data, even when LegacyRecordType.DataPermissions is missing from enabledRecords
+     * @deprecated
+     * Return true if we need to ask permissions for data, even when LegacyRecordType.DataPermissions is missing from enabledLegacyRecords
      */
     needsData(): boolean {
         if (this.doctor !== AskRequirement.NotAsked) {
             return true
         }
-        if (this.enabledRecords.length == 0) {
+        if (this.enabledLegacyRecords.length == 0) {
             return false
         }
 
-        if (this.enabledRecords.find(type => {
+        if (this.enabledLegacyRecords.find(type => {
             if (![LegacyRecordType.DataPermissions, LegacyRecordType.MedicinePermissions, LegacyRecordType.PicturePermissions, LegacyRecordType.GroupPicturePermissions].includes(type)) {
                 return true
             }
@@ -151,17 +164,20 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         return false
     }
 
+    /**
+     * @deprecated
+     */
     shouldSkipRecords(age: number | null): boolean {
         if (this.doctor !== AskRequirement.NotAsked) {
             return false
         }
-        if (this.enabledRecords.length == 0) {
+        if (this.enabledLegacyRecords.length == 0) {
             return true
         }
 
-        if (this.enabledRecords.length == 1 && (age === null || age >= 18)) {
+        if (this.enabledLegacyRecords.length == 1 && (age === null || age >= 18)) {
             // Skip if the only record that should get asked is permission for medication
-            return this.enabledRecords[0] === LegacyRecordType.MedicinePermissions
+            return this.enabledLegacyRecords[0] === LegacyRecordType.MedicinePermissions
         }
 
         return false
@@ -217,7 +233,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             const records = Object.values(LegacyRecordType)
 
             return OrganizationRecordsConfiguration.create({
-                enabledRecords: records,
+                enabledLegacyRecords: records,
                 doctor: AskRequirement.Required,
                 emergencyContact: AskRequirement.Optional
             })
@@ -227,7 +243,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             // Enable sport related records + pictures
 
             return OrganizationRecordsConfiguration.create({
-                enabledRecords: [
+                enabledLegacyRecords: [
                     LegacyRecordType.DataPermissions,
                     LegacyRecordType.PicturePermissions,
 
@@ -259,7 +275,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
          if (type === OrganizationType.LGBTQ) {
             // Request data permissions + emergency contact is optional
             return OrganizationRecordsConfiguration.create({
-                enabledRecords: [LegacyRecordType.DataPermissions],
+                enabledLegacyRecords: [LegacyRecordType.DataPermissions],
                 doctor: AskRequirement.NotAsked,
                 emergencyContact: AskRequirement.Optional
             })

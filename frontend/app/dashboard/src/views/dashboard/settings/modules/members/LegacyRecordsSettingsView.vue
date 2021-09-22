@@ -7,7 +7,7 @@
 
         <main>
             <h1>
-                Wijzig gevraagde gegevens
+                LEGACY Wijzig gevraagde gegevens
             </h1>
             <p>Je kan hieronder kiezen welke vragen of keuzes jouw leden te zien krijgen bij het inschrijven. Voorlopig is het nog niet mogelijk om zelf vragen toe te voegen, contacteer ons gerust op hallo@stamhoofd.be als je ideeën hebt voor vragen.</p>
 
@@ -273,7 +273,7 @@ import { OrganizationManager } from "../../../../../classes/OrganizationManager"
         PriceInput
     },
 })
-export default class RecordsSettingsView extends Mixins(NavigationMixin) {
+export default class LegacyRecordsSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
@@ -460,11 +460,11 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     // Helpers ---
 
     getBooleanType(type: LegacyRecordType) {
-        return !!this.organization.meta.recordsConfiguration.enabledRecords.find(r => r == type)
+        return !!this.organization.meta.recordsConfiguration.enabledLegacyRecords.find(r => r == type)
     }
 
     setBooleanType(type: LegacyRecordType, enabled: boolean) {
-        const index = this.organization.meta.recordsConfiguration.enabledRecords.findIndex(r => r == type)
+        const index = this.organization.meta.recordsConfiguration.enabledLegacyRecords.findIndex(r => r == type)
         if ((index != -1) === enabled) {
             return
         }
@@ -481,14 +481,14 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             return
         }
 
-        if (!(this.organizationPatch.meta.recordsConfiguration.enabledRecords instanceof PatchableArray)) {
+        if (!(this.organizationPatch.meta.recordsConfiguration.enabledLegacyRecords instanceof PatchableArray)) {
             return
         }        
         
         if (enabled) {
-            this.organizationPatch.meta.recordsConfiguration.enabledRecords.addPut(type)
+            this.organizationPatch.meta.recordsConfiguration.enabledLegacyRecords.addPut(type)
         } else {
-            this.organizationPatch.meta.recordsConfiguration.enabledRecords.addDelete(type)
+            this.organizationPatch.meta.recordsConfiguration.enabledLegacyRecords.addDelete(type)
         }
     }
    
