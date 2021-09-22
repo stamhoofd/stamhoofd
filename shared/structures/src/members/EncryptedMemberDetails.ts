@@ -175,6 +175,8 @@ export class EncryptedMemberDetails extends AutoEncoder {
         const details = MemberDetails.create({})
         details.isRecovered = true
         details.records = original.records.filter(r => LegacyRecordTypeHelper.isPublic(r.type))
+        details.allowSensitiveDataCollection = original.allowSensitiveDataCollection
+        details.memberNumber = original.memberNumber
 
         if (details.records.length == 0) {
             return null

@@ -241,7 +241,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
             beperking: lid.vgagegevens && lid.vgagegevens.beperking ? true : false,
             geboortedatum: Formatter.dateNumber(details.birthDay).split("/").reverse().join("-"),
             individueleSteekkaartdatumaangepast: lid.vgagegevens && lid.vgagegevens.individueleSteekkaartdatumaangepast ? lid.vgagegevens.individueleSteekkaartdatumaangepast : undefined,
-            verminderdlidgeld: details.records.find(r => r.type == LegacyRecordType.FinancialProblems) ? true : false,
+            verminderdlidgeld: details.requiresFinancialSupport?.value ?? false,
         }
     }
 

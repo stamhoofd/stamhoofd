@@ -13,6 +13,17 @@ import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from './record
 import { ReviewTimes } from './ReviewTime';
 
 /**
+ * Keep track of date nad time of an edited boolean value
+ */
+export class BooleanStatus extends AutoEncoder {
+    @field({ decoder: BooleanDecoder })
+    value = false
+
+    @field({ decoder: DateDecoder })
+    date = new Date()
+}
+
+/**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form. 
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
  * Validation needs to happen mostly client side - but malicious users can just send invalid data in the encrypted form. So validation happens a second time on the client side when an organitiona's admin decrypts the member data.
@@ -97,6 +108,15 @@ export class MemberDetails extends AutoEncoder {
         } 
     })
     records: LegacyRecord[] = [];    
+
+    @field({ decoder: BooleanStatus, version: 116, optional: true })
+    requiresFinancialSupport?: BooleanStatus
+
+    /**
+     * Gave permission to collect sensitive information
+     */
+    @field({ decoder: BooleanStatus, version: 116, optional: true })
+    allowSensitiveDataCollection?: BooleanStatus
 
     @field({ decoder: EmergencyContact, nullable: true })
     doctor: EmergencyContact | null = null;
@@ -449,5 +469,12 @@ export class MemberDetails extends AutoEncoder {
             }
         }
 
+        if (other.requiresFinancialSupport && (!this.requiresFinancialSupport || this.requiresFinancialSupport.date < other.requiresFinancialSupport.date)) {
+            this.requiresFinancialSupport = other.requiresFinancialSupport
+        }
+
+        if (other.allowSensitiveDataCollection && (!this.allowSensitiveDataCollection || this.allowSensitiveDataCollection.date < other.allowSensitiveDataCollection.date)) {
+            this.allowSensitiveDataCollection = other.allowSensitiveDataCollection
+        }
     }
 }

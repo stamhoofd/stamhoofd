@@ -6,6 +6,7 @@
         "../registration",
         "../webshop",
         "../admin",
+        "../mobile",
     ],
     "compilerOptions": {
         "resolveJsonModule": true

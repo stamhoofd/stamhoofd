@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { OrganizationType } from "../OrganizationType"
 import { LegacyRecord } from "./records/LegacyRecord"
@@ -18,12 +18,65 @@ export class FreeContributionSettings extends AutoEncoder {
     amounts: number[] = [500, 1500, 3000]
 }
 
+export class FinancialSupportSettings extends AutoEncoder {
+    /**
+     * E.g. 'financial support'
+     */
+    @field({ decoder: StringDecoder })
+    title = FinancialSupportSettings.defaultTitle
+
+    /**
+     * E.g. 'We provide financial support for families in financial difficulties. You can ask for this by checking this checkbox'
+     */
+    @field({ decoder: StringDecoder })
+    description = FinancialSupportSettings.defaultDescription
+
+    /**
+     * E.g. 'My family is in need of financial support'
+     */
+    @field({ decoder: StringDecoder })
+    checkboxLabel = FinancialSupportSettings.defaultCheckboxLabel
+
+    /**
+     * E.g. 'Uses financial support'
+     */
+    @field({ decoder: StringDecoder, optional: true })
+    warningText = FinancialSupportSettings.defaultCheckboxLabel
+
+    static get defaultDescription() {
+        return "We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om."
+    }
+
+    static get defaultTitle() {
+        return "Financiële ondersteuning"
+    }
+
+    static get defaultCheckboxLabel() {
+        return "Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken"
+    }
+
+    static get defaultWarningText() {
+        return "Gebruikt financiële ondersteuning"
+    }
+}
+
 export class OrganizationRecordsConfiguration extends AutoEncoder {
     // New record configurations
-    
+
+    /**
+     * If the organizations provides support for families in financial difficulties
+     */
+    @field({ decoder: FinancialSupportSettings, nullable: true, version: 115 })
+    financialSupport: FinancialSupportSettings | null = null
+
+    /**
+     * Ask to collect sensitive information
+     * TODO: make this an automatic getter that checks financialSupport + custom records + organization type (e.g. lgbtq+, politics) to determine if this is needed
+     */
+    @field({ decoder: BooleanDecoder, version: 115 })
+    dataPermission = false
 
     // Old configurations
-
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), upgrade: () => [], version: 55 })
     enabledRecords: LegacyRecordType[] = []
