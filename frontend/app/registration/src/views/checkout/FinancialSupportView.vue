@@ -32,7 +32,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Record, RecordType } from '@stamhoofd/structures';
+import { LegacyRecord,LegacyRecordType } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
@@ -71,7 +71,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
         if (!this.reduced) {
             for (const item of CheckoutManager.checkout.cart.items) {
                 const member = item.member
-                if (member.details.records.find(r => r.type == RecordType.FinancialProblems)) {
+                if (member.details.records.find(r => r.type == LegacyRecordType.FinancialProblems)) {
                     this.reduced = true;
                     break;
                 }
@@ -106,11 +106,11 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                 // Update reduced
                 for (const item of CheckoutManager.checkout.cart.items) {
                     const member = item.member
-                    if (!member.details.records.find(r => r.type == RecordType.FinancialProblems)) {
+                    if (!member.details.records.find(r => r.type == LegacyRecordType.FinancialProblems)) {
                         // Check if we are allowed to gather this information
-                        if (member.details.records.find(r => r.type == RecordType.DataPermissions)) {
-                            member.details.records.push(Record.create({
-                                type: RecordType.FinancialProblems
+                        if (member.details.records.find(r => r.type == LegacyRecordType.DataPermissions)) {
+                            member.details.records.push(LegacyRecord.create({
+                                type: LegacyRecordType.FinancialProblems
                             }))
                             needsSync = true;
                         }
@@ -122,7 +122,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                 // Update reduced
                 for (const item of CheckoutManager.checkout.cart.items) {
                     const member = item.member
-                    const i = member.details.records.findIndex(r => r.type == RecordType.FinancialProblems)
+                    const i = member.details.records.findIndex(r => r.type == LegacyRecordType.FinancialProblems)
                     if (i != -1) {
                         member.details.records.splice(i, 1);
                         needsSync = true;

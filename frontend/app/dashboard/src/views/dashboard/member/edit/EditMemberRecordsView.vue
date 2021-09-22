@@ -3,23 +3,23 @@
         <main>
             <STErrorsDefault :error-box="errorBox" />
 
-            <template v-if="shouldAsk(RecordType.DataPermissions, RecordType.PicturePermissions, RecordType.GroupPicturePermissions)">
+            <template v-if="shouldAsk(LegacyRecordType.DataPermissions, LegacyRecordType.PicturePermissions, LegacyRecordType.GroupPicturePermissions)">
                 <h2>Privacy</h2>
 
                 <p class="info-box">
                     Maak hier niet zomaar wijzigingen.
                 </p>
 
-                <template v-if="shouldAsk(RecordType.DataPermissions)">
+                <template v-if="shouldAsk(LegacyRecordType.DataPermissions)">
                     <Checkbox v-model="allowData" class="long-text">
                         Toestemming om de gevoelige gegevens van {{ memberDetails.firstName }} te verzamelen en te verwerken (o.a. voor medische steekkaart) zoals staat vermeld in het privacybeleid.
                     </Checkbox>
                 </template>
 
-                <Checkbox v-if="shouldAsk(RecordType.PicturePermissions)" v-model="allowPictures" class="long-text">
+                <Checkbox v-if="shouldAsk(LegacyRecordType.PicturePermissions)" v-model="allowPictures" class="long-text">
                     {{ memberDetails.firstName }} mag tijdens de activiteiten worden gefotografeerd voor publicatie op de website en sociale media.
                 </Checkbox>
-                <Checkbox v-if="(!allowPictures || !shouldAsk(RecordType.PicturePermissions)) && shouldAsk(RecordType.GroupPicturePermissions)" v-model="allowGroupPictures" class="long-text">
+                <Checkbox v-if="(!allowPictures || !shouldAsk(LegacyRecordType.PicturePermissions)) && shouldAsk(LegacyRecordType.GroupPicturePermissions)" v-model="allowGroupPictures" class="long-text">
                     Ik geef wel toestemming voor de publicatie van groepsfoto's met {{ memberDetails.firstName }} voor publicatie op de website en sociale media.
                 </Checkbox>
 
@@ -30,60 +30,60 @@
             </template>
 
             <template v-if="allowData">
-                <template v-if="shouldAsk(RecordType.FinancialProblems)">
+                <template v-if="shouldAsk(LegacyRecordType.FinancialProblems)">
                     <hr>
                     <h2>Kansarm gezin</h2>
-                    <RecordCheckbox v-model="records" :type="RecordType.FinancialProblems" />
+                    <RecordCheckbox v-model="records" :type="LegacyRecordType.FinancialProblems" />
                 </template>
 
-                <template v-if="shouldAsk(RecordType.FoodAllergies, RecordType.MedicineAllergies, RecordType.HayFever, RecordType.OtherAllergies)">
+                <template v-if="shouldAsk(LegacyRecordType.FoodAllergies, LegacyRecordType.MedicineAllergies, LegacyRecordType.HayFever, LegacyRecordType.OtherAllergies)">
                     <hr>
                     <h2>Allergieën</h2>
 
-                    <RecordCheckbox v-if="shouldAsk(RecordType.FoodAllergies)" v-model="records" :type="RecordType.FoodAllergies" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.MedicineAllergies)" v-model="records" :type="RecordType.MedicineAllergies" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.HayFever)" v-model="records" :type="RecordType.HayFever" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.OtherAllergies)" v-model="records" :type="RecordType.OtherAllergies" placeholder="Som hier op welke zaken" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.FoodAllergies)" v-model="records" :type="LegacyRecordType.FoodAllergies" placeholder="Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.MedicineAllergies)" v-model="records" :type="LegacyRecordType.MedicineAllergies" placeholder="Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.HayFever)" v-model="records" :type="LegacyRecordType.HayFever" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.OtherAllergies)" v-model="records" :type="LegacyRecordType.OtherAllergies" placeholder="Som hier op welke zaken" />
                 </template>
 
-                <template v-if="shouldAsk(RecordType.Vegetarian, RecordType.Vegan, RecordType.Halal, RecordType.Kosher, RecordType.Diet)">
+                <template v-if="shouldAsk(LegacyRecordType.Vegetarian, LegacyRecordType.Vegan, LegacyRecordType.Halal, LegacyRecordType.Kosher, LegacyRecordType.Diet)">
                     <hr>
                     <h2>Dieet</h2>
 
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Vegetarian)" v-model="records" :type="RecordType.Vegetarian" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Vegan)" v-model="records" :type="RecordType.Vegan" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Halal)" v-model="records" :type="RecordType.Halal" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Kosher)" v-model="records" :type="RecordType.Kosher" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Diet)" v-model="records" name="Ander dieet" :type="RecordType.Diet" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.Vegetarian)" v-model="records" :type="LegacyRecordType.Vegetarian" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.Vegan)" v-model="records" :type="LegacyRecordType.Vegan" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.Halal)" v-model="records" :type="LegacyRecordType.Halal" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.Kosher)" v-model="records" :type="LegacyRecordType.Kosher" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.Diet)" v-model="records" name="Ander dieet" :type="LegacyRecordType.Diet" placeholder="Beschrijving van ander soort dieet. Let op, allergieën hoef je hier niet nog eens te vermelden." />
                 </template>
 
-                <template v-if="shouldAsk(RecordType.CovidHighRisk, RecordType.Asthma, RecordType.BedWaters, RecordType.Epilepsy, RecordType.HeartDisease, RecordType.SkinCondition, RecordType.Rheumatism, RecordType.SleepWalking, RecordType.Diabetes, RecordType.Medicines, RecordType.SpecialHealthCare)">
+                <template v-if="shouldAsk(LegacyRecordType.CovidHighRisk, LegacyRecordType.Asthma, LegacyRecordType.BedWaters, LegacyRecordType.Epilepsy, LegacyRecordType.HeartDisease, LegacyRecordType.SkinCondition, LegacyRecordType.Rheumatism, LegacyRecordType.SleepWalking, LegacyRecordType.Diabetes, LegacyRecordType.Medicines, LegacyRecordType.SpecialHealthCare)">
                     <hr>
                     <h2>Gezondheid, hygiëne &amp; slapen</h2>
 
-                    <RecordCheckbox v-for="type in [RecordType.CovidHighRisk, RecordType.Asthma, RecordType.BedWaters, RecordType.Epilepsy, RecordType.HeartDisease, RecordType.SkinCondition, RecordType.Rheumatism, RecordType.SleepWalking, RecordType.Diabetes ]" v-if="shouldAsk(type)" :key="type" v-model="records" :type="type" :comments="true" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.Medicines)" v-model="records" :type="RecordType.Medicines" placeholder="Welke, wanneer en hoe vaak?" comment="Gelieve ons ook de noodzakelijke doktersattesten te bezorgen." />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.SpecialHealthCare)" v-model="records" :type="RecordType.SpecialHealthCare" placeholder="Welke?" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.SpecialHealthCare)" v-model="records" :type="RecordType.SpecialHealthCare" placeholder="Welke?" />
+                    <RecordCheckbox v-for="type in [LegacyRecordType.CovidHighRisk, LegacyRecordType.Asthma, LegacyRecordType.BedWaters, LegacyRecordType.Epilepsy, LegacyRecordType.HeartDisease, LegacyRecordType.SkinCondition, LegacyRecordType.Rheumatism, LegacyRecordType.SleepWalking, LegacyRecordType.Diabetes ]" v-if="shouldAsk(type)" :key="type" v-model="records" :type="type" :comments="true" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.Medicines)" v-model="records" :type="LegacyRecordType.Medicines" placeholder="Welke, wanneer en hoe vaak?" comment="Gelieve ons ook de noodzakelijke doktersattesten te bezorgen." />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.SpecialHealthCare)" v-model="records" :type="LegacyRecordType.SpecialHealthCare" placeholder="Welke?" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.SpecialHealthCare)" v-model="records" :type="LegacyRecordType.SpecialHealthCare" placeholder="Welke?" />
                 </template>
 
-                <template v-if="shouldAsk(RecordType.TetanusVaccine)">
+                <template v-if="shouldAsk(LegacyRecordType.TetanusVaccine)">
                     <hr>
                     <h2>Tetanusvaccinatie (klem)</h2>
-                    <RecordCheckbox v-if="shouldAsk(RecordType.TetanusVaccine)" v-model="records" :small="true" :name="memberDetails.firstName+' is gevaccineerd tegen tetanus/klem in de afgelopen 10 jaar'" :type="RecordType.TetanusVaccine" placeholder="In welk jaar?" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.TetanusVaccine)" v-model="records" :small="true" :name="memberDetails.firstName+' is gevaccineerd tegen tetanus/klem in de afgelopen 10 jaar'" :type="LegacyRecordType.TetanusVaccine" placeholder="In welk jaar?" />
                 </template>
 
-                <template v-if="shouldAsk(RecordType.CanNotSwim, RecordType.TiredQuickly, RecordType.CanNotParticipateInSport, RecordType.SpecialSocialCare)">
+                <template v-if="shouldAsk(LegacyRecordType.CanNotSwim, LegacyRecordType.TiredQuickly, LegacyRecordType.CanNotParticipateInSport, LegacyRecordType.SpecialSocialCare)">
                     <hr>
                     <h2>Sport, spel &amp; sociale omgang</h2>
 
-                    <RecordCheckbox v-if="shouldAsk(RecordType.CanNotSwim)" v-model="records" :type="RecordType.CanNotSwim" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.TiredQuickly)" v-model="records" :type="RecordType.TiredQuickly" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.CanNotParticipateInSport)" v-model="records" :type="RecordType.CanNotParticipateInSport" placeholder="Meer informatie" />
-                    <RecordCheckbox v-if="shouldAsk(RecordType.SpecialSocialCare)" v-model="records" :type="RecordType.SpecialSocialCare" placeholder="Meer informatie" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.CanNotSwim)" v-model="records" :type="LegacyRecordType.CanNotSwim" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.TiredQuickly)" v-model="records" :type="LegacyRecordType.TiredQuickly" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.CanNotParticipateInSport)" v-model="records" :type="LegacyRecordType.CanNotParticipateInSport" placeholder="Meer informatie" />
+                    <RecordCheckbox v-if="shouldAsk(LegacyRecordType.SpecialSocialCare)" v-model="records" :type="LegacyRecordType.SpecialSocialCare" placeholder="Meer informatie" />
                 </template>
 
-                <template v-if="shouldAsk(RecordType.Other)">
+                <template v-if="shouldAsk(LegacyRecordType.Other)">
                     <hr>
                     <h2>Andere inlichtingen</h2>
                     <textarea v-model="otherDescription" class="input" placeholder="Enkel invullen indien van toepassing" />
@@ -107,7 +107,7 @@
                 </template>
             </template>
 
-            <template v-if="(memberDetails.age !== null && memberDetails.age < 18) && shouldAsk(RecordType.MedicinePermissions)">
+            <template v-if="(memberDetails.age !== null && memberDetails.age < 18) && shouldAsk(LegacyRecordType.MedicinePermissions)">
                 <hr>
                 <h2>Toedienen van medicatie</h2>
 
@@ -133,7 +133,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, RecordCheckbox, Slider, STErrorsDefault, STInputBox, Toast,Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
-import { AskRequirement, EmergencyContact, Record, RecordType, Version } from "@stamhoofd/structures"
+import { AskRequirement, EmergencyContact, LegacyRecord, LegacyRecordType, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -234,7 +234,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization.meta.recordsConfiguration.doctor === AskRequirement.Optional
     }
 
-    shouldAsk(...types: RecordType[]) {
+    shouldAsk(...types: LegacyRecordType[]) {
         return OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(...types)
     }
 
@@ -242,45 +242,45 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization.meta.recordsConfiguration.needsData()
     }
 
-    get RecordType() {
-        return RecordType
+    get LegacyRecordType() {
+        return LegacyRecordType
     }
 
     showPrivacyWarning() {
         new Toast("Maak niet zomaar wijzigingen aan toestemmingen. Zorg dat je altijd schriftelijk bewijs hebt. Aan deze wijziging werd jouw gebruikers-ID gekoppeld.", "error red").setHide(15*1000).show()
     }
 
-    get allowData() { return this.getBooleanType(RecordType.DataPermissions) }
+    get allowData() { return this.getBooleanType(LegacyRecordType.DataPermissions) }
     set allowData(enabled: boolean) { 
-        this.setBooleanType(RecordType.DataPermissions, enabled) 
+        this.setBooleanType(LegacyRecordType.DataPermissions, enabled) 
         if (enabled) ( this.showPrivacyWarning() )
     }
     
-    get allowPictures() { return this.getBooleanType(RecordType.PicturePermissions) }
+    get allowPictures() { return this.getBooleanType(LegacyRecordType.PicturePermissions) }
     set allowPictures(enabled: boolean) { 
-        this.setBooleanType(RecordType.PicturePermissions, enabled) 
+        this.setBooleanType(LegacyRecordType.PicturePermissions, enabled) 
         if (enabled) ( this.showPrivacyWarning() )
     }
 
-    get allowGroupPictures() { return this.getBooleanType(RecordType.GroupPicturePermissions) }
+    get allowGroupPictures() { return this.getBooleanType(LegacyRecordType.GroupPicturePermissions) }
     set allowGroupPictures(enabled: boolean) { 
-        this.setBooleanType(RecordType.GroupPicturePermissions, enabled)
+        this.setBooleanType(LegacyRecordType.GroupPicturePermissions, enabled)
         if (enabled) ( this.showPrivacyWarning() )
     }
 
-    get allowMedicines() { return this.getBooleanType(RecordType.MedicinePermissions) }
+    get allowMedicines() { return this.getBooleanType(LegacyRecordType.MedicinePermissions) }
     set allowMedicines(enabled: boolean) { 
-        this.setBooleanType(RecordType.MedicinePermissions, enabled)
+        this.setBooleanType(LegacyRecordType.MedicinePermissions, enabled)
         if (enabled) ( this.showPrivacyWarning() )
     }
 
-    get otherDescription() { return this.getTypeDescription(RecordType.Other) }
+    get otherDescription() { return this.getTypeDescription(LegacyRecordType.Other) }
     set otherDescription(description: string) { 
         if (description.length > 0) { 
-            this.setBooleanType(RecordType.Other, true, description)
-            this.setTypeDescription(RecordType.Other, description) 
+            this.setBooleanType(LegacyRecordType.Other, true, description)
+            this.setTypeDescription(LegacyRecordType.Other, description) 
         } else {
-            this.setBooleanType(RecordType.Other, false)
+            this.setBooleanType(LegacyRecordType.Other, false)
         }
     }
 
@@ -290,7 +290,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         return this.memberDetails.records
     }
 
-    set records(records: Record[]) {
+    set records(records: LegacyRecord[]) {
         const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
         memberDetails.records = OrganizationManager.organization.meta.recordsConfiguration.filterRecords(records)
 
@@ -299,11 +299,11 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
 
     // Helpers ---
 
-    getBooleanType(type: RecordType) {
+    getBooleanType(type: LegacyRecordType) {
         return !!this.memberDetails.records.find(r => r.type == type)
     }
 
-    setBooleanType(type: RecordType, enabled: boolean, description = "") {
+    setBooleanType(type: LegacyRecordType, enabled: boolean, description = "") {
         const index = this.memberDetails.records.findIndex(r => r.type == type)
         if ((index != -1) === enabled) {
             return
@@ -312,7 +312,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
 
         if (enabled) {
-            memberDetails.records.push(Record.create({
+            memberDetails.records.push(LegacyRecord.create({
                 type,
                 description,
                 author: SessionManager.currentSession?.user?.id ?? ""
@@ -324,7 +324,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         this.$emit("change", memberDetails)
     }
 
-    getTypeDescription(type: RecordType) {
+    getTypeDescription(type: LegacyRecordType) {
         const record = this.memberDetails.records.find(r => r.type == type)
         if (!record) {
             return ""
@@ -332,7 +332,7 @@ export default class EditMemberRecordsView extends Mixins(NavigationMixin) {
         return record.description
     }
 
-    setTypeDescription(type: RecordType, description: string) {
+    setTypeDescription(type: LegacyRecordType, description: string) {
         const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
         const record = memberDetails.records.find(r => r.type === type)
         if (!record) {

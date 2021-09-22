@@ -1,16 +1,10 @@
-import { AutoEncoder, BooleanDecoder, Data, field, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding"
+import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
-import { RecordChoice, RecordSettings } from "./RecordSettings"
+import { RecordChoice, RecordSettings, LegacyRecordType } from "./RecordSettings"
 
-export class RecordCheckboxValue extends AutoEncoder {
-    @field({ decoder: BooleanDecoder })
-    selected = false
-
-    @field({ decoder: StringDecoder, optional: true })
-    comments?: string
-}
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -21,13 +15,31 @@ export class RecordAnswer extends AutoEncoder {
      */
     @field({ decoder: RecordSettings })
     settings: RecordSettings
-    
-    /**
-     * Depending on the settings, this will decode the value to a different type
-     */
-    /*@field({ decoder: StringDecoder })
-    value: RecordCheckboxValue | Address | string | RecordChoice | null = null;
-    */
+}
+
+export const RecordAnswerDecoder: Decoder<RecordAnswer> = {
+    decode: function (data: Data): RecordAnswer {
+        const type = data.field("settings").field("type").enum(LegacyRecordType)
+
+        switch (type) {
+            case LegacyRecordType.Checkbox: return data.decode(RecordCheckboxAnswer as Decoder<RecordCheckboxAnswer>)
+            case LegacyRecordType.Text: 
+            case LegacyRecordType.Textarea:
+                return data.decode(RecordTextAnswer as Decoder<RecordTextAnswer>)
+            case LegacyRecordType.MultipleChoice: return data.decode(RecordMultipleChoiceAnswer as Decoder<RecordMultipleChoiceAnswer>)
+            case LegacyRecordType.Address: return data.decode(RecordAddressAnswer as Decoder<RecordAddressAnswer>)
+        }
+        throw new SimpleError({
+            code: "not_supported",
+            message: "A property type is not supported",
+            human: "Een bepaald kenmerk wordt niet ondersteund. Kijk na of je wel de laatste versie gebruikt en update indien nodig."
+        })
+    }
+}
+
+export class RecordTextAnswer extends RecordAnswer {
+    @field({ decoder: StringDecoder })
+    value = ""
 }
 
 export class RecordCheckboxAnswer extends RecordAnswer {
@@ -37,6 +49,12 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder, optional: true })
     comments?: string
 }
+
+export class RecordMultipleChoiceAnswer extends RecordAnswer {
+    @field({ decoder: new ArrayDecoder(RecordChoice) })
+    selectedChoices: RecordChoice[] = []
+}
+
 
 export class RecordAddressAnswer extends RecordAnswer {
     @field({ decoder: Address, nullable: true })

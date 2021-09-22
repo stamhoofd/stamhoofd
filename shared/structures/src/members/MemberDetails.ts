@@ -7,9 +7,9 @@ import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
+import { LegacyRecord,OldRecord } from './LegacyRecord';
+import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from './LegacyRecordType';
 import { Parent } from './Parent';
-import { OldRecord, Record } from './Record';
-import { OldRecordType, RecordType, RecordTypeHelper } from './RecordType';
 import { ReviewTimes } from './ReviewTime';
 
 /**
@@ -52,42 +52,42 @@ export class MemberDetails extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(OldRecord) })
     @field({ 
-        decoder: new ArrayDecoder(Record), version: 54, upgrade: (old: OldRecord[]): Record[] => {
-            const addIfNotFound = new Map<RecordType, boolean>()
-            addIfNotFound.set(RecordType.DataPermissions, true)
-            addIfNotFound.set(RecordType.PicturePermissions, true)
-            addIfNotFound.set(RecordType.GroupPicturePermissions, false)
-            addIfNotFound.set(RecordType.MedicinePermissions, true)
+        decoder: new ArrayDecoder(LegacyRecord), version: 54, upgrade: (old: OldRecord[]): LegacyRecord[] => {
+            const addIfNotFound = new Map<LegacyRecordType, boolean>()
+            addIfNotFound.set(LegacyRecordType.DataPermissions, true)
+            addIfNotFound.set(LegacyRecordType.PicturePermissions, true)
+            addIfNotFound.set(LegacyRecordType.GroupPicturePermissions, false)
+            addIfNotFound.set(LegacyRecordType.MedicinePermissions, true)
             
             const result = old.flatMap((o) => {
-                // Does this type exist in RecordType?
-                if (Object.values(RecordType).includes(o.type as any)) {
-                    return [Record.create(o as any)] // compatible
+                // Does this type exist in LegacyRecordType?
+                if (Object.values(LegacyRecordType).includes(o.type as any)) {
+                    return [LegacyRecord.create(o as any)] // compatible
                 }
 
                 if (o.type === OldRecordType.NoPictures) {
                     // Do not add picture permissions
-                    addIfNotFound.set(RecordType.PicturePermissions, false)
+                    addIfNotFound.set(LegacyRecordType.PicturePermissions, false)
                 }
                 if (o.type === OldRecordType.OnlyGroupPictures) {
                     // Yay
-                    addIfNotFound.set(RecordType.PicturePermissions, false)
-                    addIfNotFound.set(RecordType.GroupPicturePermissions, true)
+                    addIfNotFound.set(LegacyRecordType.PicturePermissions, false)
+                    addIfNotFound.set(LegacyRecordType.GroupPicturePermissions, true)
                 }
                 if (o.type === OldRecordType.NoData) {
                     // Yay
-                    addIfNotFound.set(RecordType.DataPermissions, false)
+                    addIfNotFound.set(LegacyRecordType.DataPermissions, false)
                 }
                 if (o.type === OldRecordType.NoPermissionForMedicines) {
                     // Yay
-                    addIfNotFound.set(RecordType.MedicinePermissions, false)
+                    addIfNotFound.set(LegacyRecordType.MedicinePermissions, false)
                 }
                 return []
             })
 
             for (const [key, add] of addIfNotFound.entries()) {
                 if (add) {
-                    result.push(Record.create({
+                    result.push(LegacyRecord.create({
                         type: key
                     }))
                 }
@@ -96,7 +96,7 @@ export class MemberDetails extends AutoEncoder {
             return result
         } 
     })
-    records: Record[] = [];
+    records: LegacyRecord[] = [];
 
     @field({ decoder: EmergencyContact, nullable: true })
     doctor: EmergencyContact | null = null;
@@ -326,7 +326,7 @@ export class MemberDetails extends AutoEncoder {
     /**
      * This will add or update the parent (possibily partially if not all data is present)
      */
-    addRecord(record: Record) {
+    addRecord(record: LegacyRecord) {
         for (const [index, _record] of this.records.entries()) {
             if (_record.type === record.type) {
                 this.records[index] = record
@@ -336,7 +336,7 @@ export class MemberDetails extends AutoEncoder {
         this.records.push(record)
     }
 
-    removeRecord(type: RecordType) {
+    removeRecord(type: LegacyRecordType) {
         for (let index = this.records.length - 1; index >= 0; index--) {
             const record = this.records[index];
 
@@ -443,8 +443,8 @@ export class MemberDetails extends AutoEncoder {
 
         // If some records are missing in the incoming blob AND if they are public, we need to delete them. Always.
         // E.g. permissions
-        for (const recordType of Object.values(RecordType)) {
-            if (RecordTypeHelper.isPublic(recordType) && !other.records.find(r => r.type === recordType)) {
+        for (const recordType of Object.values(LegacyRecordType)) {
+            if (LegacyRecordTypeHelper.isPublic(recordType) && !other.records.find(r => r.type === recordType)) {
                 this.removeRecord(recordType)
             }
         }

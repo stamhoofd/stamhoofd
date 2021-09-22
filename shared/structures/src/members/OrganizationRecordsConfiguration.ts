@@ -1,8 +1,8 @@
 import { ArrayDecoder, AutoEncoder, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { OrganizationType } from "../OrganizationType"
-import { Record } from "./Record"
-import { RecordType } from "./RecordType"
+import { LegacyRecord } from "./LegacyRecord"
+import { LegacyRecordType } from "./LegacyRecordType"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",
@@ -25,8 +25,8 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     // Old configurations
 
     @field({ decoder: new ArrayDecoder(StringDecoder) })
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(RecordType)), upgrade: () => [], version: 55 })
-    enabledRecords: RecordType[] = []
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), upgrade: () => [], version: 55 })
+    enabledRecords: LegacyRecordType[] = []
 
     // General configurations
     @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
@@ -51,13 +51,13 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     /**
      * Return true if at least one from the records should get asked
      */
-    shouldAsk(...types: RecordType[]): boolean {
+    shouldAsk(...types: LegacyRecordType[]): boolean {
         for (const type of types) {
             if (this.enabledRecords.find(r => r === type)) {
                 return true
             }
 
-            if (type == RecordType.DataPermissions) {
+            if (type == LegacyRecordType.DataPermissions) {
                 // Required if at least non oprivacy related record automatically
                 if (this.needsData()) {
                     return true
@@ -67,7 +67,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         return false
     }
 
-    filterRecords(records: Record[], ...allow: RecordType[]): Record[] {
+    filterRecords(records: LegacyRecord[], ...allow: LegacyRecordType[]): LegacyRecord[] {
         return records.filter((r) => {
             if (allow.includes(r.type)) {
                 return true
@@ -77,7 +77,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     }
 
     /**
-     * Return true if we need to ask permissions for data, even when RecordType.DataPermissions is missing from enabledRecords
+     * Return true if we need to ask permissions for data, even when LegacyRecordType.DataPermissions is missing from enabledRecords
      */
     needsData(): boolean {
         if (this.doctor !== AskRequirement.NotAsked) {
@@ -88,7 +88,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         }
 
         if (this.enabledRecords.find(type => {
-            if (![RecordType.DataPermissions, RecordType.MedicinePermissions, RecordType.PicturePermissions, RecordType.GroupPicturePermissions].includes(type)) {
+            if (![LegacyRecordType.DataPermissions, LegacyRecordType.MedicinePermissions, LegacyRecordType.PicturePermissions, LegacyRecordType.GroupPicturePermissions].includes(type)) {
                 return true
             }
             return false
@@ -108,7 +108,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
         if (this.enabledRecords.length == 1 && (age === null || age >= 18)) {
             // Skip if the only record that should get asked is permission for medication
-            return this.enabledRecords[0] === RecordType.MedicinePermissions
+            return this.enabledRecords[0] === LegacyRecordType.MedicinePermissions
         }
 
         return false
@@ -119,30 +119,30 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      * E.g. MedicalPermissions is returned if the member did NOT give permissions -> because we need to show a message
      * PicturePermissions is returned if no group picture permissions was given and normal picture permissions are disabled
      */
-    filterForDisplay(records: Record[], age: number | null): Record[] {
+    filterForDisplay(records: LegacyRecord[], age: number | null): LegacyRecord[] {
         return this.filterRecords(
-            Record.invertRecords(records), 
-            ...(this.shouldAsk(RecordType.GroupPicturePermissions) ? [RecordType.PicturePermissions] : [])
+            LegacyRecord.invertRecords(records), 
+            ...(this.shouldAsk(LegacyRecordType.GroupPicturePermissions) ? [LegacyRecordType.PicturePermissions] : [])
         ).filter((record) => {
             // Some edge cases
             // Note: inverted types are already reverted here! -> GroupPicturePermissions means no permissions here
             
-            if (record.type === RecordType.GroupPicturePermissions) {
+            if (record.type === LegacyRecordType.GroupPicturePermissions) {
                 // When both group and normal pictures are allowed, hide the group pictures message
-                if (this.shouldAsk(RecordType.PicturePermissions) && records.find(r => r.type === RecordType.PicturePermissions)) {
+                if (this.shouldAsk(LegacyRecordType.PicturePermissions) && records.find(r => r.type === LegacyRecordType.PicturePermissions)) {
                     // Permissions for pictures -> this is okay
                     return false
                 }
 
-                if (!this.shouldAsk(RecordType.PicturePermissions)) {
+                if (!this.shouldAsk(LegacyRecordType.PicturePermissions)) {
                     // This is not a special case
                     return false
                 }
             }
 
             // If no permissions for pictures but permissions for group pictures, only show the group message
-            if (record.type === RecordType.PicturePermissions) {
-                if (this.shouldAsk(RecordType.GroupPicturePermissions) && records.find(r => r.type === RecordType.GroupPicturePermissions)) {
+            if (record.type === LegacyRecordType.PicturePermissions) {
+                if (this.shouldAsk(LegacyRecordType.GroupPicturePermissions) && records.find(r => r.type === LegacyRecordType.GroupPicturePermissions)) {
                     // Only show the 'only permissions for group pictures' banner
                     return false
                 }
@@ -150,7 +150,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
 
             // Member is older than 18 years, and no permissions for medicines
-            if (record.type === RecordType.MedicinePermissions && (age ?? 18) >= 18) {
+            if (record.type === LegacyRecordType.MedicinePermissions && (age ?? 18) >= 18) {
                 return false
             }
 
@@ -161,7 +161,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     static getDefaultFor(type: OrganizationType): OrganizationRecordsConfiguration {
         if (type === OrganizationType.Youth) {
             // Enable all
-            const records = Object.values(RecordType)
+            const records = Object.values(LegacyRecordType)
 
             return OrganizationRecordsConfiguration.create({
                 enabledRecords: records,
@@ -175,28 +175,28 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
             return OrganizationRecordsConfiguration.create({
                 enabledRecords: [
-                    RecordType.DataPermissions,
-                    RecordType.PicturePermissions,
+                    LegacyRecordType.DataPermissions,
+                    LegacyRecordType.PicturePermissions,
 
                     // Allergies
-                    RecordType.FoodAllergies,
-                    RecordType.MedicineAllergies,
-                    RecordType.OtherAllergies,
+                    LegacyRecordType.FoodAllergies,
+                    LegacyRecordType.MedicineAllergies,
+                    LegacyRecordType.OtherAllergies,
 
                     // Health
-                    RecordType.Asthma,
-                    RecordType.Epilepsy,
-                    RecordType.HeartDisease,
-                    RecordType.Diabetes,
-                    RecordType.SpecialHealthCare,
-                    RecordType.Medicines,
-                    RecordType.Rheumatism,
-                    ...(type === OrganizationType.Swimming ? [RecordType.SkinCondition] : [RecordType.HayFever]),
+                    LegacyRecordType.Asthma,
+                    LegacyRecordType.Epilepsy,
+                    LegacyRecordType.HeartDisease,
+                    LegacyRecordType.Diabetes,
+                    LegacyRecordType.SpecialHealthCare,
+                    LegacyRecordType.Medicines,
+                    LegacyRecordType.Rheumatism,
+                    ...(type === OrganizationType.Swimming ? [LegacyRecordType.SkinCondition] : [LegacyRecordType.HayFever]),
 
-                    RecordType.MedicinePermissions,
+                    LegacyRecordType.MedicinePermissions,
 
                     // Other
-                    RecordType.Other,
+                    LegacyRecordType.Other,
                 ],
                 doctor: AskRequirement.Optional,
                 emergencyContact: AskRequirement.Optional
@@ -206,7 +206,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
          if (type === OrganizationType.LGBTQ) {
             // Request data permissions + emergency contact is optional
             return OrganizationRecordsConfiguration.create({
-                enabledRecords: [RecordType.DataPermissions],
+                enabledRecords: [LegacyRecordType.DataPermissions],
                 doctor: AskRequirement.NotAsked,
                 emergencyContact: AskRequirement.Optional
             })

@@ -68,7 +68,7 @@
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, LoadingButton,StepperInput,Steps,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Group, RecordType, RegisterItem } from '@stamhoofd/structures';
+import { Group, LegacyRecordType, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
@@ -116,7 +116,7 @@ export default class CartView extends Mixins(NavigationMixin){
 
          try {
             // todo: go to checkout ;)
-            if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems)) {
+            if (OrganizationManager.organization.meta.recordsConfiguration.shouldAsk(LegacyRecordType.FinancialProblems)) {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FinancialSupportView.vue')).default;
                 this.present(

@@ -40,7 +40,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { MemberWithRegistrations, Record, RecordTypeHelper } from '@stamhoofd/structures';
+import { LegacyRecord, MemberWithRegistrations, LegacyRecordTypeHelper } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
@@ -55,18 +55,18 @@ export default class RecordDescriptionView extends Mixins(NavigationMixin) {
     member!: MemberWithRegistrations;
 
     @Prop()
-    record!: Record;
+    record!: LegacyRecord;
 
     get title() {
-        return RecordTypeHelper.getName(this.record.type)
+        return LegacyRecordTypeHelper.getName(this.record.type)
     }
 
     get info() {
-        return RecordTypeHelper.getInternalDescription(this.record.type)
+        return LegacyRecordTypeHelper.getInternalDescription(this.record.type)
     }
 
     get links() {
-        return RecordTypeHelper.getInternalLinks(this.record.type)
+        return LegacyRecordTypeHelper.getInternalLinks(this.record.type)
     }
 
     get description() {

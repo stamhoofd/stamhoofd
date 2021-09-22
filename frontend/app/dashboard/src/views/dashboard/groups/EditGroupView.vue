@@ -345,7 +345,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AgeInput, BackButton,CenteredMessage, Checkbox, DateSelection, ErrorBox, FemaleIcon, LoadingButton, MaleIcon, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
-import { GroupCategory, GroupPrivateSettings, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, RecordType, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
+import { GroupCategory, GroupPrivateSettings, LegacyRecordType, OrganizationMetaData, PermissionLevel, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { Group, GroupGenderType, GroupPrices, GroupSettings, Image, Organization, OrganizationRecordsConfiguration, WaitingListType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -791,11 +791,11 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         let patch = this.patchOrganization
 
         // Check if reduced price is enabled
-        if (!this.patchedOrganization.meta.recordsConfiguration.shouldAsk(RecordType.FinancialProblems) && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
+        if (!this.patchedOrganization.meta.recordsConfiguration.shouldAsk(LegacyRecordType.FinancialProblems) && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
             console.log("Auto enabled financial problems record")
 
             const p = OrganizationRecordsConfiguration.patch({});
-            p.enabledRecords.addPut(RecordType.FinancialProblems)
+            p.enabledRecords.addPut(LegacyRecordType.FinancialProblems)
             const patchOrganization = Organization.patch({
                 meta:  OrganizationMetaData.patch({
                     recordsConfiguration: p

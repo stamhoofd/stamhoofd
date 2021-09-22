@@ -1,5 +1,6 @@
+import { LegacyRecordType,MemberWithRegistrations } from '@stamhoofd/structures';
+
 import { Filter } from "./Filter";
-import { MemberWithRegistrations, RecordType } from '@stamhoofd/structures';
 
 export class CanNotSwimFilter implements Filter {
     getName(): string {
@@ -10,7 +11,7 @@ export class CanNotSwimFilter implements Filter {
             return false;
         }
         return member.details.records.some((record) => {
-            return record.type == RecordType.CanNotSwim;
+            return record.type == LegacyRecordType.CanNotSwim;
         });
     }
 }

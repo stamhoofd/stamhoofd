@@ -20,7 +20,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { Record, RecordType, RecordTypeHelper } from "@stamhoofd/structures"
+import { LegacyRecord, LegacyRecordType, LegacyRecordTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
@@ -34,7 +34,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class RecordCheckbox extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    type!: RecordType
+    type!: LegacyRecordType
 
     @Prop({ required: false, default: null })
     name!: string | null
@@ -58,11 +58,11 @@ export default class RecordCheckbox extends Mixins(NavigationMixin) {
     small!: boolean
 
     @Prop({ required: true })
-    records!: Record[]
+    records!: LegacyRecord[]
 
     get checkboxText() {
         if (!this.name) {
-            return RecordTypeHelper.getName(this.type)
+            return LegacyRecordTypeHelper.getName(this.type)
         }
         return this.name
     }
@@ -75,7 +75,7 @@ export default class RecordCheckbox extends Mixins(NavigationMixin) {
     }
 
     get hint() {
-        return RecordTypeHelper.getHint(this.type) 
+        return LegacyRecordTypeHelper.getHint(this.type) 
     }
 
     get enabled() {
@@ -88,7 +88,7 @@ export default class RecordCheckbox extends Mixins(NavigationMixin) {
             return
         }
         if (enabled) {
-            this.records.push(Record.create({
+            this.records.push(LegacyRecord.create({
                 type: this.type,
                 author: SessionManager.currentSession?.user?.id
             }))

@@ -1,7 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { EncryptedMemberDetails, Gender, MemberDetails, MemberDetailsMeta, ParentType, Record, RecordType, RecordTypeHelper, RecordTypePriority, Version } from '@stamhoofd/structures';
+import { EncryptedMemberDetails, Gender, MemberDetails, MemberDetailsMeta, ParentType, LegacyRecord, LegacyRecordType, LegacyRecordTypeHelper, LegacyRecordTypePriority, Version } from '@stamhoofd/structures';
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Member } from "../models/Member";
@@ -92,7 +92,7 @@ export class MemberFactory extends Factory<Options, Member> {
         }
         const recordFactory = new RecordFactory({});
         memberDetails.records = await recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
-        memberDetails.records.push(Record.create({ type: RecordType.DataPermissions }))
+        memberDetails.records.push(LegacyRecord.create({ type: LegacyRecordType.DataPermissions }))
         // Remove duplicates    
         const unique = {};
         memberDetails.records.forEach(function (i) {
@@ -103,8 +103,8 @@ export class MemberFactory extends Factory<Options, Member> {
         memberDetails.records = Object.values(unique);
         
         memberDetails.records.sort((a, b) => {
-            const pA = RecordTypeHelper.getPriority(a.type);
-            const pB = RecordTypeHelper.getPriority(b.type);
+            const pA = LegacyRecordTypeHelper.getPriority(a.type);
+            const pB = LegacyRecordTypeHelper.getPriority(b.type);
             if (pA == pB) {
                 if (a.getText() < b.getText()) {
                     return -1;
@@ -114,16 +114,16 @@ export class MemberFactory extends Factory<Options, Member> {
                 }
                 return 0;
             }
-            if (pA == RecordTypePriority.High && pB != RecordTypePriority.High) {
+            if (pA == LegacyRecordTypePriority.High && pB != LegacyRecordTypePriority.High) {
                 return -1;
             }
-            if (pB == RecordTypePriority.High && pA != RecordTypePriority.High) {
+            if (pB == LegacyRecordTypePriority.High && pA != LegacyRecordTypePriority.High) {
                 return 1;
             }
-            if (pA == RecordTypePriority.Medium && pB != RecordTypePriority.Medium) {
+            if (pA == LegacyRecordTypePriority.Medium && pB != LegacyRecordTypePriority.Medium) {
                 return -1;
             }
-            if (pB == RecordTypePriority.Medium && pA != RecordTypePriority.Medium) {
+            if (pB == LegacyRecordTypePriority.Medium && pA != LegacyRecordTypePriority.Medium) {
                 return 1;
             }
 

@@ -5,7 +5,7 @@ import { Request, RequestMiddleware, RequestResult,Server } from '@simonbackx/si
 import { ComponentWithProperties,NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
-import { Country, CountryDecoder, Gender, MemberWithRegistrations, Organization, RecordType } from '@stamhoofd/structures';
+import { Country, CountryDecoder, Gender, LegacyRecordType,MemberWithRegistrations, Organization } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';

@@ -72,7 +72,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STErrorsDefault,STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
-import { Group, Member, MemberWithRegistrations, ParentTypeHelper,RecordType, RecordTypeHelper } from '@stamhoofd/structures';
+import { Group, Member, MemberWithRegistrations, ParentTypeHelper,LegacyRecordType, LegacyRecordTypeHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 // PDFKit is used! Wrong warning below!
 import PDFKit from "pdfkit"
@@ -133,7 +133,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
         members.sort(Member.sorterByName("ASC"));
 
         // Sort by record type (start with first record types)
-        for (const recordType of Object.values(RecordType)) {
+        for (const recordType of Object.values(LegacyRecordType)) {
             for (const member of members) {
                 const records = OrganizationManager.organization.meta.recordsConfiguration.filterForDisplay(
                     member.details?.records ?? [], 
@@ -143,19 +143,19 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                     if (record.type != recordType) {
                         continue
                     }
-                    let category = RecordTypeHelper.getCategory(record.type)
+                    let category = LegacyRecordTypeHelper.getCategory(record.type)
                     const repeatName = !!category
                     if (!category) {
-                        category = RecordTypeHelper.getName(record.type)
+                        category = LegacyRecordTypeHelper.getName(record.type)
                     }
                     const group = groups.get(category) ?? new SamenvattingGroep(category)
                     const existing = group.items.get(member.name) ?? ""
 
                     let text = ""
                     if (repeatName) {
-                        text = RecordTypeHelper.getName(record.type) + (record.description ? ": "+record.description : "")
+                        text = LegacyRecordTypeHelper.getName(record.type) + (record.description ? ": "+record.description : "")
                     } else {
-                        text = record.description ? record.description : RecordTypeHelper.getName(record.type)
+                        text = record.description ? record.description : LegacyRecordTypeHelper.getName(record.type)
                     }
 
                     group.items.set(member.name, (existing + "\n" + text).trim())

@@ -208,7 +208,7 @@
                                 v-for="(record, index) in sortedRecords"
                                 :key="index"
                                 v-tooltip="record.description.length > 0 ? record.description : null"
-                                :class="{ [RecordTypeHelper.getPriority(record.type)]: true}"
+                                :class="{ [LegacyRecordTypeHelper.getPriority(record.type)]: true}"
                             >
                                 <span :class="'icon '+getIcon(record)" />
                                 <span class="text">{{ record.getText() }}</span>
@@ -242,7 +242,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from "@stamhoofd/networking";
-import { MemberDetails, MemberWithRegistrations, Parent, Record,RecordTypeHelper, RecordTypePriority, Registration, User } from '@stamhoofd/structures';
+import { LegacyRecord,LegacyRecordTypePriority, MemberDetails, MemberWithRegistrations, Parent, LegacyRecordTypeHelper, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -272,7 +272,7 @@ export default class MemberView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     member!: MemberWithRegistrations
 
-    RecordTypeHelper = RecordTypeHelper
+    LegacyRecordTypeHelper = LegacyRecordTypeHelper
 
     async editGeneral() {
         await this.openSteps([EditMemberStepType.Details])
@@ -350,11 +350,11 @@ export default class MemberView extends Mixins(NavigationMixin){
         return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
 
-    getIcon(record: Record) {
-        switch (RecordTypeHelper.getPriority(record.type)) {
-            case RecordTypePriority.High: return " exclamation-two red"
-            case RecordTypePriority.Medium: return " exclamation yellow"
-            case RecordTypePriority.Low: return " info"
+    getIcon(record: LegacyRecord) {
+        switch (LegacyRecordTypeHelper.getPriority(record.type)) {
+            case LegacyRecordTypePriority.High: return " exclamation-two red"
+            case LegacyRecordTypePriority.Medium: return " exclamation yellow"
+            case LegacyRecordTypePriority.Low: return " info"
         }
     }
 
@@ -373,17 +373,17 @@ export default class MemberView extends Mixins(NavigationMixin){
 
     get sortedRecords() {
         return this.filteredRecords?.sort((record1, record2) => {
-            const priority1: string = RecordTypeHelper.getPriority(record1.type);
-            const priority2: string = RecordTypeHelper.getPriority(record2.type)
+            const priority1: string = LegacyRecordTypeHelper.getPriority(record1.type);
+            const priority2: string = LegacyRecordTypeHelper.getPriority(record2.type)
 
-            if (priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Medium ||
-                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.Low ||
-                priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Low) {
+            if (priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Medium ||
+                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.Low ||
+                priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Low) {
                 return -1;
             }
-            else if (priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.Medium ||
-                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.High ||
-                priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.High) {
+            else if (priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.Medium ||
+                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.High ||
+                priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.High) {
                 return 1;
             }
             else {

@@ -232,7 +232,7 @@
                         v-for="(record, index) in sortedRecords"
                         :key="index"
                         v-tooltip="record.description.length > 0 ? record.description : null"
-                        :class="{ more: canOpenRecord(record), [RecordTypeHelper.getPriority(record.type)]: true}"
+                        :class="{ more: canOpenRecord(record), [LegacyRecordTypeHelper.getPriority(record.type)]: true}"
                         @click="openRecordView(record)"
                     >
                         <span :class="'icon '+getIcon(record)" />
@@ -303,7 +303,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration, User } from '@stamhoofd/structures';
+import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,LegacyRecord, LegacyRecordType, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, LegacyRecordTypeHelper, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -341,7 +341,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
-        (this as any).RecordTypeHelper = RecordTypeHelper;
+        (this as any).LegacyRecordTypeHelper = LegacyRecordTypeHelper;
         this.checkBounces().catch(e => console.error(e))
     }
 
@@ -507,28 +507,28 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.present(component);
     }
 
-    canOpenRecord(record: Record) {
+    canOpenRecord(record: LegacyRecord) {
         if (record.description.length > 0) {
             return true;
         }
-        if (RecordTypeHelper.getInternalDescription(record.type)) {
+        if (LegacyRecordTypeHelper.getInternalDescription(record.type)) {
             return true;
         }
-        if (RecordTypeHelper.getInternalLinks(record.type).length > 0) {
+        if (LegacyRecordTypeHelper.getInternalLinks(record.type).length > 0) {
             return true;
         }
         return false;
     }
 
-    getIcon(record: Record) {
-        switch (RecordTypeHelper.getPriority(record.type)) {
-            case RecordTypePriority.High: return " exclamation-two red"
-            case RecordTypePriority.Medium: return " exclamation yellow"
-            case RecordTypePriority.Low: return " info"
+    getIcon(record: LegacyRecord) {
+        switch (LegacyRecordTypeHelper.getPriority(record.type)) {
+            case LegacyRecordTypePriority.High: return " exclamation-two red"
+            case LegacyRecordTypePriority.Medium: return " exclamation yellow"
+            case LegacyRecordTypePriority.Low: return " info"
         }
     }
 
-    openRecordView(record: Record) {
+    openRecordView(record: LegacyRecord) {
         this.show(new ComponentWithProperties(RecordDescriptionView, {
             member: this.member,
             record
@@ -632,17 +632,17 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get sortedRecords() {
         return this.filteredRecords?.sort((record1, record2) => {
-            const priority1: string = RecordTypeHelper.getPriority(record1.type);
-            const priority2: string = RecordTypeHelper.getPriority(record2.type)
+            const priority1: string = LegacyRecordTypeHelper.getPriority(record1.type);
+            const priority2: string = LegacyRecordTypeHelper.getPriority(record2.type)
 
-            if (priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Medium ||
-                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.Low ||
-                priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Low) {
+            if (priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Medium ||
+                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.Low ||
+                priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Low) {
                 return -1;
             }
-            else if (priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.Medium ||
-                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.High ||
-                priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.High) {
+            else if (priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.Medium ||
+                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.High ||
+                priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.High) {
                 return 1;
             }
             else {

@@ -1,4 +1,4 @@
-export enum RecordType {
+export enum LegacyRecordType {
     // Privacy
     DataPermissions = "DataPermissions",
     PicturePermissions = "PicturePermissions",
@@ -94,13 +94,13 @@ export enum OldRecordType {
     Other = "Other"
 }
 
-export enum RecordTypePriority {
+export enum LegacyRecordTypePriority {
     High = "High",
     Medium = "Medium",
     Low = "Low"
 }
 
-export class RecordTypeHelper {
+export class LegacyRecordTypeHelper {
     /**
      * Some types are only saved if permission is granted. But they should only be displayed
      * when they are not present. So the names and descriptions are only relevant when they are missing.
@@ -108,12 +108,12 @@ export class RecordTypeHelper {
      * So before they are displayed, we switch them up: if they are not present, they are added
      * if they are present, they are removed
      */
-    static isInverted(type: RecordType): boolean {
+    static isInverted(type: LegacyRecordType): boolean {
         switch (type) {
-            case RecordType.DataPermissions:
-            case RecordType.PicturePermissions:
-            case RecordType.MedicinePermissions:
-            case RecordType.TetanusVaccine:
+            case LegacyRecordType.DataPermissions:
+            case LegacyRecordType.PicturePermissions:
+            case LegacyRecordType.MedicinePermissions:
+            case LegacyRecordType.TetanusVaccine:
             // Group picturs is not inverted -> we show a warning if there is only permissions for group pictures
                 return true;
          
@@ -125,12 +125,12 @@ export class RecordTypeHelper {
     /**
      * Store this information publicly (not end-to-end encrypted)
      */
-    static isPublic(type: RecordType): boolean {
+    static isPublic(type: LegacyRecordType): boolean {
         switch (type) {
-            case RecordType.DataPermissions:
-            case RecordType.PicturePermissions:
-            case RecordType.GroupPicturePermissions:
-            case RecordType.MedicinePermissions:
+            case LegacyRecordType.DataPermissions:
+            case LegacyRecordType.PicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
+            case LegacyRecordType.MedicinePermissions:
                 return true;
          
         }
@@ -138,163 +138,163 @@ export class RecordTypeHelper {
         return false
     }
 
-    static getFilterCategory(type: RecordType): string | undefined {
+    static getFilterCategory(type: LegacyRecordType): string | undefined {
         switch (type) {
-            case RecordType.DataPermissions:
-            case RecordType.PicturePermissions:
-            case RecordType.GroupPicturePermissions:
+            case LegacyRecordType.DataPermissions:
+            case LegacyRecordType.PicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
                 return "Privacy";
 
-            case RecordType.Vegetarian:
-            case RecordType.Vegan:
-            case RecordType.Halal:
-            case RecordType.Kosher:
-            case RecordType.Diet:
-            case RecordType.FoodAllergies:
+            case LegacyRecordType.Vegetarian:
+            case LegacyRecordType.Vegan:
+            case LegacyRecordType.Halal:
+            case LegacyRecordType.Kosher:
+            case LegacyRecordType.Diet:
+            case LegacyRecordType.FoodAllergies:
                 return "Voeding & dieet";
 
-            case RecordType.CovidHighRisk:
-            case RecordType.TetanusVaccine:
-            case RecordType.Asthma:
-            case RecordType.Epilepsy:
-            case RecordType.HeartDisease:
-            case RecordType.HayFever:
-            case RecordType.SkinCondition:
-            case RecordType.Rheumatism:
-            case RecordType.SleepWalking:
-            case RecordType.Diabetes:
-            case RecordType.MedicinePermissions:
+            case LegacyRecordType.CovidHighRisk:
+            case LegacyRecordType.TetanusVaccine:
+            case LegacyRecordType.Asthma:
+            case LegacyRecordType.Epilepsy:
+            case LegacyRecordType.HeartDisease:
+            case LegacyRecordType.HayFever:
+            case LegacyRecordType.SkinCondition:
+            case LegacyRecordType.Rheumatism:
+            case LegacyRecordType.SleepWalking:
+            case LegacyRecordType.Diabetes:
+            case LegacyRecordType.MedicinePermissions:
                 return "Gezondheid";
 
-            case RecordType.CanNotSwim:
-            case RecordType.TiredQuickly:
-            case RecordType.CanNotParticipateInSport:
+            case LegacyRecordType.CanNotSwim:
+            case LegacyRecordType.TiredQuickly:
+            case LegacyRecordType.CanNotParticipateInSport:
                 return "Sport & Spel";
         }
 
         // others: keep name, don't repeat name
     }
 
-    static getCategory(type: RecordType): string | undefined {
+    static getCategory(type: LegacyRecordType): string | undefined {
         switch (type) {
-            case RecordType.DataPermissions:
-            case RecordType.PicturePermissions:
-            case RecordType.GroupPicturePermissions:
+            case LegacyRecordType.DataPermissions:
+            case LegacyRecordType.PicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
                 return "Privacy";
 
-            case RecordType.Vegetarian:
-            case RecordType.Vegan:
-            case RecordType.Halal:
-            case RecordType.Kosher:
-            case RecordType.Diet:
+            case LegacyRecordType.Vegetarian:
+            case LegacyRecordType.Vegan:
+            case LegacyRecordType.Halal:
+            case LegacyRecordType.Kosher:
+            case LegacyRecordType.Diet:
                 return "Dieet";
 
-            case RecordType.CovidHighRisk:
-            case RecordType.Asthma:
-            case RecordType.Epilepsy:
-            case RecordType.HeartDisease:
-            case RecordType.HayFever:
-            case RecordType.SkinCondition:
-            case RecordType.Rheumatism:
-            case RecordType.SleepWalking:
-            case RecordType.Diabetes:
+            case LegacyRecordType.CovidHighRisk:
+            case LegacyRecordType.Asthma:
+            case LegacyRecordType.Epilepsy:
+            case LegacyRecordType.HeartDisease:
+            case LegacyRecordType.HayFever:
+            case LegacyRecordType.SkinCondition:
+            case LegacyRecordType.Rheumatism:
+            case LegacyRecordType.SleepWalking:
+            case LegacyRecordType.Diabetes:
                 return "Gezondheid";
 
-            case RecordType.CanNotSwim:
-            case RecordType.TiredQuickly:
-            case RecordType.CanNotParticipateInSport:
+            case LegacyRecordType.CanNotSwim:
+            case LegacyRecordType.TiredQuickly:
+            case LegacyRecordType.CanNotParticipateInSport:
                 return "Sport & Spel";
         }
 
         // others: keep name, don't repeat name
     }
 
-    static getName(type: RecordType): string {
+    static getName(type: LegacyRecordType): string {
         switch (type) {
-            case RecordType.DataPermissions:
+            case LegacyRecordType.DataPermissions:
                 return "Geen toestemming voor verzamelen gevoelige gegevens";
-            case RecordType.PicturePermissions:
+            case LegacyRecordType.PicturePermissions:
                 return "Geen foto's publiceren";
-            case RecordType.GroupPicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
                 return "Enkel groepsfoto's mogen worden gepubliceerd";
 
-            case RecordType.FoodAllergies:
+            case LegacyRecordType.FoodAllergies:
                 return "Allergisch of overgevoelig voor bepaalde voeding";
-            case RecordType.MedicineAllergies:
+            case LegacyRecordType.MedicineAllergies:
                 return "Allergisch voor geneesmiddelen";
-            case RecordType.OtherAllergies:
+            case LegacyRecordType.OtherAllergies:
                 return "Allergisch voor bepaalde zaken";
 
-            case RecordType.Vegetarian:
+            case LegacyRecordType.Vegetarian:
                 return "Vegetarisch dieet";
-            case RecordType.Vegan:
+            case LegacyRecordType.Vegan:
                 return "Veganistisch dieet";
-            case RecordType.Halal:
+            case LegacyRecordType.Halal:
                 return "Halal dieet";
-            case RecordType.Kosher:
+            case LegacyRecordType.Kosher:
                 return "Koosjer dieet";
-            case RecordType.Diet:
+            case LegacyRecordType.Diet:
                 return "Speciaal dieet";
 
-            case RecordType.TetanusVaccine:
+            case LegacyRecordType.TetanusVaccine:
                 return "Geen tetanusvaccinatie";
 
-            case RecordType.CovidHighRisk:
+            case LegacyRecordType.CovidHighRisk:
                 return "Hoog-risicogroep voor coronavirus";
-            case RecordType.Asthma:
+            case LegacyRecordType.Asthma:
                 return "Astma";
-            case RecordType.BedWaters:
+            case LegacyRecordType.BedWaters:
                 return "Bedwateren";
-            case RecordType.Epilepsy:
+            case LegacyRecordType.Epilepsy:
                 return "Epilepsie";
-            case RecordType.HeartDisease:
+            case LegacyRecordType.HeartDisease:
                 return "Hartaandoening";
-            case RecordType.HayFever:
+            case LegacyRecordType.HayFever:
                 return "Hooikoorts";
-            case RecordType.SkinCondition:
+            case LegacyRecordType.SkinCondition:
                 return "Huidaandoening";
-            case RecordType.Rheumatism:
+            case LegacyRecordType.Rheumatism:
                 return "Reuma";
-            case RecordType.SleepWalking:
+            case LegacyRecordType.SleepWalking:
                 return "Slaapwandelen";
-            case RecordType.Diabetes:
+            case LegacyRecordType.Diabetes:
                 return "Diabetes";
-            case RecordType.Medicines:
+            case LegacyRecordType.Medicines:
                 return "Moet geneesmiddelen nemen";
-            case RecordType.SpecialHealthCare:
+            case LegacyRecordType.SpecialHealthCare:
                 return "Speciale zorg om risico's te voorkomen";
-            case RecordType.CanNotSwim:
+            case LegacyRecordType.CanNotSwim:
                 return "Kan niet (of onvoldoende) zwemmen";
-            case RecordType.TiredQuickly:
+            case LegacyRecordType.TiredQuickly:
                 return "Is snel moe";
-            case RecordType.CanNotParticipateInSport:
+            case LegacyRecordType.CanNotParticipateInSport:
                 return "Kan niet deelnemen aan sport en spel afgestemd op leeftijd";
-            case RecordType.SpecialSocialCare:
+            case LegacyRecordType.SpecialSocialCare:
                 return "Bijzondere aandacht nodig bij sociale omgang";
-            case RecordType.MedicinePermissions:
+            case LegacyRecordType.MedicinePermissions:
                 return "Geen toestemming voor het toedienen van medicatie";
-            case RecordType.FinancialProblems:
+            case LegacyRecordType.FinancialProblems:
                 return "Kansarm gezin";
-            case RecordType.Other:
+            case LegacyRecordType.Other:
                 return "Andere opmerking";
         }
     }
 
-    static getHint(type: RecordType): string | null {
+    static getHint(type: LegacyRecordType): string | null {
         switch (type) {
-            case RecordType.Vegan:
+            case LegacyRecordType.Vegan:
                 return "Geen dierlijke producten";
 
-            case RecordType.Medicines:
+            case LegacyRecordType.Medicines:
                 return "Dagelijks, wekelijks...";
 
-            case RecordType.TetanusVaccine:
+            case LegacyRecordType.TetanusVaccine:
                 return "In de afgelopen 10 jaar";
 
-            case RecordType.OtherAllergies:
+            case LegacyRecordType.OtherAllergies:
                 return "Zoals verf, insecten...";
 
-            case RecordType.Diet:
+            case LegacyRecordType.Diet:
                 return "Geen allergieën";
            
         }
@@ -302,141 +302,141 @@ export class RecordTypeHelper {
         return null
     }
 
-    static getInternalDescription(type: RecordType): string | null {
+    static getInternalDescription(type: LegacyRecordType): string | null {
         switch (type) {
-            case RecordType.DataPermissions:
+            case LegacyRecordType.DataPermissions:
                 return "Dit gezin heeft ervoor gekozen om de steekkaart niet in te vullen omdat er geen toestemming werd gegeven i.v.m. het verzamelen van gevoelige gegevens. Bespreek dit zeker met de ouders.";
-            case RecordType.PicturePermissions:
+            case LegacyRecordType.PicturePermissions:
                 return "Bij het inschrijven is er geen toestemming gegeven voor het publiceren van foto's op de website of sociale media.";
-            case RecordType.GroupPicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
                 return "Bij het inschrijven is er wel toestemming gegeven voor het publiceren van groepsfoto's op de website of sociale media.";
-            case RecordType.Vegetarian:
+            case LegacyRecordType.Vegetarian:
                 return "Dit lid eet geen vlees en waarschijnlijk ook geen vis (dat vraag je best eens na). Hou hier rekening mee of bespreek dit met het lid.";
-            case RecordType.Vegan:
+            case LegacyRecordType.Vegan:
                 return "Een veganist eet geen dierlijke producten. Kijk zeker eens bij de links naar mogelijke alternatieven voor bepaalde producten. Bespreek dit ook zeker met het lid.";
-            case RecordType.Halal:
+            case LegacyRecordType.Halal:
                 return "Kijk in onderstaande artikelen wat een Halal dieet precies inhoudt.";
-            case RecordType.Kosher:
+            case LegacyRecordType.Kosher:
                 return "Kijk in onderstaande artikelen wat een Koosjer dieet precies inhoudt.";
-            case RecordType.MedicinePermissions:
+            case LegacyRecordType.MedicinePermissions:
                 return "Het is verboden om als leid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via de steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp. In dit geval hebben de ouders geen toestemming gegeven.";
-            case RecordType.FinancialProblems:
+            case LegacyRecordType.FinancialProblems:
                 return "Tijdens het inschrijven kunnen leden en hun ouders aangeven dat de kost zwaar op hun gezin kan liggen. Spring hier uiterst discreet mee om, maar communiceer dit ook naar de juiste personen om dit discreet te kunnen houden: je wilt absoluut niet dat medeleiding de vraag “heb jij je kampgeld al betaald?” stelt zonder dat ze van iets weten. Neem zeker een kijkje op onderstaande links.";
         }
         return null;
     }
 
-    static getInternalLinks(type: RecordType): {name: string; url: string}[] {
+    static getInternalLinks(type: LegacyRecordType): {name: string; url: string}[] {
         switch (type) {
-            case RecordType.DataPermissions:
+            case LegacyRecordType.DataPermissions:
                 return [
                     {
                         "name": "Welke persoonsgegevens worden als gevoelig beschouwd?",
                         "url": "https://ec.europa.eu/info/law/law-topic/data-protection/reform/rules-business-and-organisations/legal-grounds-processing-data/sensitive-data/what-personal-data-considered-sensitive_nl"
                     }
                 ]
-            case RecordType.PicturePermissions:
+            case LegacyRecordType.PicturePermissions:
                 return [
                     {
                         "name": "Recht op afbeelding",
                         "url": "https://www.gegevensbeschermingsautoriteit.be/recht-op-afbeelding"
                     }
                 ]
-            case RecordType.GroupPicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
                 return [
                     {
                         "name": "Recht op afbeelding",
                         "url": "https://www.gegevensbeschermingsautoriteit.be/recht-op-afbeelding"
                     }
                 ]
-            case RecordType.Vegetarian:
+            case LegacyRecordType.Vegetarian:
                 return [
                     {
                         "name": "Vegetarische recepten van Eva VZW",
                         "url": "https://www.evavzw.be/recepten"
                     }
                 ]
-            case RecordType.Vegan:
+            case LegacyRecordType.Vegan:
                 return [
                     { // todo
                         "name": "WAT IS HET VERSCHIL TUSSEN EEN VEGETARIËR EN EEN VEGANIST?",
                         "url": "https://www.watwat.be/eten/wat-het-verschil-tussen-een-vegetarier-en-een-veganist"
                     }
                 ]
-            case RecordType.Halal:
+            case LegacyRecordType.Halal:
                 return []; // todo
-            case RecordType.Kosher:
+            case LegacyRecordType.Kosher:
                 return []; // todo
-           case RecordType.FinancialProblems:
+           case LegacyRecordType.FinancialProblems:
                 return []; // todo
         }
         return [];
     }
 
-    static getPriority(type: RecordType): string {
+    static getPriority(type: LegacyRecordType): string {
         switch (type) {
-            case RecordType.DataPermissions:
-                return RecordTypePriority.High;
-            case RecordType.PicturePermissions:
-                return RecordTypePriority.High;
-            case RecordType.GroupPicturePermissions:
-                return RecordTypePriority.High;
-            case RecordType.FoodAllergies:
-                return RecordTypePriority.Medium;
-            case RecordType.MedicineAllergies:
-                return RecordTypePriority.Medium;
-            case RecordType.OtherAllergies:
-                return RecordTypePriority.Medium;
-            case RecordType.Vegetarian:
-                return RecordTypePriority.Low;
-            case RecordType.Vegan:
-                return RecordTypePriority.Low;
-            case RecordType.Halal:
-                return RecordTypePriority.Low;
-            case RecordType.Kosher:
-                return RecordTypePriority.Low;
-            case RecordType.Diet:
-                return RecordTypePriority.Low;
-            case RecordType.CovidHighRisk:
-                return RecordTypePriority.Medium;
-            case RecordType.TetanusVaccine:
-                return RecordTypePriority.Low;
-            case RecordType.Asthma:
-                return RecordTypePriority.Medium;
-            case RecordType.BedWaters:
-                return RecordTypePriority.Medium;
-            case RecordType.Epilepsy:
-                return RecordTypePriority.Medium;
-            case RecordType.HeartDisease:
-                return RecordTypePriority.Medium;
-            case RecordType.HayFever:
-                return RecordTypePriority.Low;
-            case RecordType.SkinCondition:
-                return RecordTypePriority.Medium;
-            case RecordType.Rheumatism:
-                return RecordTypePriority.Low;
-            case RecordType.SleepWalking:
-                return RecordTypePriority.Low;
-            case RecordType.Diabetes:
-                return RecordTypePriority.Medium;
-            case RecordType.Medicines:
-                return RecordTypePriority.High;
-            case RecordType.SpecialHealthCare:
-                return RecordTypePriority.Medium;
-            case RecordType.CanNotSwim:
-                return RecordTypePriority.Medium;
-            case RecordType.TiredQuickly:
-                return RecordTypePriority.Low;
-            case RecordType.CanNotParticipateInSport:
-                return RecordTypePriority.Low;
-            case RecordType.SpecialSocialCare:
-                return RecordTypePriority.Medium;
-            case RecordType.MedicinePermissions:
-                return RecordTypePriority.High;
-            case RecordType.FinancialProblems:
-                return RecordTypePriority.High;
-            case RecordType.Other:
-                return RecordTypePriority.Medium;
+            case LegacyRecordType.DataPermissions:
+                return LegacyRecordTypePriority.High;
+            case LegacyRecordType.PicturePermissions:
+                return LegacyRecordTypePriority.High;
+            case LegacyRecordType.GroupPicturePermissions:
+                return LegacyRecordTypePriority.High;
+            case LegacyRecordType.FoodAllergies:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.MedicineAllergies:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.OtherAllergies:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.Vegetarian:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.Vegan:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.Halal:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.Kosher:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.Diet:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.CovidHighRisk:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.TetanusVaccine:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.Asthma:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.BedWaters:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.Epilepsy:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.HeartDisease:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.HayFever:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.SkinCondition:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.Rheumatism:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.SleepWalking:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.Diabetes:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.Medicines:
+                return LegacyRecordTypePriority.High;
+            case LegacyRecordType.SpecialHealthCare:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.CanNotSwim:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.TiredQuickly:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.CanNotParticipateInSport:
+                return LegacyRecordTypePriority.Low;
+            case LegacyRecordType.SpecialSocialCare:
+                return LegacyRecordTypePriority.Medium;
+            case LegacyRecordType.MedicinePermissions:
+                return LegacyRecordTypePriority.High;
+            case LegacyRecordType.FinancialProblems:
+                return LegacyRecordTypePriority.High;
+            case LegacyRecordType.Other:
+                return LegacyRecordTypePriority.Medium;
         }
     }
 }

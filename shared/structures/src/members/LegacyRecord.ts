@@ -1,7 +1,7 @@
 import { AutoEncoder, Data, Decoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { OldRecordType, RecordType, RecordTypeHelper } from "./RecordType";
+import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from "./LegacyRecordType";
 
 // Temporary fix for space in enum....
 class TrimEnumDecoder<E extends { [key: number]: string | number }> implements Decoder<E[keyof E]> {
@@ -41,9 +41,9 @@ class TrimEnumDecoder<E extends { [key: number]: string | number }> implements D
     }
 }
 
-export class Record extends AutoEncoder {
-    @field({ decoder: new EnumDecoder(RecordType) })
-    type: RecordType;
+export class LegacyRecord extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(LegacyRecordType) })
+    type: LegacyRecordType;
 
     @field({ decoder: StringDecoder })
     description = "";
@@ -57,21 +57,21 @@ export class Record extends AutoEncoder {
     author?: string
 
     getText(): string {
-        return RecordTypeHelper.getName(this.type);
+        return LegacyRecordTypeHelper.getName(this.type);
     }
 
     /**
      * Invert all records that need to be reversed in order to get displayed correctly
      */
-    static invertRecords(records: Record[]): Record[] {
-        const invertMap = new Map<RecordType, boolean>()
-        for (const type of Object.values(RecordType)) {
-            if (RecordTypeHelper.isInverted(type)) {
+    static invertRecords(records: LegacyRecord[]): LegacyRecord[] {
+        const invertMap = new Map<LegacyRecordType, boolean>()
+        for (const type of Object.values(LegacyRecordType)) {
+            if (LegacyRecordTypeHelper.isInverted(type)) {
                 invertMap.set(type, true) // add this record if it was not found
             }
         }
         const result = records.filter((record) => {
-            if (!RecordTypeHelper.isInverted(record.type)) {
+            if (!LegacyRecordTypeHelper.isInverted(record.type)) {
                 return true
             }
             invertMap.set(record.type, false) // do not add again
@@ -81,7 +81,7 @@ export class Record extends AutoEncoder {
 
         for (const [type, b] of invertMap.entries()) {
             if (b) {
-                result.push(Record.create({ type }))
+                result.push(LegacyRecord.create({ type }))
             }
         }
         return result

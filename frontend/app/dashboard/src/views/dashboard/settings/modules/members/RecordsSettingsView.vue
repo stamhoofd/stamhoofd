@@ -20,7 +20,7 @@
             <hr>
             <h2>Privacy</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.DataPermissions) || dataRequired" :disabled="dataRequired" class="long-text" @change="setBooleanType(RecordType.DataPermissions, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.DataPermissions) || dataRequired" :disabled="dataRequired" class="long-text" @change="setBooleanType(LegacyRecordType.DataPermissions, $event)">
                 Vraag toestemming voor het verzamelen van <a class="inline-link" target="_blank" rel="noopener noreferrer" href="https://www.gegevensbeschermingsautoriteit.be/professioneel/thema-s/gevoelige-gegevens">gevoelige gegevens</a>
                 <p v-if="dataRequired" class="style-description-small">
                     Dit kan je enkel uitschakelen als je verder geen gevoelige gegevens in Stamhoofd zelf vraagt.
@@ -30,13 +30,13 @@
                 </p>
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.PicturePermissions)" class="long-text" @change="setBooleanType(RecordType.PicturePermissions, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.PicturePermissions)" class="long-text" @change="setBooleanType(LegacyRecordType.PicturePermissions, $event)">
                 Vraag toestemming voor publicatie van foto's op de website en sociale media
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.GroupPicturePermissions)" class="long-text" @change="setBooleanType(RecordType.GroupPicturePermissions, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.GroupPicturePermissions)" class="long-text" @change="setBooleanType(LegacyRecordType.GroupPicturePermissions, $event)">
                 Vraag toestemming voor publicatie van <strong>groeps</strong>foto's op de website en sociale media
-                <p v-if="getBooleanType(RecordType.PicturePermissions)" class="style-description-small">
+                <p v-if="getBooleanType(LegacyRecordType.PicturePermissions)" class="style-description-small">
                     Als er geen toestemming werd gegeven voor de publicatie van foto's (hierboven)
                 </p>
             </Checkbox>
@@ -77,108 +77,108 @@
             <hr>
             <h2>Allergieën</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.FoodAllergies)" @change="setBooleanType(RecordType.FoodAllergies, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.FoodAllergies)" @change="setBooleanType(LegacyRecordType.FoodAllergies, $event)">
                 Allergisch of overgevoelig voor bepaalde voeding
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.MedicineAllergies)" @change="setBooleanType(RecordType.MedicineAllergies, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.MedicineAllergies)" @change="setBooleanType(LegacyRecordType.MedicineAllergies, $event)">
                 Allergisch voor geneesmiddelen
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.HayFever)" @change="setBooleanType(RecordType.HayFever, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.HayFever)" @change="setBooleanType(LegacyRecordType.HayFever, $event)">
                 Hooikoorts
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.OtherAllergies)" @change="setBooleanType(RecordType.OtherAllergies, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.OtherAllergies)" @change="setBooleanType(LegacyRecordType.OtherAllergies, $event)">
                 Allergisch voor andere zaken (verf, insecten...)
             </Checkbox>
 
             <hr>
             <h2>Dieet</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.Vegetarian)" @change="setBooleanType(RecordType.Vegetarian, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Vegetarian)" @change="setBooleanType(LegacyRecordType.Vegetarian, $event)">
                 Vegetarisch dieet
             </Checkbox>
-            <Checkbox :checked="getBooleanType(RecordType.Vegan)" @change="setBooleanType(RecordType.Vegan, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Vegan)" @change="setBooleanType(LegacyRecordType.Vegan, $event)">
                 Veganistisch dieet (geen dierlijke producten)
             </Checkbox>
-            <Checkbox :checked="getBooleanType(RecordType.Halal)" @change="setBooleanType(RecordType.Halal, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Halal)" @change="setBooleanType(LegacyRecordType.Halal, $event)">
                 Halal dieet
             </Checkbox>
-            <Checkbox :checked="getBooleanType(RecordType.Kosher)" @change="setBooleanType(RecordType.Kosher, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Kosher)" @change="setBooleanType(LegacyRecordType.Kosher, $event)">
                 Koosjer dieet
             </Checkbox>
-            <Checkbox :checked="getBooleanType(RecordType.Diet)" @change="setBooleanType(RecordType.Diet, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Diet)" @change="setBooleanType(LegacyRecordType.Diet, $event)">
                 Ander dieet (geen allergieën)
             </Checkbox>
 
             <hr>
             <h2>Gezondheid, hygiëne &amp; slapen</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.CovidHighRisk)" @change="setBooleanType(RecordType.CovidHighRisk, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.CovidHighRisk)" @change="setBooleanType(LegacyRecordType.CovidHighRisk, $event)">
                 Hoge risicogroep voor coronavirus
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.TetanusVaccine)" @change="setBooleanType(RecordType.TetanusVaccine, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.TetanusVaccine)" @change="setBooleanType(LegacyRecordType.TetanusVaccine, $event)">
                 Tetanusvaccinatie
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.Asthma)" @change="setBooleanType(RecordType.Asthma, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Asthma)" @change="setBooleanType(LegacyRecordType.Asthma, $event)">
                 Astma
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.BedWaters)" @change="setBooleanType(RecordType.BedWaters, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.BedWaters)" @change="setBooleanType(LegacyRecordType.BedWaters, $event)">
                 Bedwateren
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.Epilepsy)" @change="setBooleanType(RecordType.Epilepsy, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Epilepsy)" @change="setBooleanType(LegacyRecordType.Epilepsy, $event)">
                 Epilepsie
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.HeartDisease)" @change="setBooleanType(RecordType.HeartDisease, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.HeartDisease)" @change="setBooleanType(LegacyRecordType.HeartDisease, $event)">
                 Hartkwaal
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.SkinCondition)" @change="setBooleanType(RecordType.SkinCondition, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.SkinCondition)" @change="setBooleanType(LegacyRecordType.SkinCondition, $event)">
                 Huidaandoening
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.Rheumatism)" @change="setBooleanType(RecordType.Rheumatism, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Rheumatism)" @change="setBooleanType(LegacyRecordType.Rheumatism, $event)">
                 Reuma
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.SleepWalking)" @change="setBooleanType(RecordType.SleepWalking, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.SleepWalking)" @change="setBooleanType(LegacyRecordType.SleepWalking, $event)">
                 Slaapwandelen
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.Diabetes)" @change="setBooleanType(RecordType.Diabetes, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Diabetes)" @change="setBooleanType(LegacyRecordType.Diabetes, $event)">
                 Suikerziekte
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.Medicines)" @change="setBooleanType(RecordType.Medicines, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Medicines)" @change="setBooleanType(LegacyRecordType.Medicines, $event)">
                 Moet geneesmiddelen nemen (dagelijks, wekelijks...)
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.SpecialHealthCare)" @change="setBooleanType(RecordType.SpecialHealthCare, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.SpecialHealthCare)" @change="setBooleanType(LegacyRecordType.SpecialHealthCare, $event)">
                 Er is bijzondere aandacht nodig om risico's te voorkomen + welke
             </Checkbox>
 
             <hr>
             <h2>Sport, spel en sociale omgang</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.CanNotSwim)" @change="setBooleanType(RecordType.CanNotSwim, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.CanNotSwim)" @change="setBooleanType(LegacyRecordType.CanNotSwim, $event)">
                 Kan niet (of onvoldoende) zwemmen
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.TiredQuickly)" @change="setBooleanType(RecordType.TiredQuickly, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.TiredQuickly)" @change="setBooleanType(LegacyRecordType.TiredQuickly, $event)">
                 Vlug moe
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.CanNotParticipateInSport)" @change="setBooleanType(RecordType.CanNotParticipateInSport, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.CanNotParticipateInSport)" @change="setBooleanType(LegacyRecordType.CanNotParticipateInSport, $event)">
                 Kan niet deelnemen aan sport en spel afgestemd op hun leeftijd
             </Checkbox>
 
-            <Checkbox :checked="getBooleanType(RecordType.SpecialSocialCare)" @change="setBooleanType(RecordType.SpecialSocialCare, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.SpecialSocialCare)" @change="setBooleanType(LegacyRecordType.SpecialSocialCare, $event)">
                 Er is bijzondere aandacht nodig bij sociale omgang
             </Checkbox>
 
@@ -189,7 +189,7 @@
                 Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.
             </p>
 
-            <Checkbox :checked="getBooleanType(RecordType.MedicinePermissions)" @change="setBooleanType(RecordType.MedicinePermissions, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.MedicinePermissions)" @change="setBooleanType(LegacyRecordType.MedicinePermissions, $event)">
                 Vraag toestemming voor het toedienen van medicatie (wordt enkel gevraagd voor minderjarigen)*
             </Checkbox>
 
@@ -200,7 +200,7 @@
             <hr>
             <h2>Andere inlichtingen</h2>
 
-            <Checkbox :checked="getBooleanType(RecordType.Other)" @change="setBooleanType(RecordType.Other, $event)">
+            <Checkbox :checked="getBooleanType(LegacyRecordType.Other)" @change="setBooleanType(LegacyRecordType.Other, $event)">
                 Vrij veld voor andere opmerkingen
             </Checkbox>
 
@@ -254,7 +254,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { FreeContributionSettings } from '@stamhoofd/structures';
-import { AskRequirement, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, RecordType, Version } from "@stamhoofd/structures"
+import { AskRequirement, LegacyRecordType, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -326,7 +326,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     }
 
     get financialProblems() {
-        return this.getBooleanType(RecordType.FinancialProblems)
+        return this.getBooleanType(LegacyRecordType.FinancialProblems)
     }
 
     set financialProblems(enabled: boolean) {
@@ -337,7 +337,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             new Toast("Eén of meerdere leeftijdsgroepen maken gebruik van verminderd lidgeld. Schakel dat eerst overal uit.", "error red").show()
             return
         }
-        this.setBooleanType(RecordType.FinancialProblems, enabled)
+        this.setBooleanType(LegacyRecordType.FinancialProblems, enabled)
     }
 
     get freeContribution() {
@@ -445,8 +445,8 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
-    get RecordType() {
-        return RecordType
+    get LegacyRecordType() {
+        return LegacyRecordType
     }
 
     get AskRequirement() {
@@ -459,11 +459,11 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     // Helpers ---
 
-    getBooleanType(type: RecordType) {
+    getBooleanType(type: LegacyRecordType) {
         return !!this.organization.meta.recordsConfiguration.enabledRecords.find(r => r == type)
     }
 
-    setBooleanType(type: RecordType, enabled: boolean) {
+    setBooleanType(type: LegacyRecordType, enabled: boolean) {
         const index = this.organization.meta.recordsConfiguration.enabledRecords.findIndex(r => r == type)
         if ((index != -1) === enabled) {
             return

@@ -1,4 +1,4 @@
-import { MemberWithRegistrations, Organization, RecordType, RecordTypeHelper } from '@stamhoofd/structures';
+import { LegacyRecordType, MemberWithRegistrations, Organization, LegacyRecordTypeHelper } from '@stamhoofd/structures';
 
 import { DescriptiveFilter, Filter } from "./Filter";
 
@@ -24,15 +24,15 @@ export class RecordTypeFilter implements Filter, DescriptiveFilter {
         ) 
 
         return records.some((record) => {
-            return RecordTypeHelper.getFilterCategory(record.type) === this.category
+            return LegacyRecordTypeHelper.getFilterCategory(record.type) === this.category
         });
     }
 
     static generateAll() {
-        const types = Object.values(RecordType)
+        const types = Object.values(LegacyRecordType)
         const map = new Map<string, RecordTypeFilter>()
         for (const type of types) {
-            const category = RecordTypeHelper.getFilterCategory(type)
+            const category = LegacyRecordTypeHelper.getFilterCategory(type)
             if (category && !map.has(category)) {
                 map.set(category, new RecordTypeFilter(category))
             }
@@ -51,8 +51,8 @@ export class RecordTypeFilter implements Filter, DescriptiveFilter {
         ) 
 
         return records.flatMap((record) => {
-            if (RecordTypeHelper.getFilterCategory(record.type) === this.category) {
-                return [RecordTypeHelper.getName(record.type)+(record.description.length > 0 ? ": "+record.description : "")]
+            if (LegacyRecordTypeHelper.getFilterCategory(record.type) === this.category) {
+                return [LegacyRecordTypeHelper.getName(record.type)+(record.description.length > 0 ? ": "+record.description : "")]
             }
             return []
         }).join("\n");
