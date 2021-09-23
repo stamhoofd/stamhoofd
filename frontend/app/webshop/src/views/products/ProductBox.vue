@@ -44,13 +44,13 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { CartItemView, Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { CartItem, Product, ProductDateRange } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
-import CartItemView from './CartItemView.vue';
+import { WebshopManager } from "../../classes/WebshopManager";
 
 @Component({
     components: {
@@ -108,7 +108,16 @@ export default class ProductBox extends Mixins(NavigationMixin){
             productPrice: this.product.prices[0]
         })
 
-        this.present(new ComponentWithProperties(CartItemView, { cartItem }).setDisplayStyle("sheet"))
+        this.present(new ComponentWithProperties(CartItemView, { 
+            cartItem,
+            cart: CheckoutManager.cart,
+            webshop: WebshopManager.webshop,
+            saveHandler: (cartItem: CartItem) => {
+                new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
+                CheckoutManager.cart.addItem(cartItem)
+                CheckoutManager.saveCart()
+            }
+        }).setDisplayStyle("sheet"))
     }
 
     get remainingStock() {

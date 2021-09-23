@@ -39,6 +39,13 @@ export class CartItem extends AutoEncoder {
     amount = 1;
 
     /**
+     * When an order is correctly placed, we store the reserved amount in the stock here.
+     * We need this to check the stock changes when an order is edited after placement.
+     */
+    @field({ decoder: IntegerDecoder, version: 115 })
+    reservedAmount = 0;
+
+    /**
      * Saved unitPrice (migration needed)
      */
     @field({ decoder: IntegerDecoder, nullable: true, version: 107 })
@@ -144,10 +151,6 @@ export class CartItem extends AutoEncoder {
         return descriptions.join("\n")
     }
 
-    duplicate(version: number) {
-        return CartItem.decode(new ObjectData(this.encode({ version }), { version }))
-    }
-
     validateAnswers() {
         const newAnswers: WebshopFieldAnswer[] = []
         for (const field of this.product.customFields) {
@@ -175,11 +178,96 @@ export class CartItem extends AutoEncoder {
     }
 
     /**
+     * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
+     */
+    refresh(webshop: Webshop) {
+        const errors = new SimpleErrors()
+        const product = webshop.products.find(p => p.id == this.product.id)
+        if (!product) {
+            errors.addError(new SimpleError({
+                code: "product_unavailable",
+                message: "Product unavailable",
+                human: this.product.name+" is niet meer beschikbaar"
+            }))
+        } else {
+            this.product = product
+
+            const productPrice = this.product.prices.find(p => p.id === this.productPrice.id)
+            if (!productPrice) {
+                errors.addError(new SimpleError({
+                    code: "product_price_unavailable",
+                    message: "Product price unavailable",
+                    human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar"
+                }))
+            } else {
+                this.productPrice = productPrice
+            }
+
+            // Check all options
+            const remainingMenus = this.product.optionMenus.slice()
+
+            for (const o of this.options) {
+                let index = remainingMenus.findIndex(m => m.id === o.optionMenu.id)
+                if (index == -1) {
+                    // Check if it has a multiple choice one
+                    index = this.product.optionMenus.findIndex(m => m.id === o.optionMenu.id)
+                    errors.addError(new SimpleError({
+                        code: "option_menu_unavailable",
+                        message: "Option menu unavailable",
+                        human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar"
+                    }))
+                    continue
+                }
+
+                const menu = remainingMenus[index]
+                if (!menu.multipleChoice) {
+                    // Already used: not possible to add another
+                    remainingMenus.splice(index, 1)[0]
+                }
+                
+                const option = menu.options.find(m => m.id === o.option.id)
+
+                if (!option) {
+                    errors.addError(new SimpleError({
+                        code: "option_unavailable",
+                        message: "Option unavailable",
+                        human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar"
+                    }))
+                    continue
+                }
+
+                // Update to latest data
+                o.optionMenu = menu
+                o.option = option
+            }
+
+            if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
+                throw new SimpleError({
+                    code: "missing_menu",
+                    message: "Missing menu's "+remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(", "),
+                    human: "Er zijn nieuwe keuzemogelijkheden voor "+this.product.name+" waaruit je moet kiezen"
+                })
+            }
+        }
+
+        try {
+            this.validateAnswers()
+        } catch (e) {
+            errors.addError(e)
+        }
+
+        errors.throwIfNotEmpty()
+    }
+
+    /**
      * Update self to the newest available data and throw if it was not able to recover
      */
     validate(webshop: Webshop, cart: Cart) {
-        const product = webshop.products.find(p => p.id == this.product.id)
-        if (!product || !product.enabled) {
+        this.refresh(webshop)
+
+        // Check stock
+        const product = this.product
+        if (!product.enabled && this.amount > this.reservedAmount) {
             throw new SimpleError({
                 code: "product_unavailable",
                 message: "Product unavailable",
@@ -187,7 +275,7 @@ export class CartItem extends AutoEncoder {
             })
         }
 
-        if (product.isSoldOut) {
+        if (product.isSoldOut && this.amount > this.reservedAmount) {
             throw new SimpleError({
                 code: "product_unavailable",
                 message: "Product unavailable",
@@ -195,7 +283,7 @@ export class CartItem extends AutoEncoder {
             })
         }
 
-        if (product.remainingStock !== null && product.remainingStock < this.amount) {
+        if (product.remainingStock !== null && product.remainingStock < this.amount - this.reservedAmount) {
             throw new SimpleError({
                 code: "product_unavailable",
                 message: "No remaining stock",
@@ -203,64 +291,6 @@ export class CartItem extends AutoEncoder {
                 human: "Er zijn nog maar "+product.remainingStock+" stuks beschikbaar van "+this.product.name
             })
         }
-
-        const productPrice = product.prices.find(p => p.id === this.productPrice.id)
-        if (!productPrice) {
-            throw new SimpleError({
-                code: "product_price_unavailable",
-                message: "Product price unavailable",
-                human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar, voeg het opnieuw toe"
-            })
-        }
-
-        this.product = product
-        this.productPrice = productPrice
-
-        // Check all options
-        const remainingMenus = this.product.optionMenus.slice()
-
-        for (const o of this.options) {
-            let index = remainingMenus.findIndex(m => m.id === o.optionMenu.id)
-            if (index == -1) {
-                // Check if it has a multiple choice one
-                index = this.product.optionMenus.findIndex(m => m.id === o.optionMenu.id)
-                throw new SimpleError({
-                    code: "option_menu_unavailable",
-                    message: "Option menu unavailable",
-                    human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar, voeg het opnieuw toe"
-                })
-            }
-
-            const menu = remainingMenus[index]
-            if (!menu.multipleChoice) {
-                // Already used: not possible to add another
-                remainingMenus.splice(index, 1)[0]
-            }
-            
-            const option = menu.options.find(m => m.id === o.option.id)
-
-            if (!option) {
-                throw new SimpleError({
-                    code: "option_unavailable",
-                    message: "Option unavailable",
-                    human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar, voeg het opnieuw toe"
-                })
-            }
-
-            // Update to latest data
-            o.optionMenu = menu
-            o.option = option
-        }
-
-        if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
-            throw new SimpleError({
-                code: "missing_menu",
-                message: "Missing menu's "+remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(", "),
-                human: "Er zijn nieuwe keuzemogelijkheden voor "+this.product.name+" waaruit je moet kiezen, voeg het opnieuw toe"
-            })
-        }
-
-        this.validateAnswers()
 
         // Update prices
         this.calculateUnitPrice(cart)
@@ -299,6 +329,38 @@ export class Cart extends AutoEncoder {
 
     get count() {
         return this.items.reduce((c, item) => c + item.amount, 0)
+    }
+
+    /**
+     * Refresh all items with the newest data, throw if something failed (at the end)
+     */
+    refresh(webshop: Webshop) {
+        const errors = new SimpleErrors()
+        for (const item of this.items) {
+            try {
+                item.refresh(webshop)
+            } catch (e) {
+                errors.addError(e)
+            }
+        }
+
+        errors.throwIfNotEmpty()
+    }
+
+    /**
+     * Refresh all items with the newest data, throw if something failed (at the end)
+     */
+    updatePrices() {
+        const errors = new SimpleErrors()
+        for (const item of this.items) {
+            try {
+                item.calculateUnitPrice(this)
+            } catch (e) {
+                errors.addError(e)
+            }
+        }
+
+        errors.throwIfNotEmpty()
     }
 
     validate(webshop: Webshop) {

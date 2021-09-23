@@ -93,7 +93,7 @@ export class Order extends Model {
     }
 
     async onPaymentFailed(this: Order) {
-        if (this.status !== OrderStatus.Canceled) {
+        if (this.shouldIncludeStock()) {
             this.status = OrderStatus.Canceled
             await this.save()
 
@@ -106,35 +106,41 @@ export class Order extends Model {
                     return
                 }
                 
-                await this.setRelation(Order.webshop, webshop).updateStock(false) // remove reserved stock
+                await this.setRelation(Order.webshop, webshop).updateStock() // remove reserved stock
             })
         }
     }
 
     /**
+     * Adds or removes the order to the stock of the webshop (if it wasn't already included). If amounts were changed, only those
+     * changes will get added
      * Should always happen in the webshop-stock queue to prevent multiple webshop writes at the same time
      * + in combination with validation and reading the webshop
      */
-    async updateStock(this: Order & { webshop: Webshop }, add = true) {
+    async updateStock(this: Order & { webshop: Webshop }) {
+        // Add or delete this order from the stock?
+        const add = this.shouldIncludeStock()
+
         let changed = false
         for (const item of this.data.cart.items) {
-            if (item.product.stock !== null) {
+            const difference = add ? (item.amount - item.reservedAmount) : -item.reservedAmount
+            if (item.product.stock !== null && difference !== 0) {
                 const product = this.webshop.products.find(p => p.id === item.product.id)
                 if (product) {
-                    if (add) {
-                        product.usedStock += item.amount
-                    } else {
-                        product.usedStock -= item.amount
-                        if (product.usedStock < 0) {
-                            product.usedStock = 0
-                        }
+                    product.usedStock += difference
+                    if (product.usedStock < 0) {
+                        product.usedStock = 0
                     }
+
+                    // Keep track that we included this order in the stock already
+                    item.reservedAmount += difference
                     changed = true
                 }
             }
         }
         if (changed) {
             await this.webshop.save()
+            await this.save()
         }
     }
 

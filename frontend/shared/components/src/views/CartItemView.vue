@@ -95,14 +95,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
-import { CartItem, ProductDateRange } from '@stamhoofd/structures';
+import { ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { Cart,CartItem, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
 
-import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from '../../classes/WebshopManager';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 
@@ -128,31 +126,38 @@ export default class CartItemView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     cartItem: CartItem
 
+    @Prop({ required: true })
+    webshop: Webshop
+
+    @Prop({ required: true })
+    cart: Cart
+
+    @Prop({ required: true })
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+
     @Prop({ default: null })
     oldItem: CartItem | null
 
     errorBox: ErrorBox | null = null
 
-    get cart() {
-        return CheckoutManager.cart
-    }
-
     addToCart() {
         try {
-            this.cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
+            this.cartItem.validate(this.webshop, this.cart)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             return
         }
 
-        if (this.oldItem) {
+        this.saveHandler(this.cartItem, this.oldItem)
+
+        /*if (this.oldItem) {
             CheckoutManager.cart.removeItem(this.oldItem)
             new Toast(this.cartItem.product.name+" is aangepast", "success green").setHide(1000).show()
         } else {
             new Toast(this.cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
         }
         CheckoutManager.cart.addItem(this.cartItem)
-        CheckoutManager.saveCart()
+        CheckoutManager.saveCart()*/
         this.pop()
     }
 
@@ -179,8 +184,11 @@ export default class CartItemView extends Mixins(NavigationMixin){
         return this.cartItem.productPrice.discountPrice ?? 0
     }
 
+    /**
+     * Return the total amount of this same product in the cart, that is not this item (if it is editing)
+     */
     get count() {
-        return CheckoutManager.cart.items.reduce((prev, item) => {
+        return this.cart.items.reduce((prev, item) => {
             if (item.product.id != this.product.id) {
                 return prev
             }
@@ -193,11 +201,11 @@ export default class CartItemView extends Mixins(NavigationMixin){
             return null
         }
 
-        return this.product.remainingStock - this.count
+        return this.product.remainingStock  + (this.oldItem?.reservedAmount ?? 0) - this.count
     }
 
     get remainingStock() {
-        return this.product.remainingStock 
+        return (this.product.remainingStock ?? 0) + (this.oldItem?.reservedAmount ?? 0)
     }
 
     formatDateRange(dateRange: ProductDateRange) {

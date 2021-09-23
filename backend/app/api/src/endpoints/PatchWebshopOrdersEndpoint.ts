@@ -74,16 +74,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     })
                 }
 
-                const didIncludeStock = model.shouldIncludeStock()
-
                 model.status = patch.status ?? model.status
 
-                if (didIncludeStock && !model.shouldIncludeStock()) {
-                    // Remove from stock
-                    await model.setRelation(Order.webshop, webshop).updateStock(false)
-                } else if (!didIncludeStock && model.shouldIncludeStock()) {
-                    // Add to stock
-                    await model.setRelation(Order.webshop, webshop).updateStock()
+                if (patch.data) {
+                    model.data.patchOrPut(patch.data)
                 }
             }
 
@@ -92,6 +86,14 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 // Automatically checks if it is changed or not
                 await order.save()
             }
+
+            // Update stock if needed: add or remove it from the stock
+            await QueueHandler.schedule("webshop-stock/"+webshop.id, async () => {
+                // Save best inside the queue to prevent duplicate stock updates
+                for (const order of orders) {
+                    await order.setRelation(Order.webshop, webshop).updateStock()
+                }
+            })
 
             return orders
         })

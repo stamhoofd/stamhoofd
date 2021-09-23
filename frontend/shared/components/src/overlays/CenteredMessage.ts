@@ -100,7 +100,7 @@ export class CenteredMessage {
         return this
     }
 
-    static confirm(text: string, confirmText: string, description = ""): Promise<boolean> {
+    static confirm(text: string, confirmText: string, description = "", cancelText?: string): Promise<boolean> {
         return new Promise((resolve) => {
             new CenteredMessage(text, description).addButton(new CenteredMessageButton(confirmText, {
                 action: () => {
@@ -108,7 +108,7 @@ export class CenteredMessage {
                     return Promise.resolve()
                 },
                 type: "destructive"
-            })).addButton(new CenteredMessageButton("Annuleren", {
+            })).addButton(new CenteredMessageButton(cancelText ?? "Annuleren", {
                 action: () => {
                     resolve(false)
                     return Promise.resolve()

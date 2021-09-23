@@ -60,6 +60,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.createdAt = new Date()
             order.createdAt.setMilliseconds(0)
 
+            // Always reserve the stock
             await order.updateStock()
             return { webshop, order, organization }
         })

@@ -1,10 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { getPermissionLevelNumber, OrderStatus, PermissionLevel } from "@stamhoofd/structures";
-
 import { Order } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
+import { QueueHandler } from "@stamhoofd/queues";
+import { getPermissionLevelNumber, OrderStatus, PermissionLevel } from "@stamhoofd/structures";
 
 type Params = { id: string; orderId: string };
 type Query = undefined;
@@ -56,10 +56,13 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             })
         }
 
-        if (order.shouldIncludeStock()) {
-            // Remove from stock
-            await order.setRelation(Order.webshop, webshop).updateStock(false)
-        }
+        await QueueHandler.schedule("webshop-stock/"+webshop.id, async () => {
+            if (order.shouldIncludeStock()) {
+                // Remove from stock
+                order.status = OrderStatus.Canceled
+                await order.setRelation(Order.webshop, webshop).updateStock()
+            }
+        })
 
         await order.delete()      
         return new Response(undefined);
