@@ -34,10 +34,8 @@ export default new Migration(async () => {
 
                 let changed = false
                 for (const item of order.data.cart.items) {
-                    if (item.product.stock !== null) {
-                        item.reservedAmount = item.amount
-                        changed = true
-                    }
+                    item.reservedAmount = item.amount
+                    changed = true
                 }
                 if (changed) {
                     count++

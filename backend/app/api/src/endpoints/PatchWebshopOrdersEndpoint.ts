@@ -88,12 +88,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             // Update stock if needed: add or remove it from the stock
-            await QueueHandler.schedule("webshop-stock/"+webshop.id, async () => {
-                // Save best inside the queue to prevent duplicate stock updates
-                for (const order of orders) {
-                    await order.setRelation(Order.webshop, webshop).updateStock()
-                }
-            })
+            // Save best inside the queue to prevent duplicate stock updates
+            for (const order of orders) {
+                await order.setRelation(Order.webshop, webshop).updateStock()
+            }
 
             return orders
         })

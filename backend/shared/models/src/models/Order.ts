@@ -124,7 +124,7 @@ export class Order extends Model {
         let changed = false
         for (const item of this.data.cart.items) {
             const difference = add ? (item.amount - item.reservedAmount) : -item.reservedAmount
-            if (item.product.stock !== null && difference !== 0) {
+            if (difference !== 0) {
                 const product = this.webshop.products.find(p => p.id === item.product.id)
                 if (product) {
                     product.usedStock += difference

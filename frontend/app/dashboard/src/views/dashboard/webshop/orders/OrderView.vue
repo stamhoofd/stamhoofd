@@ -202,6 +202,13 @@
                         <p class="price">
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
                         </p>
+
+                        <p v-if="cartItem.reservedAmount < cartItem.amount" class="warning-box">
+                            Als je opslaat zal de voorraad van {{ cartItem.product.name }} verminderd worden met {{ cartItem.amount - cartItem.reservedAmount }} stuk(s)
+                        </p>
+                        <p v-else-if="cartItem.reservedAmount > cartItem.amount" class="warning-box">
+                            Als je opslaat zal de voorraad van {{ cartItem.product.name }} aangevuld worden met {{ cartItem.reservedAmount - cartItem.amount }} stuk(s)
+                        </p>
                     </footer>
 
                     <figure v-if="imageSrc(cartItem)" slot="right">
@@ -236,13 +243,19 @@
             </div>
         </main>
 
-        <STToolbar v-if="hasWrite && patchedOrder.payment && patchedOrder.payment.method == 'Transfer'">
-            <LoadingButton slot="right" :loading="loadingPayment">
+        <STToolbar v-if="hasWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') || isChanged())">
+            <LoadingButton v-if="!isChanged()" slot="right" :loading="loadingPayment">
                 <button v-if="patchedOrder.payment.status == 'Succeeded' && patchedOrder.payment.paidAt" class="button secundary" @click="markNotPaid(patchedOrder.payment)">
                     Toch niet betaald
                 </button>
                 <button v-else class="button primary" @click="markPaid(patchedOrder.payment)">
                     Markeer als betaald
+                </button>
+            </LoadingButton>
+
+            <LoadingButton v-else slot="right" :loading="saving">
+                <button class="button primary" @click="save()">
+                    Opslaan
                 </button>
             </LoadingButton>
         </STToolbar>
@@ -254,7 +267,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, patchContainsChanges } fro
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, OrderData, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, OrderData, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -471,6 +484,35 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
     }
 
+    saving = false
+
+    save() {
+        if (this.saving) {
+            return
+        }
+        this.saving = true
+        this.patchOrder.id = this.order.id
+        this.webshopManager.patchOrders(
+            [
+                PrivateOrder.patch(this.patchOrder as any)
+            ]
+        ).then((orders) => {
+            this.saving = false
+            new Toast("Wijzigingen opgeslagen", "success").setHide(1000).show()
+
+            // Move all data to original order
+            for (const order of orders) {
+                if (order.id === this.order.id) {
+                    this.order.set(order)
+                }
+            }
+            this.patchOrder = Order.patch({})
+        }).catch((e) => {
+            this.saving = false
+            Toast.fromError(e).show()
+        })
+    }
+
     async editCartItem(cartItem: CartItem ) {
         let clone = this.patchedOrder.data.cart.clone()
         console.log("clone", clone)
@@ -492,7 +534,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                 clone.addItem(cartItem)
 
                 if (clone.price != this.patchedOrder.data.cart.price) {
-                    new Toast("Opgelet, de totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "error red").setHide(10*1000).show();
+                    new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
                 }
 
                 this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
