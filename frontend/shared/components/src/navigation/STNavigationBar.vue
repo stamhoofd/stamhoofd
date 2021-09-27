@@ -104,7 +104,7 @@ export default class STNavigationBar extends Vue {
 
     onScroll() {
         const scroll = this.scrollElement!.scrollTop;
-        if (scroll > 50) {
+        if (scroll > 20) {
             this.scrolled = true;
         } else if (scroll < 15) {
             this.scrolled = false;

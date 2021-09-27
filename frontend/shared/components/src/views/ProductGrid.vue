@@ -1,9 +1,6 @@
 <template>
-    <div class="category-box container">
-        <h2>{{ category.name }}</h2>
-
-        <ProductGrid :products="products" />
-        <hr v-if="!isLast">
+    <div class="product-grid">
+        <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :cart="cart" :save-handler="saveHandler" />
     </div>
 </template>
 
@@ -11,11 +8,11 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Category, Product, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, Product, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import ProductGrid from "./ProductGrid.vue"
+import ProductBox from "./ProductBox.vue"
 
 @Component({
     components: {
@@ -25,32 +22,24 @@ import ProductGrid from "./ProductGrid.vue"
         STListItem,
         LoadingView,
         Checkbox,
-        ProductGrid
+        ProductBox
     },
     filters: {
         price: Formatter.price
     }
 })
-export default class CategoryBox extends Mixins(NavigationMixin){
+export default class ProductGrid extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    category: Category
+    products: Product[]
 
     @Prop({ required: true })
     webshop: Webshop
 
-    @Prop({ default: false })
-    isLast: boolean
+    @Prop({ required: true })
+    cart: Cart
 
-    get products() {
-        return this.category.productIds.flatMap(id => {
-            const product = this.webshop.products.find(p => p.id === id)
-            if (product) {
-                return [product]
-            }
-            return []
-        })
-    }
-
+    @Prop({ required: true })
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 }
 </script>
 
@@ -58,4 +47,16 @@ export default class CategoryBox extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
+.product-grid {
+    display: grid;
+    gap: 0;
+    grid-template-columns: 1fr;
+}
+
+.enable-grid .product-grid {
+    @media (min-width: 801px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+}
 </style>

@@ -54,7 +54,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
 
 
         const payments = await GetOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId)
-        const orderPayments = await GetOrganizationPaymentsEndpoint.getPaymentsWithOrder(user.organizationId)
+        const orderPayments = await GetOrganizationPaymentsEndpoint.getPaymentsWithOrder(user.organizationId, true)
         const changedPayments: (PaymentWithRegistrations | PaymentWithOrder)[] = []
 
         let groups: Group[] = []

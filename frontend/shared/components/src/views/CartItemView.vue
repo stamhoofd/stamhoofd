@@ -1,8 +1,9 @@
 <template>
     <div class="st-view cart-item-view">
         <STNavigationBar :title="cartItem.product.name">
+            <BackButton v-if="canPop" slot="left" @click="pop" />
             <span slot="left" class="style-tag">{{ cartItem.getUnitPrice(cart) | price }}</span>
-            <button slot="right" class="button icon close gray" @click="pop" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         <main>
             <h1>{{ cartItem.product.name }}</h1>
@@ -73,9 +74,8 @@
 
             <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true" />
             <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
-                Er zijn nog maar {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }} beschikbaar<template v-if="count > 0">
-                    , waarvan er al {{ count }} in jouw winkelmandje zitten
-                </template>
+                <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
+                Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
             </p>
         </main>
 
@@ -95,7 +95,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { BackButton,ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
 import { Cart,CartItem, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
@@ -115,7 +115,8 @@ import OptionMenuBox from './OptionMenuBox.vue';
         OptionMenuBox,
         StepperInput,
         FieldBox,
-        STErrorsDefault
+        STErrorsDefault,
+        BackButton
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -142,13 +143,11 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     addToCart() {
         try {
-            this.cartItem.validate(this.webshop, this.cart)
+            this.saveHandler(this.cartItem, this.oldItem)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
             return
         }
-
-        this.saveHandler(this.cartItem, this.oldItem)
 
         /*if (this.oldItem) {
             CheckoutManager.cart.removeItem(this.oldItem)
@@ -158,7 +157,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
         }
         CheckoutManager.cart.addItem(this.cartItem)
         CheckoutManager.saveCart()*/
-        this.pop()
+        this.dismiss({ force: true })
     }
 
     get image() {
@@ -196,16 +195,28 @@ export default class CartItemView extends Mixins(NavigationMixin){
         }, 0)  - (this.oldItem?.amount ?? 0)
     }
 
+    /**
+     * Return the total reserved amount for the same product in this cart, without the current item included (if editing)
+     */
+    get reservedAmountFromOthers() {
+        return this.cart.items.reduce((prev, item) => {
+            if (item.product.id != this.product.id) {
+                return prev
+            }
+            return prev + item.reservedAmount
+        }, 0)  - (this.oldItem?.reservedAmount ?? 0)
+    }
+
     get maximumRemaining() {
         if (this.product.remainingStock === null) {
             return null
         }
 
-        return this.product.remainingStock  + (this.oldItem?.reservedAmount ?? 0) - this.count
+        return this.product.remainingStock  + (this.oldItem?.reservedAmount ?? 0) - this.count + this.reservedAmountFromOthers
     }
 
     get remainingStock() {
-        return (this.product.remainingStock ?? 0) + (this.oldItem?.reservedAmount ?? 0)
+        return (this.product.remainingStock ?? 0) + (this.oldItem?.reservedAmount ?? 0) + this.reservedAmountFromOthers
     }
 
     formatDateRange(dateRange: ProductDateRange) {

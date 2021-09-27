@@ -1,9 +1,9 @@
+import { PartialWithoutMethods } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Order as OrderStruct } from "@stamhoofd/structures";
-
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
+import { Order as OrderStruct } from "@stamhoofd/structures";
 type Params = { id: string; paymentId: string };
 type Query = undefined;
 type Body = undefined

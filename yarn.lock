@@ -2072,10 +2072,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@^2.2.10":
-  version "2.2.10"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.2.10.tgz#7ee136ae59cf963eff6e7eaa0fe1b7d47b20b6d9"
-  integrity sha512-sm3OLbaL/ckrSTlzQUyENv8Y50zJQSyjkeRniOQpCLvcP7V/dEijtAtLLopLUdC3gkbdSGNpPGGdz6PQn6tneA==
+"@simonbackx/simple-encoding@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.3.0.tgz#b9aa933d1d9da675460f20bd939e138baff1f4ea"
+  integrity sha512-DLquHxRE88dps/LPpsr3P0OJK7Jdulu5VghVrIvmD4nAhKzHhO/naKMbTJcv059WfjyMrgiSDe0g01K3yX7efQ==
 
 "@simonbackx/simple-endpoints@^1.7.3":
   version "1.7.3"
@@ -2092,10 +2092,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.10.0.tgz#f6669e4012a6aec4b1ea8d67a802b880b0cf023c"
   integrity sha512-YVyV/XnSBprBEmGmitUxQmnTVzYSfI1IymxlAh0YjbMoy6i55uX/2RjU6TILbI0gerdolXCNljPHC4xzWYNehQ==
 
-"@simonbackx/vue-app-navigation@^1.15.0":
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.15.0.tgz#195f3a83829dda8e26d175f0d1ecd4e5674b39f8"
-  integrity sha512-bgwEbJZvz2HBSk3AlIKHndzp2Wt1zFIQqxXRS2AAXLKrLc0GxI/+G8X7zFqjmsVFoEP6ikylSHNEozgOT1ERyg==
+"@simonbackx/vue-app-navigation@^1.16.1":
+  version "1.16.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.16.1.tgz#dfc94af56fe65c9fd67a22f94158bd18f7a5ce28"
+  integrity sha512-R/0NrdePa2wN/0JahwTuXehNSoRebMn+awYGcHMfob3qwoGrhBi7FXd1LE/zqXkYVOqc38JhYsQGbXv6RfZuqg==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"

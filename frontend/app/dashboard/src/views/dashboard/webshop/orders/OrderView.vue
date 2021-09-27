@@ -36,16 +36,17 @@
                     </template>
                 </STListItem>
 
-                <STListItem class="right-description">
+                <STListItem class="right-description" :selectable="true" @click="markAs">
                     Status
 
                     <template slot="right">
                         <span v-if="patchedOrder.status == 'Created'" class="style-tag">Nieuw</span>
-                        <span v-if="patchedOrder.payment && patchedOrder.payment.status !== 'Succeeded'" class="style-tag warn">Niet betaald</span>
-                        <span v-if="patchedOrder.status == 'Prepared'" class="style-tag">Verwerkt</span>
-                        <span v-if="patchedOrder.status == 'Collect'" class="style-tag">Ligt klaar</span>
-                        <span v-if="patchedOrder.status == 'Completed'" v-tooltip="'Voltooid'" class="success icon green" />
-                        <span v-if="patchedOrder.status == 'Canceled'" v-tooltip="'Geannuleerd'" class="error icon canceled" />
+                        <span v-else-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
+                        <span v-else-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
+                        <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
+                        <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
+                        <span v-else>Onbekend</span>
+                        <span class="icon arrow-down-small" />
                     </template>
                 </STListItem>
 
@@ -198,16 +199,16 @@
                     </h3>
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
+                    <p v-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount < cartItem.amount" class="warning-box">
+                        De voorraad van {{ cartItem.product.name }} zal verminderd worden met {{ cartItem.amount - cartItem.reservedAmount }} stuk(s)
+                    </p>
+                    <p v-else-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount > cartItem.amount" class="warning-box">
+                        De voorraad van {{ cartItem.product.name }} zal aangevuld worden met {{ cartItem.reservedAmount - cartItem.amount }} stuk(s)
+                    </p>
+
                     <footer>
                         <p class="price">
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
-                        </p>
-
-                        <p v-if="cartItem.reservedAmount < cartItem.amount" class="warning-box">
-                            Als je opslaat zal de voorraad van {{ cartItem.product.name }} verminderd worden met {{ cartItem.amount - cartItem.reservedAmount }} stuk(s)
-                        </p>
-                        <p v-else-if="cartItem.reservedAmount > cartItem.amount" class="warning-box">
-                            Als je opslaat zal de voorraad van {{ cartItem.product.name }} aangevuld worden met {{ cartItem.reservedAmount - cartItem.amount }} stuk(s)
                         </p>
                     </footer>
 
@@ -216,6 +217,13 @@
                     </figure>
                 </STListItem>
             </STList>
+
+            <p>
+                <button class="button text" @click="addProduct">
+                    <span class="icon add" />
+                    <span>Nieuw</span>
+                </button>
+            </p>
 
             <div v-if="hasTickets" class="container">
                 <hr>
@@ -264,7 +272,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, patchContainsChanges } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
 import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, OrderData, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
@@ -273,6 +281,8 @@ import { Component, Mixins,  Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { WebshopManager } from "../WebshopManager";
+import AddItemView from "./AddItemView.vue";
+import OrderStatusContextMenu from "./OrderStatusContextMenu.vue";
 
 @Component({
     components: {
@@ -365,8 +375,25 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.tickets.reduce((c, ticket) => c + (ticket.scannedAt ? 1 : 0), 0)
     }
 
+    markAs(event) {
+        const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {
+            x: event.clientX,
+            y: event.clientY,
+            orders: [this.order],
+            webshopManager: this.webshopManager
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
     created() {
         if (this.hasTickets) {
+            this.recheckTickets()
+        }
+    }
+
+    recheckTickets() {
+        if (this.hasTickets) {
+            this.loadingTickets = true
             this.webshopManager.getTicketsForOrder(this.patchedOrder.id, true).then((tickets) => {
                 this.tickets = tickets
                 this.loadingTickets = false
@@ -374,6 +401,8 @@ export default class OrderView extends Mixins(NavigationMixin){
                 console.error(e)
                 new Toast("Het laden van de tickets die bij deze bestelling horen is mislukt", "error red").show()
                 this.loadingTickets = false
+            }).finally(() => {
+                this.downloadNewTickets()
             })
         }
     }
@@ -423,6 +452,10 @@ export default class OrderView extends Mixins(NavigationMixin){
     onKey(event) {
         if (event.defaultPrevented || event.repeat) {
             return;
+        }
+
+        if (!this.isFocused()) {
+            return
         }
 
         const key = event.key || event.keyCode;
@@ -476,6 +509,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                 if (p) {
                     payment.set(p)
                 }
+                this.downloadNewTickets()
             } catch (e) {
                 Toast.fromError(e).show()
             }
@@ -507,29 +541,71 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }
             }
             this.patchOrder = Order.patch({})
+            this.downloadNewTickets()
         }).catch((e) => {
             this.saving = false
             Toast.fromError(e).show()
         })
     }
 
+    downloadNewTickets() {
+        if (!this.hasTickets) {
+            return
+        }
+        this.webshopManager.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
+            for (const ticket of tickets) {
+                if (ticket.orderId === this.order.id) {
+                    const existing = this.tickets.find(t => t.id === ticket.id)
+                    if (existing) {
+                        existing.set(ticket)
+                    } else {
+                        this.tickets.push(ticket)
+                    }
+                }
+            }
+        }).catch(console.error);
+    }
+
+    async addProduct() {
+        let clone = this.patchedOrder.data.cart.clone()
+        const webshop = await this.webshopManager.loadWebshopIfNeeded()
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(AddItemView, { 
+                cart: clone,
+                webshop: webshop,
+                saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
+                    cartItem.validate(webshop, clone)
+
+                    if (oldItem) {
+                        clone.removeItem(oldItem)
+                    }
+                    clone.addItem(cartItem)
+
+                    if (clone.price != this.patchedOrder.data.cart.price) {
+                        new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
+                    }
+
+                    this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
+                        cart: clone
+                    })})
+                }
+            })
+        }).setDisplayStyle("sheet"))
+    }
+
     async editCartItem(cartItem: CartItem ) {
         let clone = this.patchedOrder.data.cart.clone()
-        console.log("clone", clone)
+        const webshop = await this.webshopManager.loadWebshopIfNeeded()
 
         this.present(new ComponentWithProperties(CartItemView, { 
             cartItem: cartItem.clone(), 
             oldItem: cartItem,
             cart: clone,
-            webshop: await this.webshopManager.loadWebshopIfNeeded(),
+            webshop: webshop,
             saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
-
-
+                cartItem.validate(webshop, clone)
                 if (oldItem) {
                     clone.removeItem(oldItem)
-                    new Toast(cartItem.product.name+" is aangepast", "success green").setHide(1000).show()
-                } else {
-                    new Toast(cartItem.product.name+" is toegevoegd aan de bestelling", "success green").setHide(2000).show()
                 }
                 clone.addItem(cartItem)
 

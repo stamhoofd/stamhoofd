@@ -21,11 +21,12 @@
                         {{ name }}
                         <span v-if="ticket.getIndexText()" class="ticket-index">{{ ticket.getIndexText() }}</span>
                     </h3>
+                    <p v-if="isSingle && order" class="description" v-text="'Bestelling #'+order.number" />
+                    <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
                     <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.name" />
                     <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.address" />
-                    <p v-if="cartItem.product.dateRange" class="description" v-text="formatDateRange(cartItem.product.dateRange)" />
 
                     <p class="description" v-text="formatPrice(price)" />
                 </div>
@@ -96,7 +97,11 @@ export default class TicketBox extends Mixins(NavigationMixin){
     }
 
     get price() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? this.ticket.items.reduce((c, item) => c + (item.price ?? 0), 0) : (this.cartItem?.unitPrice ?? 0)
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? (this.order ? this.order.data.cart.price : this.ticket.items.reduce((c, item) => c + (item.price ?? 0), 0)) : (this.cartItem?.unitPrice ?? 0)
+    }
+
+    get isSingle() {
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
     }
 
     share() {

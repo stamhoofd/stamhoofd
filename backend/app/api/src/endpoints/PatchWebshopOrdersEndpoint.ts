@@ -6,7 +6,7 @@ import { Payment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { getPermissionLevelNumber, Payment as PaymentStruct, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, Payment as PaymentStruct, PaymentStatus, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -87,13 +87,15 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 await order.save()
             }
 
+            const mapped = orders.map(order => order.setRelation(Order.webshop, webshop))
+
             // Update stock if needed: add or remove it from the stock
             // Save best inside the queue to prevent duplicate stock updates
-            for (const order of orders) {
-                await order.setRelation(Order.webshop, webshop).updateStock()
+            for (const order of mapped) {
+                await order.updateStock()
             }
 
-            return orders
+            return mapped
         })
 
         // Load payments
@@ -103,6 +105,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             for (const order of orders) {
                 const payment = payments.find(p => p.id === order.paymentId)
                 order.setOptionalRelation(Order.payment, payment ?? null)
+
+                if (payment && payment.status === PaymentStatus.Succeeded) {
+                    await order.updateTickets()
+                }
             }
         } else {
             for (const order of orders) {
@@ -111,7 +117,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         }
     
         return new Response(
-            (orders as (Order & { payment: Payment | null })[])
+            (orders as (Order & Record<"webshop", Webshop> & { payment: Payment | null })[])
                 .map(order => PrivateOrder.create({
                     ...order, 
                     payment: order.payment ? PrivatePayment.create(order.payment) : null }

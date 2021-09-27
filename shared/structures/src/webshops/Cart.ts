@@ -129,12 +129,9 @@ export class CartItem extends AutoEncoder {
         return this.getUnitPrice(cart) * this.amount
     }
 
-    get description(): string {
+    get descriptionWithoutDate(): string {
         const descriptions: string[] = []
 
-        if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
-            descriptions.push(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()))
-        }
         if (this.product.prices.length > 1) {
             descriptions.push(this.productPrice.name)
         }
@@ -147,6 +144,15 @@ export class CartItem extends AutoEncoder {
                 continue
             }
             descriptions.push(a.field.name+": "+a.answer)
+        }
+        return descriptions.join("\n")
+    }
+
+    get description(): string {
+        const descriptions: string[] = [this.descriptionWithoutDate]
+
+        if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
+            descriptions.unshift(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()))
         }
         return descriptions.join("\n")
     }
@@ -303,6 +309,9 @@ export class Cart extends AutoEncoder {
     items: CartItem[] = []
 
     addItem(item: CartItem) {
+        if (item.amount === 0) {
+            return
+        }
         const c = item.code
         for (const i of this.items) {
             if (i.code === c) {

@@ -66,9 +66,9 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Address, AnyCheckoutMethodPatch, CheckoutMethodPrice,Image, OptionMenu, PrivateWebshop, Product, ProductPrice, ResolutionFit, ResolutionRequest, Version, WebshopDeliveryMethod, WebshopMetaData, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
+import { CheckoutMethodPrice,PrivateWebshop, Version, WebshopDeliveryMethod, WebshopMetaData, WebshopTimeSlots } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import CheckoutMethodPriceBox from "./CheckoutMethodPriceBox.vue"

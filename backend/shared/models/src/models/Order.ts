@@ -144,16 +144,8 @@ export class Order extends Model {
         }
     }
 
-    /**
-     * Only call this once! Make sure you use the queues correctly
-     */
-    async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
-        console.log("Marking order "+this.id+" as paid")
-        const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
-        if (!webshop) {
-            console.error("Missing webshop for order "+this.id)
-            return
-        }
+    async updateTickets(this: Order & { webshop: Webshop }): Promise<{ tickets: Ticket[], didCreateTickets: Boolean }> {
+        const webshop = this.webshop
 
         // Create tickets if needed (we might already be valid in case of transfer payments)
         let tickets: Ticket[] = []
@@ -204,10 +196,36 @@ export class Order extends Model {
 
         if (tickets.length > 0) {
             // First check if we already have tickets
-            const existingTickets = !this.id ? [] : await Ticket.where({ orderId: this.id }, { limit: 1, select: "id" })
+            const existingTickets = !this.id ? [] : await Ticket.where({ orderId: this.id })
             if (existingTickets.length > 0) {
                 // Skip
-                tickets = existingTickets
+                // Check difference: do we need to create new tickets or not?
+                const mergedTickets: Ticket[] = []
+                for (const ticket of tickets) {
+                    // Check if this combination already exists or not. Else create it. Update existing total if needed
+                    const existing = existingTickets.find(existing => existing.itemId === ticket.itemId && ticket.index === existing.index)
+                    if (existing) {
+                        existing.total = ticket.total
+                        mergedTickets.push(existing)
+                    } else {
+                        didCreateTickets = true
+                        mergedTickets.push(ticket)
+                    }
+                }
+
+                tickets = mergedTickets
+
+                // Wait to save them all
+                console.log("Saving merged tickets for order "+this.id)
+                await Promise.all(tickets.map((ticket) => ticket.save()))
+
+                // Delete others
+                for (const existing of existingTickets) {
+                    if (!mergedTickets.find(m => m.id === existing.id)) {
+                        console.log("Deleting ticket for order "+this.id+", ticket id = "+existing.id)
+                        await existing.delete()
+                    }
+                }
             } else {
                 // Create the tickets
                 didCreateTickets = true
@@ -225,33 +243,51 @@ export class Order extends Model {
             }
         }
 
-        // Needs to happen before validation, because we can include the tickets in the validation that way
+        return { tickets, didCreateTickets }
+    }
 
+    /**
+     * Only call this once! Make sure you use the queues correctly
+     */
+    async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+        console.log("Marking order "+this.id+" as paid")
+        const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
+        if (!webshop) {
+            console.error("Missing webshop for order "+this.id)
+            return
+        }
+
+        const { tickets, didCreateTickets } = await this.setRelation(Order.webshop, webshop).updateTickets()
+
+        // Needs to happen before validation, because we can include the tickets in the validation that way
         if (this.validAt === null) {
             await this.setRelation(Order.webshop, webshop).markValid(payment, tickets)
         } else {
             if (didCreateTickets && this.data.customer.email.length > 0) {
-                const organization = webshop.organization
                 
-                const { from, replyTo } = organization.getDefaultEmail()
-            
-                const customer = this.data.customer
-
-                const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
-
-                // Also send a copy
-                Email.send({
-                    from,
-                    replyTo,
-                    to: toStr,
-                    subject: "["+webshop.meta.name+"] Jouw tickets zijn beschikbaar (bestelling "+this.number+")",
-                    text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu downloaden via de link hieronder:"
-                    + "\n"
-                    + this.setRelation(Order.webshop, webshop).getUrl()
-                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
-                })
             }
         }
+    }
+
+    async sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
+        const organization = this.webshop.organization
+        const { from, replyTo } = organization.getDefaultEmail()
+    
+        const customer = this.data.customer
+
+        const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
+
+        // Also send a copy
+        Email.send({
+            from,
+            replyTo,
+            to: toStr,
+            subject: "["+this.webshop.meta.name+"] Jouw tickets zijn beschikbaar (bestelling "+this.number+")",
+            text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu downloaden via de link hieronder:"
+            + "\n"
+            + this.getUrl()
+            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
+        })
     }
 
     /**
@@ -292,7 +328,7 @@ export class Order extends Model {
                         "Je kan jouw tickets downloaden en jouw bestelling nakijken via deze link::"
                     + "\n"
                     + this.setRelation(Order.webshop, webshop).getUrl()
-                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
                 })
             } else {
                 if (this.webshop.meta.ticketType === WebshopTicketType.None) {

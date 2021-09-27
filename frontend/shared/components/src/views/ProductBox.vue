@@ -45,12 +45,9 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
-import { CartItem, Product, ProductDateRange } from '@stamhoofd/structures';
+import { Cart, CartItem, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import { CheckoutManager } from '../../classes/CheckoutManager';
-import { WebshopManager } from "../../classes/WebshopManager";
 
 @Component({
     components: {
@@ -68,18 +65,35 @@ import { WebshopManager } from "../../classes/WebshopManager";
 export default class ProductBox extends Mixins(NavigationMixin){
     @Prop({ required: true })
     product: Product
-    CheckoutManager = CheckoutManager
+    
+    @Prop({ required: true })
+    webshop: Webshop
+
+    @Prop({ required: true })
+    cart: Cart
+
+    @Prop({ required: true })
+    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 
     get price() {
         return this.product.prices[0].price
     }
 
     get count() {
-        return CheckoutManager.cart.items.reduce((prev, item) => {
+        return this.cart.items.reduce((prev, item) => {
             if (item.product.id != this.product.id) {
                 return prev
             }
             return prev + item.amount
+        }, 0)
+    }
+
+    get pendingReservationCount() {
+        return this.cart.items.reduce((prev, item) => {
+            if (item.product.id != this.product.id) {
+                return prev
+            }
+            return prev + item.amount - item.reservedAmount
         }, 0)
     }
     
@@ -98,7 +112,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
             return;
         }
 
-        if (this.product.remainingStock != null && this.product.remainingStock <= this.count) {
+        if (this.product.remainingStock != null && this.product.remainingStock <= this.pendingReservationCount) {
             new Toast("Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel.", "error red").show()
             return;
         }
@@ -108,16 +122,21 @@ export default class ProductBox extends Mixins(NavigationMixin){
             productPrice: this.product.prices[0]
         })
 
-        this.present(new ComponentWithProperties(CartItemView, { 
-            cartItem,
-            cart: CheckoutManager.cart,
-            webshop: WebshopManager.webshop,
-            saveHandler: (cartItem: CartItem) => {
-                new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
-                CheckoutManager.cart.addItem(cartItem)
-                CheckoutManager.saveCart()
-            }
-        }).setDisplayStyle("sheet"))
+        if (this.canDismiss) {
+            this.show(new ComponentWithProperties(CartItemView, { 
+                cartItem,
+                cart: this.cart,
+                webshop: this.webshop,
+                saveHandler: this.saveHandler,
+            }))
+        } else {
+            this.present(new ComponentWithProperties(CartItemView, { 
+                cartItem,
+                cart: this.cart,
+                webshop: this.webshop,
+                saveHandler: this.saveHandler,
+            }).setDisplayStyle("sheet"))
+        }
     }
 
     get remainingStock() {
@@ -146,6 +165,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
     transition: background-color 0.2s 0.1s;
 
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    padding-right: var(--st-horizontal-padding, 15px);
 
     .maskingSvg {
         display: none;
@@ -171,17 +191,6 @@ export default class ProductBox extends Mixins(NavigationMixin){
         }
     }
 
-    @media (min-width: 801px) {
-        background: $color-white;
-        border-radius: $border-radius;
-        margin: 0;
-        @include style-side-view-shadow();
-
-        > .content > hr {
-            display: none;
-        }
-    }
-
     &:active {
         transition: none;
         background: $color-primary-background;
@@ -198,10 +207,6 @@ export default class ProductBox extends Mixins(NavigationMixin){
         transform: translateX(-4px);
         transition: opacity 0.2s, transform 0.2s;
         margin-right: var(--st-horizontal-padding, 15px);
-
-        @media (min-width: 801px) {
-            margin-right: 0;
-        }
     }
 
     &.selected {
@@ -221,11 +226,6 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
         > div {
             padding: 15px 0;
-            padding-right: var(--st-horizontal-padding, 15px);
-
-            @media (min-width: 801px) {
-                padding: 15px;
-            }
 
             flex-grow: 1;
             min-width: 0;
@@ -288,9 +288,68 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
     &.ticket {
         position: relative;
-        
-        @media (min-width: 801px) {
+    }
 
+
+    &.selected {
+        > .content > div {
+            > h3 {
+                transform: translateX(30px);
+
+                >.counter {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    > figure {
+        flex-shrink: 0;
+        padding: 15px 0 15px 15px;
+
+        img {
+            width: 70px;
+            height: 70px;
+            border-radius: $border-radius;
+
+            @media (min-width: 340px) {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    }
+}
+
+.enable-grid .product-box {
+    @media (min-width: 801px) {
+        background: $color-white;
+        border-radius: $border-radius;
+        margin: 0;
+        @include style-side-view-shadow();
+        padding-right: 0;
+
+        > .content > hr {
+            display: none;
+        }
+
+        > .left {
+            margin-right: 0;
+        }
+
+        > .content > div {
+            padding: 15px;
+        }
+
+        > figure {
+            padding: 15px 15px 0 15px;
+
+            img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        &.ticket {
             .maskingSvg {
                 display: block;
                 z-index: -1;
@@ -330,39 +389,6 @@ export default class ProductBox extends Mixins(NavigationMixin){
             }
         }
     }
-
-
-    &.selected {
-        > .content > div {
-            > h3 {
-                transform: translateX(30px);
-
-                >.counter {
-                    opacity: 1;
-                }
-            }
-        }
-    }
-
-    > figure {
-        flex-shrink: 0;
-        padding: 15px 15px 15px 0;
-
-        img {
-            width: 70px;
-            height: 70px;
-            border-radius: $border-radius;
-
-            @media (min-width: 340px) {
-                width: 80px;
-                height: 80px;
-            }
-
-            @media (min-width: 801px) {
-                width: 100px;
-                height: 100px;
-            }
-        }
-    }
 }
+
 </style>
