@@ -483,9 +483,10 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
 
         const data: AutoEncoderPatchType<Payment>[] = []
-        if (payment.status != PaymentStatus.Succeeded) {
+        if (payment.status != PaymentStatus.Succeeded || this.order.data.cart.price != payment.price) {
             data.push(Payment.patch({
                 id: payment.id,
+                price: this.order.data.cart.price,
                 status: PaymentStatus.Succeeded
             }))
         }
