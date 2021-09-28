@@ -265,8 +265,33 @@ export class Order extends Model {
         } else {
             if (didCreateTickets && this.data.customer.email.length > 0) {
                 this.setRelation(Order.webshop, webshop).sendTickets()
+            } else {
+                if (payment && payment.method === PaymentMethod.Transfer) {
+                    this.setRelation(Order.webshop, webshop).sendPaidMail()
+                }
             }
         }
+    }
+
+    sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {        
+        const organization = this.webshop.organization
+        const { from, replyTo } = organization.getDefaultEmail()
+    
+        const customer = this.data.customer
+
+        const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
+
+        // Also send a copy
+        Email.send({
+            from,
+            replyTo,
+            to: toStr,
+            subject: "["+this.webshop.meta.name+"] Betaling ontvangen (bestelling "+this.number+")",
+            text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen (via overschrijving). Je kan jouw bestelling nakijken via de volgende link:"
+            + "\n"
+            + this.getUrl()
+            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+        })
     }
 
     sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
