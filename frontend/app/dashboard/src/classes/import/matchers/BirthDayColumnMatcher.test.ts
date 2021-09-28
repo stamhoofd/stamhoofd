@@ -53,7 +53,7 @@ describe("BirthDayColumnMatcher", () => {
             w: "don't use me",
         };
 
-        expect(Formatter.date(matcher.dateFromCell(numberCell))).toEqual(Formatter.date(date))
+        expect(Formatter.date(matcher.dateFromCell(numberCell)!)).toEqual(Formatter.date(date))
 
         // As string
         const stringCell: XLSX.CellObject = {

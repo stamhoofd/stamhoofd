@@ -13,6 +13,7 @@ import { PaidColumnMatcher } from "./PaidColumnMatcher";
 import { PaidPriceColumnMatcher } from "./PaidPriceColumnMatcher";
 import { PaymentPriceColumnMatcher } from "./PaymentPriceColumnMatcher";
 import { PhoneColumnMatcher } from "./PhoneColumnMatcher";
+import { RegisterDateColumnMatcher } from "./RegisterDateColumnMatcher";
 import { StreetColumnMatcher } from "./StreetColumnMatcher";
 import { StreetNumberColumnMatcher } from "./StreetNumberColumnMatcher";
 import { StreetWithNumberColumnMatcher } from "./StreetWithNumberColumnMatcher";
@@ -35,6 +36,7 @@ export const memberMatchers = [
     new CityColumnMatcher(MatcherCategory.Member),
     new ZipColumnMatcher(MatcherCategory.Member),
     new CityWithZipColumnMatcher(MatcherCategory.Member),
+    new RegisterDateColumnMatcher(),
 ]
 
 export const parentMatchers1 = [
