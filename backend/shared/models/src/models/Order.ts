@@ -263,11 +263,13 @@ export class Order extends Model {
         if (this.validAt === null) {
             await this.setRelation(Order.webshop, webshop).markValid(payment, tickets)
         } else {
-            if (didCreateTickets && this.data.customer.email.length > 0) {
-                this.setRelation(Order.webshop, webshop).sendTickets()
-            } else {
-                if (payment && payment.method === PaymentMethod.Transfer) {
-                    this.setRelation(Order.webshop, webshop).sendPaidMail()
+            if (this.data.customer.email.length > 0){
+                if (didCreateTickets) {
+                    this.setRelation(Order.webshop, webshop).sendTickets()
+                } else {
+                    if (payment && payment.method === PaymentMethod.Transfer) {
+                        this.setRelation(Order.webshop, webshop).sendPaidMail()
+                    }
                 }
             }
         }

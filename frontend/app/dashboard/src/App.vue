@@ -72,7 +72,11 @@ export default class App extends Vue {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
                 await this.$nextTick()
             }
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
+            (this.$refs.modalStack as any).present({
+                components: [
+                    new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay")
+                ]
+            })
         })
 
         const parts = UrlHelper.shared.getParts();
@@ -81,13 +85,17 @@ export default class App extends Vue {
         if (parts.length == 2 && parts[0] == 'reset-password') {
             UrlHelper.shared.clear()
             const token = queryString.get('token');
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    const session = new Session(parts[1]);
-                    await session.loadFromStorage()
-                    return new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token })
-                }
-            }).setDisplayStyle("popup").setAnimated(false));
+            (this.$refs.modalStack as any).present({
+                components: [
+                    new ComponentWithProperties(PromiseView, {
+                        promise: async () => {
+                            const session = new Session(parts[1]);
+                            await session.loadFromStorage()
+                            return new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token })
+                        }
+                    }).setDisplayStyle("popup").setAnimated(false)
+                ]
+            });
         }
 
         if (parts.length >= 1 && parts[0] == 'login' && queryString.get("refresh_token") && queryString.get("organization_id") && queryString.get("auth_encryption_key")) {
@@ -141,44 +149,48 @@ export default class App extends Vue {
             const secret = queryString.get('secret');
 
             if (key && secret) {
-                (this.$refs.modalStack as any).present(new ComponentWithProperties(NavigationController, { 
-                    root: new ComponentWithProperties(PromiseView, {
-                        promise: async () => {
-                            try {
-                                const response = await NetworkManager.server.request({
-                                    method: "GET",
-                                    path: "/invite/"+key,
-                                    decoder: Invite as Decoder<Invite>
-                                })
+                (this.$refs.modalStack as any).present({
+                    components: [
+                        new ComponentWithProperties(NavigationController, { 
+                            root: new ComponentWithProperties(PromiseView, {
+                                promise: async () => {
+                                    try {
+                                        const response = await NetworkManager.server.request({
+                                            method: "GET",
+                                            path: "/invite/"+key,
+                                            decoder: Invite as Decoder<Invite>
+                                        })
 
-                                if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
-                                    // Invalid or almost invalid
-                                    const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                                    return new ComponentWithProperties(InvalidInviteView, {
-                                        invite: response.data
-                                    })
+                                        if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
+                                            // Invalid or almost invalid
+                                            const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                                            return new ComponentWithProperties(InvalidInviteView, {
+                                                invite: response.data
+                                            })
+                                        }
+                                        let session = await SessionManager.getSessionForOrganization(response.data.organization.id)
+                                        if (!session) {
+                                            session = new Session(response.data.organization.id)
+                                            await session.loadFromStorage()
+                                        }
+                                        const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
+                                        return new ComponentWithProperties(AcceptInviteView, {
+                                            session,
+                                            invite: response.data,
+                                            secret
+                                        })
+                                    } catch (e) {
+                                        Logger.error(e)
+                                        // Probably invalid invite
+                                        const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
+                                        return new ComponentWithProperties(InvalidInviteView, {})
+                                    }
+                                    
                                 }
-                                let session = await SessionManager.getSessionForOrganization(response.data.organization.id)
-                                if (!session) {
-                                    session = new Session(response.data.organization.id)
-                                    await session.loadFromStorage()
-                                }
-                                const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
-                                return new ComponentWithProperties(AcceptInviteView, {
-                                    session,
-                                    invite: response.data,
-                                    secret
-                                })
-                            } catch (e) {
-                                Logger.error(e)
-                                // Probably invalid invite
-                                const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                                return new ComponentWithProperties(InvalidInviteView, {})
-                            }
-                            
-                        }
-                    })
-                }).setDisplayStyle("popup").setAnimated(false));
+                            })
+                        }).setDisplayStyle("popup").setAnimated(false)
+                    ]
+                });
             }
         }
     }
@@ -324,7 +336,11 @@ export default class App extends Vue {
             // Show warnign instead
             new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
                 (this.$refs.modalStack as any).present(
-                    AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './views/dashboard/NoKeyView.vue')).setDisplayStyle("popup")
+                    {
+                        components: [
+                            AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './views/dashboard/NoKeyView.vue')).setDisplayStyle("popup")
+                        ]
+                    }
                 )
             })).show()
         }

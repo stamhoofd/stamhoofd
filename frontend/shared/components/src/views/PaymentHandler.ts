@@ -60,12 +60,11 @@ export class PaymentHandler {
         component: NavigationMixin; 
         type: "order" | "registration";
     }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
-        let finishedHandler: (() => void) | null = null
         const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings, additionalReference } = settings;
 
         if (payment.method == PaymentMethod.Transfer) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            component.navigationController!.push(new ComponentWithProperties(TransferPaymentView, {
+            component.show(new ComponentWithProperties(TransferPaymentView, {
                 created: true,
                 type: settings.type,
                 organization,
@@ -73,15 +72,10 @@ export class PaymentHandler {
                 settings: transferSettings,
                 additionalReference,
                 finishedHandler: (payment: Payment) => {
-                    if (finishedHandler) {
-                        // hide payconiq button view if needed
-                        finishedHandler()
-                    }
-
                     // Always go to success
                     successHandler(payment)
                 }
-            }), true)
+            }))
         } else if (payment.method == PaymentMethod.Payconiq) {
             if (this.getOS() == "android" || this.getOS() == "iOS") {
                 const url = paymentUrl+"?returnUrl="+encodeURIComponent(returnUrl ? returnUrl : "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
@@ -92,10 +86,6 @@ export class PaymentHandler {
                     server,
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
-                        if (finishedHandler) {
-                            // hide payconiq button view if needed
-                            finishedHandler()
-                        }
                         if (payment && payment.status == PaymentStatus.Succeeded) {
                             successHandler(payment)
                         } else {
@@ -114,10 +104,6 @@ export class PaymentHandler {
                     server,
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
-                        if (finishedHandler) {
-                            // hide payconiq button view if needed
-                            finishedHandler()
-                        }
                         if (payment && payment.status == PaymentStatus.Succeeded) {
                             successHandler(payment)
                         } else {

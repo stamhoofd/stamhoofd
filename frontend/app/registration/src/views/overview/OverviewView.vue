@@ -216,9 +216,17 @@ export default class OverviewView extends Mixins(NavigationMixin){
                                         decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
                                     })
                                     const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
-                                    this.navigationController!.push(new ComponentWithProperties(RegistrationSuccessView, {
-                                        registrations
-                                    }), true, 1)
+
+                                    this.show({
+                                        components: [
+                                            new ComponentWithProperties(RegistrationSuccessView, {
+                                                registrations
+                                            })
+                                        ], 
+                                        replace: 1, 
+                                        force: true
+                                    })
+
                                 } else {
                                     HistoryManager.setUrl("/")
                                     this.dismiss({ force: true })

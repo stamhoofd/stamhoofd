@@ -124,7 +124,12 @@ export default class MemberView extends Mixins(NavigationMixin) {
             cycleOffset: this.cycleOffset,
             waitingList: this.waitingList
         });
-        this.navigationController?.push(component, true, 1, true);
+
+        this.show({
+            components: [component],
+            replace: 1,
+            reverse: true
+        })
     }
 
     goNext() {
@@ -142,7 +147,11 @@ export default class MemberView extends Mixins(NavigationMixin) {
             cycleOffset: this.cycleOffset,
             waitingList: this.waitingList
         });
-        this.navigationController?.push(component, true, 1, false);
+
+        this.show({
+            components: [component],
+            replace: 1,
+        })
     }
 
     activated() {

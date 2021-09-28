@@ -101,7 +101,14 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     goToOrder(id: string) {
-        this.navigationController!.push(new ComponentWithProperties(OrderView, { orderId: id, success: true }), true, this.navigationController!.components.length - 1)
+        console.log("Go to order ", id)
+         this.navigationController!.push({
+            components: [
+                new ComponentWithProperties(OrderView, { orderId: id, success: true })
+            ],
+            replace: this.navigationController!.components.length - 1,
+            force: true
+        }).catch(console.error)
     }
    
     async goNext() {

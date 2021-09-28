@@ -468,7 +468,12 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 // Reload organization
                 SessionManager.currentSession?.fetchOrganization().catch(e => console.error)
                 new CenteredMessage("Gelukt", "Het pakket wordt meteen geactiveerd").addCloseButton().show()
-                this.navigationController!.push(new ComponentWithProperties(PackageSettingsView), true, this.navigationController!.components.length, true)
+                this.show({
+                    components: [new ComponentWithProperties(PackageSettingsView)], 
+                    replace: this.navigationController?.components.length, 
+                    reverse: true,
+                    force: true
+                })
             }
         } catch (e) {
             this.errorBox = new ErrorBox(e)

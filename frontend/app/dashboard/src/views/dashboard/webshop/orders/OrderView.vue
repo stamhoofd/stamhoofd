@@ -224,6 +224,9 @@
                         <p class="price">
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
                         </p>
+                        <div @click.stop>
+                            <button class="button icon trash gray" @click="deleteItem(cartItem)" />
+                        </div>
                     </footer>
 
                     <figure v-if="imageSrc(cartItem)" slot="right">
@@ -422,7 +425,12 @@ export default class OrderView extends Mixins(NavigationMixin){
             getNextOrder: this.getNextOrder,
             getPreviousOrder: this.getPreviousOrder,
         });
-        this.navigationController?.push(component, true, 1, true);
+        
+        this.show({
+            components: [component],
+            replace: 1,
+            reverse: true
+        })
     }
 
     goNext() {
@@ -436,7 +444,10 @@ export default class OrderView extends Mixins(NavigationMixin){
             getNextOrder: this.getNextOrder,
             getPreviousOrder: this.getPreviousOrder,
         });
-        this.navigationController?.push(component, true, 1, false);
+        this.show({
+            components: [component],
+            replace: 1,
+        })
     }
 
     getName(paymentMethod: PaymentMethod): string {
@@ -633,6 +644,22 @@ export default class OrderView extends Mixins(NavigationMixin){
                 })})
             }
         }).setDisplayStyle("sheet"))
+    }
+
+    async deleteItem(cartItem: CartItem ) {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je dit wilt verwijderen?", "Ja, verwijderen", "Je kan de bestelling nog nakijken voor je het definitief verwijdert.")) {
+            return
+        }
+        let clone = this.patchedOrder.data.cart.clone()
+        clone.removeItem(cartItem)
+
+        if (clone.price != this.patchedOrder.data.cart.price) {
+            new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
+        }
+
+        this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
+            cart: clone
+        })})
     }
 
     async markNotPaid(payment: Payment) {
