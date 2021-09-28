@@ -56,13 +56,13 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
             })
         }
 
-        await QueueHandler.schedule("webshop-stock/"+webshop.id, async () => {
-            if (order.shouldIncludeStock()) {
+        if (order.shouldIncludeStock()) {
+            await QueueHandler.schedule("webshop-stock/"+webshop.id, async () => {
                 // Remove from stock
                 order.status = OrderStatus.Canceled
                 await order.setRelation(Order.webshop, webshop).updateStock()
-            }
-        })
+            })
+        }
 
         await order.delete()      
         return new Response(undefined);
