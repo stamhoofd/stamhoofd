@@ -10,11 +10,11 @@
         <ContextMenuItem @click="exportToExcel">
             Exporteer naar Excel
         </ContextMenuItem>
-        <ContextMenuLine />
-        <ContextMenuItem @click="markAs">
+        <ContextMenuLine v-if="hasWrite" />
+        <ContextMenuItem v-if="hasWrite" @click="markAs">
             Markeer als...
         </ContextMenuItem>
-        <ContextMenuItem @click="deleteOrder">
+        <ContextMenuItem v-if="hasWrite" @click="deleteOrder">
             <span slot="right" class="icon trash" />
             Verwijderen
         </ContextMenuItem>
@@ -26,7 +26,7 @@ import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, ContextMenuLine, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { OrderStatus, PrivateOrder } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, OrderStatus, PermissionLevel, PrivateOrder } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import MailView from "../../mail/MailView.vue";
@@ -61,6 +61,14 @@ export default class OrderContextMenu extends Mixins(NavigationMixin) {
 
     @Prop()
     orders!: PrivateOrder[];
+
+    get hasWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
 
     markAs(event) {
         const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {

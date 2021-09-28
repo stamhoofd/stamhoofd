@@ -126,7 +126,7 @@
                 </template>
             </template>
             <template #right>
-                <button class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
+                <button v-if="hasWrite" class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
                     <span class="dropdown-text">Markeren als...</span>
                 </button>
                 <LoadingButton :loading="actionLoading">
@@ -149,7 +149,8 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { OrderStatus, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
+import { SessionManager } from "@stamhoofd/networking";
+import { getPermissionLevelNumber, OrderStatus, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -270,6 +271,14 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 }
             }, 1000*30)
         }*/
+    }
+
+    get hasWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
     }
 
     deactivated() {

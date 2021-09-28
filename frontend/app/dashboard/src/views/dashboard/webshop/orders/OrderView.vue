@@ -36,7 +36,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem class="right-description" :selectable="true" @click="markAs">
+                <STListItem class="right-description" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     Status
 
                     <template slot="right">
@@ -46,7 +46,7 @@
                         <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
                         <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
                         <span v-else>Onbekend</span>
-                        <span class="icon arrow-down-small" />
+                        <span v-if="hasWrite" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
 
@@ -177,7 +177,7 @@
                 </STListItem>
             </STList>
 
-            <LoadingButton v-if="hasWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" :loading="loadingPayment">
+            <LoadingButton v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" :loading="loadingPayment">
                 <p>
                     <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" class="button text" @click="markPaid(patchedOrder.payment)">
                         <span class="icon success" />
@@ -352,13 +352,21 @@ export default class OrderView extends Mixins(NavigationMixin){
         return !!this.getPreviousOrder(this.order);
     }
 
-    get hasWrite() {
+    get hasPaymentsWrite() {
         const p = SessionManager.currentSession?.user?.permissions
         if (!p) {
             return false
         }
         if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? []) || p.hasFullAccess()) {
             return true
+        }
+        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
+
+    get hasWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
         }
         return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
     }
