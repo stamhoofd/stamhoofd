@@ -222,7 +222,7 @@ export class TicketBuilder {
             }
         }
 
-        const price = this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? (this.order ? this.order.data.cart.price : ticket.items.reduce((c, item) => c + (item.price ?? 0), 0)) : (ticket.items[0]?.unitPrice ?? 0)
+        const price = this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? (this.order ? this.order.data.totalPrice : Math.max(0, ticket.items.reduce((c, item) => c + (item.price ?? 0), 0))) : (ticket.items[0]?.unitPrice ?? 0)
         if (!dryRun) {
             this.document.text(Formatter.price(price).replace(/ /g, " ").replace(/,00/g, ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
         }
