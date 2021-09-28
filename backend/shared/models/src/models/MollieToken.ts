@@ -320,9 +320,9 @@ export class MollieToken extends Model {
                     vatRegulation: "shifted"
                 },
                 profile: {
-                    name: organization.name+" inschrijvingsformulier",
-                    url: "https://"+organization.getHost(),
-                    description: "Betalen van inschrijvingsgelden voor onze vereniging via Stamhoofd (partner).",
+                    name: organization.name+" - Stamhoofd",
+                    //url: "https://"+organization.getHost(),
+                    description: "Betalen van inschrijvingsgelden of webshops voor een vereniging via Stamhoofd (partner).",
                     categoryCode: 8398
                 }
             })

@@ -115,7 +115,12 @@ export default class MembersPriceSetupView extends Mixins(NavigationMixin) {
             await this.checkout(STPackageBundle.TrialMembers)
             this.organizationPatch = OrganizationPatch.create({ id: OrganizationManager.organization.id })
             new Toast('Je kan nu de ledenadministratie uittesten', "success green").show()
-            this.navigationController!.push(new ComponentWithProperties(ActivatedView), true, this.navigationController?.components.length)
+
+            this.show({
+                components: [new ComponentWithProperties(ActivatedView)],
+                replace: this.navigationController?.components.length,
+                force: true
+            })
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

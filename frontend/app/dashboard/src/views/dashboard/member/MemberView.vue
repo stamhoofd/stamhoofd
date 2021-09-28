@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, Popup, Sheet } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationTitle } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
@@ -124,7 +124,12 @@ export default class MemberView extends Mixins(NavigationMixin) {
             cycleOffset: this.cycleOffset,
             waitingList: this.waitingList
         });
-        this.navigationController?.push(component, true, 1, true);
+
+        this.show({
+            components: [component],
+            replace: 1,
+            reverse: true
+        })
     }
 
     goNext() {
@@ -142,7 +147,11 @@ export default class MemberView extends Mixins(NavigationMixin) {
             cycleOffset: this.cycleOffset,
             waitingList: this.waitingList
         });
-        this.navigationController?.push(component, true, 1, false);
+
+        this.show({
+            components: [component],
+            replace: 1,
+        })
     }
 
     activated() {
@@ -158,6 +167,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
     onKey(event) {
         if (event.defaultPrevented || event.repeat) {
             return;
+        }
+
+        if (!this.isFocused()) {
+            return
         }
 
         const key = event.key || event.keyCode;

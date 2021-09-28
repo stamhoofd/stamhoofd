@@ -64,7 +64,12 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
     }
 
     retry() {
-        this.navigationController!.push(new ComponentWithProperties(PackageSettingsView), true, 1, true)
+        this.show({
+            components: [new ComponentWithProperties(PackageSettingsView)],
+            replace: 1,
+            reverse: true,
+            force: true
+        })
     }
 
     onSuccess() {

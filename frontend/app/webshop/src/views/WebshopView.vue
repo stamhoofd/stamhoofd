@@ -24,14 +24,14 @@
                         <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
                     </figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
-                    <p v-if="webshop.meta.description" v-text="webshop.meta.description" class="description"/>
+                    <p v-if="webshop.meta.description" class="description" v-text="webshop.meta.description" />
 
                     <p v-if="isTrial" class="error-box">
                         Dit is een demo webshop
                     </p>
                 </main>
             </section>
-            <section class="gray-shadow view">
+            <section class="gray-shadow view enable-grid">
                 <main>
                     <p v-if="webshop.categories.length == 0 && webshop.products.length == 0" class="warning-box">
                         Er zijn nog geen artikels toegevoegd aan deze webshop, kom later eens terug.
@@ -45,8 +45,8 @@
                     </p>
 
                     <template v-if="!closed">
-                        <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :is-last="index === webshop.categories.length - 1" />
-                        <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" />
+                        <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="onAddItem" :is-last="index === webshop.categories.length - 1" />
+                        <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
                     </template>
                 </main>
                 <div class="legal-footer">
@@ -84,9 +84,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,GlobalEventBus,LoadingView, Logo,OrganizationLogo,PaymentPendingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { CategoryBox,CenteredMessage, Checkbox,GlobalEventBus,LoadingView, Logo,OrganizationLogo,PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
 import { UrlHelper } from "@stamhoofd/networking";
-import { Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -96,8 +96,6 @@ import CartView from './checkout/CartView.vue';
 import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
 import TicketView from "./orders/TicketView.vue";
-import CategoryBox from "./products/CategoryBox.vue"
-import ProductGrid from "./products/ProductGrid.vue"
 
 @Component({
     components: {
@@ -190,6 +188,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return null
     }
 
+    get cart() {
+        return CheckoutManager.cart
+    }
+
     get cartCount() {
         return CheckoutManager.cart.count
     }
@@ -232,6 +234,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
         }
         return false
     }
+    
+    onAddItem(cartItem: CartItem) {
+        cartItem.validate(this.webshop, CheckoutManager.cart)
+        new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
+        CheckoutManager.cart.addItem(cartItem)
+        CheckoutManager.saveCart()
+    }
 
     mounted() {
         GlobalEventBus.addListener(this, "checkout", async (cartComponent: CartView) => {
@@ -264,21 +273,36 @@ export default class WebshopView extends Mixins(NavigationMixin){
             const secret = path[1];
             this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
         } else if (path.length == 1 && path[0] == 'payment') {
-            this.navigationController!.push(new ComponentWithProperties(PaymentPendingView, { 
-                server: WebshopManager.server, 
-                paymentId: params.get("id"),
-                finishedHandler: (payment: Payment | null) => {
-                    if (payment && payment.status == PaymentStatus.Succeeded) {
-                        this.navigationController!.push(new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true }), false, 1);
-                    } else {
-                        this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
-                        new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
-                        this.resumeStep(CheckoutStepType.Payment).catch(e => {
-                            console.error(e)
-                        })
-                    }
-                } 
-            }), false);
+            const me = this
+            this.show({
+                components: [
+                    new ComponentWithProperties(PaymentPendingView, { 
+                        server: WebshopManager.server, 
+                        paymentId: params.get("id"),
+                        finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
+                            if (payment && payment.status == PaymentStatus.Succeeded) {
+                                // Can't use this.show, becaus this is deactivated -> no parents
+                                this.navigationController!.push({
+                                    components: [
+                                        new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true })
+                                    ],
+                                    animated: false,
+                                    replace: 1,
+                                    force: true
+                                }).catch(console.error)
+                            } else {
+                                this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                                new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                                me.resumeStep(CheckoutStepType.Payment).catch(e => {
+                                    console.error(e)
+                                })
+                            }
+                        } 
+                    })
+                ],
+                animated: false,
+                force: true
+            })
         } else if (path.length == 2 && path[0] == 'checkout') {
             const stepName = Formatter.capitalizeFirstLetter(path[1])
             if (Object.values(CheckoutStepType).includes(stepName as any)) {
@@ -317,7 +341,12 @@ export default class WebshopView extends Mixins(NavigationMixin){
             return;
         }
         const replaceWith = comp.map(component => new ComponentWithProperties(component, {}))
-        this.navigationController!.push(replaceWith[replaceWith.length - 1], animated, 0, false, replaceWith.slice(0, replaceWith.length - 1))
+
+        // Can't use show here -> might be deactivated
+        await this.navigationController!.push({
+            components: replaceWith,
+            animated,
+        })
     }
 
     deactivated() {

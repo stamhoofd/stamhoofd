@@ -167,7 +167,7 @@
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductLocation, ProductDateRange, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
+import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
@@ -176,8 +176,8 @@ import EditProductPriceView from './EditProductPriceView.vue';
 import OptionMenuSection from "./OptionMenuSection.vue"
 import ProductPriceBox from "./ProductPriceBox.vue"
 import ProductPriceRow from "./ProductPriceRow.vue"
-import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
 import ProductSelectDateRangeInput from "./ProductSelectDateRangeInput.vue"
+import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
 
 @Component({
     components: {

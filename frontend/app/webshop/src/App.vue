@@ -74,7 +74,11 @@ export default class App extends Vue {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early
                 await this.$nextTick()
             }
-            (this.$refs.modalStack as any).present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
+            (this.$refs.modalStack as any).present(
+                {
+                    components: [new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay")]
+                }
+            )
         })
     }
 		

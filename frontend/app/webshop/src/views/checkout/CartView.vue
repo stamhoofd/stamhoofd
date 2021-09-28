@@ -52,7 +52,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage,ErrorBox, GlobalEventBus, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { CartItemView,CenteredMessage,ErrorBox, GlobalEventBus, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { CartItem, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component } from 'vue-property-decorator';
@@ -60,7 +60,6 @@ import { Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
-import CartItemView from '../products/CartItemView.vue';
 
 @Component({
     components: {
@@ -119,7 +118,21 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     editCartItem(cartItem: CartItem ) {
-        this.present(new ComponentWithProperties(CartItemView, { cartItem: cartItem.duplicate(Version), oldItem: cartItem }).setDisplayStyle("sheet"))
+        this.present(new ComponentWithProperties(CartItemView, { 
+            cartItem: cartItem.clone(), 
+            oldItem: cartItem,
+            cart: CheckoutManager.cart,
+            webshop: WebshopManager.webshop,
+            saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
+                cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
+                if (oldItem) {
+                    CheckoutManager.cart.removeItem(oldItem)
+                }
+                new Toast(cartItem.product.name+" is aangepast", "success green").setHide(1000).show()
+                CheckoutManager.cart.addItem(cartItem)
+                CheckoutManager.saveCart()
+            }
+        }).setDisplayStyle("sheet"))
     }
 
     mounted() {

@@ -195,6 +195,11 @@ export class TicketBuilder {
             }
             height += this.document.heightOfString("Bestelling #"+this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
 
+            if (!dryRun) {
+                this.document.text(this.order.data.customer.name, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+            }
+            height += this.document.heightOfString(this.order.data.customer.name, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+
             const checkoutMethod = this.order.data.checkoutMethod
             if (checkoutMethod) {
                 let str = checkoutMethod.name
@@ -217,9 +222,7 @@ export class TicketBuilder {
             }
         }
 
-       
-
-        const price = this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ?  ticket.items.reduce((c, item) => c + (item.price ?? 0), 0) : (ticket.items[0]?.unitPrice ?? 0)
+        const price = this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? (this.order ? this.order.data.totalPrice : Math.max(0, ticket.items.reduce((c, item) => c + (item.price ?? 0), 0))) : (ticket.items[0]?.unitPrice ?? 0)
         if (!dryRun) {
             this.document.text(Formatter.price(price).replace(/ /g, " ").replace(/,00/g, ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5*MM })
         }
@@ -230,7 +233,8 @@ export class TicketBuilder {
         MAX_COLUMN_HEIGHT = height - initialColumnHeight
 
         // SECOND COLUMN
-        const description = ticket.items.length > 1 ? ticket.items.map(item => item.amount+"x "+item.product.name+(item.description ? ("\n"+item.description) : "")).join("\n") : ticket.items[0].description
+        const description = this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? ticket.items.map(item => item.amount+"x "+item.product.name+(item.descriptionWithoutDate ? ("\n"+item.descriptionWithoutDate) : "")).join("\n") : ticket.items[0].descriptionWithoutDate
+
         if (description) {
             // Second column
             height = initialColumnHeight

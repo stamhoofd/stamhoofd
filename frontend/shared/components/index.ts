@@ -80,10 +80,16 @@ export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 export { default as VATNumberInput } from "./src/inputs/VATNumberInput.vue"
 
 // Shared views should be last
+export { default as CartItemView } from "./src/views/CartItemView.vue"
+export { default as CategoryBox } from "./src/views/CategoryBox.vue"
 export { default as ChangePasswordView } from "./src/views/ChangePasswordView.vue"
 export { default as ConfirmEmailView } from "./src/views/ConfirmEmailView.vue"
+export { default as FieldBox } from "./src/views/FieldBox.vue"
 export { default as ForgotPasswordResetView } from "./src/views/ForgotPasswordResetView.vue"
 export { default as ForgotPasswordView } from "./src/views/ForgotPasswordView.vue"
+export { default as OptionMenuBox } from "./src/views/OptionMenuBox.vue"
+export { default as ProductBox } from "./src/views/ProductBox.vue"
+export { default as ProductGrid } from "./src/views/ProductGrid.vue"
 
 // Payment
 export * from "./src/ColorHelper"
