@@ -496,7 +496,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
 
         if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker?", "Markeer als betaald", "Tip: je kan dit ook via het menu 'Overschrijvingen' doen voor meerdere overschrijvingen in één keer, dat spaart je wat werk uit.")) {
+            if (!await CenteredMessage.confirm("Ben je zeker?", "Markeer als betaald", "De besteller ontvangt een automatische e-mail. Tip: je kan dit ook via het menu 'Overschrijvingen' doen voor meerdere overschrijvingen in één keer, dat spaart je wat werk uit.")) {
                 return;
             }
             this.loadingPayment = true
