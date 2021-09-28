@@ -111,7 +111,13 @@ export class CartItem extends AutoEncoder {
         for (const option of this.options) {
             price += option.option.price
         }
-        this.unitPrice = Math.max(0, price)
+
+        if (price >= 0) {
+            this.unitPrice = Math.max(0, price)
+        } else {
+            // Allow negative
+            this.unitPrice = price
+        }
         return this.unitPrice
     }
 
@@ -348,7 +354,7 @@ export class Cart extends AutoEncoder {
     }
 
     get price() {
-        return this.items.reduce((c, item) => c + item.getPrice(this), 0)
+        return Math.max(0, this.items.reduce((c, item) => c + item.getPrice(this), 0))
     }
 
     get count() {

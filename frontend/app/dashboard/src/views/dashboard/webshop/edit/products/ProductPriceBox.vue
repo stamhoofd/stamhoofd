@@ -12,7 +12,7 @@
         </STInputBox>
 
         <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="price" placeholder="Gratis" />
+            <PriceInput v-model="price" placeholder="Gratis" :min="null" />
         </STInputBox>
 
         <Checkbox v-model="useDiscount">
@@ -21,7 +21,7 @@
 
         <template v-if="useDiscount">
             <STInputBox title="Prijs met korting" error-fields="discountPrice" :error-box="errorBox">
-                <PriceInput v-model="discountPrice" placeholder="Gratis" />
+                <PriceInput v-model="discountPrice" placeholder="Gratis" :min="null" />
             </STInputBox>
 
             <STInputBox title="Vanaf ... aantal stuks*" error-fields="discountAmount" :error-box="errorBox">

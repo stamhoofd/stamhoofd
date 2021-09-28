@@ -5,12 +5,18 @@
         </STNavigationBar>
 
         <div class="box">
-            <main>
+            <main v-if="checkout.totalPrice > 0">
                 <h1>Kies je betaalmethode</h1>
 
                 <STErrorsDefault :error-box="errorBox" />
 
                 <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+            </main>
+            <main v-else>
+                <h1>Bevestig jouw bestelling</h1>
+                <p>Jouw bestelling zal worden geplaatst, je kan dit niet ongedaan maken.</p>
+
+                <STErrorsDefault :error-box="errorBox" />
             </main>
 
             <STToolbar>
