@@ -22,7 +22,6 @@ export default new Migration(async () => {
         })
 
         if (orders.length == 0) {
-            // Wait again until next day
             break
         }
         
@@ -51,8 +50,6 @@ export default new Migration(async () => {
     console.log("Updated "+count+" orders")
     console.log("Checked "+countChecked+" orders")
     console.log("Total "+countOrders+" orders")
-
-    throw new Error("Wip")
 });
 
 

@@ -264,7 +264,7 @@ export class Order extends Model {
             await this.setRelation(Order.webshop, webshop).markValid(payment, tickets)
         } else {
             if (didCreateTickets && this.data.customer.email.length > 0) {
-                
+                this.setRelation(Order.webshop, webshop).sendTickets()
             }
         }
     }
