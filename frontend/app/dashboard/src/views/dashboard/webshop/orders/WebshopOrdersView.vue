@@ -263,13 +263,13 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     activated() {
         WebshopOrdersEventBus.addListener(this, "deleted", this.onDeleteOrder)
 
-        if (this.hasTickets) {
+        /*if (this.hasTickets) {
             this.pollInterval = window.setInterval(() => {
                 if (!this.isRefreshingOrders) {
                     this.refresh(false).catch(console.error)
                 }
             }, 1000*30)
-        }
+        }*/
     }
 
     deactivated() {

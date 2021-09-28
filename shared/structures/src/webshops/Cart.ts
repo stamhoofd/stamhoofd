@@ -197,15 +197,23 @@ export class CartItem extends AutoEncoder {
             }))
         } else {
             this.product = product
-
-            const productPrice = this.product.prices.find(p => p.id === this.productPrice.id)
+            const productPrice = product.prices.find(p => p.id === this.productPrice.id)
             if (!productPrice) {
-                errors.addError(new SimpleError({
-                    code: "product_price_unavailable",
-                    message: "Product price unavailable",
-                    human: "Eén of meerdere keuzemogelijkheden van "+this.product.name+" zijn niet meer beschikbaar"
-                }))
+                if (this.productPrice.name.length == 0 || this.product.prices.length <= 1 && product.prices.length > 1) {
+                    errors.addError(new SimpleError({
+                        code: "product_price_unavailable",
+                        message: "Product price unavailable",
+                        human: "Er werden keuzemogelijkheden toegevoegd aan "+this.product.name+", waar je nu eerst moet uit kiezen."
+                    }))
+                } else {
+                    errors.addError(new SimpleError({
+                        code: "product_price_unavailable",
+                        message: "Product price unavailable",
+                        human: "De keuzemogelijkheid '"+this.productPrice.name+"' van "+this.product.name+" is niet meer beschikbaar. Kies een andere."
+                    }))
+                }
             } else {
+                // Only set product if we did find our product price
                 this.productPrice = productPrice
             }
 
@@ -248,11 +256,13 @@ export class CartItem extends AutoEncoder {
             }
 
             if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
-                throw new SimpleError({
-                    code: "missing_menu",
-                    message: "Missing menu's "+remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(", "),
-                    human: "Er zijn nieuwe keuzemogelijkheden voor "+this.product.name+" waaruit je moet kiezen"
-                })
+                errors.addError(
+                    new SimpleError({
+                        code: "missing_menu",
+                        message: "Missing menu's "+remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(", "),
+                        human: "Er zijn nieuwe keuzemogelijkheden voor "+this.product.name+" waaruit je moet kiezen"
+                    })
+                )
             }
         }
 
@@ -263,13 +273,18 @@ export class CartItem extends AutoEncoder {
         }
 
         errors.throwIfNotEmpty()
+
+    
+
     }
 
     /**
      * Update self to the newest available data and throw if it was not able to recover
      */
-    validate(webshop: Webshop, cart: Cart) {
-        this.refresh(webshop)
+    validate(webshop: Webshop, cart: Cart, refresh = true) {
+        if (refresh) {
+            this.refresh(webshop)
+        }
 
         // Check stock
         const product = this.product

@@ -169,13 +169,27 @@
                 </STListItem>
 
                 <STListItem v-if="patchedOrder.payment && patchedOrder.payment.status === 'Succeeded' && patchedOrder.payment.price != patchedOrder.data.totalPrice" class="right-description">
-                    Waarvan totaal betaald
-
+                    Waarvan al betaald
+                    
                     <template slot="right">
                         {{ patchedOrder.payment.price | price }}
                     </template>
                 </STListItem>
             </STList>
+
+            <LoadingButton v-if="hasWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" :loading="loadingPayment">
+                <p>
+                    <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" class="button text" @click="markPaid(patchedOrder.payment)">
+                        <span class="icon success" />
+                        <span>Markeer als betaald</span>
+                    </button>
+
+                    <button v-if="patchedOrder.payment && patchedOrder.payment.status == 'Succeeded'" class="button text" @click="markNotPaid(patchedOrder.payment)">
+                        <span class="icon canceled" />
+                        <span>Markeer als niet betaald</span>
+                    </button>
+                </p>
+            </LoadingButton>
 
             <div v-if="patchedOrder.data.checkoutMethod && patchedOrder.data.checkoutMethod.description" class="container">
                 <hr>
@@ -192,10 +206,10 @@
             <hr>
 
             <STList>
-                <STListItem v-for="cartItem in patchedOrder.data.cart.items" :key="cartItem.id" class="cart-item-row" :selectable="true" @click="editCartItem(cartItem)">
+                <STListItem v-for="cartItem in patchedOrder.data.cart.items" :key="cartItem.id" class="cart-item-row" :selectable="hasWrite" @click="hasWrite ? editCartItem(cartItem) : false">
                     <h3>
                         <span>{{ cartItem.product.name }}</span>
-                        <span class="icon arrow-right-small gray" />
+                        <span v-if="hasWrite" class="icon arrow-right-small gray" />
                     </h3>
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
@@ -218,7 +232,7 @@
                 </STListItem>
             </STList>
 
-            <p>
+            <p v-if="hasWrite">
                 <button class="button text" @click="addProduct">
                     <span class="icon add" />
                     <span>Nieuw</span>
@@ -233,35 +247,17 @@
                 <input v-tooltip="'Klik om te kopiëren'" class="input" :value="orderUrl" readonly @click="copyElement">
             </div>
 
-            <div class="container">
+            <div v-if="hasWrite" class="container">
                 <hr>
-                <h2>Wijzigingen</h2>
+                <h2>Wijzigingen maken</h2>
                 <p>
-                    Als een bestelling geplaatst wordt, dan houden we een momentopname bij van die bestelling. Als je daarna bijvoorbeeld de naam van een product wijzigt, blijft die onveranderd in deze bestelling. Je kan dit toch aanpassen, maar dit lukt niet altijd (soms kan je bijvoorbeeld een product verwijderd hebben).
-                    <br><br>
-                    Je kan op de knop hieronder klikken om het resultaat te bekijken voor je de wijziging wilt opslaan. Daarnaast kan je ook gewoon de items in een bestelling beperkt wijzigen.
-                </p>
-
-                <p>
-                    <a class="button text" @click="refreshCart">
-                        <span class="icon reverse" />
-                        <span>Bestelling corrigeren</span>
-                    </a>
+                    Als een bestelling geplaatst wordt, dan houden we een momentopname bij van die bestelling. Als je daarna bijvoorbeeld de naam van een product wijzigt, blijft die onveranderd in deze bestelling. Je kan dit corrigeren door bovenaan op een product te klikken, de (eventuele) wijzigingen na te kijken en op te slaan. Als er intussen bijvoorbeeld nieuwe keuzemogelijkheden zijn toegevoegd, kan je dan ook een keuze maken.
                 </p>
             </div>
         </main>
 
-        <STToolbar v-if="hasWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') || isChanged())">
-            <LoadingButton v-if="!isChanged()" slot="right" :loading="loadingPayment">
-                <button v-if="patchedOrder.payment.status == 'Succeeded' && patchedOrder.payment.paidAt" class="button secundary" @click="markNotPaid(patchedOrder.payment)">
-                    Toch niet betaald
-                </button>
-                <button v-else class="button primary" @click="markPaid(patchedOrder.payment)">
-                    Markeer als betaald
-                </button>
-            </LoadingButton>
-
-            <LoadingButton v-else slot="right" :loading="saving">
+        <STToolbar v-if="hasWrite && isChanged()">
+            <LoadingButton slot="right" :loading="saving">
                 <button class="button primary" @click="save()">
                     Opslaan
                 </button>
@@ -570,6 +566,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     async addProduct() {
         let clone = this.patchedOrder.data.cart.clone()
         const webshop = await this.webshopManager.loadWebshopIfNeeded()
+
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(AddItemView, { 
                 cart: clone,
@@ -598,8 +595,17 @@ export default class OrderView extends Mixins(NavigationMixin){
         let clone = this.patchedOrder.data.cart.clone()
         const webshop = await this.webshopManager.loadWebshopIfNeeded()
 
+        const newCartItem = cartItem.clone()
+
+        // First refresh the item
+        try {
+            newCartItem.refresh(webshop)
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+
         this.present(new ComponentWithProperties(CartItemView, { 
-            cartItem: cartItem.clone(), 
+            cartItem: newCartItem, 
             oldItem: cartItem,
             cart: clone,
             webshop: webshop,
@@ -619,39 +625,6 @@ export default class OrderView extends Mixins(NavigationMixin){
                 })})
             }
         }).setDisplayStyle("sheet"))
-    }
-
-    async refreshCart() {
-        let clone = this.patchedOrder.data.cart.clone()
-        let error: Error | null = null
-        try {
-            clone.refresh(await this.webshopManager.loadWebshopIfNeeded())
-            
-        } catch (e) {
-            error = e
-        }
-
-        const clone2 = clone.clone()
-        clone2.updatePrices()
-
-        if (clone2.price != clone.price) {
-            if (await CenteredMessage.confirm("De totaalprijs is gewijzigd", "Wijzig de totaalprijs", "Wil je de prijs van deze bestelling en individuele producten ook wijzigen? Je moet dit zelf communiceren naar de besteller en opvolgen als de bestelling al betaald werd.", "Niet wijzigen")) {
-                clone = clone2
-            }
-        } else {
-           clone = clone2
-        }
-
-        this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-            cart: clone
-        })})
-
-        if (!error) {
-            new Toast("De bestelling werd gecorrigeerd", "success").show()
-        } else {
-            Toast.fromError(error).show()
-            new Toast("De bestelling werd (gedeeltelijk) gecorrigeerd maar met één of meer foutmeldingen", "success").show()
-        }
     }
 
     async markNotPaid(payment: Payment) {
