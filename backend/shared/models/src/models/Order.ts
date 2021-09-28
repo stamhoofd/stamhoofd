@@ -269,7 +269,7 @@ export class Order extends Model {
         }
     }
 
-    async sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
+    sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getDefaultEmail()
     
