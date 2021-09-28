@@ -2,7 +2,7 @@
     <div class="st-view cart-item-view">
         <STNavigationBar :title="cartItem.product.name">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <span slot="left" class="style-tag">{{ cartItem.getUnitPrice(cart) | price }}</span>
+            <span slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | price }}</span>
             <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         <main>
