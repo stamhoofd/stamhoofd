@@ -67,14 +67,14 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     /**
      * If the organizations provides support for families in financial difficulties
      */
-    @field({ decoder: FinancialSupportSettings, nullable: true, version: 115 })
+    @field({ decoder: FinancialSupportSettings, nullable: true, version: 116 })
     financialSupport: FinancialSupportSettings | null = null
 
     /**
      * Ask to collect sensitive information
      * TODO: make this an automatic getter that checks financialSupport + custom records + organization type (e.g. lgbtq+, politics) to determine if this is needed
      */
-    @field({ decoder: BooleanDecoder, version: 115 })
+    @field({ decoder: BooleanDecoder, version: 116 })
     dataPermission = false
 
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 117 })

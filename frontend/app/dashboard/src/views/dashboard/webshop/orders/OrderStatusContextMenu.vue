@@ -70,26 +70,11 @@ export default class OrderStatusContextMenu extends Mixins(NavigationMixin) {
             }
 
             if (status == OrderStatus.Canceled) {
-                this.openMail("Jouw bestelling werd geannuleerd")
+                new Toast("Je moet zelf communiceren dat de bestelling werd geannuleerd", "warning yellow").setHide(10*1000).show()
             }
         }).catch((e) => {
             Toast.fromError(e).show()
         })
-    }
-
-    openMail(subject = "") {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MailView, {
-                otherRecipients: this.orders.flatMap((o) => {
-                    if ( o.data.customer.email.length > 0) {
-                        return [o.data.customer]
-                    }
-                    return []
-                }),
-                defaultSubject: subject
-            })
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 }
 </script>

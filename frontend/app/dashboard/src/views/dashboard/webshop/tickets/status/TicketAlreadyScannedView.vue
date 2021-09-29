@@ -89,11 +89,17 @@ export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
     }
 
     viewTicket() {
-        this.navigationController!.push(new ComponentWithProperties(ValidTicketView, {
-            webshopManager: this.webshopManager,
-            ticket: this.ticket,
-            order: this.order
-        }), true, 1)
+        this.show({
+            components: [
+                new ComponentWithProperties(ValidTicketView, {
+                    webshopManager: this.webshopManager,
+                    ticket: this.ticket,
+                    order: this.order
+                })
+            ], 
+            replace: 1, 
+            force: true
+        })
     }
 
     mounted() {

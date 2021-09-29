@@ -135,9 +135,16 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     // success
                     this.loading = false
 
-                    this.navigationController!.push(new ComponentWithProperties(RegistrationSuccessView, {
-                        registrations
-                    }), true, this.navigationController!.components.length)
+                    this.navigationController!.push({
+                        components: [
+                            new ComponentWithProperties(RegistrationSuccessView, {
+                                registrations
+                            })
+                        ], 
+                        replace: this.navigationController?.components.length, 
+                        force: true
+                    }).catch(console.error)
+
                 }, (payment: Payment) => {
                     console.log(payment)
                     // failure
@@ -147,10 +154,15 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             }
 
             this.loading = false
-            
-            this.navigationController!.push(new ComponentWithProperties(RegistrationSuccessView, {
-                registrations
-            }), true, this.navigationController!.components.length)
+
+            this.show({
+                components: [
+                    new ComponentWithProperties(RegistrationSuccessView, {
+                        registrations
+                    })
+                ], 
+                replace: this.navigationController?.components.length, 
+            })
             
         } catch (e) {
             console.error(e)

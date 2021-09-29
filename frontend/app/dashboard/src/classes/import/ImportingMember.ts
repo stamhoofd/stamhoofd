@@ -13,6 +13,7 @@ export class ImportingRegistration {
     paidPrice: number | null = null
     price: number | null = null
     paymentMethod: PaymentMethod | null = null
+    date: Date | null = null
 }
 
 export class ImportResult {

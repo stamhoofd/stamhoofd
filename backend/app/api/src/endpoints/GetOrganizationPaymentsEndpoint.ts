@@ -78,12 +78,19 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
         })
     }
     
-    static async getPaymentsWithOrder(organizationId: string): Promise<PaymentWithOrder[]> {
+    static async getPaymentsWithOrder(organizationId: string, withCanceled = false): Promise<PaymentWithOrder[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Order.getDefaultSelect()} from \`${Payment.table}\`\n`;
         query += `JOIN \`${Order.table}\` ON \`${Order.table}\`.\`${Order.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\`\n`
-        query += `where \`${Order.table}\`.\`organizationId\` = ? AND \`${Order.table}\`.\`status\` != ?`
+        query += `where \`${Order.table}\`.\`organizationId\` = ?`
 
-        const [results] = await Database.select(query, [organizationId, OrderStatus.Canceled])
+        const params = [organizationId]
+
+        if (!withCanceled) {
+            query += ` AND \`${Order.table}\`.\`status\` != ?`
+            params.push(OrderStatus.Canceled)
+        }
+
+        const [results] = await Database.select(query, params)
         const payments: PaymentWithOrder[] = []
 
         // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.

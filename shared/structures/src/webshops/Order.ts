@@ -98,11 +98,16 @@ export class Order extends AutoEncoder {
         } 
     })
     status: OrderStatus
+
+    get shouldIncludeStock() {
+        return this.status !== OrderStatus.Canceled
+    }
 }
 
 export class PrivateOrder extends Order {
     @field({ decoder: PrivatePayment, nullable: true })
     payment: PrivatePayment | null
+    
 }
 
 export class OrderResponse extends AutoEncoder {

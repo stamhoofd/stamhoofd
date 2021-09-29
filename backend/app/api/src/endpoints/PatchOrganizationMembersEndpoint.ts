@@ -357,6 +357,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         registration.memberId = member.id
         registration.registeredAt = registrationStruct.registeredAt
         registration.waitingList = registrationStruct.waitingList
+        registration.createdAt = registrationStruct.createdAt ?? new Date()
 
         if (registration.waitingList) {
             registration.registeredAt = null

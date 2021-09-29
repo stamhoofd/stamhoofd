@@ -30,6 +30,10 @@ export class Formatter {
     }
 
     static weekDay(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         const monthNames = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"]
         return monthNames[date.getDay()]
     }
@@ -38,6 +42,10 @@ export class Formatter {
      * 1 januari (2020). Year only in different year if withYear is null (default)
      */
     static date(date: Date, withYear: boolean | null = null): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         const currentYear = new Date().getFullYear()
         const year = date.getFullYear()
         return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year || withYear === true ? (" "+year) : "")
@@ -47,6 +55,10 @@ export class Formatter {
      * maandag, 1 januari (2020). Year only in different year
      */
     static dateWithDay(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         return this.weekDay(date) +", "+this.date(date)
     }
 
@@ -54,6 +66,10 @@ export class Formatter {
      * maandag, 1 januari (2020) om XX:XX. Year only in different year
      */
     static dateTimeWithDay(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         return this.weekDay(date) +", "+this.dateTime(date)
     }
 
@@ -62,6 +78,10 @@ export class Formatter {
      * 01/01/2020
      */
     static dateNumber(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         const year = date.getFullYear()
         return (date.getDate()+"").padStart(2, "0") + "/" + ((date.getMonth() + 1)+"").padStart(2, "0") + "/"+year
     }
@@ -70,6 +90,10 @@ export class Formatter {
      * 2020-01-31
      */
     static dateIso(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         const year = date.getFullYear()
         return year+"-"+((date.getMonth() + 1)+"").padStart(2, "0")+"-"+(date.getDate()+"").padStart(2, "0")
     }
@@ -78,6 +102,10 @@ export class Formatter {
      * 12:00
      */
     static time(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         return date.getHours()+":"+(date.getMinutes()+"").padStart(2, "0")
     }
 
@@ -85,6 +113,10 @@ export class Formatter {
      * 12:00
      */
     static timeIso(date: Date): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         return (date.getHours()+"").padStart(2, "0")+":"+(date.getMinutes()+"").padStart(2, "0")
     }
 
@@ -100,6 +132,10 @@ export class Formatter {
      * 1 januari (2020) om 12:00. Year only in different year
      */
     static dateTime(date: Date, hideZero = false): string {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return "?"
+        }
         if (hideZero && this.time(date) == "0:00") {
             return this.date(date)
         }

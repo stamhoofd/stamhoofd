@@ -493,7 +493,8 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             cycle: group.cycle + (this.needRegistration ? -1 : 0),
             waitingList: this.waitingList,
             payment: payment,
-            registeredAt: new Date()
+            registeredAt: this.waitingList ? null : (member.registration.date ?? new Date()),
+            createdAt: member.registration.date ?? new Date(),
         })
     }
 

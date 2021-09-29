@@ -20,7 +20,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, Radio, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { CartItem, CartItemOption, Option, OptionMenu, Product, Version } from '@stamhoofd/structures';
+import { CartItem, CartItemOption, Option, OptionMenu } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -70,15 +70,5 @@ export default class OptionMenuBox extends Mixins(NavigationMixin){
         filtered.push(CartItemOption.create({ optionMenu: this.optionMenu, option }))
         this.cartItem.options = filtered
     }
-
-   
-
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>
