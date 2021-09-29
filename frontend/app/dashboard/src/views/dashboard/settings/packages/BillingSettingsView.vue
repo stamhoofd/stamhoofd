@@ -132,6 +132,10 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
 
     get balance() {
         return this.status?.credits.slice().reverse().reduce((t, c) => {
+            if (c.expireAt !== null && c.expireAt < new Date()) {
+                return t
+            }
+            
             const l = t + c.change
             if (l < 0) {
                 return 0
