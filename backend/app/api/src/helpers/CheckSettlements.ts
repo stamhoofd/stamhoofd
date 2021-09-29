@@ -3,7 +3,6 @@
 import { MolliePayment, MollieToken, Payment } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/structures'
 import axios from 'axios';
-import { env } from 'process';
 
 type MollieSettlement = {
     id: string;
@@ -24,7 +23,7 @@ type MolliePaymentJSON = {
 let lastSettlementCheck: Date | null = null
 
 export async function checkSettlements(checkAll = false) {
-    if (!checkAll && lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 6 * 24 * 60 * 60 * 1000) || new Date().getDay() != 2)) {
+    if (!checkAll && lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 24 * 60 * 60 * 1000))) {
         console.log("Skip settlement check")
         return
     }
@@ -62,15 +61,15 @@ export async function checkSettlements(checkAll = false) {
 
 // Check settlements once a week on tuesday morning/night
 export async function checkSettlementsFor(token: string, checkAll = false) {
-    // Check last 2 weeks, unless we check them all
+    // Check last 2 weeks + 3 day margin, unless we check them all
     const d = new Date()
-    d.setDate(d.getDate() - 14)
+    d.setDate(d.getDate() - 17)
 
     console.log("Checking settlements for given token...")
 
     // Loop all organizations with online paymetns the last week
     try {
-        const request = await axios.get("https://api.mollie.com/v2/settlements?limit="+(checkAll ? 250 : 2), {
+        const request = await axios.get("https://api.mollie.com/v2/settlements?limit="+(checkAll ? 250 : 14), {
             headers: {
                 "Authorization": "Bearer "+token
             }

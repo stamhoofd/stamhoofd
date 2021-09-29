@@ -414,10 +414,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     getSelectedOrders(): PrivateOrder[] {
-        return this.orders
-            .filter((order: SelectableOrder) => {
-                return order.selected;
-            })
+        return this.sortOrders(
+                this.orders.filter((order: SelectableOrder) => {
+                    return order.selected;
+                })
+            )
             .map((order: SelectableOrder) => {
                 return order.order;
             });
@@ -451,17 +452,19 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     }
 
-    get sortedOrders() {
+    sortOrders(orders: SelectableOrder[]) {
+        const clone = orders.slice()
+
         if (this.sortBy == "number") {
-            return this.filteredOrders.sort((a, b) => Sorter.byNumberValue(a.order.number ?? 0, b.order.number ?? 0) * (this.sortDirection == "ASC" ? -1 : 1));
+            return clone.sort((a, b) => Sorter.byNumberValue(a.order.number ?? 0, b.order.number ?? 0) * (this.sortDirection == "ASC" ? -1 : 1));
         }
 
         if (this.sortBy == "name") {
-            return this.filteredOrders.sort((a, b) => Sorter.byStringValue(a.order.data.customer.name, b.order.data.customer.name) * (this.sortDirection == "ASC" ? 1 : -1));
+            return clone.sort((a, b) => Sorter.byStringValue(a.order.data.customer.name, b.order.data.customer.name) * (this.sortDirection == "ASC" ? 1 : -1));
         }
 
         if (this.sortBy == "checkout") {
-            return this.filteredOrders.sort((a, b) => Sorter.stack(
+            return clone.sort((a, b) => Sorter.stack(
                     Sorter.byNumberValue(
                         (a.order.data.timeSlot?.date?.getTime() ?? 0) + ((a.order.data.timeSlot?.startTime ?? 0) + (a.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60, 
                         (b.order.data.timeSlot?.date?.getTime() ?? 0) + ((b.order.data.timeSlot?.startTime ?? 0) + (b.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60
@@ -478,15 +481,18 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 statusMap.set(status, statusMap.size)
             }
 
-            return this.filteredOrders.sort((a, b) => Sorter.stack(
+            return clone.sort((a, b) => Sorter.stack(
                 Sorter.byNumberValue(statusMap.get(a.order.status) ?? 0, statusMap.get(b.order.status) ?? 0),
                 Sorter.byBooleanValue((a.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded, (b.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded), 
                 Sorter.byNumberValue(a.order.number ?? 0, b.order.number ?? 0)
             ) * (this.sortDirection == "ASC" ? -1 : 1));
         }
 
+        return clone
+    }
 
-        return this.filteredOrders
+    get sortedOrders() {
+        return this.sortOrders(this.filteredOrders)
     }
 
     get title() {
