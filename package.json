@@ -19,7 +19,7 @@
     "scripts": {
         "build": "cd shared/crypto && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
-        "build:backend": "yarn build && cd backend && yarn build:full",
+        "build:shared": "yarn build && cd backend/shared/email && yarn build && cd ../models && yarn build && cd ../queues && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
         "upgrade:internal": "yarn upgrade --scope simonbackx",
         "caddy:development": "export $(cat .env | xargs) && caddy run --resume",
