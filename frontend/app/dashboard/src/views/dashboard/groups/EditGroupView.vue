@@ -804,7 +804,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
             patch = patch.patch(patchOrganization)
 
-            new Toast("We vragen nu ook bij het inschrijven of een lid het financieel moeilijk heeft, zodat we de verminderde prijzen kunnen toepassen", "info-filled").show()
+            new Toast("Kijk zeker de instellingen voor 'Financiële ondersteuning' na bij de instellingen. We vragen nu bij het inschrijven of een lid financiële ondersteuning nodig heeft, zodat we de verminderde prijzen kunnen toepassen.", "warning yellow").setHide(15*1000).show()
         }
 
         this.errorBox = null

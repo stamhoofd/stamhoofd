@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
-export enum LegacyRecordType {
+export enum RecordType {
     /**
      * Show a checkbox to the user so they can check the value on/off
      * It is possible to add a textarea as soon as the checkbox is selected if the extra property is set.
@@ -70,8 +70,8 @@ export class RecordSettings extends AutoEncoder {
     // @field({ decoder: BooleanDecoder })
     // visibleForMembers = true
 
-    @field({ decoder: new EnumDecoder(LegacyRecordType) })
-    type = LegacyRecordType.Checkbox
+    @field({ decoder: new EnumDecoder(RecordType) })
+    type = RecordType.Checkbox
 
     /**
      * In case of multiple choice: the values you can choose from with optional additional information

@@ -26,6 +26,17 @@
             <p>
                 Voeg zelf kenmerken toe die ingevuld kunnen worden bij het inschrijven of enkel door beheerders (kan je zelf kiezen). Hieronder kan je de kenmerken toevoegen op bepaalde plaatsen, maar je kan ook een nieuwe categorie maken en die bijvoorbeeld koppelen aan specifieke inschrijvingsgroepen zodat ze enkel daar gevraagd worden.
             </p>
+
+            <STList>
+                <RecordCategoryRow v-for="category in categories" :key="category.id" :selectable="true" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+            </STList>
+
+            <p>
+                <button class="button text" @click="newCategory">
+                    <span class="icon add" />
+                    <span>Nieuwe categorie</span>
+                </button>
+            </p>
         </main>
 
         <STToolbar>
@@ -44,11 +55,12 @@
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Organization, OrganizationPatch, Version } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+import RecordCategoryRow from "./records/RecordCategoryRow.vue"
 
 @Component({
     components: {
@@ -57,11 +69,9 @@ import { OrganizationManager } from "../../../../../classes/OrganizationManager"
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        RadioGroup,
-        Radio,
         BackButton,
         LoadingButton,
-        PriceInput
+        RecordCategoryRow
     },
 })
 export default class RecordsSettingsView extends Mixins(NavigationMixin) {
@@ -78,7 +88,49 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization.patch(this.organizationPatch)
     }
 
-    
+    get categories() {
+        return this.patchedOrganization.meta.recordsConfiguration.recordCategories
+    }
+
+    addPatch(patch: AutoEncoderPatchType<Organization>) {
+        this.organizationPatch = this.organizationPatch.patch(patch)
+    }
+
+    addRecordsConfigurationPatch(patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) {
+        this.addPatch(Organization.patch({
+            meta: OrganizationMetaData.patch({
+                recordsConfiguration: patch
+            })
+        }))
+    }
+
+    moveCategoryUp(category: RecordCategory) {
+        const index = this.categories.findIndex(c => c.id === category.id)
+        if (index == -1 || index == 0) {
+            return;
+        }
+
+        const moveTo = index - 2
+        const p = OrganizationRecordsConfiguration.patch({})
+        p.recordCategories.addMove(category.id, this.categories[moveTo]?.id ?? null)
+        this.addRecordsConfigurationPatch(p)
+    }
+     
+    moveCategoryDown(category: RecordCategory) {
+        const index = this.categories.findIndex(c => c.id === category.id)
+        if (index == -1 || index >= this.categories.length - 1) {
+            return;
+        }
+
+        const moveTo = index + 1
+        const p = OrganizationRecordsConfiguration.patch({})
+        p.recordCategories.addMove(category.id, this.categories[moveTo]?.id ?? null)
+        this.addRecordsConfigurationPatch(p)
+    }
+
+    newCategory() {
+        
+    }
 
     async save() {
         if (this.saving) {

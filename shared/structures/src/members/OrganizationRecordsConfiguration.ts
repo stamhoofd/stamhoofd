@@ -4,6 +4,7 @@ import { OrganizationType } from "../OrganizationType"
 import { LegacyRecord } from "./records/LegacyRecord"
 import { LegacyRecordType } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
+import { RecordSettings } from "./records/RecordSettings"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",
@@ -79,6 +80,12 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 117 })
     recordCategories: RecordCategory[] = []
+
+    @field({ decoder: new ArrayDecoder(RecordSettings), version: 117 })
+    records: RecordSettings[] = []
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 117 })
+    mainRecordCategories: string[] = []
 
     /**
      * @deprecated

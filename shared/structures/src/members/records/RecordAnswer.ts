@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
-import { LegacyRecordType, RecordChoice, RecordSettings } from "./RecordSettings"
+import { RecordChoice, RecordSettings,RecordType } from "./RecordSettings"
 
 
 export class RecordAnswer extends AutoEncoder {
@@ -19,15 +19,15 @@ export class RecordAnswer extends AutoEncoder {
 
 export const RecordAnswerDecoder: Decoder<RecordAnswer> = {
     decode: function (data: Data): RecordAnswer {
-        const type = data.field("settings").field("type").enum(LegacyRecordType)
+        const type = data.field("settings").field("type").enum(RecordType)
 
         switch (type) {
-            case LegacyRecordType.Checkbox: return data.decode(RecordCheckboxAnswer as Decoder<RecordCheckboxAnswer>)
-            case LegacyRecordType.Text: 
-            case LegacyRecordType.Textarea:
+            case RecordType.Checkbox: return data.decode(RecordCheckboxAnswer as Decoder<RecordCheckboxAnswer>)
+            case RecordType.Text: 
+            case RecordType.Textarea:
                 return data.decode(RecordTextAnswer as Decoder<RecordTextAnswer>)
-            case LegacyRecordType.MultipleChoice: return data.decode(RecordMultipleChoiceAnswer as Decoder<RecordMultipleChoiceAnswer>)
-            case LegacyRecordType.Address: return data.decode(RecordAddressAnswer as Decoder<RecordAddressAnswer>)
+            case RecordType.MultipleChoice: return data.decode(RecordMultipleChoiceAnswer as Decoder<RecordMultipleChoiceAnswer>)
+            case RecordType.Address: return data.decode(RecordAddressAnswer as Decoder<RecordAddressAnswer>)
         }
         throw new SimpleError({
             code: "not_supported",
