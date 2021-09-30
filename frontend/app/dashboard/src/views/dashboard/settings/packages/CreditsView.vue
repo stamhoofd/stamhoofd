@@ -27,6 +27,7 @@
 
                     <p v-if="credit.expireAt !== null" class="style-description">
                         Vervalt op {{ credit.expireAt | dateTime }}
+                        <span v-if="isExpired(credit)" class="style-tag error">Vervallen</span>
                     </p>
                     <template slot="right">
                         {{ credit.change | priceChange }}
@@ -40,7 +41,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { STBillingStatus } from '@stamhoofd/structures';
+import { STBillingStatus, STCredit } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -64,6 +65,10 @@ export default class CreditsView extends Mixins(NavigationMixin){
     get credits() {
         const now = new Date()
         return this.status.credits.filter(c => c.expireAt === null || (c.expireAt > now || c.change > 0))
+    }
+
+    isExpired(credit: STCredit) {
+        return credit.expireAt !== null && credit.expireAt < new Date()
     }
 }
 </script>

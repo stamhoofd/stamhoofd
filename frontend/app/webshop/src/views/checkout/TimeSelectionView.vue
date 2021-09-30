@@ -12,9 +12,16 @@
                 <h1 v-else-if="checkoutMethod.type == 'Delivery'">
                     Kies je leveringstijdstip
                 </h1>
+                <h1 v-else-if="checkoutMethod.type == 'OnSite'">
+                    Kies wanneer je komt
+                </h1>
 
                 <p v-if="checkoutMethod.type == 'Takeout'">
                     Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+                </p>
+
+                <p v-if="checkoutMethod.type == 'OnSite'">
+                    Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
                 </p>
                 
                 <STErrorsDefault :error-box="errorBox" />
@@ -26,7 +33,7 @@
                             {{ slot.date | dateWithDay }}
                         </h2> 
                         <p class="style-description">
-                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
                         </p>
                     </STListItem>
                 </STList>

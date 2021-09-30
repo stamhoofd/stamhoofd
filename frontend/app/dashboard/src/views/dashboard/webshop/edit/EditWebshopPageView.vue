@@ -41,7 +41,7 @@
         </figure>
 
         <hr>
-        <h2>Link</h2>
+        <h2>Link van jouw webshop</h2>
 
         <Checkbox v-model="hasCustomDomain">
             Eigen domeinnaam gebruiken
@@ -93,17 +93,41 @@
                 >
             </STInputBox>
         </template>
+
+        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
+
+        <hr>
+        <h2 class="style-with-button">
+            <div>Externe links</div>
+            <div>
+                <button class="button text" @click="addPolicy">
+                    <span class="icon add" />
+                    <span>Toevoegen</span>
+                </button>
+            </div>
+        </h2>
+        <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
+
+        <p v-if="policies.length == 0" class="info-box">
+            Je hebt momenteel geen externe links toegevoegd.
+        </p>
+        <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
+            De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
+        </p>
     </main>
 </template>
 
 <script lang="ts">
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Tooltip, TooltipDirective, UploadButton, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { DNSRecord, DNSRecordType,Image, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
+import { DNSRecord, DNSRecordType,Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
+import EditPolicyBox from "./EditPolicyBox.vue"
 
 @Component({
     components: {
@@ -113,7 +137,8 @@ import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
         STErrorsDefault,
         UploadButton,
         Checkbox,
-        DNSRecordBox
+        DNSRecordBox,
+        EditPolicyBox
     },
     directives: { Tooltip: TooltipDirective },
 })
@@ -127,6 +152,33 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
     cachedHasCustomDomain: boolean | null = this.hasCustomDomain
     cachedCustomUrl: string | null = this.customUrl
     cachedUri: string | null = this.uri
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    patchPolicy(policy: Policy, patch: AutoEncoderPatchType<Policy>) {
+        const p = WebshopMetaData.patch({})
+        patch.id = policy.id
+        p.policies.addPatch(patch)
+        this.$emit("patch", PrivateWebshop.patch({ meta: p }) )
+    }
+
+    deletePolicy(policy: Policy) {
+        const p = WebshopMetaData.patch({})
+        p.policies.addDelete(policy.id)
+        this.$emit("patch", PrivateWebshop.patch({ meta: p }) )
+    }
+
+    addPolicy() {
+        const p = WebshopMetaData.patch({})
+        p.policies.addPut(Policy.create({}))
+        this.$emit("patch", PrivateWebshop.patch({ meta: p }) )
+    }
+
+    get policies() {
+        return this.webshop.meta.policies
+    }
 
     get title() {
         return this.webshop.meta.title

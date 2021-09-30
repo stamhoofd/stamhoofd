@@ -100,6 +100,14 @@
                         {{ patchedOrder.validAt | dateTime | capitalizeFirstLetter }}
                     </template>
                 </STListItem>
+                <STListItem v-if="patchedOrder.payment && patchedOrder.payment.settlement" class="right-description right-stack">
+                    Uitbetaald op
+
+                    <template slot="right">
+                        {{ patchedOrder.payment.settlement.settledAt | dateTime | capitalizeFirstLetter }}<br>
+                        Mededeling "{{ patchedOrder.payment.settlement.reference }}"
+                    </template>
+                </STListItem>
                 <STListItem class="right-description">
                     Bestelnummer
 
@@ -274,7 +282,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, patchContainsChanges } fro
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, Order, OrderData, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, OrderData, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
@@ -312,7 +320,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
 
     @Prop({ required: true })
-    initialOrder!: Order
+    initialOrder!: PrivateOrder
 
     @Prop({ required: true })
     webshopManager!: WebshopManager
@@ -324,18 +332,18 @@ export default class OrderView extends Mixins(NavigationMixin){
     @Prop({ default: false })
     success: boolean
 
-    order: Order = this.initialOrder
+    order: PrivateOrder = this.initialOrder
 
-    patchOrder: AutoEncoderPatchType<Order> = Order.patch({})
+    patchOrder: AutoEncoderPatchType<PrivateOrder> = PrivateOrder.patch({})
 
     tickets: TicketPrivate[] = []
     loadingTickets = false
     
     @Prop({ default: null })
-    getNextOrder!: (order: Order) => Order | null;
+    getNextOrder!: (order: PrivateOrder) => PrivateOrder | null;
 
     @Prop({ default: null })
-    getPreviousOrder!: (order: Order) => Order | null;
+    getPreviousOrder!: (order: PrivateOrder) => PrivateOrder | null;
 
     get patchedOrder() {
         return this.order.patch(this.patchOrder)
@@ -556,7 +564,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                     this.order.set(order)
                 }
             }
-            this.patchOrder = Order.patch({})
+            this.patchOrder = PrivateOrder.patch({})
             this.downloadNewTickets()
         }).catch((e) => {
             this.saving = false

@@ -10,6 +10,7 @@ import { Province } from '../addresses/Province';
 import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
+import { Policy } from '../Policy';
 import { TransferSettings } from './TransferSettings';
 import { WebshopField } from './WebshopField';
 
@@ -257,6 +258,8 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 41 })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
+    @field({ decoder: new ArrayDecoder(Policy), version: 116 })
+    policies: Policy[] = []
 
     @field({ decoder: StringDecoder, nullable: true, version: 42, field: "iban" })
     @field({ 

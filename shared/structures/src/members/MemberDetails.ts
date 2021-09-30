@@ -109,13 +109,13 @@ export class MemberDetails extends AutoEncoder {
     })
     records: LegacyRecord[] = [];    
 
-    @field({ decoder: BooleanStatus, version: 116, optional: true })
+    @field({ decoder: BooleanStatus, version: 117, optional: true })
     requiresFinancialSupport?: BooleanStatus
 
     /**
      * Gave permission to collect sensitive information
      */
-    @field({ decoder: BooleanStatus, version: 116, optional: true })
+    @field({ decoder: BooleanStatus, version: 117, optional: true })
     allowSensitiveDataCollection?: BooleanStatus
 
     @field({ decoder: EmergencyContact, nullable: true })
