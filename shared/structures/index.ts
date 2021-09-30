@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 115
+export const Version = 116
 
 // General
 export * from "./src/addresses/Address"
@@ -25,6 +25,7 @@ export * from "./src/OrganizationType"
 export * from "./src/PaymentMethod"
 export * from "./src/PaymentStatus"
 export * from "./src/Permissions"
+export * from "./src/Policy"
 export * from "./src/RegisterCodeStatus"
 export * from "./src/Token"
 export * from "./src/UmbrellaOrganization"

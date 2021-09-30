@@ -33,7 +33,7 @@
                             {{ slot.date | dateWithDay }}
                         </h2> 
                         <p class="style-description">
-                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
                         </p>
                     </STListItem>
                 </STList>

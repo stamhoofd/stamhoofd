@@ -58,14 +58,24 @@
                                 -
                             </template>
                             <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                                Website
+                                Terug naar website
                             </a>
+                            
+                            <template v-for="policy in policies">
+                                -
+                                <a :key="policy.id" :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                                    {{ policy.name }}
+                                </a>
+                            </template>
+
                             <template v-if="privacyUrl">
                                 -
                             </template>
+
                             <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
                                 Privacyvoorwaarden
                             </a>
+
                             <br>
                             {{ organization.meta.companyAddress || organization.address }}
                         </aside>
@@ -178,7 +188,14 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return this.webshop.meta.ticketType === WebshopTicketType.Tickets
     }
 
+    get policies() {
+        return this.webshop.meta.policies
+    }
+
     get privacyUrl() {
+        if (this.webshop.meta.policies.length > 0) {
+            return null
+        }
         if (WebshopManager.organization.meta.privacyPolicyUrl) {
             return WebshopManager.organization.meta.privacyPolicyUrl
         }
