@@ -28,11 +28,11 @@
             </p>
 
             <STList>
-                <RecordCategoryRow v-for="category in categories" :key="category.id" :selectable="true" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+                <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" @patch="addCategoriesPatch" />
             </STList>
 
             <p>
-                <button class="button text" @click="newCategory">
+                <button class="button text" @click="addCategory">
                     <span class="icon add" />
                     <span>Nieuwe categorie</span>
                 </button>
@@ -52,14 +52,15 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+import EditRecordCategoryView from './records/EditRecordCategoryView.vue';
 import RecordCategoryRow from "./records/RecordCategoryRow.vue"
 
 @Component({
@@ -68,7 +69,7 @@ import RecordCategoryRow from "./records/RecordCategoryRow.vue"
         STToolbar,
         STInputBox,
         STErrorsDefault,
-        Checkbox,
+        STList,
         BackButton,
         LoadingButton,
         RecordCategoryRow
@@ -104,32 +105,23 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         }))
     }
 
-    moveCategoryUp(category: RecordCategory) {
-        const index = this.categories.findIndex(c => c.id === category.id)
-        if (index == -1 || index == 0) {
-            return;
-        }
-
-        const moveTo = index - 2
-        const p = OrganizationRecordsConfiguration.patch({})
-        p.recordCategories.addMove(category.id, this.categories[moveTo]?.id ?? null)
-        this.addRecordsConfigurationPatch(p)
-    }
-     
-    moveCategoryDown(category: RecordCategory) {
-        const index = this.categories.findIndex(c => c.id === category.id)
-        if (index == -1 || index >= this.categories.length - 1) {
-            return;
-        }
-
-        const moveTo = index + 1
-        const p = OrganizationRecordsConfiguration.patch({})
-        p.recordCategories.addMove(category.id, this.categories[moveTo]?.id ?? null)
+    addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
+        const p = OrganizationRecordsConfiguration.patch({
+            recordCategories: patch
+        })
         this.addRecordsConfigurationPatch(p)
     }
 
-    newCategory() {
-        
+    addCategory() {
+        const category = RecordCategory.create({})
+
+        this.present(new ComponentWithProperties(EditRecordCategoryView, {
+            category,
+            isNew: true,
+            saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                this.addCategoriesPatch(patch)
+            }
+        }).setDisplayStyle("popup"))
     }
 
     async save() {

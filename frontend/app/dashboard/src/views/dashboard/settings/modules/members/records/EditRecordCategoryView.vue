@@ -1,6 +1,6 @@
 <template>
     <div class="st-view record-category-edit-view">
-        <STNavigationBar :title="isNew ? typeName+' toevoegen' : name+' bewerken'">
+        <STNavigationBar :title="title">
             <template slot="right">
                 <button v-if="!isNew" class="button text" @click="deleteMe">
                     <span class="icon trash" />
@@ -11,11 +11,8 @@
         </STNavigationBar>
 
         <main>
-            <h1 v-if="isNew">
-                {{ typeName }} toevoegen
-            </h1>
-            <h1 v-else>
-                {{ name || typeName }} bewerken
+            <h1>
+                {{ title }}
             </h1>
         
             <STErrorsDefault :error-box="errorBox" />
@@ -27,19 +24,9 @@
                         v-model="name"
                         class="input"
                         type="text"
-                        :placeholder="'Naam '+typeName"
+                        placeholder="Naam"
                         autocomplete=""
                     >
-                </STInputBox>
-                <STInputBox v-if="isTicket" title="Type" error-fields="name" :error-box="errorBox">
-                    <select
-                        v-model="type"
-                        class="input"
-                        type="text"
-                    >
-                        <option>Ticket</option>
-                        <option>Voucher</option>
-                    </select>
                 </STInputBox>
             </div>
 
@@ -48,7 +35,7 @@
                     v-model="description"
                     class="input"
                     type="text"
-                    placeholder="Beschrijving van dit artikel"
+                    placeholder="Beschrijving"
                     autocomplete=""
                 />
             </STInputBox>
@@ -68,20 +55,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, ProductDateRange, ProductLocation, ProductPrice, ProductType, RecordCategory, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ErrorBox, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { RecordCategory, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
-import EditOptionMenuView from './EditOptionMenuView.vue';
-import EditProductPriceView from './EditProductPriceView.vue';
-import OptionMenuSection from "./OptionMenuSection.vue"
-import ProductPriceBox from "./ProductPriceBox.vue"
-import ProductPriceRow from "./ProductPriceRow.vue"
-import ProductSelectDateRangeInput from "./ProductSelectDateRangeInput.vue"
-import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
 
 @Component({
     components: {
@@ -89,22 +67,8 @@ import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
         STToolbar,
         STInputBox,
         STErrorsDefault,
-        SegmentedControl,
-        DateSelection,
-        RadioGroup,
-        PriceInput,
-        Radio,
-        Checkbox,
-        NumberInput,
         Spinner,
-        UploadButton,
-        ProductPriceRow,
         STList,
-        OptionMenuSection,
-        ProductPriceBox,
-        WebshopFieldsBox,
-        ProductSelectLocationInput,
-        ProductSelectDateRangeInput
     },
 })
 export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
@@ -117,29 +81,23 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     isNew!: boolean
 
-    @Prop({ required: true })
-    organization: Organization
-
-    /// For now only used to update locations and times of other products that are shared
-    patchOrganization:  AutoEncoderPatchType<Organization> = Organization.patch({})
     patchCategory: AutoEncoderPatchType<RecordCategory> = RecordCategory.patch({ id: this.category.id })
 
     /**
-     * If we can immediately save this category, then you can create a save handler and pass along the changes.
+     * Pass along the changes of the array (so we can also delete with the save handler)
      */
     @Prop({ required: true })
-    saveHandler: (patchOrganization: AutoEncoderPatchType<Organization>) => void;
-
-    get patchedOrganization() {
-        return this.organization.patch(this.patchOrganization)
-    }
+    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
 
     get patchedCategory() {
         return this.category.patch(this.patchCategory)
     }
 
-    get typeName(): string {
-        return "Categorie"
+    get title(): string {
+        if (this.isNew) {
+            return "Nieuwe categorie"
+        }
+        return "Categorie bewerken"
     }
 
     get name() {
@@ -168,16 +126,15 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
             return
         }
 
-        const recordsConfiguration = OrganizationRecordsConfiguration.patch({})
-        recordsConfiguration.recordCategories.addPatch(this.patchCategory)
+        const arrayPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
 
-        const p = this.patchOrganization.patch({
-            meta: OrganizationMetaData.patch({
-                recordsConfiguration
-            })
-        })
+        if (this.isNew) {
+            arrayPatch.addPut(this.patchedCategory)
+        } else {
+            arrayPatch.addPatch(this.patchCategory)
+        }
 
-        this.saveHandler(p)
+        this.saveHandler(arrayPatch)
         this.pop({ force: true })
     }
 
@@ -186,16 +143,16 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
             return
         }
 
-        const recordsConfiguration = OrganizationRecordsConfiguration.patch({})
-        recordsConfiguration.recordCategories.addDelete(this.category.id)
+        if (this.isNew) {
+            // do nothing
+            this.pop({ force: true })
+            return
+        }
 
-        const p = Organization.patch({
-            meta: OrganizationMetaData.patch({
-                recordsConfiguration
-            })
-        })
+        const arrayPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
+        arrayPatch.addDelete(this.category.id)
 
-        this.saveHandler(p)
+        this.saveHandler(arrayPatch)
         this.pop({ force: true })
     }
 
@@ -217,16 +174,3 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-.category-edit-view {
-    img.image {
-        margin: 15px 0;
-        height: 140px;
-        border-radius: $border-radius;
-    }
-}
-</style>

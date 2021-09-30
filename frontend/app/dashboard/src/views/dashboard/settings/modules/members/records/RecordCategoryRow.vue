@@ -13,13 +13,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STListItem } from "@stamhoofd/components";
-import { Organization, RecordCategory } from "@stamhoofd/structures"
+import { RecordCategory } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import EditProductView from './EditRecordCategoryView.vue';
+import EditRecordCategoryView from './EditRecordCategoryView.vue';
 
 @Component({
     components: {
@@ -31,27 +31,44 @@ export default class RecordCategoryRow extends Mixins(NavigationMixin) {
     category: RecordCategory
 
     @Prop({})
-    organization: Organization
+    categories: RecordCategory[]
 
     editCategory() {
-        this.present(new ComponentWithProperties(EditProductView, { 
-            category: this.category, 
-            organization: this.organization, 
-            isNew: false, 
-            saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
-                this.$emit("patch", patch)
-
-                // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+        this.present(new ComponentWithProperties(EditRecordCategoryView, {
+            category: this.category,
+            isNew: false,
+            saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                this.addPatch(patch)
             }
         }).setDisplayStyle("popup"))
     }
 
-    moveUp() {
-        this.$emit("move-up")
+    addPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
+        this.$emit("patch", patch)
     }
 
+    moveUp() {
+        const index = this.categories.findIndex(c => c.id === this.category.id)
+        if (index == -1 || index == 0) {
+            return;
+        }
+
+        const moveTo = index - 2
+        const p: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
+        p.addMove(this.category.id, this.categories[moveTo]?.id ?? null)
+        this.addPatch(p)
+    }
+     
     moveDown() {
-        this.$emit("move-down")
+        const index = this.categories.findIndex(c => c.id === this.category.id)
+        if (index == -1 || index >= this.categories.length - 1) {
+            return;
+        }
+
+        const moveTo = index + 1
+        const p: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
+        p.addMove(this.category.id, this.categories[moveTo]?.id ?? null)
+        this.addPatch(p)
     }
 }
 </script>

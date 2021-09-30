@@ -81,12 +81,6 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 117 })
     recordCategories: RecordCategory[] = []
 
-    @field({ decoder: new ArrayDecoder(RecordSettings), version: 117 })
-    records: RecordSettings[] = []
-
-    @field({ decoder: new ArrayDecoder(StringDecoder), version: 117 })
-    mainRecordCategories: string[] = []
-
     /**
      * @deprecated
      * Moved to recordCategories
