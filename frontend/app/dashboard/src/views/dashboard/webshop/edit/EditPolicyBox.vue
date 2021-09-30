@@ -17,7 +17,7 @@
                 v-model="name"
                 class="input"
                 type="text"
-                :placeholder="'bv. Algemene voorwaarden of Contact'"
+                :placeholder="'bv. Contact'"
                 autocomplete=""
             >
         </STInputBox>

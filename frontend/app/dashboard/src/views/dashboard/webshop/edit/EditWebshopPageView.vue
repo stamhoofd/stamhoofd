@@ -94,6 +94,8 @@
             </STInputBox>
         </template>
 
+        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
+
         <hr>
         <h2 class="style-with-button">
             <div>Externe links</div>
@@ -109,8 +111,9 @@
         <p v-if="policies.length == 0" class="info-box">
             Je hebt momenteel geen externe links toegevoegd.
         </p>
-
-        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
+        <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
+            De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
+        </p>
     </main>
 </template>
 
@@ -122,6 +125,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { DNSRecord, DNSRecordType,Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
 import EditPolicyBox from "./EditPolicyBox.vue"
 
@@ -148,6 +152,10 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
     cachedHasCustomDomain: boolean | null = this.hasCustomDomain
     cachedCustomUrl: string | null = this.customUrl
     cachedUri: string | null = this.uri
+
+    get organization() {
+        return OrganizationManager.organization
+    }
 
     patchPolicy(policy: Policy, patch: AutoEncoderPatchType<Policy>) {
         const p = WebshopMetaData.patch({})

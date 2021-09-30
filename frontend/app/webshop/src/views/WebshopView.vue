@@ -6,9 +6,9 @@
             </template>
 
             <template slot="right">
-                <a v-if="privacyUrl" class="button text limit-space" :href="privacyUrl" target="_blank" rel="nofollow noreferrer noopener">
-                    <span class="icon privacy" />
-                    <span>Privacy</span>
+                <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
+                    <span class="icon external" />
+                    <span>Terug naar website</span>
                 </a>
                 <button class="primary button" @click="openCart(true)">
                     <span class="icon basket" />
@@ -58,7 +58,7 @@
                                 -
                             </template>
                             <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                                Terug naar website
+                                Website
                             </a>
                             
                             <template v-for="policy in policies">
