@@ -28,7 +28,7 @@
                     Naar een website
                 </Radio>
                 <Radio v-model="selectedType" value="file">
-                    Naar een PDF-file
+                    Naar een PDF-bestand
                 </Radio>
             </RadioGroup>
         </STInputBox>
