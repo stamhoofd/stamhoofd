@@ -145,3 +145,12 @@ select.input {
     background-position: 8px center;
     background-repeat: no-repeat;
 }
+
+.textarea-container {
+    padding-bottom: 20px;
+    padding-left: 35px;
+
+    @media (max-width: 450px) {
+        padding-left: 0;
+    }
+}

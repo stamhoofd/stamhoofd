@@ -1,7 +1,12 @@
 <template>
     <div>
         <Checkbox v-if="answer.settings.type == RecordType.Checkbox" v-model="answer.selected">
-            {{ label }}
+            <h3 class="style-title-list">
+                {{ label }}
+            </h3>
+            <p v-if="answer.settings.description" class="style-description-small">
+                {{ answer.settings.description }}
+            </p>
         </Checkbox>
         <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label">
             <STList>
@@ -29,8 +34,29 @@
                 </STListItem>
             </STList>
         </STInputBox>
+        <STInputBox v-else-if="answer.settings.type == RecordType.Text" :title="label">
+            <input v-model="answer.value" :placeholder="inputPlaceholder" class="input">
+        </STInputBox>
+        <STInputBox v-else-if="answer.settings.type == RecordType.Textarea" :title="label" class="max">
+            <textarea v-model="answer.value" :placeholder="inputPlaceholder" class="input" />
+        </STInputBox>
         <p v-else class="error-box">
             Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
+        </p>
+
+        <!-- Comments if checkbox is selected -->
+
+        <div v-if="answer.settings.type == RecordType.Checkbox && answer.selected && answer.settings.askComments" class="textarea-container">
+            <textarea v-model="answer.comments" class="input" :placeholder="inputPlaceholder" />
+            <p v-if="answer.settings.commentsDescription" class="info-box">
+                {{ answer.settings.commentsDescription }}
+            </p>
+        </div>
+
+        <!-- Footer description -->
+
+        <p v-if="answer.settings.type != RecordType.Checkbox && answer.settings.description" class="style-description-small">
+            {{ answer.settings.description }}
         </p>
     </div>
 </template>
@@ -106,6 +132,10 @@ export default class RecordAnswerInput extends Vue {
         if (this.validator) {
             this.validator.removeValidation(this)
         }
+    }
+
+    get inputPlaceholder() {
+        return this.answer.settings.inputPlaceholder
     }
 
     get answer(): RecordAnswer {

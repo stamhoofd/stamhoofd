@@ -116,17 +116,3 @@ export default class RecordCheckbox extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.record-checkbox .textarea-container {
-    padding-bottom: 20px;
-    padding-left: 35px;
-
-    @media (max-width: 450px) {
-        padding-left: 0;
-    }
-}
-</style>

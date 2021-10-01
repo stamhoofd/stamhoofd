@@ -134,7 +134,7 @@
 
             <STInputBox v-if="shouldAskInputPlaceholder" title="Tekst in leeg tekstvak" error-fields="label" :error-box="errorBox" class="max">
                 <input
-                    v-model="label"
+                    v-model="inputPlaceholder"
                     class="input"
                     type="text"
                     placeholder="bv. 'Vul hier jouw naam in'"
@@ -278,6 +278,14 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     set required(required: boolean) {
         this.patchRecord = this.patchRecord.patch({ required })
+    }
+
+    get inputPlaceholder() {
+        return this.patchedRecord.inputPlaceholder
+    }
+
+    set inputPlaceholder(inputPlaceholder: string) {
+        this.patchRecord = this.patchRecord.patch({ inputPlaceholder })
     }
 
     get askComments() {
