@@ -37,17 +37,16 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
-import { AskRequirement, MemberDetailsMeta, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
+import { AskRequirement, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
 import { Group } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from "../classes/CheckoutManager";
 import { MemberManager } from "../classes/MemberManager";
 import { OrganizationManager } from "../classes/OrganizationManager";
 import GroupView from "../views/groups/GroupView.vue";
-import { EditMemberStepsManager, EditMemberStepType } from "../views/members/details/EditMemberStepsManager";
-import MemberChooseGroupsView from "../views/members/MemberChooseGroupsView.vue";
+import { BuiltInEditMemberStep, EditMemberStep, EditMemberStepsManager, EditMemberStepType } from "../views/members/details/EditMemberStepsManager";
 
 @Component({
     components: {
@@ -135,7 +134,7 @@ export default class MemberBox extends Mixins(NavigationMixin){
     async tryToSelect() {
         // Only ask details + parents for new members
         // We'll ask the other things when selecting the details
-        const steps: EditMemberStepType[] = []
+        const steps: EditMemberStep[] = []
 
         if (this.member.details.isRecovered) {
             let meta = this.member.getDetailsMeta()
@@ -144,37 +143,39 @@ export default class MemberBox extends Mixins(NavigationMixin){
             // Don't check for reviews (unless the records, which will be asked if it was never reviewed)
 
             if (!meta || !meta.hasMemberGeneral) {
-                steps.push(EditMemberStepType.Details)
+                steps.push(
+                    new BuiltInEditMemberStep(EditMemberStepType.Details)
+                )
             }
             if (!meta || !meta.hasParents) {
-                steps.push(EditMemberStepType.Parents)
+                steps.push(new BuiltInEditMemberStep(EditMemberStepType.Parents))
             }
 
             if (!this.item.waitingList) {
                 if (!meta || !meta.hasEmergency) {
-                    steps.push(EditMemberStepType.EmergencyContact)
+                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact))
                 }
                 if (!meta || !meta.hasRecords) {
-                    steps.push(EditMemberStepType.Records)
+                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.Records))
                 }
             }
         } else {
             // We still have all the data. Ask everything that is older than 3 months
             if (this.member.details.reviewTimes.isOutdated("details", 60*1000*60*24*31*3)) {
-                steps.push(EditMemberStepType.Details)
+                steps.push(new BuiltInEditMemberStep(EditMemberStepType.Details))
             }
 
             if (this.member.details.reviewTimes.isOutdated("parents", 60*1000*60*24*31*3) || this.member.details.parents.length == 0) {
-                steps.push(EditMemberStepType.Parents)
+                steps.push(new BuiltInEditMemberStep(EditMemberStepType.Parents))
             }
 
             if (!this.item.waitingList) {
                 if (this.member.details.reviewTimes.isOutdated("emergencyContacts", 60*1000*60*24*31*3) || (this.member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.Required)) {
-                    steps.push(EditMemberStepType.EmergencyContact)
+                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact))
                 }
 
                 if (this.member.details.reviewTimes.isOutdated("records", 60*1000*60*24*31*3)) {
-                    steps.push(EditMemberStepType.Records)
+                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.Records))
                 }
             }
         }

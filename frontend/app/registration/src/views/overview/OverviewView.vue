@@ -89,7 +89,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
-import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
+import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
 import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import MemberView from "../members/MemberView.vue";
 import MissingKeyView from "./MissingKeyView.vue";
@@ -266,8 +266,8 @@ export default class OverviewView extends Mixins(NavigationMixin){
         // We'll ask the other things when selecting the details
         const stepManager = new EditMemberStepsManager(
             [
-                EditMemberStepType.Details,
-                EditMemberStepType.Parents
+                new BuiltInEditMemberStep(EditMemberStepType.Details),
+                new BuiltInEditMemberStep(EditMemberStepType.Parents)
             ], 
             undefined,
             (component: NavigationMixin) => {

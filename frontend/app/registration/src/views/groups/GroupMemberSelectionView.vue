@@ -46,7 +46,7 @@ import { CheckoutManager } from "../../classes/CheckoutManager";
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from "../../classes/OrganizationManager";
 import MemberBox from "../../components/MemberBox.vue"
-import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
+import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
 
 @Component({
     components: {
@@ -98,8 +98,8 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
         // We'll ask the other things when selecting the details
         const stepManager = new EditMemberStepsManager(
             [
-                EditMemberStepType.Details,
-                EditMemberStepType.Parents
+                new BuiltInEditMemberStep(EditMemberStepType.Details),
+                new BuiltInEditMemberStep(EditMemberStepType.Parents)
             ], 
             undefined,
             (component: NavigationMixin) => {

@@ -2,7 +2,6 @@ import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { AskRequirement, MemberDetails, MemberWithRegistrations, Version } from '@stamhoofd/structures';
-import { component } from 'vue/types/umd';
 
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -15,7 +14,21 @@ export enum EditMemberStepType {
     // todo: Questions step
 }
 
-export class EditMemberStep {
+export interface EditMemberStep {
+    getComponent(): Promise<any>
+
+    /**
+     * Skipping = this information should not get stored, and should even get removed
+     */
+    shouldSkip(details: MemberDetails): boolean
+
+    /**
+     * Remove the information that is stored in member details that normally would be asked in this step
+     */
+    onSkip(details: MemberDetails)
+}
+
+export class BuiltInEditMemberStep implements EditMemberStep {
     type: EditMemberStepType
 
     constructor(type: EditMemberStepType) {
@@ -89,15 +102,15 @@ export class EditMemberStepsManager {
      */
     lastButtonText: string
 
-    types: EditMemberStepType[]
+    steps: EditMemberStep[]
     finishHandler: (component: NavigationMixin) => Promise<void>;
     lastSaveHandler?: (details: MemberDetails) => Promise<void>;
 
     /**
      * Intialise a new step flow with all the given steps
      */
-    constructor(types: EditMemberStepType[], editMember?: MemberWithRegistrations, finishHandler?: (component: NavigationMixin) => Promise<void>) {
-        this.types = types
+    constructor(steps: EditMemberStep[], editMember?: MemberWithRegistrations, finishHandler?: (component: NavigationMixin) => Promise<void>) {
+        this.steps = steps
         this.lastButtonText = "Klaar"
 
         if (editMember) {
@@ -150,27 +163,13 @@ export class EditMemberStepsManager {
         }
     }
 
-    /// Return all the steps that are confirmed with the current checkout configuration
-    getSteps(): EditMemberStep[] {
-        const steps: EditMemberStep[] = []
-
-        for (const type of this.types) {
-            steps.push(new EditMemberStep(
-                type
-            ))
-        }
-
-        return steps
-    }
-
     /**
      * Get the next step, executing possible mutations on member details if some steps are skipped
      */
-    private getNextStep(step: EditMemberStepType | undefined, details: MemberDetails) {
-
-        const steps = this.getSteps()
+    private getNextStep(step: EditMemberStep | undefined, details: MemberDetails) {
         let next = step === undefined
-        for (const s of steps) {
+
+        for (const s of this.steps) {
             if (next) {
                 if (this.force || !s.shouldSkip(details)) {
                     return s
@@ -181,7 +180,7 @@ export class EditMemberStepsManager {
                 continue
             }
 
-            if (s.type === step) {
+            if (s === step) {
                 next = true
             }
         }
@@ -197,14 +196,14 @@ export class EditMemberStepsManager {
     /**
      * Get the next component, executing possible mutations on member details if some steps are skipped
      */
-    private async getNextComponent(currentType: EditMemberStepType | undefined, details: MemberDetails): Promise<ComponentWithProperties | undefined> {
+    private async getNextComponent(currentStep: EditMemberStep | undefined, details: MemberDetails): Promise<ComponentWithProperties | undefined> {
 
-        const step = this.getNextStep(currentType, details)
+        const step = this.getNextStep(currentStep, details)
         if (!step) {
             return undefined
         }
 
-        const hasNext = !!this.getNextStep(step.type, details)
+        const hasNext = !!this.getNextStep(step, details)
         return new ComponentWithProperties(await step.getComponent(), {
             // Details to check if anything is changed
             originalDetails: this.cloneDetails(details),
@@ -216,7 +215,7 @@ export class EditMemberStepsManager {
 
             // Save details on complete
             saveHandler: async (details: MemberDetails, component: NavigationMixin): Promise<void> => {
-                const next = await this.getNextComponent(step.type, details)
+                const next = await this.getNextComponent(step, details)
 
                 if (!next && this.lastSaveHandler) {
                     // Allow to still make changes to  the given details before saving it
