@@ -9,7 +9,12 @@ export enum RecordType {
     Checkbox = "Checkbox",
 
     /**
-     * Select one, zero or more from a menu (wih a given minimum and maximum setting)
+     * Select one (or none if not required)
+     */
+    ChooseOne = "ChooseOne",
+
+    /**
+     * Select one, zero or more from a menu
      * The way this is shown will differ depending on the minimum or maximum setting. e.g. when exactly one 
      * item should be selected, we could show it with a dropdown menu
      */
@@ -37,6 +42,9 @@ export class RecordChoice extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     name = ""
+
+    @field({ decoder: StringDecoder, version: 118 })
+    description = ""
 }
 
 export class RecordSettings extends AutoEncoder {
@@ -50,7 +58,9 @@ export class RecordSettings extends AutoEncoder {
     name = ""
 
     /**
-     * When used with checkbox: has no meaning, but if it is a checkbox with text input, then the input is required
+     * When used with checkbox: checkbox needs to get checked (e.g accept terms, confirm age...)
+     * Multiple choice: minimum one selection required
+     * Text: required input
      */
     @field({ decoder: BooleanDecoder })
     required = false
@@ -61,6 +71,12 @@ export class RecordSettings extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder })
     encrypted = true
+
+    /**
+     * Only used for checkboxes
+     */
+    @field({ decoder: BooleanDecoder, version: 119 })
+    askComments = false
 
     /**
      * Future idea:
@@ -83,6 +99,7 @@ export class RecordSettings extends AutoEncoder {
      * Label used for input (depending on the type)
      * Checkbox: text next to checkbox
      * Text inputs: label field above the input
+     * If empty: name is used
      */
     @field({ decoder: StringDecoder })
     label = ""
@@ -98,8 +115,7 @@ export class RecordSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     inputPlaceholder = ""
 
-    /// In case of textboxes or comments for checked checkboxes
-    /// Below the input
-    @field({ decoder: StringDecoder })
-    inputDescription = ""
+    /// Text below the input field for comments (if any)
+    @field({ decoder: StringDecoder, version: 120 })
+    commentsDescription = ""
 }

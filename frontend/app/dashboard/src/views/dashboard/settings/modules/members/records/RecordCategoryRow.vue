@@ -27,10 +27,10 @@ import EditRecordCategoryView from './EditRecordCategoryView.vue';
     },
 })
 export default class RecordCategoryRow extends Mixins(NavigationMixin) {
-    @Prop({})
+    @Prop({ required: true })
     category: RecordCategory
 
-    @Prop({})
+    @Prop({ required: true })
     categories: RecordCategory[]
 
     editCategory() {

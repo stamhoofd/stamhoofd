@@ -18,13 +18,13 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <div class="split-inputs">
-                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                <STInputBox title="Titel" error-fields="name" :error-box="errorBox">
                     <input
                         ref="firstInput"
                         v-model="name"
                         class="input"
                         type="text"
-                        placeholder="Naam"
+                        placeholder="Titel"
                         autocomplete=""
                     >
                 </STInputBox>
@@ -39,6 +39,42 @@
                     autocomplete=""
                 />
             </STInputBox>
+            <p class="style-description-small">
+                De beschrijving staat onder de titel van de categorie
+            </p>
+
+            <hr>
+            <h2 v-if="categories.length == 0">
+                Kenmerken
+            </h2>
+            <h2 v-else>
+                Subcategorieën
+            </h2>
+            <p>
+                In elke categorie kan je kenmerken/vragen onderverdelen. Je kan er ook voor kiezen om een categorie nog eens onder te verdelen in categorieën, wat handig is als je heel wat informatie moet opvragen.
+            </p>
+
+            <STList v-if="categories.length > 0">
+                <RecordCategoryRow v-for="c in categories" :key="c.id" :category="c" :categories="categories" :parent-category="patchedCategory" :selectable="true" @patch="addCategoriesPatch" />
+            </STList>
+
+            <STList v-if="records.length > 0">
+                <RecordRow v-for="record in records" :key="record.id" :record="record" :records="records" :parent-category="patchedCategory" :selectable="true" @patch="addRecordsPatch" />
+            </STList>
+
+            <p v-if="categories.length == 0">
+                <button class="button text" @click="addRecord">
+                    <span class="icon add" />
+                    <span>Nieuw kenmerk/vraag</span>
+                </button>
+            </p>
+
+            <p v-if="!parentCategory">
+                <button class="button text" @click="addCategory">
+                    <span class="icon add" />
+                    <span>Nieuwe subcategorie</span>
+                </button>
+            </p>
         </main>
 
         <STToolbar>
@@ -56,10 +92,14 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { RecordCategory, Version } from "@stamhoofd/structures"
+import { RecordCategory, RecordSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import EditRecordView from "./EditRecordView.vue"
+import RecordCategoryRow from "./RecordCategoryRow.vue"
+import RecordRow from "./RecordRow.vue"
 
 @Component({
     components: {
@@ -69,6 +109,8 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         STErrorsDefault,
         Spinner,
         STList,
+        RecordCategoryRow,
+        RecordRow
     },
 })
 export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
@@ -77,6 +119,9 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     category!: RecordCategory
+
+    @Prop({ required: false, default: null })
+    parentCategory!: RecordCategory | null
 
     @Prop({ required: true })
     isNew!: boolean
@@ -91,6 +136,14 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
     get patchedCategory() {
         return this.category.patch(this.patchCategory)
+    }
+
+    get categories() {
+        return this.patchedCategory.childCategories
+    }
+
+    get records() {
+        return this.patchedCategory.records
     }
 
     get title(): string {
@@ -118,6 +171,57 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
     addPatch(patch: AutoEncoderPatchType<RecordCategory>) {
         this.patchCategory = this.patchCategory.patch(patch)
+    }
+    
+    addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
+        const p = RecordCategory.patch({
+            childCategories: patch
+        })
+        this.addPatch(p)
+    }
+
+    addRecordsPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
+        const p = RecordCategory.patch({
+            records: patch
+        })
+        this.addPatch(p)
+    }
+
+    addCategory() {
+        const currentRecords = this.records
+        const category = RecordCategory.create({
+            records: currentRecords
+        })
+
+        this.present(new ComponentWithProperties(EditRecordCategoryView, {
+            category,
+            isNew: true,
+            parentCategory: this.patchedCategory,
+            saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                // Clear records that were added to the new category
+                const p: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray()
+                for (const record of currentRecords) {
+                    p.addDelete(record.id)
+                }
+                this.addRecordsPatch(p)
+
+                // Add category
+                this.addCategoriesPatch(patch)
+            }
+        }).setDisplayStyle("popup"))
+    }
+
+    addRecord() {
+        const record = RecordSettings.create({})
+
+        this.present(new ComponentWithProperties(EditRecordView, {
+            record,
+            isNew: true,
+            parentCategory: this.patchedCategory,
+            saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => {
+                this.addRecordsPatch(patch)
+            }
+        }).setDisplayStyle("popup"))
     }
 
     async save() {
