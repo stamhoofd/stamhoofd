@@ -17,17 +17,21 @@ export class RecordAnswer extends AutoEncoder {
     settings: RecordSettings
 }
 
-export const RecordAnswerDecoder: Decoder<RecordAnswer> = {
-    decode: function (data: Data): RecordAnswer {
+export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
+    decode(data: Data): RecordAnswer {
         const type = data.field("settings").field("type").enum(RecordType)
+        return data.decode(this.getClassForType(type) as Decoder<RecordAnswer>)
+    }
 
+    getClassForType(type: RecordType): typeof RecordAnswer {
         switch (type) {
-            case RecordType.Checkbox: return data.decode(RecordCheckboxAnswer as Decoder<RecordCheckboxAnswer>)
+            case RecordType.Checkbox: return RecordCheckboxAnswer
             case RecordType.Text: 
             case RecordType.Textarea:
-                return data.decode(RecordTextAnswer as Decoder<RecordTextAnswer>)
-            case RecordType.MultipleChoice: return data.decode(RecordMultipleChoiceAnswer as Decoder<RecordMultipleChoiceAnswer>)
-            case RecordType.Address: return data.decode(RecordAddressAnswer as Decoder<RecordAddressAnswer>)
+                return RecordTextAnswer
+            case RecordType.MultipleChoice: return RecordMultipleChoiceAnswer
+            case RecordType.ChooseOne: return RecordChooseOneAnswer
+            case RecordType.Address: return RecordAddressAnswer
         }
         throw new SimpleError({
             code: "not_supported",
@@ -36,6 +40,7 @@ export const RecordAnswerDecoder: Decoder<RecordAnswer> = {
         })
     }
 }
+export const RecordAnswerDecoder = new RecordAnswerDecoderStatic()
 
 export class RecordTextAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder })
@@ -55,6 +60,10 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
     selectedChoices: RecordChoice[] = []
 }
 
+export class RecordChooseOneAnswer extends RecordAnswer {
+    @field({ decoder: RecordChoice, nullable: true })
+    selectedChoice: RecordChoice | null = null
+}
 
 export class RecordAddressAnswer extends RecordAnswer {
     @field({ decoder: Address, nullable: true })

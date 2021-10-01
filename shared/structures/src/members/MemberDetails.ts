@@ -10,6 +10,7 @@ import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { LegacyRecord,OldRecord } from './records/LegacyRecord';
 import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from './records/LegacyRecordType';
+import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
 import { ReviewTimes } from './ReviewTime';
 
 /**
@@ -60,6 +61,9 @@ export class MemberDetails extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(EmergencyContact) })
     emergencyContacts: EmergencyContact[] = [];
+
+    @field({ decoder: new ArrayDecoder(RecordAnswerDecoder), version: 120 })
+    recordAnswers: RecordAnswer[] = []
 
     @field({ decoder: new ArrayDecoder(OldRecord) })
     @field({ 

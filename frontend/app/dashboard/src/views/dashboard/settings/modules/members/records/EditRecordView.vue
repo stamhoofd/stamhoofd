@@ -94,7 +94,7 @@
             <h2 class="style-with-button">
                 <div>Formulier</div>
                 <div>
-                    <button class="button text">
+                    <button class="button text" @click="openPreview">
                         <span class="icon eye" />
                         <span>Voorbeeld</span>
                     </button>
@@ -180,6 +180,7 @@ import { RecordCategory, RecordChoice, RecordSettings, RecordType, Version } fro
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
+import PreviewRecordView from './PreviewRecordView.vue';
 import RecordChoiceRow from "./RecordChoiceRow.vue"
 
 @Component({
@@ -429,6 +430,10 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
-    
+    openPreview() {
+        this.present(new ComponentWithProperties(PreviewRecordView, {
+            record: this.patchedRecord
+        }).setDisplayStyle("popup"))
+    }
 }
 </script>
