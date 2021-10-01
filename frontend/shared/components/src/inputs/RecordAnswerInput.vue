@@ -40,6 +40,7 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.Textarea" :title="label" class="max">
             <textarea v-model="answer.value" :placeholder="inputPlaceholder" class="input" />
         </STInputBox>
+        <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="answer.address" :title="label" :required="required" :validator="validator" />
         <p v-else class="error-box">
             Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
         </p>
@@ -63,7 +64,7 @@
 
 
 <script lang="ts">
-import { Checkbox,ErrorBox, Radio,STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
+import { AddressInput,Checkbox,ErrorBox, Radio,STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -73,7 +74,8 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         STListItem,
         STList,
         Checkbox,
-        Radio
+        Radio,
+        AddressInput
     }
 })
 export default class RecordAnswerInput extends Vue {
@@ -97,6 +99,10 @@ export default class RecordAnswerInput extends Vue {
 
     get label() {
         return this.recordSettings.label || this.recordSettings.name
+    }
+
+    get required() {
+        return this.recordSettings.required
     }
 
     getChoiceSelected(choice: RecordChoice): boolean {

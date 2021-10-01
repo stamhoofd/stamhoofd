@@ -144,7 +144,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton,PhoneInput, RecordCheckbox,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
-import { AskRequirement, EmergencyContact,LegacyRecordType, MemberDetails, LegacyRecord, Version } from "@stamhoofd/structures"
+import { AskRequirement, EmergencyContact,LegacyRecord, LegacyRecordType, MemberDetails, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
