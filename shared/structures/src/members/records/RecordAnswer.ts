@@ -32,6 +32,10 @@ export class RecordAnswer extends AutoEncoder {
         }
         return false
     }
+
+    get stringValue() {
+        return "Onbekend"
+    }
 }
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
@@ -62,6 +66,10 @@ export const RecordAnswerDecoder = new RecordAnswerDecoderStatic()
 export class RecordTextAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder })
     value = ""
+
+    get stringValue() {
+        return this.value
+    }
 }
 
 export class RecordCheckboxAnswer extends RecordAnswer {
@@ -75,14 +83,26 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 export class RecordMultipleChoiceAnswer extends RecordAnswer {
     @field({ decoder: new ArrayDecoder(RecordChoice) })
     selectedChoices: RecordChoice[] = []
+
+    get stringValue() {
+        return this.selectedChoices.map(c => c.name).join(", ")
+    }
 }
 
 export class RecordChooseOneAnswer extends RecordAnswer {
     @field({ decoder: RecordChoice, nullable: true })
     selectedChoice: RecordChoice | null = null
+
+    get stringValue() {
+        return this.selectedChoice?.name ?? "/"
+    }
 }
 
 export class RecordAddressAnswer extends RecordAnswer {
     @field({ decoder: Address, nullable: true })
     address: Address | null = null
+
+    get stringValue() {
+        return this.address?.toString() ?? "/"
+    }
 }

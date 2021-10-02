@@ -4,10 +4,9 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { FillRecordCategoryView } from '@stamhoofd/components';
 import { MemberDetails, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import FillRecordCategoryView from "./FillRecordCategoryView.vue"
 
 /**
  * This component removes any member specific logic from FillRecordCategoryView and puts it separately so we can reuse

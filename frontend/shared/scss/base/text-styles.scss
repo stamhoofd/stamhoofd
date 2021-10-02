@@ -291,7 +291,7 @@
 
 .details-grid {
     display: grid;
-    grid-template-columns: 40% 60%;
+    grid-template-columns: 40% 1fr;
     gap: 8px 15px;
 
     &.small {
@@ -304,6 +304,21 @@
 
     dd {
         @extend .style-definition-description;
+    }
+
+    .center {
+        align-self: center;
+    }
+
+    .icons {
+        text-align: right;
+        line-height: 1;
+    }
+
+    dd.description {
+        grid-column: 1 / span 2;
+        margin-top: -5px;
+        @extend .style-description-small;
     }
 }
 
@@ -320,12 +335,12 @@
         
         > h2 {
             @extend .style-title-2;
-            padding-bottom: 15px;
+            padding-bottom: 20px;
         }
 
         > h2.style-with-button {
             > *:first-child {
-                padding-bottom: 15px;
+                padding-bottom: 20px;
             }
             padding-bottom: 0;
         }
@@ -338,6 +353,12 @@
             &:not([class]), &.style-description {
                 @extend .style-description-block;
             }
+
+            
+        }
+
+        > h2 + .st-list {
+            margin-top: -15px;
         }
 
         > hr {

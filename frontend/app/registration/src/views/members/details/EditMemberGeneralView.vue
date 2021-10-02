@@ -104,12 +104,12 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     isNew: boolean
 
     @Prop({ required: true })
-    details: MemberDetails
+    details!: MemberDetails
 
     @Prop({ required: true })
     saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
-    livesAtParents = false
+    livesAtParents = this.details.parents.length > 0
     validator = new Validator()
     errorBox: ErrorBox | null = null
 

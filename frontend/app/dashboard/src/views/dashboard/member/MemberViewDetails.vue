@@ -1,5 +1,5 @@
 <template>
-    <div class="member-view-details">
+    <div class="member-view-details split">
         <div>
             <p v-if="hasWrite && member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
                 {{ member.firstName }} is niet ingeschreven
@@ -9,7 +9,7 @@
                 {{ member.firstName }} is niet ingeschreven
             </p>
 
-            <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box">
+            <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box container">
                 <hr v-if="member.activeRegistrations.length == 0">
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
@@ -94,7 +94,7 @@
                 </STList>
             </div>
 
-            <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box">
+            <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
@@ -130,7 +130,7 @@
                 </dl>
             </div>
 
-            <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index" class="hover-box">
+            <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ contact.title }}</div>
@@ -148,7 +148,7 @@
                 </dl>
             </div>
 
-            <div v-if="member.details.doctor" class="hover-box">
+            <div v-if="member.details.doctor" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
@@ -170,32 +170,19 @@
                 </dl>
             </div>
 
-            <div v-if="familyMembers.length > 0" class="hover-box">
+            <!-- Loop all records -->
+            <div v-for="category in recordCategories" :key="category.id" class="hover-box container">
                 <hr>
-
                 <h2 class="style-with-button">
-                    <div v-if="member.details.age <= 30 && familyMembers[0].details.age <= 30">
-                        Broers &amp; zussen
-                    </div>
-                    <div v-else>
-                        Familie
+                    <div>{{ category.name }}</div>
+                    <div class="hover-show">
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editRecordCategory(category)" />
                     </div>
                 </h2>
-
-                <STList>
-                    <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
-                        <h3 class="style-title-list">
-                            {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
-                        </h3>
-                        <p class="style-description">
-                            {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-                </STList>
+                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" />
             </div>
 
-            <div v-if="!member.details || member.details.isRecovered">
+            <div v-if="!member.details || member.details.isRecovered" class="container">
                 <hr>
                 <p v-if="!hasLatestKey" class="error-box">
                     Een deel van de gegevens van dit lid is versleuteld met een sleutel die je niet hebt — en is dus onleesbaar voor jou. Vraag een hoofdbeheerder - die deze sleutel wel heeft - om jou terug toegang te geven (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven).
@@ -211,8 +198,8 @@
             </div>
         </div>
 
-        <div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords) || member.users.length > 0" class="hover-box">
-            <template v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
+        <div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords) || member.users.length > 0">
+            <div class="hover-box container" v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
                 <h2 class="style-with-button">
                     <div>
                         <span class="icon-spacer">Steekkaart</span><span
@@ -255,9 +242,9 @@
                 <template v-if="member.users.length > 0">
                     <hr>
                 </template>
-            </template>
+            </div>
 
-            <template v-if="activeAccounts.length > 0">
+            <div class="hover-box container" v-if="activeAccounts.length > 0">
                 <h2>
                     <span class="icon-spacer">Accounts</span><span
                         v-tooltip="
@@ -271,9 +258,9 @@
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                     <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" @click="unlinkUser(user)" />
                 </p>
-            </template>
+            </div>
 
-            <template v-if="placeholderAccounts.length > 0">
+            <div class="hover-box container" v-if="placeholderAccounts.length > 0">
                 <h2>
                     <span class="icon-spacer">Kunnen registereren</span><span
                         v-tooltip="
@@ -286,14 +273,38 @@
                     <span>{{ user.email }}</span>
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                 </p>
-            </template>
+            </div>
 
-            <template v-if="false">
+            <div v-if="familyMembers.length > 0" class="hover-box container">
+                <hr>
+                <h2>
+                    <template v-if="member.details.age <= 30 && Math.abs(maxFamilyAge - member.details.age) <= 14">
+                        Broers &amp; zussen
+                    </template>
+                    <template v-else>
+                        Familie
+                    </template>
+                </h2>
+
+                <STList>
+                    <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
+                        <h3 class="style-title-list">
+                            {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
+                        </h3>
+                        <p class="style-description" v-if="familyMember.groups.length > 0">
+                            {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+            </div>
+
+            <div class="hover-box container" v-if="false">
                 <hr>
 
                 <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
                 <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
-            </template>
+            </div>
         </div>
     </div>
 </template>
@@ -301,9 +312,9 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,LegacyRecord, LegacyRecordType, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, LegacyRecordTypeHelper, Registration, User } from '@stamhoofd/structures';
+import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -320,7 +331,8 @@ import RecordDescriptionView from './records/RecordDescriptionView.vue';
 @Component({
     components: {
         STListItem,
-        STList
+        STList,
+        RecordCategoryAnswersBox
     },
     directives: { Tooltip },
     filters: {
@@ -347,6 +359,30 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     getGroup(groupId: string) {
         return OrganizationManager.organization.groups.find(g => g.id === groupId)
+    }
+
+    get recordCategories(): RecordCategory[] {
+        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
+        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
+            if (category.childCategories) {
+                return category.childCategories
+            }
+            return [category]
+        })
+    }
+
+    editRecordCategory(category: RecordCategory) {
+        const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
+            category,
+            answers: this.member.details.recordAnswers,
+            markReviewed: false,
+            saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
+                this.member.details.recordAnswers = answers
+                await this.familyManager.patchAllMembersWith(this.member)
+                component.dismiss({ force: true })
+            }
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 
     imageSrc(registration: Registration) {
@@ -619,6 +655,14 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get familyMembers() {
         return this.familyManager.members.filter(m => m.id != this.member.id)
+    }
+
+    get maxFamilyAge() {
+        const ages = this.familyMembers.map(m => m.details.age ?? 99)
+        if (ages.length == 0) {
+            return 99
+        }
+        return Math.max(...ages)
     }
 
     get filteredRecords() {

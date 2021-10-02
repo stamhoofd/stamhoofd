@@ -36,7 +36,7 @@
 <script lang="ts">
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,CenteredMessage, ErrorBox, LoadingButton,RecordAnswerInput, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { BackButton,CenteredMessage, ErrorBox, LoadingButton,RecordAnswerInput, STErrorsDefault, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -44,9 +44,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
     components: {
         STToolbar,
         STNavigationBar,
-        Slider,
         STErrorsDefault,
-        STInputBox,
         RecordAnswerInput,
         LoadingButton,
         BackButton
