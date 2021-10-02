@@ -133,55 +133,12 @@ export default class MemberBox extends Mixins(NavigationMixin){
 
     async tryToSelect() {
         // Only ask details + parents for new members
-        // We'll ask the other things when selecting the details
-        const steps: EditMemberStep[] = []
 
-        if (this.member.details.isRecovered) {
-            let meta = this.member.getDetailsMeta()
-            
-            // Only add the steps that are missing for the organization
-            // Don't check for reviews (unless the records, which will be asked if it was never reviewed)
-
-            if (!meta || !meta.hasMemberGeneral) {
-                steps.push(
-                    new BuiltInEditMemberStep(EditMemberStepType.Details)
-                )
-            }
-            if (!meta || !meta.hasParents) {
-                steps.push(new BuiltInEditMemberStep(EditMemberStepType.Parents))
-            }
-
-            if (!this.item.waitingList) {
-                if (!meta || !meta.hasEmergency) {
-                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact))
-                }
-                if (!meta || !meta.hasRecords) {
-                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.Records))
-                }
-            }
-        } else {
-            // We still have all the data. Ask everything that is older than 3 months
-            if (this.member.details.reviewTimes.isOutdated("details", 60*1000*60*24*31*3)) {
-                steps.push(new BuiltInEditMemberStep(EditMemberStepType.Details))
-            }
-
-            if (this.member.details.reviewTimes.isOutdated("parents", 60*1000*60*24*31*3) || this.member.details.parents.length == 0) {
-                steps.push(new BuiltInEditMemberStep(EditMemberStepType.Parents))
-            }
-
-            if (!this.item.waitingList) {
-                if (this.member.details.reviewTimes.isOutdated("emergencyContacts", 60*1000*60*24*31*3) || (this.member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.Required)) {
-                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact))
-                }
-
-                if (this.member.details.reviewTimes.isOutdated("records", 60*1000*60*24*31*3)) {
-                    steps.push(new BuiltInEditMemberStep(EditMemberStepType.Records))
-                }
-            }
-        }
+        const items = [...this.CheckoutManager.cart.items.filter(item => item.memberId === this.member.id), this.item]
 
         const stepManager = new EditMemberStepsManager(
-            steps, 
+            EditMemberStepsManager.getAllSteps(items, this.member, false), 
+            items,
             this.member,
             (component: NavigationMixin) => {
                 this.doSelect()

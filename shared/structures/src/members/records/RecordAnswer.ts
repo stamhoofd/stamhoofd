@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -15,6 +15,23 @@ export class RecordAnswer extends AutoEncoder {
      */
     @field({ decoder: RecordSettings })
     settings: RecordSettings
+
+    /**
+     * Date that this answer was last reviewed by the author
+     * -> when editing by the organization, don't set this date
+     */
+    @field({ decoder: DateDecoder, nullable: true })
+    reviewedAt: Date | null = null
+
+    isOutdated(timeoutMs: number): boolean {
+        if (!this.reviewedAt) {
+            return true
+        }
+        if (this.reviewedAt.getTime() < new Date().getTime() - timeoutMs) {
+            return true
+        }
+        return false
+    }
 }
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {

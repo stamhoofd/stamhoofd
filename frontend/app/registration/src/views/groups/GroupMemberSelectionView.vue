@@ -98,9 +98,10 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
         // We'll ask the other things when selecting the details
         const stepManager = new EditMemberStepsManager(
             [
-                new BuiltInEditMemberStep(EditMemberStepType.Details),
-                new BuiltInEditMemberStep(EditMemberStepType.Parents)
+                new BuiltInEditMemberStep(EditMemberStepType.Details, true),
+                new BuiltInEditMemberStep(EditMemberStepType.Parents, true)
             ], 
+            [],
             undefined,
             (component: NavigationMixin) => {
                 // when we are ready, return to this component

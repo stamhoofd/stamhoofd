@@ -1,7 +1,7 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { AskRequirement, MemberDetails, MemberWithRegistrations, Version } from '@stamhoofd/structures';
+import { AskRequirement, MemberDetails, MemberWithRegistrations, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
 
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -15,27 +15,186 @@ export enum EditMemberStepType {
 }
 
 export interface EditMemberStep {
-    getComponent(): Promise<any>
+    getComponent(baseProperties: any): Promise<ComponentWithProperties>
 
     /**
-     * Skipping = this information should not get stored, and should even get removed
+     * Skip this step and delete the information in it
      */
-    shouldSkip(details: MemberDetails): boolean
+    shouldDelete(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean
 
     /**
      * Remove the information that is stored in member details that normally would be asked in this step
      */
-    onSkip(details: MemberDetails)
+    delete(details: MemberDetails)
+
+    /**
+     * Return whether this step should get reviewed for selecting a specific item.
+     * If false, this step will get skipped, but the information won't get deleted.
+     * -> usefull because we can skip a step we already asked not long ago (e.g. when selecting multiple groups prevent needing to review the same steps multiple times)
+     */
+    shouldReview(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean
+}
+
+/**
+ * Note: we don't save the review times in non-encrypted form for own categories, because that could leak sensitive information as meta-data
+ * -> e.g. only ask given category IF financial aid needed -> did review => leaks member needs financial aid. So we only store
+ * this information in the encrypted blob. If the member is locked/key is missing, we do always ask the information again
+ * -> we can later extend this to determine which information is sensitive and which not and detect if the category filter is sensitive or not
+ * -> so we can detect if we can store the meta data in an unencrypted form when it doesn't leak sensitive information
+ */
+export class RecordCategoryStep implements EditMemberStep {
+    category: RecordCategory
+
+    /**
+     * Force that we review this step (e.g. when validating it)
+     */
+    forceReview = false
+
+    /**
+     * Time in ms for when to force a review because the infomration is outdated
+     */
+    outdatedTime = 60*1000*60*24*31*3
+
+    constructor(category: RecordCategory, forceReview = false) {
+        this.category = category
+        this.forceReview = forceReview
+    }
+
+    async getComponentClass(): Promise<any> {
+        return (await import(/* webpackChunkName: "EditMemberRecordCategoryView", webpackPrefetch: true */ './EditMemberRecordCategoryView.vue')).default;
+    }
+
+    async getComponent(baseProperties): Promise<ComponentWithProperties> {
+        return new ComponentWithProperties(await this.getComponentClass(), { ...baseProperties, category: this.category })
+    }
+
+    shouldDelete(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
+        // Delete all the information in this category, if this is not asked in the given category
+        return false
+    }
+
+    delete(details: MemberDetails) {
+        // todo: delete the info
+        throw new Error('Method not implemented.');
+    }
+
+    shouldReview(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
+        if (this.forceReview) {
+            return true
+        }
+
+        if (details.isRecovered) {
+            // Always review if still encrypted
+            return true
+        }
+        // Check all the properties in this category and check their last review times
+        const records = this.category.getAllRecords()
+
+        for (const record of records) {
+            const answer = details.recordAnswers.find(a => a.settings.id === record.id)
+            if (!answer || answer.isOutdated(this.outdatedTime)) {
+                // This was never answered
+                console.log("Need review: ", record, answer)
+                return true
+            }
+        }
+
+        // We got all the answers, and they are all very recent
+        return false
+    }
 }
 
 export class BuiltInEditMemberStep implements EditMemberStep {
     type: EditMemberStepType
 
-    constructor(type: EditMemberStepType) {
+    /**
+     * Force that we review this step (e.g. when validating it)
+     */
+    forceReview = false
+
+    /**
+     * Time in ms for when to force a review because the infomration is outdated
+     */
+    outdatedTime = 60*1000*60*24*31*3
+
+    constructor(type: EditMemberStepType, forceReview = false) {
         this.type = type
+        this.forceReview = forceReview
     }
 
-    async getComponent(): Promise<any> {
+    /**
+     * 
+     * @param member 
+     * @param item 
+     * @returns 
+     */
+    shouldReview(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
+        if (this.forceReview) {
+            return true
+        }
+
+        if (!member) {
+            // Always review for new members
+            return true
+        }
+
+        switch (this.type) {
+            case EditMemberStepType.Details: {
+                if (member.details.isRecovered) {
+                    const meta = member.getDetailsMeta()
+                    // Review if never entered or saved
+                    return !meta || !meta.hasMemberGeneral
+                }
+                // We still have all the data. Ask everything that is older than 3 months
+                return member.details.reviewTimes.isOutdated("details", this.outdatedTime)
+            }
+            case EditMemberStepType.Parents: {
+                if (member.details.isRecovered) {
+                    const meta = member.getDetailsMeta()
+                    // Review if never entered or saved
+                    return !meta || !meta.hasParents
+                }
+                // We still have all the data. Ask everything that is older than 3 months
+                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || member.details.parents.length == 0
+            }
+            case EditMemberStepType.EmergencyContact: {
+                if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
+                    // All items are on the waiting list only
+                    // So never ask this information, since we don't need it right now
+                    return false
+                }
+
+                if (member.details.isRecovered) {
+                    
+                    const meta = member.getDetailsMeta()
+                    // Review if never entered or saved
+                    return !meta || !meta.hasEmergency
+                }
+                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.Required)
+            }
+            case EditMemberStepType.Records: {
+                if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
+                    // All items are on the waiting list only
+                    // So never ask this information, since we don't need it right now
+                    return false
+                }
+
+                if (member.details.isRecovered) {
+                    
+                    const meta = member.getDetailsMeta()
+                    // Review if never entered or saved
+                    return !meta || !meta.hasRecords
+                }
+                return member.details.reviewTimes.isOutdated("records", this.outdatedTime)
+            }
+
+            default: {
+                return true
+            }
+        }
+    }
+
+    async getComponentClass(): Promise<any> {
         switch (this.type) {
             case EditMemberStepType.Details: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditMemberGeneralView.vue')).default;
             case EditMemberStepType.Parents: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditMemberParentsView.vue')).default;
@@ -51,12 +210,16 @@ export class BuiltInEditMemberStep implements EditMemberStep {
         }
     }
 
-    shouldSkip(details: MemberDetails): boolean {
+    async getComponent(baseProperties): Promise<ComponentWithProperties> {
+        return new ComponentWithProperties(await this.getComponentClass(), baseProperties)
+    }
+
+    shouldDelete(details: MemberDetails): boolean {
         switch (this.type) {
-            // Skip parents for > 18 and has address, or > 27 (no matter of address)
+            // Delete parents for > 18 and has address, or > 27 (no matter of address)
             case EditMemberStepType.Parents: return ((details.age ?? 99) >= 18 && details.address !== null) || (details.age ?? 99) > 27;
 
-            // Skip emergency contacts if not asked by organization
+            // Delete emergency contacts if not asked by organization
             case EditMemberStepType.EmergencyContact: return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked
 
             // Skip records if not asked by organization for this age
@@ -65,8 +228,8 @@ export class BuiltInEditMemberStep implements EditMemberStep {
         return false
     }
 
-    /// What happens when shouldSkip returned true, most of the time we need to clear some old data
-    onSkip(details: MemberDetails) {
+    /// What happens when shouldDelete returned true, most of the time we need to clear some old data
+    delete(details: MemberDetails) {
         switch (this.type) {
             // Skip parents for > 18 and has address, or > 24 (no matter of address)
             case EditMemberStepType.Parents: 
@@ -87,11 +250,19 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                 break;
         }
     }
-
 }
 
 export class EditMemberStepsManager {
+    /**
+     * Edit a member or leave empty for a new member creation
+     */
     editMember: MemberWithRegistrations | null = null
+
+    /**
+     * For which register items do you want to provide the steps?
+     */
+    items: RegisterItem[] = []
+
     isNew = true
 
     // force to do all steps (and not skip them)
@@ -106,11 +277,30 @@ export class EditMemberStepsManager {
     finishHandler: (component: NavigationMixin) => Promise<void>;
     lastSaveHandler?: (details: MemberDetails) => Promise<void>;
 
+    static getAllSteps(items: RegisterItem[] = [], member?: MemberWithRegistrations, forceReview = false): EditMemberStep[] {
+        const base: EditMemberStep[] = [
+            new BuiltInEditMemberStep(EditMemberStepType.Details, forceReview),
+            new BuiltInEditMemberStep(EditMemberStepType.Parents, forceReview),
+            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, forceReview),
+            new BuiltInEditMemberStep(EditMemberStepType.Records, forceReview),
+        ]
+
+        for (const category of OrganizationManager.organization.meta.recordsConfiguration.recordCategories) {
+            base.push(new RecordCategoryStep(category, forceReview))
+        }
+
+        // todo: categories that are bound to a single group (thats why we need items and member already)
+
+        return base
+    }
+
     /**
      * Intialise a new step flow with all the given steps
      */
-    constructor(steps: EditMemberStep[], editMember?: MemberWithRegistrations, finishHandler?: (component: NavigationMixin) => Promise<void>) {
+    constructor(steps: EditMemberStep[], items: RegisterItem[] = [], editMember?: MemberWithRegistrations, finishHandler?: (component: NavigationMixin) => Promise<void>) {
         this.steps = steps
+        this.items = items
+
         this.lastButtonText = "Klaar"
 
         if (editMember) {
@@ -128,6 +318,7 @@ export class EditMemberStepsManager {
             }
         }
     }
+
     /**
      * Create a new copy of the current details for editing
      */
@@ -171,12 +362,15 @@ export class EditMemberStepsManager {
 
         for (const s of this.steps) {
             if (next) {
-                if (this.force || !s.shouldSkip(details)) {
+                if (this.force || !s.shouldDelete(details, this.editMember ?? undefined, this.items)) {
+                    if (!s.shouldReview(details, this.editMember ?? undefined, this.items)) {
+                        continue
+                    }
                     return s
                 }
 
                 // skip this step
-                s.onSkip(details)
+                s.delete(details)
                 continue
             }
 
@@ -204,7 +398,7 @@ export class EditMemberStepsManager {
         }
 
         const hasNext = !!this.getNextStep(step, details)
-        return new ComponentWithProperties(await step.getComponent(), {
+        return await step.getComponent({
             // Details to check if anything is changed
             originalDetails: this.cloneDetails(details),
             
@@ -222,7 +416,7 @@ export class EditMemberStepsManager {
                     await this.lastSaveHandler(details)
                 }
 
-                // Save details AFTER determining the next component (because onSkip behaviour might update the details)
+                // Save details AFTER determining the next component (because delete behaviour might update the details)
                 await this.saveDetails(details)
 
                 if (!next) {

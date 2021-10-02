@@ -246,7 +246,7 @@ import { LegacyRecord,LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDe
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberManager } from "../../classes/MemberManager";
+import { CheckoutManager } from "../../classes/CheckoutManager";
 import { OrganizationManager } from "../../classes/OrganizationManager";
 import GroupTree from "../../components/GroupTree.vue";
 import { BuiltInEditMemberStep, EditMemberStep, EditMemberStepsManager, EditMemberStepType } from "./details/EditMemberStepsManager";
@@ -275,27 +275,41 @@ export default class MemberView extends Mixins(NavigationMixin){
     LegacyRecordTypeHelper = LegacyRecordTypeHelper
 
     async editGeneral() {
-        await this.openSteps([new BuiltInEditMemberStep(EditMemberStepType.Details)])
+        // If we don't have parents, also ask to review parents (will get skipped if disabled or age too old)
+        await this.openSteps(
+            this.member.details.parents.length > 0 ? [
+                new BuiltInEditMemberStep(EditMemberStepType.Details, true)
+            ] : [
+                new BuiltInEditMemberStep(EditMemberStepType.Details, true), 
+                new BuiltInEditMemberStep(EditMemberStepType.Parents, false)
+            ]
+        )
     }
 
     async editParents() {
-        await this.openSteps([new BuiltInEditMemberStep(EditMemberStepType.Parents)])
+        await this.openSteps([
+            new BuiltInEditMemberStep(EditMemberStepType.Parents, true)
+        ])
     }
 
     async editRecords() {
-        await this.openSteps([new BuiltInEditMemberStep(EditMemberStepType.Records)])
+        await this.openSteps([
+            new BuiltInEditMemberStep(EditMemberStepType.Records, true)
+        ])
     }
 
     async editEmergencyContact() {
-        await this.openSteps([new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact)])
+        await this.openSteps([
+            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, true)
+        ])
     }
 
     async fullCheck() {
         await this.openSteps([
-            new BuiltInEditMemberStep(EditMemberStepType.Details),
-            new BuiltInEditMemberStep(EditMemberStepType.Parents),
-            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact),
-            new BuiltInEditMemberStep(EditMemberStepType.Records),
+            new BuiltInEditMemberStep(EditMemberStepType.Details, true),
+            new BuiltInEditMemberStep(EditMemberStepType.Parents, true),
+            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, true),
+            new BuiltInEditMemberStep(EditMemberStepType.Records, true),
         ], false, async (details: MemberDetails) => {
             // Do basic check if information is okay
             if (details.lastName && details.isRecovered) {
@@ -307,8 +321,11 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 
     async openSteps(steps: EditMemberStep[], force = true, lastSaveHandler?: (details: MemberDetails) => Promise<void>) {
+        const items = CheckoutManager.cart.items.filter(item => item.memberId === this.member.id)
+
         const stepManager = new EditMemberStepsManager(
             steps, 
+            items,
             this.member,
             async (component: NavigationMixin) => {
                 component.dismiss({ force: true })

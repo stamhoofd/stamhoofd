@@ -101,7 +101,7 @@
 
             <template v-if="enableMemberModule">
                 <hr>
-                <h2>Inschrijvingen</h2>
+                <h2>Ledenadministratie</h2>
 
                 <STList class="illustration-list">    
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">

@@ -173,11 +173,3 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-#financial-support-view {
-    .style-description {
-        padding-bottom: 20px;
-    }
-}
-</style>

@@ -22,4 +22,11 @@ export class RecordCategory extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(RecordSettings) })
     records: RecordSettings[] = []
+
+    getAllRecords(): RecordSettings[] {
+        if (this.childCategories.length > 0) {
+            return this.childCategories.flatMap(c => c.getAllRecords())
+        }
+        return this.records
+    }
 }
