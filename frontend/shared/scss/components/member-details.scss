@@ -93,12 +93,19 @@
         align-items: center;
         vertical-align: middle;
 
-        &.High {
+        &:first-child {
+            margin-top: 0;
+        }
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &.Error {
             background: $color-error-background;
             color: $color-error-dark;
         }
 
-        &.Medium {
+        &.Warning {
             background: $color-warning-background;
             color: $color-warning-dark;
         }

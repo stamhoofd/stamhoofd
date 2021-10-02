@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
-import { RecordChoice, RecordSettings,RecordType } from "./RecordSettings"
+import { RecordChoice, RecordSettings,RecordType, RecordWarning } from "./RecordSettings"
 
 
 export class RecordAnswer extends AutoEncoder {
@@ -35,6 +35,10 @@ export class RecordAnswer extends AutoEncoder {
 
     get stringValue() {
         return "Onbekend"
+    }
+
+    getWarnings(): RecordWarning[] {
+        return []
     }
 }
 
@@ -70,6 +74,16 @@ export class RecordTextAnswer extends RecordAnswer {
     get stringValue() {
         return this.value
     }
+
+    getWarnings(): RecordWarning[] {
+        if (!this.settings.warning) {
+            return []
+        }
+        if (this.settings.warning.inverted) {
+            return this.value.length == 0 ? [this.settings.warning] : []
+        }
+        return this.value.length > 0 ? [this.settings.warning] : []
+    }
 }
 
 export class RecordCheckboxAnswer extends RecordAnswer {
@@ -78,6 +92,16 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     @field({ decoder: StringDecoder, optional: true })
     comments?: string
+
+    getWarnings(): RecordWarning[] {
+        if (!this.settings.warning) {
+            return []
+        }
+        if (this.settings.warning.inverted) {
+            return !this.selected ? [this.settings.warning] : []
+        }
+        return this.selected ? [this.settings.warning] : []
+    }
 }
 
 export class RecordMultipleChoiceAnswer extends RecordAnswer {
@@ -87,6 +111,30 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
     get stringValue() {
         return this.selectedChoices.map(c => c.name).join(", ")
     }
+
+    getWarnings(): RecordWarning[] {
+        if (this.selectedChoices.length == 0) {
+            return []
+        }
+
+        const warnings: RecordWarning[] = []
+
+        for (const choice of this.selectedChoices) {
+            if (choice.warning && !choice.warning.inverted) {
+                warnings.push(choice.warning)
+            }
+        }
+
+        for (const choice of this.settings.choices) {
+            if (choice.warning && choice.warning.inverted) {
+                if (!this.selectedChoices.find(s => s.id === choice.id)) {
+                    warnings.push(choice.warning)
+                }
+            }
+        }
+
+        return warnings
+    }
 }
 
 export class RecordChooseOneAnswer extends RecordAnswer {
@@ -95,6 +143,29 @@ export class RecordChooseOneAnswer extends RecordAnswer {
 
     get stringValue() {
         return this.selectedChoice?.name ?? "/"
+    }
+
+    getWarnings(): RecordWarning[] {
+        if (this.selectedChoice === null) {
+            // todo: show warning if inverted
+            return []
+        }
+
+        const warnings: RecordWarning[] = []
+
+        if (this.selectedChoice.warning && !this.selectedChoice.warning.inverted) {
+            warnings.push(this.selectedChoice.warning)
+        }
+
+        for (const choice of this.settings.choices) {
+            if (choice.warning && choice.warning.inverted) {
+                if (this.selectedChoice.id !== choice.id) {
+                    warnings.push(choice.warning)
+                }
+            }
+        }
+
+        return warnings
     }
 }
 

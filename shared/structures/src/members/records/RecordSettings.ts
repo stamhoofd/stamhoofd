@@ -36,6 +36,29 @@ export enum RecordType {
     Address = "Address",
 }
 
+export enum RecordWarningType {
+    Info = "Info",
+    Warning = "Warning",
+    Error = "Error",
+}
+
+export class RecordWarning extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string
+
+    @field({ decoder: StringDecoder })
+    text = ""
+
+    @field({ decoder: new EnumDecoder(RecordWarningType) })
+    type = RecordWarningType.Info
+
+    /**
+     * Show a warning if the associated value is falsy
+     */
+    @field({ decoder: BooleanDecoder })
+    inverted = false
+}
+
 export class RecordChoice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string
@@ -45,6 +68,12 @@ export class RecordChoice extends AutoEncoder {
 
     @field({ decoder: StringDecoder, version: 118 })
     description = ""
+
+    /**
+     * Show a warning if selected (or not selected if inverted)
+     */
+    @field({ decoder: RecordWarning, version: 122, nullable: true })
+    warning: RecordWarning | null = null
 }
 
 export class RecordSettings extends AutoEncoder {
@@ -118,4 +147,10 @@ export class RecordSettings extends AutoEncoder {
     /// Text below the input field for comments (if any)
     @field({ decoder: StringDecoder, version: 120 })
     commentsDescription = ""
+
+    /**
+     * Show a warning if selected / entered (or not selected/entered if inverted)
+     */
+    @field({ decoder: RecordWarning, version: 122, nullable: true })
+    warning: RecordWarning | null = null
 }

@@ -286,7 +286,7 @@ export default class MemberView extends Mixins(NavigationMixin){
     get recordCategories(): RecordCategory[] {
         // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
         return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
-            if (category.childCategories) {
+            if (category.childCategories.length > 0) {
                 return category.childCategories
             }
             return [category]

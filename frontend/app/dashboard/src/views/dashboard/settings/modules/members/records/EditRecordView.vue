@@ -37,7 +37,7 @@
             <STInputBox title="Type" error-fields="type" :error-box="errorBox" class="max">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Checkbox" />
+                        <Radio slot="left" v-model="type" :value="RecordType.Checkbox" name="type" />
                         <h3 class="style-title-list">
                             Aankruisvakje
                         </h3>
@@ -47,27 +47,27 @@
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.ChooseOne" />
+                        <Radio slot="left" v-model="type" :value="RecordType.ChooseOne" name="type" />
                         Kies één uit lijst
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.MultipleChoice" />
+                        <Radio slot="left" v-model="type" :value="RecordType.MultipleChoice" name="type" />
                         Kies meerdere uit lijst
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Text" />
+                        <Radio slot="left" v-model="type" :value="RecordType.Text" name="type" />
                         Tekst op één lijn
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Textarea" />
+                        <Radio slot="left" v-model="type" :value="RecordType.Textarea" name="type" />
                         Meerdere lijnen tekst
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Address" />
+                        <Radio slot="left" v-model="type" :value="RecordType.Address" name="type" />
                         Adres
                     </STListItem>
                 </STList>
@@ -157,6 +157,77 @@
             <p v-if="shouldAskCommentsDescription" class="style-description-small">
                 Laat hier eventueel extra instructies achter onder het tekstveld, als het aankruisvakje is aangevinkt.
             </p>
+
+            <hr>
+            <h2>Waarschuwing</h2>
+            <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar als dit kenmerk een bepaalde waarde heeft.</p>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="warningInverted" :value="null" name="warningInverted" />
+                    <h3 class="style-title-list">
+                        Geen waarschuwing
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="warningInverted" :value="false" name="warningInverted" />
+                    <h3 class="style-title-list">
+                        Toon waarschuwing als aangevinkt
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="warningInverted" :value="true" name="warningInverted" />
+                    <h3 class="style-title-list">
+                        Toon waarschuwing als <strong class="style-strong">niet</strong> aangevinkt
+                    </h3>
+                </STListItem>
+            </STList>
+
+            <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
+                <input
+                    v-model="warningText"
+                    class="input"
+                    type="text"
+                    placeholder="bv. 'Geen toestemming om foto's te maken'"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <STInputBox v-if="warningType" class="max" title="Type">
+                <STList>
+                    <STListItem :selectable="true" element-name="label">
+                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                        <h3 class="style-title-list">
+                            Informatief
+                        </h3>
+                        <p class="style-description-small">
+                            Grijze achtergrond. Voor minder belangrijke zaken
+                        </p>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="label">
+                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                        <h3 class="style-title-list">
+                            Waarschuwing
+                        </h3>
+                        <p class="style-description-small">
+                            Gele achtergrond
+                        </p>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="label">
+                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                        <h3 class="style-title-list">
+                            Foutmelding
+                        </h3>
+                        <p class="style-description-small">
+                            Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
+                        </p>
+                    </STListItem>
+                </STList>
+            </STInputBox>
         </main>
 
         <STToolbar>
@@ -176,7 +247,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,ErrorBox, Radio,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { RecordCategory, RecordChoice, RecordSettings, RecordType, Version } from "@stamhoofd/structures"
+import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning,RecordWarningType,Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
@@ -221,6 +292,10 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     get RecordType() {
         return RecordType
+    }
+
+    get RecordWarningType() {
+        return RecordWarningType
     }
 
     get title(): string {
@@ -361,6 +436,84 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     set commentsDescription(commentsDescription: string) {
         this.patchRecord = this.patchRecord.patch({ commentsDescription })
+    }
+
+    get warningInverted() {
+        return this.patchedRecord.warning?.inverted ?? null
+    }
+
+    set warningInverted(inverted: boolean | null) {
+        if (inverted === null) {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: null
+             })
+            return
+        }
+        if (this.warningInverted === null) {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: RecordWarning.create({
+                    inverted
+                })
+             })
+        } else {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: RecordWarning.patch({
+                    inverted
+                })
+             })
+        }
+    }
+
+    get warningText() {
+        return this.patchedRecord.warning?.text ?? null
+    }
+
+    set warningText(text: string | null) {
+        if (text === null) {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: null
+             })
+            return
+        }
+        if (this.warningText === null) {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: RecordWarning.create({
+                    text
+                })
+             })
+        } else {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: RecordWarning.patch({
+                    text
+                })
+             })
+        }
+    }
+
+    get warningType() {
+        return this.patchedRecord.warning?.type ?? null
+    }
+
+    set warningType(type: RecordWarningType | null) {
+        if (type === null) {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: null
+             })
+            return
+        }
+        if (this.warningType === null) {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: RecordWarning.create({
+                    type
+                })
+             })
+        } else {
+            this.patchRecord = this.patchRecord.patch({ 
+                warning: RecordWarning.patch({
+                    type
+                })
+             })
+        }
     }
 
     addPatch(patch: AutoEncoderPatchType<RecordSettings>) {

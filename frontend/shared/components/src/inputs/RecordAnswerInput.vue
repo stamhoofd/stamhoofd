@@ -152,8 +152,6 @@ export default class RecordAnswerInput extends Vue {
             return answer
         }
 
-        console.log("Created new record answer")
-
         // Create a new one
         // todo: try to migrate old values if possible
         return type.create({
@@ -162,8 +160,6 @@ export default class RecordAnswerInput extends Vue {
     }
 
     set answer(answer: RecordAnswer) {
-        console.log("Did set record answer")
-
         const index = this.recordAnswers.findIndex(a => a.settings.id === this.recordSettings.id)
         if (index != -1) {
             this.recordAnswers.splice(index, 1, answer)

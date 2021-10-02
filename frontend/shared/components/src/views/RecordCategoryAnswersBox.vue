@@ -1,20 +1,20 @@
 <template>
     <dl class="details-grid">
         <template v-for="record of category.records">
-            <dt :key="record.id" class="center">
+            <dt :key="'dt-'+record.id" class="center">
                 {{ record.name }}
             </dt>
-            <dd v-if="!getAnswer(record)" :key="record.id">
+            <dd v-if="!getAnswer(record)" :key="'dd-'+record.id">
                 /
             </dd>
             <template v-else-if="getAnswer(record).settings.type === RecordType.Checkbox">
-                <dd :key="record.id" class="center icons">
+                <dd :key="'dd-'+record.id" class="center icons">
                     <span v-if="getAnswer(record).selected" class="icon success primary" />
                     <span v-else class="icon canceled gray" />
                 </dd>
-                <dd v-if="getAnswer(record).comments" :key="record.id" class="description pre-wrap" v-text="getAnswer(record).comments" />
+                <dd v-if="getAnswer(record).comments" :key="'dd-description-'+record.id" class="description pre-wrap" v-text="getAnswer(record).comments" />
             </template>
-            <dd v-else :key="record.id">
+            <dd v-else :key="'dd-'+record.id">
                 {{ getAnswer(record).stringValue }}
             </dd>
         </template>

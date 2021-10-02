@@ -198,8 +198,31 @@
             </div>
         </div>
 
-        <div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords) || member.users.length > 0">
-            <div class="hover-box container" v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
+        <div v-if="hasWarnings || member.users.length > 0 || familyMembers.length > 0">
+            <div v-if="hasWarnings" class="hover-box container">
+                <h2>Waarschuwingen</h2>
+
+                <ul class="member-records">
+                    <li
+                        v-for="warning in warnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
+                    >
+                        <span :class="'icon '+getIcon(warning)" />
+                        <span class="text">{{ warning.text }}</span>
+                    </li>
+                </ul>
+
+                <p v-if="warnings.length == 0" class="info-box">
+                    Geen waarschuwingen
+                </p>
+
+                <template v-if="member.users.length > 0">
+                    <hr>
+                </template>
+            </div>
+
+            <!--<div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)" class="hover-box container">
                 <h2 class="style-with-button">
                     <div>
                         <span class="icon-spacer">Steekkaart</span><span
@@ -242,9 +265,9 @@
                 <template v-if="member.users.length > 0">
                     <hr>
                 </template>
-            </div>
+            </div>-->
 
-            <div class="hover-box container" v-if="activeAccounts.length > 0">
+            <div v-if="activeAccounts.length > 0" class="hover-box container">
                 <h2>
                     <span class="icon-spacer">Accounts</span><span
                         v-tooltip="
@@ -260,7 +283,7 @@
                 </p>
             </div>
 
-            <div class="hover-box container" v-if="placeholderAccounts.length > 0">
+            <div v-if="placeholderAccounts.length > 0" class="hover-box container">
                 <h2>
                     <span class="icon-spacer">Kunnen registereren</span><span
                         v-tooltip="
@@ -291,7 +314,7 @@
                         <h3 class="style-title-list">
                             {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
                         </h3>
-                        <p class="style-description" v-if="familyMember.groups.length > 0">
+                        <p v-if="familyMember.groups.length > 0" class="style-description">
                             {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
@@ -299,7 +322,7 @@
                 </STList>
             </div>
 
-            <div class="hover-box container" v-if="false">
+            <div v-if="false" class="hover-box container">
                 <hr>
 
                 <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
@@ -314,7 +337,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, Registration, User } from '@stamhoofd/structures';
+import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -364,11 +387,26 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     get recordCategories(): RecordCategory[] {
         // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
         return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
-            if (category.childCategories) {
+            if (category.childCategories.length > 0) {
                 return category.childCategories
             }
             return [category]
         })
+    }
+
+    get hasWarnings() {
+        // todo: also scan choices
+        return !!this.member.details.recordAnswers.find(a => a.settings.warning !== null)
+    }
+
+    get warnings(): RecordWarning[] {
+        const warnings: RecordWarning[] = []
+
+        for (const answer of this.member.details.recordAnswers) {
+            warnings.push(...answer.getWarnings())
+        }
+
+        return warnings
     }
 
     editRecordCategory(category: RecordCategory) {
@@ -556,11 +594,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         return false;
     }
 
-    getIcon(record: LegacyRecord) {
-        switch (LegacyRecordTypeHelper.getPriority(record.type)) {
-            case LegacyRecordTypePriority.High: return " exclamation-two red"
-            case LegacyRecordTypePriority.Medium: return " exclamation yellow"
-            case LegacyRecordTypePriority.Low: return " info"
+    getIcon(warning: RecordWarning) {
+        switch (warning.type) {
+            case RecordWarningType.Error: return " exclamation-two red"
+            case RecordWarningType.Warning: return " exclamation yellow"
+            case RecordWarningType.Info: return " info"
         }
     }
 
