@@ -1,21 +1,27 @@
 <template>
     <STList>
-        <STListItem :selectable="true" element-name="label">
-            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Contains" />
-            <p>Bevat...</p>
-            <input v-if="filter.mode === StringFilterMode.Contains" v-model="filter.value" placeholder="Vul tekst in" class="input">
+        <STListItem :selectable="true" element-name="label" @click="onChange">
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Contains" @change="onChange" />
+            <p class="style-title-list">
+                Bevat...
+            </p>
+            <input v-if="filter.mode === StringFilterMode.Contains" ref="input" v-model="filter.value" placeholder="Vul tekst in" class="input option">
         </STListItem>
 
-        <STListItem :selectable="true" element-name="label">
-            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotContains" />
-            <p>Bevat niet...</p>
-            <input v-if="filter.mode === StringFilterMode.NotContains" v-model="filter.value" placeholder="Vul tekst in" class="input">
+        <STListItem :selectable="true" element-name="label" @click="onChange">
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.NotContains" @change="onChange" />
+            <p class="style-title-list">
+                Bevat niet...
+            </p>
+            <input v-if="filter.mode === StringFilterMode.NotContains" ref="input" v-model="filter.value" placeholder="Vul tekst in" class="input option">
         </STListItem>
 
-        <STListItem :selectable="true" element-name="label">
-            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Equals" />
-            <p>Is gelijk aan...</p>
-            <input v-if="filter.mode === StringFilterMode.Equals" v-model="filter.value" placeholder="Vul tekst in" class="input">
+        <STListItem :selectable="true" element-name="label" @click="onChange">
+            <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="StringFilterMode.Equals" @change="onChange" />
+            <p class="style-title-list">
+                Is gelijk aan...
+            </p>
+            <input v-if="filter.mode === StringFilterMode.Equals" ref="input" v-model="filter.value" placeholder="Vul tekst in" class="input option">
         </STListItem>
     </STList>
 </template>
@@ -39,6 +45,12 @@ export default class StringFilterView extends Vue {
 
     get StringFilterMode() {
         return StringFilterMode
+    }
+
+    async onChange() {
+        await this.$nextTick();
+        console.log("onchange");
+        (this.$refs["input"] as any).focus()
     }
 
 }

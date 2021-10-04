@@ -19,6 +19,9 @@
         </main>
 
         <STToolbar>
+            <button v-if="editingFilter.filters.length > 0" slot="right" class="button secundary full" @click="resetFilter()">
+                Resetten
+            </button>
             <button slot="right" class="button primary full" @click="applyFilter">
                 Toepassen
             </button>
@@ -76,9 +79,13 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
         ]
     }
 
+    resetFilter() {
+        this.setFilter(new FilterGroup<MemberWithRegistrations>(this.definitions))
+        this.dismiss({ force: true })
+    }
+
     applyFilter() {
         this.setFilter(this.editingFilter)
-        console.log(this.editingFilter)
         this.dismiss({ force: true })
     }
 }
