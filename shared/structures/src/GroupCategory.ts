@@ -164,7 +164,7 @@ export class GroupCategoryTree extends GroupCategory {
                         // Hide empty categories where we cannot create new groups
                         return []
                     }
-
+                    
                     if (maxDepth !== null && t.depth >= maxDepth) {
                         for (const cat of t.categories) {
                             // Clone reference
