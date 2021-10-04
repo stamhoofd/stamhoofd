@@ -126,3 +126,9 @@ export * from "./src/Graph"
 
 // Email
 export * from "./src/email/EmailAddressSettings"
+
+// Filters
+export * from "./src/filters/DateFilter"
+export * from "./src/filters/FilterDefinition"
+export * from "./src/filters/FilterGroup"
+export * from "./src/filters/StringFilter"

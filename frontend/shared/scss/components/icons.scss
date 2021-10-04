@@ -303,6 +303,9 @@
     &.eye:after {
         font-icon: url(@stamhoofd/assets/images/icons/eye.svg);
     }
+    &.filter:after {
+        font-icon: url(@stamhoofd/assets/images/icons/filter.svg);
+    }
 }
 
 .android-icons {

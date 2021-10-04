@@ -24,11 +24,11 @@
                 <div />
             </template>
             <template #right>
-                <select v-if="!waitingList" v-model="selectedFilter" class="input hide-small">
-                    <option v-for="(filter, index) in filters" :key="index" :value="index">
-                        {{ filter.getName() }}
-                    </option>
-                </select>
+                <button class="button text" @click="editFilter">
+                    <span class="icon filter" />
+                    <span>Filter</span>
+                    <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                </button>
                 <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
             </template>
         </STNavigationBar>
@@ -232,16 +232,16 @@ import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrationsPatch, Filter,getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { CanNotSwimFilter, NoFilter, NotPaidFilter, RecordTypeFilter } from "../../../classes/member-filters";
 import { MemberChangeEvent,MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from '../member/edit/EditMemberView.vue';
 import MemberContextMenu from "../member/MemberContextMenu.vue";
+import MemberFilterView from "../member/MemberFilterView.vue";
 import MemberSummaryView from '../member/MemberSummaryView.vue';
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
@@ -289,8 +289,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     members: SelectableMember[] = [];
     searchQuery = "";
-    filters = [new NoFilter(), new NotPaidFilter(), new CanNotSwimFilter(), ...RecordTypeFilter.generateAll()];
-    selectedFilter = 0;
+
+    selectedFilter: Filter<MemberWithRegistrations> | null = null;
+
     selectionCountHidden = 0;
     sortBy = "info";
     sortDirection = "ASC";
@@ -336,6 +337,17 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             }
             
         }
+    }
+
+    editFilter() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberFilterView, {
+                selectedFilter: this.selectedFilter,
+                setFilter: (filter: Filter<MemberWithRegistrations>) => {
+                    this.selectedFilter = filter
+                }
+            })
+        }).setDisplayStyle("sheet"))
     }
 
     /**
@@ -762,29 +774,26 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return this.filteredMembers;
     }
 
-    isDescriptiveFilter() {
-        return !!((this.filters[this.selectedFilter] as any).getDescription)
-    }
-
     getMemberDescription(member: MemberWithRegistrations) {
         if (this.waitingList) {
             return this.formatDate(this.registrationDate(member))
         }
 
-        if (this.isDescriptiveFilter()) {
-            return (this.filters[this.selectedFilter] as any).getDescription(member, OrganizationManager.organization)
-        }
-
         return member.info
     }
 
+    filteredCount = 0
+
     get filteredMembers(): SelectableMember[] {
-        this.selectionCountHidden = 0;
-        const filtered = this.members.filter((member: SelectableMember) => {
-            if (this.filters[this.selectedFilter].doesMatch(member.member, OrganizationManager.organization)) {
+        this.selectionCountHidden = 0
+        this.filteredCount = 0
+
+        const filtered = this.selectedFilter === null ? this.members.slice() : this.members.filter((member: SelectableMember) => {
+            if (this.selectedFilter?.doesMatch(member.member)) {
                 return true;
             }
             this.selectionCountHidden += member.selected ? 1 : 0;
+            this.filteredCount += 1
             return false;
         });
 

@@ -103,3 +103,7 @@ export { default as TransferPaymentView } from "./src/views/TransferPaymentView.
 
 // Members
 export { default as RecordCheckbox } from "./src/members/RecordCheckbox.vue"
+
+// Filters
+export { default as FilterGroupView } from "./src/filters/FilterGroupView.vue"
+export { default as StringFilterView } from "./src/filters/StringFilterView.vue"

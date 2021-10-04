@@ -675,7 +675,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                             message: "Synchronisatie geannuleerd"
                         }))
                     },
-                    setAction: async (action: "delete" | "import" | "nothing") => {
+                    setAction: (action: "delete" | "import" | "nothing") => {
                         try {
                             resolve({ oldMembers, action })
                         } catch (e) {
