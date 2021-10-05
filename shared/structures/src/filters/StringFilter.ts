@@ -6,14 +6,7 @@ import { StringCompare } from "@stamhoofd/utility"
 
 import { Filter, FilterDefinition } from "./FilterDefinition"
 
-export class StringFilterDefinition<T> extends FilterDefinition<T, StringFilter<T>> {
-    getValue: (object: T) => string
-
-    constructor(id: string, name: string, getValue: (object: T) => string) {
-        super(id, name)
-        this.getValue = getValue
-    }
-
+export class StringFilterDefinition<T> extends FilterDefinition<T, StringFilter<T>, string> {
     decode(data: Data): StringFilter<T> {
         const filter = new StringFilter()
         filter.definition = this

@@ -4,14 +4,15 @@ import { SimpleError } from "@simonbackx/simple-errors";
 /**
  * Points to a value in a object of type T that is filterable
  */
-export abstract class FilterDefinition<T, FilterType extends Filter<T>> implements Decoder<FilterType>{
+export abstract class FilterDefinition<T, FilterType extends Filter<T>, ValueType> implements Decoder<FilterType>{
     id: string
     name: string
-    getValue: (object: T) => any
+    getValue: (object: T) => ValueType
 
-    constructor(id: string, name: string) {
-        this.id = id
-        this.name = name
+    constructor(settings: { id: string, name: string, getValue: (object: T) => ValueType }) {
+        this.id = settings.id
+        this.name = settings.name
+        this.getValue = settings.getValue
     }
 
     abstract decode(data: Data): FilterType
@@ -25,7 +26,7 @@ export abstract class FilterDefinition<T, FilterType extends Filter<T>> implemen
  */
 
 export abstract class Filter<T> implements Encodeable {
-    definition: FilterDefinition<T, Filter<T>>
+    definition: FilterDefinition<T, Filter<T>, any>
 
     abstract doesMatch(object: T): boolean
     abstract encode(context: EncodeContext): PlainObject
@@ -37,9 +38,9 @@ export abstract class Filter<T> implements Encodeable {
 }
 
 export class FilterDecoder<T> implements Decoder<Filter<T>> {
-    definitions: FilterDefinition<T, Filter<T>>[]
+    definitions: FilterDefinition<T, Filter<T>, any>[]
 
-    constructor(definitions: FilterDefinition<T, Filter<T>>[]) {
+    constructor(definitions: FilterDefinition<T, Filter<T>, any>[]) {
         this.definitions = definitions
     }
     

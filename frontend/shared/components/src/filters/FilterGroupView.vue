@@ -57,7 +57,7 @@ export default class FilterBuilderView extends Vue {
         return filter instanceof ChoicesFilter
     }
 
-    addFilter(definition: FilterDefinition<any, Filter<any>>) {
+    addFilter(definition: FilterDefinition<any, Filter<any>, any>) {
         this.group.filters.push(definition.createFilter())
     }
 

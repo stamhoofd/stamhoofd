@@ -8,11 +8,11 @@ import { Filter,FilterDecoder, FilterDefinition } from "./FilterDefinition";
  */
 
 export class FilterGroup<T> extends Filter<T> {
-    definition: FilterDefinition<T, Filter<T>>
-    definitions: FilterDefinition<T, Filter<T>>[]
+    definition: FilterDefinition<T, Filter<T>, any>
+    definitions: FilterDefinition<T, Filter<T>, any>[]
     filters: Filter<T>[] = []
 
-    constructor(definitions: FilterDefinition<T, Filter<T>>[]) {
+    constructor(definitions: FilterDefinition<T, Filter<T>, any>[]) {
         super()
         this.definitions = definitions
         this.definition = new FilterGroupDecoder(this.definitions)
@@ -35,11 +35,17 @@ export class FilterGroup<T> extends Filter<T> {
     }
 }
 
-export class FilterGroupDecoder<T> extends FilterDefinition<T, FilterGroup<T>> implements Decoder<FilterGroup<T>> {
-    definitions: FilterDefinition<T, Filter<T>>[]
+export class FilterGroupDecoder<T> extends FilterDefinition<T, FilterGroup<T>, any> implements Decoder<FilterGroup<T>> {
+    definitions: FilterDefinition<T, Filter<T>, any>[]
 
-    constructor(definitions: FilterDefinition<T, Filter<T>>[]) {
-        super("FilterGroup", "FilterGroup")
+    constructor(definitions: FilterDefinition<T, Filter<T>, any>[]) {
+        super({
+            id: "filter_group",
+            name: "Filter group",
+            getValue: () => {
+                throw new Error("Can't get value of group filter definition")
+            }
+        })
         this.definitions = definitions
     }
     

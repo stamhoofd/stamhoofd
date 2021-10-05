@@ -14,18 +14,11 @@ import { Filter, FilterDefinition } from "./FilterDefinition"
  * exampleFilter.minimumDate = new Date(2020, 0, 1)
  * ```
 */
-export class FilterDateDefinition<T> extends FilterDefinition<T, DateFilter<T>> {
+export class FilterDateDefinition<T> extends FilterDefinition<T, DateFilter<T>, Date> {
     /**
      * Also filter on time
      */
     time = true
-
-    getValue: (object: T) => Date
-
-    constructor(id: string, name: string, getValue: (object: T) => Date) {
-        super(id, name)
-        this.getValue = getValue
-    }
 
     decode(data: Data): DateFilter<T> {
         const filter = new DateFilter()
