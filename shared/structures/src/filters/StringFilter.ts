@@ -6,7 +6,7 @@ import { StringCompare } from "@stamhoofd/utility"
 
 import { Filter, FilterDefinition, RecursivePartial } from "./FilterDefinition"
 
-export class FilterStringDefinition<T> extends FilterDefinition<T, StringFilter<T>> {
+export class StringFilterDefinition<T> extends FilterDefinition<T, StringFilter<T>> {
     getValue: (object: RecursivePartial<T>) => string
 
     constructor(id: string, name: string, getValue: (object: RecursivePartial<T>) => string) {
@@ -38,7 +38,7 @@ export enum StringFilterMode {
 export class StringFilter<T> extends Filter<T> {
     value = ""
     mode: StringFilterMode = StringFilterMode.Contains
-    definition: FilterStringDefinition<T>
+    definition: StringFilterDefinition<T>
 
     doesMatch(object: T): boolean {
         const str = this.definition.getValue(object)

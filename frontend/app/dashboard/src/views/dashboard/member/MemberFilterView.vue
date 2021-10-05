@@ -33,7 +33,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, FilterGroupView, STToolbar } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, Filter, FilterStringDefinition, PaymentStatus, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
+import { ChoicesFilterChoice, ChoicesFilterDefinition, Filter, PaymentStatus, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType,StringFilterDefinition } from "@stamhoofd/structures";
 import { FilterGroup, MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -80,16 +80,16 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
 
     get definitions() {
         const base = [
-            new FilterStringDefinition<MemberWithRegistrations>("memberFirstname", "Voornaam lid", (member) => {
+            new StringFilterDefinition<MemberWithRegistrations>("memberFirstname", "Voornaam lid", (member) => {
                 return member?.firstName ?? ""
             }),
-            new FilterStringDefinition<MemberWithRegistrations>("memberName", "Naam lid", (member) => {
+            new StringFilterDefinition<MemberWithRegistrations>("memberName", "Naam lid", (member) => {
                 return member?.name ?? ""
             }),
-            new FilterStringDefinition<MemberWithRegistrations>("memberLastname", "Achternaam lid", (member) => {
+            new StringFilterDefinition<MemberWithRegistrations>("memberLastname", "Achternaam lid", (member) => {
                 return member?.details?.lastName ?? ""
             }),
-            new FilterStringDefinition<MemberWithRegistrations>("memberPhone", "Telefoonnummer lid", (member) => {
+            new StringFilterDefinition<MemberWithRegistrations>("memberPhone", "Telefoonnummer lid", (member) => {
                 // todo: remove spaces
                 return member?.details?.phone ?? ""
             }),
@@ -109,7 +109,7 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
         for (const record of this.records) {
             if (record.type === RecordType.Checkbox) {
                 const def = new ChoicesFilterDefinition<MemberWithRegistrations>("record-"+record.id, record.name, [
-                    new ChoicesFilterChoice("checked", "Aanvinkt"),
+                    new ChoicesFilterChoice("checked", "Aangevinkt"),
                     new ChoicesFilterChoice("not_checked", "Niet aangevinkt"),
                     new ChoicesFilterChoice("missing", "Niet ingevuld (info ontbreekt)")
                 ], (member) => {

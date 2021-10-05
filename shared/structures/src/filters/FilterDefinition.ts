@@ -29,7 +29,7 @@ export abstract class FilterDefinition<T, FilterType extends Filter<T>> implemen
     abstract createFilter(): FilterType
 }
 
-/*export class FilterStringDefinition<T> extends FilterDefinition<T> {
+/*export class StringFilterDefinition<T> extends FilterDefinition<T> {
     getValue: (object: RecursivePartial<T>) => string
 }
 */
