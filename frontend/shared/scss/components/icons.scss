@@ -300,6 +300,10 @@
     &.flashlight:after {
         font-icon: url(@stamhoofd/assets/images/icons/flashlight.svg);
     }
+
+    &.language:after {
+        font-icon: url(@stamhoofd/assets/images/icons/language.svg);
+    }
 }
 
 .android-icons {

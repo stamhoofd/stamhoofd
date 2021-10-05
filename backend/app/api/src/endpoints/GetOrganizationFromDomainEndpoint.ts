@@ -1,10 +1,10 @@
 import { AutoEncoder, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization as OrganizationStruct } from "@stamhoofd/structures";
-
 import { Organization } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { Organization as OrganizationStruct } from "@stamhoofd/structures";
+import { GoogleTranslateHelper } from "@stamhoofd/utility";
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -40,6 +40,10 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
         if (!process.env.HOSTNAME_REGISTRATION) {
             throw new Error("Expected environment variable HOSTNAME_REGISTRATION")
         }
+
+        // Clean up google translate domains -> make sure we can translate register pages
+        request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(request.query.domain)
+
         if (request.query.domain.endsWith("." + process.env.HOSTNAME_REGISTRATION)) {
             const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_REGISTRATION).length )
             if (strippped.includes(".")) {
