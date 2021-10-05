@@ -1,10 +1,9 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
-import { OrganizationType } from "../OrganizationType"
+import { OrganizationType, } from "../OrganizationType"
 import { LegacyRecord } from "./records/LegacyRecord"
-import { LegacyRecordType } from "./records/LegacyRecordType"
+import { LegacyRecordType, LegacyRecordTypeHelper } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
-import { RecordSettings } from "./records/RecordSettings"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",
@@ -284,5 +283,23 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
         // Others are all disabled by default
         return OrganizationRecordsConfiguration.create({})
+    }
+
+    static override decode<T extends typeof AutoEncoder>(this: T, data: Data): InstanceType<T> {
+        const d = super.decode(data) as OrganizationRecordsConfiguration
+
+        if (d.enabledLegacyRecords.length > 0) {
+            const categories = LegacyRecordTypeHelper.convert(d.enabledLegacyRecords)
+            if (categories.length > 0) {
+                d.recordCategories.push(
+                    RecordCategory.create({
+                        name: "Steekkaart",
+                        childCategories: categories
+                    })
+                )
+            }
+        }
+
+        return d as InstanceType<T>
     }
 }

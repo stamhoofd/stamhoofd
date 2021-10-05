@@ -1,8 +1,19 @@
+import { LegacyRecord } from "./LegacyRecord";
+import { RecordAnswer } from "./RecordAnswer";
+import { RecordCategory } from "./RecordCategory";
+import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from "./RecordSettings";
+
 export enum LegacyRecordType {
     // Privacy
     DataPermissions = "DataPermissions",
     PicturePermissions = "PicturePermissions",
     GroupPicturePermissions = "GroupPicturePermissions",
+
+    // Allergies & diet
+    FoodAllergies = "FoodAllergies",
+    MedicineAllergies = "MedicineAllergies",
+    HayFever = "HayFever",
+    OtherAllergies = "OtherAllergies",
 
     // Diet
     Vegetarian = "Vegetarian",
@@ -11,18 +22,12 @@ export enum LegacyRecordType {
     Kosher = "Kosher",
     Diet = "Diet",
 
-    // Allergies & diet
-    FoodAllergies = "FoodAllergies",
-    MedicineAllergies = "MedicineAllergies",
-    OtherAllergies = "OtherAllergies",
-
     // Medicines
     MedicinePermissions = "MedicinePermissions",
     TetanusVaccine = "TetanusVaccine",
 
-    // Health, hygiene and sleep
+    // Health, hygiene and sleep   
     CovidHighRisk = "CovidHighRisk",
-    HayFever = "HayFever",
     Asthma = "Asthma",
     BedWaters = "BedWaters",
     Epilepsy = "Epilepsy",
@@ -32,6 +37,8 @@ export enum LegacyRecordType {
     SleepWalking = "SleepWalking",
     Diabetes = "Diabetes",
     SpecialHealthCare = "SpecialHealthCare",
+    
+    // Medicines
     Medicines = "Medicines",
 
     // Sport, games, social
@@ -39,10 +46,12 @@ export enum LegacyRecordType {
     TiredQuickly = "TiredQuickly",
     CanNotParticipateInSport = "CanNotParticipateInSport",
     SpecialSocialCare = "SpecialSocialCare",
-    FinancialProblems = "FinancialProblems",
 
     // Other
-    Other = "Other"
+    Other = "Other",
+
+    // Moved
+    FinancialProblems = "FinancialProblems",
 }
 
 /**
@@ -175,6 +184,90 @@ export class LegacyRecordTypeHelper {
         // others: keep name, don't repeat name
     }
 
+    static getRecordCategory(type: LegacyRecordType): RecordCategory | undefined {
+        switch (type) {
+            case LegacyRecordType.PicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.Privacy",
+                    name: "Privacy"
+                })
+
+            case LegacyRecordType.FoodAllergies:
+            case LegacyRecordType.MedicineAllergies:
+            case LegacyRecordType.HayFever:
+            case LegacyRecordType.OtherAllergies:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.Allergies",
+                    name: "Allergieën"
+                })
+
+            case LegacyRecordType.Vegetarian:
+            case LegacyRecordType.Vegan:
+            case LegacyRecordType.Halal:
+            case LegacyRecordType.Kosher:
+            case LegacyRecordType.Diet:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.Diet",
+                    name: "Dieet"
+                })
+
+            case LegacyRecordType.CovidHighRisk:
+            case LegacyRecordType.Asthma:
+            case LegacyRecordType.BedWaters:
+            case LegacyRecordType.Medicines:
+            case LegacyRecordType.SpecialHealthCare:
+            case LegacyRecordType.Epilepsy:
+            case LegacyRecordType.HeartDisease:
+            case LegacyRecordType.SkinCondition:
+            case LegacyRecordType.Rheumatism:
+            case LegacyRecordType.SleepWalking:
+            case LegacyRecordType.Diabetes:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.Health",
+                    name: "Gezondheid, hygiëne & slapen"
+                })
+
+            case LegacyRecordType.CanNotSwim:
+            case LegacyRecordType.TiredQuickly:
+            case LegacyRecordType.CanNotParticipateInSport:
+            case LegacyRecordType.SpecialSocialCare:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.Sport",
+                    name: "Sport, spel en sociale omgang"
+                })
+
+            case LegacyRecordType.Other:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.Other",
+                    name: "Andere inlichtingen"
+                })
+
+            case LegacyRecordType.TetanusVaccine:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.TetanusVaccine",
+                    name: "Tetanusvaccinatie (klem)"
+                })
+
+            case LegacyRecordType.MedicinePermissions:
+                return RecordCategory.create({
+                    // We need to have a predictable id
+                    id: "RecordCategory.MedicinePermissions",
+                    name: "Toedienen van medicatie",
+                    description: "Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp."
+                })
+        }
+
+        // others: keep name, don't repeat name
+    }
+
     static getCategory(type: LegacyRecordType): string | undefined {
         switch (type) {
             case LegacyRecordType.DataPermissions:
@@ -204,6 +297,12 @@ export class LegacyRecordTypeHelper {
             case LegacyRecordType.TiredQuickly:
             case LegacyRecordType.CanNotParticipateInSport:
                 return "Sport & Spel";
+
+            case LegacyRecordType.Other:
+                return "Andere inlichtingen";
+
+            case LegacyRecordType.MedicinePermissions:
+                return "Toedienen van medicatie";
         }
 
         // others: keep name, don't repeat name
@@ -279,6 +378,7 @@ export class LegacyRecordTypeHelper {
                 return "Andere opmerking";
         }
     }
+
 
     static getHint(type: LegacyRecordType): string | null {
         switch (type) {
@@ -373,7 +473,7 @@ export class LegacyRecordTypeHelper {
         return [];
     }
 
-    static getPriority(type: LegacyRecordType): string {
+    static getPriority(type: LegacyRecordType): LegacyRecordTypePriority {
         switch (type) {
             case LegacyRecordType.DataPermissions:
                 return LegacyRecordTypePriority.High;
@@ -438,5 +538,182 @@ export class LegacyRecordTypeHelper {
             case LegacyRecordType.Other:
                 return LegacyRecordTypePriority.Medium;
         }
+    }
+
+    static convertToAnswer(record: LegacyRecord): RecordAnswer {
+        // todo
+        const answer = new RecordAnswer()
+        answer.settings = this.convertToRecord(record.type)!
+
+        return answer
+    }
+
+    static convert(types: LegacyRecordType[]): RecordCategory[] {
+        // Make sure all the types are sorted in the default ordering
+        const allTypes = Object.values(LegacyRecordType)
+
+        types.sort((a, b) => {
+            const index1 = allTypes.findIndex(q => q == a)
+            const index2 = allTypes.findIndex(q => q == b)
+            return index1 - index2
+        })
+
+        const categories: RecordCategory[] = []
+
+        for (const type of types) {
+            const category = this.getRecordCategory(type)
+            const settings = this.convertToRecord(type)
+
+            if (!category || !settings) {
+                // Has custom migration
+                continue
+            }
+
+            if (type == LegacyRecordType.PicturePermissions && types.includes(LegacyRecordType.GroupPicturePermissions) ) {
+                // Skip: we ask group picture permissions alreadys
+                continue
+            }
+
+            let exists = categories.find(c => c.id === category.id)
+
+            if (!exists) {
+                categories.push(category)
+                exists = category
+            }
+            exists.records.push(settings)
+
+        }
+
+        return categories
+    }
+
+    static convertToRecord(type: LegacyRecordType): RecordSettings | null {
+        if (type === LegacyRecordType.FinancialProblems || type === LegacyRecordType.DataPermissions) {
+            // Should get moved to separate field in member details
+            return null
+        }
+
+        const record = new RecordSettings()
+        record.encrypted = !this.isPublic(type)
+
+        record.type = RecordType.Checkbox
+        record.name = this.getName(type)
+
+
+        switch (type) {
+            case LegacyRecordType.PicturePermissions:
+            case LegacyRecordType.GroupPicturePermissions:
+                record.type = RecordType.ChooseOne
+                record.name = "Toestemming foto's"
+                record.label = "Toestemming publicatie foto's"
+                record.choices = [
+                    RecordChoice.create({
+                        id: "no",
+                        name: "Nee, ik geef geen toestemming",
+                        warning: RecordWarning.create({
+                            id: "",
+                            text: "Geen toestemming voor publicatie foto's",
+                            type: RecordWarningType.Error
+                        })
+                    }),
+                    RecordChoice.create({
+                        id: "yes",
+                        name: "Ja, ik geef toestemming"
+                    }),
+                    RecordChoice.create({
+                        id: "groups_only",
+                        name: "Ik geef enkel toestemming voor groepsfoto's",
+                        warning: RecordWarning.create({
+                            id: "",
+                            text: "Enkel toestemming voor groepsfoto's",
+                            type: RecordWarningType.Error
+                        })
+                    })
+                ]
+                record.description = "Tijdens de activiteiten maken we soms foto's die we publiceren op de website en sociale media."
+                break
+
+            case LegacyRecordType.FoodAllergies:
+                record.askComments = true
+                record.inputPlaceholder = "Som hier op welke zaken (bv. noten, lactose, ...). Vul eventueel aan met enkele voorbeelden";
+                break
+            case LegacyRecordType.MedicineAllergies:
+                record.askComments = true
+                record.inputPlaceholder = "Som hier op welke zaken (bv. bepaalde antibiotica, ontsmettingsmiddelen, pijnstillers, ...). Vul eventueel aan met enkele voorbeelden";
+                break
+            case LegacyRecordType.HayFever:
+                break
+            case LegacyRecordType.OtherAllergies:
+                record.askComments = true
+                record.inputPlaceholder = "Som hier op welke zaken";
+                break
+
+            case LegacyRecordType.Vegetarian:
+            case LegacyRecordType.Vegan:
+            case LegacyRecordType.Halal:
+            case LegacyRecordType.Kosher:
+                break
+
+            case LegacyRecordType.Diet:
+                record.askComments = true
+                record.inputPlaceholder = "Beschrijving van ander soort dieet. Allergieën hoef je hier niet nog eens te vermelden.";
+                break
+
+            case LegacyRecordType.CovidHighRisk:
+            case LegacyRecordType.Asthma:
+            case LegacyRecordType.BedWaters:
+            case LegacyRecordType.Epilepsy:
+            case LegacyRecordType.HeartDisease:
+            case LegacyRecordType.SkinCondition:
+            case LegacyRecordType.Rheumatism:
+            case LegacyRecordType.SleepWalking:
+            case LegacyRecordType.Diabetes:
+                record.askComments = true
+                record.inputPlaceholder = "Optioneel";
+                break
+
+            case LegacyRecordType.Medicines:
+                record.askComments = true
+                record.inputPlaceholder = "Welke, wanneer en hoe vaak?";
+                record.commentsDescription = "Gelieve ons ook de noodzakelijke doktersattesten te bezorgen."
+                break
+
+            case LegacyRecordType.SpecialHealthCare:
+                record.askComments = true
+                record.inputPlaceholder = "Welke?";
+                break
+
+            case LegacyRecordType.TetanusVaccine:
+                record.askComments = true
+                record.inputPlaceholder = "In welk jaar? (mag maximaal 10 jaar geleden zijn)";
+                record.commentsDescription = "Een vaccinatie voor tetanus/klem is 10 jaar werkzaam, daarna is een nieuwe vaccinatie noodzakelijk."
+                break
+                
+            case LegacyRecordType.CanNotParticipateInSport:
+            case LegacyRecordType.SpecialSocialCare:
+                record.askComments = true
+                record.inputPlaceholder = "Meer informatie";
+                break
+
+            case LegacyRecordType.Other:
+                record.type = RecordType.Textarea
+                record.inputPlaceholder = "Enkel invullen indien van toepassing";
+                break
+
+            case LegacyRecordType.MedicinePermissions:
+                record.label = "Wij geven toestemming aan de begeleiders om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*"
+                record.description = "* gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang";
+                break
+        }
+
+        if (record.type === RecordType.Checkbox || record.type === RecordType.Textarea) {
+            record.warning = RecordWarning.create({
+                text: this.getName(type),
+                type: this.getPriority(type) == LegacyRecordTypePriority.Low ? RecordWarningType.Info : (this.getPriority(type) == LegacyRecordTypePriority.Medium ? RecordWarningType.Warning : RecordWarningType.Error),
+                inverted: this.isInverted(type)
+            })
+        }
+
+        return record
     }
 }

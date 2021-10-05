@@ -158,76 +158,78 @@
                 Laat hier eventueel extra instructies achter onder het tekstveld, als het aankruisvakje is aangevinkt.
             </p>
 
-            <hr>
-            <h2>Waarschuwing</h2>
-            <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar als dit kenmerk een bepaalde waarde heeft.</p>
+            <template v-if="canAddWarning">
+                <hr>
+                <h2>Waarschuwing</h2>
+                <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar als dit kenmerk een bepaalde waarde heeft.</p>
 
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="warningInverted" :value="null" name="warningInverted" />
-                    <h3 class="style-title-list">
-                        Geen waarschuwing
-                    </h3>
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="warningInverted" :value="false" name="warningInverted" />
-                    <h3 class="style-title-list">
-                        Toon waarschuwing als aangevinkt
-                    </h3>
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="warningInverted" :value="true" name="warningInverted" />
-                    <h3 class="style-title-list">
-                        Toon waarschuwing als <strong class="style-strong">niet</strong> aangevinkt
-                    </h3>
-                </STListItem>
-            </STList>
-
-            <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
-                <input
-                    v-model="warningText"
-                    class="input"
-                    type="text"
-                    placeholder="bv. 'Geen toestemming om foto's te maken'"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <STInputBox v-if="warningType" class="max" title="Type">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                        <Radio slot="left" v-model="warningInverted" :value="null" name="warningInverted" />
                         <h3 class="style-title-list">
-                            Informatief
+                            Geen waarschuwing
                         </h3>
-                        <p class="style-description-small">
-                            Grijze achtergrond. Voor minder belangrijke zaken
-                        </p>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                        <Radio slot="left" v-model="warningInverted" :value="false" name="warningInverted" />
                         <h3 class="style-title-list">
-                            Waarschuwing
+                            {{ warningNonInvertedText }}
                         </h3>
-                        <p class="style-description-small">
-                            Gele achtergrond
-                        </p>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                        <Radio slot="left" v-model="warningInverted" :value="true" name="warningInverted" />
                         <h3 class="style-title-list">
-                            Foutmelding
+                            {{ warningInvertedText }}
                         </h3>
-                        <p class="style-description-small">
-                            Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
-                        </p>
                     </STListItem>
                 </STList>
-            </STInputBox>
+
+                <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
+                    <input
+                        v-model="warningText"
+                        class="input"
+                        type="text"
+                        placeholder="bv. 'Geen toestemming om foto's te maken'"
+                        autocomplete=""
+                    >
+                </STInputBox>
+
+                <STInputBox v-if="warningType" class="max" title="Type">
+                    <STList>
+                        <STListItem :selectable="true" element-name="label">
+                            <Radio slot="left" v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
+                            <h3 class="style-title-list">
+                                Informatief
+                            </h3>
+                            <p class="style-description-small">
+                                Grijze achtergrond. Voor minder belangrijke zaken
+                            </p>
+                        </STListItem>
+
+                        <STListItem :selectable="true" element-name="label">
+                            <Radio slot="left" v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                            <h3 class="style-title-list">
+                                Waarschuwing
+                            </h3>
+                            <p class="style-description-small">
+                                Gele achtergrond
+                            </p>
+                        </STListItem>
+
+                        <STListItem :selectable="true" element-name="label">
+                            <Radio slot="left" v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                            <h3 class="style-title-list">
+                                Foutmelding
+                            </h3>
+                            <p class="style-description-small">
+                                Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
+                            </p>
+                        </STListItem>
+                    </STList>
+                </STInputBox>
+            </template>
         </main>
 
         <STToolbar>
@@ -296,6 +298,24 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     get RecordWarningType() {
         return RecordWarningType
+    }
+
+    get canAddWarning() {
+        return this.patchedRecord.type === RecordType.Checkbox || this.patchedRecord.type === RecordType.Text || this.patchedRecord.type === RecordType.Textarea
+    }
+
+    get warningNonInvertedText() {
+        if (this.patchedRecord.type === RecordType.Checkbox) {
+            return "Waarschuwing als aangevinkt"
+        }
+        return "Waarschuwing als ingevuld"
+    }
+
+    get warningInvertedText() {
+        if (this.patchedRecord.type === RecordType.Checkbox) {
+            return "Waarschuwing als niet aangevinkt"
+        }
+        return "Waarschuwing als niet ingevuld"
     }
 
     get title(): string {
