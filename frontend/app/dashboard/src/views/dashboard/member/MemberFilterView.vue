@@ -90,7 +90,7 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
             new ChoicesFilterDefinition<MemberWithRegistrations>({
                 id: "active_registrations", 
                 name: "Inschrijvingen", 
-                choices: OrganizationManager.organization.groups.map(g => new ChoicesFilterChoice(g.id, g.settings.name)), 
+                choices: OrganizationManager.organization.availableGroups.map(g => new ChoicesFilterChoice(g.id, g.settings.name)), 
                 getValue: (member) => {
                     return member.groups.map(g => g.id)
                 },
