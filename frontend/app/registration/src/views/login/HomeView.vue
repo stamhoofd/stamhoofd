@@ -46,7 +46,7 @@
                         </aside>
                     </div>
                     <p class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be/ledenadministratie" target="_blank" class="button text">Ledenadministratie door <strong>Stamhoofd</strong></a>
+                        <a href="https://www.stamhoofd.be/ledenadministratie" target="_blank" class="button text">Ledenadministratie door <strong class="notranslate">Stamhoofd</strong></a>
                     </p>
                 </main>
             </div>
@@ -64,6 +64,7 @@
 import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
+import { GoogleTranslateHelper } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';

@@ -33,6 +33,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { SessionManager } from "@stamhoofd/networking";
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -58,7 +59,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     CheckoutManager = CheckoutManager
 
     get tree() {
-        const tree = OrganizationManager.organization.getCategoryTreeWithDepth(1)
+        const tree = OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(SessionManager.currentSession!.user!.permissions !== null, OrganizationManager.organization.meta.packages.useActivities)
         // Filter the tree
 
         tree.groups = tree.groups.filter(g => this.member.shouldShowGroup(g, OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories))

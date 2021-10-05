@@ -4,6 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { OrganizationWithWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { GoogleTranslateHelper } from "@stamhoofd/utility";
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -42,6 +43,10 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
         if (!process.env.HOSTNAME_WEBSHOP) {
             throw new Error("Expected environment variable HOSTNAME_WEBSHOP")
         }
+
+        // Clean up google translate domains -> make sure we can translate register pages
+        request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(request.query.domain)
+        
         if (request.query.domain.endsWith("." + process.env.HOSTNAME_WEBSHOP)) {
             const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_WEBSHOP).length )
             if (strippped.includes(".")) {

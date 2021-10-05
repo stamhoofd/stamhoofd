@@ -11,6 +11,7 @@ import { ComponentWithProperties, HistoryManager,ModalStackComponent, Navigation
 import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
+import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
 import { CheckoutManager } from './classes/CheckoutManager';
@@ -141,7 +142,15 @@ export default class App extends Vue {
         }
     }
 
-    mounted() {
+    created() {
+        if (GoogleTranslateHelper.isGoogleTranslateDomain(window.location.hostname)) {
+            // Enable translations
+            document.documentElement.translate = true
+        }
+
+        if (process.env.NODE_ENV == "development") {
+            ComponentWithProperties.debug = true
+        }
         HistoryManager.activate();
     }
     

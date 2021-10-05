@@ -300,11 +300,17 @@
     &.flashlight:after {
         font-icon: url(@stamhoofd/assets/images/icons/flashlight.svg);
     }
+    
     &.eye:after {
         font-icon: url(@stamhoofd/assets/images/icons/eye.svg);
     }
+    
     &.filter:after {
         font-icon: url(@stamhoofd/assets/images/icons/filter.svg);
+    }
+
+    &.language:after {
+        font-icon: url(@stamhoofd/assets/images/icons/language.svg);
     }
 }
 

@@ -12,6 +12,7 @@ import { ComponentWithProperties, HistoryManager,ModalStackComponent, Navigation
 import { CenteredMessage, CenteredMessageView, ColorHelper, PromiseView, ToastBox } from '@stamhoofd/components';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
+import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
 import { WebshopManager } from './classes/WebshopManager';
@@ -62,6 +63,11 @@ export default class App extends Vue {
     })
 
     created() {
+        if (GoogleTranslateHelper.isGoogleTranslateDomain(window.location.hostname)) {
+            // Enable translations
+            document.documentElement.translate = true
+        }
+
         if (process.env.NODE_ENV == "development") {
             ComponentWithProperties.debug = true
         }
