@@ -4,12 +4,12 @@
 import { Data, EncodeContext, PlainObject } from "@simonbackx/simple-encoding"
 import { StringCompare } from "@stamhoofd/utility"
 
-import { Filter, FilterDefinition, RecursivePartial } from "./FilterDefinition"
+import { Filter, FilterDefinition } from "./FilterDefinition"
 
 export class StringFilterDefinition<T> extends FilterDefinition<T, StringFilter<T>> {
-    getValue: (object: RecursivePartial<T>) => string
+    getValue: (object: T) => string
 
-    constructor(id: string, name: string, getValue: (object: RecursivePartial<T>) => string) {
+    constructor(id: string, name: string, getValue: (object: T) => string) {
         super(id, name)
         this.getValue = getValue
     }

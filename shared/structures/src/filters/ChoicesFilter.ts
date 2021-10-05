@@ -3,7 +3,7 @@
 
 import { Data, EncodeContext, PlainObject, StringDecoder } from "@simonbackx/simple-encoding"
 
-import { Filter, FilterDefinition, RecursivePartial } from "./FilterDefinition"
+import { Filter, FilterDefinition } from "./FilterDefinition"
 export class ChoicesFilterChoice {
     id: string
     name: string
@@ -15,11 +15,11 @@ export class ChoicesFilterChoice {
 }
 
 export class ChoicesFilterDefinition<T> extends FilterDefinition<T, ChoicesFilter<T>> {
-    getValue: (object: RecursivePartial<T>) => string[]
+    getValue: (object: T) => string[]
 
     choices: ChoicesFilterChoice[] = []
 
-    constructor(id: string, name: string, choices: ChoicesFilterChoice[], getValue: (object: RecursivePartial<T>) => string[]) {
+    constructor(id: string, name: string, choices: ChoicesFilterChoice[], getValue: (object: T) => string[]) {
         super(id, name)
         this.choices = choices
         this.getValue = getValue

@@ -2,23 +2,12 @@ import { Data, DateDecoder, Decoder, Encodeable, EncodeContext, ObjectData, Plai
 import { SimpleError } from "@simonbackx/simple-errors";
 
 /**
- * Helper types
- */
-
-export type RecursivePartial<T> = {
-    [P in keyof T]?:
-    T[P] extends Array<infer U> ? Array<Value<U>> : Value<T[P]>;
-};
-type AllowedPrimitives = boolean | string | number | Date /* add any types than should be considered as a value, say, DateTimeOffset */;
-type Value<T> = T extends AllowedPrimitives ? T : RecursivePartial<T>;
-
-/**
  * Points to a value in a object of type T that is filterable
  */
 export abstract class FilterDefinition<T, FilterType extends Filter<T>> implements Decoder<FilterType>{
     id: string
     name: string
-    getValue: (object: RecursivePartial<T>) => any
+    getValue: (object: T) => any
 
     constructor(id: string, name: string) {
         this.id = id
@@ -29,10 +18,6 @@ export abstract class FilterDefinition<T, FilterType extends Filter<T>> implemen
     abstract createFilter(): FilterType
 }
 
-/*export class StringFilterDefinition<T> extends FilterDefinition<T> {
-    getValue: (object: RecursivePartial<T>) => string
-}
-*/
 
 
 /**

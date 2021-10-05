@@ -3,7 +3,7 @@
 
 import { Data, DateDecoder, EncodeContext, PlainObject } from "@simonbackx/simple-encoding"
 
-import { Filter, FilterDefinition, RecursivePartial } from "./FilterDefinition"
+import { Filter, FilterDefinition } from "./FilterDefinition"
 
 /** 
  * @Example Create a date filter for orders
@@ -20,9 +20,9 @@ export class FilterDateDefinition<T> extends FilterDefinition<T, DateFilter<T>> 
      */
     time = true
 
-    getValue: (object: RecursivePartial<T>) => Date
+    getValue: (object: T) => Date
 
-    constructor(id: string, name: string, getValue: (object: RecursivePartial<T>) => Date) {
+    constructor(id: string, name: string, getValue: (object: T) => Date) {
         super(id, name)
         this.getValue = getValue
     }

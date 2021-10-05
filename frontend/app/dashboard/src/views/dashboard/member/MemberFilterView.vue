@@ -94,16 +94,25 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
                 return member?.details?.phone ?? ""
             }),
             new ChoicesFilterDefinition<MemberWithRegistrations>("paid", "Betaald", [
-                new ChoicesFilterChoice("paid", "Betaald"),
-                new ChoicesFilterChoice("not_paid", "Niet betaald"),
+                new ChoicesFilterChoice("checked", "Betaald"),
+                new ChoicesFilterChoice("not_checked", "Niet betaald"),
             ], (member) => {
                 // todo: remove spaces
                 if (member.paid) {
-                    return ["paid"]
+                    return ["checked"]
                 }
-                return ["not_paid"]
+                return ["not_checked"]
+            }),
+            new ChoicesFilterDefinition<MemberWithRegistrations>("financial_support", "Financiële ondersteuning", [
+                new ChoicesFilterChoice("checked", "Vroeg financiële ondersteuning aan"),
+                new ChoicesFilterChoice("not_checked", "Geen financiële ondersteuning"),
+            ], (member) => {
+                // todo: remove spaces
+                if (member.details.requiresFinancialSupport?.value) {
+                    return ["checked"]
+                }
+                return ["not_checked"]
             })
-
         ]
 
         for (const record of this.records) {
@@ -113,12 +122,6 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
                     new ChoicesFilterChoice("not_checked", "Niet aangevinkt"),
                     new ChoicesFilterChoice("missing", "Niet ingevuld (info ontbreekt)")
                 ], (member) => {
-                    if (!member.details) {
-                        return ["missing"]
-                    }
-                    if (!member.details.recordAnswers) {
-                        return ["missing"]
-                    }
                     const answer: RecordCheckboxAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
 
                     if (!answer) {
@@ -136,12 +139,8 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
     }
 
     resetFilter() {
-        this.present(new ComponentWithProperties(MemberFilterView, {
-            selectedFilter: this.selectedFilter,
-            setFilter: this.setFilter
-        }).setDisplayStyle("side-view"))
-        //this.setFilter(new FilterGroup<MemberWithRegistrations>(this.definitions))
-        //this.dismiss({ force: true })
+        this.setFilter(new FilterGroup<MemberWithRegistrations>(this.definitions))
+        this.dismiss({ force: true })
     }
 
     applyFilter() {
