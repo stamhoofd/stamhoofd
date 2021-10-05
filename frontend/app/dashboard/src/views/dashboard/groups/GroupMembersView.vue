@@ -347,7 +347,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     this.selectedFilter = filter
                 }
             })
-        }).setDisplayStyle("sheet"))
+        }).setDisplayStyle("side-view"))
     }
 
     /**
@@ -889,7 +889,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 waitingList: this.waitingList
             }),
         });
-        component.modalDisplayStyle = "popup";
+        component.modalDisplayStyle = "side-view";
         this.present(component);
     }
 

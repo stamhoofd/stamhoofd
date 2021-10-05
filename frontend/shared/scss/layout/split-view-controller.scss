@@ -38,3 +38,12 @@
         overscroll-behavior: contain;
     }
 }
+
+.side-view {
+    transform: translate3d(0, 0, 0);
+
+    > div {
+        max-width: 400px;
+        overscroll-behavior: contain;
+    }
+}

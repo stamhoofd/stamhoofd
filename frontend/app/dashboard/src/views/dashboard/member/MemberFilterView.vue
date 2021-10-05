@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view member-filter-view">
+    <form class="st-view member-filter-view" @submit.prevent="applyFilter">
         <STNavigationBar title="Filter">
             <template #left>
                 <BackButton v-if="canPop" @click="pop" />
@@ -19,18 +19,18 @@
         </main>
 
         <STToolbar>
-            <button v-if="editingFilter.filters.length > 0" slot="right" class="button secundary full" @click="resetFilter()">
+            <button v-if="editingFilter.filters.length > 0" slot="right" class="button secundary full" type="button" @click="resetFilter()">
                 Resetten
             </button>
-            <button slot="right" class="button primary full" @click="applyFilter">
+            <button slot="right" class="button primary full" type="button" @click="applyFilter">
                 Toepassen
             </button>
         </STToolbar>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, FilterGroupView, STToolbar } from "@stamhoofd/components";
 import { Filter, FilterStringDefinition } from "@stamhoofd/structures";
@@ -80,8 +80,12 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
     }
 
     resetFilter() {
-        this.setFilter(new FilterGroup<MemberWithRegistrations>(this.definitions))
-        this.dismiss({ force: true })
+        this.present(new ComponentWithProperties(MemberFilterView, {
+            selectedFilter: this.selectedFilter,
+            setFilter: this.setFilter
+        }).setDisplayStyle("side-view"))
+        //this.setFilter(new FilterGroup<MemberWithRegistrations>(this.definitions))
+        //this.dismiss({ force: true })
     }
 
     applyFilter() {

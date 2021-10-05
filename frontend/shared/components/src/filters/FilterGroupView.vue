@@ -7,7 +7,7 @@
                     {{ filter.definition.name }}
                 </div>
                 <div>
-                    <button class="button icon gray trash" @click="removeFilter(index)" />
+                    <button class="button icon gray trash" type="button" @click="removeFilter(index)" />
                 </div>
             </h2>
             <StringFilterView v-if="isStringFilter(filter)" :filter="filter" />
@@ -19,7 +19,7 @@
         <hr v-if="group.filters.length > 0">
 
         <p v-for="definition in group.definitions" :key="definition.id">
-            <button class="button text" @click="addFilter(definition)">
+            <button class="button text" type="button" @click="addFilter(definition)">
                 <span class="icon add" />
                 <span>{{ definition.name }}</span>
             </button>
