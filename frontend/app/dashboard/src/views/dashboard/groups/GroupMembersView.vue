@@ -889,7 +889,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 waitingList: this.waitingList
             }),
         });
-        component.modalDisplayStyle = "side-view";
+        component.modalDisplayStyle = "popup";
         this.present(component);
     }
 

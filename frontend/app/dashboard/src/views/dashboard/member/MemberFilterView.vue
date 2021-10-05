@@ -33,9 +33,11 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, FilterGroupView, STToolbar } from "@stamhoofd/components";
-import { Filter, FilterStringDefinition } from "@stamhoofd/structures";
+import { ChoicesFilterChoice, ChoicesFilterDefinition, Filter, FilterStringDefinition, PaymentStatus, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { FilterGroup, MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 
 @Component({
@@ -61,8 +63,23 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
 
     editingFilter = this.selectedFilter?.clone() ?? new FilterGroup<MemberWithRegistrations>(this.definitions)
 
+    get recordCategories(): RecordCategory[] {
+        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
+        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
+            if (category.childCategories.length > 0) {
+                return category.childCategories
+            }
+            return [category]
+        })
+    }
+
+    get records(): RecordSettings[] {
+        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
+        return this.recordCategories.flatMap(c => c.records)
+    }
+
     get definitions() {
-        return [
+        const base = [
             new FilterStringDefinition<MemberWithRegistrations>("memberFirstname", "Voornaam lid", (member) => {
                 return member?.firstName ?? ""
             }),
@@ -75,8 +92,47 @@ export default class MemberFilterView extends Mixins(NavigationMixin) {
             new FilterStringDefinition<MemberWithRegistrations>("memberPhone", "Telefoonnummer lid", (member) => {
                 // todo: remove spaces
                 return member?.details?.phone ?? ""
+            }),
+            new ChoicesFilterDefinition<MemberWithRegistrations>("paid", "Betaald", [
+                new ChoicesFilterChoice("paid", "Betaald"),
+                new ChoicesFilterChoice("not_paid", "Niet betaald"),
+            ], (member) => {
+                // todo: remove spaces
+                if (member.paid) {
+                    return ["paid"]
+                }
+                return ["not_paid"]
             })
+
         ]
+
+        for (const record of this.records) {
+            if (record.type === RecordType.Checkbox) {
+                const def = new ChoicesFilterDefinition<MemberWithRegistrations>("record-"+record.id, record.name, [
+                    new ChoicesFilterChoice("checked", "Aanvinkt"),
+                    new ChoicesFilterChoice("not_checked", "Niet aangevinkt"),
+                    new ChoicesFilterChoice("missing", "Niet ingevuld (info ontbreekt)")
+                ], (member) => {
+                    if (!member.details) {
+                        return ["missing"]
+                    }
+                    if (!member.details.recordAnswers) {
+                        return ["missing"]
+                    }
+                    const answer: RecordCheckboxAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+
+                    if (!answer) {
+                        return ["missing"]
+                    }
+
+                    return answer.selected ? ["checked"] : ["not_checked"]
+                })
+                base.push(def)
+            }
+        }
+
+
+        return base
     }
 
     resetFilter() {

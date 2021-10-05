@@ -11,6 +11,7 @@
                 </div>
             </h2>
             <StringFilterView v-if="isStringFilter(filter)" :filter="filter" />
+            <ChoicesFilterView v-else-if="isChoicesFilter(filter)" :filter="filter" />
             <p v-else class="error-box">
                 Filter niet ondersteund
             </p>
@@ -30,16 +31,18 @@
 
 <script lang="ts">
 import { STInputBox, STListItem } from "@stamhoofd/components"
-import { Filter, FilterDefinition, FilterGroup, StringFilter } from "@stamhoofd/structures";
+import { ChoicesFilter, Filter, FilterDefinition, FilterGroup, StringFilter } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
+import ChoicesFilterView from "./ChoicesFilterView.vue"
 import StringFilterView from "./StringFilterView.vue"
 
 @Component({
     components: {
         STInputBox,
         STListItem,
-        StringFilterView
+        StringFilterView,
+        ChoicesFilterView
     }
 })
 export default class FilterBuilderView extends Vue {
@@ -48,6 +51,10 @@ export default class FilterBuilderView extends Vue {
 
     isStringFilter(filter: Filter<any>): boolean {
         return filter instanceof StringFilter
+    }
+
+    isChoicesFilter(filter: Filter<any>): boolean {
+        return filter instanceof ChoicesFilter
     }
 
     addFilter(definition: FilterDefinition<any, Filter<any>>) {
