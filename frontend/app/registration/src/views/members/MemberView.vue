@@ -153,7 +153,7 @@
                 <hr>
             </div>
 
-            <div v-if="member.details.doctor" class="container">
+            <div v-if="false && member.details.doctor" class="container">
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
                     <div>
@@ -262,12 +262,6 @@ export default class MemberView extends Mixins(NavigationMixin){
     async editParents() {
         await this.openSteps([
             new BuiltInEditMemberStep(EditMemberStepType.Parents, true)
-        ])
-    }
-
-    async editRecords() {
-        await this.openSteps([
-            new BuiltInEditMemberStep(EditMemberStepType.Records, true)
         ])
     }
 

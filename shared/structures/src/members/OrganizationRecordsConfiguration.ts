@@ -2,7 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, EnumDecoder,field, Int
 
 import { FilterGroup, FilterGroupDecoder } from "../filters/FilterGroup"
 import { OrganizationType, } from "../OrganizationType"
-import { MemberWithRegistrations } from "./MemberWithRegistrations"
+import { MemberDetails } from "./MemberDetails"
 import { LegacyRecord } from "./records/LegacyRecord"
 import { LegacyRecordType, LegacyRecordTypeHelper } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
@@ -27,14 +27,14 @@ export class PropertyFilterConfiguration extends AutoEncoder {
      * Enabled when...
      * cannot be null (always should be enabled)
      */
-    @field({ decoder: new FilterGroupDecoder<MemberWithRegistrations>(MemberWithRegistrations.getBaseFilterDefinitions()) })
-    enabledWhen: FilterGroup<MemberWithRegistrations> = new FilterGroup(MemberWithRegistrations.getBaseFilterDefinitions())
+    @field({ decoder: new FilterGroupDecoder<MemberDetails>(MemberDetails.getBaseFilterDefinitions()) })
+    enabledWhen: FilterGroup<MemberDetails> = new FilterGroup(MemberDetails.getBaseFilterDefinitions())
 
     /**
      * If enabled, whether it is required
      */
-    @field({ decoder: new FilterGroupDecoder<MemberWithRegistrations>(MemberWithRegistrations.getBaseFilterDefinitions()), nullable: true })
-    requiredWhen: FilterGroup<MemberWithRegistrations> | null = null
+    @field({ decoder: new FilterGroupDecoder<MemberDetails>(MemberDetails.getBaseFilterDefinitions()), nullable: true })
+    requiredWhen: FilterGroup<MemberDetails> | null = null
 }
 
 export class FinancialSupportSettings extends AutoEncoder {
@@ -312,7 +312,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     static override decode<T extends typeof AutoEncoder>(this: T, data: Data): InstanceType<T> {
         const d = super.decode(data) as OrganizationRecordsConfiguration
 
-        if (d.enabledLegacyRecords.length > 0) {
+        if (d.enabledLegacyRecords.length > 0 && d.recordCategories.length == 0) {
             const categories = LegacyRecordTypeHelper.convert(d.enabledLegacyRecords)
             if (categories.length > 0) {
                 d.recordCategories.push(

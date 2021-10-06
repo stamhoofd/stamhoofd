@@ -2,6 +2,8 @@ import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field,
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
+import { StringFilterDefinition } from '../filters/StringFilter';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
@@ -480,5 +482,30 @@ export class MemberDetails extends AutoEncoder {
         if (other.allowSensitiveDataCollection && (!this.allowSensitiveDataCollection || this.allowSensitiveDataCollection.date < other.allowSensitiveDataCollection.date)) {
             this.allowSensitiveDataCollection = other.allowSensitiveDataCollection
         }
+    }
+
+    static getBaseFilterDefinitions() {
+        return [
+            new StringFilterDefinition<MemberDetails>({
+                id: "member_name", 
+                name: "Naam lid", 
+                getValue: (details) => {
+                    return details.name
+                }
+            }),
+             new ChoicesFilterDefinition<MemberDetails>({
+                id: "gender", 
+                name: "Geslacht", 
+                choices: [
+                    new ChoicesFilterChoice(Gender.Male, "Man"),
+                    new ChoicesFilterChoice(Gender.Female, "Vrouw"),
+                    new ChoicesFilterChoice(Gender.Other, "Andere"),
+                ], 
+                getValue: (details) => {
+                    return [details.gender]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            })
+        ]
     }
 }

@@ -171,7 +171,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                 }
                 return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.Required)
             }
-            case EditMemberStepType.Records: {
+            /*case EditMemberStepType.Records: {
                 if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
                     // All items are on the waiting list only
                     // So never ask this information, since we don't need it right now
@@ -185,7 +185,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     return !meta || !meta.hasRecords
                 }
                 return member.details.reviewTimes.isOutdated("records", this.outdatedTime)
-            }
+            }*/
 
             default: {
                 return true
@@ -270,8 +270,7 @@ export class EditMemberStepsManager {
         const base: EditMemberStep[] = [
             new BuiltInEditMemberStep(EditMemberStepType.Details, forceReview),
             new BuiltInEditMemberStep(EditMemberStepType.Parents, forceReview),
-            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, forceReview),
-            new BuiltInEditMemberStep(EditMemberStepType.Records, forceReview),
+            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, forceReview)
         ]
 
         for (const category of OrganizationManager.organization.meta.recordsConfiguration.recordCategories) {
