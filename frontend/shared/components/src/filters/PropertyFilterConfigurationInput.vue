@@ -17,6 +17,7 @@ import { Filter, FilterDefinition, FilterGroup, PropertyFilterConfiguration } fr
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import PropertyEnabledContextMenu from './PropertyEnabledContextMenu.vue';
+import PropertyRequiredContextMenu from './PropertyRequiredContextMenu.vue';
 
 @Component
 export default class PropertyFilterConfigurationInput extends Mixins(NavigationMixin) {
@@ -66,15 +67,16 @@ export default class PropertyFilterConfigurationInput extends Mixins(NavigationM
     openRequiredContextMenu(event: Event) {
         // todo
         const el = event.target as HTMLElement;
-        const displayedComponent = new ComponentWithProperties(PropertyEnabledContextMenu, {
+        const displayedComponent = new ComponentWithProperties(PropertyRequiredContextMenu, {
             x: el.getBoundingClientRect().left,
             y: el.getBoundingClientRect().top + el.offsetHeight,
             preferredWidth: el.offsetWidth,
             definitions: this.definitions,
+            selectedFilter: this.configuration.requiredWhen,
 
-            handler: (enabledWhen: FilterGroup<any>) => {
+            handler: (requiredWhen: FilterGroup<any> | null) => {
                 this.$emit("patch", PropertyFilterConfiguration.patch({
-                    enabledWhen
+                    requiredWhen
                 }))
             }
         });

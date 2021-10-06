@@ -1,7 +1,10 @@
 <template>
     <ContextMenu v-bind="{ x, y, preferredWidth }">
-        <ContextMenuItem @click="setAlways">
-            Altijd vragen
+        <ContextMenuItem @click="setRequired">
+            Verplicht invullen
+        </ContextMenuItem>
+        <ContextMenuItem @click="setOptional">
+            Optioneel
         </ContextMenuItem>
         <ContextMenuItem @click="editFilter()">
             Aangepast...
@@ -24,7 +27,7 @@ import FilterEditor from "./FilterEditor.vue";
         ContextMenuLine
     },
 })
-export default class PropertyEnabledContextMenu extends Mixins(NavigationMixin) {    
+export default class PropertyRequiredContextMenu extends Mixins(NavigationMixin) {    
     @Prop({ default: 0 })
     x!: number;
 
@@ -40,18 +43,22 @@ export default class PropertyEnabledContextMenu extends Mixins(NavigationMixin) 
     definitions!: FilterDefinition<any, Filter<any>, any>[]
 
     @Prop({ required: true })
-    selectedFilter!: FilterGroup<any>
+    selectedFilter!: FilterGroup<any> | null
 
     @Prop()
-    handler!: (enabledWhen: FilterGroup<any>) => void
+    handler!: (enabledWhen: FilterGroup<any> | null) => void
 
-    setAlways() {
+    setRequired() {
         this.handler(new FilterGroup(this.definitions))
+    }
+
+    setOptional() {
+        this.handler(null)
     }
 
     editFilter() {
         this.present(new ComponentWithProperties(FilterEditor, {
-            title: "Vragen als...",
+            title: "Verplicht als...",
             selectedFilter: this.selectedFilter,
             setFilter: this.handler,
             definitions: this.definitions

@@ -34,7 +34,7 @@ export class PropertyFilterConfiguration extends AutoEncoder {
      * If enabled, whether it is required
      */
     @field({ decoder: new FilterGroupDecoder<MemberDetails>(MemberDetails.getBaseFilterDefinitions()), nullable: true })
-    requiredWhen: FilterGroup<MemberDetails> | null = null
+    requiredWhen: FilterGroup<MemberDetails> | null = new FilterGroup(MemberDetails.getBaseFilterDefinitions())
 }
 
 export class FinancialSupportSettings extends AutoEncoder {
@@ -95,11 +95,26 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 117 })
     dataPermission = false
 
-    /**
-     * Warning: all PropertyFilterConfiguration should be asked BEFORE recordCategories -> because context is extendable here
-     */
     @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 124 })
-    emailAddress: PropertyFilterConfiguration | null = null
+    emailAddress: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+
+    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
+    phone: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+
+    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
+    gender: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+
+    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
+    birthDay: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+
+    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
+    address: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+
+    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
+    parents: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+
+    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
+    emergencyContacts: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
 
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 117 })
     recordCategories: RecordCategory[] = []
