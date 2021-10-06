@@ -204,7 +204,7 @@
 
                 <ul class="member-records">
                     <li
-                        v-for="warning in warnings"
+                        v-for="warning in sortedWarnings"
                         :key="warning.id"
                         :class="{ [warning.type]: true }"
                     >
@@ -337,7 +337,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -406,7 +406,36 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             warnings.push(...answer.getWarnings())
         }
 
+        if (this.member.details.requiresFinancialSupport && this.member.details.requiresFinancialSupport.value) {
+            warnings.push(RecordWarning.create({
+                text: OrganizationManager.organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
+                type: RecordWarningType.Error
+            }))
+        }
+
         return warnings
+    }
+
+
+    get sortedWarnings() {
+        return this.warnings.sort((warning1, warning2) => {
+            const priority1: string = warning1.type
+            const priority2: string = warning2.type
+
+            if (priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Warning ||
+                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Info ||
+                priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Info) {
+                return -1;
+            }
+            else if (priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Warning ||
+                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Error ||
+                priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Error) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        } )
     }
 
     editRecordCategory(category: RecordCategory) {
@@ -581,32 +610,12 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.present(component);
     }
 
-    canOpenRecord(record: LegacyRecord) {
-        if (record.description.length > 0) {
-            return true;
-        }
-        if (LegacyRecordTypeHelper.getInternalDescription(record.type)) {
-            return true;
-        }
-        if (LegacyRecordTypeHelper.getInternalLinks(record.type).length > 0) {
-            return true;
-        }
-        return false;
-    }
-
     getIcon(warning: RecordWarning) {
         switch (warning.type) {
             case RecordWarningType.Error: return " exclamation-two red"
             case RecordWarningType.Warning: return " exclamation yellow"
             case RecordWarningType.Info: return " info"
         }
-    }
-
-    openRecordView(record: LegacyRecord) {
-        this.show(new ComponentWithProperties(RecordDescriptionView, {
-            member: this.member,
-            record
-        }))
     }
 
     editContact(contact: EmergencyContact) {
@@ -701,36 +710,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             return 99
         }
         return Math.max(...ages)
-    }
-
-    get filteredRecords() {
-        return this.member.details?.records ? 
-            OrganizationManager.organization.meta.recordsConfiguration.filterForDisplay(
-                this.member.details.records, 
-                this.member.details?.age ?? null
-            ) 
-        : undefined
-    }
-
-    get sortedRecords() {
-        return this.filteredRecords?.sort((record1, record2) => {
-            const priority1: string = LegacyRecordTypeHelper.getPriority(record1.type);
-            const priority2: string = LegacyRecordTypeHelper.getPriority(record2.type)
-
-            if (priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Medium ||
-                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.Low ||
-                priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Low) {
-                return -1;
-            }
-            else if (priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.Medium ||
-                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.High ||
-                priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.High) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        } )
     }
 }
 </script>

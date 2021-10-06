@@ -95,6 +95,12 @@ export class RecordSettings extends AutoEncoder {
     required = false
 
     /**
+     * Whether you need permission to collect this information
+     */
+    @field({ decoder: BooleanDecoder, version: 123 })
+    sensitive = true
+
+    /**
      * In some cases, we need to collect some information and store it non-encrypted, in case the keys get lost:
      * examples of this is mainly for storing granted permissions: permission to take pictures, permissions to collect data, ...
      */

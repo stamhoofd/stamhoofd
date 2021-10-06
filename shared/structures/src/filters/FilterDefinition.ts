@@ -50,10 +50,35 @@ export class FilterDecoder<T> implements Decoder<Filter<T>> {
         if (!definition) {
             throw new SimpleError({
                 code: "invalid_definition",
-                message: "De opgeslagen filter filtert op iets dat niet langer bestaat",
+                message: "De opgeslagen filter filtert op iets dat niet langer bestaat: "+definitionId,
                 field: data.addToCurrentField("definitionId")
             })
         }
         return definition.decode(data)
+    }
+}
+
+/**
+ * Allow filters that are extendable on definitions that are saved in the contextx
+ */
+export class ExtendableFilterDecoder<T> implements Decoder<Filter<T>> {
+    definitions: FilterDefinition<T, Filter<T>, any>[]
+
+    constructor(definitions: FilterDefinition<T, Filter<T>, any>[]) {
+        this.definitions = definitions
+    }
+    
+    decode(data: Data): Filter<T> {
+        const general: EncodeContext & { definitions?: FilterDefinition<T, Filter<T>, any>[]} = data.context
+        const extendedDefinitions = general.definitions ?? []
+        return new FilterDecoder([...this.definitions, ...extendedDefinitions]).decode(data)
+    }
+
+    static saveDefinitionInContext(context: EncodeContext, definition: FilterDefinition<any, Filter<any>, any>) {
+        const general: EncodeContext & { definitions?: FilterDefinition<any, Filter<any>, any>[]} = context
+        if (!general.definitions) {
+            general.definitions = []
+        }
+        general.definitions.push(definition)
     }
 }

@@ -49,6 +49,8 @@ a.st-list-item {
 .st-list-item {
     padding-left: var(--st-horizontal-padding, 15px);
     padding-right: 0;
+    padding-right: var(--st-horizontal-padding, 15px);
+
     margin: 0;
     display: flex !important;
     flex-direction: row;
@@ -158,7 +160,6 @@ a.st-list-item {
 
             > .right {
                 margin-left: auto;
-                padding-right: var(--st-horizontal-padding, 15px);
                 min-width: 0; // flexbox disable becoming bigger than parent
                 flex-shrink: 0;
 
@@ -179,6 +180,10 @@ a.st-list-item {
             background: var(--color-current-border, #{$color-border});
             border-radius: $border-width/2;
             margin: 0;
+            margin-right: calc(-1 * var(--st-horizontal-padding, 15px));
+
+            // Increase width + horizontal padding
+            padding-right: var(--st-horizontal-padding, 15px);
         }
     }
 

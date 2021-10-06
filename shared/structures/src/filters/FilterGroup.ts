@@ -8,14 +8,21 @@ import { Filter,FilterDecoder, FilterDefinition } from "./FilterDefinition";
  */
 
 export class FilterGroup<T> extends Filter<T> {
-    definition: FilterDefinition<T, Filter<T>, any>
-    definitions: FilterDefinition<T, Filter<T>, any>[]
+    definition: FilterGroupDecoder<T>
+    private definitions: FilterDefinition<T, Filter<T>, any>[]
     filters: Filter<T>[] = []
 
     constructor(definitions: FilterDefinition<T, Filter<T>, any>[]) {
         super()
         this.definitions = definitions
         this.definition = new FilterGroupDecoder(this.definitions)
+    }
+
+    setDefinitions(definitions: FilterDefinition<T, Filter<T>, any>[]) {
+        this.definitions = definitions
+
+        // Make sure that decoding is also updated
+        this.definition.definitions = this.definitions
     }
 
     doesMatch(object: T): boolean {

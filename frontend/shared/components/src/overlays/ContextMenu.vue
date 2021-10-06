@@ -5,7 +5,7 @@
                 ref="context"
                 oncontextmenu="return false;"
                 class="context-menu"
-                :style="{ top: top + 'px', left: left + 'px' }"
+                :style="{ top: top + 'px', left: left + 'px', width: preferredWidth ? (preferredWidth + 'px') : undefined }"
                 @click.stop=""
             >
                 <slot />
@@ -24,6 +24,11 @@ export default class ContextMenu extends Vue {
         default: 0,
     })
     x!: number;
+
+    @Prop({
+        default: null,
+    })
+    preferredWidth!: number | null;
 
     @Prop({
         default: 0,

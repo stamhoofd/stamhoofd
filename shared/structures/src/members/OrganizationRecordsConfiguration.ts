@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
+import { FilterGroup, FilterGroupDecoder } from "../filters/FilterGroup"
 import { OrganizationType, } from "../OrganizationType"
+import { MemberWithRegistrations } from "./MemberWithRegistrations"
 import { LegacyRecord } from "./records/LegacyRecord"
 import { LegacyRecordType, LegacyRecordTypeHelper } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
@@ -17,6 +19,22 @@ export class FreeContributionSettings extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(IntegerDecoder) })
     amounts: number[] = [500, 1500, 3000]
+}
+
+
+export class PropertyFilterConfiguration extends AutoEncoder {
+    /**
+     * Enabled when...
+     * cannot be null (always should be enabled)
+     */
+    @field({ decoder: new FilterGroupDecoder<MemberWithRegistrations>(MemberWithRegistrations.getBaseFilterDefinitions()) })
+    enabledWhen: FilterGroup<MemberWithRegistrations> = new FilterGroup(MemberWithRegistrations.getBaseFilterDefinitions())
+
+    /**
+     * If enabled, whether it is required
+     */
+    @field({ decoder: new FilterGroupDecoder<MemberWithRegistrations>(MemberWithRegistrations.getBaseFilterDefinitions()), nullable: true })
+    requiredWhen: FilterGroup<MemberWithRegistrations> | null = null
 }
 
 export class FinancialSupportSettings extends AutoEncoder {
@@ -76,6 +94,12 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 117 })
     dataPermission = false
+
+    /**
+     * Warning: all PropertyFilterConfiguration should be asked BEFORE recordCategories -> because context is extendable here
+     */
+    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 124 })
+    emailAddress: PropertyFilterConfiguration | null = null
 
     @field({ decoder: new ArrayDecoder(RecordCategory), version: 117 })
     recordCategories: RecordCategory[] = []

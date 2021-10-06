@@ -20,11 +20,39 @@
 
             <p>Bepaalde gegevens van leden zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Gebruik deze en voeg deze zaken niet zelf toe als vragen!</p>
 
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
+                    <p class="style-title-list">
+                        E-mailadres (van lid zelf)
+                    </p>
+                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('emailAddress')" :configuration="patchedOrganization.meta.recordsConfiguration.emailAddress" :definitions="definitions" @patch="patchConfigProperty('emailAddress', $event)" />
+                </STListItem>
+            </STList>
+
             <hr>
-            <h2>Eigen kenmerken/gegevens</h2>
+            <h2>Vragen tijdens inschrijven</h2>
 
             <p>
-                Voeg zelf kenmerken toe die ingevuld kunnen worden bij het inschrijven of enkel door beheerders (kan je zelf kiezen). Hieronder kan je de kenmerken toevoegen op bepaalde plaatsen, maar je kan ook een nieuwe categorie maken en die bijvoorbeeld koppelen aan specifieke inschrijvingsgroepen zodat ze enkel daar gevraagd worden.
+                Voeg zelf kenmerken toe die ingevuld kunnen worden bij het inschrijven. De kenmerken worden onderverdeeld in verschillende categorieën om de structuur te bewaren.
+            </p>
+
+            <STList>
+                <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" @patch="addCategoriesPatch" />
+            </STList>
+
+            <p>
+                <button class="button text" @click="addCategory">
+                    <span class="icon add" />
+                    <span>Nieuwe categorie</span>
+                </button>
+            </p>
+
+            <hr>
+            <h2>Interne gegevens</h2>
+
+            <p>
+                Je kan ook kenmerken toevoegen die enkel zichtbaar zijn voor beheerders.
             </p>
 
             <STList>
@@ -55,8 +83,8 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton, PropertyFilterConfigurationInput,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { AskRequirement, MemberWithRegistrations, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilterConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -72,7 +100,10 @@ import RecordCategoryRow from "./records/RecordCategoryRow.vue"
         STList,
         BackButton,
         LoadingButton,
-        RecordCategoryRow
+        RecordCategoryRow,
+        STListItem,
+        PropertyFilterConfigurationInput,
+        Checkbox
     },
 })
 export default class RecordsSettingsView extends Mixins(NavigationMixin) {
@@ -85,6 +116,14 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
+    get AskRequirement() {
+        return AskRequirement
+    }
+
+    get definitions() {
+        return MemberWithRegistrations.getBaseFilterDefinitions()
+    }
+
     get patchedOrganization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
     }
@@ -93,8 +132,34 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         return this.patchedOrganization.meta.recordsConfiguration.recordCategories
     }
 
+    get emergencyContact() {
+        return this.patchedOrganization.meta.recordsConfiguration.emergencyContact
+    }
+
+    set emergencyContact(val: AskRequirement) {
+        this.addRecordsConfigurationPatch(OrganizationRecordsConfiguration.patch({
+            emergencyContact: val
+        }))
+    }
+
     addPatch(patch: AutoEncoderPatchType<Organization>) {
         this.organizationPatch = this.organizationPatch.patch(patch)
+    }
+
+    patchConfigProperty(property: string, patch: any) {
+        console.log(property, patch)
+        console.log({
+                    [property]: patch
+                })
+        this.addPatch(Organization.patch({
+            meta: OrganizationMetaData.patch({
+                recordsConfiguration: OrganizationRecordsConfiguration.patch({
+                    [property]: patch
+                })
+            })
+        }))
+
+        console.log(this.organizationPatch)
     }
 
     addRecordsConfigurationPatch(patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) {
@@ -122,6 +187,21 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
                 this.addCategoriesPatch(patch)
             }
         }).setDisplayStyle("popup"))
+    }
+    
+    getEnableFilterConfiguration(property: string) {
+        return this.patchedOrganization.meta.recordsConfiguration[property] !== null
+    }
+
+    setEnableFilterConfiguration(property: string, enable: boolean) {
+        if (enable === this.getEnableFilterConfiguration(property)) {
+            return
+        }
+        if (enable) {
+            this.patchConfigProperty(property, PropertyFilterConfiguration.create({}))
+        } else {
+            this.patchConfigProperty(property, null)
+        }
     }
 
     async save() {

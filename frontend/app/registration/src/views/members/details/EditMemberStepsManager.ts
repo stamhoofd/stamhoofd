@@ -10,7 +10,6 @@ export enum EditMemberStepType {
     "Details" = "Details",
     "Parents" = "Parents", // Only if meets criteria
     "EmergencyContact" = "EmergencyContact",
-    "Records" = "Records", // Olny if enabled
     // todo: Questions step
 }
 
@@ -199,7 +198,6 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             case EditMemberStepType.Details: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditMemberGeneralView.vue')).default;
             case EditMemberStepType.Parents: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditMemberParentsView.vue')).default;
             case EditMemberStepType.EmergencyContact: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditEmergencyContactView.vue')).default;
-            case EditMemberStepType.Records: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditMemberRecordsView.vue')).default;
 
             default: {
                 // If you get a compile error here, a type is missing in the switch and you should add it
@@ -221,9 +219,6 @@ export class BuiltInEditMemberStep implements EditMemberStep {
 
             // Delete emergency contacts if not asked by organization
             case EditMemberStepType.EmergencyContact: return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked
-
-            // Skip records if not asked by organization for this age
-            case EditMemberStepType.Records: return OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(details.age ?? null)
         }
         return false
     }
@@ -241,12 +236,6 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             case EditMemberStepType.EmergencyContact: 
                 details.emergencyContacts = []
                 details.reviewTimes.markReviewed("emergencyContacts")
-                break;
-
-            // Skip records if not asked by organization for this age
-            case EditMemberStepType.Records: 
-                details.records = []
-                details.reviewTimes.markReviewed("records")
                 break;
         }
     }

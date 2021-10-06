@@ -1,5 +1,7 @@
 import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
+import { StringFilterDefinition } from '../filters/StringFilter';
 import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
 import { WaitingListType } from '../GroupSettings';
@@ -7,6 +9,7 @@ import { PaymentStatus } from '../PaymentStatus';
 import { User } from '../User';
 import { RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
+import { Gender } from './Gender';
 import { Member } from './Member';
 import { Registration } from './Registration';
 
@@ -230,5 +233,61 @@ export class MemberWithRegistrations extends Member {
         if (member.users !== this.users) {
             this.users.splice(0, this.users.length, ...member.users)
         }
+    }
+
+    static getBaseFilterDefinitions() {
+        return [
+            new StringFilterDefinition<MemberWithRegistrations>({
+                id: "member_name", 
+                name: "Naam lid", 
+                getValue: (member) => {
+                    return member?.name ?? ""
+                }
+            }),
+             new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "gender", 
+                name: "Geslacht", 
+                choices: [
+                    new ChoicesFilterChoice(Gender.Male, "Man"),
+                    new ChoicesFilterChoice(Gender.Female, "Vrouw"),
+                    new ChoicesFilterChoice(Gender.Other, "Andere"),
+                ], 
+                getValue: (member) => {
+                    return [member.details.gender]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "paid", 
+                name: "Betaling", 
+                choices: [
+                    new ChoicesFilterChoice("checked", "Betaald"),
+                    new ChoicesFilterChoice("not_checked", "Niet betaald"),
+                ], 
+                getValue: (member) => {
+                    // todo: remove spaces
+                    if (member.paid) {
+                        return ["checked"]
+                    }
+                    return ["not_checked"]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "financial_support", 
+                name: "Financiële ondersteuning", 
+                choices: [
+                    new ChoicesFilterChoice("checked", "Vroeg financiële ondersteuning aan"),
+                    new ChoicesFilterChoice("not_checked", "Geen financiële ondersteuning"),
+                ], 
+                getValue: (member) => {
+                    // todo: remove spaces
+                    if (member.details.requiresFinancialSupport?.value) {
+                        return ["checked"]
+                    }
+                    return ["not_checked"]
+                }
+            })
+        ]
     }
 }

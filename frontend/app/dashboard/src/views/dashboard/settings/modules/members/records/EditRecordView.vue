@@ -230,6 +230,27 @@
                     </STList>
                 </STInputBox>
             </template>
+
+            <hr>
+            <h2>Opslag en beveiliging</h2>
+            <p>
+                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a href="https://www.stamhoofd.be/docs/toestemming-gegevens-verzamelen" class="inline-link">
+                    Lees onze gids
+                </a>
+            </p>
+
+
+            <Checkbox v-model="sensitive">
+                Ik heb toestemming nodig om deze informatie te verzamelen, of de antwoorden zijn (of bevatten mogelijks) gevoelige informatie
+            </Checkbox>
+            <Checkbox v-if="!sensitive" v-model="encrypted">
+                <h3 class="style-title-list">
+                    Sla antwoorden end-to-end-versleuteld op
+                </h3>
+                <p class="style-description-small">
+                    Vink dit zeker aan bij: vrije invoer, contactgegevens of persoonsgegevens
+                </p>
+            </Checkbox>
         </main>
 
         <STToolbar>
@@ -439,7 +460,11 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
     }
 
     set type(type: RecordType) {
-        this.patchRecord = this.patchRecord.patch({ type })
+        this.patchRecord = this.patchRecord.patch({ 
+            type,
+            // Set required if choose one and if it wasn't choose one when opening
+            required: type === RecordType.ChooseOne && this.record.type !== RecordType.ChooseOne ? true : undefined
+         })
     }
 
     get description() {
@@ -534,6 +559,24 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
                 })
              })
         }
+    }
+
+    get sensitive() {
+        return this.patchedRecord.sensitive
+    }
+
+    set sensitive(sensitive: boolean) {
+        // Always require encryption for sensitive information
+        this.patchRecord = this.patchRecord.patch({ sensitive, encrypted: sensitive ? true : undefined })
+    }
+
+    get encrypted() {
+        return this.patchedRecord.encrypted
+    }
+
+    set encrypted(encrypted: boolean) {
+        // Always require encryption for sensitive information
+        this.patchRecord = this.patchRecord.patch({ encrypted })
     }
 
     addPatch(patch: AutoEncoderPatchType<RecordSettings>) {

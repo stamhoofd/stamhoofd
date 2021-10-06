@@ -595,6 +595,7 @@ export class LegacyRecordTypeHelper {
 
         const record = new RecordSettings()
         record.encrypted = !this.isPublic(type)
+        record.sensitive = !this.isPublic(type)
 
         record.type = RecordType.Checkbox
         record.name = this.getName(type)
@@ -604,6 +605,7 @@ export class LegacyRecordTypeHelper {
             case LegacyRecordType.PicturePermissions:
             case LegacyRecordType.GroupPicturePermissions:
                 record.type = RecordType.ChooseOne
+                record.required = true
                 record.name = "Toestemming foto's"
                 record.label = "Toestemming publicatie foto's"
                 record.choices = [
