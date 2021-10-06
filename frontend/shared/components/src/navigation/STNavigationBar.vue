@@ -1,5 +1,5 @@
 <template>
-    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle }">
+    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle, 'no-title': title.length == 0 }">
         <div>
             <slot name="left" />
         </div>
@@ -158,6 +158,18 @@ export default class STNavigationBar extends Vue {
     background: var(--color-current-background, white);
     z-index: 11;
 
+    &.no-title {
+        grid-template-columns: auto 1fr;
+
+        & > div:first-child:empty + div {
+            margin-left: -20px;
+        }
+
+        > h1 {
+            display: none;
+        }
+    }
+
     > div {
         display: flex;
         flex-direction: row;
@@ -176,6 +188,10 @@ export default class STNavigationBar extends Vue {
                 &:first-child {
                     margin-left: 0;
                 }
+
+                &:last-child {
+                    margin-right: 0;
+                }
             }
         }
 
@@ -187,6 +203,10 @@ export default class STNavigationBar extends Vue {
 
                 &:last-child {
                     margin-right: 0;
+                }
+
+                &:first-child {
+                    margin-left: 0;
                 }
             }
         }
@@ -236,6 +256,7 @@ export default class STNavigationBar extends Vue {
         width: 220px;
         display: inline-block;
         margin: 5px 5px;
+        flex-shrink: 10000000;
 
         @media (max-width: 500px) {
             width: 100%;

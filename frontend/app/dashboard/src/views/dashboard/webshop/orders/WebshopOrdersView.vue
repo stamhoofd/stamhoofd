@@ -7,9 +7,6 @@
                     <span class="icon-spacer">{{ title }}</span>
                 </STNavigationTitle>
             </template>
-            <template #middle>
-                <div />
-            </template>
             <template #right>
                 <select v-model="selectedFilter" class="input hide-small">
                     <option v-for="(filter, index) in filters" :key="index" :value="index">

@@ -1,55 +1,45 @@
 <template>
     <div class="st-view group-members-view background">
-        <STNavigationBar :sticky="false" :class="{ 'wrap': !canPop }">
+        <STNavigationBar :sticky="false">
             <template #left>
                 <BackButton v-if="canPop" slot="left" @click="pop" />
-                <STNavigationTitle v-else>
-                    <span class="icon-spacer">{{ title }}</span>
-                    <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
-
-                    <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
-                        <span class="icon clock-small" />
-                        <span>Wachtlijst</span>
-                    </button>
-
-                    <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
-                    
-                    <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
-                        <span class="icon add" />
-                        <span>Nieuw</span>
-                    </button>
-                </STNavigationTitle>
-            </template>
-            <template #middle>
-                <div />
             </template>
             <template #right>
-                <button class="button text" @click="editFilter">
-                    <span class="icon filter" />
-                    <span>Filter</span>
-                    <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
+                    <span class="icon add" />
+                    <span class="hide-small">Nieuw</span>
                 </button>
-                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                <button v-if="group && hasFull" class="button text" @click="modifyGroup">
+                    <span class="icon settings" />
+                    <span class="hide-small">Instellingen</span>
+                </button>
+                <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
+                    <span class="icon clock-small" />
+                    <span class="hide-small">Wachtlijst</span>
+                </button>
             </template>
         </STNavigationBar>
     
         <main>
-            <h1 v-if="canPop" class="data-table-prefix">
+            <h1 class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
-
-                <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
-                    <span class="icon clock-small" />
-                    <span>Wachtlijst</span>
-                </button>
-
-                <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
-
-                <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
-                    <span class="icon add" />
-                    <span>Nieuw</span>
-                </button>
+                <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
+                <span v-if="!loading && !maxMembers" class="style-tag">{{ members.length }}</span>
             </h1>
             <span v-if="titleDescription" class="style-description title-description data-table-prefix">{{ titleDescription }}</span>
+
+            <div class="input-with-buttons data-table-prefix title-description">
+                <div>
+                    <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                </div>
+                <div>
+                    <button class="button text" @click="editFilter">
+                        <span class="icon filter" />
+                        <span class="hide-small">Filter</span>
+                        <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                    </button>
+                </div>
+            </div>
 
             <BillingWarningBox filter-types="members" />
 
@@ -143,6 +133,21 @@
                     </tr>
                 </tbody>
             </table>
+
+            <p v-if="totalFilteredCount == 1" class="info-box icon filter with-button">
+                De filters verbergen één lid
+
+                <button class="button text" @click="resetFilter">
+                    Wissen
+                </button>
+            </p>
+            <p v-else-if="totalFilteredCount > 1" class="info-box icon filter">
+                De filters verbergen {{ totalFilteredCount }} leden
+
+                <button class="button text" @click="resetFilter">
+                    Wissen
+                </button>
+            </p>
 
             <template v-if="!loading && members.length == 0">
                 <p v-if="cycleOffset === 0" class="info-box">
@@ -337,6 +342,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             }
             
         }
+    }
+
+    resetFilter() {
+        this.searchQuery = ""
+        this.selectedFilter = null
     }
 
     editFilter() {
@@ -784,6 +794,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     filteredCount = 0
 
+    get totalFilteredCount() {
+        return this.members.length - this.filteredMembers.length
+    }
+
     get filteredMembers(): SelectableMember[] {
         this.selectionCountHidden = 0
         this.filteredCount = 0
@@ -1015,7 +1029,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/base/text-styles.scss';
 
 .group-members-view {
     .new-member-bubble {
@@ -1046,7 +1059,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     .title-description {
-        margin-bottom: 20px;
+        padding-bottom: 20px;
     }
 }
 </style>
