@@ -18,15 +18,60 @@
             <hr>
             <h2>Ingebouwde gegevens</h2>
 
-            <p>Bepaalde gegevens van leden zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Gebruik deze en voeg deze zaken niet zelf toe als vragen!</p>
+            <p>Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten, en eventueel bepaalde gegevens optioneel maken (altijd of bijvoorbeeld op basis van de leeftijd).</p>
 
             <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
+                    <p class="style-title-list">
+                        GSM-nummer (van lid zelf)
+                    </p>
+                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('phone')" :configuration="patchedOrganization.meta.recordsConfiguration.phone" :definitions="definitions" @patch="patchConfigProperty('phone', $event)" />
+                </STListItem>
                 <STListItem :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
                     <p class="style-title-list">
                         E-mailadres (van lid zelf)
                     </p>
+                    <p class="style-description-small">
+                        Er is wel altijd een e-mailadres noodzakelijk om een account aan te maken
+                    </p>
                     <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('emailAddress')" :configuration="patchedOrganization.meta.recordsConfiguration.emailAddress" :definitions="definitions" @patch="patchConfigProperty('emailAddress', $event)" />
+                </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
+                    <p class="style-title-list">
+                        Geslacht
+                    </p>
+                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('gender')" :configuration="patchedOrganization.meta.recordsConfiguration.gender" :definitions="definitions" @patch="patchConfigProperty('gender', $event)" />
+                </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
+                    <p class="style-title-list">
+                        Geboortedatum
+                    </p>
+                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('birthDay')" :configuration="patchedOrganization.meta.recordsConfiguration.birthDay" :definitions="definitions" @patch="patchConfigProperty('birthDay', $event)" />
+                </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
+                    <p class="style-title-list">
+                        Adres (van lid zelf)
+                    </p>
+                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('address')" :configuration="patchedOrganization.meta.recordsConfiguration.address" :definitions="definitions" @patch="patchConfigProperty('address', $event)" />
+                </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
+                    <p class="style-title-list">
+                        Ouders
+                    </p>
+                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('parents')" :configuration="patchedOrganization.meta.recordsConfiguration.parents" :definitions="definitions" @patch="patchConfigProperty('parents', $event)" />
+                </STListItem>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
+                    <p class="style-title-list">
+                        Noodcontactpersoon
+                    </p>
+                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('emergencyContacts')" :configuration="patchedOrganization.meta.recordsConfiguration.emergencyContacts" :definitions="definitions" @patch="patchConfigProperty('emergencyContacts', $event)" />
                 </STListItem>
             </STList>
 
@@ -84,7 +129,7 @@ import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchCont
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton, PropertyFilterConfigurationInput,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { AskRequirement, MemberWithRegistrations, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilterConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
+import { AskRequirement, MemberDetails, MemberWithRegistrations, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilterConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -121,7 +166,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     }
 
     get definitions() {
-        return MemberWithRegistrations.getBaseFilterDefinitions()
+        return MemberDetails.getBaseFilterDefinitions()
     }
 
     get patchedOrganization() {

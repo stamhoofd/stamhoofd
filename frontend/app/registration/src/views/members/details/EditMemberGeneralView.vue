@@ -32,7 +32,7 @@
 
                     <BirthDayInput v-model="birthDay" title="Geboortedatum" :validator="validator" />
 
-                    <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
+                    <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox" v-if="isPropertyEnabled('gender')">
                         <RadioGroup>
                             <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
                                 Man
@@ -45,16 +45,12 @@
                             </Radio>
                         </RadioGroup>
                     </STInputBox>
-
-                    <Checkbox v-if="livesAtParents || (age >= 18 && age <= 27)" v-model="livesAtParents">
-                        Woont bij ouders
-                    </Checkbox>
                 </div>
 
                 <div>
-                    <AddressInput v-if="age >= 18 && !livesAtParents" v-model="address" title="Adres van dit lid" :validator="validator" />
+                    <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" title="Adres van dit lid" :validator="validator" />
                     <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" title="E-mailadres van dit lid" :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
-                    <PhoneInput v-if="age >= 11 || phone" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="age >= 18" :placeholder="age >= 18 ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
                 </div>
             </div>
         </main>
@@ -111,7 +107,6 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
-    livesAtParents = this.details.parents.length > 0
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
@@ -160,11 +155,6 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                     code: "invalid_field",
                     message: "Birthday check failed",
                 }))
-            }
-
-            if (this.age <= 18 || this.livesAtParents) {
-                // remove address
-                this.address = null
             }
 
             errors.throwIfNotEmpty()

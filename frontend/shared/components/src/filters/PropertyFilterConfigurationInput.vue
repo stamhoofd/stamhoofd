@@ -91,8 +91,12 @@ export default class PropertyFilterConfigurationInput extends Mixins(NavigationM
 .property-filter-configuration-input {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     padding: 10px 0;
+    gap: 10px;
+
+    @media (max-width: 700px) {
+        flex-wrap: wrap;
+    }
 
     > div {
         margin: 5px 0;

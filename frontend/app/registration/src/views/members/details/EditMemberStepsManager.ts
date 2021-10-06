@@ -215,10 +215,12 @@ export class BuiltInEditMemberStep implements EditMemberStep {
     shouldDelete(details: MemberDetails): boolean {
         switch (this.type) {
             // Delete parents for > 18 and has address, or > 27 (no matter of address)
-            case EditMemberStepType.Parents: return ((details.age ?? 99) >= 18 && details.address !== null) || (details.age ?? 99) > 27;
+            case EditMemberStepType.Parents: return !OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(details);
+
+            case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(details);
 
             // Delete emergency contacts if not asked by organization
-            case EditMemberStepType.EmergencyContact: return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked
+            //case EditMemberStepType.EmergencyContact: return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked
         }
         return false
     }
