@@ -102,6 +102,10 @@ export class RecordCheckboxAnswer extends RecordAnswer {
         }
         return this.selected ? [this.settings.warning] : []
     }
+
+    get stringValue() {
+        return this.selected ? "Aangevinkt" : "Niet aangevinkt"
+    }
 }
 
 export class RecordMultipleChoiceAnswer extends RecordAnswer {

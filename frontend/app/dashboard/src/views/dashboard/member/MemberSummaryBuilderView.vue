@@ -23,7 +23,7 @@
                     </button>
                 </div>
             </h2>
-            <p>Selecteer hier alle kenmerken die je in de samenvatting wilt oplijsten, gegroepeerd per lid. Om papier te sparen is het vaak nuttiger om sommige eigenschappen te groeperen (zie volgende titel).</p>
+            <p>Selecteer hier alle kenmerken die je in de samenvatting wilt oplijsten, gegroepeerd per lid.</p>
 
             <STList>
                 <STListItem v-for="(property, index) of memberProperties" :key="index" :selectable="true" element-name="label">
@@ -212,11 +212,34 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                 if (member.details.address) {
                     addresses.add(member.details.address.toString())
                 }
+                
+                const parentAddresses = new Set<string>()
 
                 for (const parent of member.details.parents) {
                     if (parent.address) {
                         addresses.add(parent.address.toString())
+                        parentAddresses.add(parent.address.toString())
                     }
+                }
+
+                if (parentAddresses.size > 1) {
+                    if (!member.details.address || addresses.size === parentAddresses.size) {
+                        return new Map(member.details.parents.flatMap(parent => {
+                            if (!parent.address) {
+                                return []
+                            }
+                            return [["Adres "+ParentTypeHelper.getName(parent.type), parent.address.toString()]]
+                        }))
+                    }
+                    return new Map([
+                        ["Adres", member.details.address.toString()],
+                        ...member.details.parents.flatMap(parent =>  {
+                            if (!parent.address) {
+                                return []
+                            }
+                            return [["Adres "+ParentTypeHelper.getName(parent.type), parent.address.toString()]] as [string, string][]
+                        })
+                    ])
                 }
 
                 return new Map([["Adres", [...addresses].join("\n")]])
@@ -292,9 +315,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                         }
                     })
                 )
-            }
-
-            if (record.type === RecordType.ChooseOne) {
+            } else if (record.type === RecordType.ChooseOne) {
                 this.memberProperties.push(
                     new SummaryMemberProperty({
                         name: record.name,
@@ -329,10 +350,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                         })
                     )
                 }
-            }
-
-
-            if (record.type === RecordType.MultipleChoice) {
+            } else if (record.type === RecordType.MultipleChoice) {
                 this.memberProperties.push(
                     new SummaryMemberProperty({
                         name: record.name,
@@ -367,6 +385,20 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                         })
                     )
                 }
+            } else  {
+                this.memberProperties.push(
+                    new SummaryMemberProperty({
+                        name: record.name,
+                        selected: false,
+                        getValue: (member) => {
+                            const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
+                            if (!answer) {
+                                return
+                            }
+                            return answer.stringValue && answer.stringValue != "/" ? answer.stringValue : undefined
+                        }
+                    })
+                )
             }
 
 
@@ -507,7 +539,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
            
             if (this.hasMemberProperties) {
                 doc.moveDown(2);
-                this.drawBoxes(doc, 3, this.buildMemberGroups(), this.hasGroupProperties)
+                this.drawBoxes(doc, 2, this.buildMemberGroups(), this.hasGroupProperties)
             }
         
             // Page numbers
