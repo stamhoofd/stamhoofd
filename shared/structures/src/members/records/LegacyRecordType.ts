@@ -308,7 +308,7 @@ export class LegacyRecordTypeHelper {
         // others: keep name, don't repeat name
     }
 
-    static getName(type: LegacyRecordType): string {
+    static getWarningText(type: LegacyRecordType): string {
         switch (type) {
             case LegacyRecordType.DataPermissions:
                 return "Geen toestemming voor verzamelen gevoelige gegevens";
@@ -372,6 +372,77 @@ export class LegacyRecordTypeHelper {
                 return "Bijzondere aandacht nodig bij sociale omgang";
             case LegacyRecordType.MedicinePermissions:
                 return "Geen toestemming voor het toedienen van medicatie";
+            case LegacyRecordType.FinancialProblems:
+                return "Kansarm gezin";
+            case LegacyRecordType.Other:
+                return "Andere opmerking";
+        }
+    }
+
+    static getName(type: LegacyRecordType): string {
+        switch (type) {
+            case LegacyRecordType.DataPermissions:
+                return "Toestemming voor verzamelen gevoelige gegevens";
+            case LegacyRecordType.PicturePermissions:
+                return "Toestemming foto's";
+            case LegacyRecordType.GroupPicturePermissions:
+                return "Toestemming groepsfoto's";
+
+            case LegacyRecordType.FoodAllergies:
+                return "Allergisch of overgevoelig voor bepaalde voeding";
+            case LegacyRecordType.MedicineAllergies:
+                return "Allergisch voor geneesmiddelen";
+            case LegacyRecordType.OtherAllergies:
+                return "Allergisch voor bepaalde zaken";
+
+            case LegacyRecordType.Vegetarian:
+                return "Vegetarisch dieet";
+            case LegacyRecordType.Vegan:
+                return "Veganistisch dieet";
+            case LegacyRecordType.Halal:
+                return "Halal dieet";
+            case LegacyRecordType.Kosher:
+                return "Koosjer dieet";
+            case LegacyRecordType.Diet:
+                return "Speciaal dieet";
+
+            case LegacyRecordType.TetanusVaccine:
+                return "Tetanusvaccinatie";
+
+            case LegacyRecordType.CovidHighRisk:
+                return "Hoog-risicogroep voor coronavirus";
+            case LegacyRecordType.Asthma:
+                return "Astma";
+            case LegacyRecordType.BedWaters:
+                return "Bedwateren";
+            case LegacyRecordType.Epilepsy:
+                return "Epilepsie";
+            case LegacyRecordType.HeartDisease:
+                return "Hartaandoening";
+            case LegacyRecordType.HayFever:
+                return "Hooikoorts";
+            case LegacyRecordType.SkinCondition:
+                return "Huidaandoening";
+            case LegacyRecordType.Rheumatism:
+                return "Reuma";
+            case LegacyRecordType.SleepWalking:
+                return "Slaapwandelen";
+            case LegacyRecordType.Diabetes:
+                return "Diabetes";
+            case LegacyRecordType.Medicines:
+                return "Moet geneesmiddelen nemen";
+            case LegacyRecordType.SpecialHealthCare:
+                return "Speciale zorg om risico's te voorkomen";
+            case LegacyRecordType.CanNotSwim:
+                return "Kan niet (of onvoldoende) zwemmen";
+            case LegacyRecordType.TiredQuickly:
+                return "Is snel moe";
+            case LegacyRecordType.CanNotParticipateInSport:
+                return "Kan niet deelnemen aan sport en spel afgestemd op leeftijd";
+            case LegacyRecordType.SpecialSocialCare:
+                return "Bijzondere aandacht nodig bij sociale omgang";
+            case LegacyRecordType.MedicinePermissions:
+                return "Toestemming voor het toedienen van medicatie";
             case LegacyRecordType.FinancialProblems:
                 return "Kansarm gezin";
             case LegacyRecordType.Other:
@@ -594,6 +665,7 @@ export class LegacyRecordTypeHelper {
         }
 
         const record = new RecordSettings()
+        record.id = "legacy-type-"+type
         record.encrypted = !this.isPublic(type)
         record.sensitive = !this.isPublic(type)
 
@@ -710,7 +782,7 @@ export class LegacyRecordTypeHelper {
 
         if (record.type === RecordType.Checkbox || record.type === RecordType.Textarea) {
             record.warning = RecordWarning.create({
-                text: this.getName(type),
+                text: this.getWarningText(type),
                 type: this.getPriority(type) == LegacyRecordTypePriority.Low ? RecordWarningType.Info : (this.getPriority(type) == LegacyRecordTypePriority.Medium ? RecordWarningType.Warning : RecordWarningType.Error),
                 inverted: this.isInverted(type)
             })

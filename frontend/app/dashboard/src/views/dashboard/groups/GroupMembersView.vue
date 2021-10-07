@@ -246,7 +246,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from '../member/edit/EditMemberView.vue';
 import MemberContextMenu from "../member/MemberContextMenu.vue";
-import MemberSummaryView from '../member/MemberSummaryView.vue';
+import MemberSummaryBuilderView from '../member/MemberSummaryBuilderView.vue';
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 import EditGroupView from "./EditGroupView.vue";
@@ -1120,7 +1120,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     openSamenvatting() {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberSummaryView, {
+            root: new ComponentWithProperties(MemberSummaryBuilderView, {
                 members: this.getSelectedMembers(),
                 group: this.group
             })
