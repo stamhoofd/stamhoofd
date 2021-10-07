@@ -15,15 +15,15 @@
                     Geen vrije bijdrage
                 </Radio>
 
-                <Radio v-for="a in amounts" :key="a" v-model="amountOption" :value="a" name="contributionRadio">
+                <Radio v-for="(a, index) in amounts" :key="index" v-model="amountOption" :value="a" name="contributionRadio">
                     {{ a | price }}
                 </Radio>
               
-                <Radio v-model="amountOption" :value="amounts[amounts.length - 1] + 1000" name="contributionRadio">
+                <Radio v-model="amountOption" :value="otherValue" name="contributionRadio">
                     Ander bedrag kiezen
                 </Radio>
 
-                <div v-if="amountOption === amounts[amounts.length - 1] + 1000" class="textarea-container">
+                <div v-if="amountOption === otherValue" class="textarea-container">
                     <PriceInput v-model="amount" placeholder="Jouw bijdrage" />
                 </div>
 
@@ -89,13 +89,20 @@ export default class FreeContributionView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
     CheckoutManager = CheckoutManager
 
-    amountOption = this.amounts.includes(this.cart.freeContribution) || this.cart.freeContribution == 0 ? this.cart.freeContribution : (this.amounts[this.amounts.length - 1] + 1000)
+    amountOption = this.amounts.includes(this.cart.freeContribution) || this.cart.freeContribution == 0 ? this.cart.freeContribution : (this.otherValue)
     amount = this.cart.freeContribution
     loading = false
     errorBox: ErrorBox | null = null
 
+    get otherValue() {
+        if (this.amounts.length == 0) {
+            return 1000
+        }
+        return Math.max(...this.amounts) + 1000
+    }
+
     get amounts() {
-        return OrganizationManager.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []
+        return (OrganizationManager.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).filter(a => a > 0)
     }
 
     get description() {

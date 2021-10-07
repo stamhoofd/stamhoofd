@@ -50,7 +50,24 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
             }))
         }
 
-        const titel = data.field("titel").string
+        const titel = data.optionalField("titel")?.string
+
+        if (!titel) {
+            console.error("Onbekende foutmelding van de groepsadministratie: ", data.data)
+            
+            try {
+                return new SimpleErrors(new SimpleError({
+                    code: "SGVError",
+                    message: "De groepsadministratie gaf een onbekende foutmelding terug aan Stamhoofd: "+JSON.stringify(data.data)
+                }))
+            } catch (e) {
+                return new SimpleErrors(new SimpleError({
+                    code: "SGVError",
+                    message: "De groepsadministratie gaf een onbekende foutmelding terug aan Stamhoofd. Kijk even na of er niet ergens foutieve gegevens ingevuld staan, dat de groepsadministratie online is en dat je zelf wel deze leden kan bewerken in de groepsadministratie."
+                }))
+            }
+            
+        }
         const beschrijving = data.optionalField("beschrijving")?.string
         return new SimpleErrors(new SimpleError({
             code: "SGVError",
