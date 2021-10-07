@@ -15,7 +15,14 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <hr>
-            <h2>Kenmerken per lid oplijsten</h2>
+            <h2 class="style-with-button">
+                <div>Kenmerken per lid oplijsten</div>
+                <div>
+                    <button v-if="hasMemberProperties" class="button text" type="button" @click="deselectAllMemberProperties">
+                        Deselecteren
+                    </button>
+                </div>
+            </h2>
             <p>Selecteer hier alle kenmerken die je in de samenvatting wilt oplijsten, gegroepeerd per lid. Om papier te sparen is het vaak nuttiger om sommige eigenschappen te groeperen (zie volgende titel).</p>
 
             <STList>
@@ -26,7 +33,14 @@
             </STList>
 
             <hr>
-            <h2>Leden oplijsten per categorie</h2>
+            <h2 class="style-with-button">
+                <div>Leden oplijsten per categorie</div>
+                <div>
+                    <button v-if="hasGroupProperties" class="button text" type="button" @click="deselectAllGroupProperties">
+                        Deselecteren
+                    </button>
+                </div>
+            </h2>
             <p>Je kan ook leden oplijsten per categorie, eventueel met extra opmerkingen erbij (bv. bij aanvinkvakjes met opmerkingen).</p>
 
             <STList>
@@ -56,7 +70,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ErrorBox, STErrorsDefault,STList, STListItem,STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
-import { Group, Member, MemberWithRegistrations, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
+import { Group, Member, MemberWithRegistrations, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 // PDFKit is used! Wrong warning below!
 import PDFKit from "pdfkit"
@@ -94,10 +108,12 @@ class SummaryMemberProperty {
 
     constructor(settings: {
         name: string, 
+        selected?: boolean,
         getValues?: (member: MemberWithRegistrations) => (Map<string, string> | undefined),
         getValue?: (member: MemberWithRegistrations) => string | undefined | null
     }) {
         this.name = settings.name
+        this.selected = settings.selected ?? false
 
         if (settings.getValue && settings.getValues) {
             throw new Error("getValue + getValues can't be used together")
@@ -211,13 +227,6 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
 
     groupProperties = [
         new SummaryGroupProperty({
-            name: "Test groep",
-            getValue: (member) => {
-                return "Dit is een test waarde"
-                //return member.details.requiresFinancialSupport?.value ? "" : null
-            }
-        }),
-        new SummaryGroupProperty({
             name: "Financiële ondersteuning",
             getValue: (member) => {
                 return member.details.requiresFinancialSupport?.value ? "" : null
@@ -253,7 +262,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                 this.groupProperties.push(
                     new SummaryGroupProperty({
                         name: record.name+": aangevinkt",
-                        selected: !preferInverted,
+                        selected: !preferInverted && !!record.warning,
                         getValue: (member) => {
                             const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
                             if (!answer) {
@@ -270,7 +279,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                 this.groupProperties.push(
                     new SummaryGroupProperty({
                         name: record.name+": niet aangevinkt",
-                        selected: preferInverted,
+                        selected: preferInverted && !!record.warning,
                         getValue: (member) => {
                             const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
                             if (!answer) {
@@ -284,6 +293,83 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                     })
                 )
             }
+
+            if (record.type === RecordType.ChooseOne) {
+                this.memberProperties.push(
+                    new SummaryMemberProperty({
+                        name: record.name,
+                        selected: false,
+                        getValue: (member) => {
+                            const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
+                            if (!answer) {
+                                return
+                            }
+                            if (answer instanceof RecordChooseOneAnswer) {
+                                return answer.selectedChoice?.name
+                            }
+                        }
+                    })
+                )
+
+                for (const choice of record.choices) {
+                    this.groupProperties.push(
+                        new SummaryGroupProperty({
+                            name: record.name+": "+choice.name,
+                            selected: !!choice.warning,
+                            getValue: (member) => {
+                                const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
+                                if (!answer) {
+                                    return null
+                                }
+                                if (answer instanceof RecordChooseOneAnswer) {
+                                    return answer.selectedChoice?.id == choice.id ? "" : null
+                                }
+                                return null
+                            }
+                        })
+                    )
+                }
+            }
+
+
+            if (record.type === RecordType.MultipleChoice) {
+                this.memberProperties.push(
+                    new SummaryMemberProperty({
+                        name: record.name,
+                        selected: false,
+                        getValue: (member) => {
+                            const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
+                            if (!answer) {
+                                return
+                            }
+                            if (answer instanceof RecordMultipleChoiceAnswer) {
+                                return answer.selectedChoices.map(c => c.name).join(", ")
+                            }
+                        }
+                    })
+                )
+
+                for (const choice of record.choices) {
+                    this.groupProperties.push(
+                        new SummaryGroupProperty({
+                            name: record.name+": "+choice.name,
+                            selected: !!choice.warning,
+                            getValue: (member) => {
+                                const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
+                                if (!answer) {
+                                    return null
+                                }
+                                if (answer instanceof RecordMultipleChoiceAnswer) {
+                                    return answer.selectedChoices.find(c => c.id == choice.id) ? "" : null
+                                }
+                                return null
+                            }
+                        })
+                    )
+                }
+            }
+
+
         }
         
     }
@@ -294,6 +380,18 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
 
     get hasMemberProperties() {
         return !!this.memberProperties.find(m => m.selected)
+    }
+
+    deselectAllGroupProperties() {
+        for (const prop of this.groupProperties) {
+            prop.selected = false
+        }
+    }
+
+    deselectAllMemberProperties() {
+        for (const prop of this.memberProperties) {
+            prop.selected = false
+        }
     }
 
     buildMemberGroups() {
@@ -319,7 +417,9 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
                 }
             }
 
-            groups.push(group)
+            if (group.items.size > 0) {
+                groups.push(group)
+            }
         }
         return groups
     }
@@ -526,7 +626,7 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
             columns *= 2
         }
 
-        columns = Math.max(Math.min(columns, data.items.size), 1)
+        columns = Math.max(Math.min(columns, Math.floor(data.items.size / 4)), 1)
 
         let height = 0;
         let pages =  0;
