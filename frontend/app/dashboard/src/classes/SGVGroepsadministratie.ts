@@ -50,7 +50,7 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
             }))
         }
 
-        const titel = data.optionalField("titel")?.string
+        const titel = data.optionalField("titel")?.string ?? data.optionalField("boodschap")?.string
 
         if (!titel) {
             console.error("Onbekende foutmelding van de groepsadministratie: ", data.data)
