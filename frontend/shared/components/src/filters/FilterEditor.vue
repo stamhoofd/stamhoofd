@@ -31,9 +31,9 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar } from "@stamhoofd/components";
+import { CenteredMessage, STNavigationBar } from "@stamhoofd/components";
 import { BackButton, FilterGroupView, STToolbar } from "@stamhoofd/components";
-import { Filter, FilterDefinition } from "@stamhoofd/structures";
+import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
 import { FilterGroup, MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -51,7 +51,7 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
     title!: string
 
     @Prop({ required: true })
-    selectedFilter!: Filter<any> | null
+    selectedFilter!: FilterGroup<any> | null
 
     @Prop({ required: true })
     setFilter: (filter: Filter<any>) => void
@@ -59,7 +59,7 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     definitions!: FilterDefinition<any, any, any>[]
 
-    editingFilter = this.selectedFilter?.clone() ?? new FilterGroup<MemberWithRegistrations>(this.definitions)
+    editingFilter: FilterGroup<any> = (this.selectedFilter?.clone() ?? new FilterGroup<any>(this.definitions)) as FilterGroup<any>
 
     created() {
         if (this.editingFilter instanceof FilterGroup) {
@@ -76,6 +76,20 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
     applyFilter() {
         this.setFilter(this.editingFilter)
         this.dismiss({ force: true })
+    }
+
+    isChanged() {
+        if (this.selectedFilter === null) {
+            return this.editingFilter.filters.length > 0
+        }
+        return JSON.stringify(this.editingFilter.encode({ version: Version })) != JSON.stringify(this.selectedFilter.encode({ version: Version }))
+    }
+
+    async shouldNavigateAway() {
+        if (!this.isChanged()) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 }
 </script>

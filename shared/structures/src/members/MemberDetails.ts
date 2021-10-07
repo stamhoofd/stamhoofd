@@ -499,7 +499,8 @@ export class MemberDetails extends AutoEncoder {
                 name: "Leeftijd", 
                 getValue: (details) => {
                     return details.age ?? 99
-                }
+                },
+                floatingPoint: false
             }),
              new ChoicesFilterDefinition<MemberDetails>({
                 id: "gender", 

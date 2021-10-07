@@ -1,10 +1,10 @@
 <template>
     <ContextMenu v-bind="{ x, y, preferredWidth }">
         <ContextMenuItem @click="setAlways">
-            Altijd vragen
+            Altijd
         </ContextMenuItem>
         <ContextMenuItem @click="editFilter()">
-            Aangepast...
+            Als...
         </ContextMenuItem>
     </ContextMenu>
 </template>

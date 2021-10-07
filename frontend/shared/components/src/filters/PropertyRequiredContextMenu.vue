@@ -1,13 +1,13 @@
 <template>
     <ContextMenu v-bind="{ x, y, preferredWidth }">
         <ContextMenuItem @click="setRequired">
-            Verplicht invullen
+            Altijd
         </ContextMenuItem>
         <ContextMenuItem @click="setOptional">
-            Optioneel
+            Nooit (optioneel invullen)
         </ContextMenuItem>
         <ContextMenuItem @click="editFilter()">
-            Aangepast...
+            Als...
         </ContextMenuItem>
     </ContextMenu>
 </template>

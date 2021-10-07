@@ -1,8 +1,8 @@
 <template>
     <div class="stepper-input">
-        <button class="icon min" @click="step(-1)" />
+        <button class="icon min" type="button" @click="step(-1)" />
         <hr>
-        <button class="icon plus" @click="step(1)" /> 
+        <button class="icon plus" type="button" @click="step(1)" /> 
     </div>
 </template>
 

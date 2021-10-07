@@ -25,7 +25,7 @@ export class NumberFilterDefinition<T> extends FilterDefinition<T, NumberFilter<
         const filter = this.createFilter()
         filter.start = data.optionalField("start")?.nullable(NumberDecoder) ?? null
         filter.end = data.optionalField("end")?.nullable(NumberDecoder) ?? null
-        filter.mode = data.optionalField("mode")?.enum(NumberFilterMode) ?? NumberFilterMode.Between
+        filter.mode = data.optionalField("mode")?.enum(NumberFilterMode) ?? NumberFilterMode.Equal
         return filter
     }
 
@@ -37,6 +37,8 @@ export class NumberFilterDefinition<T> extends FilterDefinition<T, NumberFilter<
 }
 
 export enum NumberFilterMode {
+    GreaterThan = "GreaterThan",
+    LessThan = "LessThan",
     Between = "Between",
     NotBetween = "NotBetween",
     Equal = "Equal",
@@ -46,11 +48,27 @@ export enum NumberFilterMode {
 export class NumberFilter<T> extends Filter<T> {
     start: number | null = null
     end: number | null = null
-    mode: NumberFilterMode = NumberFilterMode.Between
+    mode: NumberFilterMode = NumberFilterMode.Equal
     definition: NumberFilterDefinition<T>
 
     doesMatch(object: T): boolean {
         const num = this.definition.getValue(object)
+
+        if (this.mode === NumberFilterMode.LessThan) {
+            if (this.end === null) {
+                return true
+            }
+
+            return num <= this.end
+        }
+
+        if (this.mode === NumberFilterMode.GreaterThan) {
+            if (this.start === null) {
+                return true
+            }
+
+            return num >= this.start
+        }
 
         if (this.mode === NumberFilterMode.Between) {
             if (this.start === null) {
@@ -99,6 +117,14 @@ export class NumberFilter<T> extends Filter<T> {
     }
 
     toString() {
+        if (this.mode === NumberFilterMode.GreaterThan) {
+            return this.definition.name + " is "+this.start+" of meer"
+        }
+
+        if (this.mode === NumberFilterMode.LessThan) {
+            return this.definition.name + " is "+this.end+" of minder"
+        }
+
         if (this.mode === NumberFilterMode.Between) {
             if (this.start === null) {
                 if (this.end === null) {

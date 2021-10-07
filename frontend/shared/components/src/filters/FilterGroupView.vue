@@ -11,7 +11,7 @@
                 </div>
             </h2>
             <StringFilterView v-if="isStringFilter(filter)" :filter="filter" />
-            <NumberFilterView v-if="isNumberFilter(filter)" :filter="filter" />
+            <NumberFilterView v-else-if="isNumberFilter(filter)" :filter="filter" />
             <ChoicesFilterView v-else-if="isChoicesFilter(filter)" :filter="filter" />
             <p v-else class="error-box">
                 Filter niet ondersteund

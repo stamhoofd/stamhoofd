@@ -1,25 +1,34 @@
 <template>
     <div class="property-filter-configuration-input">
-        <div class="input input-dropdown" @click="openEnabledWhenContextMenu">
-            {{ enabledText }}
-        </div>
+        <STInputBox title="Wanneer vragen?">
+            <div class="input input-dropdown" @click="openEnabledWhenContextMenu">
+                {{ enabledText }}
+            </div>
+        </STInputBox>
 
-        <div class="input input-dropdown" @click="openRequiredContextMenu">
-            {{ requiredText }}
-        </div>
+        <STInputBox title="Wanneer verplicht invullen?">
+            <div class="input input-dropdown" @click="openRequiredContextMenu">
+                {{ requiredText }}
+            </div>
+        </STInputBox>
     </div>
 </template>
 
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { STInputBox } from '@stamhoofd/components';
 import { Filter, FilterDefinition, FilterGroup, PropertyFilterConfiguration } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import PropertyEnabledContextMenu from './PropertyEnabledContextMenu.vue';
 import PropertyRequiredContextMenu from './PropertyRequiredContextMenu.vue';
 
-@Component
+@Component({
+    components: {
+        STInputBox
+    }
+})
 export default class PropertyFilterConfigurationInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     configuration: PropertyFilterConfiguration
@@ -29,21 +38,21 @@ export default class PropertyFilterConfigurationInput extends Mixins(NavigationM
 
     get enabledText() {
         if (this.configuration.enabledWhen.filters.length == 0) {
-            return "Altijd vragen"
+            return "Altijd"
         }
-        return "Vragen als: "+this.configuration.enabledWhen.toString()
+        return "Als: "+this.configuration.enabledWhen.toString()
     }
 
     get requiredText() {
         if (!this.configuration.requiredWhen) {
-            return "Invullen optioneel"
+            return "Nooit (optioneel invullen)"
         }
 
         if (this.configuration.requiredWhen.filters.length == 0) {
-            return "Verplicht invullen"
+            return "Altijd"
         }
 
-        return "Verplicht als: "+this.configuration.requiredWhen.toString()
+        return "Als: "+this.configuration.requiredWhen.toString()
     }
 
     openEnabledWhenContextMenu(event: Event) {
@@ -89,17 +98,21 @@ export default class PropertyFilterConfigurationInput extends Mixins(NavigationM
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 
 .property-filter-configuration-input {
-    display: flex;
-    flex-direction: row;
-    padding: 10px 0;
-    gap: 10px;
+    @media (min-width: 700px) {
+        display: flex;
+        flex-direction: row;
+        
+        > * {
+            flex-basis: 50%;
 
-    @media (max-width: 700px) {
-        flex-wrap: wrap;
-    }
+            &:first-child {
+                padding-right: 5px;
+            }
 
-    > div {
-        margin: 5px 0;
+            &:last-child {
+                padding-left: 5px;
+            }
+        }
     }
 }
 </style>
