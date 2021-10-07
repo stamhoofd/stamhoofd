@@ -3,6 +3,7 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
+import { NumberFilterDefinition } from '../filters/NumberFilter';
 import { StringFilterDefinition } from '../filters/StringFilter';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
@@ -491,6 +492,13 @@ export class MemberDetails extends AutoEncoder {
                 name: "Naam lid", 
                 getValue: (details) => {
                     return details.name
+                }
+            }),
+            new NumberFilterDefinition<MemberDetails>({
+                id: "member_age", 
+                name: "Leeftijd", 
+                getValue: (details) => {
+                    return details.age ?? 99
                 }
             }),
              new ChoicesFilterDefinition<MemberDetails>({
