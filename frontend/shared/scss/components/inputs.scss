@@ -100,6 +100,10 @@ textarea.input {
 
     // Increase the right padding just a little.
     padding-right: 35px;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 select.input {

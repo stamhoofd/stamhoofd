@@ -54,4 +54,17 @@ export class StringFilter<T> extends Filter<T> {
             mode: this.mode
         }
     }
+
+    toString() {
+        if (this.mode === StringFilterMode.Contains) {
+            return this.definition.name + " bevat "+this.value
+        }
+        if (this.mode === StringFilterMode.NotContains) {
+            return this.definition.name + " bevat niet "+this.value
+        }
+        if (this.mode === StringFilterMode.Equals) {
+            return this.definition.name + " is gelijk aan "+this.value
+        }
+        return "Onbekend"
+    }
 }

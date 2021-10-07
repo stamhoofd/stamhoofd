@@ -145,7 +145,28 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     return !meta || !meta.hasMemberGeneral
                 }
                 // We still have all the data. Ask everything that is older than 3 months
-                return member.details.reviewTimes.isOutdated("details", this.outdatedTime)
+                if (member.details.reviewTimes.isOutdated("details", this.outdatedTime)) {
+                    return true
+                }
+
+                // Check missing information
+                if (!member.details.phone && OrganizationManager.organization.meta.recordsConfiguration.phone?.requiredWhen?.doesMatch(details) === true) {
+                    return true
+                }
+
+                if (!member.details.email && OrganizationManager.organization.meta.recordsConfiguration.emailAddress?.requiredWhen?.doesMatch(details) === true) {
+                    return true
+                }
+
+                if (!member.details.address && OrganizationManager.organization.meta.recordsConfiguration.address?.requiredWhen?.doesMatch(details) === true) {
+                    return true
+                }
+
+                if (!member.details.birthDay && OrganizationManager.organization.meta.recordsConfiguration.birthDay?.requiredWhen?.doesMatch(details) === true) {
+                    return true
+                }
+
+                return false
             }
             case EditMemberStepType.Parents: {
                 if (member.details.isRecovered) {
@@ -154,7 +175,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     return !meta || !meta.hasParents
                 }
                 // We still have all the data. Ask everything that is older than 3 months
-                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || member.details.parents.length == 0
+                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(details) === true)
             }
             case EditMemberStepType.EmergencyContact: {
                 if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
@@ -169,7 +190,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     // Review if never entered or saved
                     return !meta || !meta.hasEmergency
                 }
-                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.Required)
+                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(details) === true)
             }
             /*case EditMemberStepType.Records: {
                 if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
@@ -215,9 +236,9 @@ export class BuiltInEditMemberStep implements EditMemberStep {
     shouldDelete(details: MemberDetails): boolean {
         switch (this.type) {
             // Delete parents for > 18 and has address, or > 27 (no matter of address)
-            case EditMemberStepType.Parents: return !OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(details);
+            case EditMemberStepType.Parents: return !OrganizationManager.organization.meta.recordsConfiguration.parents?.enabledWhen?.doesMatch(details);
 
-            case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(details);
+            case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.enabledWhen?.doesMatch(details);
 
             // Delete emergency contacts if not asked by organization
             //case EditMemberStepType.EmergencyContact: return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked

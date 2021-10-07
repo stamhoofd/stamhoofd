@@ -30,7 +30,7 @@
                         </div>
                     </STInputBox>
 
-                    <BirthDayInput v-model="birthDay" title="Geboortedatum" :validator="validator" />
+                    <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')"/>
 
                     <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox" v-if="isPropertyEnabled('gender')">
                         <RadioGroup>
@@ -48,7 +48,7 @@
                 </div>
 
                 <div>
-                    <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" title="Adres van dit lid" :validator="validator" />
+                    <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="isPropertyRequired('address') ? 'Adres van dit lid' : 'Adres van dit lid (optioneel)'" :validator="validator" />
                     <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" title="E-mailadres van dit lid" :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
                     <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
                 </div>
@@ -114,11 +114,11 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
         return this.details.age ?? 99
     }
 
-    isPropertyEnabled(name: "emailAddress") {
+    isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address") {
         return OrganizationManager.organization.meta.recordsConfiguration[name]?.enabledWhen?.doesMatch(this.details) ?? false
     }
 
-    isPropertyRequired(name: "emailAddress") {
+    isPropertyRequired(name: "emailAddress" | "birthDay" | "phone" | "address") {
         return this.isPropertyEnabled(name) && (OrganizationManager.organization.meta.recordsConfiguration[name]?.requiredWhen?.doesMatch(this.details) ?? false)
     }
 
@@ -148,7 +148,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 }))
             }
             
-            if (valid && !this.birthDay) {
+            if (valid && !this.birthDay && this.isPropertyRequired("birthDay")) {
                 // Security check in case event based validation fails
                 // no translations needed here, since this is an edge case
                 errors.addError(new SimpleError({

@@ -40,6 +40,10 @@ export class FilterGroup<T> extends Filter<T> {
             definitionId: "FilterGroup"
         }
     }
+
+    toString() {
+        return this.filters.map(f => f.toString()).join(", ")
+    }
 }
 
 export class FilterGroupDecoder<T> extends FilterDefinition<T, FilterGroup<T>, any> implements Decoder<FilterGroup<T>> {

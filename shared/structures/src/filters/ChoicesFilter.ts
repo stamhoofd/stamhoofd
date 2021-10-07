@@ -2,6 +2,7 @@
 // Date example
 
 import { Data, EncodeContext, PlainObject, StringDecoder } from "@simonbackx/simple-encoding"
+import { Formatter } from "@stamhoofd/utility"
 
 import { Filter, FilterDefinition } from "./FilterDefinition"
 export class ChoicesFilterChoice {
@@ -79,6 +80,14 @@ export class ChoicesFilter<T> extends Filter<T> {
             definitionId: this.definition.id,
             choiceIds: this.choiceIds,
             mode: this.mode
+        }
+    }
+
+    toString() {
+        if (this.mode === ChoicesFilterMode.Or) {
+            return this.definition.name + " is "+Formatter.joinLast(this.choiceIds.map(c => this.definition.choices.find(cc => cc.id == c)?.name ?? c), ", ", " of ")
+        } else {
+            return this.definition.name + " is "+Formatter.joinLast(this.choiceIds.map(c => this.definition.choices.find(cc => cc.id == c)?.name ?? c), ", ", " en ")
         }
     }
 }

@@ -9,10 +9,16 @@ export abstract class FilterDefinition<T, FilterType extends Filter<T>, ValueTyp
     name: string
     getValue: (object: T) => ValueType
 
-    constructor(settings: { id: string, name: string, getValue: (object: T) => ValueType }) {
+    /**
+     * Transform a filter in an explanation text (optional)
+     */
+    explainFilter?: (filter: FilterType) => string
+
+    constructor(settings: { id: string, name: string, getValue: (object: T) => ValueType , explainFilter?: (filter: FilterType) => string }) {
         this.id = settings.id
         this.name = settings.name
         this.getValue = settings.getValue
+        this.explainFilter = settings.explainFilter
     }
 
     abstract decode(data: Data): FilterType

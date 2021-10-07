@@ -31,7 +31,7 @@ export default class PropertyFilterConfigurationInput extends Mixins(NavigationM
         if (this.configuration.enabledWhen.filters.length == 0) {
             return "Altijd vragen"
         }
-        return "Vragen als: eigen voorwaarden"
+        return "Vragen als: "+this.configuration.enabledWhen.toString()
     }
 
     get requiredText() {
@@ -43,7 +43,7 @@ export default class PropertyFilterConfigurationInput extends Mixins(NavigationM
             return "Verplicht invullen"
         }
 
-        return "Verplicht als: eigen voorwaarden"
+        return "Verplicht als: "+this.configuration.requiredWhen.toString()
     }
 
     openEnabledWhenContextMenu(event: Event) {
