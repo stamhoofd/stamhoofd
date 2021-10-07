@@ -886,7 +886,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             try {
                 const updateResponse = await this.authenticatedServer.request<any>({
                     method: "POST",
-                    path: "/lid",
+                    path: "/lid?bevestig=true",
                     body: post
                 })
 
