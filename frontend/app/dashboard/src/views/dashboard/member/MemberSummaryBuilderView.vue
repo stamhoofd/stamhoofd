@@ -177,7 +177,7 @@ class SummaryGroupProperty {
         tooltip: TooltipDirective
     }
 })
-export default class MemberSummaryView extends Mixins(NavigationMixin) {
+export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
     loading = false
     errorBox: ErrorBox | null = null
 
@@ -905,33 +905,3 @@ export default class MemberSummaryView extends Mixins(NavigationMixin) {
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.member-summary-view {
-    > main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        padding-top: 25px;
-    }
-
-    .details-grid dd {
-        white-space: pre-wrap;
-    }
-
-    .split-main {
-        display: grid;
-        grid-template-columns: repeat( auto-fit, minmax(250px, 1fr) );
-        gap: 10px;
-
-        h2 {
-            @extend .style-title-2;
-            padding-top: 25px;
-            padding-bottom: 15px;
-        }
-    }
-}
-</style>
