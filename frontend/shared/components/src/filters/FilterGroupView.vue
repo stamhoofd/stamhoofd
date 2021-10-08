@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div v-for="(filter, index) of group.filters" :key="index" class="container">
+        <div v-for="(filter, index) of group.filters" :key="'filters'+index" class="container">
             <hr>
             <h2 class="style-with-button">
                 <div>
@@ -20,10 +20,17 @@
 
         <hr v-if="group.filters.length > 0">
 
-        <p v-for="definition in group.definitions" :key="definition.id">
+        <p v-for="definition in definitions" :key="definition.id">
             <button class="button text" type="button" @click="addFilter(definition)">
                 <span class="icon add" />
                 <span>{{ definition.name }}</span>
+            </button>
+        </p>
+
+        <p v-for="(category, index) in categories" :key="'categories'+index">
+            <button class="button text" type="button" @click="openCategory($event, category)">
+                <span class="icon add" />
+                <span>{{ category.name }}</span>
             </button>
         </p>
     </div>
@@ -31,11 +38,13 @@
 
 
 <script lang="ts">
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STInputBox, STListItem } from "@stamhoofd/components"
 import { ChoicesFilter, Filter, FilterDefinition, FilterGroup, NumberFilter, StringFilter } from "@stamhoofd/structures";
-import { Component, Prop,Vue } from "vue-property-decorator";
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import ChoicesFilterView from "./ChoicesFilterView.vue"
+import ChooseFilterDefinitionContextMenu from "./ChooseFilterDefinitionContextMenu.vue";
 import NumberFilterView from "./NumberFilterView.vue"
 import StringFilterView from "./StringFilterView.vue"
 
@@ -48,9 +57,50 @@ import StringFilterView from "./StringFilterView.vue"
         ChoicesFilterView
     }
 })
-export default class FilterBuilderView extends Vue {
+export default class FilterBuilderView extends Mixins(NavigationMixin)  {
     @Prop({ required: true }) 
     group: FilterGroup<any>
+
+    get definitions() {
+        const m: FilterDefinition<any, any, any>[] = []
+
+        for (const definition of this.group.getDefinitions()) {
+            if (!definition.category) {
+                m.push(definition)
+            }
+        }
+
+        return m
+    }
+
+    get categories() {
+        const m = new Map<string, { name: string, definitions: FilterDefinition<any, any, any>[] }>()
+
+        for (const definition of this.group.getDefinitions()) {
+            if (definition.category) {
+                const existing = m.get(definition.category)
+                if (existing) {
+                    existing.definitions.push(definition)
+                } else {
+                    m.set(definition.category, { name: definition.category, definitions: [definition] })
+                }
+            }
+        }
+
+        return [...m.values()]
+    }
+
+    openCategory(event, category: { name: string, definitions: FilterDefinition<any, any, any>[] }) {
+        const displayedComponent = new ComponentWithProperties(ChooseFilterDefinitionContextMenu, {
+            x: event.clientX,
+            y: event.clientY + 10,
+            definitions: category.definitions,
+            handler: (definition) =>  {
+                this.addFilter(definition)
+            }
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
 
     isStringFilter(filter: Filter<any>): boolean {
         return filter instanceof StringFilter

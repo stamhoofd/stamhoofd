@@ -4,7 +4,7 @@
 import { Data, EncodeContext, PlainObject, StringDecoder } from "@simonbackx/simple-encoding"
 import { Formatter } from "@stamhoofd/utility"
 
-import { Filter, FilterDefinition } from "./FilterDefinition"
+import { Filter, FilterDefinition, FilterDefinitionSettings } from "./FilterDefinition"
 export class ChoicesFilterChoice {
     id: string
     name: string
@@ -24,7 +24,7 @@ export class ChoicesFilterDefinition<T> extends FilterDefinition<T, ChoicesFilte
     choices: ChoicesFilterChoice[] = []
     defaultMode = ChoicesFilterMode.Or
 
-    constructor(settings: { id: string, name: string, getValue: (object: T) => string[], explainFilter?: (filter: ChoicesFilter<T>) => string, choices: ChoicesFilterChoice[], defaultMode?: ChoicesFilterMode }) {
+    constructor(settings: FilterDefinitionSettings<T, ChoicesFilter<T>, string[]> & { choices: ChoicesFilterChoice[], defaultMode?: ChoicesFilterMode }) {
         super(settings)
         if (settings.defaultMode) {
             this.defaultMode = settings.defaultMode

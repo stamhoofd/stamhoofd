@@ -690,16 +690,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup");
         this.present(displayedComponent);
     }
-
-    editMemberRecords() {
-        const displayedComponent = new ComponentWithProperties(EditMemberView, {
-            member: this.member,
-            initialFamily: this.familyManager,
-            initialTabIndex: 2
-        }).setDisplayStyle("popup");
-        this.present(displayedComponent);
-    }
-
+    
     get familyMembers() {
         return this.familyManager.members.filter(m => m.id != this.member.id)
     }

@@ -25,6 +25,10 @@ export class FilterGroup<T> extends Filter<T> {
         this.definition.definitions = this.definitions
     }
 
+    getDefinitions() {
+        return this.definitions
+    }
+
     doesMatch(object: T): boolean {
         for (const filter of this.filters) {
             if (!filter.doesMatch(object)) {

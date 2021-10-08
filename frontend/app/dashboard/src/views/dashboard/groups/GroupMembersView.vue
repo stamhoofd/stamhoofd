@@ -378,72 +378,78 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             })
         )
 
-        for (const record of this.records) {
-            if (record.type === RecordType.Checkbox) {
-                const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    choices: [
-                        new ChoicesFilterChoice("checked", "Aangevinkt"),
-                        new ChoicesFilterChoice("not_checked", "Niet aangevinkt")
-                    ], 
-                    getValue: (member) => {
-                        const answer: RecordCheckboxAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
-                        return answer?.selected ? ["checked"] : ["not_checked"]
-                    },
-                    defaultMode: ChoicesFilterMode.Or
-                })
-                base.push(def)
-            }
+        for (const recordCategory of this.recordCategories) {
+            for (const record of recordCategory.records) {
+                if (record.type === RecordType.Checkbox) {
+                    const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: [
+                            new ChoicesFilterChoice("checked", "Aangevinkt"),
+                            new ChoicesFilterChoice("not_checked", "Niet aangevinkt")
+                        ], 
+                        getValue: (member) => {
+                            const answer: RecordCheckboxAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+                            return answer?.selected ? ["checked"] : ["not_checked"]
+                        },
+                        defaultMode: ChoicesFilterMode.Or
+                    })
+                    base.push(def)
+                }
 
-            if (record.type === RecordType.MultipleChoice) {
-                const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
-                    getValue: (member) => {
-                        const answer: RecordMultipleChoiceAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+                if (record.type === RecordType.MultipleChoice) {
+                    const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                        getValue: (member) => {
+                            const answer: RecordMultipleChoiceAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
 
-                        if (!answer) {
-                            return []
+                            if (!answer) {
+                                return []
+                            }
+
+                            return answer.selectedChoices.map(c => c.id)
+                        },
+                        defaultMode: ChoicesFilterMode.And
+                    })
+                    base.push(def)
+                }
+
+                if (record.type === RecordType.ChooseOne) {
+                    const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                        getValue: (member) => {
+                            const answer: RecordChooseOneAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+
+                            if (!answer || !answer.selectedChoice) {
+                                return []
+                            }
+
+                            return [answer.selectedChoice.id]
+                        },
+                        defaultMode: ChoicesFilterMode.Or
+                    })
+                    base.push(def)
+                }
+
+                if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
+                    const def = new StringFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        getValue: (member) => {
+                            const answer: RecordTextAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+                            return answer?.value ?? ""
                         }
-
-                        return answer.selectedChoices.map(c => c.id)
-                    },
-                    defaultMode: ChoicesFilterMode.And
-                })
-                base.push(def)
-            }
-
-            if (record.type === RecordType.ChooseOne) {
-                const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
-                    getValue: (member) => {
-                        const answer: RecordChooseOneAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
-
-                        if (!answer || !answer.selectedChoice) {
-                            return []
-                        }
-
-                        return [answer.selectedChoice.id]
-                    },
-                    defaultMode: ChoicesFilterMode.Or
-                })
-                base.push(def)
-            }
-
-            if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
-                const def = new StringFilterDefinition<MemberWithRegistrations>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    getValue: (member) => {
-                        const answer: RecordTextAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
-                        return answer?.value ?? ""
-                    }
-                })
-                base.push(def)
+                    })
+                    base.push(def)
+                }
             }
         }
 

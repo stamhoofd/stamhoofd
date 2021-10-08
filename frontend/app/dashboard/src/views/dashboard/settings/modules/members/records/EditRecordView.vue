@@ -234,7 +234,7 @@
             <hr>
             <h2>Opslag en beveiliging</h2>
             <p>
-                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a href="https://www.stamhoofd.be/docs/toestemming-gegevens-verzamelen" class="inline-link">
+                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a href="https://www.stamhoofd.be/docs/toestemming-gegevens-verzamelen" class="inline-link" target="_blank" rel="noopener">
                     Lees onze gids
                 </a>
             </p>

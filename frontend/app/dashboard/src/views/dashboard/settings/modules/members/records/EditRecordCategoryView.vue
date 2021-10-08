@@ -75,6 +75,12 @@
                     <span>Nieuwe subcategorie</span>
                 </button>
             </p>
+
+            <hr>
+            <h2>Inschrijvingsgroepen</h2>
+            <p>Bepaal voor welke inschrijvingsgroepen deze kenmerken verzameld/gevraagd moeten worden. Zodra een lid in één van die groepen is ingeschreven, moet het deze gegevens ook nakijken als het voor een andere groep inschrijft.</p>
+
+            <Checkbox>Alle groepen</Checkbox>
         </main>
 
         <STToolbar>
@@ -93,7 +99,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator, Checkbox } from "@stamhoofd/components";
 import { RecordCategory, RecordSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -110,7 +116,8 @@ import RecordRow from "./RecordRow.vue"
         Spinner,
         STList,
         RecordCategoryRow,
-        RecordRow
+        RecordRow,
+        Checkbox
     },
 })
 export default class EditRecordCategoryView extends Mixins(NavigationMixin) {

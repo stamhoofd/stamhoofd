@@ -49,7 +49,7 @@ import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components"
-import { Address, Gender, LegacyRecord, LegacyRecordType, Version } from "@stamhoofd/structures"
+import { Address, Gender, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -73,8 +73,10 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
     },
 })
 export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
-    memberDetails!: MemberDetails | null            
+    @Prop({ required: true })
+    memberDetails!: MemberDetails
+
+
     firstName = ""
     lastName = ""
     phone: string | null = null
@@ -86,10 +88,18 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     birthDay: Date | null = null
     gender = Gender.Male
     livesAtParents = false
-    validator = new Validator()
+
+    @Prop({ required: true })
+    validator: Validator
+
     hasOldAddress = false
 
-    mounted() {
+     mounted() {
+        if (this.validator) {
+            this.validator.addValidation(this, () => {
+                return this.isValid()
+            })
+        }
         if (this.memberDetails) {
             this.firstName = this.memberDetails.firstName
             this.lastName = this.memberDetails.lastName
@@ -102,6 +112,8 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
             this.hasOldAddress = this.address !== null
         }
     }
+
+    
 
     get age() {
         if (!this.birthDay) {
@@ -116,7 +128,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
         return age;
     }
 
-    async validate() {
+    isValid() {
         const errors = new SimpleErrors()
         if (this.firstName.length < 2) {
             errors.addError(new SimpleError({
@@ -134,35 +146,20 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
             this.errorBox = null
             valid = true
         }
-        valid = valid && await this.validator.validate()
 
         if (valid) {
-            if (this.memberDetails) {
-                const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
+            const memberDetails = new ObjectData(this.memberDetails.encode({ version: Version }), { version: Version }).decode(MemberDetails as Decoder<MemberDetails>)
 
-                // Keep all that was already chagned in next steps
-                memberDetails.firstName = this.firstName
-                memberDetails.lastName = this.lastName
-                memberDetails.gender = this.gender
-                memberDetails.phone = this.phone
-                memberDetails.birthDay = this.birthDay
-                memberDetails.email = this.email
-                memberDetails.address = this.livesAtParents ? null : this.address
+            // Keep all that was already chagned in next steps
+            memberDetails.firstName = this.firstName
+            memberDetails.lastName = this.lastName
+            memberDetails.gender = this.gender
+            memberDetails.phone = this.phone
+            memberDetails.birthDay = this.birthDay
+            memberDetails.email = this.email
+            memberDetails.address = this.livesAtParents ? null : this.address
 
-                this.$emit("change", memberDetails)
-            } else {
-                const memberDetails = MemberDetails.create({
-                    firstName: this.firstName,
-                    lastName: this.lastName,
-                    gender: this.gender,
-                    phone: this.phone,
-                    email: this.email,
-                    birthDay: this.birthDay,
-                    address: this.livesAtParents ? null : this.address
-                })
-
-                this.$emit("change", memberDetails)
-            }
+            this.$emit("change", memberDetails)
             return true;
         }
         return false

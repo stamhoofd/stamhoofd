@@ -1,12 +1,24 @@
 import { Data, DateDecoder, Decoder, Encodeable, EncodeContext, ObjectData, PlainObject } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors";
 
+
+export type FilterDefinitionSettings<T, FilterType extends Filter<T>, ValueType> = { 
+    id: string, 
+    name: string, 
+    getValue: (object: T) => ValueType, 
+    explainFilter?: (filter: FilterType) => string,
+    category?: string
+}
 /**
  * Points to a value in a object of type T that is filterable
  */
 export abstract class FilterDefinition<T, FilterType extends Filter<T>, ValueType> implements Decoder<FilterType>{
     id: string
     name: string
+
+    // for grouping
+    category?: string
+
     getValue: (object: T) => ValueType
 
     /**
@@ -14,9 +26,10 @@ export abstract class FilterDefinition<T, FilterType extends Filter<T>, ValueTyp
      */
     explainFilter?: (filter: FilterType) => string
 
-    constructor(settings: { id: string, name: string, getValue: (object: T) => ValueType , explainFilter?: (filter: FilterType) => string }) {
+    constructor(settings: FilterDefinitionSettings<T, FilterType, ValueType>) {
         this.id = settings.id
         this.name = settings.name
+        this.category = settings.category
         this.getValue = settings.getValue
         this.explainFilter = settings.explainFilter
     }

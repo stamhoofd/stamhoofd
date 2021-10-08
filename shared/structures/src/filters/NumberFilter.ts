@@ -1,15 +1,15 @@
 
 // Date example
 
-import { Data, EncodeContext, NumberDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding"
+import { Data, EncodeContext, NumberDecoder, PlainObject } from "@simonbackx/simple-encoding"
 
-import { Filter, FilterDefinition } from "./FilterDefinition"
+import { Filter, FilterDefinition, FilterDefinitionSettings } from "./FilterDefinition"
 
 export class NumberFilterDefinition<T> extends FilterDefinition<T, NumberFilter<T>, number> {
     floatingPoint = false
     currency = false
 
-    constructor(settings: { id: string, name: string, getValue: (object: T) => number, explainFilter?: (filter: NumberFilter<T>) => string, floatingPoint?: boolean, currency?: boolean }) {
+    constructor(settings: FilterDefinitionSettings<T, NumberFilter<T>, number> & { floatingPoint?: boolean, currency?: boolean }) {
         super(settings)
 
         if (settings.floatingPoint !== undefined) {

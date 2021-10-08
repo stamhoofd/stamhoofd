@@ -13,8 +13,10 @@
                 Nieuw lid toevoegen
             </h1>
 
-            <SegmentedControl v-model="changeTab" :items="tabs" :labels="tabLabels" />
-            <component :is="tab" ref="currentComponent" v-model="memberDetails" :member="member" :family-manager="familyManager" />
+            <STErrorsDefault :error-box="errorBox" />
+            <EditMemberGeneralView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
+
+            <EditMemberContactsView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
         </main>
 
         <STToolbar>
@@ -32,18 +34,16 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox,STNavigationTitle } from "@stamhoofd/components";
+import { ErrorBox,STErrorsDefault,STNavigationTitle, Validator } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { MemberDetails, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { FamilyManager } from "../../../../classes/FamilyManager";
-import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import { FamilyManager } from "../../../../classes/FamilyManager";
 import EditMemberContactsView from './EditMemberContactsView.vue';
 import EditMemberGeneralView from './EditMemberGeneralView.vue';
 import EditMemberGroupView from './EditMemberGroupView.vue';
-import EditMemberRecordsView from './EditMemberRecordsView.vue';
 
 @Component({
     components: {
@@ -52,11 +52,13 @@ import EditMemberRecordsView from './EditMemberRecordsView.vue';
         SegmentedControl,
         BackButton,
         STToolbar,
-        LoadingButton
+        LoadingButton,
+        EditMemberGeneralView,
+        EditMemberContactsView,
+        STErrorsDefault
     },
 })
 export default class EditMemberView extends Mixins(NavigationMixin) {
-    tabLabels = ["Algemeen", "Contacten", "Steekkaart"];
     loading = false
 
     @Prop({ default: null })
@@ -65,44 +67,20 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     member!: MemberWithRegistrations | null;
 
-    @Prop({ default: null })
-    initialTabIndex!: number | null
-
-    tab: any = this.tabs[this.initialTabIndex ?? 0];
-
     familyManager = this.initialFamily ?? new FamilyManager(this.member ? [this.member] : []);
 
-    memberDetails = this.member ? this.member.details : null// do not link with member, only link on save!
+    memberDetails = this.member ? this.member.details : MemberDetails.create({})// do not link with member, only link on save!
 
-    get tabs() {
-        if (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.memberDetails?.age ?? null)) {
-            return [EditMemberGeneralView, EditMemberContactsView]
-        }
-        return [EditMemberGeneralView, EditMemberContactsView, EditMemberRecordsView];
-    }
+    validator = new Validator()
 
-    get changeTab() {
-        return this.tab
-    }
-
-    set changeTab(tab: any) {
-        (this.$refs.currentComponent as any).validate().then((isValid) => {
-            if (isValid) {
-                this.tab = tab
-            }
-        })
-    }
-
-    get currentComponent() {
-        return (this.$refs.currentComponent as any)
-    }
+    errorBox: ErrorBox | null = null
 
     async save() {
         if (this.loading) {
             return;
         }
         
-        const isValid = await (this.$refs.currentComponent as any).validate()
+        const isValid = await this.validator.validate()
         if (!isValid) {
             return;
         }
@@ -128,7 +106,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
                 await this.familyManager.patchAllMembersWith(this.member)
             }
           
-            this.currentComponent.errorBox = null
+            this.errorBox = null
             this.loading = false;
             this.pop({ force: true })
             return true
@@ -136,7 +114,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             if (this.member && o) {
                 this.member.details = o
             }
-            this.currentComponent.errorBox = new ErrorBox(e)
+            this.errorBox = new ErrorBox(e)
             this.loading = false;
             return false;
         }
