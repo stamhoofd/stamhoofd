@@ -15,7 +15,7 @@
             </h1>
             <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
 
-            <PropertyFilterConfigurationInput :configuration="editingConfiguration" :definitions="definitions" @patch="addPatch"/>
+            <PropertyFilterInput v-model="editingConfiguration" />
         </main>
 
         <STToolbar>
@@ -30,11 +30,10 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationBar } from "@stamhoofd/components";
-import { BackButton, PropertyFilterConfigurationInput, STToolbar } from "@stamhoofd/components";
-import { Filter, FilterDefinition, PropertyFilterConfiguration, Version } from "@stamhoofd/structures";
+import { BackButton, PropertyFilterInput, STToolbar } from "@stamhoofd/components";
+import { PropertyFilter, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 
@@ -42,31 +41,24 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
     components: {
         STNavigationBar,
         BackButton,
-        PropertyFilterConfigurationInput,
+        PropertyFilterInput,
         STToolbar
     },
 })
-export default class PropertyFilterConfigurationView extends Mixins(NavigationMixin) {
+export default class PropertyFilterView extends Mixins(NavigationMixin) {
     @Prop({ default: "" })
     title!: string
 
     @Prop({ required: true })
-    configuration!: PropertyFilterConfiguration
+    configuration!: PropertyFilter<any>
 
     @Prop({ required: true })
-    definitions!: FilterDefinition<any, Filter<any>, any>[]
+    setConfiguration: (configuration: PropertyFilter<any>) => void
 
-    @Prop({ required: true })
-    setConfiguration: (configuration: PropertyFilterConfiguration) => void
-
-    editingConfiguration: PropertyFilterConfiguration = this.configuration.clone()
+    editingConfiguration: PropertyFilter<any> = this.configuration
 
     cancel() {
         this.dismiss({ force: true })
-    }
-
-    addPatch(patch: AutoEncoderPatchType<PropertyFilterConfiguration>) {
-        this.editingConfiguration = this.editingConfiguration.patch(patch)
     }
 
     save() {

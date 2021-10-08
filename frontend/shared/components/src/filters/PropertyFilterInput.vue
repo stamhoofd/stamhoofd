@@ -1,5 +1,5 @@
 <template>
-    <div class="property-filter-configuration-input">
+    <div class="property-filter-value-input">
         <STInputBox title="Wanneer vragen?" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -63,11 +63,8 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { FilterEditor, Radio,STInputBox, STList, STListItem } from '@stamhoofd/components';
-import { Filter, FilterDefinition, FilterGroup, PropertyFilterConfiguration } from '@stamhoofd/structures';
+import { FilterGroup, PropertyFilter } from '@stamhoofd/structures';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
-
-import PropertyEnabledContextMenu from './PropertyEnabledContextMenu.vue';
-import PropertyRequiredContextMenu from './PropertyRequiredContextMenu.vue';
 
 @Component({
     components: {
@@ -77,12 +74,9 @@ import PropertyRequiredContextMenu from './PropertyRequiredContextMenu.vue';
         Radio
     }
 })
-export default class PropertyFilterConfigurationInput extends Mixins(NavigationMixin) {
+export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    configuration: PropertyFilterConfiguration
-
-    @Prop({ required: true })
-    definitions!: FilterDefinition<any, Filter<any>, any>[]
+    value: PropertyFilter<any>
 
     cachedRequiredFilter: FilterGroup<any> | null = null
     cachedEnabledFilter: FilterGroup<any> | null = null
@@ -91,136 +85,117 @@ export default class PropertyFilterConfigurationInput extends Mixins(NavigationM
         this.onConfigurationChange()
     }
 
-    @Watch('configuration')
+    get definitions() {
+        return this.value.definitions
+    }
+
+    @Watch('value')
     onConfigurationChange() {
-        if (this.configuration.requiredWhen && this.configuration.requiredWhen.filters.length > 0) {
-            this.cachedRequiredFilter = this.configuration.requiredWhen
+        if (this.value.requiredWhen && this.value.requiredWhen.filters.length > 0) {
+            this.cachedRequiredFilter = this.value.requiredWhen
         }
-        if (this.configuration.enabledWhen.filters.length > 0) {
-            this.cachedEnabledFilter = this.configuration.enabledWhen
+        if (this.value.enabledWhen.filters.length > 0) {
+            this.cachedEnabledFilter = this.value.enabledWhen
         }
     }
 
     isAlwaysEnabled() {
-        return this.configuration.enabledWhen.filters.length == 0
+        return this.value.enabledWhen.filters.length == 0
     }
 
     isAlwaysRequired() {
-        return this.configuration.requiredWhen && this.configuration.requiredWhen.filters.length == 0
+        return this.value.requiredWhen && this.value.requiredWhen.filters.length == 0
     }
 
     isNeverRequired() {
-        return this.configuration.requiredWhen === null
+        return this.value.requiredWhen === null
     }
 
     setAlwaysEnabled() {
-        this.$emit("patch", PropertyFilterConfiguration.patch({
-            enabledWhen: new FilterGroup(this.definitions)
-        }))
+        this.$emit("input", 
+            new PropertyFilter<any>(
+                new FilterGroup(this.definitions),
+                this.value.requiredWhen
+            )
+        )
     }
 
     setEnabledWhen(useCache = false) {
         if (useCache && this.cachedEnabledFilter) {
-            this.$emit("patch", PropertyFilterConfiguration.patch({
-                enabledWhen: this.cachedEnabledFilter
-            }))
+            this.$emit("input", 
+                new PropertyFilter<any>(
+                    this.cachedEnabledFilter,
+                    this.value.requiredWhen
+                )
+            )
             return
         }
 
         this.present(new ComponentWithProperties(FilterEditor, {
             title: "Vragen als...",
-            selectedFilter: this.cachedEnabledFilter ?? this.configuration.enabledWhen,
+            selectedFilter: this.cachedEnabledFilter ?? this.value.enabledWhen,
             setFilter: (enabledWhen) => {
-                this.$emit("patch", PropertyFilterConfiguration.patch({
-                    enabledWhen
-                }))
+                this.$emit("input", 
+                    new PropertyFilter<any>(
+                        enabledWhen,
+                        this.value.requiredWhen
+                    )
+                )
             },
             definitions: this.definitions
         }).setDisplayStyle("popup"))
     }
 
     setAlwaysRequired() {
-        this.$emit("patch", PropertyFilterConfiguration.patch({
-            requiredWhen: new FilterGroup(this.definitions)
-        }))
+        this.$emit("input", 
+            new PropertyFilter<any>(
+                this.value.enabledWhen,
+                new FilterGroup(this.definitions)
+            )
+        )
     }
 
     setNeverRequired() {
-        this.$emit("patch", PropertyFilterConfiguration.patch({
-            requiredWhen: null
-        }))
+        this.$emit("input", 
+            new PropertyFilter<any>(
+                this.value.enabledWhen,
+                null
+            )
+        )
     }
 
     setRequiredWhen(useCache = false) {
         if (useCache && this.cachedRequiredFilter) {
-            this.$emit("patch", PropertyFilterConfiguration.patch({
-                requiredWhen: this.cachedRequiredFilter
-            }))
+            this.$emit("input", 
+                new PropertyFilter<any>(
+                    this.value.enabledWhen,
+                    this.cachedRequiredFilter
+                )
+            )
             return
         }
         this.present(new ComponentWithProperties(FilterEditor, {
             title: "Verplicht als...",
-            selectedFilter: this.cachedRequiredFilter ?? this.configuration.requiredWhen ?? new FilterGroup(this.definitions),
+            selectedFilter: this.cachedRequiredFilter ?? this.value.requiredWhen ?? new FilterGroup(this.definitions),
             setFilter: (requiredWhen) => {
-                this.$emit("patch", PropertyFilterConfiguration.patch({
-                    requiredWhen
-                }))
+                this.$emit("input", 
+                    new PropertyFilter<any>(
+                        this.value.enabledWhen,
+                        requiredWhen
+                    )
+                )
             },
             definitions: this.definitions
         }).setDisplayStyle("popup"))
     }
 
     get enabledText() {
-        return (this.cachedEnabledFilter ?? this.configuration.enabledWhen).toString()
+        return (this.cachedEnabledFilter ?? this.value.enabledWhen).toString()
     }
 
     get requiredText() {
-        return (this.cachedRequiredFilter ?? this.configuration.requiredWhen ?? "").toString()
+        return (this.cachedRequiredFilter ?? this.value.requiredWhen ?? "").toString()
     }
 
-    openEnabledWhenContextMenu(event: Event) {
-        const el = event.target as HTMLElement;
-        const displayedComponent = new ComponentWithProperties(PropertyEnabledContextMenu, {
-            x: el.getBoundingClientRect().left,
-            y: el.getBoundingClientRect().top + el.offsetHeight,
-            preferredWidth: el.offsetWidth,
-            definitions: this.definitions,
-            selectedFilter: this.configuration.enabledWhen,
-
-            handler: (enabledWhen: FilterGroup<any>) => {
-                this.$emit("patch", PropertyFilterConfiguration.patch({
-                    enabledWhen
-                }))
-            }
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-    }
-
-    openRequiredContextMenu(event: Event) {
-        // todo
-        const el = event.target as HTMLElement;
-        const displayedComponent = new ComponentWithProperties(PropertyRequiredContextMenu, {
-            x: el.getBoundingClientRect().left,
-            y: el.getBoundingClientRect().top + el.offsetHeight,
-            preferredWidth: el.offsetWidth,
-            definitions: this.definitions,
-            selectedFilter: this.configuration.requiredWhen,
-
-            handler: (requiredWhen: FilterGroup<any> | null) => {
-                this.$emit("patch", PropertyFilterConfiguration.patch({
-                    requiredWhen
-                }))
-            }
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-    }
 }
 </script>
-
-<style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-
-.property-filter-configuration-input {
-    
-}
-</style>

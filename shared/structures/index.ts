@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 125
+export const Version = 126
 
 // General
 export * from "./src/addresses/Address"
@@ -133,4 +133,5 @@ export * from "./src/filters/DateFilter"
 export * from "./src/filters/FilterDefinition"
 export * from "./src/filters/FilterGroup"
 export * from "./src/filters/NumberFilter"
+export * from "./src/filters/PropertyFilter"
 export * from "./src/filters/StringFilter"

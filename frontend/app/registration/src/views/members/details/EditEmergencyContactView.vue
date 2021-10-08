@@ -78,7 +78,8 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, BirthDayInput, CenteredMessage, Checkbox, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { AskRequirement,EmergencyContact, MemberDetails, Version } from "@stamhoofd/structures"
+import { MemberWithRegistrations, RegisterItem } from '@stamhoofd/structures';
+import { AskRequirement,EmergencyContact, MemberDetails, MemberDetailsWithGroups, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -112,6 +113,12 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     details: MemberDetails
+
+    @Prop({ required: false })
+    member?: MemberWithRegistrations
+
+    @Prop({ required: true })
+    items: RegisterItem[]
 
     @Prop({ required: true })
     saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
@@ -156,7 +163,8 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     }
 
     get isOptional() {
-        return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.Required
+        return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
+        //return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.Required
     }
 
     async skipStep() {

@@ -2072,11 +2072,6 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.3.0.tgz#b9aa933d1d9da675460f20bd939e138baff1f4ea"
-  integrity sha512-DLquHxRE88dps/LPpsr3P0OJK7Jdulu5VghVrIvmD4nAhKzHhO/naKMbTJcv059WfjyMrgiSDe0g01K3yX7efQ==
-
 "@simonbackx/simple-endpoints@^1.7.3":
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.7.3.tgz#5d70baa167645bbfc55655a25afb6b42b91e003d"

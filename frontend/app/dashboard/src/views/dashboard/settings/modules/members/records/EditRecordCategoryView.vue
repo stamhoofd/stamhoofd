@@ -78,9 +78,9 @@
 
             <hr>
             <h2>Wanneer vragen?</h2>
-            <p>Bepaal voor welke inschrijvingsgroepen deze kenmerken verzameld/gevraagd moeten worden. Zodra een lid in één van die groepen is ingeschreven, moet het deze gegevens ook nakijken als het voor een andere groep inschrijft.</p>
+            <p>Je kan kiezen op welke leden deze kenmerken van toepassing zijn, en wanneer deze stap overgeslagen kan worden.</p>
 
-            <Checkbox>Alle groepen</Checkbox>
+            <PropertyFilterInput v-model="filter" />
         </main>
 
         <STToolbar>
@@ -99,8 +99,8 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { RecordCategory, RecordSettings, Version } from "@stamhoofd/structures"
+import { CenteredMessage, Checkbox,ErrorBox, PropertyFilterInput,Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { MemberDetails, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditRecordView from "./EditRecordView.vue"
@@ -117,7 +117,8 @@ import RecordRow from "./RecordRow.vue"
         STList,
         RecordCategoryRow,
         RecordRow,
-        Checkbox
+        Checkbox,
+        PropertyFilterInput
     },
 })
 export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
@@ -166,6 +167,14 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
     set name(name: string) {
         this.patchCategory = this.patchCategory.patch({ name })
+    }
+
+    get filter() {
+        return this.patchedCategory.filter ?? PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+    }
+
+    set filter(filter: PropertyFilter<MemberDetails> | null) {
+        this.patchCategory = this.patchCategory.patch({ filter })
     }
 
     get description() {

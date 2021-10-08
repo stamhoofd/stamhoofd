@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
+import { PropertyFilter, PropertyFilterDecoderFromContext } from "../../filters/PropertyFilter";
 import { RecordSettings } from "./RecordSettings";
 
 export class RecordCategory extends AutoEncoder {
@@ -29,4 +30,7 @@ export class RecordCategory extends AutoEncoder {
         }
         return this.records
     }
+
+    @field({ decoder: new PropertyFilterDecoderFromContext(), version: 126, nullable: true })
+    filter: PropertyFilter<any> | null = null
 }

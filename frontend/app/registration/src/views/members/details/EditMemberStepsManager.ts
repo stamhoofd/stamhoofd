@@ -1,7 +1,7 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { AskRequirement, MemberDetails, MemberWithRegistrations, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
+import { AskRequirement, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
 
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -69,12 +69,19 @@ export class RecordCategoryStep implements EditMemberStep {
 
     shouldDelete(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
         // Delete all the information in this category, if this is not asked in the given category
+        if (this.category.filter) {
+            return !this.category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(details, member, items));
+        }
         return false
     }
 
     delete(details: MemberDetails) {
-        // todo: delete the info
-        throw new Error('Method not implemented.');
+        for (const record of this.category.getAllRecords()) {
+            const index = details.recordAnswers.findIndex(a => a.settings.id == record.id)
+            if (index != -1) {
+                details.recordAnswers.splice(index, 1)
+            }
+        }
     }
 
     shouldReview(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
@@ -175,7 +182,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     return !meta || !meta.hasParents
                 }
                 // We still have all the data. Ask everything that is older than 3 months
-                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(details) === true)
+                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
             case EditMemberStepType.EmergencyContact: {
                 if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
@@ -190,7 +197,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     // Review if never entered or saved
                     return !meta || !meta.hasEmergency
                 }
-                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(details) === true)
+                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
             /*case EditMemberStepType.Records: {
                 if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
@@ -233,12 +240,12 @@ export class BuiltInEditMemberStep implements EditMemberStep {
         return new ComponentWithProperties(await this.getComponentClass(), baseProperties)
     }
 
-    shouldDelete(details: MemberDetails): boolean {
+    shouldDelete(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
         switch (this.type) {
             // Delete parents for > 18 and has address, or > 27 (no matter of address)
-            case EditMemberStepType.Parents: return !OrganizationManager.organization.meta.recordsConfiguration.parents?.enabledWhen?.doesMatch(details);
+            case EditMemberStepType.Parents: return !OrganizationManager.organization.meta.recordsConfiguration.parents?.enabledWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items));
 
-            case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.enabledWhen?.doesMatch(details);
+            case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.enabledWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items));
 
             // Delete emergency contacts if not asked by organization
             //case EditMemberStepType.EmergencyContact: return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked
@@ -415,6 +422,10 @@ export class EditMemberStepsManager {
             
             // Details to edit (can happen directly, no need to copy again)
             details: this.cloneDetails(details),
+
+            member: this.editMember,
+            items: this.items,
+
             isNew: this.isNew,
             nextText: hasNext ? "Doorgaan" : this.lastButtonText,
 

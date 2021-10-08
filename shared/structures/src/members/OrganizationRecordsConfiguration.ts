@@ -1,8 +1,15 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, Decoder, Encodeable, EncodeContext, EnumDecoder,field, IntegerDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding"
 
-import { FilterGroup, FilterGroupDecoder } from "../filters/FilterGroup"
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../filters/ChoicesFilter"
+import { NumberFilterDefinition } from "../filters/NumberFilter"
+import { PropertyFilter, PropertyFilterDecoder, SetPropertyFilterDecoder } from "../filters/PropertyFilter"
+import { StringFilterDefinition } from "../filters/StringFilter"
+import { Group } from "../Group"
 import { OrganizationType, } from "../OrganizationType"
+import { RegisterItem } from "./checkout/RegisterItem"
+import { Gender } from "./Gender"
 import { MemberDetails } from "./MemberDetails"
+import { MemberWithRegistrations } from "./MemberWithRegistrations"
 import { LegacyRecord } from "./records/LegacyRecord"
 import { LegacyRecordType, LegacyRecordTypeHelper } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
@@ -19,47 +26,6 @@ export class FreeContributionSettings extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(IntegerDecoder) })
     amounts: number[] = [500, 1500, 3000]
-}
-
-
-export class PropertyFilterConfiguration extends AutoEncoder {
-    /**
-     * Enabled when...
-     * cannot be null (always should be enabled)
-     */
-    @field({ decoder: new FilterGroupDecoder<MemberDetails>(MemberDetails.getBaseFilterDefinitions()) })
-    enabledWhen: FilterGroup<MemberDetails> = new FilterGroup(MemberDetails.getBaseFilterDefinitions())
-
-    /**
-     * If enabled, whether it is required
-     */
-    @field({ decoder: new FilterGroupDecoder<MemberDetails>(MemberDetails.getBaseFilterDefinitions()), nullable: true })
-    requiredWhen: FilterGroup<MemberDetails> | null = new FilterGroup(MemberDetails.getBaseFilterDefinitions())
-
-    toString() {
-        if (this.enabledWhen.filters.length == 0) {
-            // Always enabled
-
-            if (this.requiredWhen === null) {
-                return "Optioneel invullen"
-            }
-            if (this.requiredWhen.filters.length == 0) {
-                return "Verplicht invullen"
-            }
-
-            return "Verplicht invullen als: "+this.requiredWhen.toString()
-        }
-
-        if (this.requiredWhen === null) {
-            return "Ingeschakeld, en altijd optioneel als: "+this.enabledWhen.toString()
-        }
-
-        if (this.requiredWhen.filters.length == 0) {
-            return "Ingeschakeld als: "+this.enabledWhen.toString()
-        }
-
-        return "Ingeschakeld als: "+this.enabledWhen+", enkel verplicht invullen als: "+this.requiredWhen.toString()
-    }
 }
 
 export class FinancialSupportSettings extends AutoEncoder {
@@ -104,6 +70,50 @@ export class FinancialSupportSettings extends AutoEncoder {
     }
 }
 
+/**
+ * Convenicence class used to pass around details and current or future groups it is registered in
+ * -> needed for filtering.
+ */
+export class MemberDetailsWithGroups {
+    details: MemberDetails
+    member?: MemberWithRegistrations
+    registerItems: RegisterItem[] = []
+
+    constructor(details: MemberDetails, member?: MemberWithRegistrations, registerItems: RegisterItem[] = []) {
+        this.details = details
+        this.member = member
+        this.registerItems = registerItems
+    }
+
+    static getBaseFilterDefinitions() {
+        return [
+            // todo: map member filters instead of redefining them
+            new NumberFilterDefinition<MemberDetailsWithGroups>({
+                id: "member_age", 
+                name: "Leeftijd", 
+                getValue: (member) => {
+                    return member.details.age ?? 99
+                },
+                floatingPoint: false
+            }),
+             new ChoicesFilterDefinition<MemberDetailsWithGroups>({
+                id: "gender", 
+                name: "Geslacht", 
+                choices: [
+                    new ChoicesFilterChoice(Gender.Male, "Man"),
+                    new ChoicesFilterChoice(Gender.Female, "Vrouw"),
+                    new ChoicesFilterChoice(Gender.Other, "Andere"),
+                ], 
+                getValue: (member) => {
+                    return [member.details.gender]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            })
+            // todo: registrations filter on groups
+        ]
+    }
+}
+
 export class OrganizationRecordsConfiguration extends AutoEncoder {
     // New record configurations
 
@@ -120,28 +130,28 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 117 })
     dataPermission = false
 
-    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 124 })
-    emailAddress: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 124 })
+    emailAddress: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
 
-    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
-    phone: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    phone: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
 
-    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
-    gender: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    gender: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
 
-    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
-    birthDay: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    birthDay: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
 
-    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
-    address: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    address: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
 
-    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
-    parents: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+    @field({ decoder: new PropertyFilterDecoder(MemberDetailsWithGroups.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    parents: PropertyFilter<MemberDetailsWithGroups> | null = PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
 
-    @field({ decoder: PropertyFilterConfiguration, nullable: true, version: 125 })
-    emergencyContacts: PropertyFilterConfiguration | null = PropertyFilterConfiguration.create({})
+    @field({ decoder: new PropertyFilterDecoder(MemberDetailsWithGroups.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    emergencyContacts: PropertyFilter<MemberDetailsWithGroups> | null = PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
 
-    @field({ decoder: new ArrayDecoder(RecordCategory), version: 117 })
+    @field({ decoder: new SetPropertyFilterDecoder(new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), MemberDetailsWithGroups.getBaseFilterDefinitions()), version: 117 })
     recordCategories: RecordCategory[] = []
 
     /**

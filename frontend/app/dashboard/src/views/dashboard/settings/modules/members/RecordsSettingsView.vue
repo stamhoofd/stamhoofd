@@ -165,8 +165,8 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton,PropertyFilterConfigurationView,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { AskRequirement, MemberDetails, MemberWithRegistrations, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilterConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton,PropertyFilterView,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { AskRequirement, MemberDetails, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordCategory,Version  } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -199,10 +199,6 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     get AskRequirement() {
         return AskRequirement
-    }
-
-    get definitions() {
-        return MemberDetails.getBaseFilterDefinitions()
     }
 
     get patchedOrganization() {
@@ -273,18 +269,17 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             return
         }
         if (enable) {
-            this.patchConfigProperty(property, PropertyFilterConfiguration.create({}))
+            this.patchConfigProperty(property, PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions()))
         } else {
             this.patchConfigProperty(property, null)
         }
     }
 
     editEnableFilterConfiguration(property: string) {
-        this.present(new ComponentWithProperties(PropertyFilterConfigurationView, {
+        this.present(new ComponentWithProperties(PropertyFilterView, {
             configuration: this.patchedOrganization.meta.recordsConfiguration[property],
             title: property,
-            definitions: this.definitions,
-            setConfiguration: (configuration: PropertyFilterConfiguration) => {
+            setConfiguration: (configuration: PropertyFilter<MemberDetails>) => {
                 this.patchConfigProperty(property, configuration)
             }
         }).setDisplayStyle("popup"))

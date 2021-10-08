@@ -109,6 +109,6 @@ export { default as ChoicesFilterView } from "./src/filters/ChoicesFilterView.vu
 export { default as FilterEditor } from "./src/filters/FilterEditor.vue"
 export { default as FilterGroupView } from "./src/filters/FilterGroupView.vue"
 export { default as NumberFilterView } from "./src/filters/NumberFilterView.vue"
-export { default as PropertyFilterConfigurationInput } from "./src/filters/PropertyFilterConfigurationInput.vue"
+export { default as PropertyFilterInput } from "./src/filters/PropertyFilterInput.vue"
 export { default as StringFilterView } from "./src/filters/StringFilterView.vue"
-export { default as PropertyFilterConfigurationView } from "./src/filters/PropertyFilterConfigurationView.vue"
+export { default as PropertyFilterView } from "./src/filters/PropertyFilterView.vue"
