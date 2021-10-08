@@ -77,10 +77,15 @@
             </p>
 
             <hr>
-            <h2>Wanneer vragen?</h2>
-            <p>Je kan kiezen op welke leden deze kenmerken van toepassing zijn, en wanneer deze stap overgeslagen kan worden.</p>
+            <h2>Wanneer ingeschakeld?</h2>
+            <p v-if="!parentCategory">
+                Je kan kiezen op welke leden deze categorie van toepassing is, en bij wie deze stap overgeslagen kan worden tijdens het inschrijven.
+            </p>
+            <p v-else>
+                Je kan kiezen op welke leden deze categorie van toepassing is.
+            </p>
 
-            <PropertyFilterInput v-model="filter" />
+            <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" />
         </main>
 
         <STToolbar>

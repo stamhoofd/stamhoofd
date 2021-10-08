@@ -337,7 +337,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -387,8 +387,16 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     get recordCategories(): RecordCategory[] {
         // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
         return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
+            if (category.filter && !category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(this.member.details, this.member, []))) {
+                return []
+            }
             if (category.childCategories.length > 0) {
-                return category.childCategories
+                return category.childCategories.filter(category => {
+                    if (category.filter && !category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(this.member.details, this.member, []))) {
+                        return false
+                    }
+                    return true
+                })
             }
             return [category]
         })
@@ -409,6 +417,13 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         if (this.member.details.requiresFinancialSupport && this.member.details.requiresFinancialSupport.value) {
             warnings.push(RecordWarning.create({
                 text: OrganizationManager.organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
+                type: RecordWarningType.Error
+            }))
+        }
+
+        if (this.member.details.allowSensitiveDataCollection && !this.member.details.allowSensitiveDataCollection.value) {
+            warnings.push(RecordWarning.create({
+                text: "Geen toestemming om gevoelige informatie te verzamelen",
                 type: RecordWarningType.Error
             }))
         }

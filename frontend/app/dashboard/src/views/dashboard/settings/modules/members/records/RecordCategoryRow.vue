@@ -3,6 +3,9 @@
         <h2 class="style-title-list">
             {{ category.name }}
         </h2>
+        <p v-if="category.filter" class="style-description-small">
+            {{ category.filter }}
+        </p>
 
         <template slot="right">
             <button class="button icon arrow-up gray" @click.stop="moveUp" />
@@ -30,12 +33,16 @@ export default class RecordCategoryRow extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     category: RecordCategory
 
+    @Prop({ required: false, default: null })
+    parentCategory!: RecordCategory | null
+
     @Prop({ required: true })
     categories: RecordCategory[]
 
     editCategory() {
         this.present(new ComponentWithProperties(EditRecordCategoryView, {
             category: this.category,
+            parentCategory: this.parentCategory,
             isNew: false,
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                 this.addPatch(patch)

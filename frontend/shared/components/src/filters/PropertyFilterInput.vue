@@ -1,6 +1,6 @@
 <template>
     <div class="property-filter-value-input">
-        <STInputBox title="Wanneer vragen?" class="max">
+        <STInputBox title="Wanneer ingeschakeld?" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <Radio slot="left" :model-value="isAlwaysEnabled()" :value="true" @change="setAlwaysEnabled()" />
@@ -25,7 +25,7 @@
             </STList>
         </STInputBox>
 
-        <STInputBox title="Wanneer verplicht invullen?" class="max">
+        <STInputBox v-if="allowOptional" title="Wanneer verplicht invullen?" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <Radio slot="left" :model-value="isAlwaysRequired()" :value="true" @change="setAlwaysRequired()" />
@@ -77,6 +77,9 @@ import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     value: PropertyFilter<any>
+
+    @Prop({ default: true })
+    allowOptional: boolean
 
     cachedRequiredFilter: FilterGroup<any> | null = null
     cachedEnabledFilter: FilterGroup<any> | null = null

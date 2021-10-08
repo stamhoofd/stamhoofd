@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view edit-member-view">
+    <form class="st-view edit-member-view" @submit.prevent="save">
         <STNavigationBar :title="member ? member.details.name : 'Nieuw lid'">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-else slot="right" class="button icon gray close" @click="pop" />
@@ -17,6 +17,23 @@
             <EditMemberGeneralView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
 
             <EditMemberContactsView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
+
+            <div v-for="category of recordCategories" :key="category.id" class="container">
+                <hr>
+                <h2>{{ category.name }}</h2>
+
+                <STList v-if="category.childCategories.length > 0">
+                    <STListItem v-for="child of filterRecordCategories(category.childCategories)" :key="child.id" :selectable="true" @click="editRecordCategory(child)">
+                        {{ child.name }}
+
+                        <button slot="right" type="button" class="button text">
+                            <span class="icon edit" />
+                            <span class="hide-small">Bewerken</span>
+                        </button>
+                    </STListItem>
+                </STList>
+                <RecordAnswerInput v-for="record of category.records" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" />
+            </div>
         </main>
 
         <STToolbar>
@@ -28,19 +45,20 @@
                 </LoadingButton>
             </template>
         </STToolbar>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox,STErrorsDefault,STNavigationTitle, Validator } from "@stamhoofd/components";
+import { ErrorBox,FillRecordCategoryView,RecordAnswerInput,STErrorsDefault,STList, STListItem,STNavigationTitle, Validator } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
-import { MemberDetails, MemberWithRegistrations } from '@stamhoofd/structures';
+import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from "../../../../classes/FamilyManager";
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import EditMemberContactsView from './EditMemberContactsView.vue';
 import EditMemberGeneralView from './EditMemberGeneralView.vue';
 import EditMemberGroupView from './EditMemberGroupView.vue';
@@ -55,7 +73,10 @@ import EditMemberGroupView from './EditMemberGroupView.vue';
         LoadingButton,
         EditMemberGeneralView,
         EditMemberContactsView,
-        STErrorsDefault
+        STErrorsDefault,
+        STList,
+        STListItem,
+        RecordAnswerInput
     },
 })
 export default class EditMemberView extends Mixins(NavigationMixin) {
@@ -74,6 +95,8 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     errorBox: ErrorBox | null = null
+
+    OrganizationManager = OrganizationManager
 
     async save() {
         if (this.loading) {
@@ -118,6 +141,33 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             this.loading = false;
             return false;
         }
+    }
+
+    get recordCategories(): RecordCategory[] {
+        return this.filterRecordCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories)
+    }
+
+    filterRecordCategories(categories: RecordCategory[]): RecordCategory[] {
+        const m = new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, [])
+        return categories.filter(category => {
+            if (category.filter && !category.filter.enabledWhen.doesMatch(m)) {
+                return false
+            }
+            return true
+        })
+    }
+
+    editRecordCategory(category: RecordCategory) {
+        const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
+            category,
+            answers: this.memberDetails.recordAnswers,
+            markReviewed: false,
+            saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => {
+                this.memberDetails.recordAnswers = answers
+                component.dismiss({ force: true })
+            }
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 }
 </script>
