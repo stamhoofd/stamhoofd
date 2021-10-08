@@ -2,7 +2,7 @@
     <form class="st-view edit-member-view" @submit.prevent="save">
         <STNavigationBar :title="member ? member.details.name : 'Nieuw lid'">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop" />
+            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -24,7 +24,12 @@
 
                 <STList v-if="category.childCategories.length > 0">
                     <STListItem v-for="child of filterRecordCategories(category.childCategories)" :key="child.id" :selectable="true" @click="editRecordCategory(child)">
-                        {{ child.name }}
+                        <h3 class="style-title-list">
+                            {{ child.name }}
+                        </h3>
+                        <p v-if="getCategoryFillStatus(child)" class="style-description-small">
+                            {{ getCategoryFillStatus(child) }}
+                        </p>
 
                         <button slot="right" type="button" class="button text">
                             <span class="icon edit" />
@@ -145,6 +150,33 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
     get recordCategories(): RecordCategory[] {
         return this.filterRecordCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories)
+    }
+
+    getCategoryFillStatus(category: RecordCategory) {
+        // Check all the properties in this category and check their last review times
+        const records = category.getAllRecords()
+
+        let hasValue = false
+        let hasMissingValue = false
+
+        for (const record of records) {
+            const answer = this.memberDetails.recordAnswers.find(a => a.settings.id === record.id)
+            if (answer) {
+                hasValue = true
+            } else {
+                hasMissingValue = true
+            }
+        }
+
+        if (hasValue && hasMissingValue) {
+            return "Onvolledig: sommige antwoorden ontbreken"
+        }
+
+        if (hasValue && !hasMissingValue) {
+            return ""
+        }
+
+        return "Niet ingevuld"
     }
 
     filterRecordCategories(categories: RecordCategory[]): RecordCategory[] {

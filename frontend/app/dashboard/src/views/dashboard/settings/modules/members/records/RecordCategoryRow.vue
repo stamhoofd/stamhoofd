@@ -1,8 +1,8 @@
 <template>
     <STListItem :selectable="true" @click="editCategory()">
-        <h2 class="style-title-list">
+        <h3 class="style-title-list">
             {{ category.name }}
-        </h2>
+        </h3>
         <p v-if="category.filter" class="style-description-small">
             {{ category.filter }}
         </p>
