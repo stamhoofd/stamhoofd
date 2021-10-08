@@ -7,11 +7,9 @@
 
         <main>
             <h1>
-                Eigen kenmerken en gegevens
+                Kenmerken en gegevens van leden
             </h1>
             <p>Je kan zelf kiezen welke extra informatie je van jouw leden wilt verzamelen. Stamhoofd heeft enkele ingebouwde zaken, maar je kan de informatie die je wilt verzamelen zo veel uitbreiden als je wilt.</p>
-
-           
             
             <STErrorsDefault :error-box="errorBox" />
 
@@ -26,52 +24,91 @@
                     <p class="style-title-list">
                         GSM-nummer (van lid zelf)
                     </p>
-                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('phone')" :configuration="patchedOrganization.meta.recordsConfiguration.phone" :definitions="definitions" @patch="patchConfigProperty('phone', $event)" />
+                    <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
+                        {{ patchedOrganization.meta.recordsConfiguration.phone }}
+                    </p>
+                    <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('phone')">
+                        <span clas="icon edit" />
+                        <span class="hide-small">Wijzig</span>
+                    </button>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
                     <p class="style-title-list">
                         E-mailadres (van lid zelf)
                     </p>
-                    <p class="style-description-small">
-                        Er is wel altijd een e-mailadres noodzakelijk om een account aan te maken
+                    <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
+                        {{ patchedOrganization.meta.recordsConfiguration.emailAddress }}
                     </p>
-                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('emailAddress')" :configuration="patchedOrganization.meta.recordsConfiguration.emailAddress" :definitions="definitions" @patch="patchConfigProperty('emailAddress', $event)" />
+                    <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emailAddress')">
+                        <span clas="icon edit" />
+                        <span class="hide-small">Wijzig</span>
+                    </button>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
                     <p class="style-title-list">
                         Geslacht
                     </p>
-                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('gender')" :configuration="patchedOrganization.meta.recordsConfiguration.gender" :definitions="definitions" @patch="patchConfigProperty('gender', $event)" />
+                    <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
+                        {{ patchedOrganization.meta.recordsConfiguration.gender }}
+                    </p>
+                    <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('gender')">
+                        <span clas="icon edit" />
+                        <span class="hide-small">Wijzig</span>
+                    </button>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
                     <p class="style-title-list">
                         Geboortedatum
                     </p>
-                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('birthDay')" :configuration="patchedOrganization.meta.recordsConfiguration.birthDay" :definitions="definitions" @patch="patchConfigProperty('birthDay', $event)" />
+                    <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
+                        {{ patchedOrganization.meta.recordsConfiguration.birthDay }}
+                    </p>
+                    <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('birthDay')">
+                        <span clas="icon edit" />
+                        <span class="hide-small">Wijzig</span>
+                    </button>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
                     <p class="style-title-list">
                         Adres (van lid zelf)
                     </p>
-                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('address')" :configuration="patchedOrganization.meta.recordsConfiguration.address" :definitions="definitions" @patch="patchConfigProperty('address', $event)" />
+                    <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
+                        {{ patchedOrganization.meta.recordsConfiguration.address }}
+                    </p>
+                    <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('address')">
+                        <span clas="icon edit" />
+                        <span class="hide-small">Wijzig</span>
+                    </button>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
                     <p class="style-title-list">
                         Ouders
                     </p>
-                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('parents')" :configuration="patchedOrganization.meta.recordsConfiguration.parents" :definitions="definitions" @patch="patchConfigProperty('parents', $event)" />
+                    <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
+                        {{ patchedOrganization.meta.recordsConfiguration.parents }}
+                    </p>
+                    <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('parents')">
+                        <span clas="icon edit" />
+                        <span class="hide-small">Wijzig</span>
+                    </button>
                 </STListItem>
                 <STListItem :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
                     <p class="style-title-list">
                         Noodcontactpersoon
                     </p>
-                    <PropertyFilterConfigurationInput @click.native.prevent v-if="getEnableFilterConfiguration('emergencyContacts')" :configuration="patchedOrganization.meta.recordsConfiguration.emergencyContacts" :definitions="definitions" @patch="patchConfigProperty('emergencyContacts', $event)" />
+                    <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
+                        {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts }}
+                    </p>
+                    <button v-if="getEnableFilterConfiguration('emergencyContacts')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emergencyContacts')">
+                        <span clas="icon edit" />
+                        <span class="hide-small">Wijzig</span>
+                    </button>
                 </STListItem>
             </STList>
 
@@ -128,7 +165,7 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton, PropertyFilterConfigurationInput,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton,PropertyFilterConfigurationView,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { AskRequirement, MemberDetails, MemberWithRegistrations, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilterConfiguration, RecordCategory,Version  } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -147,7 +184,6 @@ import RecordCategoryRow from "./records/RecordCategoryRow.vue"
         LoadingButton,
         RecordCategoryRow,
         STListItem,
-        PropertyFilterConfigurationInput,
         Checkbox
     },
 })
@@ -192,10 +228,6 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     }
 
     patchConfigProperty(property: string, patch: any) {
-        console.log(property, patch)
-        console.log({
-                    [property]: patch
-                })
         this.addPatch(Organization.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
@@ -203,8 +235,6 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
                 })
             })
         }))
-
-        console.log(this.organizationPatch)
     }
 
     addRecordsConfigurationPatch(patch: AutoEncoderPatchType<OrganizationRecordsConfiguration>) {
@@ -247,6 +277,17 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         } else {
             this.patchConfigProperty(property, null)
         }
+    }
+
+    editEnableFilterConfiguration(property: string) {
+        this.present(new ComponentWithProperties(PropertyFilterConfigurationView, {
+            configuration: this.patchedOrganization.meta.recordsConfiguration[property],
+            title: property,
+            definitions: this.definitions,
+            setConfiguration: (configuration: PropertyFilterConfiguration) => {
+                this.patchConfigProperty(property, configuration)
+            }
+        }).setDisplayStyle("popup"))
     }
 
     async save() {

@@ -35,6 +35,31 @@ export class PropertyFilterConfiguration extends AutoEncoder {
      */
     @field({ decoder: new FilterGroupDecoder<MemberDetails>(MemberDetails.getBaseFilterDefinitions()), nullable: true })
     requiredWhen: FilterGroup<MemberDetails> | null = new FilterGroup(MemberDetails.getBaseFilterDefinitions())
+
+    toString() {
+        if (this.enabledWhen.filters.length == 0) {
+            // Always enabled
+
+            if (this.requiredWhen === null) {
+                return "Optioneel invullen"
+            }
+            if (this.requiredWhen.filters.length == 0) {
+                return "Verplicht invullen"
+            }
+
+            return "Verplicht invullen als: "+this.requiredWhen.toString()
+        }
+
+        if (this.requiredWhen === null) {
+            return "Ingeschakeld, en altijd optioneel als: "+this.enabledWhen.toString()
+        }
+
+        if (this.requiredWhen.filters.length == 0) {
+            return "Ingeschakeld als: "+this.enabledWhen.toString()
+        }
+
+        return "Ingeschakeld als: "+this.enabledWhen+", enkel verplicht invullen als: "+this.requiredWhen.toString()
+    }
 }
 
 export class FinancialSupportSettings extends AutoEncoder {

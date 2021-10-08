@@ -1,7 +1,7 @@
 <template>
     <div>
         <label class="radio">
-            <input v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete" :disabled="disabled">
+            <input ref="radio" v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete" :disabled="disabled">
             <div>
                 <div />
                 <div><slot /></div>
@@ -41,6 +41,15 @@ export default class Radio extends Vue {
 
     set radioButtonValue(value) {
         this.$emit("change", value)
+
+        // Add support for a model that doesn't change
+        this.$nextTick(() => {
+            if (this.radioButtonValue != value) {
+                if (this.$refs.radio) {
+                    (this.$refs.radio as any).checked = (this.radioButtonValue === this.value);
+                }
+            }
+        })
     }
 }
 </script>

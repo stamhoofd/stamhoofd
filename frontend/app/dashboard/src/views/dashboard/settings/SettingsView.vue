@@ -181,10 +181,10 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
                         <h2 class="style-title-list">
-                            Eigen kenmerken en gegevens
+                            Kenmerken en gegevens van leden
                         </h2>
                         <p class="style-description">
-                            Voeg zelf eigen kenmerken en gegevens toe die je van leden wilt verzamelen
+                            Kies welke informatie je verzamelt van jouw leden
                         </p>
 
                         <template slot="right">
