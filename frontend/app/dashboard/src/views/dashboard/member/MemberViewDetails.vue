@@ -179,7 +179,7 @@
                         <button v-if="hasWrite" class="button icon gray edit" @click="editRecordCategory(category)" />
                     </div>
                 </h2>
-                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" />
+                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :dataPermission="dataPermission" />
             </div>
 
             <div v-if="!member.details || member.details.isRecovered" class="container">
@@ -221,51 +221,6 @@
                     <hr>
                 </template>
             </div>
-
-            <!--<div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)" class="hover-box container">
-                <h2 class="style-with-button">
-                    <div>
-                        <span class="icon-spacer">Steekkaart</span><span
-                            v-tooltip="
-                                'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
-                            "
-                            class="icon gray privacy"
-                        />
-                    </div>
-                    <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editMemberRecords()" />
-                    </div>
-                </h2>
-
-                <ul class="member-records">
-                    <li
-                        v-for="(record, index) in sortedRecords"
-                        :key="index"
-                        v-tooltip="record.description.length > 0 ? record.description : null"
-                        :class="{ more: canOpenRecord(record), [LegacyRecordTypeHelper.getPriority(record.type)]: true}"
-                        @click="openRecordView(record)"
-                    >
-                        <span :class="'icon '+getIcon(record)" />
-                        <span class="text">{{ record.getText() }}</span>
-                        <span v-if="canOpenRecord(record)" class="icon arrow-right-small" />
-                    </li>
-                </ul>
-
-                <p v-if="sortedRecords.length == 0" class="info-box">
-                    {{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart
-                </p>
-
-                <p v-if="member.details.reviewTimes.getLastReview('records')" class="style-description-small">
-                    Laatst nagekeken op {{ member.details.reviewTimes.getLastReview("records") | dateTime }}
-                </p>
-                <p v-else class="style-description-small">
-                    Nog nooit nagekeken
-                </p>
-
-                <template v-if="member.users.length > 0">
-                    <hr>
-                </template>
-            </div>-->
 
             <div v-if="activeAccounts.length > 0" class="hover-box container">
                 <h2>
@@ -337,7 +292,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -385,21 +340,16 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get recordCategories(): RecordCategory[] {
-        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
-            if (category.filter && !category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(this.member.details, this.member, []))) {
-                return []
+        return RecordCategory.filterCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission).flatMap(cat => {
+            if (cat.childCategories) {
+                return cat.filterChildCategories(new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission)
             }
-            if (category.childCategories.length > 0) {
-                return category.childCategories.filter(category => {
-                    if (category.filter && !category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(this.member.details, this.member, []))) {
-                        return false
-                    }
-                    return true
-                })
-            }
-            return [category]
+            return [cat]
         })
+    }
+
+    get dataPermission() {
+        return this.member.details.dataPermissions?.value ?? false
     }
 
     get hasWarnings() {
@@ -414,18 +364,22 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             warnings.push(...answer.getWarnings())
         }
 
-        if (this.member.details.requiresFinancialSupport && this.member.details.requiresFinancialSupport.value) {
-            warnings.push(RecordWarning.create({
-                text: OrganizationManager.organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
-                type: RecordWarningType.Error
-            }))
+        if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport) {
+            if (this.member.details.requiresFinancialSupport && this.member.details.requiresFinancialSupport.value) {
+                warnings.push(RecordWarning.create({
+                    text: OrganizationManager.organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
+                    type: RecordWarningType.Error
+                }))
+            }
         }
-
-        if (this.member.details.allowSensitiveDataCollection && !this.member.details.allowSensitiveDataCollection.value) {
-            warnings.push(RecordWarning.create({
-                text: "Geen toestemming om gevoelige informatie te verzamelen",
-                type: RecordWarningType.Error
-            }))
+        
+        if (OrganizationManager.organization.meta.recordsConfiguration.dataPermission) {
+            if (this.member.details.dataPermissions && !this.member.details.dataPermissions.value) {
+                warnings.push(RecordWarning.create({
+                    text: OrganizationManager.organization.meta.recordsConfiguration.dataPermission?.warningText || DataPermissionsSettings.defaultWarningText,
+                    type: RecordWarningType.Error
+                }))
+            }
         }
 
         return warnings
@@ -458,6 +412,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             category,
             answers: this.member.details.recordAnswers,
             markReviewed: false,
+            dataPermission: this.member.details.dataPermissions?.value ?? false,
+            filterValue: new MemberDetailsWithGroups(this.member.details, this.member, []),
             saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
                 this.member.details.recordAnswers = answers
                 await this.familyManager.patchAllMembersWith(this.member)

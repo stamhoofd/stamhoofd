@@ -258,7 +258,7 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
         new SummaryGroupProperty({
             name: "Geen toestemming verzamelen gevoelige gegevens",
             getValue: (member) => {
-                return member.details.allowSensitiveDataCollection?.value ? null : ""
+                return member.details.dataPermissions?.value ? null : ""
             }
         })
     ]

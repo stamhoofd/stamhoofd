@@ -7,53 +7,47 @@
 
         <main>
             <h1>
-                Financiële ondersteuning
+                Toestemming gegevensverzameling
             </h1>
-            <p>Net voor het betalen van inschrijvingen is het in Stamhoofd mogelijk om te vragen of een gezin wenst gebruik te maken van financiële ondersteuning. Dit kunnen ze kenbaar maken door heel laagdrempelig een aankruisvakje aan te vinken. Als je deze functie aanzet kan je per inschrijvingsgroep een verminderd tarief instellen dat automatisch wordt toegepast, of je kan deze informatie zelf gebruiken voor andere zaken (bv. uitdelen tweedehands materiaal).</p>
+            <p>
+                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a href="https://www.stamhoofd.be/docs/toestemming-gegevens-verzamelen" class="inline-link" target="_blank" rel="noopener">
+                    Lees onze gids
+                </a>
+            </p>
 
             <p class="info-box">
-                Wil je dat leden een kaart of bewijs voorleggen, dan raden we aan om dit achteraf manueel (en discreet) te controleren. Leg dit dan uit in de beschrijving (kan je hieronder zelf intypen als je het aanzet). Dat houdt de drempel voldoende laag voor kansarme gezinnen (er is al genoeg administratie en regelgeving). Je kan dit later altijd corrigeren wanneer een lid foutief het aankruisvakje heeft aangeduid, het omgekeerde is veel moeilijker.
+                Je kan toestemming nooit verplichten volgens de GDPR-wetgeving. Als een lid geen toestemming geeft, kan je enkel gegevens verzamelen die noodzakelijk zijn (zoals bepaald volgens de 5 verwerkingsgronden bepaald in de GDPR-wetgeving). Stamhoofd verbergt automatisch vragen waarvoor toestemming noodzakelijk is in dat geval.
             </p>
 
-            <p class="info-box icon privacy">
-                Om in orde te zijn met de GDPR-wetgeving moet je altijd toestemming gekregen hebben voor je deze informatie kan opslaan. Stamhoofd vraagt deze toestemming automatisch aan leden als je dit aanzet.
-            </p>
-            
             <STErrorsDefault :error-box="errorBox" />          
 
-            <Checkbox v-model="enableFinancialSupport">
-                Vraag of het gezin financiële ondersteuning nodig heeft (kansarm gezin)
+            <Checkbox v-model="enableDataPermission">
+                Vraag toestemming voor gegevensverzameling
             </Checkbox>
 
-            <template v-if="enableFinancialSupport">
+            <template v-if="enableDataPermission">
                 <hr>
                 <h2>Wijzig uitleg voor leden</h2>
-                <p>Kies zelf de uitleg en titels die zichtbaar zijn voor leden op de pagina (net voor het afrekenen).</p>
+                <p>Kies zelf de uitleg en titels die zichtbaar zijn op het moment we naar toestemming vragen</p>
 
                 <STInputBox title="Titel" class="max">
                     <input v-model="title" class="input" :placeholder="defaultTitle">
                 </STInputBox>
-                <p class="style-description-small">
-                    De titel bovenaan de pagina. Normaal neem je hier gewoon '{{ defaultTitle }}', maar als je bijvoorbeeld met een UiTPAS werkt, kan je dat wat wijzigen naar bijvoorbeeld 'UiTPAS kansentarief'.
-                </p>
 
                 <STInputBox title="Beschrijving" class="max">
-                    <textarea v-model="description" class="input" :placeholder="defaultDescription" />
+                    <textarea v-model="description" class="input" placeholder="Optioneel" />
                 </STInputBox>
-                <p class="style-description-small">
-                    Tekst onder de titel. Leg hier uit wat voor financiële ondersteuning je geeft en wie er gebruik van kan maken. Leg uit dat ze discreet kunnen aanvinken dat ze gebruik willen maken van de ondersteuning.
-                </p>
 
                 <STInputBox title="Tekst naast aankruisvakje" class="max">
                     <input v-model="checkboxLabel" class="input" :placeholder="defaultCheckbox">
                 </STInputBox>
                 <p class="style-description-small">
-                    Deze tekst is zichtbaar naast het aankruisvakje (dat ze moeten aanvinken als ze de ondersteuning willen gebruiken). Zorg dat je duidelijk bent, bv. "{{ defaultCheckbox }}"
+                    Deze tekst is zichtbaar naast het aankruisvakje (dat ze moeten aanvinken als ze de toestemming geven). 
                 </p>
 
                 <hr>
                 <h2>Waarschuwing bij leden</h2>
-                <p>Als een lid gebruik wil maken van de financiële ondersteuning, dan tonen we dit als waarschuwing als je dat lid bekijkt in Stamhoofd. Je kan zelf de tekst in deze waarschuwing wijzigen. Dit is niet zichtbaar voor de leden zelf.</p>
+                <p>Als een lid geen toestemming gaf, dan tonen we dit als waarschuwing als je dat lid bekijkt in Stamhoofd. Je kan zelf de tekst in deze waarschuwing wijzigen. Dit is niet zichtbaar voor de leden zelf.</p>
             
                 <STInputBox title="Waarschuwingstekst" class="max">
                     <input v-model="warningText" class="input" :placeholder="defaultWarningText">
@@ -78,7 +72,7 @@ import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonb
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { FinancialSupportSettings } from '@stamhoofd/structures';
+import { DataPermissionsSettings } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -98,7 +92,7 @@ import { OrganizationManager } from "../../../../../classes/OrganizationManager"
         PriceInput
     },
 })
-export default class FinancialSupportSettingsView extends Mixins(NavigationMixin) {
+export default class DataPermissionsSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
@@ -110,11 +104,11 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
         return OrganizationManager.organization.patch(this.organizationPatch)
     }
 
-    get enableFinancialSupport() {
-        return this.organization.meta.recordsConfiguration.financialSupport !== null
+    get enableDataPermission() {
+        return this.organization.meta.recordsConfiguration.dataPermission !== null
     }
 
-    set enableFinancialSupport(enabled: boolean) {
+    set enableDataPermission(enabled: boolean) {
         const hasReduced = !!this.organization.groups.find(g => {
             return !!g.settings.prices.find(p => !!p.prices.find(gg => gg.reducedPrice !== null))
         })
@@ -125,21 +119,21 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    financialSupport: enabled ? (this.organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})) : null
+                    dataPermission: enabled ? (this.organization.meta.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})) : null
                 })
             })
         })
     }
 
     get description() {
-        return this.organization.meta.recordsConfiguration.financialSupport?.description ?? ""
+        return this.organization.meta.recordsConfiguration.dataPermission?.description ?? ""
     }
 
     set description(description: string) {
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    financialSupport: FinancialSupportSettings.patch({
+                    dataPermission: DataPermissionsSettings.patch({
                         description
                     })
                 })
@@ -148,14 +142,14 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     }
 
     get checkboxLabel() {
-        return this.organization.meta.recordsConfiguration.financialSupport?.checkboxLabel ?? ""
+        return this.organization.meta.recordsConfiguration.dataPermission?.checkboxLabel ?? ""
     }
 
     set checkboxLabel(checkboxLabel: string) {
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    financialSupport: FinancialSupportSettings.patch({
+                    dataPermission: DataPermissionsSettings.patch({
                         checkboxLabel
                     })
                 })
@@ -164,14 +158,14 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     }
 
     get title() {
-        return this.organization.meta.recordsConfiguration.financialSupport?.title ?? ""
+        return this.organization.meta.recordsConfiguration.dataPermission?.title ?? ""
     }
 
     set title(title: string) {
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    financialSupport: FinancialSupportSettings.patch({
+                    dataPermission: DataPermissionsSettings.patch({
                         title
                     })
                 })
@@ -180,14 +174,14 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     }
 
     get warningText() {
-        return this.organization.meta.recordsConfiguration.financialSupport?.warningText ?? ""
+        return this.organization.meta.recordsConfiguration.dataPermission?.warningText ?? ""
     }
 
     set warningText(warningText: string) {
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
-                    financialSupport: FinancialSupportSettings.patch({
+                    dataPermission: DataPermissionsSettings.patch({
                         warningText
                     })
                 })
@@ -196,19 +190,19 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     }
 
     get defaultDescription() {
-        return FinancialSupportSettings.defaultDescription
+        return DataPermissionsSettings.defaultDescription
     }
 
     get defaultTitle() {
-        return FinancialSupportSettings.defaultTitle
+        return DataPermissionsSettings.defaultTitle
     }
 
     get defaultCheckbox() {
-        return FinancialSupportSettings.defaultCheckboxLabel
+        return DataPermissionsSettings.defaultCheckboxLabel
     }
 
     get defaultWarningText() {
-        return FinancialSupportSettings.defaultWarningText
+        return DataPermissionsSettings.defaultWarningText
     }
 
     async save() {
@@ -254,7 +248,7 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/financial-support");
+        HistoryManager.setUrl("/settings/data-permission");
     }
 }
 </script>

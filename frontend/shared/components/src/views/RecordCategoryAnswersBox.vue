@@ -1,6 +1,6 @@
 <template>
     <dl class="details-grid">
-        <template v-for="record of category.records">
+        <template v-for="record of records">
             <dt :key="'dt-'+record.id" class="center">
                 {{ record.name }}
             </dt>
@@ -43,6 +43,13 @@ export default class RecordCategoryAnswersBox extends Mixins(NavigationMixin){
 
     @Prop({ required: true })
     category: RecordCategory
+
+    @Prop({ required: true })
+    dataPermission!: boolean
+
+    get records() {
+        return this.category.filterRecords(this.dataPermission)
+    }
 
     get RecordType() {
         return RecordType

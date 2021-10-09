@@ -33,6 +33,10 @@ export class RecordAnswer extends AutoEncoder {
         return false
     }
 
+    markReviewed() {
+        this.reviewedAt = new Date()
+    }
+
     get stringValue() {
         return "Onbekend"
     }

@@ -18,6 +18,31 @@
 
             <EditMemberContactsView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
 
+            <template v-if="financialSupportEnabled">
+                <hr>
+                <h2>{{ dataPermissionsTitle }}</h2>
+                
+                <Checkbox v-model="dataPermissionsValue">
+                    {{ dataPermissionsLabel }}
+                </Checkbox>
+
+                <p v-if="dataPermissionsChangeDate" class="style-description-small">
+                    Laatst gewijzigd op {{ formatDate(dataPermissionsChangeDate) }}
+                </p>
+            </template>
+
+            <template v-if="financialSupportEnabled">
+                <hr>
+                <h2>{{ financialSupportTitle }}</h2>
+                <Checkbox v-model="financialSupportValue">
+                    {{ financialSupportLabel }}
+                </Checkbox>
+
+                <p v-if="financialSupportChangeDate" class="style-description-small">
+                    Laatst gewijzigd op {{ formatDate(financialSupportChangeDate) }}
+                </p>
+            </template>
+
             <div v-for="category of recordCategories" :key="category.id" class="container">
                 <hr>
                 <h2>{{ category.name }}</h2>
@@ -37,7 +62,7 @@
                         </button>
                     </STListItem>
                 </STList>
-                <RecordAnswerInput v-for="record of category.records" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" />
+                <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" />
             </div>
         </main>
 
@@ -56,10 +81,11 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox,FillRecordCategoryView,RecordAnswerInput,STErrorsDefault,STList, STListItem,STNavigationTitle, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox,FillRecordCategoryView,RecordAnswerInput,STErrorsDefault,STList, STListItem,STNavigationTitle, Validator } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
-import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
+import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, Version } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from "../../../../classes/FamilyManager";
@@ -81,7 +107,8 @@ import EditMemberGroupView from './EditMemberGroupView.vue';
         STErrorsDefault,
         STList,
         STListItem,
-        RecordAnswerInput
+        RecordAnswerInput,
+        Checkbox
     },
 })
 export default class EditMemberView extends Mixins(NavigationMixin) {
@@ -95,13 +122,74 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
     familyManager = this.initialFamily ?? new FamilyManager(this.member ? [this.member] : []);
 
-    memberDetails = this.member ? this.member.details : MemberDetails.create({})// do not link with member, only link on save!
+    memberDetails = this.member ? this.member.details.clone() : MemberDetails.create({})// do not link with member, only link on save!
 
     validator = new Validator()
 
     errorBox: ErrorBox | null = null
 
     OrganizationManager = OrganizationManager
+
+    get supportSettings(): FinancialSupportSettings {
+        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
+    }
+
+    get financialSupportEnabled() {
+        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport !== null
+    }
+
+    get financialSupportTitle() {
+        return this.supportSettings.title || FinancialSupportSettings.defaultTitle
+    }
+
+    get financialSupportLabel() {
+        return this.supportSettings.checkboxLabel || FinancialSupportSettings.defaultCheckboxLabel
+    }
+
+    get financialSupportValue() {
+        return this.memberDetails.requiresFinancialSupport?.value ?? false
+    }
+
+    set financialSupportValue(value: boolean) {
+        this.memberDetails.requiresFinancialSupport = BooleanStatus.create({ value })
+    }
+
+    get financialSupportChangeDate() {
+        return this.memberDetails.requiresFinancialSupport?.date
+    }
+
+
+    get dataPermissionsSettings(): DataPermissionsSettings {
+        return OrganizationManager.organization.meta.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
+    }
+
+    get dataPermissionsEnabled() {
+        return OrganizationManager.organization.meta.recordsConfiguration.dataPermission !== null
+    }
+
+    get dataPermissionsTitle() {
+        return this.dataPermissionsSettings.title || DataPermissionsSettings.defaultTitle
+    }
+
+    get dataPermissionsLabel() {
+        return this.dataPermissionsSettings.checkboxLabel || DataPermissionsSettings.defaultCheckboxLabel
+    }
+
+    get dataPermissionsValue() {
+        return this.memberDetails.dataPermissions?.value ?? false
+    }
+
+    set dataPermissionsValue(value: boolean) {
+        this.memberDetails.dataPermissions = BooleanStatus.create({ value })
+    }
+
+    get dataPermissionsChangeDate() {
+        return this.memberDetails.dataPermissions?.date
+    }
+
+    formatDate(date: Date) {
+        return Formatter.dateTime(date)
+    }
 
     async save() {
         if (this.loading) {
@@ -130,7 +218,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         
         try {
             if (this.member) {
-                this.member.details = this.memberDetails
+                this.member.details.set(this.memberDetails)
                 await this.familyManager.patchAllMembersWith(this.member)
             }
           
@@ -180,19 +268,15 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     }
 
     filterRecordCategories(categories: RecordCategory[]): RecordCategory[] {
-        const m = new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, [])
-        return categories.filter(category => {
-            if (category.filter && !category.filter.enabledWhen.doesMatch(m)) {
-                return false
-            }
-            return true
-        })
+        return RecordCategory.filterCategories(categories, new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), this.dataPermissionsValue)
     }
 
     editRecordCategory(category: RecordCategory) {
         const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
             category,
             answers: this.memberDetails.recordAnswers,
+            dataPermission: this.dataPermissionsValue,
+            filterValue: new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []),
             markReviewed: false,
             saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => {
                 this.memberDetails.recordAnswers = answers
@@ -201,17 +285,13 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup");
         this.present(displayedComponent);
     }
-}
-</script>
 
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-.edit-member-view {
-    > main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
+    async shouldNavigateAway() {
+        const compareTo = this.member ? this.member.details : MemberDetails.create({})
+        if (JSON.stringify(this.memberDetails.encode({ version: Version })) == JSON.stringify(compareTo.encode({ version: Version }))) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 }
-</style>
+</script>

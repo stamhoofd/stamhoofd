@@ -66,6 +66,7 @@
 <script lang="ts">
 import { AddressInput,Checkbox,ErrorBox, Radio,STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
 @Component({

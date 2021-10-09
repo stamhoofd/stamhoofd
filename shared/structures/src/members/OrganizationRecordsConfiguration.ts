@@ -70,6 +70,48 @@ export class FinancialSupportSettings extends AutoEncoder {
     }
 }
 
+export class DataPermissionsSettings extends AutoEncoder {
+    /**
+     * E.g. 'financial support'
+     */
+    @field({ decoder: StringDecoder })
+    title = DataPermissionsSettings.defaultTitle
+
+    /**
+     * E.g. 'We provide financial support for families in financial difficulties. You can ask for this by checking this checkbox'
+     */
+    @field({ decoder: StringDecoder })
+    description = DataPermissionsSettings.defaultDescription
+
+    /**
+     * E.g. 'My family is in need of financial support'
+     */
+    @field({ decoder: StringDecoder })
+    checkboxLabel = DataPermissionsSettings.defaultCheckboxLabel
+
+    /**
+     * E.g. 'Uses financial support'
+     */
+    @field({ decoder: StringDecoder, optional: true })
+    warningText = DataPermissionsSettings.defaultWarningText
+
+    static get defaultDescription() {
+        return ""
+    }
+
+    static get defaultTitle() {
+        return "Toestemming verzamelen gevoelige gegevens"
+    }
+
+    static get defaultCheckboxLabel() {
+        return "Ik geef toestemming om gevoelige gegevens te verzamelen en te verwerken. Hoe we met deze gegevens omgaan staat vermeld in ons privacybeleid."
+    }
+
+    static get defaultWarningText() {
+        return "Geen toestemming om gevoelige gegevens te verzamelen"
+    }
+}
+
 /**
  * Convenicence class used to pass around details and current or future groups it is registered in
  * -> needed for filtering.
@@ -128,7 +170,19 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      * TODO: make this an automatic getter that checks financialSupport + custom records + organization type (e.g. lgbtq+, politics) to determine if this is needed
      */
     @field({ decoder: BooleanDecoder, version: 117 })
-    dataPermission = false
+    @field({ 
+        decoder: DataPermissionsSettings, 
+        nullable: true,
+        version: 127, 
+        upgrade: (v) => {
+            if (v) {
+                return DataPermissionsSettings.create({})
+            } else {
+                return null
+            }
+        } 
+    })
+    dataPermission: DataPermissionsSettings | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 124 })
     emailAddress: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
@@ -168,6 +222,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     freeContribution: FreeContributionSettings | null = null
 
     /**
+     * @deprecated
      * true: required
      * false: don't ask
      * null: optional
@@ -176,6 +231,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     doctor = AskRequirement.NotAsked
 
     /**
+     * @deprecated
      * true: required
      * false: don't ask
      * null: optional

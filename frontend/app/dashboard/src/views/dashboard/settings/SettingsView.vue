@@ -164,6 +164,20 @@
                         </template>
                     </STListItem>
 
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageDataPermission(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/agreement.svg">
+                        <h2 class="style-title-list">
+                            Toestemming gegevensverzameling
+                        </h2>
+                        <p class="style-description">
+                            Vaak heb je toestemming nodig om bepaalde gegevens te verzamelen. Dat stel je hier in.
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageFreeContribution(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg">
                         <h2 class="style-title-list">
@@ -275,6 +289,7 @@ import AdminsView from '../admins/AdminsView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
+import DataPermissionSettingsView from './modules/members/DataPermissionSettingsView.vue';
 import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import LegacyRecordsSettingsView from './modules/members/LegacyRecordsSettingsView.vue';
@@ -406,6 +421,12 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
+    manageDataPermission(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(DataPermissionSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
     manageFreeContribution(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(FreeContributionSettingsView, {})
@@ -526,6 +547,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'financial-support') {
             this.manageFinancialSupport(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'data-permission') {
+            this.manageDataPermission(false)
         }
 
         if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {

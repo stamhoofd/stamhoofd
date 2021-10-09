@@ -123,7 +123,7 @@ export class MemberDetails extends AutoEncoder {
      * Gave permission to collect sensitive information
      */
     @field({ decoder: BooleanStatus, version: 117, optional: true })
-    allowSensitiveDataCollection?: BooleanStatus
+    dataPermissions?: BooleanStatus
 
     @field({ decoder: EmergencyContact, nullable: true })
     doctor: EmergencyContact | null = null;
@@ -480,8 +480,8 @@ export class MemberDetails extends AutoEncoder {
             this.requiresFinancialSupport = other.requiresFinancialSupport
         }
 
-        if (other.allowSensitiveDataCollection && (!this.allowSensitiveDataCollection || this.allowSensitiveDataCollection.date < other.allowSensitiveDataCollection.date)) {
-            this.allowSensitiveDataCollection = other.allowSensitiveDataCollection
+        if (other.dataPermissions && (!this.dataPermissions || this.dataPermissions.date < other.dataPermissions.date)) {
+            this.dataPermissions = other.dataPermissions
         }
     }
 

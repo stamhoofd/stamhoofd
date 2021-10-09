@@ -13,14 +13,19 @@
 
             <STErrorsDefault :error-box="errorBox" />
             
-            <RecordAnswerInput v-for="record of category.records" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
-            <div v-for="category of category.childCategories" :key="category.id" class="container">
+            <RecordAnswerInput v-for="record of records" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
+            <div v-for="category of childCategories" :key="category.id" class="container">
                 <hr>
                 <h2>{{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
-                <RecordAnswerInput v-for="record of category.records" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
+                <RecordAnswerInput v-for="record of category.filterRecords(dataPermission)" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
             </div>
+
+
+            <p v-if="!markReviewed && lastReviewed" class="style-description-small">
+                Laatst nagekeken op {{ formatDate(lastReviewed) }}
+            </p>
         </main>
 
         <STToolbar>
@@ -38,6 +43,7 @@ import { encodeObject } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage, ErrorBox, LoadingButton,RecordAnswerInput, STErrorsDefault, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures"
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
@@ -65,6 +71,15 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
     @Prop({ default: false })
     markReviewed!: boolean
 
+    @Prop({ required: true })
+    dataPermission!: boolean
+
+    /**
+     * Type of the filters used (category.filter)
+     */
+    @Prop({ required: true })
+    filterValue!: any
+
     editingAnswers = this.answers.map(a => a.clone())
 
     @Prop({ required: true })
@@ -73,8 +88,36 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
+    get records() {
+        return this.category.filterRecords(this.dataPermission)
+    }
+
+    get childCategories(): RecordCategory[] {
+        return this.category.filterChildCategories(this.filterValue, this.dataPermission)
+    }
+
     get title() {
         return this.category.name
+    }
+
+    formatDate(date: Date) {
+        return Formatter.dateTime(date)
+    }
+
+    get lastReviewed() {
+        const allRecords = this.category.getAllRecords()
+        let last: Date | null = null
+
+        for (const answer of this.editingAnswers) {
+            const record = !!allRecords.find(r => r.id == answer.settings.id)
+            if (record && answer.reviewedAt) {
+                // Mark reviewed
+                if (!last || answer.reviewedAt < last) {
+                    last = answer.reviewedAt
+                }
+            }
+        }
+        return last
     }
 
     async goNext() {
@@ -101,7 +144,7 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
                     const record = !!allRecords.find(r => r.id == answer.settings.id)
                     if (record) {
                         // Mark reviewed
-                        answer.reviewedAt = new Date()
+                        answer.markReviewed()
                     }
                 }
             }

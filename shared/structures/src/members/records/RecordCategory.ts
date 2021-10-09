@@ -33,4 +33,33 @@ export class RecordCategory extends AutoEncoder {
 
     @field({ decoder: new PropertyFilterDecoderFromContext(), version: 126, nullable: true })
     filter: PropertyFilter<any> | null = null
+
+    filterRecords(dataPermission: boolean) {
+        if (dataPermission) {
+            return this.records
+        }
+        return this.records.filter(r => !r.sensitive)
+    }
+
+    static filterCategories(categories: RecordCategory[], filterValue: any, dataPermission: boolean): RecordCategory[] {
+        return categories.filter(category => {
+            if (category.filter && !category.filter.enabledWhen.doesMatch(filterValue)) {
+                return false
+            }
+
+            if (category.childCategories.length > 0) {
+                return category.filterChildCategories(filterValue, dataPermission).length > 0
+            }
+
+            if (category.filterRecords(dataPermission).length == 0) {
+                return false
+            }
+
+            return true
+        })
+    }
+
+    filterChildCategories(filterValue: any, dataPermission: boolean): RecordCategory[] {
+        return RecordCategory.filterCategories(this.childCategories, filterValue, dataPermission)
+    }
 }
