@@ -1,5 +1,14 @@
 <template>
     <div class="container">
+        <select v-if="group.filters.length > 1" v-model="mode" class="input">
+            <option :value="GroupFilterMode.And">
+                Alle filters moeten matchen
+            </option>
+            <option :value="GroupFilterMode.Or">
+                Minstens één filter is voldoende
+            </option>
+        </select>
+
         <div v-for="(filter, index) of group.filters" :key="'filters'+index" class="container">
             <hr>
             <h2 class="style-with-button">
@@ -42,7 +51,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STInputBox, STListItem } from "@stamhoofd/components"
-import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, NumberFilter, Organization, RegistrationsFilter, StringFilter } from "@stamhoofd/structures";
+import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, GroupFilterMode, NumberFilter, Organization, RegistrationsFilter, StringFilter } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import ChoicesFilterView from "./ChoicesFilterView.vue"
@@ -63,12 +72,24 @@ import StringFilterView from "./StringFilterView.vue"
         RegistrationsFilterView
     }
 })
-export default class FilterBuilderView extends Mixins(NavigationMixin)  {
+export default class FilterGroupView extends Mixins(NavigationMixin)  {
     @Prop({ required: true }) 
     group: FilterGroup<any>
 
     @Prop({ required: true })
     organization!: Organization
+
+    get GroupFilterMode() {
+        return GroupFilterMode
+    }
+
+    get mode() {
+        return this.group.mode
+    }
+
+    set mode(mode: GroupFilterMode) {
+        this.group.mode = mode
+    }
 
     get definitions() {
         const m: FilterDefinition<any, any, any>[] = []
