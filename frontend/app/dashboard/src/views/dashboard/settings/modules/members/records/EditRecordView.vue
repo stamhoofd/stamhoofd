@@ -269,10 +269,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, Radio,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox, Radio,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning,RecordWarningType,Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import PreviewRecordView from './PreviewRecordView.vue';
 import RecordChoiceRow from "./RecordChoiceRow.vue"
@@ -566,6 +567,10 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
     }
 
     set sensitive(sensitive: boolean) {
+        if (sensitive && OrganizationManager.organization.meta.recordsConfiguration.dataPermission === null) {
+            new Toast("Schakel eerst de functie om toestemming te vragen in, dat kan via instellingen > Toestemming gegevensverzameling. Daarna kan je kenmerken toevoegen waarvoor toestemming noodzakelijk is.", "error red").show()
+            return
+        }
         // Always require encryption for sensitive information
         this.patchRecord = this.patchRecord.patch({ sensitive, encrypted: sensitive ? true : undefined })
     }

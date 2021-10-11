@@ -109,11 +109,10 @@ export default class DataPermissionsSettingsView extends Mixins(NavigationMixin)
     }
 
     set enableDataPermission(enabled: boolean) {
-        const hasReduced = !!this.organization.groups.find(g => {
-            return !!g.settings.prices.find(p => !!p.prices.find(gg => gg.reducedPrice !== null))
-        })
-        if (hasReduced && !enabled) {
-            new Toast("Eén of meerdere inschrijvingsgroepen maken gebruik van verminderd lidgeld. Schakel dat eerst overal uit.", "error red").show()
+        const hasSensitiveFields = !!this.organization.meta.recordsConfiguration.recordCategories.flatMap(r => r.getAllRecords()).find(r => r.sensitive)
+
+        if (hasSensitiveFields && !enabled) {
+            new Toast("Je hebt momenteel kenmerken van leden waarvoor toestemming vereist is. Pas die eerst aan (bij instellingen > Kenmerken en gegevens van leden)", "error red").show()
             return
         }
         this.organizationPatch = this.organizationPatch.patch({

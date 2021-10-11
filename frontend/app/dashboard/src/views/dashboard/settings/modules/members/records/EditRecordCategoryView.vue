@@ -108,6 +108,7 @@ import { CenteredMessage, Checkbox,ErrorBox, PropertyFilterInput,Spinner,STError
 import { MemberDetails, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
 import EditRecordView from "./EditRecordView.vue"
 import RecordCategoryRow from "./RecordCategoryRow.vue"
 import RecordRow from "./RecordRow.vue"
@@ -233,7 +234,9 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     addRecord() {
-        const record = RecordSettings.create({})
+        const record = RecordSettings.create({
+            sensitive: !!OrganizationManager.organization.meta.recordsConfiguration.dataPermission
+        })
 
         this.present(new ComponentWithProperties(EditRecordView, {
             record,
