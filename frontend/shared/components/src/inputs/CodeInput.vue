@@ -90,6 +90,10 @@ export default class CodeInput extends Vue {
     }
 
     selectNext(index: number) {
+        if (index < 0) {
+            return
+        }
+
         console.log("select next ", index)
         if (index >= this.codeLength) {
             const prev = this.$refs.numberInput[index - 1];
