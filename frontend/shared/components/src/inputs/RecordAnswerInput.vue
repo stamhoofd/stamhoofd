@@ -8,7 +8,7 @@
                 {{ answer.settings.description }}
             </p>
         </Checkbox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label">
+        <STInputBox v-else-if="answer.settings.type == RecordType.MultipleChoice" class="max" :title="label" error-fields="input" :error-box="errorBox">
             <STList>
                 <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
                     <Checkbox slot="left" :checked="getChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
@@ -21,7 +21,7 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.ChooseOne" class="max" :title="label">
+        <STInputBox v-else-if="answer.settings.type == RecordType.ChooseOne" class="max" :title="label" error-fields="input" :error-box="errorBox">
             <STList>
                 <STListItem v-for="choice in recordSettings.choices" :key="choice.id" :selectable="true" element-name="label">
                     <Radio slot="left" v-model="answer.selectedChoice" :name="'record-answer-'+answer.id" :value="choice" />
@@ -34,10 +34,10 @@
                 </STListItem>
             </STList>
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.Text" :title="label">
+        <STInputBox v-else-if="answer.settings.type == RecordType.Text" :title="label" error-fields="input" :error-box="errorBox">
             <input v-model="answer.value" :placeholder="inputPlaceholder" class="input">
         </STInputBox>
-        <STInputBox v-else-if="answer.settings.type == RecordType.Textarea" :title="label" class="max">
+        <STInputBox v-else-if="answer.settings.type == RecordType.Textarea" :title="label" class="max" error-fields="input" :error-box="errorBox">
             <textarea v-model="answer.value" :placeholder="inputPlaceholder" class="input" />
         </STInputBox>
         <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="answer.address" :title="label" :required="required" :validator="validator" />
@@ -46,7 +46,6 @@
         </p>
 
         <!-- Comments if checkbox is selected -->
-
         <div v-if="answer.settings.type == RecordType.Checkbox && answer.selected && answer.settings.askComments" class="textarea-container">
             <textarea v-model="answer.comments" class="input" :placeholder="inputPlaceholder" />
             <p v-if="answer.settings.commentsDescription" class="info-box">
@@ -54,8 +53,10 @@
             </p>
         </div>
 
-        <!-- Footer description -->
+        <!-- Unhandled errors -->
+        <STErrorsDefault :error-box="errorBox" />
 
+        <!-- Footer description -->
         <p v-if="answer.settings.type != RecordType.Checkbox && answer.settings.description" class="style-description-small">
             {{ answer.settings.description }}
         </p>
@@ -64,9 +65,8 @@
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,ErrorBox, Radio,STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
+import { AddressInput,Checkbox,ErrorBox, Radio,STInputBox, STList, STListItem, Validator, STErrorsDefault } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
 @Component({
@@ -76,7 +76,8 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         STList,
         Checkbox,
         Radio,
-        AddressInput
+        AddressInput,
+        STErrorsDefault
     }
 })
 export default class RecordAnswerInput extends Vue {
@@ -170,6 +171,13 @@ export default class RecordAnswerInput extends Vue {
     }
 
     async isValid(): Promise<boolean> {
+        try {
+            this.answer.validate()
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+            return false
+        }
+        this.errorBox = null
         return Promise.resolve(true)
     }
 }

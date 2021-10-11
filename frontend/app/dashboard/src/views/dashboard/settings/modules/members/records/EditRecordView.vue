@@ -268,12 +268,13 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox,ErrorBox, Radio,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning,RecordWarningType,Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
+import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import PreviewRecordView from './PreviewRecordView.vue';
 import RecordChoiceRow from "./RecordChoiceRow.vue"
@@ -562,13 +563,20 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
         }
     }
 
+    manageDataPermission(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(DataPermissionSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
     get sensitive() {
         return this.patchedRecord.sensitive
     }
 
     set sensitive(sensitive: boolean) {
         if (sensitive && OrganizationManager.organization.meta.recordsConfiguration.dataPermission === null) {
-            new Toast("Schakel eerst de functie om toestemming te vragen in, dat kan via instellingen > Toestemming gegevensverzameling. Daarna kan je kenmerken toevoegen waarvoor toestemming noodzakelijk is.", "error red").show()
+            new Toast("Voor je kan instellen dat toestemming verplicht is voor dit kenmerk, moet je de functie om toestemming te vragen inschakelen.", "error red").show()
+            this.manageDataPermission(true)
             return
         }
         // Always require encryption for sensitive information

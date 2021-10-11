@@ -92,7 +92,7 @@ import { OrganizationManager } from "../../../../../classes/OrganizationManager"
         PriceInput
     },
 })
-export default class DataPermissionsSettingsView extends Mixins(NavigationMixin) {
+export default class DataPermissionSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false

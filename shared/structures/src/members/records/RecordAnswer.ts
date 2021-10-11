@@ -44,6 +44,10 @@ export class RecordAnswer extends AutoEncoder {
     getWarnings(): RecordWarning[] {
         return []
     }
+
+    validate() {
+        // valid by default
+    }
 }
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
@@ -88,6 +92,16 @@ export class RecordTextAnswer extends RecordAnswer {
         }
         return this.value.length > 0 ? [this.settings.warning] : []
     }
+
+    override validate() {
+        if (this.settings.required && this.value.length == 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Dit veld is verplicht",
+                field: "input"
+            })
+        }
+    }
 }
 
 export class RecordCheckboxAnswer extends RecordAnswer {
@@ -109,6 +123,16 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     get stringValue() {
         return this.selected ? "Aangevinkt" : "Niet aangevinkt"
+    }
+
+    override validate() {
+        if (this.settings.required && !this.selected) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Dit is verplicht",
+                field: "input"
+            })
+        }
     }
 }
 
@@ -143,6 +167,16 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
 
         return warnings
     }
+
+    override validate() {
+        if (this.settings.required && this.selectedChoices.length == 0) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Duid minstens één keuze aan",
+                field: "input"
+            })
+        }
+    }
 }
 
 export class RecordChooseOneAnswer extends RecordAnswer {
@@ -175,6 +209,16 @@ export class RecordChooseOneAnswer extends RecordAnswer {
 
         return warnings
     }
+
+    override validate() {
+        if (this.settings.required && this.selectedChoice === null) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Duid een keuze aan",
+                field: "input"
+            })
+        }
+    }
 }
 
 export class RecordAddressAnswer extends RecordAnswer {
@@ -183,5 +227,15 @@ export class RecordAddressAnswer extends RecordAnswer {
 
     get stringValue() {
         return this.address?.toString() ?? "/"
+    }
+
+    override validate() {
+        if (this.settings.required && this.address === null) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Verplicht in te vullen",
+                field: "input"
+            })
+        }
     }
 }
