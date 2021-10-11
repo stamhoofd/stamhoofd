@@ -138,7 +138,7 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
 
             // Mark reviewed
             if (this.markReviewed) {
-                const allRecords = this.category.getAllRecords()
+                const allRecords = this.category.getAllFilteredRecords(this.filterValue, this.dataPermission)
 
                 for (const answer of this.editingAnswers) {
                     const record = !!allRecords.find(r => r.id == answer.settings.id)

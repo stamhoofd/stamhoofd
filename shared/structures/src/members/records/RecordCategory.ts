@@ -31,6 +31,13 @@ export class RecordCategory extends AutoEncoder {
         return this.records
     }
 
+    getAllFilteredRecords(filterValue: any, dataPermission: boolean): RecordSettings[] {
+        if (this.childCategories.length > 0) {
+            return this.filterChildCategories(filterValue, dataPermission).flatMap(c => c.getAllFilteredRecords(filterValue, dataPermission))
+        }
+        return this.filterRecords(dataPermission)
+    }
+
     @field({ decoder: new PropertyFilterDecoderFromContext(), version: 126, nullable: true })
     filter: PropertyFilter<any> | null = null
 

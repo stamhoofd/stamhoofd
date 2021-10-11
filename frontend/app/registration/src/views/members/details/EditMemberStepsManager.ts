@@ -70,9 +70,9 @@ export class RecordCategoryStep implements EditMemberStep {
     shouldDelete(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
         // Delete all the information in this category, if this is not asked in the given category
         if (this.category.filter) {
-            return !this.category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(details, member, items));
+            return !this.category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(details, member, items)) || this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), details.dataPermissions?.value ?? false).length == 0;
         }
-        return false
+        return this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), details.dataPermissions?.value ?? false).length == 0
     }
 
     delete(details: MemberDetails) {
@@ -85,17 +85,19 @@ export class RecordCategoryStep implements EditMemberStep {
     }
 
     shouldReview(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
+        const records = this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), details.dataPermissions?.value ?? false)
+        console.log("shouldReview", records, details)
+
         if (this.forceReview) {
-            return true
+            return records.length > 0
         }
 
         if (details.isRecovered) {
             // Always review if still encrypted
-            return true
+            return records.length > 0
         }
-        // Check all the properties in this category and check their last review times
-        const records = this.category.getAllRecords()
 
+        // Check all the properties in this category and check their last review times
         for (const record of records) {
             const answer = details.recordAnswers.find(a => a.settings.id === record.id)
             if (!answer || answer.isOutdated(this.outdatedTime)) {

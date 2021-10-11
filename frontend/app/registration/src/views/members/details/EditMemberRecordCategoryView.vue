@@ -1,11 +1,11 @@
 <template>
-    <FillRecordCategoryView :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" />
+    <FillRecordCategoryView :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" :filter-value="filterValue" :data-permission="dataPermission" />
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { FillRecordCategoryView } from '@stamhoofd/components';
-import { MemberDetails, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
+import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, RegisterItem } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 /**
@@ -27,8 +27,22 @@ export default class EditMemberCategoryView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     details: MemberDetails
 
+    @Prop({ required: false })
+    member?: MemberWithRegistrations
+
+    @Prop({ required: true })
+    items: RegisterItem[]
+
     @Prop({ required: true })
     saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
+
+    get filterValue() {
+        return new MemberDetailsWithGroups(this.details, this.member, this.items)
+    }
+
+    get dataPermission() {
+        return this.details.dataPermissions?.value ?? false
+    }
 
     async mappedSaveHandler(answers: RecordAnswer[], component: NavigationMixin) {
         this.details.recordAnswers = answers

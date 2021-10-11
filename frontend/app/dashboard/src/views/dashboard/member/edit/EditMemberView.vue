@@ -242,7 +242,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
     getCategoryFillStatus(category: RecordCategory) {
         // Check all the properties in this category and check their last review times
-        const records = category.getAllRecords()
+        const records = category.getAllFilteredRecords(new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), this.dataPermissionsValue)
 
         let hasValue = false
         let hasMissingValue = false

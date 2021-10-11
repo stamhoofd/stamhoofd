@@ -189,7 +189,7 @@
                         </button>
                     </div>
                 </h2>
-                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" />
+                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :dataPermission="dataPermission" />
                 <hr>
             </div>
 
@@ -216,7 +216,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, RecordCategoryAnswersBox,STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components"
-import { LegacyRecord,LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetails, MemberWithRegistrations, RecordCategory, Registration, User } from '@stamhoofd/structures';
+import { LegacyRecord,LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -277,14 +277,17 @@ export default class MemberView extends Mixins(NavigationMixin){
         ])
     }
 
-    get recordCategories(): RecordCategory[] {
-        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
-        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
-            if (category.childCategories.length > 0) {
-                return category.childCategories
+     get recordCategories(): RecordCategory[] {
+        return RecordCategory.filterCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission).flatMap(cat => {
+            if (cat.childCategories) {
+                return cat.filterChildCategories(new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission)
             }
-            return [category]
+            return [cat]
         })
+    }
+
+    get dataPermission() {
+        return this.member.details.dataPermissions?.value ?? false
     }
 
     async fullCheck() {
