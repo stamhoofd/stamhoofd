@@ -531,6 +531,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         } catch (e) {
             console.error(e)
             new Toast("Leden ophalen mislukt", "error red").show()
+            throw e;
         }
     }
 
