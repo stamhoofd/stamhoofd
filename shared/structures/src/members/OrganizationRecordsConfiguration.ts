@@ -140,7 +140,7 @@ export class MemberDetailsWithGroups {
                 floatingPoint: false
             }),
             new ChoicesFilterDefinition<MemberDetailsWithGroups>({
-                id: "gender", 
+                id: "member_gender", 
                 name: "Geslacht", 
                 choices: [
                     new ChoicesFilterChoice(Gender.Male, "Man"),

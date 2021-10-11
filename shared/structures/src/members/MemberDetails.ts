@@ -494,14 +494,8 @@ export class MemberDetails extends AutoEncoder {
     }
 
     static getBaseFilterDefinitions() {
+        // When you make changes here, make sure the ID's match the those of MemberDetailsWithGroups
         return [
-            new StringFilterDefinition<MemberDetails>({
-                id: "member_name", 
-                name: "Naam lid", 
-                getValue: (details) => {
-                    return details.name
-                }
-            }),
             new NumberFilterDefinition<MemberDetails>({
                 id: "member_age", 
                 name: "Leeftijd", 
@@ -511,7 +505,7 @@ export class MemberDetails extends AutoEncoder {
                 floatingPoint: false
             }),
              new ChoicesFilterDefinition<MemberDetails>({
-                id: "gender", 
+                id: "member_gender", 
                 name: "Geslacht", 
                 choices: [
                     new ChoicesFilterChoice(Gender.Male, "Man"),

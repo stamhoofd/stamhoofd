@@ -78,11 +78,11 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
 export const RecordAnswerDecoder = new RecordAnswerDecoderStatic()
 
 export class RecordTextAnswer extends RecordAnswer {
-    @field({ decoder: StringDecoder })
-    value = ""
+    @field({ decoder: StringDecoder, nullable: true })
+    value: string | null = null
 
     get stringValue() {
-        return this.value
+        return this.value ?? "/"
     }
 
     getWarnings(): RecordWarning[] {
@@ -90,13 +90,13 @@ export class RecordTextAnswer extends RecordAnswer {
             return []
         }
         if (this.settings.warning.inverted) {
-            return this.value.length == 0 ? [this.settings.warning] : []
+            return this.value === null || this.value.length == 0 ? [this.settings.warning] : []
         }
-        return this.value.length > 0 ? [this.settings.warning] : []
+        return this.value !== null && this.value.length > 0 ? [this.settings.warning] : []
     }
 
     override validate() {
-        if (this.settings.required && this.value.length == 0) {
+        if (this.settings.required && (this.value === null || this.value.length == 0)) {
             throw new SimpleError({
                 code: "invalid_field",
                 message: "Dit veld is verplicht",

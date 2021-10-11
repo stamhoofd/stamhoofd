@@ -253,13 +253,13 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             // Skip parents for > 18 and has address, or > 24 (no matter of address)
             case EditMemberStepType.Parents: 
                 details.parents = []
-                details.reviewTimes.markReviewed("parents")
+                details.reviewTimes.removeReview("parents")
                 break;
 
             // Skip emergency contacts if not asked by organization
             case EditMemberStepType.EmergencyContact: 
                 details.emergencyContacts = []
-                details.reviewTimes.markReviewed("emergencyContacts")
+                details.reviewTimes.removeReview("emergencyContacts")
                 break;
 
             case EditMemberStepType.DataPermissions: 

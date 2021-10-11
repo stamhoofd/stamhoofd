@@ -201,8 +201,12 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         return AskRequirement
     }
 
+    get organization() {
+        return OrganizationManager.organization
+    }
+
     get patchedOrganization() {
-        return OrganizationManager.organization.patch(this.organizationPatch)
+        return this.organization.patch(this.organizationPatch)
     }
 
     get categories() {
@@ -269,7 +273,12 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             return
         }
         if (enable) {
-            this.patchConfigProperty(property, PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions()))
+            const def = OrganizationRecordsConfiguration.create({})
+            this.patchConfigProperty(
+                property, 
+                // try to resuse the settings if they existed
+                this.organization.meta.recordsConfiguration[property] ?? def[property] ?? PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
+            )
         } else {
             this.patchConfigProperty(property, null)
         }
