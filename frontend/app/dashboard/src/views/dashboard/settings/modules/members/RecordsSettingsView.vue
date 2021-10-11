@@ -166,7 +166,7 @@ import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchCont
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton,PropertyFilterView,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { AskRequirement, MemberDetails, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordCategory,Version  } from "@stamhoofd/structures"
+import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordCategory,Version  } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -269,7 +269,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             return
         }
         if (enable) {
-            this.patchConfigProperty(property, PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions()))
+            this.patchConfigProperty(property, PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions()))
         } else {
             this.patchConfigProperty(property, null)
         }
@@ -279,6 +279,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(PropertyFilterView, {
             configuration: this.patchedOrganization.meta.recordsConfiguration[property],
             title: property,
+            organization: this.patchedOrganization,
             setConfiguration: (configuration: PropertyFilter<MemberDetails>) => {
                 this.patchConfigProperty(property, configuration)
             }

@@ -15,7 +15,7 @@
             </h1>
             <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
 
-            <FilterGroupView :group="editingFilter" />
+            <FilterGroupView :group="editingFilter" :organization="organization" />
         </main>
 
         <STToolbar>
@@ -33,7 +33,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationBar } from "@stamhoofd/components";
 import { BackButton, FilterGroupView, STToolbar } from "@stamhoofd/components";
-import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
+import { Filter, FilterDefinition, Organization, Version } from "@stamhoofd/structures";
 import { FilterGroup, MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -58,6 +58,9 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     definitions!: FilterDefinition<any, any, any>[]
+
+    @Prop({ required: true })
+    organization!: Organization
 
     editingFilter: FilterGroup<any> = (this.selectedFilter?.clone() ?? new FilterGroup<any>(this.definitions)) as FilterGroup<any>
 

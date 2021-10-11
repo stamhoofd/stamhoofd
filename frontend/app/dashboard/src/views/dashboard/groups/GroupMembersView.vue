@@ -366,18 +366,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     get definitions() {
         const base = MemberWithRegistrations.getBaseFilterDefinitions()
 
-        base.push(
-            new ChoicesFilterDefinition<MemberWithRegistrations>({
-                id: "active_registrations", 
-                name: "Inschrijvingen", 
-                choices: OrganizationManager.organization.availableGroups.map(g => new ChoicesFilterChoice(g.id, g.settings.name)), 
-                getValue: (member) => {
-                    return member.groups.map(g => g.id)
-                },
-                defaultMode: ChoicesFilterMode.And
-            })
-        )
-
         for (const recordCategory of this.recordCategories) {
             for (const record of recordCategory.records) {
                 if (record.type === RecordType.Checkbox) {
@@ -462,6 +450,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             root: new ComponentWithProperties(FilterEditor, {
                 definitions: this.definitions,
                 selectedFilter: this.selectedFilter,
+                organization: OrganizationManager.organization,
                 setFilter: (filter: Filter<MemberWithRegistrations>) => {
                     this.selectedFilter = filter
                 }

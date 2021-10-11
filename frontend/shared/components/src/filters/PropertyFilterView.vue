@@ -15,7 +15,7 @@
             </h1>
             <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
 
-            <PropertyFilterInput v-model="editingConfiguration" />
+            <PropertyFilterInput v-model="editingConfiguration" :organization="organization" />
         </main>
 
         <STToolbar>
@@ -33,7 +33,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationBar } from "@stamhoofd/components";
 import { BackButton, PropertyFilterInput, STToolbar } from "@stamhoofd/components";
-import { PropertyFilter, Version } from "@stamhoofd/structures";
+import { Organization, PropertyFilter, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 
@@ -48,6 +48,9 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 export default class PropertyFilterView extends Mixins(NavigationMixin) {
     @Prop({ default: "" })
     title!: string
+
+    @Prop({ required: true })
+    organization: Organization
 
     @Prop({ required: true })
     configuration!: PropertyFilter<any>

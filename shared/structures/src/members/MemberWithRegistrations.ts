@@ -3,10 +3,10 @@ import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
 import { DateFilterDefinition } from '../filters/DateFilter';
 import { NumberFilterDefinition } from '../filters/NumberFilter';
+import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from '../filters/RegistrationsFilter';
 import { StringFilterDefinition } from '../filters/StringFilter';
 import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
-import { WaitingListType } from '../GroupSettings';
 import { PaymentStatus } from '../PaymentStatus';
 import { User } from '../User';
 import { RegisterCartValidator } from './checkout/RegisterCartValidator';
@@ -244,6 +244,25 @@ export class MemberWithRegistrations extends Member {
                 name: "Naam lid", 
                 getValue: (member) => {
                     return member?.name ?? ""
+                }
+            }),
+            new RegistrationsFilterDefinition<MemberWithRegistrations>({
+                id: "registrations", 
+                name: "Inschrijvingen",
+                getValue: (member) => {
+                    const groups = member.groups.map(g => RegistrationsFilterChoice.create({
+                        id: g.id,
+                        name: g.settings.name,
+                        waitingList: false
+                    })) ?? []
+
+                    const waitingGroups = member.waitingGroups.map(g => RegistrationsFilterChoice.create({
+                        id: g.id,
+                        name: g.settings.name,
+                        waitingList: true
+                    })) ?? []
+
+                    return [...groups, ...waitingGroups]
                 }
             }),
             new NumberFilterDefinition<MemberWithRegistrations>({

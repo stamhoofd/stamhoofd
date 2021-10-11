@@ -85,7 +85,7 @@
                 Je kan kiezen op welke leden deze categorie van toepassing is.
             </p>
 
-            <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" />
+            <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" />
         </main>
 
         <STToolbar>
@@ -158,6 +158,10 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
     get records() {
         return this.patchedCategory.records
+    }
+
+    get organization() {
+        return OrganizationManager.organization
     }
 
     get title(): string {

@@ -3,6 +3,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, Decoder, Encodeable, E
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../filters/ChoicesFilter"
 import { NumberFilterDefinition } from "../filters/NumberFilter"
 import { PropertyFilter, PropertyFilterDecoder, SetPropertyFilterDecoder } from "../filters/PropertyFilter"
+import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from "../filters/RegistrationsFilter"
 import { StringFilterDefinition } from "../filters/StringFilter"
 import { Group } from "../Group"
 import { OrganizationType, } from "../OrganizationType"
@@ -138,7 +139,7 @@ export class MemberDetailsWithGroups {
                 },
                 floatingPoint: false
             }),
-             new ChoicesFilterDefinition<MemberDetailsWithGroups>({
+            new ChoicesFilterDefinition<MemberDetailsWithGroups>({
                 id: "gender", 
                 name: "Geslacht", 
                 choices: [
@@ -150,6 +151,31 @@ export class MemberDetailsWithGroups {
                     return [member.details.gender]
                 },
                 defaultMode: ChoicesFilterMode.Or
+            }),
+            new RegistrationsFilterDefinition<MemberDetailsWithGroups>({
+                id: "registrations", 
+                name: "Inschrijvingen",
+                getValue: (member) => {
+                    const groups = member.member?.groups.map(g => RegistrationsFilterChoice.create({
+                        id: g.id,
+                        name: g.settings.name,
+                        waitingList: false
+                    })) ?? []
+
+                    const waitingGroups = member.member?.waitingGroups.map(g => RegistrationsFilterChoice.create({
+                        id: g.id,
+                        name: g.settings.name,
+                        waitingList: true
+                    })) ?? []
+
+                    const pendingGroups = member.registerItems.map(item => RegistrationsFilterChoice.create({
+                        id: item.group.id,
+                        name: item.group.settings.name,
+                        waitingList: item.waitingList
+                    })) ?? []
+
+                    return [...groups, ...waitingGroups, ...pendingGroups]
+                }
             })
             // todo: registrations filter on groups
         ]

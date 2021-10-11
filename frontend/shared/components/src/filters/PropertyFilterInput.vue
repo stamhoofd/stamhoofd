@@ -63,7 +63,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { FilterEditor, Radio,STInputBox, STList, STListItem } from '@stamhoofd/components';
-import { FilterGroup, PropertyFilter } from '@stamhoofd/structures';
+import { FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 @Component({
@@ -80,6 +80,9 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
 
     @Prop({ default: true })
     allowOptional: boolean
+
+    @Prop({ required: true })
+    organization: Organization
 
     cachedRequiredFilter: FilterGroup<any> | null = null
     cachedEnabledFilter: FilterGroup<any> | null = null
@@ -137,6 +140,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(FilterEditor, {
             title: "Vragen als...",
             selectedFilter: this.cachedEnabledFilter ?? this.value.enabledWhen,
+            organization: this.organization,
             setFilter: (enabledWhen) => {
                 this.$emit("input", 
                     new PropertyFilter<any>(
@@ -180,6 +184,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(FilterEditor, {
             title: "Verplicht als...",
             selectedFilter: this.cachedRequiredFilter ?? this.value.requiredWhen ?? new FilterGroup(this.definitions),
+            organization: this.organization,
             setFilter: (requiredWhen) => {
                 this.$emit("input", 
                     new PropertyFilter<any>(

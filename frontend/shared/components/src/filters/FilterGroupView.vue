@@ -14,6 +14,7 @@
             <NumberFilterView v-else-if="isNumberFilter(filter)" :filter="filter" />
             <DateFilterView v-else-if="isDateFilter(filter)" :filter="filter" />
             <ChoicesFilterView v-else-if="isChoicesFilter(filter)" :filter="filter" />
+            <RegistrationsFilterView v-else-if="isRegistrationsFilter(filter)" :filter="filter" :organization="organization" />
             <p v-else class="error-box">
                 Filter niet ondersteund
             </p>
@@ -41,13 +42,14 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STInputBox, STListItem } from "@stamhoofd/components"
-import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, NumberFilter, StringFilter } from "@stamhoofd/structures";
+import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, NumberFilter, Organization, RegistrationsFilter, StringFilter } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import ChoicesFilterView from "./ChoicesFilterView.vue"
 import ChooseFilterDefinitionContextMenu from "./ChooseFilterDefinitionContextMenu.vue";
 import DateFilterView from "./DateFilterView.vue"
 import NumberFilterView from "./NumberFilterView.vue"
+import RegistrationsFilterView from "./RegistrationsFilterView.vue"
 import StringFilterView from "./StringFilterView.vue"
 
 @Component({
@@ -57,12 +59,16 @@ import StringFilterView from "./StringFilterView.vue"
         StringFilterView,
         NumberFilterView,
         ChoicesFilterView,
-        DateFilterView
+        DateFilterView,
+        RegistrationsFilterView
     }
 })
 export default class FilterBuilderView extends Mixins(NavigationMixin)  {
     @Prop({ required: true }) 
     group: FilterGroup<any>
+
+    @Prop({ required: true })
+    organization!: Organization
 
     get definitions() {
         const m: FilterDefinition<any, any, any>[] = []
@@ -119,6 +125,10 @@ export default class FilterBuilderView extends Mixins(NavigationMixin)  {
 
     isChoicesFilter(filter: Filter<any>): boolean {
         return filter instanceof ChoicesFilter
+    }
+
+    isRegistrationsFilter(filter: Filter<any>): boolean {
+        return filter instanceof RegistrationsFilter
     }
 
     addFilter(definition: FilterDefinition<any, Filter<any>, any>) {
