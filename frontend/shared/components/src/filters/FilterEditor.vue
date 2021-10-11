@@ -5,7 +5,7 @@
                 <BackButton v-if="canPop" @click="pop" />
             </template>
             <template #right>
-                <button v-if="canDismiss" class="button icon close gray" @click="dismiss" />
+                <button v-if="canDismiss" class="button icon close gray" type="button" @click="dismiss" />
             </template>
         </STNavigationBar>
 
