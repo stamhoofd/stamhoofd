@@ -189,7 +189,7 @@
                         </button>
                     </div>
                 </h2>
-                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :dataPermission="dataPermission" />
+                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :data-permission="dataPermission" />
                 <hr>
             </div>
 
@@ -216,7 +216,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, RecordCategoryAnswersBox,STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components"
-import { LegacyRecord,LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, Registration, User } from '@stamhoofd/structures';
+import { LegacyRecordTypeHelper, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -277,10 +277,14 @@ export default class MemberView extends Mixins(NavigationMixin){
         ])
     }
 
-     get recordCategories(): RecordCategory[] {
-        return RecordCategory.filterCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission).flatMap(cat => {
-            if (cat.childCategories) {
-                return cat.filterChildCategories(new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission)
+    get recordCategories(): RecordCategory[] {
+        return RecordCategory.filterCategories(
+            OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
+            new MemberDetailsWithGroups(this.member.details, this.member, this.cartItems), 
+            this.dataPermission
+        ).flatMap(cat => {
+            if (cat.childCategories.length > 0) {
+                return cat.filterChildCategories(new MemberDetailsWithGroups(this.member.details, this.member, this.cartItems), this.dataPermission)
             }
             return [cat]
         })
@@ -303,11 +307,9 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 
     async openSteps(steps: EditMemberStep[], force = true, lastSaveHandler?: (details: MemberDetails) => Promise<void>) {
-        const items = CheckoutManager.cart.items.filter(item => item.memberId === this.member.id)
-
         const stepManager = new EditMemberStepsManager(
             steps, 
-            items,
+            this.cartItems,
             this.member,
             async (component: NavigationMixin) => {
                 component.dismiss({ force: true })
@@ -341,6 +343,10 @@ export default class MemberView extends Mixins(NavigationMixin){
         }))
     }
 
+    get cartItems() {
+        return CheckoutManager.cart.items.filter(i => i.member.id === this.member.id)
+    }
+
     imageSrc(registration: Registration) {
         const group = this.getGroup(registration.groupId)
         if (!group) {
@@ -348,54 +354,9 @@ export default class MemberView extends Mixins(NavigationMixin){
         }
         return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
-
-    getIcon(record: LegacyRecord) {
-        switch (LegacyRecordTypeHelper.getPriority(record.type)) {
-            case LegacyRecordTypePriority.High: return " exclamation-two red"
-            case LegacyRecordTypePriority.Medium: return " exclamation yellow"
-            case LegacyRecordTypePriority.Low: return " info"
-        }
-    }
-
-    get shouldSkipRecords() {
-        return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
-    }
-
-    get filteredRecords() {
-        return this.member.details?.records ? 
-            OrganizationManager.organization.meta.recordsConfiguration.filterForDisplay(
-                this.member.details.records, 
-                this.member.details?.age ?? null
-            ) 
-        : undefined
-    }
-
-    get sortedRecords() {
-        return this.filteredRecords?.sort((record1, record2) => {
-            const priority1: string = LegacyRecordTypeHelper.getPriority(record1.type);
-            const priority2: string = LegacyRecordTypeHelper.getPriority(record2.type)
-
-            if (priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Medium ||
-                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.Low ||
-                priority1 == LegacyRecordTypePriority.High && priority2 == LegacyRecordTypePriority.Low) {
-                return -1;
-            }
-            else if (priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.Medium ||
-                priority1 == LegacyRecordTypePriority.Medium && priority2 == LegacyRecordTypePriority.High ||
-                priority1 == LegacyRecordTypePriority.Low && priority2 == LegacyRecordTypePriority.High) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        } )
-    }
 }
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
 @use "@stamhoofd/scss/components/member-details.scss";
 </style>

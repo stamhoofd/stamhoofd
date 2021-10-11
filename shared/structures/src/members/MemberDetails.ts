@@ -25,6 +25,14 @@ export class BooleanStatus extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     date = new Date()
+
+    isOutdated(timeoutMs: number): boolean {
+        const time = this.date
+        if (time.getTime() < new Date().getTime() - timeoutMs) {
+            return true
+        }
+        return false
+    }
 }
 
 /**

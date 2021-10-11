@@ -10,6 +10,7 @@ export enum EditMemberStepType {
     "Details" = "Details",
     "Parents" = "Parents", // Only if meets criteria
     "EmergencyContact" = "EmergencyContact",
+    "DataPermissions" = "DataPermissions",
     // todo: Questions step
 }
 
@@ -177,6 +178,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
 
                 return false
             }
+
             case EditMemberStepType.Parents: {
                 if (member.details.isRecovered) {
                     const meta = member.getDetailsMeta()
@@ -186,6 +188,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                 // We still have all the data. Ask everything that is older than 3 months
                 return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
+
             case EditMemberStepType.EmergencyContact: {
                 if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
                     // All items are on the waiting list only
@@ -201,21 +204,10 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                 }
                 return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
-            /*case EditMemberStepType.Records: {
-                if (member.activeRegistrations.length == 0 && items.reduce((allWaitingList, item) => item.waitingList && allWaitingList, true)) {
-                    // All items are on the waiting list only
-                    // So never ask this information, since we don't need it right now
-                    return false
-                }
 
-                if (member.details.isRecovered) {
-                    
-                    const meta = member.getDetailsMeta()
-                    // Review if never entered or saved
-                    return !meta || !meta.hasRecords
-                }
-                return member.details.reviewTimes.isOutdated("records", this.outdatedTime)
-            }*/
+            case EditMemberStepType.DataPermissions: {
+                return (member.details.dataPermissions?.value ?? false) == false || !member.details.dataPermissions || member.details.dataPermissions.isOutdated(this.outdatedTime)
+            }
 
             default: {
                 return true
@@ -228,6 +220,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             case EditMemberStepType.Details: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditMemberGeneralView.vue')).default;
             case EditMemberStepType.Parents: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditMemberParentsView.vue')).default;
             case EditMemberStepType.EmergencyContact: return (await import(/* webpackChunkName: "EditMemberGeneralView", webpackPrefetch: true */ './EditEmergencyContactView.vue')).default;
+            case EditMemberStepType.DataPermissions: return (await import(/* webpackChunkName: "MemberDataPermissionView", webpackPrefetch: true */ './MemberDataPermissionView.vue')).default;
 
             default: {
                 // If you get a compile error here, a type is missing in the switch and you should add it
@@ -249,8 +242,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
 
             case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.enabledWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items));
 
-            // Delete emergency contacts if not asked by organization
-            //case EditMemberStepType.EmergencyContact: return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact === AskRequirement.NotAsked
+            case EditMemberStepType.DataPermissions: return OrganizationManager.organization.meta.recordsConfiguration.dataPermission === null;
         }
         return false
     }
@@ -268,6 +260,10 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             case EditMemberStepType.EmergencyContact: 
                 details.emergencyContacts = []
                 details.reviewTimes.markReviewed("emergencyContacts")
+                break;
+
+            case EditMemberStepType.DataPermissions: 
+                details.dataPermissions = undefined
                 break;
         }
     }
@@ -302,7 +298,8 @@ export class EditMemberStepsManager {
         const base: EditMemberStep[] = [
             new BuiltInEditMemberStep(EditMemberStepType.Details, forceReview),
             new BuiltInEditMemberStep(EditMemberStepType.Parents, forceReview),
-            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, forceReview)
+            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, forceReview),
+            new BuiltInEditMemberStep(EditMemberStepType.DataPermissions, forceReview),
         ]
 
         for (const category of OrganizationManager.organization.meta.recordsConfiguration.recordCategories) {
