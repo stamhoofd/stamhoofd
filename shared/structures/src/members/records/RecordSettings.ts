@@ -34,6 +34,9 @@ export enum RecordType {
      * Address input
      */
     Address = "Address",
+
+    Phone = "Phone",
+    Email = "Email",
 }
 
 export enum RecordWarningType {

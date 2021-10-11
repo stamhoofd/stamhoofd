@@ -60,6 +60,8 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
         switch (type) {
             case RecordType.Checkbox: return RecordCheckboxAnswer
             case RecordType.Text: 
+            case RecordType.Phone: 
+            case RecordType.Email: 
             case RecordType.Textarea:
                 return RecordTextAnswer
             case RecordType.MultipleChoice: return RecordMultipleChoiceAnswer

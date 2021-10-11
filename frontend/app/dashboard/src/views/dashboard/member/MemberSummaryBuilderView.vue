@@ -222,7 +222,7 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
                     }
                 }
 
-                if (parentAddresses.size > 1) {
+                if (parentAddresses.size >= 1) {
                     if (!member.details.address || addresses.size === parentAddresses.size) {
                         return new Map(member.details.parents.flatMap(parent => {
                             if (!parent.address) {

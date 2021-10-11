@@ -70,6 +70,16 @@
                         <Radio slot="left" v-model="type" :value="RecordType.Address" name="type" />
                         Adres
                     </STListItem>
+
+                    <STListItem :selectable="true" element-name="label">
+                        <Radio slot="left" v-model="type" :value="RecordType.Phone" name="type" />
+                        Telefoonnummer
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="label">
+                        <Radio slot="left" v-model="type" :value="RecordType.Email" name="type" />
+                        E-mailadres
+                    </STListItem>
                 </STList>
             </STInputBox>
 

@@ -41,6 +41,8 @@
             <textarea v-model="answer.value" :placeholder="inputPlaceholder" class="input" />
         </STInputBox>
         <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="answer.address" :title="label" :required="required" :validator="validator" />
+        <PhoneInput v-else-if="answer.settings.type == RecordType.Phone" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" />
+        <EmailInput v-else-if="answer.settings.type == RecordType.Email" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" />
         <p v-else class="error-box">
             Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
         </p>
@@ -65,7 +67,7 @@
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,ErrorBox, Radio,STInputBox, STList, STListItem, Validator, STErrorsDefault } from "@stamhoofd/components"
+import { AddressInput,Checkbox,EmailInput, ErrorBox, PhoneInput,Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -77,7 +79,9 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         Checkbox,
         Radio,
         AddressInput,
-        STErrorsDefault
+        STErrorsDefault,
+        EmailInput,
+        PhoneInput
     }
 })
 export default class RecordAnswerInput extends Vue {
@@ -143,6 +147,12 @@ export default class RecordAnswerInput extends Vue {
     }
 
     get inputPlaceholder() {
+        if (!this.required) {
+            if (this.answer.settings.inputPlaceholder.length > 0) {
+                return "Optioneel. "+this.answer.settings.inputPlaceholder
+            }
+            return "Optioneel"
+        }
         return this.answer.settings.inputPlaceholder
     }
 
