@@ -1,4 +1,4 @@
-import { isSimpleError, SimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 /***
  * Distributes errors to components that ask for it. The first that asks receives
  */

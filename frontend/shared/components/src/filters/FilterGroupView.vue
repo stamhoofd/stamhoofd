@@ -12,6 +12,7 @@
             </h2>
             <StringFilterView v-if="isStringFilter(filter)" :filter="filter" />
             <NumberFilterView v-else-if="isNumberFilter(filter)" :filter="filter" />
+            <DateFilterView v-else-if="isDateFilter(filter)" :filter="filter" />
             <ChoicesFilterView v-else-if="isChoicesFilter(filter)" :filter="filter" />
             <p v-else class="error-box">
                 Filter niet ondersteund
@@ -40,11 +41,12 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STInputBox, STListItem } from "@stamhoofd/components"
-import { ChoicesFilter, Filter, FilterDefinition, FilterGroup, NumberFilter, StringFilter } from "@stamhoofd/structures";
+import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, NumberFilter, StringFilter } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import ChoicesFilterView from "./ChoicesFilterView.vue"
 import ChooseFilterDefinitionContextMenu from "./ChooseFilterDefinitionContextMenu.vue";
+import DateFilterView from "./DateFilterView.vue"
 import NumberFilterView from "./NumberFilterView.vue"
 import StringFilterView from "./StringFilterView.vue"
 
@@ -54,7 +56,8 @@ import StringFilterView from "./StringFilterView.vue"
         STListItem,
         StringFilterView,
         NumberFilterView,
-        ChoicesFilterView
+        ChoicesFilterView,
+        DateFilterView
     }
 })
 export default class FilterBuilderView extends Mixins(NavigationMixin)  {
@@ -108,6 +111,10 @@ export default class FilterBuilderView extends Mixins(NavigationMixin)  {
 
     isNumberFilter(filter: Filter<any>): boolean {
         return filter instanceof NumberFilter
+    }
+
+    isDateFilter(filter: Filter<any>): boolean {
+        return filter instanceof DateFilter
     }
 
     isChoicesFilter(filter: Filter<any>): boolean {

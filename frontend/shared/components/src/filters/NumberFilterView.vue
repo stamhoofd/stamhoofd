@@ -89,7 +89,6 @@ export default class NumberFilterView extends Vue {
 
     async onChange() {
         await this.$nextTick();
-        console.log("onchange");
         (this.$refs["input"] as any).focus()
     }
 
