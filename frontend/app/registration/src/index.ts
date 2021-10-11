@@ -8,7 +8,7 @@ import VueMeta from 'vue-meta'
 
 Vue.use(VueMeta)
 
-if (process.env.NODE_ENV == "production") {
+/*if (process.env.NODE_ENV == "production") {
     Sentry.init({
         dsn: 'https://b62b02f163f6448594b3c081c1be28e0@o431770.ingest.sentry.io/5383559',
         environment: process.env.NODE_ENV ?? "production",
@@ -24,7 +24,7 @@ if (process.env.NODE_ENV == "production") {
             }
     });
 }
-
+*/
 
 import App from "./App.vue";
 
