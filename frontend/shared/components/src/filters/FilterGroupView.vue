@@ -74,7 +74,7 @@ export default class FilterBuilderView extends Mixins(NavigationMixin)  {
         const m: FilterDefinition<any, any, any>[] = []
 
         for (const definition of this.group.getDefinitions()) {
-            if (!definition.category) {
+            if (!definition.category || (this.categoryMap.get(definition.category)?.definitions.length ?? 0) <= 1) {
                 m.push(definition)
             }
         }
@@ -82,7 +82,7 @@ export default class FilterBuilderView extends Mixins(NavigationMixin)  {
         return m
     }
 
-    get categories() {
+    get categoryMap() {
         const m = new Map<string, { name: string, definitions: FilterDefinition<any, any, any>[] }>()
 
         for (const definition of this.group.getDefinitions()) {
@@ -96,7 +96,12 @@ export default class FilterBuilderView extends Mixins(NavigationMixin)  {
             }
         }
 
-        return [...m.values()]
+        return m
+    }
+
+    get categories() {
+        const m = this.categoryMap
+        return [...m.values()].filter(m => m.definitions.length > 1)
     }
 
     openCategory(event, category: { name: string, definitions: FilterDefinition<any, any, any>[] }) {
