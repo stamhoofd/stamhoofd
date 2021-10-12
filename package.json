@@ -31,7 +31,7 @@
     },
     "dependencies": {
         "@babel/runtime": "^7.10.5",
-        "@simonbackx/simple-encoding": "^2.4.0",
+        "@simonbackx/simple-encoding": "^2.4.1",
         "@simonbackx/simple-errors": "^1.3.0",
         "@simonbackx/simple-networking": "~1.10.0",
         "@simonbackx/vue-app-navigation": "^1.18",

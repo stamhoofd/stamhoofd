@@ -94,7 +94,7 @@ export class RecordCategoryStep implements EditMemberStep {
         }
 
         if (details.isRecovered) {
-            // Always review if still encrypted
+            // Only review if theses questions were never reviewed
             return records.length > 0
         }
 

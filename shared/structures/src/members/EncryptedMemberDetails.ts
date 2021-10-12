@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, BooleanDecoder, DateDecoder, field, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { Organization } from "../Organization";
@@ -50,15 +50,29 @@ export class MemberDetailsMeta extends AutoEncoder {
     @field({ decoder: ReviewTimes, nullable: true, version: 71 })
     reviewTimes = ReviewTimes.create({})
 
+    /**
+     * Only set to true when it has non-public ones
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, DateDecoder), version: 128 })
+    recordAnswerReviewTimes: Map<string, Date> = new Map()
+
     static createFor(details: MemberDetails): MemberDetailsMeta {
-        return MemberDetailsMeta.create({
+        const meta = MemberDetailsMeta.create({
             hasMemberGeneral: details.lastName.length > 0 && details.birthDay !== null,
             hasParents: details.address !== null || details.parents.length > 0 || (details.age !== null && details.age > 18),
             hasEmergency: details.emergencyContacts.length > 0,
             hasRecords: details.records.filter(r => !LegacyRecordTypeHelper.isPublic(r.type)).length > 0,
             isRecovered: details.isRecovered,
-            reviewTimes: details.reviewTimes
+            reviewTimes: details.reviewTimes,
         })
+
+        for (const answer of details.recordAnswers) {
+            if (answer.reviewedAt) {
+                meta.recordAnswerReviewTimes.set(answer.settings.id, answer.reviewedAt)
+            }
+        }
+
+        return meta
     }
 
     merge(other: MemberDetailsMeta) {
@@ -79,6 +93,13 @@ export class MemberDetailsMeta extends AutoEncoder {
 
         if (!other.isRecovered) {
             this.isRecovered = false
+        }
+
+        for (const [key, value] of other.recordAnswerReviewTimes) {
+            const d = this.recordAnswerReviewTimes.get(key)
+            if (d === undefined || d < value) {
+                this.recordAnswerReviewTimes.set(key, value)
+            }
         }
 
         this.reviewTimes.merge(other.reviewTimes)
@@ -123,6 +144,18 @@ export class MemberDetailsMeta extends AutoEncoder {
                 return false
             }
         }
+
+        if (this.recordAnswerReviewTimes.size !== other.recordAnswerReviewTimes.size) {
+            return false
+        }
+
+        for (const [key, value] of this.recordAnswerReviewTimes) {
+            const o = other.recordAnswerReviewTimes.get(key)
+            if (o === undefined || o.getTime() != value.getTime()) {
+                return false
+            }
+        }
+
         return true
     }
 }
@@ -167,20 +200,17 @@ export class EncryptedMemberDetails extends AutoEncoder {
      * @param organization not used at the moment but we'll need it for future organization settings that defines this behaviour
      */
     static getPublicData(original: MemberDetails, organization: Organization): MemberDetails | null {
-        if (original.records.length === 0) {
-            // Nothing to announce publicly
-            return null
-        }
-
         const details = MemberDetails.create({})
         details.isRecovered = true
-        details.records = original.records.filter(r => LegacyRecordTypeHelper.isPublic(r.type))
         details.dataPermissions = original.dataPermissions
         details.memberNumber = original.memberNumber
 
-        if (details.records.length == 0) {
-            return null
-        }
+        // Keep all non-encrypted fields
+        details.recordAnswers = original.recordAnswers.filter(answer => !answer.settings.encrypted)
+
+        // Deprecated
+        details.records = original.records.filter(r => LegacyRecordTypeHelper.isPublic(r.type))
+
         return details
     }
 }

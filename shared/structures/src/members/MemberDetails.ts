@@ -133,6 +133,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: BooleanStatus, version: 117, optional: true })
     dataPermissions?: BooleanStatus
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: EmergencyContact, nullable: true })
     doctor: EmergencyContact | null = null;
 
@@ -359,6 +362,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /**
+     * @deprecated
      * This will add or update the parent (possibily partially if not all data is present)
      */
     addRecord(record: LegacyRecord) {
@@ -371,6 +375,9 @@ export class MemberDetails extends AutoEncoder {
         this.records.push(record)
     }
 
+    /**
+     * @deprecated
+     */
     removeRecord(type: LegacyRecordType) {
         for (let index = this.records.length - 1; index >= 0; index--) {
             const record = this.records[index];
@@ -491,6 +498,21 @@ export class MemberDetails extends AutoEncoder {
         if (other.dataPermissions && (!this.dataPermissions || this.dataPermissions.date < other.dataPermissions.date)) {
             this.dataPermissions = other.dataPermissions
         }
+
+        // Merge answers
+        const newAnswers: RecordAnswer[] = this.recordAnswers.slice()
+        for (const answer of other.recordAnswers) {
+            const existingIndex = newAnswers.findIndex(a => a.settings.id === answer.settings.id)
+
+            if (existingIndex == -1) {
+                newAnswers.push(answer)
+            } else if (answer.date >= newAnswers[existingIndex].date) {
+                newAnswers.splice(existingIndex, 1, answer)
+            } else {
+                // keep existing, this one is more up-to-date, don't add the other answer
+            }
+        }
+        this.recordAnswers = newAnswers
     }
 
     static getBaseFilterDefinitions() {
