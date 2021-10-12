@@ -2,7 +2,7 @@
     <div id="sgv-old-members-view" class="st-view">
         <STNavigationBar title="Schrappen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -27,11 +27,11 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button destructive" @click="doDelete">
+                <button class="button destructive" type="button" @click="doDelete">
                     <span class="icon trash" /><span>Schrappen</span>
                 </button>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="doNothing">
+                    <button class="button primary" type="button" @click="doNothing">
                         Behouden
                     </button>
                 </LoadingButton>

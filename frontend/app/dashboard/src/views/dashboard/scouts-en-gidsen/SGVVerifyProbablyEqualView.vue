@@ -2,7 +2,7 @@
     <div id="sgv-probably-equal-view" class="st-view">
         <STNavigationBar title="Lijken op elkaar">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -38,11 +38,11 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary">
+                <button class="button secundary" type="button">
                     <span>Annuleren</span>
                 </button>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary" type="button" @click="goNext">
                         Verder
                     </button>
                 </LoadingButton>
@@ -108,7 +108,7 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
     }
     
     goNext() {
-        if (this.loading) {
+        if (this.loading || this.didVerify) {
             return;
         }
         this.didVerify = true;

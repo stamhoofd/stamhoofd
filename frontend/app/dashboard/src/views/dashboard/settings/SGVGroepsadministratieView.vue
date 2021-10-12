@@ -42,10 +42,10 @@
                     Naar groepsadministratie
                 </a>
                 <LoadingButton :loading="loading">
-                    <button v-if="isLoggedIn" class="button primary" @click="sync">
+                    <button v-if="isLoggedIn" class="button primary" type="button" @click="sync">
                         Synchroniseren
                     </button>
-                    <button v-else class="button primary" @click="login">
+                    <button v-else class="button primary" type="button" @click="login">
                         Inloggen
                     </button>
                 </LoadingButton>
