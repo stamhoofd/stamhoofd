@@ -131,7 +131,7 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, RecordCheckbox, Slider, STErrorsDefault, STInputBox, Toast,Validator } from "@stamhoofd/components"
+import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, Toast,Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { AskRequirement, EmergencyContact, LegacyRecord, LegacyRecordType, Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
@@ -151,8 +151,7 @@ import { OrganizationManager } from '../../../../classes/OrganizationManager';
         PhoneInput,
         EmailInput,
         Checkbox,
-        LoadingButton,
-        RecordCheckbox
+        LoadingButton
     },
     model: {
         prop: 'memberDetails',

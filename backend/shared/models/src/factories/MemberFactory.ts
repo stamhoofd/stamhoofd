@@ -1,7 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { EncryptedMemberDetails, Gender, MemberDetails, MemberDetailsMeta, ParentType, LegacyRecord, LegacyRecordType, LegacyRecordTypeHelper, LegacyRecordTypePriority, Version } from '@stamhoofd/structures';
+import { EncryptedMemberDetails, Gender, MemberDetails, MemberDetailsMeta, ParentType, Version } from '@stamhoofd/structures';
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Member } from "../models/Member";
@@ -90,7 +90,8 @@ export class MemberFactory extends Factory<Options, Member> {
                 memberDetails.parents[1].email = null;
             }
         }
-        const recordFactory = new RecordFactory({});
+        
+        /*const recordFactory = new RecordFactory({});
         memberDetails.records = await recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
         memberDetails.records.push(LegacyRecord.create({ type: LegacyRecordType.DataPermissions }))
         // Remove duplicates    
@@ -129,7 +130,7 @@ export class MemberFactory extends Factory<Options, Member> {
 
             // Not possible
             throw new Error("Method records sorting failure")
-        });
+        });*/
 
         // Sort
 

@@ -143,7 +143,7 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton,PhoneInput, RecordCheckbox,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton,PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip, Validator } from "@stamhoofd/components"
 import { AskRequirement, EmergencyContact,LegacyRecord, LegacyRecordType, MemberDetails, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -161,8 +161,7 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         Checkbox,
         BackButton,
         PhoneInput,
-        LoadingButton,
-        RecordCheckbox
+        LoadingButton
     },
     "directives": { Tooltip }
 })

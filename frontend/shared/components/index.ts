@@ -101,9 +101,6 @@ export { default as PaymentPendingView } from "./src/views/PaymentPendingView.vu
 export { default as PaymentSelectionList } from "./src/views/PaymentSelectionList.vue"
 export { default as TransferPaymentView } from "./src/views/TransferPaymentView.vue"
 
-// Members
-export { default as RecordCheckbox } from "./src/members/RecordCheckbox.vue"
-
 // Filters
 export { default as ChoicesFilterView } from "./src/filters/ChoicesFilterView.vue"
 export { default as FilterEditor } from "./src/filters/FilterEditor.vue"

@@ -1,7 +1,7 @@
 import { AutoEncoder, Data, Decoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from "./LegacyRecordType";
+import { LegacyRecordType,OldRecordType } from "./LegacyRecordType";
 
 // Temporary fix for space in enum....
 class TrimEnumDecoder<E extends { [key: number]: string | number }> implements Decoder<E[keyof E]> {
@@ -55,37 +55,6 @@ export class LegacyRecord extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, optional: true })
     author?: string
-
-    getText(): string {
-        return LegacyRecordTypeHelper.getName(this.type);
-    }
-
-    /**
-     * Invert all records that need to be reversed in order to get displayed correctly
-     */
-    static invertRecords(records: LegacyRecord[]): LegacyRecord[] {
-        const invertMap = new Map<LegacyRecordType, boolean>()
-        for (const type of Object.values(LegacyRecordType)) {
-            if (LegacyRecordTypeHelper.isInverted(type)) {
-                invertMap.set(type, true) // add this record if it was not found
-            }
-        }
-        const result = records.filter((record) => {
-            if (!LegacyRecordTypeHelper.isInverted(record.type)) {
-                return true
-            }
-            invertMap.set(record.type, false) // do not add again
-            return false
-
-        })
-
-        for (const [type, b] of invertMap.entries()) {
-            if (b) {
-                result.push(LegacyRecord.create({ type }))
-            }
-        }
-        return result
-    }
 }
 
 

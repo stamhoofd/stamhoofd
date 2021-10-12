@@ -37,7 +37,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         for (const member of data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
-                await this.decryptMember(member),
+                await this.decryptMember(member, OrganizationManager.organization),
                 member.registrations,
                 member.users,
                 groups

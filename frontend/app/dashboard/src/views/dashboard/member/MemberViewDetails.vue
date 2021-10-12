@@ -302,7 +302,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -314,7 +314,6 @@ import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
 import EditMemberView from './edit/EditMemberView.vue';
 import MemberView from './MemberView.vue';
-import RecordDescriptionView from './records/RecordDescriptionView.vue';
 
 @Component({
     components: {
@@ -341,7 +340,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
-        (this as any).LegacyRecordTypeHelper = LegacyRecordTypeHelper;
         this.checkBounces().catch(e => console.error(e))
     }
 
@@ -385,8 +383,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get hasWarnings() {
-        // todo: also scan choices
-        return !!this.member.details.recordAnswers.find(a => a.settings.warning !== null)
+        return this.warnings.length > 0
     }
 
     get warnings(): RecordWarning[] {

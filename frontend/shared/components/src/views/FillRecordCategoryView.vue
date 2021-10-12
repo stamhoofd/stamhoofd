@@ -29,6 +29,9 @@
         </main>
 
         <STToolbar>
+            <button v-if="isOptional" slot="right" class="button secundary" @click="skipStep">
+                Overslaan
+            </button>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary">
                     Volgende
@@ -118,6 +121,37 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
             }
         }
         return last
+    }
+
+    get isOptional() {
+        return this.category.filter && (this.category.filter.requiredWhen === null || !this.category.filter.requiredWhen.doesMatch(this.filterValue))
+    }
+
+    async skipStep() {
+        if (this.loading) {
+            return;
+        }
+
+        this.loading = true
+        this.errorBox = null
+
+        try {
+            const allRecords = this.category.getAllRecords()
+           
+            // Delete all answers from this catgory
+            this.editingAnswers = this.editingAnswers.filter(answer => {
+                const record = !!allRecords.find(r => r.id == answer.settings.id)
+                if (record) {
+                    return false
+                }
+                return true
+            })
+            
+            await this.saveHandler(this.editingAnswers, this)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.loading = false
     }
 
     async goNext() {

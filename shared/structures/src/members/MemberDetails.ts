@@ -8,11 +8,12 @@ import { StringFilterDefinition } from '../filters/StringFilter';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
+import { Organization } from '../Organization';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { LegacyRecord,OldRecord } from './records/LegacyRecord';
-import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from './records/LegacyRecordType';
+import { LegacyRecordType,OldRecordType } from './records/LegacyRecordType';
 import { RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordTextAnswer } from './records/RecordAnswer';
 import { RecordFactory } from './records/RecordFactory';
 import { RecordChoice, RecordType, RecordWarning, RecordWarningType } from './records/RecordSettings';
@@ -488,14 +489,6 @@ export class MemberDetails extends AutoEncoder {
             this.addRecord(record)
         }
 
-        // If some records are missing in the incoming blob AND if they are public, we need to delete them. Always.
-        // E.g. permissions
-        for (const recordType of Object.values(LegacyRecordType)) {
-            if (LegacyRecordTypeHelper.isPublic(recordType) && !other.records.find(r => r.type === recordType)) {
-                this.removeRecord(recordType)
-            }
-        }
-
         if (other.requiresFinancialSupport && (!this.requiresFinancialSupport || this.requiresFinancialSupport.date < other.requiresFinancialSupport.date)) {
             this.requiresFinancialSupport = other.requiresFinancialSupport
         }
@@ -554,103 +547,162 @@ export class MemberDetails extends AutoEncoder {
         if (data.context.version < 128) {
             console.warn("Migrating member details from version "+data.context.version)
 
-            if (!d.requiresFinancialSupport) {
-                d.requiresFinancialSupport = BooleanStatus.create({ 
-                    value: !!d.records.find(r => r.type === LegacyRecordType.FinancialProblems),
-                    date: d.reviewTimes.getLastReview("records") ?? new Date()
-                })
-            }
-
-            if (!d.dataPermissions) {
-                d.dataPermissions = BooleanStatus.create({ 
-                    value: !!d.records.find(r => r.type === LegacyRecordType.DataPermissions),
-                    date: d.reviewTimes.getLastReview("records") ?? new Date()
-                })
-            }
-
-            for (const record of d.records) {
-                // Mi ma migrate
-                const settings = RecordFactory.create(record.type)
-                if (!settings) {
-                    continue
-                }
-
-                if (record.type === LegacyRecordType.PicturePermissions) {
-                    const answer = RecordChooseOneAnswer.create({
-                        settings,
-                        selectedChoice: RecordChoice.create({
-                            id: "yes",
-                            name: "Ja, ik geef toestemming",
-                            warning: RecordWarning.create({
-                                id: "",
-                                text: "Geen toestemming voor publicatie foto's",
-                                type: RecordWarningType.Error
-                            })
-                        }),
-                        date: new Date(2021, 0, 1), // Always give it the same date
-                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
-                    })
-                    d.recordAnswers.push(answer)
-                } else if (record.type === LegacyRecordType.GroupPicturePermissions) {
-                    const answer = RecordChooseOneAnswer.create({
-                        settings,
-                        selectedChoice: RecordChoice.create({
-                            id: "groups_only",
-                            name: "Ik geef enkel toestemming voor groepsfoto's",
-                            warning: RecordWarning.create({
-                                id: "",
-                                text: "Enkel toestemming voor groepsfoto's",
-                                type: RecordWarningType.Error
-                            })
-                        }),
-                        date: new Date(2021, 0, 1), // Always give it the same date
-                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
-                    })
-                    d.recordAnswers.push(answer)
-
-                } else if (settings.type === RecordType.Checkbox) {
-                    const answer = RecordCheckboxAnswer.create({
-                        settings,
-                        selected: true,
-                        comments: record.description ? record.description : undefined,
-                        date: new Date(2021, 0, 1), // Always give it the same date
-                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
-                    })
-                    d.recordAnswers.push(answer)
-                } else if (settings.type === RecordType.Textarea) {
-                    const answer = RecordTextAnswer.create({
-                        settings,
-                        value: record.description ? record.description : null,
-                        date: new Date(2021, 0, 1), // Always give it the same date
-                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
-                    })
-                    d.recordAnswers.push(answer)
-                } else {
-                    throw new Error("Unsupported type "+settings.type)
-                }
-            }
-
-            // Doctor
-            if (d.doctor) {
-                d.recordAnswers.push(RecordTextAnswer.create({
-                    settings: RecordFactory.createDoctorName(),
-                    value: d.doctor.name,
-                    date: new Date(2021, 0, 1), // Always give it the same date
-                    reviewedAt: d.reviewTimes.getLastReview("records") ?? null
-                }))
-                d.recordAnswers.push(RecordTextAnswer.create({
-                    settings: RecordFactory.createDoctorPhone(),
-                    value: d.doctor.phone,
-                    date: new Date(2021, 0, 1), // Always give it the same date
-                    reviewedAt: d.reviewTimes.getLastReview("records") ?? null
-                }))
-            }
-
-            // Clear outdated data
-            d.doctor = null
-            d.records = []
+            
         }
 
         return d as InstanceType<T>
+    }
+
+    upgradeFromLegacy(organization: Organization) {
+        if (!this.requiresFinancialSupport) {
+            this.requiresFinancialSupport = BooleanStatus.create({ 
+                value: !!this.records.find(r => r.type === LegacyRecordType.FinancialProblems),
+                date: this.reviewTimes.getLastReview("records") ?? new Date()
+            })
+        }
+
+        if (!this.dataPermissions) {
+            this.dataPermissions = BooleanStatus.create({ 
+                value: !!this.records.find(r => r.type === LegacyRecordType.DataPermissions),
+                date: this.reviewTimes.getLastReview("records") ?? new Date()
+            })
+        }
+
+        for (const record of this.records) {
+            // Mi ma migrate
+            const settings = RecordFactory.create(record.type)
+            if (!settings) {
+                continue
+            }
+
+            if (record.type === LegacyRecordType.PicturePermissions) {
+                const answer = RecordChooseOneAnswer.create({
+                    settings,
+                    selectedChoice: RecordChoice.create({
+                        id: "yes",
+                        name: "Ja, ik geef toestemming",
+                        warning: RecordWarning.create({
+                            id: "",
+                            text: "Geen toestemming voor publicatie foto's",
+                            type: RecordWarningType.Error
+                        })
+                    }),
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+            } else if (record.type === LegacyRecordType.GroupPicturePermissions) {
+                const answer = RecordChooseOneAnswer.create({
+                    settings,
+                    selectedChoice: RecordChoice.create({
+                        id: "groups_only",
+                        name: "Ik geef enkel toestemming voor groepsfoto's",
+                        warning: RecordWarning.create({
+                            id: "",
+                            text: "Enkel toestemming voor groepsfoto's",
+                            type: RecordWarningType.Error
+                        })
+                    }),
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+
+            } else if (settings.type === RecordType.Checkbox) {
+                const answer = RecordCheckboxAnswer.create({
+                    settings,
+                    selected: true,
+                    comments: record.description ? record.description : undefined,
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+            } else if (settings.type === RecordType.Textarea) {
+                const answer = RecordTextAnswer.create({
+                    settings,
+                    value: record.description ? record.description : null,
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+            } else {
+                throw new Error("Unsupported type "+settings.type)
+            }
+        }
+
+        // Complete with unselected properties
+        const age = this.age ?? 18
+
+        for (const record of organization.meta.recordsConfiguration.recordCategories.flatMap(c => c.getAllRecords())) {
+            const answer = this.recordAnswers.find(a => a.settings.id == record.id)
+            if (answer) {
+                continue
+            }
+
+            // Member is older than 18 years, and no permissions for medicines
+            if (record.id === "legacy-type-"+LegacyRecordType.PicturePermissions) {
+                const alternativeAnswer = this.recordAnswers.find(a => a.settings.id == "legacy-type-"+LegacyRecordType.GroupPicturePermissions)
+
+                if (alternativeAnswer) {
+                    continue
+                }
+
+                // No permissions
+                const a = RecordChooseOneAnswer.create({
+                    settings: record,
+                    selectedChoice: RecordChoice.create({
+                        id: "no",
+                        name: "Nee, ik geef geen toestemming",
+                        warning: RecordWarning.create({
+                            id: "",
+                            text: "Geen toestemming voor publicatie foto's",
+                            type: RecordWarningType.Error
+                        })
+                    }),
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(a)
+                continue
+            }
+
+             if (record.type !== RecordType.Checkbox) {
+                continue
+            }
+            
+            // Member is older than 18 years, and no permissions for medicines
+            if (record.id === "legacy-type-"+LegacyRecordType.MedicinePermissions && (age ?? 18) >= 18) {
+                // Don't add this property
+                continue
+            }
+
+            const a = RecordCheckboxAnswer.create({
+                settings: record,
+                selected: false,
+                date: new Date(2021, 0, 1), // Always give it the same date
+                reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+            })
+            this.recordAnswers.push(a)
+        }
+
+        // Doctor
+        if (this.doctor) {
+            this.recordAnswers.push(RecordTextAnswer.create({
+                settings: RecordFactory.createDoctorName(),
+                value: this.doctor.name,
+                date: new Date(2021, 0, 1), // Always give it the same date
+                reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+            }))
+            this.recordAnswers.push(RecordTextAnswer.create({
+                settings: RecordFactory.createDoctorPhone(),
+                value: this.doctor.phone,
+                date: new Date(2021, 0, 1), // Always give it the same date
+                reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+            }))
+        }
+
+        // Clear outdated data
+        this.doctor = null
+        this.records = []
     }
 }

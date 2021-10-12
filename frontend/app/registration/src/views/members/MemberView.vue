@@ -216,7 +216,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, RecordCategoryAnswersBox,STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components"
-import { LegacyRecordTypeHelper, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, Registration } from '@stamhoofd/structures';
+import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -246,8 +246,6 @@ import MemberChooseGroupsView from "./MemberChooseGroupsView.vue";
 export default class MemberView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     member!: MemberWithRegistrations
-
-    LegacyRecordTypeHelper = LegacyRecordTypeHelper
 
     async editGeneral() {
         await this.openSteps(

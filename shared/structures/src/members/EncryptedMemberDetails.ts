@@ -5,7 +5,6 @@ import { Organization } from "../Organization";
 // eslint bug thinks MemberDetails is not used
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberDetails } from "./MemberDetails";
-import { LegacyRecordTypeHelper } from "./records/LegacyRecordType";
 import { ReviewTimes } from "./ReviewTime";
 
 
@@ -61,7 +60,7 @@ export class MemberDetailsMeta extends AutoEncoder {
             hasMemberGeneral: details.lastName.length > 0 && details.birthDay !== null,
             hasParents: details.address !== null || details.parents.length > 0 || (details.age !== null && details.age > 18),
             hasEmergency: details.emergencyContacts.length > 0,
-            hasRecords: details.records.filter(r => !LegacyRecordTypeHelper.isPublic(r.type)).length > 0,
+            hasRecords: false,
             isRecovered: details.isRecovered,
             reviewTimes: details.reviewTimes,
         })
@@ -209,7 +208,7 @@ export class EncryptedMemberDetails extends AutoEncoder {
         details.recordAnswers = original.recordAnswers.filter(answer => !answer.settings.encrypted)
 
         // Deprecated
-        details.records = original.records.filter(r => LegacyRecordTypeHelper.isPublic(r.type))
+        details.records = []
 
         return details
     }

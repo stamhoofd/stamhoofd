@@ -328,7 +328,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      * E.g. MedicalPermissions is returned if the member did NOT give permissions -> because we need to show a message
      * PicturePermissions is returned if no group picture permissions was given and normal picture permissions are disabled
      */
-    filterForDisplay(records: LegacyRecord[], age: number | null): LegacyRecord[] {
+    /*filterForDisplay(records: LegacyRecord[], age: number | null): LegacyRecord[] {
         return this.filterRecords(
             LegacyRecord.invertRecords(records), 
             ...(this.shouldAsk(LegacyRecordType.GroupPicturePermissions) ? [LegacyRecordType.PicturePermissions] : [])
@@ -365,7 +365,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
             return true
         })
-    }
+    }*/
 
     static getDefaultFor(type: OrganizationType): OrganizationRecordsConfiguration {
         if (type === OrganizationType.Youth) {
