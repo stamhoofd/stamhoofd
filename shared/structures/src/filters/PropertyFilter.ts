@@ -108,6 +108,14 @@ export class SetPropertyFilterDecoder<T> implements Decoder<T> {
         return new SetPropertyFilterDecoder(patchDecoder, this.definitions)
     }
 
+    patchDefaultValue() {
+        if (!(this.decoder as any).patchDefaultValue) {
+            return undefined
+        }
+
+        return (this.decoder as any).patchDefaultValue()
+    }
+
 }
 
 export class PropertyFilterDecoderFromContext implements Decoder<PropertyFilter<any>> {
