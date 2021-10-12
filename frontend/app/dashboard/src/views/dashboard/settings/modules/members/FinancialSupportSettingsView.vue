@@ -16,7 +16,7 @@
             </p>
 
             <p class="info-box icon privacy">
-                Om in orde te zijn met de GDPR-wetgeving moet je altijd toestemming gekregen hebben voor je deze informatie kan opslaan. Stamhoofd vraagt deze toestemming automatisch aan leden als je dit aanzet.
+                Om in orde te zijn met de GDPR-wetgeving moet je altijd toestemming gekregen hebben voor je deze informatie kan opslaan. Je kan deze toestemming aanzetten via de instellingen.
             </p>
             
             <STErrorsDefault :error-box="errorBox" />          
