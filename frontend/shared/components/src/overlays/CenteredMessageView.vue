@@ -61,6 +61,9 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     async onClickButton(button: CenteredMessageButton) {
+        if (this.isClosing) {
+            return
+        }
         if (button.loading) {
             return;
         }
@@ -80,6 +83,9 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     close() {
+        if (this.isClosing) {
+            return
+        }
         this.isClosing = true
         this.pop({ force: true })
     }

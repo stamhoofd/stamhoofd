@@ -531,35 +531,32 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         } catch (e) {
             console.error(e)
             new Toast("Leden ophalen mislukt", "error red").show()
+            throw e;
         }
     }
 
     async downloadWithCurrentFilter() {
         const leden: SGVLid[] = []
-        try {
-            let offset = 0
-            let total = 1
+        let offset = 0
+        let total = 1
 
-            while (offset < total) {
-                // prevent brute force attack, spread the load
-                await sleep(250);
-                const response = await this.authenticatedServer.request({
-                    method: "GET",
-                    path: "/ledenlijst",
-                    query: {
-                        aantal: 100,
-                        offset: offset
-                    },
-                    decoder: SGVLedenResponse as Decoder<SGVLedenResponse>
-                })
-                leden.push(...response.data.leden)
+        while (offset < total) {
+            // prevent brute force attack, spread the load
+            await sleep(250);
+            const response = await this.authenticatedServer.request({
+                method: "GET",
+                path: "/ledenlijst",
+                query: {
+                    aantal: 100,
+                    offset: offset
+                },
+                decoder: SGVLedenResponse as Decoder<SGVLedenResponse>
+            })
+            leden.push(...response.data.leden)
 
-                // Set new offset
-                offset = response.data.offset + response.data.aantal
-                total = response.data.totaal
-            }
-        } catch (e) {
-            throw e;
+            // Set new offset
+            offset = response.data.offset + response.data.aantal
+            total = response.data.totaal
         }
         return leden;
     }

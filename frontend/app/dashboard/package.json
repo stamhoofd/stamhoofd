@@ -10,6 +10,8 @@
         "lint": "eslint ../.. --ext .js,.jsx,.ts,.tsx,.vue"
     },
     "dependencies": {
+        "@sentry/tracing": "^6.13.3",
+        "@sentry/vue": "^6.13.3",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
         "@stamhoofd/logger": "1.0.0",

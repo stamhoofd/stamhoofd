@@ -69,7 +69,6 @@ export default class CodeInput extends Vue {
     }
 
     clearInput(index: number, select = true) {
-        console.log("clear")
         // Move everything one to the left
         const input = this.$refs.numberInput[index];
         if (input.value.length == 0 && index < this.codeLength - 1) {
@@ -90,6 +89,10 @@ export default class CodeInput extends Vue {
     }
 
     selectNext(index: number) {
+        if (index < 0) {
+            return
+        }
+
         console.log("select next ", index)
         if (index >= this.codeLength) {
             const prev = this.$refs.numberInput[index - 1];

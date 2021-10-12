@@ -1,30 +1,20 @@
 // import 'core-js/stable'; // only needed for entry or 'false' useBuiltIns
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
-//import * as Sentry from '@sentry/browser';
-import { Vue as VueIntegration } from '@sentry/integrations';
+import * as Sentry from '@sentry/vue';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
 Vue.use(VueMeta)
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-/*if (!isPrerender && process.env.NODE_ENV == "production") {
+if (!isPrerender && process.env.NODE_ENV == "production") {
     Sentry.init({
-    dsn: 'https://b62b02f163f6448594b3c081c1be28e0@o431770.ingest.sentry.io/5383559',
-    environment: process.env.NODE_ENV ?? "production",
-    integrations: [
-            new VueIntegration({Vue, attachProps: false})
-        ],
-        beforeSend(event, hint) {
-            if (hint) {
-                console.error(hint.originalException || hint.syntheticException);
-            }
-        
-            return event;
-        }
+        Vue,
+        dsn: "https://00c3e526a886491e853cf060f3b00b05@o431770.ingest.sentry.io/6002539",
+        logErrors: true
     });
-}*/
+}
 
 import App from "./App.vue";
 

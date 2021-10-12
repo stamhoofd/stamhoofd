@@ -123,8 +123,10 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
                     toast2.message = status
                     toast2.setProgress(progress)
                 })
-            } finally {
                 toast2.hide()
+            } catch (e) {
+                toast2.hide()
+                throw e
             }
 
             new Toast("Synchronisatie voltooid", "success green").setWithOffset().show()
