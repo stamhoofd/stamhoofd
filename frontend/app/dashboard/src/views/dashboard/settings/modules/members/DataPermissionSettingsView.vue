@@ -16,7 +16,7 @@
             </p>
 
             <p class="info-box">
-                Je kan toestemming nooit verplichten volgens de GDPR-wetgeving. Als een lid geen toestemming geeft, kan je enkel gegevens verzamelen die noodzakelijk zijn (zoals bepaald volgens de 5 verwerkingsgronden bepaald in de GDPR-wetgeving). Stamhoofd verbergt automatisch vragen waarvoor toestemming noodzakelijk is in dat geval.
+                Je kan toestemming nooit verplichten volgens de GDPR-wetgeving. Als een lid geen toestemming geeft, kan je enkel gegevens verzamelen die noodzakelijk zijn (zoals bepaald volgens de vijf verwerkingsgronden in de GDPR-wetgeving). Stamhoofd verbergt automatisch vragen waarvoor toestemming noodzakelijk is in dat geval.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />          
