@@ -660,7 +660,7 @@ export class LegacyRecordTypeHelper {
 
     static convertToRecord(type: LegacyRecordType): RecordSettings | null {
         if (type === LegacyRecordType.FinancialProblems || type === LegacyRecordType.DataPermissions) {
-            // Should get moved to separate field in member details
+            // separate field in member details
             return null
         }
 
