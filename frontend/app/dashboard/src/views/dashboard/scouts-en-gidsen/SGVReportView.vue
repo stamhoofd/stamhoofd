@@ -99,7 +99,7 @@
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary" type="button" @click="goNext">
                         Sluiten
                     </button>
                 </LoadingButton>

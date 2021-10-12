@@ -643,7 +643,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                             message: "Synchronisatie geannuleerd"
                         }))
                     },
-                    onVerified: async (verified: SGVLidMatchVerify[]) => {
+                    onVerified: (verified: SGVLidMatchVerify[]) => {
                         try {
                             for (const member of verified) {
                                 if (member.verify) {
