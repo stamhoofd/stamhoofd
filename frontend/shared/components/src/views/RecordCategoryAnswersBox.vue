@@ -11,11 +11,14 @@
                 <dd :key="'dd-'+record.id" class="center icons">
                     <span v-if="getAnswer(record).selected" class="icon success primary" />
                     <span v-else class="icon canceled gray" />
+                    <button v-if="canDelete" class="button icon trash" type="button" @click="$emit('delete', record)" />
                 </dd>
                 <dd v-if="getAnswer(record).comments" :key="'dd-description-'+record.id" class="description pre-wrap" v-text="getAnswer(record).comments" />
             </template>
             <dd v-else :key="'dd-'+record.id">
                 {{ getAnswer(record).stringValue }}
+
+                <button v-if="canDelete" class="button icon trash" type="button" @click="$emit('delete', record)" />
             </dd>
         </template>
     </dl>
@@ -41,13 +44,19 @@ export default class RecordCategoryAnswersBox extends Mixins(NavigationMixin){
     @Prop({ required: true })
     answers: RecordAnswer[]
 
-    @Prop({ required: true })
-    category: RecordCategory
+    @Prop({ required: false })
+    category?: RecordCategory
 
     @Prop({ required: true })
     dataPermission!: boolean
 
+    @Prop({ default: false })
+    canDelete!: boolean
+
     get records() {
+        if (!this.category) {
+            return this.answers.map(a => a.settings)
+        }
         return this.category.filterRecords(this.dataPermission)
     }
 

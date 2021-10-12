@@ -170,18 +170,6 @@
                 </dl>
             </div>
 
-            <!-- Loop all records -->
-            <div v-for="category in recordCategories" :key="category.id" class="hover-box container">
-                <hr>
-                <h2 class="style-with-button">
-                    <div>{{ category.name }}</div>
-                    <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editRecordCategory(category)" />
-                    </div>
-                </h2>
-                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :dataPermission="dataPermission" />
-            </div>
-
             <div v-if="!member.details || member.details.isRecovered" class="container">
                 <hr>
                 <p v-if="!hasLatestKey" class="error-box">
@@ -195,6 +183,28 @@
                     <span class="icon trash" />
                     <span>Verwijder versleutelde gegevens</span>
                 </button>
+            </div>
+
+            <!-- Loop all records -->
+            <div v-for="category in recordCategories" :key="category.id" class="hover-box container">
+                <hr>
+                <h2 class="style-with-button">
+                    <div>{{ category.name }}</div>
+                    <div class="hover-show">
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editRecordCategory(category)" />
+                    </div>
+                </h2>
+                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :data-permission="dataPermission" />
+            </div>
+
+            <!-- Loop all records -->
+            <div v-if="missingAnswers.length > 0" class="hover-box container">
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Overige kenmerken</div>
+                </h2>
+                <p>Deze kenmerken werden opgeslagen bij dit lid, maar bestaan niet langer of zijn niet meer van toepassing. Je kan ze verwijderen.</p>
+                <RecordCategoryAnswersBox :answers="missingAnswers" :data-permission="dataPermission" :can-delete="true" @delete="deleteRecord($event)" />
             </div>
         </div>
 
@@ -292,7 +302,7 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber,LegacyRecord, LegacyRecordTypeHelper, LegacyRecordTypePriority, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -346,6 +356,28 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             }
             return [cat]
         })
+    }
+
+    get missingAnswers(): RecordAnswer[] {
+        const missing: RecordAnswer[] = []
+         for (const answer of this.member.details.recordAnswers) {
+            // Search
+            if (!this.recordCategories.find(cat => !!cat.records.find(record => record.id === answer.settings.id))) {
+                missing.push(answer)
+            }
+         }
+        return missing
+    }
+
+    async deleteRecord(record: RecordSettings) {
+        if (!await CenteredMessage.confirm("Dit kenmerk verwijderen?", "Ja, verwijderen", "Je kan dit niet ongedaan maken")) {
+            return
+        }
+        const index = this.member.details.recordAnswers.findIndex(r => r.settings.id == record.id)
+        if (index !== -1) {
+            this.member.details.recordAnswers.splice(index, 1)
+            await this.familyManager.patchAllMembersWith(this.member)
+        }
     }
 
     get dataPermission() {
