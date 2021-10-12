@@ -96,7 +96,7 @@
                     <div class="split-inputs">
                         <div>
                             <STInputBox title="Naam huisarts" error-fields="doctorName" :error-box="errorBox">
-                                <input v-model="doctorName" class="input" name="doctorName" type="text" placeholder="Huisarts of prakijknaam" autocomplete="name">
+                                <input v-model="doctorName" class="input" name="doctorName" type="text" placeholder="Huisarts of praktijknaam" autocomplete="name">
                             </STInputBox>
                         </div>
 

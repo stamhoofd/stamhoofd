@@ -1,18 +1,16 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, Decoder, Encodeable, EncodeContext, EnumDecoder,field, IntegerDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../filters/ChoicesFilter"
 import { NumberFilterDefinition } from "../filters/NumberFilter"
 import { PropertyFilter, PropertyFilterDecoder, SetPropertyFilterDecoder } from "../filters/PropertyFilter"
 import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from "../filters/RegistrationsFilter"
-import { StringFilterDefinition } from "../filters/StringFilter"
-import { Group } from "../Group"
 import { OrganizationType, } from "../OrganizationType"
 import { RegisterItem } from "./checkout/RegisterItem"
 import { Gender } from "./Gender"
 import { MemberDetails } from "./MemberDetails"
 import { MemberWithRegistrations } from "./MemberWithRegistrations"
 import { LegacyRecord } from "./records/LegacyRecord"
-import { LegacyRecordType, LegacyRecordTypeHelper } from "./records/LegacyRecordType"
+import { LegacyRecordType } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
 
 export enum AskRequirement {
@@ -192,22 +190,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     financialSupport: FinancialSupportSettings | null = null
 
     /**
-     * Ask to collect sensitive information
-     * TODO: make this an automatic getter that checks financialSupport + custom records + organization type (e.g. lgbtq+, politics) to determine if this is needed
+     * Ask permissions to collect data
      */
-    @field({ decoder: BooleanDecoder, version: 117 })
-    @field({ 
-        decoder: DataPermissionsSettings, 
-        nullable: true,
-        version: 127, 
-        upgrade: (v) => {
-            if (v) {
-                return DataPermissionsSettings.create({})
-            } else {
-                return null
-            }
-        } 
-    })
+    @field({ decoder: DataPermissionsSettings, nullable: true, version: 117 })
     dataPermission: DataPermissionsSettings | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 124 })
@@ -257,7 +242,6 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     doctor = AskRequirement.NotAsked
 
     /**
-     * @deprecated
      * true: required
      * false: don't ask
      * null: optional
@@ -439,23 +423,5 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
         // Others are all disabled by default
         return OrganizationRecordsConfiguration.create({})
-    }
-
-    static override decode<T extends typeof AutoEncoder>(this: T, data: Data): InstanceType<T> {
-        const d = super.decode(data) as OrganizationRecordsConfiguration
-
-        if (d.enabledLegacyRecords.length > 0 && d.recordCategories.length == 0) {
-            const categories = LegacyRecordTypeHelper.convert(d.enabledLegacyRecords)
-            if (categories.length > 0) {
-                d.recordCategories.push(
-                    RecordCategory.create({
-                        name: "Steekkaart",
-                        childCategories: categories
-                    })
-                )
-            }
-        }
-
-        return d as InstanceType<T>
     }
 }

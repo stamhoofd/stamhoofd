@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder,Data,DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
@@ -13,7 +13,9 @@ import { Gender } from './Gender';
 import { Parent } from './Parent';
 import { LegacyRecord,OldRecord } from './records/LegacyRecord';
 import { LegacyRecordType, LegacyRecordTypeHelper,OldRecordType } from './records/LegacyRecordType';
-import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer';
+import { RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordTextAnswer } from './records/RecordAnswer';
+import { RecordFactory } from './records/RecordFactory';
+import { RecordChoice, RecordType, RecordWarning, RecordWarningType } from './records/RecordSettings';
 import { ReviewTimes } from './ReviewTime';
 
 /**
@@ -76,6 +78,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder), version: 120 })
     recordAnswers: RecordAnswer[] = []
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: new ArrayDecoder(OldRecord) })
     @field({ 
         decoder: new ArrayDecoder(LegacyRecord), version: 54, upgrade: (old: OldRecord[]): LegacyRecord[] => {
@@ -540,5 +545,112 @@ export class MemberDetails extends AutoEncoder {
                 defaultMode: ChoicesFilterMode.Or
             })
         ]
+    }
+
+    // Complex migration on decoding if version before custom records
+    static override decode<T extends typeof AutoEncoder>(this: T, data: Data): InstanceType<T> {
+        const d = super.decode(data) as MemberDetails
+
+        if (data.context.version < 128) {
+            console.warn("Migrating member details from version "+data.context.version)
+
+            if (!d.requiresFinancialSupport) {
+                d.requiresFinancialSupport = BooleanStatus.create({ 
+                    value: !!d.records.find(r => r.type === LegacyRecordType.FinancialProblems),
+                    date: d.reviewTimes.getLastReview("records") ?? new Date()
+                })
+            }
+
+            if (!d.dataPermissions) {
+                d.dataPermissions = BooleanStatus.create({ 
+                    value: !!d.records.find(r => r.type === LegacyRecordType.DataPermissions),
+                    date: d.reviewTimes.getLastReview("records") ?? new Date()
+                })
+            }
+
+            for (const record of d.records) {
+                // Mi ma migrate
+                const settings = RecordFactory.create(record.type)
+                if (!settings) {
+                    continue
+                }
+
+                if (record.type === LegacyRecordType.PicturePermissions) {
+                    const answer = RecordChooseOneAnswer.create({
+                        settings,
+                        selectedChoice: RecordChoice.create({
+                            id: "yes",
+                            name: "Ja, ik geef toestemming",
+                            warning: RecordWarning.create({
+                                id: "",
+                                text: "Geen toestemming voor publicatie foto's",
+                                type: RecordWarningType.Error
+                            })
+                        }),
+                        date: new Date(2021, 0, 1), // Always give it the same date
+                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
+                    })
+                    d.recordAnswers.push(answer)
+                } else if (record.type === LegacyRecordType.GroupPicturePermissions) {
+                    const answer = RecordChooseOneAnswer.create({
+                        settings,
+                        selectedChoice: RecordChoice.create({
+                            id: "groups_only",
+                            name: "Ik geef enkel toestemming voor groepsfoto's",
+                            warning: RecordWarning.create({
+                                id: "",
+                                text: "Enkel toestemming voor groepsfoto's",
+                                type: RecordWarningType.Error
+                            })
+                        }),
+                        date: new Date(2021, 0, 1), // Always give it the same date
+                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
+                    })
+                    d.recordAnswers.push(answer)
+
+                } else if (settings.type === RecordType.Checkbox) {
+                    const answer = RecordCheckboxAnswer.create({
+                        settings,
+                        selected: true,
+                        comments: record.description ? record.description : undefined,
+                        date: new Date(2021, 0, 1), // Always give it the same date
+                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
+                    })
+                    d.recordAnswers.push(answer)
+                } else if (settings.type === RecordType.Textarea) {
+                    const answer = RecordTextAnswer.create({
+                        settings,
+                        value: record.description ? record.description : null,
+                        date: new Date(2021, 0, 1), // Always give it the same date
+                        reviewedAt: d.reviewTimes.getLastReview("records") ?? null
+                    })
+                    d.recordAnswers.push(answer)
+                } else {
+                    throw new Error("Unsupported type "+settings.type)
+                }
+            }
+
+            // Doctor
+            if (d.doctor) {
+                d.recordAnswers.push(RecordTextAnswer.create({
+                    settings: RecordFactory.createDoctorName(),
+                    value: d.doctor.name,
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: d.reviewTimes.getLastReview("records") ?? null
+                }))
+                d.recordAnswers.push(RecordTextAnswer.create({
+                    settings: RecordFactory.createDoctorPhone(),
+                    value: d.doctor.phone,
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: d.reviewTimes.getLastReview("records") ?? null
+                }))
+            }
+
+            // Clear outdated data
+            d.doctor = null
+            d.records = []
+        }
+
+        return d as InstanceType<T>
     }
 }

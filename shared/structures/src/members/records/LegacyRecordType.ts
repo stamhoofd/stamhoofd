@@ -184,89 +184,7 @@ export class LegacyRecordTypeHelper {
         // others: keep name, don't repeat name
     }
 
-    static getRecordCategory(type: LegacyRecordType): RecordCategory | undefined {
-        switch (type) {
-            case LegacyRecordType.PicturePermissions:
-            case LegacyRecordType.GroupPicturePermissions:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.Privacy",
-                    name: "Privacy"
-                })
-
-            case LegacyRecordType.FoodAllergies:
-            case LegacyRecordType.MedicineAllergies:
-            case LegacyRecordType.HayFever:
-            case LegacyRecordType.OtherAllergies:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.Allergies",
-                    name: "Allergieën"
-                })
-
-            case LegacyRecordType.Vegetarian:
-            case LegacyRecordType.Vegan:
-            case LegacyRecordType.Halal:
-            case LegacyRecordType.Kosher:
-            case LegacyRecordType.Diet:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.Diet",
-                    name: "Dieet"
-                })
-
-            case LegacyRecordType.CovidHighRisk:
-            case LegacyRecordType.Asthma:
-            case LegacyRecordType.BedWaters:
-            case LegacyRecordType.Medicines:
-            case LegacyRecordType.SpecialHealthCare:
-            case LegacyRecordType.Epilepsy:
-            case LegacyRecordType.HeartDisease:
-            case LegacyRecordType.SkinCondition:
-            case LegacyRecordType.Rheumatism:
-            case LegacyRecordType.SleepWalking:
-            case LegacyRecordType.Diabetes:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.Health",
-                    name: "Gezondheid, hygiëne & slapen"
-                })
-
-            case LegacyRecordType.CanNotSwim:
-            case LegacyRecordType.TiredQuickly:
-            case LegacyRecordType.CanNotParticipateInSport:
-            case LegacyRecordType.SpecialSocialCare:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.Sport",
-                    name: "Sport, spel en sociale omgang"
-                })
-
-            case LegacyRecordType.Other:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.Other",
-                    name: "Andere inlichtingen"
-                })
-
-            case LegacyRecordType.TetanusVaccine:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.TetanusVaccine",
-                    name: "Tetanusvaccinatie (klem)"
-                })
-
-            case LegacyRecordType.MedicinePermissions:
-                return RecordCategory.create({
-                    // We need to have a predictable id
-                    id: "RecordCategory.MedicinePermissions",
-                    name: "Toedienen van medicatie",
-                    description: "Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp."
-                })
-        }
-
-        // others: keep name, don't repeat name
-    }
+    
 
     static getCategory(type: LegacyRecordType): string | undefined {
         switch (type) {
@@ -619,45 +537,7 @@ export class LegacyRecordTypeHelper {
         return answer
     }
 
-    static convert(types: LegacyRecordType[]): RecordCategory[] {
-        // Make sure all the types are sorted in the default ordering
-        const allTypes = Object.values(LegacyRecordType)
-
-        types.sort((a, b) => {
-            const index1 = allTypes.findIndex(q => q == a)
-            const index2 = allTypes.findIndex(q => q == b)
-            return index1 - index2
-        })
-
-        const categories: RecordCategory[] = []
-
-        for (const type of types) {
-            const category = this.getRecordCategory(type)
-            const settings = this.convertToRecord(type)
-
-            if (!category || !settings) {
-                // Has custom migration
-                continue
-            }
-
-            if (type == LegacyRecordType.PicturePermissions && types.includes(LegacyRecordType.GroupPicturePermissions) ) {
-                // Skip: we ask group picture permissions alreadys
-                continue
-            }
-
-            let exists = categories.find(c => c.id === category.id)
-
-            if (!exists) {
-                categories.push(category)
-                exists = category
-            }
-            exists.records.push(settings)
-
-        }
-
-        return categories
-    }
-
+    
     static convertToRecord(type: LegacyRecordType): RecordSettings | null {
         if (type === LegacyRecordType.FinancialProblems || type === LegacyRecordType.DataPermissions) {
             // separate field in member details
