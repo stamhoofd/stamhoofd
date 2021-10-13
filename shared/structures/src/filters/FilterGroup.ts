@@ -57,6 +57,7 @@ export class FilterGroup<T> extends Filter<T> {
     encode(context: EncodeContext): PlainObject {
         return {
             filters: this.filters.map(f => f.encode(context)),
+            mode: this.mode,
             definitionId: "FilterGroup"
         }
     }
