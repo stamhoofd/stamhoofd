@@ -54,6 +54,7 @@ export default new Migration(async () => {
             d.enabledLegacyRecords = []
         } else {
             // Use defaults as when creating a new organization
+            organization.meta.recordsConfiguration = RecordConfigurationFactory.create(organization.meta.type)
         }
 
         
