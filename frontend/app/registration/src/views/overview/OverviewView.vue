@@ -10,7 +10,7 @@
                 <main class="container">
                     <h1>Leden bewerken en inschrijven</h1>
 
-                    <p v-for="invite of invites" :key="invite.id" class="info-box email with-button selectable" @click="registerMember(invite.member)">
+                    <p v-for="invite of invites" :key="invite.id" class="info-box icon email with-button selectable" @click="registerMember(invite.member)">
                         Je hebt een uitnodiging gekregen om {{ invite.member.firstName }} in te schrijven voor {{ invite.group.settings.name }}. Nu staat {{ invite.member.firstName }} nog op de wachtlijst.
                         <span class="button text selected">
                             <span>Inschrijven</span>

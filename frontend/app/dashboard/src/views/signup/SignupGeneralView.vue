@@ -10,7 +10,7 @@
             </h1>
             <p>Met een account kan je alle functies eerst gratis uitproberen.</p>
 
-            <p v-if="registerCode" class="success-box gift">
+            <p v-if="registerCode" class="success-box icon gift">
                 Je ontvangt 25 euro tegoed van <strong>{{ registerCode.organization }}</strong> als je nu registreert
             </p>
 
