@@ -19,7 +19,7 @@
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam van het lid" error-fields="firstName,lastName" :error-box="errorBox">
+                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
@@ -48,9 +48,9 @@
                 </div>
 
                 <div>
-                    <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="isPropertyRequired('address') ? 'Adres van dit lid' : 'Adres van dit lid (optioneel)'" :validator="validator" />
-                    <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" title="E-mailadres van dit lid" :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
-                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+                    <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : '(optioneel)')" :validator="validator" />
+                    <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
+                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="'GSM-nummer' + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
                 </div>
             </div>
         </main>
@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton,BirthDayInput, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, Gender, Version } from "@stamhoofd/structures"
@@ -112,6 +112,19 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
 
     get age() {
         return this.details.age ?? 99
+    }
+
+    get lidSuffix() {
+        if (this.firstName.length < 2) {
+            if (this.age < 18) {
+                return " van dit lid"
+            }
+            return ""
+        }
+        if (this.age < 18) {
+            return " van "+this.firstName
+        }
+        return ""
     }
 
     isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address") {

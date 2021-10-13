@@ -23,7 +23,7 @@
                 <h2>{{ dataPermissionsTitle }}</h2>
                 
                 <Checkbox v-model="dataPermissionsValue">
-                    {{ dataPermissionsLabel }}
+                    Er werd toestemming gegeven
                 </Checkbox>
 
                 <p v-if="dataPermissionsChangeDate" class="style-description-small">
@@ -62,7 +62,7 @@
                         </button>
                     </STListItem>
                 </STList>
-                <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" />
+                <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" :all-optional="true" />
             </div>
         </main>
 

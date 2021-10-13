@@ -3,7 +3,7 @@
         <STErrorsDefault :error-box="errorBox" />
         <div class="split-inputs">
             <div>
-                <STInputBox title="Naam van het lid" error-fields="firstName,lastName" :error-box="errorBox">
+                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                     <div class="input-group">
                         <div>
                             <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">

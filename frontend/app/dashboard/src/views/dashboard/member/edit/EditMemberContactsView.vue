@@ -1,45 +1,47 @@
 <template>
     <div class="container">
-        <hr>
-        <h2 class="style-with-button">
-            <span>Ouders</span>
-            <div>
-                <button type="button" class="button text" @click="addParent">
-                    <span class="icon add" />
-                    <span>Toevoegen</span>
-                </button>
-            </div>
-        </h2>
-            
-        <STErrorsDefault :error-box="errorBox" />
+        <template v-if="areParentsEnabled || parents.length > 0">
+            <hr>
+            <h2 class="style-with-button">
+                <span>Ouders</span>
+                <div>
+                    <button type="button" class="button text" @click="addParent">
+                        <span class="icon add" />
+                        <span>Toevoegen</span>
+                    </button>
+                </div>
+            </h2>
+                
+            <STErrorsDefault :error-box="errorBox" />
 
-        <STList v-if="parents.length > 0">
-            <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
-                <Checkbox slot="left" v-model="parent.selected" @change="onChangedSelection" />
+            <STList v-if="parents.length > 0">
+                <STListItem v-for="parent in parents" :key="parent.parent.id" :selectable="true" element-name="label" class="right-stack left-center">
+                    <Checkbox slot="left" v-model="parent.selected" @change="onChangedSelection" />
 
-                <h2 class="style-title-list">
-                    {{ parent.parent.firstName }} {{ parent.parent.lastName }}
-                </h2>
-                <p v-if="parent.parent.phone" class="style-description-small">
-                    {{ parent.parent.phone }}
-                </p>
-                <p v-if="parent.parent.email" class="style-description-small">
-                    {{ parent.parent.email }}
-                </p>
-                <p v-if="parent.parent.address" class="style-description-small">
-                    {{ parent.parent.address }}
-                </p>
+                    <h2 class="style-title-list">
+                        {{ parent.parent.firstName }} {{ parent.parent.lastName }}
+                    </h2>
+                    <p v-if="parent.parent.phone" class="style-description-small">
+                        {{ parent.parent.phone }}
+                    </p>
+                    <p v-if="parent.parent.email" class="style-description-small">
+                        {{ parent.parent.email }}
+                    </p>
+                    <p v-if="parent.parent.address" class="style-description-small">
+                        {{ parent.parent.address }}
+                    </p>
 
-                <button slot="right" class="button text limit-space" @click.stop="editParent(parent)">
-                    <span class="icon edit" />
-                    <span>Bewerken</span>
-                </button>
-            </STListItem>
-        </STList>
+                    <button slot="right" class="button text limit-space" @click.stop="editParent(parent)">
+                        <span class="icon edit" />
+                        <span>Bewerken</span>
+                    </button>
+                </STListItem>
+            </STList>
 
-        <p v-else class="info-box">
-            Er zijn geen ouders ingesteld bij dit lid
-        </p>
+            <p v-else class="info-box">
+                Er zijn geen ouders ingesteld bij dit lid
+            </p>
+        </template>
 
         <template v-if="areEmergencyContactsAsked || emergencyContacts.length > 0">
             <hr>
@@ -80,7 +82,7 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ErrorBox, LoadingButton,Slider, STErrorsDefault, STInputBox, STList, STListItem, STToolbar, Validator } from "@stamhoofd/components"
-import { AskRequirement, EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
+import { EmergencyContact, MemberWithRegistrations, Parent,Version } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -131,6 +133,14 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     cachedParents: SelectableParent[] | null = null
+
+    get areParentsEnabled() {
+        return !!OrganizationManager.organization.meta.recordsConfiguration.parents
+    }
+
+    get areEmergencyContactsAsked() {
+        return !!OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts
+    }
 
     editParent(selectable: SelectableParent) {
         // Make sure we select it (else we risk losing it if we return)
@@ -195,10 +205,6 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
     get emergencyContacts(): EmergencyContact[]  {
         return this.memberDetails?.emergencyContacts ?? []
-    }
-    
-    get areEmergencyContactsAsked() {
-        return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.NotAsked
     }
 
     get parents(): SelectableParent[]  {

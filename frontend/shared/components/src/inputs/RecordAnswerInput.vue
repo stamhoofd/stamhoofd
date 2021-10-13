@@ -97,6 +97,9 @@ export default class RecordAnswerInput extends Vue {
     @Prop({ default: null }) 
     validator: Validator | null
 
+    @Prop({ default: false }) 
+    allOptional: boolean
+
     errorBox: ErrorBox | null = null
 
     get RecordType() {
@@ -108,7 +111,7 @@ export default class RecordAnswerInput extends Vue {
     }
 
     get required() {
-        return this.recordSettings.required
+        return !this.allOptional && this.recordSettings.required
     }
 
     getChoiceSelected(choice: RecordChoice): boolean {
@@ -181,6 +184,9 @@ export default class RecordAnswerInput extends Vue {
     }
 
     async isValid(): Promise<boolean> {
+        if (this.allOptional) {
+            return Promise.resolve(true)
+        }
         try {
             this.answer.validate()
         } catch (e) {
