@@ -11,6 +11,14 @@
 
             <BillingWarningBox />
 
+            <p class="info-box question with-button">
+                Hulp nodig? Neem contact met ons op via hallo@stamhoofd.be
+
+                <a href="mailto:hallo@stamhoofd.be" class="button text">
+                    E-mail
+                </a>
+            </p>
+
             <p v-if="!areSalesDisabled" class="info-box gift selectable with-button" @click="openReferrals(true)">
                 Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
