@@ -74,7 +74,7 @@ import { AutoEncoderPatchType, Decoder, PartialWithoutMethods } from '@simonback
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { OrganizationMetaData, OrganizationModules, OrganizationPatch, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures"
+import { OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -133,13 +133,13 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         }*/
 
         if (enable && !this.enableMemberModule) {
-            if (this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
+            if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
                 // We have an automated flow for these organizations
                 this.present(new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(MembersStructureSetupView, {})
                 }).setDisplayStyle("popup"))
             } else {
-                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten").then(() => {
+                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").then(() => {
                     // Wait for the backend to fill in all the default categories and groups
                     this.present(new ComponentWithProperties(NavigationController, {
                         root: new ComponentWithProperties(ActivatedView, {})

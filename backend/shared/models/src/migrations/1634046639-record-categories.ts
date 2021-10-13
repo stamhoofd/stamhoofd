@@ -56,7 +56,6 @@ export default new Migration(async () => {
             // Use defaults as when creating a new organization
             organization.meta.recordsConfiguration = RecordConfigurationFactory.create(organization.meta.type)
         }
-
         
         await organization.save()
     }

@@ -7,8 +7,20 @@
 
         <main>
             <h1>Yay! 🥳 De ledenadministratie is actief</h1>
+
+            <p v-if="isYouth">
+                Alle activiteiten, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvinsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
+            </p>
+            <p v-else>
+                Leden worden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvinsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
+            </p>
+
             <p>
-                Alle activiteiten, lessen, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Die zijn onderverdeeld in categorieën (bv. lessen, kampen, activiteiten, leeftijdsgroepen) om wat structuur te brengen. Je kan ze in de volgende stap wijzigen.
+                Inschrijvingsgroepen zijn nog eens onderverdeeld in categorieën om er wat structuur te brengen (als het er veel zijn). Je kan ze in de volgende stap wijzigen.
+            </p>
+
+            <p>
+                Je kan zelf kiezen welke informatie je wilt verzamelen van jouw leden (bv. geboortedatum, emailadres, gsm-nummer, eigen vragen...). Dat kan je wijzigen via Instellingen > Ledenadministratie > Kenmerken en gegevens van leden.
             </p>
 
             <hr>
@@ -50,7 +62,7 @@
                     Overschakelen midden in een werkjaar
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/online-inschrijvingen-kampen-weekends" target="_blank">
+                <STListItem v-if="isYouth" :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/online-inschrijvingen-kampen-weekends" target="_blank">
                     <span slot="left" class="icon link" />
                     Online inschrijvingen voor kampen en weekends
                 </STListItem>
@@ -73,6 +85,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, LoadingButton, STInputBox, STList, STListItem,STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { OrganizationType } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
@@ -103,6 +116,10 @@ export default class ActivatedView extends Mixins(NavigationMixin) {
         } 
 
         return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
+    }
+
+    get isYouth() {
+        return this.organization.meta.type === OrganizationType.Youth
     }
 
     manageGroups() {
