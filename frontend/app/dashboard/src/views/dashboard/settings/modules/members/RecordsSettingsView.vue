@@ -27,7 +27,7 @@
                     <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.phone }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('phone')">
+                    <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('phone', 'GSM-nummer')">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>
@@ -40,7 +40,7 @@
                     <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.emailAddress }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emailAddress')">
+                    <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>
@@ -53,7 +53,7 @@
                     <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.gender }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('gender')">
+                    <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>
@@ -66,7 +66,7 @@
                     <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.birthDay }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('birthDay')">
+                    <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>
@@ -79,7 +79,7 @@
                     <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.address }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('address')">
+                    <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('address', 'Adres')">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>
@@ -92,7 +92,7 @@
                     <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.parents }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('parents')">
+                    <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>
@@ -105,7 +105,7 @@
                     <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('emergencyContacts')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emergencyContacts')">
+                    <button v-if="getEnableFilterConfiguration('emergencyContacts')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>
@@ -273,10 +273,10 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
-    editEnableFilterConfiguration(property: string) {
+    editEnableFilterConfiguration(property: string, title: string) {
         this.present(new ComponentWithProperties(PropertyFilterView, {
             configuration: this.patchedOrganization.meta.recordsConfiguration[property],
-            title: property,
+            title,
             organization: this.patchedOrganization,
             setConfiguration: (configuration: PropertyFilter<MemberDetails>) => {
                 this.patchConfigProperty(property, configuration)
