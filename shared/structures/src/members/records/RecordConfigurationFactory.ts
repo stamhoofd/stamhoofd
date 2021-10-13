@@ -51,7 +51,7 @@ export class RecordConfigurationFactory {
         if (type === OrganizationType.Youth || [OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
             const plus26Filter = ageDef.createFilter()
             plus26Filter.mode = NumberFilterMode.GreaterThan
-            plus26Filter.start = 26
+            plus26Filter.start = 30
 
             configuration.address = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus18Filter]), new FilterGroup(detailsDefinitions, [plus26Filter]))
         }
@@ -66,11 +66,11 @@ export class RecordConfigurationFactory {
 
             const minus18Filter = ageDef.createFilter()
             minus18Filter.mode = NumberFilterMode.LessThan
-            minus18Filter.end = 18
+            minus18Filter.end = 17
 
             const minus26Filter = ageDef.createFilter()
             minus26Filter.mode = NumberFilterMode.LessThan
-            minus26Filter.end = 26
+            minus26Filter.end = 29
 
             const addressMissingFilter = missingFilter.createFilter()
             addressMissingFilter.choiceIds = ["address"]
@@ -92,11 +92,11 @@ export class RecordConfigurationFactory {
 
             const minus18Filter = ageDef.createFilter()
             minus18Filter.mode = NumberFilterMode.LessThan
-            minus18Filter.end = 18
+            minus18Filter.end = 17
 
             const minus26Filter = ageDef.createFilter()
             minus26Filter.mode = NumberFilterMode.LessThan
-            minus26Filter.end = 26
+            minus26Filter.end = 29
 
             const parentsMissingFilter = missingFilter.createFilter()
             parentsMissingFilter.choiceIds = ["parents"]

@@ -117,6 +117,10 @@ export class NumberFilter<T> extends Filter<T> {
     }
 
     toString() {
+        if (this.definition.explainFilter) {
+            return this.definition.explainFilter(this)
+        }
+        
         if (this.mode === NumberFilterMode.GreaterThan) {
             return this.definition.name + " is "+this.start+" of meer"
         }

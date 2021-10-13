@@ -86,6 +86,9 @@ export class ChoicesFilter<T> extends Filter<T> {
     }
 
     toString() {
+        if (this.definition.explainFilter) {
+            return this.definition.explainFilter(this)
+        }
         if (this.mode === ChoicesFilterMode.Or) {
             return this.definition.name + " is "+Formatter.joinLast(this.choiceIds.map(c => this.definition.choices.find(cc => cc.id == c)?.name ?? c), ", ", " of ")
         } else {

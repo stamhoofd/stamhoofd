@@ -19,6 +19,9 @@
                     <button class="button icon gray trash" type="button" @click="removeFilter(index)" />
                 </div>
             </h2>
+            <p v-if="filter.definition.description">
+                {{ filter.definition.description }}
+            </p>
             <StringFilterView v-if="isStringFilter(filter)" :filter="filter" />
             <NumberFilterView v-else-if="isNumberFilter(filter)" :filter="filter" />
             <DateFilterView v-else-if="isDateFilter(filter)" :filter="filter" />

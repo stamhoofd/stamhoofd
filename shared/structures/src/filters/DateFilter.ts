@@ -143,6 +143,10 @@ export class DateFilter<T> extends Filter<T> {
     }
 
     toString() {
+        if (this.definition.explainFilter) {
+            return this.definition.explainFilter(this)
+        }
+        
         const start = this.minimumDate ? (this.definition.time ? Formatter.dateTime(this.minimumDate) : Formatter.date(this.minimumDate)) : "?"
         const end = this.maximumDate ? (this.definition.time ? Formatter.dateTime(this.maximumDate) : Formatter.date(this.maximumDate)) : "?"
 

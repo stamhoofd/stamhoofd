@@ -56,6 +56,9 @@ export class StringFilter<T> extends Filter<T> {
     }
 
     toString() {
+        if (this.definition.explainFilter) {
+            return this.definition.explainFilter(this)
+        }
         if (this.mode === StringFilterMode.Contains) {
             return this.definition.name + " bevat "+this.value
         }

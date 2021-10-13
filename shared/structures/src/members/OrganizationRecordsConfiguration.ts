@@ -180,14 +180,17 @@ export class MemberDetailsWithGroups {
                 name: "Ontbrekende gegevens", 
                 description: "Als één van de geselecteerde gegevens ontbreekt of niet is ingevuld. Op deze manier kan je handige combinaties vormen, bv. een noodcontactpersoon enkel vragen als er maar één ouder is.",
                 choices: [
-                    new ChoicesFilterChoice("birthDay", "Geboortedatum", "Deze is altijd ingevuld als het verplicht in te vullen is."),
-                    new ChoicesFilterChoice("address", "Adres", "Van lid zelf. Deze is altijd ingevuld als het verplicht in te vullen is."),
-                    new ChoicesFilterChoice("phone", "GSM-nummer", "Van lid zelf. Deze is altijd ingevuld als het verplicht in te vullen is."),
-                    new ChoicesFilterChoice("email", "E-mailadres", "Van lid zelf. Deze is altijd ingevuld als het verplicht in te vullen is."),
-                    new ChoicesFilterChoice("parents", "Ouders", "De stap was overgeslagen (kan enkel als die optioneel is)"),
+                    new ChoicesFilterChoice("birthDay", "Geboortedatum"),
+                    new ChoicesFilterChoice("address", "Adres", "Van lid zelf"),
+                    new ChoicesFilterChoice("phone", "GSM-nummer", "Van lid zelf"),
+                    new ChoicesFilterChoice("email", "E-mailadres", "Van lid zelf"),
+                    new ChoicesFilterChoice("parents", "Ouders"),
                     new ChoicesFilterChoice("secondParent", "Tweede ouder", "Als er maar één ouder is toegevoegd aan een lid. Handig om te selecteren op een eenoudergezin, om zo een extra contactpersoon mogelijk te maken"),
-                    new ChoicesFilterChoice("emergencyContact", "Noodcontact", "De stap was overgeslagen (kan enkel als die optioneel is)"),
+                    new ChoicesFilterChoice("emergencyContact", "Noodcontact"),
                 ], 
+                explainFilter: (filter) => {
+                    return "gegevens ontbreken ("+filter.choiceIds.map(id => filter.definition.choices.find(c => c.id === id)?.name ?? "?").join(", ")+")"
+                },
                 getValue: (member) => {
                     const missing: string[] = []
                     if (!member.details.birthDay) {

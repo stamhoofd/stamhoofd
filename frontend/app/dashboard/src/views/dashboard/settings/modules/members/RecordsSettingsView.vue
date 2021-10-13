@@ -19,7 +19,7 @@
             <p>Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten, en eventueel bepaalde gegevens optioneel maken (altijd of bijvoorbeeld op basis van de leeftijd).</p>
 
             <STList>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
                     <p class="style-title-list">
                         GSM-nummer (van lid zelf)
@@ -32,7 +32,7 @@
                         <span class="hide-small">Wijzig</span>
                     </button>
                 </STListItem>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
                     <p class="style-title-list">
                         E-mailadres (van lid zelf)
@@ -45,7 +45,7 @@
                         <span class="hide-small">Wijzig</span>
                     </button>
                 </STListItem>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
                     <p class="style-title-list">
                         Geslacht
@@ -58,7 +58,7 @@
                         <span class="hide-small">Wijzig</span>
                     </button>
                 </STListItem>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
                     <p class="style-title-list">
                         Geboortedatum
@@ -71,7 +71,7 @@
                         <span class="hide-small">Wijzig</span>
                     </button>
                 </STListItem>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
                     <p class="style-title-list">
                         Adres (van lid zelf)
@@ -84,7 +84,7 @@
                         <span class="hide-small">Wijzig</span>
                     </button>
                 </STListItem>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
                     <p class="style-title-list">
                         Ouders
@@ -97,7 +97,7 @@
                         <span class="hide-small">Wijzig</span>
                     </button>
                 </STListItem>
-                <STListItem :selectable="true" element-name="label">
+                <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
                     <p class="style-title-list">
                         Noodcontactpersoon
