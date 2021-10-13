@@ -8,26 +8,48 @@
         <main>
             <h1>Yay! 🥳 De ledenadministratie is actief</h1>
 
-            <p v-if="isYouth">
-                Alle activiteiten, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvinsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
-            </p>
-            <p v-else>
-                Leden worden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvinsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
-            </p>
-
-            <p>
-                Inschrijvingsgroepen zijn nog eens onderverdeeld in categorieën om er wat structuur te brengen (als het er veel zijn). Je kan ze in de volgende stap wijzigen.
-            </p>
-
-            <p>
-                Je kan zelf kiezen welke informatie je wilt verzamelen van jouw leden (bv. geboortedatum, emailadres, gsm-nummer, eigen vragen...). Dat kan je wijzigen via Instellingen > Ledenadministratie > Kenmerken en gegevens van leden.
-            </p>
+            <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie inschrijvingspagina (zie hieronder) of kan je ze importeren via Excel. Of je probeert gewoon zelf eerst even in te schrijven, je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
 
             <hr>
-            <h2>Jouw inschrijvingspagina</h2>
+            <h2>Inschrijvingsgroepen</h2>
+
+            <p v-if="isYouth">
+                Alle activiteiten, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
+            </p>
+            <p v-else>
+                Leden worden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
+            </p>
+
+            <button class="button secundary" @click="manageGroups">
+                <span class="icon settings" />
+                <span>Instellen</span>
+            </button>
+
+            <hr>
+            <h2>Welke gegevens wil je verzamelen?</h2>
+            
+            <p class="style-description-block">
+                Je kan zelf kiezen welke informatie je wilt verzamelen van jouw leden (bv. geboortedatum, emailadres, gsm-nummer, eigen vragen...). Wijzig dit via de knop hieronder, of later via de instellingen.
+            </p>
+
+            <button class="button secundary" @click="manageRecords(true)">
+                <span class="icon settings" />
+                <span>Instellen</span>
+            </button>
+
+            <hr>
+            <h2 class="style-with-button">
+                <div>Jouw inschrijvingspagina</div>
+                <div>
+                    <a :href="registerUrl" target="_blank" rel="noopener" class="button text">
+                        <span class="icon external" />
+                        <span class="hide-small">Openen</span>
+                    </a>
+                </div>
+            </h2>
 
             <p>
-                Leden kunnen inschrijven voor inschrijvinsgroepen via je eigen inschrijvingspagina of via een uitnodiging in een e-mail (= e-mail sturen via Stamhoofd nadat je jouw leden hebt geïmporteerd).
+                Leden kunnen inschrijven voor inschrijvingsgroepen via je eigen inschrijvingspagina of via een uitnodiging in een e-mail die je via Stamhoofd verstuurd.
             </p>
 
 
@@ -70,14 +92,10 @@
         </main>
 
         <STToolbar>
-            <template slot="right">
-                <LoadingButton>
-                    <button class="button primary" @click="manageGroups">
-                        <span class="icon edit" />
-                        <span>Inschrijvingsgroepen</span>
-                    </button>
-                </LoadingButton>
-            </template>
+            <button slot="right" class="button primary" @click="dismiss">
+                <span>Doorgaan</span>
+                <span class="icon arrow-right" />
+            </button>
         </STToolbar>
     </div>
 </template>
@@ -90,6 +108,7 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager"
 import { buildManageGroupsComponent } from "../../buildManageGroupsComponent";
+import RecordsSettingsView from "./RecordsSettingsView.vue";
 
 @Component({
     components: {
@@ -120,6 +139,12 @@ export default class ActivatedView extends Mixins(NavigationMixin) {
 
     get isYouth() {
         return this.organization.meta.type === OrganizationType.Youth
+    }
+
+    manageRecords(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(RecordsSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
     }
 
     manageGroups() {

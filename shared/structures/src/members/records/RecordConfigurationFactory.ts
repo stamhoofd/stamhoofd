@@ -66,11 +66,11 @@ export class RecordConfigurationFactory {
 
             const minus18Filter = ageDef.createFilter()
             minus18Filter.mode = NumberFilterMode.LessThan
-            minus18Filter.start = 18
+            minus18Filter.end = 18
 
             const minus26Filter = ageDef.createFilter()
             minus26Filter.mode = NumberFilterMode.LessThan
-            minus26Filter.start = 26
+            minus26Filter.end = 26
 
             const addressMissingFilter = missingFilter.createFilter()
             addressMissingFilter.choiceIds = ["address"]
@@ -92,11 +92,11 @@ export class RecordConfigurationFactory {
 
             const minus18Filter = ageDef.createFilter()
             minus18Filter.mode = NumberFilterMode.LessThan
-            minus18Filter.start = 18
+            minus18Filter.end = 18
 
             const minus26Filter = ageDef.createFilter()
             minus26Filter.mode = NumberFilterMode.LessThan
-            minus26Filter.start = 26
+            minus26Filter.end = 26
 
             const parentsMissingFilter = missingFilter.createFilter()
             parentsMissingFilter.choiceIds = ["parents"]

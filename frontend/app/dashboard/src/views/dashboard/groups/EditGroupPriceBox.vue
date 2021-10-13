@@ -67,7 +67,7 @@
                     ** Van hetzelfde lid, in de categorie '{{ category.settings.name }}'
                 </p>
                 <p v-else class="style-description-small">
-                    ** In hetzelfde lid in dezelfde categorie
+                    ** Voor hetzelfde lid in dezelfde categorie
                 </p>
             </template>
             
