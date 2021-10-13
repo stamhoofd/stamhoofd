@@ -242,6 +242,7 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     doctor = AskRequirement.NotAsked
 
     /**
+     * @deprecated
      * true: required
      * false: don't ask
      * null: optional

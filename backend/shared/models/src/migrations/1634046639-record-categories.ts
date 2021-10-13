@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { AskRequirement, DataPermissionsSettings, FinancialSupportSettings, LegacyRecordType, RecordFactory } from '@stamhoofd/structures';
+import { AskRequirement, DataPermissionsSettings, File, FilterGroup, FinancialSupportSettings, LegacyRecordType, MemberDetailsWithGroups, PropertyFilter, RecordFactory } from '@stamhoofd/structures';
 import { Organization } from '../models/Organization';
 
 export default new Migration(async () => {
@@ -35,6 +35,13 @@ export default new Migration(async () => {
 
         if (d.doctor !== AskRequirement.NotAsked) {
             d.recordCategories.push(RecordFactory.createDoctorCategory(d.doctor === AskRequirement.Required))
+        }
+
+        if (d.emergencyContact !== AskRequirement.NotAsked) {
+            const definitions = MemberDetailsWithGroups.getBaseFilterDefinitions()
+            d.emergencyContacts = new PropertyFilter(new FilterGroup(definitions), d.emergencyContact === AskRequirement.Required ? new FilterGroup(definitions) : null)
+        } else {
+            d.emergencyContacts = null
         }
 
         d.enabledLegacyRecords = []

@@ -133,19 +133,8 @@
             <hr>
             <h2>Interne gegevens</h2>
 
-            <p>
-                Je kan ook kenmerken toevoegen die enkel zichtbaar zijn voor beheerders.
-            </p>
-
-            <STList>
-                <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" @patch="addCategoriesPatch" />
-            </STList>
-
-            <p>
-                <button class="button text" @click="addCategory">
-                    <span class="icon add" />
-                    <span>Nieuwe categorie</span>
-                </button>
+            <p class="info-box">
+                Nog even geduld. Het wordt binnenkort mogelijk om zelf kenmerken toe te voegen aan leden die niet zichtbaar zijn voor die leden zelf. Bv. om de status van iets bij te houden.
             </p>
         </main>
 
