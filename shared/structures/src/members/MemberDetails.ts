@@ -234,6 +234,13 @@ export class MemberDetails extends AutoEncoder {
         return age;
     }
 
+    /**
+     * Age, set to 99 if missing
+     */
+    get defaultAge() {
+        return this.age ?? 99
+    }
+
     get birthDayFormatted(): string | null {
         if (!this.birthDay) {
             return null

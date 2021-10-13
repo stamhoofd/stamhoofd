@@ -8,10 +8,12 @@ import { Filter, FilterDefinition, FilterDefinitionSettings } from "./FilterDefi
 export class ChoicesFilterChoice {
     id: string
     name: string
+    description?: string
 
-    constructor(id: string, name: string) {
+    constructor(id: string, name: string, description?: string) {
         this.id = id
         this.name = name
+        this.description = description
     }
 }
 

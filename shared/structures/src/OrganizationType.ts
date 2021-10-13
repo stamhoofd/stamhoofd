@@ -26,6 +26,8 @@ export enum OrganizationType {
     Art = "Art",
     Culture = "Culture",
     LGBTQ = "LGBTQ",
+    Politics = "Politics",
+    Union = "Union",
     Other = "Other",
 }
 
@@ -130,6 +132,14 @@ export class OrganizationTypeHelper {
                 name: "LGBTQ+",
             },
             {
+                value: OrganizationType.Politics,
+                name: "Politiek",
+            },
+            {
+                value: OrganizationType.Union,
+                name: "Vakbond",
+            },
+            {
                 value: OrganizationType.School,
                 name: "School",
             },
@@ -172,6 +182,8 @@ export class OrganizationTypeHelper {
 
             case OrganizationType.Other:
             case OrganizationType.LGBTQ:
+            case OrganizationType.Politics:
+            case OrganizationType.Union:
             case OrganizationType.Nature:
             case OrganizationType.Professional:
             case OrganizationType.Neighborhood:

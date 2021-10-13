@@ -5,6 +5,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 export type FilterDefinitionSettings<T, FilterType extends Filter<T>, ValueType> = { 
     id: string, 
     name: string, 
+    description?: string,
     getValue: (object: T) => ValueType, 
     explainFilter?: (filter: FilterType) => string,
     category?: string
@@ -15,6 +16,7 @@ export type FilterDefinitionSettings<T, FilterType extends Filter<T>, ValueType>
 export abstract class FilterDefinition<T, FilterType extends Filter<T>, ValueType> implements Decoder<FilterType>{
     id: string
     name: string
+    description?: string
 
     // for grouping
     category?: string
@@ -30,6 +32,7 @@ export abstract class FilterDefinition<T, FilterType extends Filter<T>, ValueTyp
         this.id = settings.id
         this.name = settings.name
         this.category = settings.category
+        this.description = settings.description
         this.getValue = settings.getValue
         this.explainFilter = settings.explainFilter
     }

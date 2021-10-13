@@ -491,10 +491,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         return this.member.users.filter(u => u.publicKey === null)
     }
 
-    get shouldSkipRecords() {
-        return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
-    }
-
     getInvalidEmailDescription(email: string) {
         const find = this.emailInformation.find(e => e.email === email)
         if (!find) {

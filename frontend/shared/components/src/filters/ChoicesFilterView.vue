@@ -3,8 +3,11 @@
         <STList>
             <STListItem v-for="choice of choices" :key="choice.id" :selectable="true" element-name="label">
                 <Checkbox slot="left" :checked="isChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
-                <p>
+                <h3 class="style-title-list">
                     {{ choice.name }}
+                </h3>
+                <p v-if="choice.description" class="style-description-small">
+                    {{ choice.description }}
                 </p>
             </STListItem>
         </STList>

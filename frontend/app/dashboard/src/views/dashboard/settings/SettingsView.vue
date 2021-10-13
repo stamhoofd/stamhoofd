@@ -205,20 +205,6 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
-
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageLegacyRecords(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
-                        <h2 class="style-title-list">
-                            LEGACY: Wijzig gevraagde gegevens
-                        </h2>
-                        <p class="style-description">
-                            Toestemmingen, allergieën, medische gegevens
-                        </p>
-
-                        <template slot="right">
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
                 </STList>
             </template>
 
@@ -292,7 +278,6 @@ import GeneralSettingsView from './GeneralSettingsView.vue';
 import DataPermissionSettingsView from './modules/members/DataPermissionSettingsView.vue';
 import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
-import LegacyRecordsSettingsView from './modules/members/LegacyRecordsSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
@@ -430,12 +415,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     manageFreeContribution(animated = true) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(FreeContributionSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
-    }
-
-    manageLegacyRecords(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(LegacyRecordsSettingsView, {})
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 

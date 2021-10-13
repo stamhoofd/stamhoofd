@@ -174,8 +174,53 @@ export class MemberDetailsWithGroups {
 
                     return [...groups, ...waitingGroups, ...pendingGroups]
                 }
-            })
-            // todo: registrations filter on groups
+            }),
+            new ChoicesFilterDefinition<MemberDetailsWithGroups>({
+                id: "member_missing_data", 
+                name: "Ontbrekende gegevens", 
+                description: "Als één van de geselecteerde gegevens ontbreekt of niet is ingevuld. Op deze manier kan je handige combinaties vormen, bv. een noodcontactpersoon enkel vragen als er maar één ouder is.",
+                choices: [
+                    new ChoicesFilterChoice("birthDay", "Geboortedatum", "Deze is altijd ingevuld als het verplicht in te vullen is."),
+                    new ChoicesFilterChoice("address", "Adres", "Van lid zelf. Deze is altijd ingevuld als het verplicht in te vullen is."),
+                    new ChoicesFilterChoice("phone", "GSM-nummer", "Van lid zelf. Deze is altijd ingevuld als het verplicht in te vullen is."),
+                    new ChoicesFilterChoice("email", "E-mailadres", "Van lid zelf. Deze is altijd ingevuld als het verplicht in te vullen is."),
+                    new ChoicesFilterChoice("parents", "Ouders", "De stap was overgeslagen (kan enkel als die optioneel is)"),
+                    new ChoicesFilterChoice("secondParent", "Tweede ouder", "Als er maar één ouder is toegevoegd aan een lid. Handig om te selecteren op een eenoudergezin, om zo een extra contactpersoon mogelijk te maken"),
+                    new ChoicesFilterChoice("emergencyContact", "Noodcontact", "De stap was overgeslagen (kan enkel als die optioneel is)"),
+                ], 
+                getValue: (member) => {
+                    const missing: string[] = []
+                    if (!member.details.birthDay) {
+                        missing.push("birthDay")
+                    }
+
+                    if (!member.details.address) {
+                        missing.push("address")
+                    }
+
+                    if (!member.details.phone) {
+                        missing.push("phone")
+                    }
+
+                    if (!member.details.email) {
+                        missing.push("email")
+                    }
+
+                    if (member.details.parents.length == 0) {
+                        missing.push("parents")
+                    }
+
+                    if (member.details.parents.length == 1) {
+                        missing.push("secondParent")
+                    }
+
+                    if (member.details.emergencyContacts.length == 0) {
+                        missing.push("emergencyContact")
+                    }
+                    return missing
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
         ]
     }
 }
@@ -219,6 +264,10 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: new SetPropertyFilterDecoder(new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), MemberDetailsWithGroups.getBaseFilterDefinitions()), version: 117 })
     recordCategories: RecordCategory[] = []
 
+    // General configurations
+    @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
+    freeContribution: FreeContributionSettings | null = null
+
     /**
      * @deprecated
      * Moved to recordCategories
@@ -227,10 +276,6 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), upgrade: () => [], version: 55, field: "enabledRecords" })
     @field({ decoder: new ArrayDecoder(new EnumDecoder(LegacyRecordType)), version: 117, field: "enabledLegacyRecords" })
     enabledLegacyRecords: LegacyRecordType[] = []
-
-    // General configurations
-    @field({ decoder: FreeContributionSettings, nullable: true, version: 92 })
-    freeContribution: FreeContributionSettings | null = null
 
     /**
      * @deprecated
@@ -249,180 +294,4 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
      */
     @field({ decoder: new EnumDecoder(AskRequirement), optional: true })
     emergencyContact = AskRequirement.Optional
-
-    /**
-     * @deprecated
-     * Return true if at least one from the records should get asked
-     */
-    shouldAsk(...types: LegacyRecordType[]): boolean {
-        for (const type of types) {
-            if (this.enabledLegacyRecords.find(r => r === type)) {
-                return true
-            }
-
-            if (type == LegacyRecordType.DataPermissions) {
-                // Required if at least non oprivacy related record automatically
-                if (this.needsData()) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    /**
-     * @deprecated
-     */
-    filterRecords(records: LegacyRecord[], ...allow: LegacyRecordType[]): LegacyRecord[] {
-        return records.filter((r) => {
-            if (allow.includes(r.type)) {
-                return true
-            }
-            return this.shouldAsk(r.type)
-        })
-    }
-
-    /**
-     * @deprecated
-     * Return true if we need to ask permissions for data, even when LegacyRecordType.DataPermissions is missing from enabledLegacyRecords
-     */
-    needsData(): boolean {
-        if (this.doctor !== AskRequirement.NotAsked) {
-            return true
-        }
-        if (this.enabledLegacyRecords.length == 0) {
-            return false
-        }
-
-        if (this.enabledLegacyRecords.find(type => {
-            if (![LegacyRecordType.DataPermissions, LegacyRecordType.MedicinePermissions, LegacyRecordType.PicturePermissions, LegacyRecordType.GroupPicturePermissions].includes(type)) {
-                return true
-            }
-            return false
-        })) {
-            return true
-        }
-        return false
-    }
-
-    /**
-     * @deprecated
-     */
-    shouldSkipRecords(age: number | null): boolean {
-        if (this.doctor !== AskRequirement.NotAsked) {
-            return false
-        }
-        if (this.enabledLegacyRecords.length == 0) {
-            return true
-        }
-
-        if (this.enabledLegacyRecords.length == 1 && (age === null || age >= 18)) {
-            // Skip if the only record that should get asked is permission for medication
-            return this.enabledLegacyRecords[0] === LegacyRecordType.MedicinePermissions
-        }
-
-        return false
-    }
-
-    /**
-     * This fixes how inverted and special records are returned.
-     * E.g. MedicalPermissions is returned if the member did NOT give permissions -> because we need to show a message
-     * PicturePermissions is returned if no group picture permissions was given and normal picture permissions are disabled
-     */
-    /*filterForDisplay(records: LegacyRecord[], age: number | null): LegacyRecord[] {
-        return this.filterRecords(
-            LegacyRecord.invertRecords(records), 
-            ...(this.shouldAsk(LegacyRecordType.GroupPicturePermissions) ? [LegacyRecordType.PicturePermissions] : [])
-        ).filter((record) => {
-            // Some edge cases
-            // Note: inverted types are already reverted here! -> GroupPicturePermissions means no permissions here
-            
-            if (record.type === LegacyRecordType.GroupPicturePermissions) {
-                // When both group and normal pictures are allowed, hide the group pictures message
-                if (this.shouldAsk(LegacyRecordType.PicturePermissions) && records.find(r => r.type === LegacyRecordType.PicturePermissions)) {
-                    // Permissions for pictures -> this is okay
-                    return false
-                }
-
-                if (!this.shouldAsk(LegacyRecordType.PicturePermissions)) {
-                    // This is not a special case
-                    return false
-                }
-            }
-
-            // If no permissions for pictures but permissions for group pictures, only show the group message
-            if (record.type === LegacyRecordType.PicturePermissions) {
-                if (this.shouldAsk(LegacyRecordType.GroupPicturePermissions) && records.find(r => r.type === LegacyRecordType.GroupPicturePermissions)) {
-                    // Only show the 'only permissions for group pictures' banner
-                    return false
-                }
-            }
-
-
-            // Member is older than 18 years, and no permissions for medicines
-            if (record.type === LegacyRecordType.MedicinePermissions && (age ?? 18) >= 18) {
-                return false
-            }
-
-            return true
-        })
-    }*/
-
-    static getDefaultFor(type: OrganizationType): OrganizationRecordsConfiguration {
-        if (type === OrganizationType.Youth) {
-            // Enable all
-            const records = Object.values(LegacyRecordType)
-
-            return OrganizationRecordsConfiguration.create({
-                enabledLegacyRecords: records,
-                doctor: AskRequirement.Required,
-                emergencyContact: AskRequirement.Optional
-            })
-        }
-
-        if ([OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
-            // Enable sport related records + pictures
-
-            return OrganizationRecordsConfiguration.create({
-                enabledLegacyRecords: [
-                    LegacyRecordType.DataPermissions,
-                    LegacyRecordType.PicturePermissions,
-
-                    // Allergies
-                    LegacyRecordType.FoodAllergies,
-                    LegacyRecordType.MedicineAllergies,
-                    LegacyRecordType.OtherAllergies,
-
-                    // Health
-                    LegacyRecordType.Asthma,
-                    LegacyRecordType.Epilepsy,
-                    LegacyRecordType.HeartDisease,
-                    LegacyRecordType.Diabetes,
-                    LegacyRecordType.SpecialHealthCare,
-                    LegacyRecordType.Medicines,
-                    LegacyRecordType.Rheumatism,
-                    ...(type === OrganizationType.Swimming ? [LegacyRecordType.SkinCondition] : [LegacyRecordType.HayFever]),
-
-                    LegacyRecordType.MedicinePermissions,
-
-                    // Other
-                    LegacyRecordType.Other,
-                ],
-                doctor: AskRequirement.Optional,
-                emergencyContact: AskRequirement.Optional
-            })
-        }
-
-         if (type === OrganizationType.LGBTQ) {
-            // Request data permissions + emergency contact is optional
-            return OrganizationRecordsConfiguration.create({
-                enabledLegacyRecords: [LegacyRecordType.DataPermissions],
-                doctor: AskRequirement.NotAsked,
-                emergencyContact: AskRequirement.Optional
-            })
-        }
-
-        // Others are all disabled by default
-        return OrganizationRecordsConfiguration.create({})
-    }
 }

@@ -20,11 +20,12 @@ export class FilterGroup<T> extends Filter<T> {
     filters: Filter<T>[] = []
     mode = GroupFilterMode.And
 
-    constructor(definitions: FilterDefinition<T, Filter<T>, any>[], filters: Filter<T>[] = []) {
+    constructor(definitions: FilterDefinition<T, Filter<T>, any>[], filters: Filter<T>[] = [], mode = GroupFilterMode.And) {
         super()
         this.definitions = definitions
         this.filters = filters
         this.definition = new FilterGroupDecoder(this.definitions)
+        this.mode = mode
     }
 
     setDefinitions(definitions: FilterDefinition<T, Filter<T>, any>[]) {

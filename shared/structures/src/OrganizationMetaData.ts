@@ -197,10 +197,7 @@ export class OrganizationMetaData extends AutoEncoder {
 
     @field({ 
         decoder: OrganizationRecordsConfiguration, 
-        version: 53, 
-        upgrade: function(this: OrganizationMetaData) {
-            return OrganizationRecordsConfiguration.getDefaultFor(OrganizationType.Youth)
-        },
+        version: 53,
         defaultValue: () => OrganizationRecordsConfiguration.create({})
     })
     recordsConfiguration: OrganizationRecordsConfiguration

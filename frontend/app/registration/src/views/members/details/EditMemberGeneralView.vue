@@ -30,9 +30,9 @@
                         </div>
                     </STInputBox>
 
-                    <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')"/>
+                    <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
 
-                    <STInputBox title="Identificeert zich als..." error-fields="gender" :error-box="errorBox" v-if="isPropertyEnabled('gender')">
+                    <STInputBox v-if="isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
                         <RadioGroup>
                             <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
                                 Man

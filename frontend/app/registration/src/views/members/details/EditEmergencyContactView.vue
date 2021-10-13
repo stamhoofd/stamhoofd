@@ -18,10 +18,22 @@
                 Gegevens van een noodcontactpersoon
             </h1>
             <p v-if="details.parents.length > 0">
-                Ouders worden altijd als eerste gecontacteerd in nood, maar graag hebben we nog een extra contact voor als ouders niet bereikbaar zijn. Dit kan bv. een tante, opa of buurvrouw zijn.
+                Ouders worden altijd als eerste gecontacteerd in nood, maar graag hebben we nog een extra contact voor als ouders niet bereikbaar zijn.
+
+                <template v-if="details.defaultAge > 40">
+                    Dit kan bijvoorbeeld een kind, vriend, ouder, buurvrouw of gelijk wie zijn die je vertrouwt. 
+                </template>
+                <template v-else>
+                    Dit kan een vriend, buurvrouw of gelijk wie zijn die je vertrouwt. 
+                </template>
             </p>
             <p v-else>
-                Graag hebben we een contactpersoon voor in noodgevallen. Dit kan een ouder, tante, opa, buurvrouw of gelijk wie je verkiest zijn.
+                <template v-if="details.defaultAge > 40">
+                    Graag hebben we een contactpersoon voor in noodgevallen. Dit kan bijvoorbeeld een kind, vriend, ouder, buurvrouw of gelijk wie zijn die je vertrouwt. 
+                </template>
+                <template v-else>
+                    Graag hebben we een contactpersoon voor in noodgevallen. Dit kan een ouder, vriend, buurvrouw of gelijk wie zijn die je vertrouwt. 
+                </template>
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -32,22 +44,23 @@
                     </STInputBox>
 
                     <STInputBox title="Relatie*" error-fields="title" :error-box="errorBox">
-                        <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. oma">
+                        <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. buurman">
                         <datalist id="emergency-contact-types">
                             <option v-if="details.parents.length == 0" value="Vader" />
                             <option v-if="details.parents.length == 0" value="Moeder" />
                             <option v-if="details.parents.length == 0" value="Ouder" />
-                            <option value="Oma" />
-                            <option value="Opa" />
-                            <option value="Tante" />
-                            <option value="Oom" />
+                            <option v-if="details.defaultAge < 30" value="Oma" />
+                            <option v-if="details.defaultAge < 30" value="Opa" />
+                            <option v-if="details.defaultAge < 30" value="Tante" />
+                            <option v-if="details.defaultAge < 30" value="Oom" />
                             <option value="Buurvrouw" />
                             <option value="Buurman" />
-                            <option value="Nonkel" />
-                            <option value="Pepe" />
-                            <option value="Meme" />
-                            <option value="Grootvader" />
-                            <option value="Grootmoeder" />
+                            <option value="Vriend" />
+                            <option v-if="details.defaultAge < 30" value="Nonkel" />
+                            <option v-if="details.defaultAge < 30" value="Pepe" />
+                            <option v-if="details.defaultAge < 30" value="Meme" />
+                            <option v-if="details.defaultAge < 30" value="Grootvader" />
+                            <option v-if="details.defaultAge < 30" value="Grootmoeder" />
                         </datalist>
                     </STInputBox>
                     <p class="style-description-small">
