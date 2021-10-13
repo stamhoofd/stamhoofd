@@ -18,7 +18,7 @@
 
             <EditMemberContactsView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
 
-            <template v-if="financialSupportEnabled">
+            <template v-if="dataPermissionsEnabled">
                 <hr>
                 <h2>{{ dataPermissionsTitle }}</h2>
                 
