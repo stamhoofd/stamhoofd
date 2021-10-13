@@ -50,8 +50,8 @@ export class RecordConfigurationFactory {
         // Only make address optional for youth and sport organizations for now
         if (type === OrganizationType.Youth || [OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
             const plus26Filter = ageDef.createFilter()
-            plus18Filter.mode = NumberFilterMode.GreaterThan
-            plus18Filter.start = 26
+            plus26Filter.mode = NumberFilterMode.GreaterThan
+            plus26Filter.start = 26
 
             configuration.address = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus18Filter]), new FilterGroup(detailsDefinitions, [plus26Filter]))
         }
