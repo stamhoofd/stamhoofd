@@ -222,6 +222,10 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
                     }
                 }
 
+                if (parentAddresses.size == 1 && addresses.size == 1) {
+                    return new Map([["Adres", [...addresses].join("\n")]])
+                }
+
                 if (parentAddresses.size >= 1) {
                     if (!member.details.address || addresses.size === parentAddresses.size) {
                         return new Map(member.details.parents.flatMap(parent => {
@@ -396,6 +400,21 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
                                 return
                             }
                             return answer.stringValue && answer.stringValue != "/" ? answer.stringValue : undefined
+                        }
+                    })
+                )
+
+                this.groupProperties.push(
+                    new SummaryGroupProperty({
+                        name: record.name,
+                        selected: !!record.warning,
+                        getValue: (member) => {
+                            const answer = member.details.recordAnswers.find(a => a.settings.id == record.id)
+                            if (!answer) {
+                                return null
+                            }
+                            
+                            return answer.stringValue
                         }
                     })
                 )
