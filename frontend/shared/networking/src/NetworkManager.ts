@@ -1,3 +1,4 @@
+import { SimpleErrors } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components';
 import { Version } from '@stamhoofd/structures';
@@ -80,6 +81,13 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
     async shouldRetryServerError(request: Request<any>, response: XMLHttpRequest, error: Error): Promise<boolean> {
         console.error("server error", error)
+        console.error(error)
+        console.error(response)
+        return Promise.resolve(false);
+    }
+
+    async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
+        console.error("response error", error)
         console.error(error)
         console.error(response)
         return Promise.resolve(false);
