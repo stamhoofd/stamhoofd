@@ -547,20 +547,9 @@ export class MemberDetails extends AutoEncoder {
         ]
     }
 
-    // Complex migration on decoding if version before custom records
-    static override decode<T extends typeof AutoEncoder>(this: T, data: Data): InstanceType<T> {
-        const d = super.decode(data) as MemberDetails
-
-        if (data.context.version < 128) {
-            console.warn("Migrating member details from version "+data.context.version)
-
-            
-        }
-
-        return d as InstanceType<T>
-    }
-
     upgradeFromLegacy(organization: Organization) {
+        console.log("Upgrading details")
+
         if (!this.requiresFinancialSupport) {
             this.requiresFinancialSupport = BooleanStatus.create({ 
                 value: !!this.records.find(r => r.type === LegacyRecordType.FinancialProblems),
@@ -588,17 +577,16 @@ export class MemberDetails extends AutoEncoder {
                     selectedChoice: RecordChoice.create({
                         id: "yes",
                         name: "Ja, ik geef toestemming",
-                        warning: RecordWarning.create({
-                            id: "",
-                            text: "Geen toestemming voor publicatie foto's",
-                            type: RecordWarningType.Error
-                        })
                     }),
                     date: new Date(2021, 0, 1), // Always give it the same date
                     reviewedAt: this.reviewTimes.getLastReview("records") ?? null
                 })
                 this.recordAnswers.push(answer)
             } else if (record.type === LegacyRecordType.GroupPicturePermissions) {
+                // Do not add if we already have full permission
+                if (this.records.find(r => r.type === LegacyRecordType.PicturePermissions)) {
+                    continue;
+                }
                 const answer = RecordChooseOneAnswer.create({
                     settings,
                     selectedChoice: RecordChoice.create({

@@ -215,8 +215,23 @@ export class MemberManagerStatic extends MemberManagerBase {
         return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
     }
 
-    async patchMembersDetails(members: MemberWithRegistrations[]) {
-        return await this.patchMembers(await this.getEncryptedMembersPatch(members))
+    private chunkArray<T>(array: T[], size = 10): T[][] {
+        const chunked: T[][] = []
+
+        for (let i = 0;  i < array.length; i += size) {
+            chunked.push(array.slice(i, i + size))
+        }
+
+        return chunked
+    }
+
+    async patchMembersDetails(members: MemberWithRegistrations[], shouldRetry = true): Promise<void> {
+        // Patch maximum 10 members at the same time
+        const chunked = this.chunkArray(members, 10)
+
+        for (const group of chunked) {
+            await this.patchMembers(await this.getEncryptedMembersPatch(group), shouldRetry)
+        }
     }
 
     async patchMembers(members: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {

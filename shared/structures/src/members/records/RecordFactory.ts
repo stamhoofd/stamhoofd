@@ -186,6 +186,9 @@ export class RecordFactory {
 
             case LegacyRecordType.PicturePermissions:
             case LegacyRecordType.GroupPicturePermissions:
+
+                // Force same id for group and normal pictures
+                record.id = "legacy-type-"+LegacyRecordType.PicturePermissions
                 record.encrypted = false
                 record.sensitive = false
                 record.type = RecordType.ChooseOne

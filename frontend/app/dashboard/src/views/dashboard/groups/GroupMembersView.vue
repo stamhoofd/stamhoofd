@@ -487,7 +487,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return
         }
         this.checkingInaccurate = true
-        let toast: Toast | null = null
+        let toast: Toast | null = null
         try {
             const inaccurate: MemberWithRegistrations[] = []
             for (const m of this.members) {
@@ -504,10 +504,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 toast = new Toast("Gegevens van leden updaten naar laatste versie...", "spinner").setHide(null).show()
 
                 // Patch member with new details
-                await MemberManager.patchMembersDetails(inaccurate)
+                await MemberManager.patchMembersDetails(inaccurate, false)
             }
         } catch (e) {
             console.error(e)
+            Toast.fromError(e).show()
         }
         toast?.hide()
         this.checkingInaccurate = false
