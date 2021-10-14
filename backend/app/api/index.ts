@@ -37,6 +37,7 @@ const start = async () => {
     
     // Send the app version along
     routerServer.addResponseMiddleware(AppVersionMiddleware)
+    routerServer.addRequestMiddleware(AppVersionMiddleware)
     routerServer.defaultHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",

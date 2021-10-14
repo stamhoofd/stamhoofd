@@ -258,6 +258,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 return
             }
             console.error(e)
+            Toast.fromError(e).show()
             this.results = []
         }).finally(() => {
             if (cachedCount !== this.counter) {

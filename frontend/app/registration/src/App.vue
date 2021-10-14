@@ -7,6 +7,7 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
@@ -137,6 +138,11 @@ export default class App extends Vue {
                 })
             });
         } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization"))) {
+                    Toast.fromError(e).show()
+                }
+            }
             console.error(e)
             return new ComponentWithProperties(InvalidOrganizationView, {})
         }
