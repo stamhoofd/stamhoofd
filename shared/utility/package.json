@@ -16,8 +16,6 @@
         "test": "yarn build:full && jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
-    "devDependencies": {
-        "@types/libsodium-wrappers": "^0.7.7"
-    },
+    "devDependencies": {},
     "dependencies": {}
 }

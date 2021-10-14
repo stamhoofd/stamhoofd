@@ -50,7 +50,8 @@ class SodiumStatic {
                 // Throw the same network error as 
                 throw new SimpleError({
                     code: "network_error",
-                    message: "Network error"
+                    message: "Network error",
+                    human: "Probleem met internetverbinding. Probeer de pagina te herladen als het probleem niet verdwijnt."
                 })
             }
 

@@ -15,7 +15,7 @@
         "yalc:clear": "yalc remove --all && rm -rf node_modules && yarn install"
     },
     "devDependencies": {
-        "@types/libsodium-wrappers": "^0.7.7",
+        "@types/libsodium-wrappers": "^0.7.9",
         "@types/mailparser": "^2.7.4",
         "@types/node": "^14.0.26"
     },
@@ -30,7 +30,7 @@
         "dotenv": "^8.2.0",
         "formidable": "^1.2.2",
         "html-to-text": "^5.1.1",
-        "libsodium-wrappers": "^0.7.6",
+        "libsodium-wrappers": "^0.7.9",
         "mailparser": "^3.0.0",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",

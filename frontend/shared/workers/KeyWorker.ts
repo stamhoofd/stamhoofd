@@ -39,6 +39,9 @@ export async function generateKeys(password: string) {
     const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
 
     const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
+
+    console.log("Got sign keys. Next up: encryption keys.");
+
     const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
     
     console.log("Done.");

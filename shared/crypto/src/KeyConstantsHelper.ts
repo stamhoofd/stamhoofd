@@ -16,7 +16,7 @@ export class KeyConstantsHelper {
         // https://libsodium.gitbook.io/doc/password_hashing/default_phf#guidelines-for-choosing-the-parameters
 
         // For normal users we reduce memory needs because some older devices might crash if we try to allocate 1GB memory
-        let opslimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE // Increase to make the generation of the key slower
+        let opslimit = sodium.crypto_pwhash_OPSLIMIT_MODERATE // Increase to make the generation of the key slower
         let memlimit = sodium.crypto_pwhash_MEMLIMIT_MODERATE
 
         // We do inform admins that login takes longer due to encryption
