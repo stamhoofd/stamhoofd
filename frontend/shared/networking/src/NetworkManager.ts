@@ -1,8 +1,10 @@
+import { SimpleErrors } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components';
 import { Version } from '@stamhoofd/structures';
 
 import { AppManager } from './AppManager';
+import { UrlHelper } from './UrlHelper';
 
 export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -82,6 +84,28 @@ export class NetworkManagerStatic implements RequestMiddleware {
         console.error("server error", error)
         console.error(error)
         console.error(response)
+        return Promise.resolve(false);
+    }
+
+    async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
+        console.error("response error", error)
+        console.error(error)
+        console.error(response)
+
+        try {
+            if (error.hasCode("client_update_required")) {
+                Toast.fromError(error).show()
+
+                if (!AppManager.shared.isNative && !UrlHelper.shared.getSearchParams().has("forceClientUpdate")) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("forceClientUpdate", new Date().getTime()+"")
+                    window.location.href = url.toString()
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+        
         return Promise.resolve(false);
     }
 
