@@ -33,24 +33,21 @@ export async function generateEncryptionKey(password: string, authEncryptionKeyC
  * Generate keys for a user sign-up
  */
 export async function generateKeys(password: string) {
-    //console.log("Generating keys and constants...");
+    console.log("Generating keys and constants...");
 
     // Sign keys are more sensitive, because they are the easiest to attack with a brute force attack
     const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
 
     //console.log("Got sign contants. Next up: encryption key contants");
-
     const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
 
     //console.log("Got all contants. Next up: sign key pair");
-
     const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
 
     //console.log("Got sign keys. Next up: encryption keys.");
-
     const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
     
-    //console.log("Done.");
+    console.log("Done.");
     ctx.postMessage({
         authSignKeyConstants: authSignKeyConstants.encode({ version: Version }),
         authEncryptionKeyConstants: authEncryptionKeyConstants.encode({ version: Version }),
