@@ -318,6 +318,7 @@ module.exports = {
         }),
     ],
     experiments: {
-        syncWebAssembly: true // temporary, until fixed
+        //syncWebAssembly: true // temporary, until fixed
+        asyncWebAssembly: true
     },
 };
