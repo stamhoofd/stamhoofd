@@ -6,6 +6,10 @@ export class UrlHelper {
     hash: string | null = null
 
     static shared = new UrlHelper()
+
+    /**
+     * The original values when loading the page. Do not modify this one.
+     */
     static initial = new UrlHelper()
 
     constructor() {
