@@ -1,8 +1,16 @@
 <template>
     <div class="st-view invalid-page-view">
         <main>
-            <h1>Deze webshop bestaat niet</h1>
+            <h1 v-if="!errorBox">
+                Deze webshop bestaat niet
+            </h1>
+            <h1 v-else>
+                Er ging iets mis
+            </h1>
+
             <p>Kijk even na of de link klopt of probeer later opnieuw.</p>
+
+            <STErrorsDefault :error-box="errorBox" />
         </main>
 
         <div class="legal-footer">
@@ -23,16 +31,18 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Logo } from "@stamhoofd/components"
-import { Component, Mixins } from "vue-property-decorator";
+import { ErrorBox,Logo, STErrorsDefault } from "@stamhoofd/components"
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
-        Logo
+        Logo,
+        STErrorsDefault
     }
 })
 export default class InvalidWebshopView extends Mixins(NavigationMixin){
-
+    @Prop({ default: null })
+    errorBox: ErrorBox | null
 }
 </script>
 

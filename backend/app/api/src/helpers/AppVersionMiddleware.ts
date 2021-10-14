@@ -9,7 +9,7 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         }
         const platform = request.headers["x-platform"];
         const version = request.getVersion()
-        if (version < 128) {
+        if (version < 129) {
             if (platform === "web" || platform === undefined) {
                 throw new SimpleError({
                     code: "outdated_client",

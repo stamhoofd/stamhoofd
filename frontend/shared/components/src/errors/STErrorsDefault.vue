@@ -25,6 +25,10 @@ import STErrorBox from "./STErrorBox.vue"
     
     errors: SimpleError[] = [];
 
+    mounted() {
+        this.onNewErrors(this.errorBox)
+    }
+
     @Watch('errorBox')
     onNewErrors(val: ErrorBox | null ) {
         if (!val) {

@@ -10,7 +10,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ColorHelper, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
@@ -61,6 +61,10 @@ export default class App extends Vue {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization") || e.hasCode("unknown_webshop"))) {
                         Toast.fromError(e).show()
+
+                        return new ComponentWithProperties(InvalidWebshopView, {
+                            errorBox: new ErrorBox(e)
+                        })
                     }
                 }
                 return new ComponentWithProperties(InvalidWebshopView, {})
