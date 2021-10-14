@@ -55,6 +55,7 @@ a.st-list-item {
     display: flex !important;
     flex-direction: row;
 
+    @extend .style-normal;
 
     >.left {
         flex-shrink: 0;

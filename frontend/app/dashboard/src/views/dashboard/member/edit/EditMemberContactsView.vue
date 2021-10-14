@@ -170,6 +170,7 @@ export default class EditMemberContactsView extends Mixins(NavigationMixin) {
 
     editEmergencyContact() {
         this.present(new ComponentWithProperties(EditMemberEmergencyContactView, {
+            details: this.memberDetails,
             familyManager: this.familyManager,
             contact: this.memberDetails?.emergencyContacts[0] ?? null,
             handler: (contact: EmergencyContact, component: EditMemberEmergencyContactView) => {

@@ -41,11 +41,10 @@
 </template>
 
 <script lang="ts">
-import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components"
-import { Address, Gender, Version } from "@stamhoofd/structures"
+import { Address, Gender } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 

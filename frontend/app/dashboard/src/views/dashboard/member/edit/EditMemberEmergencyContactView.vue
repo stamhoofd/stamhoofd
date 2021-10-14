@@ -1,5 +1,5 @@
 <template>
-    <div id="parent-view" class="st-view">
+    <div class="st-view">
         <STNavigationBar title="Noodcontact">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-else slot="right" class="button icon gray close" @click="pop" />
@@ -7,7 +7,7 @@
         
         <main>
             <h1>
-                Gegevens van een reserve noodcontactpersoon
+                Gegevens van een noodcontactpersoon
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -17,22 +17,29 @@
                         <input v-model="name" class="input" nmae="name" type="text" placeholder="Naam" autocomplete="name">
                     </STInputBox>
 
-                    <STInputBox title="Relatie" error-fields="title" :error-box="errorBox">
-                        <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Vrije invoer (bv. oma)">
+                    <STInputBox title="Relatie*" error-fields="title" :error-box="errorBox">
+                        <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. buurman">
                         <datalist id="emergency-contact-types">
-                            <option value="Oma" />
-                            <option value="Opa" />
-                            <option value="Tante" />
-                            <option value="Oom" />
+                            <option v-if="details && details.parents.length == 0" value="Vader" />
+                            <option v-if="details && details.parents.length == 0" value="Moeder" />
+                            <option v-if="details && details.parents.length == 0" value="Ouder" />
+                            <option v-if="details && details.defaultAge < 30" value="Oma" />
+                            <option v-if="details && details.defaultAge < 30" value="Opa" />
+                            <option v-if="details && details.defaultAge < 30" value="Tante" />
+                            <option v-if="details && details.defaultAge < 30" value="Oom" />
                             <option value="Buurvrouw" />
                             <option value="Buurman" />
-                            <option value="Nonkel" />
-                            <option value="Pepe" />
-                            <option value="Meme" />
-                            <option value="Grootvader" />
-                            <option value="Grootmoeder" />
+                            <option value="Vriend" />
+                            <option v-if="details && details.defaultAge < 30" value="Nonkel" />
+                            <option v-if="details && details.defaultAge < 30" value="Pepe" />
+                            <option v-if="details && details.defaultAge < 30" value="Meme" />
+                            <option v-if="details && details.defaultAge < 30" value="Grootvader" />
+                            <option v-if="details && details.defaultAge < 30" value="Grootmoeder" />
                         </datalist>
                     </STInputBox>
+                    <p class="style-description-small">
+                        *Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.
+                    </p>
                 </div>
 
                 <div>
@@ -53,7 +60,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton,Checkbox, EmailInput, ErrorBox, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { EmergencyContact } from "@stamhoofd/structures"
+import { EmergencyContact, MemberDetails } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
@@ -75,6 +82,9 @@ import { FamilyManager } from '../../../../classes/FamilyManager';
     }
 })
 export default class EditMemberEmergencyContactView extends Mixins(NavigationMixin) {
+    @Prop({ default: null })
+    details: MemberDetails | null // tood
+
     @Prop({ default: null })
     contact: EmergencyContact | null // tood
 
@@ -152,16 +162,3 @@ export default class EditMemberEmergencyContactView extends Mixins(NavigationMix
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables" as *;
-@use "@stamhoofd/scss/base/text-styles" as *;
-
-#parent-view {
-    .address-selection {
-        .middle {
-            @extend .style-normal;
-        }
-    }
-}
-</style>
