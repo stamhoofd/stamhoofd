@@ -8,7 +8,7 @@
         <main>
             <h1>Yay! 🥳 De ledenadministratie is actief</h1>
 
-            <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie inschrijvingspagina (zie hieronder) of kan je ze importeren via Excel. Of je probeert gewoon zelf eerst even in te schrijven, je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
+            <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie inschrijvingspagina (zie hieronder) of je kan ze importeren via Excel. Je kan ook gewoon zelf eerst even proberen in te schrijven. Je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
 
             <hr>
             <h2>Inschrijvingsgroepen</h2>
