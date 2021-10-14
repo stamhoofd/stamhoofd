@@ -244,25 +244,25 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     dataPermission: DataPermissionsSettings | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 124 })
-    emailAddress: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+    emailAddress: PropertyFilter<MemberDetails> | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
-    phone: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+    phone: PropertyFilter<MemberDetails> | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
-    gender: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+    gender: PropertyFilter<MemberDetails> | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
-    birthDay: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+    birthDay: PropertyFilter<MemberDetails> | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
-    address: PropertyFilter<MemberDetails> | null = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+    address: PropertyFilter<MemberDetails> | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetailsWithGroups.getBaseFilterDefinitions()), nullable: true, version: 125 })
-    parents: PropertyFilter<MemberDetailsWithGroups> | null = PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
+    parents: PropertyFilter<MemberDetailsWithGroups> | null = null
 
     @field({ decoder: new PropertyFilterDecoder(MemberDetailsWithGroups.getBaseFilterDefinitions()), nullable: true, version: 125 })
-    emergencyContacts: PropertyFilter<MemberDetailsWithGroups> | null = PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
+    emergencyContacts: PropertyFilter<MemberDetailsWithGroups> | null = null
 
     @field({ decoder: new SetPropertyFilterDecoder(new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), MemberDetailsWithGroups.getBaseFilterDefinitions()), version: 117 })
     recordCategories: RecordCategory[] = []

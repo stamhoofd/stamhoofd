@@ -29,6 +29,9 @@ export class RecordConfigurationFactory {
      * Except emergency contacts
      */
     static setDefaultBuiltInFields(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
+        configuration.gender = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+        configuration.birthDay = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+
         // Every organization types uses these defaults
         const detailsDefinitions = MemberDetails.getBaseFilterDefinitions()
 
@@ -54,7 +57,10 @@ export class RecordConfigurationFactory {
             plus26Filter.start = 30
 
             configuration.address = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus18Filter]), new FilterGroup(detailsDefinitions, [plus26Filter]))
+        } else {
+            configuration.address = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
         }
+
     }
 
     static setDefaultParents(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
