@@ -96,7 +96,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
             if (error.hasCode("client_update_required")) {
                 Toast.fromError(error).show()
 
-                if (!AppManager.shared.isNative && !UrlHelper.shared.getSearchParams().has("forceClientUpdate")) {
+                if (!AppManager.shared.isNative && !UrlHelper.initial.getSearchParams().has("forceClientUpdate")) {
                     const url = new URL(window.location.href);
                     url.searchParams.set("forceClientUpdate", new Date().getTime()+"")
                     window.location.href = url.toString()
@@ -105,7 +105,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
         } catch (e) {
             console.error(e)
         }
-        
+
         return Promise.resolve(false);
     }
 

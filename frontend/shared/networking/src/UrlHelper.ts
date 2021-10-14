@@ -6,6 +6,7 @@ export class UrlHelper {
     hash: string | null = null
 
     static shared = new UrlHelper()
+    static initial = new UrlHelper()
 
     constructor() {
         this.path = window.location.pathname
