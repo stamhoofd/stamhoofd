@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view webshop-view background">
+    <div class="st-view webshop-orders-view background">
         <STNavigationBar :sticky="false">
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
@@ -814,3 +814,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
 }
 </script>
+
+<style lang="scss">
+.webshop-orders-view {
+    .title-description {
+        padding-bottom: 20px;
+    }
+}
+</style>
