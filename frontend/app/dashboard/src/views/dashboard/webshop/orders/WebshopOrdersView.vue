@@ -607,23 +607,27 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }
         })
 
-        const deliveryLocation = new ChoicesFilterDefinition<PrivateOrder>({
-            id: "order_deliveryCity",
-            name: "Leveringsgemeente",
-            choices: this.deliveryCities.map(([id, city]) => {
-                return new ChoicesFilterChoice(id, city)
-            }),
-            defaultMode: ChoicesFilterMode.Or,
-            getValue: (order) => {
-                const ids: string[] = []
-                if (order.data.checkoutMethod && order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
-                    ids.push(Formatter.slug(order.data.address.postalCode+" "+order.data.address.city))
-                }
-                return ids
-            }
-        })
+        const definitions: FilterDefinition<PrivateOrder, Filter<PrivateOrder>, any>[] = [orderStatus, checkoutMethod, paymentMethod, paidStatus, orderNumber]
 
-        const price = new NumberFilterDefinition<PrivateOrder>({
+        if (this.webshop?.meta.checkoutMethods.find(c => c.type === CheckoutMethodType.Delivery)) {
+            definitions.push(new ChoicesFilterDefinition<PrivateOrder>({
+                id: "order_deliveryCity",
+                name: "Leveringsgemeente",
+                choices: this.deliveryCities.map(([id, city]) => {
+                    return new ChoicesFilterChoice(id, city)
+                }),
+                defaultMode: ChoicesFilterMode.Or,
+                getValue: (order) => {
+                    const ids: string[] = []
+                    if (order.data.checkoutMethod && order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
+                        ids.push(Formatter.slug(order.data.address.postalCode+" "+order.data.address.city))
+                    }
+                    return ids
+                }
+            }))
+        }
+
+        definitions.push(new NumberFilterDefinition<PrivateOrder>({
             id: "order_price",
             name: "Bestelbedrag",
             currency: true,
@@ -631,32 +635,61 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             getValue: (order) => {
                 return order.data.totalPrice
             }
-        })
+        }))
 
-        const date = new DateFilterDefinition<PrivateOrder>({
-            id: "order_createdAt",
-            name: "Besteldatum",
-            time: false,
-            getValue: (order) => {
-                return order.createdAt
-            }
-        })
+        definitions.push(
+            new DateFilterDefinition<PrivateOrder>({
+                id: "order_createdAt",
+                name: "Besteldatum",
+                time: false,
+                getValue: (order) => {
+                    return order.validAt ?? new Date(1900, 0, 1)
+                }
+            })
+        )
 
-        const paidDate = new DateFilterDefinition<PrivateOrder>({
-            id: "order_paidAt",
-            name: "Betaaldatum",
-            time: false,
-            getValue: (order) => {
-                return order.payment?.paidAt ?? new Date(1900, 0, 1)
-            }
-        })
+        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Transfer)) {
+            definitions.push(new DateFilterDefinition<PrivateOrder>({
+                id: "order_paidAt",
+                name: "Betaaldatum",
+                time: false,
+                getValue: (order) => {
+                    return order.payment?.paidAt ?? new Date(1900, 0, 1)
+                }
+            }))
+        }
 
-        // todo: date placed
-        // todo: tickets & vouchers
-        // todo: bestelbedrag
+        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL)) {
+            definitions.push(
+                new DateFilterDefinition<PrivateOrder>({
+                    id: "order_settledAt",
+                    name: "Uitbetalingsdatum Mollie",
+                    description: "Voor betaalmethodes Bancontact en iDEAL",
+                    time: false,
+                    getValue: (order) => {
+                        return order.payment?.settlement?.settledAt ?? new Date(1900, 0, 1)
+                    }
+                })
+            )
+        }
+
+        // todo: products
+        definitions.push(
+            new ChoicesFilterDefinition<PrivateOrder>({
+                id: "order_products",
+                name: "Bestelde artikels",
+                choices: (this.webshop?.products ?? []).map(product => {
+                    return new ChoicesFilterChoice(product.id, product.name)
+                }),
+                defaultMode: ChoicesFilterMode.Or,
+                getValue: (order) => {
+                    return order.data.cart.items.flatMap(i => i.product.id)
+                }
+            })
+        )
 
 
-        return [orderStatus, checkoutMethod, paymentMethod, paidStatus, orderNumber, deliveryLocation, price, date, paidDate]
+        return definitions
     }
 
     editFilter() {
