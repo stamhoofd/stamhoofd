@@ -1,26 +1,27 @@
 <template>
     <div class="st-view webshop-view background">
         <STNavigationBar :sticky="false">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-                <STNavigationTitle v-else>
-                    <span class="icon-spacer">{{ title }}</span>
-                </STNavigationTitle>
-            </template>
-            <template #right>
-                <select v-model="selectedFilter" class="input hide-small">
-                    <option v-for="(filter, index) in filters" :key="index" :value="index">
-                        {{ filter.getName() }}
-                    </option>
-                </select>
-                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
-            </template>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
     
         <main>
-            <h1 v-if="canPop" class="data-table-prefix">
+            <h1 class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
+                <span v-if="!loading && !isLoadingOrders" class="style-tag">{{ orders.length }}</span>
             </h1>
+
+            <div class="input-with-buttons data-table-prefix title-description">
+                <div>
+                    <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                </div>
+                <div>
+                    <button class="button text" @click="editFilter">
+                        <span class="icon filter" />
+                        <span class="hide-small">Filter</span>
+                        <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                    </button>
+                </div>
+            </div>
 
             <Spinner v-if="loading && !isRefreshingOrders" class="center" />
             <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">
@@ -113,6 +114,21 @@
             </table>
 
             <Spinner v-if="isRefreshingOrders" class="center" />
+
+            <p v-if="totalFilteredCount == 1" class="info-box icon filter with-button">
+                De filters verbergen één bestelling
+
+                <button class="button text" @click="resetFilter">
+                    Reset
+                </button>
+            </p>
+            <p v-else-if="totalFilteredCount > 1" class="info-box icon filter with-button">
+                De filters verbergen {{ totalFilteredCount }} bestellingen
+
+                <button class="button text" @click="resetFilter">
+                    Reset
+                </button>
+            </p>
         </main>
 
         <STToolbar :class="{'hide-smartphone': selectionCount == 0 }">
@@ -141,18 +157,18 @@
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { FilterEditor, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { getPermissionLevelNumber, OrderStatus, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
+import { CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { NoFilter, NotPaidFilter,StatusFilter } from '../../../../classes/order-filters';
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import { f } from "../../../../pdfkit.standalone";
 import MailView from '../../mail/MailView.vue';
 import { WebshopManager } from '../WebshopManager';
 import OrderContextMenu from './OrderContextMenu.vue';
@@ -218,8 +234,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     selectionCountHidden = 0;
     searchQuery = "";
 
-    filters = [new NoFilter(), ...StatusFilter.generateAll(), new NotPaidFilter()];
-    selectedFilter = 0;
+    selectedFilter: Filter<PrivateOrder> | null = null;
 
 
     /**
@@ -421,14 +436,22 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             });
     }
 
+    filteredCount = 0
+
+    get totalFilteredCount() {
+        return this.orders.length - this.filteredOrders.length
+    }
+
     get filteredOrders() {
         this.selectionCountHidden = 0
+        this.filteredCount = 0
 
-        const filtered = this.orders.filter((order: SelectableOrder) => {
-            if (this.filters[this.selectedFilter].doesMatch(order.order)) {
+        const filtered = this.selectedFilter === null ? this.orders.slice() : this.orders.filter((order: SelectableOrder) => {
+            if (this.selectedFilter?.doesMatch(order.order)) {
                 return true;
             }
             this.selectionCountHidden += order.selected ? 1 : 0;
+            this.filteredCount += 1
             return false;
         });
 
@@ -487,6 +510,150 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
         return clone
     }
+
+    resetFilter() {
+        this.searchQuery = ""
+        this.selectedFilter = null
+    }
+
+    get deliveryCities(): Map<string, string> {
+        const cities = new Map<string, string>()
+        for (const order of this.orders) {
+            if (order.order.data.checkoutMethod &&  order.order.data.checkoutMethod.type == CheckoutMethodType.Delivery && order.order.data.address) {
+                cities.set(Formatter.slug(order.order.data.address.city), order.order.data.address.city)
+            }
+        }
+
+        return cities
+    }
+
+    get definitions(): FilterDefinition<PrivateOrder, Filter<PrivateOrder>, any>[] {
+        const checkoutMethod = new ChoicesFilterDefinition<PrivateOrder>({
+            id: "order_checkoutMethod",
+            name: "Afhaal/leveringsmethode",
+            choices: (this.webshop?.meta.checkoutMethods ?? []).flatMap(method => {
+                // todo: also add checkout methods that are not valid anymore from existing orders
+                const choices: ChoicesFilterChoice[] = []
+
+                if (method.timeSlots.timeSlots.length == 0) {
+                    choices.push(
+                        new ChoicesFilterChoice(method.id, method.type+": "+method.name)
+                    )
+                }
+                
+                for (const time of method.timeSlots.timeSlots) {
+                    choices.push(
+                        new ChoicesFilterChoice(method.id+"-"+time.id, method.type+": "+method.name, time.toString())
+                    )
+                }
+                return choices
+            }),
+            defaultMode: ChoicesFilterMode.Or,
+            getValue: (order) => {
+                const ids: string[] = []
+                if (order.data.checkoutMethod) {
+                    ids.push(order.data.checkoutMethod.id)
+                    
+                    if (order.data.timeSlot) {
+                        ids.push(order.data.checkoutMethod.id+"-"+order.data.timeSlot.id)
+                    }
+                }
+                return ids
+            }
+        })
+
+        const paymentMethod = new ChoicesFilterDefinition<PrivateOrder>({
+            id: "order_paymentMethod",
+            name: "Betaalmethode",
+            choices: [PaymentMethod.Transfer, PaymentMethod.Payconiq, PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Unknown].map(method => {
+                return new ChoicesFilterChoice(method, Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(method)))
+            }),
+            defaultMode: ChoicesFilterMode.Or,
+            getValue: (order) => {
+                return [order.data.paymentMethod]
+            }
+        })
+
+        const paidStatus = new ChoicesFilterDefinition<PrivateOrder>({
+            id: "order_paid",
+            name: "Betaling",
+            choices: [
+                new ChoicesFilterChoice("paid", "Betaald"),
+                new ChoicesFilterChoice("not_paid", "Niet betaald")
+            ],
+            defaultMode: ChoicesFilterMode.Or,
+            getValue: (order) => {
+                return [order.payment?.status == PaymentStatus.Succeeded ? "paid" : "not_paid"]
+            }
+        })
+
+        const orderStatus = new ChoicesFilterDefinition<PrivateOrder>({
+            id: "order_status",
+            name: "Bestelstatus",
+            choices: Object.values(OrderStatus).map(status => {
+                return new ChoicesFilterChoice(status, OrderStatusHelper.getName(status))
+            }),
+            defaultMode: ChoicesFilterMode.Or,
+            getValue: (order) => {
+                return [order.status]
+            }
+        })
+
+        const orderNumber = new NumberFilterDefinition<PrivateOrder>({
+            id: "order_number",
+            name: "Bestelnummer",
+            getValue: (order) => {
+                return order.number ?? 0
+            }
+        })
+
+        const deliveryLocation = new ChoicesFilterDefinition<PrivateOrder>({
+            id: "order_deliveryCity",
+            name: "Leveringsgemeente",
+            choices: [...this.deliveryCities.entries()].map(([id, city]) => {
+                return new ChoicesFilterChoice(id, city)
+            }),
+            defaultMode: ChoicesFilterMode.Or,
+            getValue: (order) => {
+                const ids: string[] = []
+                if (order.data.checkoutMethod && order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
+                    ids.push(Formatter.slug(order.data.address.city))
+                }
+                return ids
+            }
+        })
+
+        const price = new NumberFilterDefinition<PrivateOrder>({
+            id: "order_price",
+            name: "Bestelbedrag",
+            currency: true,
+            floatingPoint: true,
+            getValue: (order) => {
+                return order.data.totalPrice
+            }
+        })
+
+        // todo: date placed
+        // todo: tickets & vouchers
+        // todo: bestelbedrag
+
+
+        return [orderStatus, checkoutMethod, paymentMethod, paidStatus, orderNumber, deliveryLocation, price]
+    }
+
+    editFilter() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(FilterEditor, {
+                definitions: this.definitions,
+                selectedFilter: this.selectedFilter,
+                organization: OrganizationManager.organization,
+                setFilter: (filter: Filter<PrivateOrder>) => {
+                    this.selectedFilter = filter
+                }
+            })
+        }).setDisplayStyle("side-view"))
+    }
+
 
     get sortedOrders() {
         return this.sortOrders(this.filteredOrders)

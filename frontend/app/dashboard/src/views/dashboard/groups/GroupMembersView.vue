@@ -138,14 +138,14 @@
                 De filters verbergen één lid
 
                 <button class="button text" @click="resetFilter">
-                    Wissen
+                    Reset
                 </button>
             </p>
             <p v-else-if="totalFilteredCount > 1" class="info-box icon filter with-button">
                 De filters verbergen {{ totalFilteredCount }} leden
 
                 <button class="button text" @click="resetFilter">
-                    Wissen
+                    Reset
                 </button>
             </p>
 
