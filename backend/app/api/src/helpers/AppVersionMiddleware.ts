@@ -12,14 +12,14 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         if (version < 128) {
             if (platform === "web" || platform === undefined) {
                 throw new SimpleError({
-                    code: "outdated_client",
+                    code: "client_update_required",
                     statusCode: 400,
                     message: "Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.",
                     human: "Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser."
                 })
             } else {
                 throw new SimpleError({
-                    code: "outdated_client",
+                    code: "client_update_required",
                     statusCode: 400,
                     message: "Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!",
                     human: "Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!"

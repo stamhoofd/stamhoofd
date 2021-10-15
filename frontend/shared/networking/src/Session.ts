@@ -6,6 +6,7 @@ import { Sodium } from '@stamhoofd/crypto'
 import { InviteKeychainItem, KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator";
 
+import { AppManager } from '..'
 import { Keychain } from './Keychain'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
@@ -199,6 +200,13 @@ export class Session implements RequestMiddleware {
      */
     get server() {
         const server = NetworkManager.server
+
+        if (AppManager.shared.isNative && this.organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
+            // Use demo server for app reviews
+            server.host = "https://" + this.organizationId + "." + process.env.HOSTNAME_DEMO_API;
+            return server
+        }
+        
         server.host = "https://" + this.organizationId + "." + process.env.HOSTNAME_API;
         return server
     }
