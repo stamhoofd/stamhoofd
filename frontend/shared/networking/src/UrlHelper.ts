@@ -7,6 +7,11 @@ export class UrlHelper {
 
     static shared = new UrlHelper()
 
+    /**
+     * The original values when loading the page. Do not modify this one.
+     */
+    static initial = new UrlHelper()
+
     constructor() {
         this.path = window.location.pathname
         this.href = window.location.href
