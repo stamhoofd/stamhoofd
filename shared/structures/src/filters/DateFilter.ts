@@ -65,7 +65,13 @@ export class DateFilter<T> extends Filter<T> {
     definition: DateFilterDefinition<T>
 
     doesMatch(object: T): boolean {
-        const date = this.definition.getValue(object)
+        const date = new Date(this.definition.getValue(object))
+
+        if (!this.definition.time) {
+            date.setHours(0, 0, 0, 0)
+        } else {
+            date.setSeconds(0, 0)
+        }
 
         if (this.mode === DateFilterMode.Between) {
             if (this.minimumDate) {

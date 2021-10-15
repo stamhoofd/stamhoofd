@@ -22,7 +22,7 @@
         <STListItem :selectable="true" element-name="label" @click="onChange">
             <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="DateFilterMode.GreaterThan" @change="onChange" />
             <p class="style-title-list">
-                Groter of gelijk aan...
+                Na of op...
             </p>
 
             <DateSelection v-if="filter.mode === DateFilterMode.GreaterThan" ref="input" v-model="filter.minimumDate" :min="null" :max="null" placeholder="Vul datum in" class="option" />
@@ -32,7 +32,7 @@
         <STListItem :selectable="true" element-name="label" @click="onChange">
             <Radio slot="left" v-model="filter.mode" :name="filter.id" :value="DateFilterMode.LessThan" @change="onChange" />
             <p class="style-title-list">
-                Kleiner of gelijk aan...
+                Voor of op...
             </p>
 
             <DateSelection v-if="filter.mode === DateFilterMode.LessThan" ref="input" v-model="filter.maximumDate" :min="null" :max="null" placeholder="Vul datum in" class="option" />

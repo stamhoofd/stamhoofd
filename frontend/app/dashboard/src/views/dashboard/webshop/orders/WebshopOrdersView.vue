@@ -163,7 +163,7 @@ import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
+import { CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -516,15 +516,15 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         this.selectedFilter = null
     }
 
-    get deliveryCities(): Map<string, string> {
+    get deliveryCities(): [string, string][] {
         const cities = new Map<string, string>()
         for (const order of this.orders) {
             if (order.order.data.checkoutMethod &&  order.order.data.checkoutMethod.type == CheckoutMethodType.Delivery && order.order.data.address) {
-                cities.set(Formatter.slug(order.order.data.address.city), order.order.data.address.city)
+                cities.set(Formatter.slug(order.order.data.address.postalCode+" "+order.order.data.address.city), order.order.data.address.postalCode+" "+order.order.data.address.city)
             }
         }
 
-        return cities
+        return [...cities.entries()].sort((a, b) => Sorter.byStringValue(a[0], b[0]))
     }
 
     get definitions(): FilterDefinition<PrivateOrder, Filter<PrivateOrder>, any>[] {
@@ -610,14 +610,14 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         const deliveryLocation = new ChoicesFilterDefinition<PrivateOrder>({
             id: "order_deliveryCity",
             name: "Leveringsgemeente",
-            choices: [...this.deliveryCities.entries()].map(([id, city]) => {
+            choices: this.deliveryCities.map(([id, city]) => {
                 return new ChoicesFilterChoice(id, city)
             }),
             defaultMode: ChoicesFilterMode.Or,
             getValue: (order) => {
                 const ids: string[] = []
                 if (order.data.checkoutMethod && order.data.checkoutMethod.type === CheckoutMethodType.Delivery && order.data.address) {
-                    ids.push(Formatter.slug(order.data.address.city))
+                    ids.push(Formatter.slug(order.data.address.postalCode+" "+order.data.address.city))
                 }
                 return ids
             }
@@ -633,12 +633,30 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }
         })
 
+        const date = new DateFilterDefinition<PrivateOrder>({
+            id: "order_createdAt",
+            name: "Besteldatum",
+            time: false,
+            getValue: (order) => {
+                return order.createdAt
+            }
+        })
+
+        const paidDate = new DateFilterDefinition<PrivateOrder>({
+            id: "order_paidAt",
+            name: "Betaaldatum",
+            time: false,
+            getValue: (order) => {
+                return order.payment?.paidAt ?? new Date(1900, 0, 1)
+            }
+        })
+
         // todo: date placed
         // todo: tickets & vouchers
         // todo: bestelbedrag
 
 
-        return [orderStatus, checkoutMethod, paymentMethod, paidStatus, orderNumber, deliveryLocation, price]
+        return [orderStatus, checkoutMethod, paymentMethod, paidStatus, orderNumber, deliveryLocation, price, date, paidDate]
     }
 
     editFilter() {
@@ -763,9 +781,3 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/base/text-styles.scss';
-
-</style>
