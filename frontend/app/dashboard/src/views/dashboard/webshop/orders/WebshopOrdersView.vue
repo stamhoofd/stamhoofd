@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <Spinner v-if="loading && !isRefreshingOrders" class="center" />
+            <Spinner v-if="isLoadingOrders && !isRefreshingOrders" class="center" />
             <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">
                 Je hebt nog geen bestellingen ontvangen
             </p>
