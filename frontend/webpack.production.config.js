@@ -14,17 +14,17 @@ module.exports = merge(common, {
     optimization: {
         minimize: true,
         splitChunks: {
-            //chunks: 'all',
-           // minChunks: 2,
+            chunks: 'all',
+            minChunks: 2,
             cacheGroups: {
-                //default: false,
+                default: false,
                 styles: {
                     name: 'styles',
                     test: /\.s?css$/,
                     chunks: 'all',
                     enforce: true,
-                    //minChunks: 2,
-                    //reuseExistingChunk: true
+                    minChunks: 2,
+                    reuseExistingChunk: true
                 },
             },
         },
