@@ -2085,10 +2085,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.4.1.tgz#be603a76818fb2530db1103f274b40ad2c9ab1fd"
-  integrity sha512-gURaexYINYAo3ZLrtPF52qJcXKK892YOWghQfaQhBxdo/6pjnjP/uz0OT/T6achXa9aokwVp57dLImxWlcSmKA==
+"@simonbackx/simple-encoding@^2.4.2":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.4.2.tgz#f9c738c10d12c10d871a7cc682599b2000156f52"
+  integrity sha512-g7WOt8tTZdXGmzcaUW1HeDN9+5qJQ7D5ZmTakI1ItzYJ9pdmLMMylDRlsj9/Oo+YIW2c5SNzdmrcPz9WR5dotw==
 
 "@simonbackx/simple-endpoints@^1.8.0":
   version "1.8.0"
