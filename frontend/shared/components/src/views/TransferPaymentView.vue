@@ -292,8 +292,6 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         }
     }
 
-   
-
     preventLeave(event) {
         // Cancel the event
         event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown

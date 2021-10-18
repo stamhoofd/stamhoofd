@@ -2,7 +2,7 @@
     <div class="loading-button" :class="{loading}">
         <div><slot /></div>
         <div>
-            <Spinner v-if="loading || delayLoading"/>
+            <Spinner v-if="loading || delayLoading" />
         </div>
     </div>
 </template>
@@ -36,8 +36,6 @@ export default class LoadingButton extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles';
 
 .loading-button {
     position: relative;

@@ -1,5 +1,5 @@
 <template>
-    <div id="sgv-old-members-view" class="st-view">
+    <div class="st-view">
         <STNavigationBar title="Schrappen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
@@ -27,11 +27,11 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button destructive" type="button" @click="doDelete">
+                <button class="button destructive" type="button" @click.prevent.stop="doDelete">
                     <span class="icon trash" /><span>Schrappen</span>
                 </button>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" type="button" @click="doNothing">
+                    <button class="button primary" type="button" @click.prevent.stop="doNothing">
                         Behouden
                     </button>
                 </LoadingButton>
@@ -85,7 +85,7 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
 
     
     doDelete() {
-        if (this.loading) {
+        if (this.didSetAction) {
             return;
         }
         this.setAction("delete")
@@ -94,7 +94,7 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
     }
 
     doNothing() {
-        if (this.loading) {
+        if (this.didSetAction) {
             return;
         }
         this.setAction("nothing")
@@ -104,10 +104,3 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
 }
 
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>
