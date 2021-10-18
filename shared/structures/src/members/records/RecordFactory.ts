@@ -375,7 +375,7 @@ export class RecordFactory {
                 record.commentsDescription = "Een vaccinatie voor tetanus/klem is 10 jaar werkzaam, daarna is een nieuwe vaccinatie noodzakelijk."
                 
                 record.warning = RecordWarning.create({
-                    text: "Geen tetanusvaccinatie in de afgelopepn 10 jaar",
+                    text: "Geen tetanusvaccinatie in de afgelopen 10 jaar",
                     type: RecordWarningType.Info,
                     inverted: true
                 })
