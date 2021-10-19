@@ -312,6 +312,10 @@
     &.language:after {
         font-icon: url(@stamhoofd/assets/images/icons/language.svg);
     }
+
+    &.feedback:after {
+        font-icon: url(@stamhoofd/assets/images/icons/feedback.svg);
+    }
 }
 
 .android-icons {

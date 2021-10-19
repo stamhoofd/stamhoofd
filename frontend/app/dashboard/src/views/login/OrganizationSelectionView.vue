@@ -182,6 +182,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             }
         }
 
+        if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
+            // do not clear url here, so we can pass on the auth to the dashboard menu
+            new Toast("Kies een vereniging en log in. Daarna kan je inloggen in het feedback systeem.", "error red").setHide(15*1000).show()
+        }
+
         this.updateDefault().catch(console.error)
     }
 

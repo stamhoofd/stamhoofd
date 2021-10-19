@@ -121,6 +121,11 @@
                     <span class="icon logout" />
                     <span>Uitloggen</span>
                 </button>
+
+                <button class="menu-button button heading" @click="gotoFeedback(false)">
+                    <span class="icon feedback" />
+                    <span>Feedback</span>
+                </button>
             </div>
         </main>
     </div>
@@ -128,15 +133,17 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { StringDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadComponent, Logo, STNavigationBar,TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, LoadComponent, Logo, STNavigationBar,Toast,TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
+import { openNolt } from "../../classes/NoltHelper";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 
@@ -208,6 +215,10 @@ export default class Menu extends Mixins(NavigationMixin) {
                 this.openSyncScoutsEnGidsen(false).catch(console.error)
                 didSet = true
             }
+        }
+
+        if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
+            this.gotoFeedback(true).catch(console.error)
         }
 
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "category") {
@@ -415,6 +426,10 @@ export default class Menu extends Mixins(NavigationMixin) {
 
     isCategoryDeactivated(category: GroupCategoryTree) {
         return this.organization.isCategoryDeactivated(category)
+    }
+
+    async gotoFeedback(check = false) {
+        await openNolt(check)
     }
 }
 </script>

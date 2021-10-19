@@ -633,7 +633,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         console.log(probablyEqualList)*/
 
         if (probablyEqualList.length > 0) {
-            return new Promise((resolve, reject) => {
+            await new Promise<void>((resolve, reject) => {
                 onPopup()
                 component.present(new ComponentWithProperties(SGVVerifyProbablyEqualView, {
                     matches: probablyEqualList,
@@ -655,7 +655,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                                     newMembers.push(member.stamhoofd)
                                 }
                             }
-                            resolve({ matchedMembers, newMembers })
+                            resolve()
                         } catch (e) {
                             reject(e)
                         }

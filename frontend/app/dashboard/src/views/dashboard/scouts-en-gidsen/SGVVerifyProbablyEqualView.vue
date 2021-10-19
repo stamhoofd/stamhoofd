@@ -38,7 +38,7 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" type="button">
+                <button class="button secundary" type="button" @click="dismiss">
                     <span>Annuleren</span>
                 </button>
                 <LoadingButton :loading="loading">
