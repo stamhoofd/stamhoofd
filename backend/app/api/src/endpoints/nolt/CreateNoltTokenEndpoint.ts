@@ -50,12 +50,12 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
         // Create token
         const payload = {
             // The ID that you use in your app for this user
-            id: user.organization.id+'-'+user.id,
+            id: user.id,
             // The user's email address that
             // Nolt should use for notifications
             email: user.email,
             // The display name for this user
-            name: user.firstName+' van '+user.organization.name,
+            name: user.firstName+" "+user.lastName,
 
             // Optional: The URL to the user's avatar picture
             imageUrl: user.organization.meta.squareLogo?.getPublicPath() ?? user.organization.meta.horizontalLogo?.getPublicPath() ?? undefined
