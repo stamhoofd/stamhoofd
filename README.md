@@ -30,8 +30,6 @@ This is what you need to know:
 3. Look at the issues if you want to help build something, or open an issue if you want to help but don't know where to start. Tip: you can look at our feedback system (https://stamhoofd.nolt.io to find inspiration).
 4. Create a pull request, make a draft if you feel some discussion is needed or if you want to show your WIP
 
-We're experimenting with a better way to communicate with the community. We've joined the [Matrix network](https://matrix.org). Join our private, end-to-end encrypted chat at [chat.stamhoofd.dev](https://chat.stamhoofd.dev) and say hi 👋 in the `General` channel.
-
 ## Development
 
 To run everything locally, we need to glue all the packages together and build them. We only publish packages to the NPM registry during a release.
