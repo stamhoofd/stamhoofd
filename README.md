@@ -27,10 +27,8 @@ This is what you need to know:
 
 1. Try to keep all communication in English, even when you know everyone is speaking the same language. It makes it easier for others to find answers to some questions later on and to join a conversation. We know the software is currently in Dutch only, but that will change in the future ;) 
 2. We recommend you to create an issue before starting to build something (unless it is a bugfix or a small improvement, then you can open up a PR right away). Big features should be discussed first.
-3. Look at the issues if you want to help build something, or open an issue if you want to help but don't know where to start
+3. Look at the issues if you want to help build something, or open an issue if you want to help but don't know where to start. Tip: you can look at our feedback system (https://stamhoofd.nolt.io to find inspiration).
 4. Create a pull request, make a draft if you feel some discussion is needed or if you want to show your WIP
-
-We're experimenting with a better way to communicate with the community. We've joined the [Matrix network](https://matrix.org). Join our private, end-to-end encrypted chat at [chat.stamhoofd.dev](https://chat.stamhoofd.dev) and say hi 👋 in the `General` channel.
 
 ## Development
 
@@ -81,6 +79,9 @@ You can use the following commands in both `/frontend/app/registration` and `/fr
 All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `yarn build`. You can rebuild them all at once by running the same command in the project root.
 
 # Support and information
+
+Feedback and ideas:
+<a title="Feedback" role="link" href="https://stamhoofd.nolt.io">Feedback</a> (use this for feature suggestions instead of issues)
 
 More info on our website:
 <a title="Stamhoofd" role="link" rel="author" href="https://www.stamhoofd.be/">Stamhoofd</a>
