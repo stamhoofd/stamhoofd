@@ -7,11 +7,6 @@
         
         <main>
             <h1>Waarvoor wil je {{ member.firstName }} inschrijven?</h1>
-
-            <p v-if="!member.details.age" class="warning-box">
-                Vul de gegevens van {{ member.firstName }} aan om de mogelijke groepen automatisch te filteren.
-            </p>
-
             <STList>
                 <MemberBox v-for="group in groups" :key="group.id" :group="group" :member="member" type="group" />
             </STList>

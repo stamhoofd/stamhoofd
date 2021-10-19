@@ -1,5 +1,5 @@
 <template>
-    <div id="parent-view" class="st-view">
+    <div class="st-view">
         <STNavigationBar title="Ouder">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-else slot="right" class="button icon gray close" @click="pop" />
@@ -201,16 +201,3 @@ export default class EditMemberParentView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables" as *;
-@use "@stamhoofd/scss/base/text-styles" as *;
-
-#parent-view {
-    .address-selection {
-        .middle {
-            @extend .style-normal;
-        }
-    }
-}
-</style>

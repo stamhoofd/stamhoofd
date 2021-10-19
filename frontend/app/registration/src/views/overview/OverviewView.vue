@@ -10,7 +10,7 @@
                 <main class="container">
                     <h1>Leden bewerken en inschrijven</h1>
 
-                    <p v-for="invite of invites" :key="invite.id" class="info-box email with-button selectable" @click="registerMember(invite.member)">
+                    <p v-for="invite of invites" :key="invite.id" class="info-box icon email with-button selectable" @click="registerMember(invite.member)">
                         Je hebt een uitnodiging gekregen om {{ invite.member.firstName }} in te schrijven voor {{ invite.group.settings.name }}. Nu staat {{ invite.member.firstName }} nog op de wachtlijst.
                         <span class="button text selected">
                             <span>Inschrijven</span>
@@ -89,7 +89,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupTree from '../../components/GroupTree.vue';
-import { EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
+import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
 import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import MemberView from "../members/MemberView.vue";
 import MissingKeyView from "./MissingKeyView.vue";
@@ -215,7 +215,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
                                         path: "/payments/"+payment.id+"/registrations",
                                         decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
                                     })
-                                    const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
+                                    const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups, OrganizationManager.organization)
 
                                     this.show({
                                         components: [
@@ -266,9 +266,10 @@ export default class OverviewView extends Mixins(NavigationMixin){
         // We'll ask the other things when selecting the details
         const stepManager = new EditMemberStepsManager(
             [
-                EditMemberStepType.Details,
-                EditMemberStepType.Parents
+                new BuiltInEditMemberStep(EditMemberStepType.Details, true),
+                new BuiltInEditMemberStep(EditMemberStepType.Parents, true)
             ], 
+            [],
             undefined,
             (component: NavigationMixin) => {
                 // when we are ready, show the 'choose group' view for this member

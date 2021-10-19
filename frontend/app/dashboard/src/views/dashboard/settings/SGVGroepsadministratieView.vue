@@ -42,10 +42,10 @@
                     Naar groepsadministratie
                 </a>
                 <LoadingButton :loading="loading">
-                    <button v-if="isLoggedIn" class="button primary" type="button" @click="sync">
+                    <button v-if="isLoggedIn" key="syncButton" class="button primary" type="button" @click="sync">
                         Synchroniseren
                     </button>
-                    <button v-else class="button primary" type="button" @click="login">
+                    <button v-else key="loginButton" class="button primary" type="button" @click="login">
                         Inloggen
                     </button>
                 </LoadingButton>
@@ -116,6 +116,8 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
             toast.hide();
 
             const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
+
+            this.setLeave()
             const toast2 = new Toast("Synchroniseren...", "spinner").setProgress(0).setWithOffset().setHide(null).show()
 
             try {
@@ -136,11 +138,48 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
             Toast.fromError(e).setWithOffset().show()
         }
+        this.removeLeave()
         this.loading = false
     }
 
     login() {
+        console.log("Login, start OAuth")
         SGVGroepsadministratie.startOAuth()
+    }
+
+    beforeDestroy() {
+        console.log("destroy")
+        this.removeLeave()
+    }
+
+    leaveSet = false
+
+    removeLeave() {
+        if (!this.leaveSet) {
+            return
+        }
+        console.log("removeLeave")
+        window.removeEventListener("beforeunload", this.preventLeave);
+        this.leaveSet = false
+    }
+
+    setLeave() {
+        if (this.leaveSet) {
+            return
+        }
+        console.log("set leave")
+        this.leaveSet = true
+        window.addEventListener("beforeunload", this.preventLeave);
+    }
+
+    preventLeave(event) {
+        // Cancel the event
+        event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        // Chrome requires returnValue to be set
+        event.returnValue = 'De synchronisatie is nog bezig. Wacht tot de synchronisatie is voltooid voor je de pagina verlaat';
+
+        // This message is not visible on most browsers
+        return "De synchronisatie is nog bezig. Wacht tot de synchronisatie is voltooid voor je de pagina verlaat"
     }
 }
 </script>

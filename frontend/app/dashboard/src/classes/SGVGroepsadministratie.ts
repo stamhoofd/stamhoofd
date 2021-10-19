@@ -5,7 +5,7 @@ import { Request, RequestMiddleware, RequestResult,Server } from '@simonbackx/si
 import { ComponentWithProperties,NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
-import { Country, CountryDecoder, Gender, MemberWithRegistrations, Organization, RecordType } from '@stamhoofd/structures';
+import { Country, CountryDecoder, Gender, LegacyRecordType,MemberWithRegistrations, Organization } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
@@ -50,7 +50,7 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
             }))
         }
 
-        const titel = data.optionalField("titel")?.string
+        const titel = data.optionalField("titel")?.string ?? data.optionalField("boodschap")?.string
 
         if (!titel) {
             console.error("Onbekende foutmelding van de groepsadministratie: ", data.data)
@@ -689,7 +689,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                             message: "Synchronisatie geannuleerd"
                         }))
                     },
-                    setAction: async (action: "delete" | "import" | "nothing") => {
+                    setAction: (action: "delete" | "import" | "nothing") => {
                         try {
                             resolve({ oldMembers, action })
                         } catch (e) {

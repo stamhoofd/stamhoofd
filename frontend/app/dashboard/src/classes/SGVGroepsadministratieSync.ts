@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Address, Gender, Group, MemberDetails, MemberWithRegistrations,Parent, ParentType, RecordType } from '@stamhoofd/structures';
+import { Address, Gender, Group, LegacyRecordType,MemberDetails, MemberWithRegistrations,Parent, ParentType } from '@stamhoofd/structures';
 import { Formatter,StringCompare } from '@stamhoofd/utility';
 
 import { SGVLid } from './SGVGroepsadministratie';
@@ -241,7 +241,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
             beperking: lid.vgagegevens && lid.vgagegevens.beperking ? true : false,
             geboortedatum: Formatter.dateNumber(details.birthDay).split("/").reverse().join("-"),
             individueleSteekkaartdatumaangepast: lid.vgagegevens && lid.vgagegevens.individueleSteekkaartdatumaangepast ? lid.vgagegevens.individueleSteekkaartdatumaangepast : undefined,
-            verminderdlidgeld: details.records.find(r => r.type == RecordType.FinancialProblems) ? true : false,
+            verminderdlidgeld: details.requiresFinancialSupport?.value ?? false,
         }
     }
 

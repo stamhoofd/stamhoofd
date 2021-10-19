@@ -5,7 +5,7 @@
             <template slot="right">
                 <button v-if="canEdit" class="button text" @click="editMe">
                     <span class="icon settings" />
-                    <span>Wijzigen</span>
+                    <span>Instellingen</span>
                 </button>
             </template>
         </STNavigationBar>

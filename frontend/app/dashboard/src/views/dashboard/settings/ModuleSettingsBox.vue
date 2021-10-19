@@ -4,9 +4,9 @@
             <label v-if="!hasLegacy" class="box" :class="{ selected: enableMemberModule }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg"></div>
                 <div>
-                    <h2 class="style-title-list">Inschrijvingen en ledenbeheer</h2>
+                    <h2 class="style-title-list">Ledenadministratie en online inschrijvingen</h2>
                     <p v-if="enableMemberModule && !isMembersTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
-                    <p v-else class="style-description">Probeer gratis uit</p>
+                    <p v-else class="style-description">Probeer gratis 14 dagen uit</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'TrialMembers'" />
@@ -19,7 +19,7 @@
                 <div>
                     <h2 class="style-title-list">Activiteiten</h2>
                     <p v-if="enableActivities && !isMembersTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
-                    <p v-else class="style-description">Probeer gratis uit</p>
+                    <p v-else class="style-description">Probeer het gratis 14 dagen uit</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'TrialMembers'" />
@@ -32,7 +32,7 @@
                 <div>
                     <h2 class="style-title-list">Webshops &amp; tickets</h2>
                     <p v-if="enableWebshopModule && !isWebshopsTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
-                    <p v-else class="style-description">Probeer gratis uit</p>
+                    <p v-else class="style-description">Probeer het gratis uit met fictieve bestellingen, zolang je wilt</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'TrialWebshops'" />
@@ -51,7 +51,7 @@
                     <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
                 </div>
                 <div>
-                    <span class="style-tag">2021</span>
+                    <span class="style-tag">2022</span>
                 </div>
             </label>
 
@@ -62,7 +62,7 @@
                     <p class="style-description">Online reservaties, automatische contracten en kalenders</p>
                 </div>
                 <div>
-                    <span class="style-tag">2021</span>
+                    <span class="style-tag">2022</span>
                 </div>
             </label>
         </div>
@@ -74,7 +74,7 @@ import { AutoEncoderPatchType, Decoder, PartialWithoutMethods } from '@simonback
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { OrganizationMetaData, OrganizationModules, OrganizationPatch, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures"
+import { OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -109,7 +109,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     get enableMemberModule() {
-        return this.organization.meta.packages.useMembers
+        return this.organization.meta.packages.useMembers || this.loadingModule === STPackageType.TrialMembers
     }
 
     set enableMemberModule(enable: boolean) {
@@ -133,13 +133,13 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         }*/
 
         if (enable && !this.enableMemberModule) {
-            if (this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
+            if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
                 // We have an automated flow for these organizations
                 this.present(new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(MembersStructureSetupView, {})
                 }).setDisplayStyle("popup"))
             } else {
-                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten").then(() => {
+                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").then(() => {
                     // Wait for the backend to fill in all the default categories and groups
                     this.present(new ComponentWithProperties(NavigationController, {
                         root: new ComponentWithProperties(ActivatedView, {})
@@ -171,7 +171,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     get enableWebshopModule() {
-        return this.organization.meta.packages.useWebshops
+        return this.organization.meta.packages.useWebshops || this.loadingModule === STPackageType.TrialWebshops
     }
 
     set enableWebshopModule(enable: boolean) {
@@ -189,6 +189,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
 
     async checkout(bundle: STPackageBundle, message: string) {
         if (this.loadingModule) {
+            new Toast("Even geduld, nog bezig met laden...", "info").show()
             return
         }
         this.loadingModule = bundle as any as STPackageType

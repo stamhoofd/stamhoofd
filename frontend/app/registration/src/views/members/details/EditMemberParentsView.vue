@@ -14,7 +14,7 @@
                 Voeg alle ouders van {{ details.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar kunnen ook de gegevens tijdens het jaar wijzigen.
             </p>
             <p v-else>
-                Voeg alle ouders van {{ details.firstName }} toe (of enkel die van de hoofdverblijfplaats). Deze kunnen we contacteren in noodgevallen.
+                Voeg alle ouders van {{ details.firstName }} toe. Deze kunnen we contacteren in noodgevallen.
             </p>
 
             <p v-if="parents.length == 0" class="warning-box">
@@ -65,10 +65,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage,Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { MemberDetails, Parent, Version } from "@stamhoofd/structures"
+import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, Parent, RegisterItem, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 import ParentView from './ParentView.vue';
 
 class SelectableParent {
@@ -99,6 +100,12 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     isNew: boolean
 
+    @Prop({ required: false })
+    member?: MemberWithRegistrations
+
+    @Prop({ required: true })
+    items: RegisterItem[]
+
     @Prop({ required: true })
     details: MemberDetails
 
@@ -107,6 +114,10 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
 
     errorBox: ErrorBox | null = null
     parents: SelectableParent[] = []
+
+    get isOptional() {
+        return !OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
+    }
 
     editParent(parent: Parent) {
         this.present(new ComponentWithProperties(ParentView, {
@@ -193,9 +204,26 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
     get selectionCount() {
         return this.parents.reduce((a, p) => { return a + (p.selected ? 1 : 0) }, 0)
     }
+
+    async skipStep() {
+        if (this.loading) {
+            return;
+        }
+        this.details.parents = []
+        this.errorBox = null;
+        this.loading = true
+
+        try {
+            this.details.reviewTimes.markReviewed("parents")
+            await this.saveHandler(this.details, this)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.loading = false
+    }
     
     async goNext() {
-        if (this.details.parents.length == 0) {
+        if (!this.isOptional && this.details.parents.length == 0) {
             this.errorBox = new ErrorBox(new SimpleError({
                 code: "",
                 message: "Voeg alle ouders toe voor je verder gaat"

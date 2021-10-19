@@ -8,7 +8,7 @@ import { Keychain } from "./Keychain"
 import { SessionManager } from "./SessionManager"
 
 export class MemberManagerBase {
-    async decryptMemberDetails(encrypted: EncryptedMemberDetails): Promise<MemberDetails> {
+    async decryptMemberDetails(encrypted: EncryptedMemberDetails, organization: Organization): Promise<MemberDetails> {
         const keychainItem = Keychain.getItem(encrypted.publicKey)
 
         if (!keychainItem) {
@@ -18,10 +18,18 @@ export class MemberManagerBase {
         const keyPair = await session.decryptKeychainItem(keychainItem)
         const json = await Sodium.unsealMessage(encrypted.ciphertext, keyPair.publicKey, keyPair.privateKey)
         const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
-        return data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>)).data
+        const decoded = data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>))
+        const details = decoded.data
+        const version = data.field("version").integer
+
+        if (version < 128) {
+            details.upgradeFromLegacy(organization)
+        }
+
+        return details
     }
 
-    async decryptMember(member: EncryptedMember): Promise<Member> {
+    async decryptMember(member: EncryptedMember, organization: Organization): Promise<Member> {
         // Get the newest complete blob where we have a key for
         const oldToNew = member.encryptedDetails.sort((a, b) => Sorter.byDateValue(b.meta.date, a.meta.date))
 
@@ -32,7 +40,7 @@ export class MemberManagerBase {
                 // Do we have a key?
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
                     try {
-                        latest = await this.decryptMemberDetails(encryptedDetails)
+                        latest = await this.decryptMemberDetails(encryptedDetails, organization)
                         latestEncryptedDetails = encryptedDetails
                         break
                     } catch (e) {
@@ -50,7 +58,7 @@ export class MemberManagerBase {
                 // Do we have a key?
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
                     try {
-                        latest = await this.decryptMemberDetails(encryptedDetails)
+                        latest = await this.decryptMemberDetails(encryptedDetails, organization)
                         latestEncryptedDetails = encryptedDetails
 
                         // We need the oldest
@@ -93,7 +101,7 @@ export class MemberManagerBase {
             if (encryptedDetails.id !== latestEncryptedDetails.id && encryptedDetails.meta.isRecovered && latestEncryptedDetails.meta.date < encryptedDetails.meta.date) {
                 if (Keychain.hasItem(encryptedDetails.publicKey)) {
                     try {
-                        const updates = await this.decryptMemberDetails(encryptedDetails)
+                        const updates = await this.decryptMemberDetails(encryptedDetails, organization)
                         details.merge(updates)
                     } catch (e) {
                         // Probably wrong key /reencrypted key in keychain: ignore it
@@ -125,17 +133,9 @@ export class MemberManagerBase {
         return mm
     }
 
-    async decryptMembers(data: EncryptedMember[]) {
-        const members: Member[] = []
-        for (const member of data) {
-            members.push(await this.decryptMember(member))
-        }
-        return members
-    }
-
-    async decryptRegistrationWithMember(registration: RegistrationWithEncryptedMember, groups: Group[]): Promise<RegistrationWithMember> {
+    async decryptRegistrationWithMember(registration: RegistrationWithEncryptedMember, groups: Group[], organization: Organization): Promise<RegistrationWithMember> {
         const member = registration.member
-        const decryptedMember = await this.decryptMember(member)
+        const decryptedMember = await this.decryptMember(member, organization)
 
         const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
             member: decryptedMember,
@@ -145,11 +145,11 @@ export class MemberManagerBase {
         return decryptedRegistration
     }
 
-    async decryptRegistrationsWithMember(data: RegistrationWithEncryptedMember[], groups: Group[]): Promise<RegistrationWithMember[]> {
+    async decryptRegistrationsWithMember(data: RegistrationWithEncryptedMember[], groups: Group[], organization: Organization): Promise<RegistrationWithMember[]> {
         const registrations: RegistrationWithMember[] = []
 
         for (const registration of data) {
-            registrations.push(await this.decryptRegistrationWithMember(registration, groups))
+            registrations.push(await this.decryptRegistrationWithMember(registration, groups, organization))
         }
 
         return registrations

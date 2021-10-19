@@ -33,8 +33,20 @@ class SodiumStatic {
 
     private async doLoad() {
         this.retriedLoading = 0;
+
+        //console.log("Importing sodium...")
         await this.importSodium()
+
+        //console.log("Waiting for sodium ready...")
+        //console.log(this.sodium);
+
+        // Disable asm.js usage
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // (this.sodium as any).libsodium.useBackupModule = null
+        
         await this.sodium.ready;
+        //console.log("Sodium ready.")
+
         this.loaded = true;
     }
 
@@ -50,7 +62,8 @@ class SodiumStatic {
                 // Throw the same network error as 
                 throw new SimpleError({
                     code: "network_error",
-                    message: "Network error"
+                    message: "Network error",
+                    human: "Probleem met internetverbinding. Probeer de pagina te herladen als het probleem niet verdwijnt."
                 })
             }
 

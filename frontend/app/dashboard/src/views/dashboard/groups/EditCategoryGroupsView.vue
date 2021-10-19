@@ -61,16 +61,17 @@
                 </STList>
             </template>
 
-            <p v-if="categories.length == 0 && !isRoot">
+            <p v-if="categories.length == 0">
                 <button class="button text" @click="createGroup">
                     <span class="icon add" />
                     <span>Nieuwe inschrijvingsgroep</span>
                 </button>
             </p>
-            <p v-if="enableActivities && groups.length == 0">
+            <p v-if="enableActivities">
                 <button class="button text" @click="createCategory">
                     <span class="icon add" />
-                    <span>Nieuwe categorie</span>
+                    <span v-if="groups.length == 0">Nieuwe categorie</span>
+                    <span v-else>Opdelen in categorieën</span>
                 </button>
             </p>
 
@@ -390,10 +391,20 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     createCategory() {
         const category = GroupCategory.create({})
+        category.groupIds = this.category.groupIds
+        
         const meta = OrganizationMetaData.patch({})
         meta.categories.addPut(category)
 
-        const me = GroupCategory.patch({ id: this.category.id })
+        const me = GroupCategory.patch({ 
+            id: this.category.id,
+        })
+
+        // Delete all groups in this category
+        for (const id of this.category.groupIds) {
+            me.groupIds.addDelete(id)
+        }
+
         me.categoryIds.addPut(category.id)
         meta.categories.addPatch(me)
 

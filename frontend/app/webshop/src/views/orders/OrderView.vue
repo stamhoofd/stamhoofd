@@ -234,11 +234,11 @@
                     </h2>
 
                     <div class="hide-smartphone">
-                        <p class="success-box environment">
+                        <p class="success-box icon environment">
                             Open deze pagina op jouw smartphone om alle tickets digitaal op te slaan. Op die manier hoef je de tickets niet af te drukken. Je kan ook een individueel ticket scannen om enkel dat ticket op te slaan of te delen.
                         </p>
                     </div>
-                    <p class="success-box environment only-smartphone">
+                    <p class="success-box icon environment only-smartphone">
                         Je hoeft de tickets niet af te drukken, je kan ze ook tonen op jouw smartphone. Sla ze eventueel op zodat je ze niet kwijt geraakt.
                     </p>
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="member-view-details">
+    <div class="member-view-details split">
         <div>
             <p v-if="hasWrite && member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
                 {{ member.firstName }} is niet ingeschreven
@@ -9,7 +9,7 @@
                 {{ member.firstName }} is niet ingeschreven
             </p>
 
-            <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box">
+            <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box container">
                 <hr v-if="member.activeRegistrations.length == 0">
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
@@ -94,7 +94,7 @@
                 </STList>
             </div>
 
-            <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box">
+            <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
@@ -130,7 +130,7 @@
                 </dl>
             </div>
 
-            <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index" class="hover-box">
+            <div v-for="(contact, index) in member.details.emergencyContacts" :key="'contact-' + index" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ contact.title }}</div>
@@ -148,7 +148,7 @@
                 </dl>
             </div>
 
-            <div v-if="member.details.doctor" class="hover-box">
+            <div v-if="member.details.doctor" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
@@ -170,32 +170,7 @@
                 </dl>
             </div>
 
-            <div v-if="familyMembers.length > 0" class="hover-box">
-                <hr>
-
-                <h2 class="style-with-button">
-                    <div v-if="member.details.age <= 30 && familyMembers[0].details.age <= 30">
-                        Broers &amp; zussen
-                    </div>
-                    <div v-else>
-                        Familie
-                    </div>
-                </h2>
-
-                <STList>
-                    <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
-                        <h3 class="style-title-list">
-                            {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
-                        </h3>
-                        <p class="style-description">
-                            {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-                </STList>
-            </div>
-
-            <div v-if="!member.details || member.details.isRecovered">
+            <div v-if="!member.details || member.details.isRecovered" class="container">
                 <hr>
                 <p v-if="!hasLatestKey" class="error-box">
                     Een deel van de gegevens van dit lid is versleuteld met een sleutel die je niet hebt — en is dus onleesbaar voor jou. Vraag een hoofdbeheerder - die deze sleutel wel heeft - om jou terug toegang te geven (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven).
@@ -209,55 +184,55 @@
                     <span>Verwijder versleutelde gegevens</span>
                 </button>
             </div>
-        </div>
 
-        <div v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords) || member.users.length > 0" class="hover-box">
-            <template v-if="(member.details && (!member.details.isRecovered || member.details.records.length > 0) && !shouldSkipRecords)">
+            <!-- Loop all records -->
+            <div v-for="category in recordCategories" :key="category.id" class="hover-box container">
+                <hr>
                 <h2 class="style-with-button">
-                    <div>
-                        <span class="icon-spacer">Steekkaart</span><span
-                            v-tooltip="
-                                'De steekkaart kan gevoelige gegevens bevatten. Spring hier uiterst zorgzaam mee om en kijk de privacyvoorwaarden van jouw vereniging na.'
-                            "
-                            class="icon gray privacy"
-                        />
-                    </div>
+                    <div>{{ category.name }}</div>
                     <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editMemberRecords()" />
+                        <button v-if="hasWrite" class="button icon gray edit" @click="editRecordCategory(category)" />
                     </div>
                 </h2>
+                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :data-permission="dataPermission" />
+            </div>
+
+            <!-- Loop all records -->
+            <div v-if="missingAnswers.length > 0" class="hover-box container">
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Overige kenmerken</div>
+                </h2>
+                <p>Deze kenmerken werden opgeslagen bij dit lid, maar bestaan niet langer of zijn niet meer van toepassing. Je kan ze verwijderen.</p>
+                <RecordCategoryAnswersBox :answers="missingAnswers" :data-permission="dataPermission" :can-delete="true" @delete="deleteRecord($event)" />
+            </div>
+        </div>
+
+        <div v-if="hasWarnings || member.users.length > 0 || familyMembers.length > 0">
+            <div v-if="hasWarnings" class="hover-box container">
+                <h2>Waarschuwingen</h2>
 
                 <ul class="member-records">
                     <li
-                        v-for="(record, index) in sortedRecords"
-                        :key="index"
-                        v-tooltip="record.description.length > 0 ? record.description : null"
-                        :class="{ more: canOpenRecord(record), [RecordTypeHelper.getPriority(record.type)]: true}"
-                        @click="openRecordView(record)"
+                        v-for="warning in sortedWarnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
                     >
-                        <span :class="'icon '+getIcon(record)" />
-                        <span class="text">{{ record.getText() }}</span>
-                        <span v-if="canOpenRecord(record)" class="icon arrow-right-small" />
+                        <span :class="'icon '+getIcon(warning)" />
+                        <span class="text">{{ warning.text }}</span>
                     </li>
                 </ul>
 
-                <p v-if="sortedRecords.length == 0" class="info-box">
-                    {{ member.details.firstName }} heeft niets speciaal aangeduid op de steekkaart
-                </p>
-
-                <p v-if="member.details.reviewTimes.getLastReview('records')" class="style-description-small">
-                    Laatst nagekeken op {{ member.details.reviewTimes.getLastReview("records") | dateTime }}
-                </p>
-                <p v-else class="style-description-small">
-                    Nog nooit nagekeken
+                <p v-if="warnings.length == 0" class="info-box">
+                    Geen waarschuwingen
                 </p>
 
                 <template v-if="member.users.length > 0">
                     <hr>
                 </template>
-            </template>
+            </div>
 
-            <template v-if="activeAccounts.length > 0">
+            <div v-if="activeAccounts.length > 0" class="hover-box container">
                 <h2>
                     <span class="icon-spacer">Accounts</span><span
                         v-tooltip="
@@ -271,9 +246,9 @@
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                     <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" @click="unlinkUser(user)" />
                 </p>
-            </template>
+            </div>
 
-            <template v-if="placeholderAccounts.length > 0">
+            <div v-if="placeholderAccounts.length > 0" class="hover-box container">
                 <h2>
                     <span class="icon-spacer">Kunnen registereren</span><span
                         v-tooltip="
@@ -286,14 +261,38 @@
                     <span>{{ user.email }}</span>
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                 </p>
-            </template>
+            </div>
 
-            <template v-if="false">
+            <div v-if="familyMembers.length > 0" class="hover-box container">
+                <hr>
+                <h2>
+                    <template v-if="member.details.age <= 30 && Math.abs(maxFamilyAge - member.details.age) <= 14">
+                        Broers &amp; zussen
+                    </template>
+                    <template v-else>
+                        Familie
+                    </template>
+                </h2>
+
+                <STList>
+                    <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
+                        <h3 class="style-title-list">
+                            {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
+                        </h3>
+                        <p v-if="familyMember.groups.length > 0" class="style-description">
+                            {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+            </div>
+
+            <div v-if="false" class="hover-box container">
                 <hr>
 
                 <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
                 <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
-            </template>
+            </div>
         </div>
     </div>
 </template>
@@ -301,9 +300,9 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,getPermissionLevelNumber,MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, Record, RecordType, RecordTypeHelper, RecordTypePriority, Registration, User } from '@stamhoofd/structures';
+import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -315,12 +314,12 @@ import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
 import EditMemberView from './edit/EditMemberView.vue';
 import MemberView from './MemberView.vue';
-import RecordDescriptionView from './records/RecordDescriptionView.vue';
 
 @Component({
     components: {
         STListItem,
-        STList
+        STList,
+        RecordCategoryAnswersBox
     },
     directives: { Tooltip },
     filters: {
@@ -341,12 +340,116 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
-        (this as any).RecordTypeHelper = RecordTypeHelper;
         this.checkBounces().catch(e => console.error(e))
     }
 
     getGroup(groupId: string) {
         return OrganizationManager.organization.groups.find(g => g.id === groupId)
+    }
+
+    get recordCategories(): RecordCategory[] {
+        return RecordCategory.filterCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission).flatMap(cat => {
+            if (cat.childCategories.length > 0) {
+                return cat.filterChildCategories(new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission)
+            }
+            return [cat]
+        })
+    }
+
+    get missingAnswers(): RecordAnswer[] {
+        const missing: RecordAnswer[] = []
+         for (const answer of this.member.details.recordAnswers) {
+            // Search
+            if (!this.recordCategories.find(cat => !!cat.records.find(record => record.id === answer.settings.id))) {
+                missing.push(answer)
+            }
+         }
+        return missing
+    }
+
+    async deleteRecord(record: RecordSettings) {
+        if (!await CenteredMessage.confirm("Dit kenmerk verwijderen?", "Ja, verwijderen", "Je kan dit niet ongedaan maken")) {
+            return
+        }
+        const index = this.member.details.recordAnswers.findIndex(r => r.settings.id == record.id)
+        if (index !== -1) {
+            this.member.details.recordAnswers.splice(index, 1)
+            await this.familyManager.patchAllMembersWith(this.member)
+        }
+    }
+
+    get dataPermission() {
+        return this.member.details.dataPermissions?.value ?? false
+    }
+
+    get hasWarnings() {
+        return this.warnings.length > 0
+    }
+
+    get warnings(): RecordWarning[] {
+        const warnings: RecordWarning[] = []
+
+        for (const answer of this.member.details.recordAnswers) {
+            warnings.push(...answer.getWarnings())
+        }
+
+        if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport) {
+            if (this.member.details.requiresFinancialSupport && this.member.details.requiresFinancialSupport.value) {
+                warnings.push(RecordWarning.create({
+                    text: OrganizationManager.organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText,
+                    type: RecordWarningType.Error
+                }))
+            }
+        }
+        
+        if (OrganizationManager.organization.meta.recordsConfiguration.dataPermission) {
+            if (this.member.details.dataPermissions && !this.member.details.dataPermissions.value) {
+                warnings.push(RecordWarning.create({
+                    text: OrganizationManager.organization.meta.recordsConfiguration.dataPermission?.warningText || DataPermissionsSettings.defaultWarningText,
+                    type: RecordWarningType.Error
+                }))
+            }
+        }
+
+        return warnings
+    }
+
+
+    get sortedWarnings() {
+        return this.warnings.sort((warning1, warning2) => {
+            const priority1: string = warning1.type
+            const priority2: string = warning2.type
+
+            if (priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Warning ||
+                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Info ||
+                priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Info) {
+                return -1;
+            }
+            else if (priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Warning ||
+                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Error ||
+                priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Error) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        } )
+    }
+
+    editRecordCategory(category: RecordCategory) {
+        const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
+            category,
+            answers: this.member.details.recordAnswers,
+            markReviewed: false,
+            dataPermission: this.member.details.dataPermissions?.value ?? false,
+            filterValue: new MemberDetailsWithGroups(this.member.details, this.member, []),
+            saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
+                this.member.details.recordAnswers = answers
+                await this.familyManager.patchAllMembersWith(this.member)
+                component.dismiss({ force: true })
+            }
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 
     imageSrc(registration: Registration) {
@@ -386,10 +489,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get placeholderAccounts() {
         return this.member.users.filter(u => u.publicKey === null)
-    }
-
-    get shouldSkipRecords() {
-        return (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.member.details?.age ?? null))
     }
 
     getInvalidEmailDescription(email: string) {
@@ -507,32 +606,12 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.present(component);
     }
 
-    canOpenRecord(record: Record) {
-        if (record.description.length > 0) {
-            return true;
+    getIcon(warning: RecordWarning) {
+        switch (warning.type) {
+            case RecordWarningType.Error: return " exclamation-two red"
+            case RecordWarningType.Warning: return " exclamation yellow"
+            case RecordWarningType.Info: return " info"
         }
-        if (RecordTypeHelper.getInternalDescription(record.type)) {
-            return true;
-        }
-        if (RecordTypeHelper.getInternalLinks(record.type).length > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    getIcon(record: Record) {
-        switch (RecordTypeHelper.getPriority(record.type)) {
-            case RecordTypePriority.High: return " exclamation-two red"
-            case RecordTypePriority.Medium: return " exclamation yellow"
-            case RecordTypePriority.Low: return " info"
-        }
-    }
-
-    openRecordView(record: Record) {
-        this.show(new ComponentWithProperties(RecordDescriptionView, {
-            member: this.member,
-            record
-        }))
     }
 
     editContact(contact: EmergencyContact) {
@@ -607,48 +686,17 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup");
         this.present(displayedComponent);
     }
-
-    editMemberRecords() {
-        const displayedComponent = new ComponentWithProperties(EditMemberView, {
-            member: this.member,
-            initialFamily: this.familyManager,
-            initialTabIndex: 2
-        }).setDisplayStyle("popup");
-        this.present(displayedComponent);
-    }
-
+    
     get familyMembers() {
         return this.familyManager.members.filter(m => m.id != this.member.id)
     }
 
-    get filteredRecords() {
-        return this.member.details?.records ? 
-            OrganizationManager.organization.meta.recordsConfiguration.filterForDisplay(
-                this.member.details.records, 
-                this.member.details?.age ?? null
-            ) 
-        : undefined
-    }
-
-    get sortedRecords() {
-        return this.filteredRecords?.sort((record1, record2) => {
-            const priority1: string = RecordTypeHelper.getPriority(record1.type);
-            const priority2: string = RecordTypeHelper.getPriority(record2.type)
-
-            if (priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Medium ||
-                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.Low ||
-                priority1 == RecordTypePriority.High && priority2 == RecordTypePriority.Low) {
-                return -1;
-            }
-            else if (priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.Medium ||
-                priority1 == RecordTypePriority.Medium && priority2 == RecordTypePriority.High ||
-                priority1 == RecordTypePriority.Low && priority2 == RecordTypePriority.High) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        } )
+    get maxFamilyAge() {
+        const ages = this.familyMembers.map(m => m.details.age ?? 99)
+        if (ages.length == 0) {
+            return 99
+        }
+        return Math.max(...ages)
     }
 }
 </script>

@@ -12,7 +12,15 @@
             </p>
 
             <hr>
-            <h2>Jouw inschrijvingspagina</h2>
+            <h2 class="style-with-button">
+                <div>Jouw inschrijvingspagina</div>
+                <div>
+                    <a :href="registerUrl" target="_blank" rel="noopener" class="button text">
+                        <span class="icon external" />
+                        <span class="hide-small">Openen</span>
+                    </a>
+                </div>
+            </h2>
 
             <input v-tooltip="'Klik om te kopiëren'" class="input" :value="registerUrl" readonly @click="copyElement">
 
@@ -45,7 +53,7 @@
                     Overschakelen midden in een werkjaar
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/online-inschrijvingen-kampen-weekends" target="_blank">
+                <STListItem v-if="isYouth" :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/online-inschrijvingen-kampen-weekends" target="_blank">
                     <span slot="left" class="icon link" />
                     Online inschrijvingen voor kampen en weekends
                 </STListItem>
@@ -57,6 +65,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, LoadingButton, STInputBox, STList, STListItem,STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { OrganizationType } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -86,6 +95,10 @@ export default class RegistrationPageSettingsView extends Mixins(NavigationMixin
         } 
 
         return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
+    }
+
+    get isYouth() {
+        return this.organization.meta.type === OrganizationType.Youth
     }
 
     copyElement(event) {

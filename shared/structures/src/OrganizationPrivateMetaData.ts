@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,Decoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 
 import { DNSRecord } from "./DNSRecord"
 import { OrganizationEmail } from './OrganizationEmail';
@@ -22,6 +22,13 @@ export class CreditItem extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     description: string
+
+    /**
+     * tmp fix
+     */
+    static patchIdentifier(): Decoder<string> {
+        return StringDecoder
+    }
 }
 
 export enum MollieStatus {
@@ -94,7 +101,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      * @deprecated
      * Credits in cents
      */
-    @field({ decoder: new ArrayDecoder(CreditItem), version: 23 })
+    @field({ decoder: new ArrayDecoder(CreditItem), version: 23, optional: true })
     credits: CreditItem[] = []
 
     // readonly

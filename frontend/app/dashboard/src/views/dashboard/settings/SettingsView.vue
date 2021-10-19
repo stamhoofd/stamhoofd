@@ -11,7 +11,15 @@
 
             <BillingWarningBox />
 
-            <p v-if="!areSalesDisabled" class="info-box gift selectable with-button" @click="openReferrals(true)">
+            <p class="info-box icon help with-button">
+                Hulp nodig? Neem contact met ons op via hallo@stamhoofd.be
+
+                <a href="mailto:hallo@stamhoofd.be" class="button text">
+                    E-mail
+                </a>
+            </p>
+
+            <p v-if="!areSalesDisabled" class="info-box icon gift selectable with-button" @click="openReferrals(true)">
                 Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
                 <button class="button text">
@@ -101,7 +109,7 @@
 
             <template v-if="enableMemberModule">
                 <hr>
-                <h2>Inschrijvingen</h2>
+                <h2>Ledenadministratie</h2>
 
                 <STList class="illustration-list">    
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
@@ -136,13 +144,15 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="importMembers(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/import-excel.svg">
+
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
                         <h2 class="style-title-list">
-                            Leden importeren
+                            Kenmerken en gegevens van leden
                         </h2>
                         <p class="style-description">
-                            Importeer leden vanaf een Excel of CSV bestand
+                            Kies welke informatie je verzamelt van jouw leden
                         </p>
 
                         <template slot="right">
@@ -150,13 +160,55 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageFinancialSupport(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/discount.svg">
                         <h2 class="style-title-list">
-                            Wijzig gevraagde gegevens
+                            Financiële ondersteuning
                         </h2>
                         <p class="style-description">
-                            Toestemmingen, allergieën, medische gegevens
+                            Steun kwetsbare gezinnen
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageDataPermission(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/agreement.svg">
+                        <h2 class="style-title-list">
+                            Toestemming gegevensverzameling
+                        </h2>
+                        <p class="style-description">
+                            Vaak heb je toestemming nodig om bepaalde gegevens te verzamelen. Dat stel je hier in.
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="manageFreeContribution(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg">
+                        <h2 class="style-title-list">
+                            Vrije bijdrage
+                        </h2>
+                        <p class="style-description">
+                            Maak het mogelijk dat leden een (optionele) vrije bijdrage doen bij het inschrijven
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="importMembers(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/import-excel.svg">
+                        <h2 class="style-title-list">
+                            Leden importeren
+                        </h2>
+                        <p class="style-description">
+                            Importeer leden vanaf een Excel of CSV bestand
                         </p>
 
                         <template slot="right">
@@ -233,6 +285,9 @@ import AdminsView from '../admins/AdminsView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
+import DataPermissionSettingsView from './modules/members/DataPermissionSettingsView.vue';
+import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
+import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
@@ -355,6 +410,24 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup").setAnimated(animated))
     }
 
+    manageFinancialSupport(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(FinancialSupportSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
+    manageDataPermission(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(DataPermissionSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
+    manageFreeContribution(animated = true) {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(FreeContributionSettingsView, {})
+        }).setDisplayStyle("popup").setAnimated(animated))
+    }
+
     importMembers(animated = true) {
         if (this.organization.groups.length == 0) {
             new CenteredMessage("Voeg eerst leeftijdsgroepen toe", "Je kan leden pas importeren nadat je jouw leeftijdsgroepen hebt ingesteld.", "error").addCloseButton().show()
@@ -455,6 +528,18 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'referrals') {
             this.openReferrals(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'free-contribution') {
+            this.manageFreeContribution(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'financial-support') {
+            this.manageFinancialSupport(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'data-permission') {
+            this.manageDataPermission(false)
         }
 
         if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {

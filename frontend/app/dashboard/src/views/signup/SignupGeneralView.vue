@@ -10,7 +10,7 @@
             </h1>
             <p>Met een account kan je alle functies eerst gratis uitproberen.</p>
 
-            <p v-if="registerCode" class="success-box gift">
+            <p v-if="registerCode" class="success-box icon gift">
                 Je ontvangt 25 euro tegoed van <strong>{{ registerCode.organization }}</strong> als je nu registreert
             </p>
 
@@ -103,7 +103,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { NetworkManager } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
+import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -297,7 +297,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 meta: OrganizationMetaData.create({
                     type: this.type,
                     umbrellaOrganization: this.umbrellaOrganization,
-                    recordsConfiguration: OrganizationRecordsConfiguration.getDefaultFor(this.type),
+                    recordsConfiguration: RecordConfigurationFactory.create(this.type),
                     defaultStartDate,
                     defaultEndDate
                 }),

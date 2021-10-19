@@ -10,7 +10,7 @@
                 Kies de functies die je wilt uitproberen
             </h1>
             <p>
-                Test de functies eerst rustig uit voor je beslist om een pakket te kopen. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen. Je kan later de functies activeren door de pakketten aan te schaffen via 'instellingen'.
+                Test de functies eerst rustig uit voor je beslist om een pakket te kopen. Je hoeft geen betaalgegevens in te geven.
             </p>
 
             <ModuleSettingsBox />
@@ -22,7 +22,7 @@
             </template>
             <template #right>
                 <button class="button primary" @click="goNext">
-                    Klaar
+                    Aan de slag
                 </button>
             </template>
         </STToolbar>

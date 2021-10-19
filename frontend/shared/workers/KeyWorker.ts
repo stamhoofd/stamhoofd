@@ -35,10 +35,16 @@ export async function generateEncryptionKey(password: string, authEncryptionKeyC
 export async function generateKeys(password: string) {
     console.log("Generating keys and constants...");
 
-    const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
+    // Sign keys are more sensitive, because they are the easiest to attack with a brute force attack
+    const authSignKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.Admin)
+
+    //console.log("Got sign contants. Next up: encryption key contants");
     const authEncryptionKeyConstants = await KeyConstantsHelper.create(SensitivityLevel.User)
 
+    //console.log("Got all contants. Next up: sign key pair");
     const authSignKeyPair = await KeyConstantsHelper.getSignKeyPair(authSignKeyConstants, password)
+
+    //console.log("Got sign keys. Next up: encryption keys.");
     const authEncryptionSecretKey = await KeyConstantsHelper.getEncryptionKey(authEncryptionKeyConstants, password)
     
     console.log("Done.");
@@ -52,7 +58,7 @@ export async function generateKeys(password: string) {
 
 
 ctx.onmessage = (e) => {
-    console.log("KeyWorker received a message")
+    //console.log("KeyWorker received a message")
 
     if (!e.data.type) {
         console.error("Expected type for key worker")
@@ -86,6 +92,14 @@ ctx.onmessage = (e) => {
                 // Need to do this to get the error back to the caller
                 setTimeout(function () { throw e; }); 
             });
+            return;
+        }
+
+        case "status": {
+            console.log("Received status check in worker")
+            ctx.postMessage({
+                status: "ok"
+            })
             return;
         }
 

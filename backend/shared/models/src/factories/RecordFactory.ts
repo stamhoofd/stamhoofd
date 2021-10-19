@@ -1,12 +1,12 @@
 import { Factory } from "@simonbackx/simple-database";
-import { Record, RecordType } from '@stamhoofd/structures';
+import { LegacyRecord, LegacyRecordType } from '@stamhoofd/structures';
 
 interface Options {}
 
-export class RecordFactory extends Factory<Options, Record> {
-    create(): Promise<Record> {
-        return Promise.resolve(Record.create({
-            type: this.randomArray(Object.values(RecordType))
+export class RecordFactory extends Factory<Options, LegacyRecord> {LegacyRecordLegacyRecord
+    create(): Promise<LegacyRecord> {
+        return Promise.resolve(LegacyRecord.create({
+            type: this.randomArray(Object.values(LegacyRecordType))
         }));
     }
 }

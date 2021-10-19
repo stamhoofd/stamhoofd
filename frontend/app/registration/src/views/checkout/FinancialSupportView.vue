@@ -1,18 +1,18 @@
 <template>
-    <div class="st-view boxed">
-        <STNavigationBar title="Financiële ondersteuning">
+    <div id="financial-support-view" class="st-view boxed">
+        <STNavigationBar :title="title">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         <div class="box">
             <main>
-                <h1>Financiële ondersteuning</h1>
-                <p>We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om.</p>
+                <h1>{{ title }}</h1>
+                <p class="style-description pre-wrap" v-text="description" />
 
                 <STErrorsDefault :error-box="errorBox" />
 
                 <Checkbox v-model="reduced">
-                    Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken
+                    {{ checkboxLabel }}
                 </Checkbox>
             </main>
 
@@ -32,7 +32,8 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { Record, RecordType } from '@stamhoofd/structures';
+import { BooleanStatus } from "@stamhoofd/structures";
+import { FinancialSupportSettings } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
@@ -71,12 +72,28 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
         if (!this.reduced) {
             for (const item of CheckoutManager.checkout.cart.items) {
                 const member = item.member
-                if (member.details.records.find(r => r.type == RecordType.FinancialProblems)) {
+                if (member.details.requiresFinancialSupport?.value) {
                     this.reduced = true;
                     break;
                 }
             }
         }
+    }
+
+    get title() {
+        return this.settings.title || FinancialSupportSettings.defaultTitle
+    }
+
+    get description() {
+        return this.settings.description || FinancialSupportSettings.defaultDescription
+    }
+
+    get checkboxLabel() {
+        return this.settings.checkboxLabel || FinancialSupportSettings.defaultCheckboxLabel
+    }
+
+    get settings(): FinancialSupportSettings {
+        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
     }
 
     @Watch("reduced")
@@ -101,39 +118,23 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
-            let needsSync = false;
             if (this.reduced) {
-                // Update reduced
                 for (const item of CheckoutManager.checkout.cart.items) {
                     const member = item.member
-                    if (!member.details.records.find(r => r.type == RecordType.FinancialProblems)) {
-                        // Check if we are allowed to gather this information
-                        if (member.details.records.find(r => r.type == RecordType.DataPermissions)) {
-                            member.details.records.push(Record.create({
-                                type: RecordType.FinancialProblems
-                            }))
-                            needsSync = true;
-                        }
-                    }
+                    // Check if we are allowed to gather this information
+                    member.details.requiresFinancialSupport = BooleanStatus.create({ value: true })
                     item.reduced = true
                 }
                 
             } else {
-                // Update reduced
                 for (const item of CheckoutManager.checkout.cart.items) {
                     const member = item.member
-                    const i = member.details.records.findIndex(r => r.type == RecordType.FinancialProblems)
-                    if (i != -1) {
-                        member.details.records.splice(i, 1);
-                        needsSync = true;
-                    }
+                    member.details.requiresFinancialSupport = BooleanStatus.create({ value: false })
                     item.reduced = false
                 }
             }
 
-            if (needsSync) {
-                await MemberManager.patchAllMembersWith(...CheckoutManager.checkout.cart.items.map(i => i.member))
-            }
+            await MemberManager.patchAllMembersWith(...CheckoutManager.checkout.cart.items.map(i => i.member))
             
             this.loading = false
 
@@ -172,10 +173,3 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

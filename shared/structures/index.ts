@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 116
+export const Version = 128
 
 // General
 export * from "./src/addresses/Address"
@@ -73,14 +73,20 @@ export * from "./src/members/Gender"
 export * from "./src/members/Member"
 export * from "./src/members/MemberDetails"
 export * from "./src/members/MemberWithRegistrations"
+export * from "./src/members/OrganizationRecordsConfiguration"
 export * from "./src/members/Parent"
 export * from "./src/members/ParentType"
 export * from "./src/members/Payment"
 export * from "./src/members/PaymentDetailed"
 export * from "./src/members/PaymentGeneral"
 export * from "./src/members/PaymentPatch"
-export * from "./src/members/Record"
-export * from "./src/members/RecordType"
+export * from "./src/members/records/LegacyRecord"
+export * from "./src/members/records/LegacyRecordType"
+export * from "./src/members/records/RecordAnswer"
+export * from "./src/members/records/RecordCategory"
+export * from "./src/members/records/RecordConfigurationFactory"
+export * from "./src/members/records/RecordFactory"
+export * from "./src/members/records/RecordSettings"
 export * from "./src/members/Registration"
 export * from "./src/members/RegistrationPatch"
 export * from "./src/members/RegistrationWithEncryptedMember"
@@ -122,3 +128,13 @@ export * from "./src/Graph"
 
 // Email
 export * from "./src/email/EmailAddressSettings"
+
+// Filters
+export * from "./src/filters/ChoicesFilter"
+export * from "./src/filters/DateFilter"
+export * from "./src/filters/FilterDefinition"
+export * from "./src/filters/FilterGroup"
+export * from "./src/filters/NumberFilter"
+export * from "./src/filters/PropertyFilter"
+export * from "./src/filters/RegistrationsFilter"
+export * from "./src/filters/StringFilter"

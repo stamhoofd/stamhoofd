@@ -32,7 +32,7 @@
                 </div>
             </div>
             <figure>
-                <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}">
+                <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness">
                 <div v-else class="placeholder" />
                 <span>{{ ticket.secret }}</span>
             </figure>

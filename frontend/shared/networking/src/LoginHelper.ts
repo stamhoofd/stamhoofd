@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
-import { GlobalEventBus, Toast } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
 import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, MyUser, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
@@ -123,14 +122,19 @@ export class LoginHelper {
 
     static async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
         return new Promise((resolve, reject) => {
-            //const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
-            const myWorker = new KeyWorker();
+            const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
+            let statusPoller: number | null = null
 
             myWorker.onmessage = (e) => {
                 const authSignKeys = e.data
 
                 // Requset challenge
                 myWorker.terminate()
+
+                if (statusPoller !== null) {
+                    clearInterval(statusPoller)
+                    statusPoller = null
+                }
                 resolve(authSignKeys)
             }
 
@@ -138,6 +142,11 @@ export class LoginHelper {
                 // todo
                 console.error(e);
                 myWorker.terminate();
+
+                if (statusPoller !== null) {
+                    clearInterval(statusPoller)
+                    statusPoller = null
+                }
                 reject(e);
                 Sentry.captureException(e);
             }
@@ -147,20 +156,38 @@ export class LoginHelper {
                 password,
                 authSignKeyConstants: authSignKeyConstants.encode({ version: Version })
             });
+
+            // This might sound crazy, but we tested this a lot.
+            // We need to create a useless poller interval. Don't even need to communicate with the web worker.
+            // This solves an issue on Firefox
+            // where the browser decides to kill the web worker without any feedback (no error / messages...)
+            // If we somehow keep the browser busy, it keeps working
+            // You can inspect the running workers via about:debugging#/runtime/this-firefox
+            statusPoller = window.setInterval(() => {
+                console.log("Polling worker status...")
+                //myWorker.postMessage({
+                //   "type": "status",
+                //})
+            }, 1000)
         })
     }
 
     static async createEncryptionKey(password: string, authEncryptionKeyConstants: KeyConstants): Promise<string> {
         return new Promise((resolve, reject) => {
             console.log("starting encryption key worker")
-            const myWorker = new KeyWorker();
-            //const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
+            const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
+            let statusPoller: number | null = null
 
             myWorker.onmessage = (e) => {
                 const key = e.data
 
                 // Requset challenge
                 myWorker.terminate()
+
+                if (statusPoller !== null) {
+                    clearInterval(statusPoller)
+                    statusPoller = null
+                }
                 resolve(key)
             }
 
@@ -168,8 +195,14 @@ export class LoginHelper {
                 // todo
                 console.error(e);
                 myWorker.terminate();
+
+                if (statusPoller !== null) {
+                    clearInterval(statusPoller)
+                    statusPoller = null
+                }
                 reject(e);
                 Sentry.captureException(e);
+                
             }
 
             myWorker.postMessage({
@@ -177,15 +210,40 @@ export class LoginHelper {
                 password,
                 authEncryptionKeyConstants: authEncryptionKeyConstants.encode({ version: Version })
             });
+
+            // This might sound crazy, but we tested this a lot.
+            // We need to create a useless poller interval. Don't even need to communicate with the web worker.
+            // This solves an issue on Firefox
+            // where the browser decides to kill the web worker without any feedback (no error / messages...)
+            // If we somehow keep the browser busy, it keeps working
+            // You can inspect the running workers via about:debugging#/runtime/this-firefox
+            statusPoller = window.setInterval(() => {
+                console.log("Polling worker status...")
+                //myWorker.postMessage({
+                //   "type": "status",
+                //})
+            }, 1000)
         })
     }
 
     static async createKeys(password: string): Promise<{ authSignKeyPair; authEncryptionSecretKey; authSignKeyConstants; authEncryptionKeyConstants }> {
         return new Promise((resolve, reject) => {
             //const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
-            const myWorker = new KeyWorker();
+            console.log("Creating a new key worker...")
+            const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url));
+
+            let statusPoller: number | null = null
+            
+            // new KeyWorker();
 
             myWorker.onmessage = (e) => {
+                myWorker.terminate()
+
+                if (statusPoller !== null) {
+                    clearInterval(statusPoller)
+                    statusPoller = null
+                }
+                
                 try {
                     const {
                         authSignKeyPair,
@@ -208,11 +266,16 @@ export class LoginHelper {
                 } catch (e) {
                     reject(e)
                 }
-                myWorker.terminate()
             }
+
+            myWorker.onmessageerror
 
             myWorker.onerror = (e) => {
                 console.error(e);
+                if (statusPoller !== null) {
+                    clearInterval(statusPoller)
+                    statusPoller = null
+                }
                 myWorker.terminate();
                 reject(e);
                 Sentry.captureException(e);
@@ -222,6 +285,19 @@ export class LoginHelper {
                 "type": "keys",
                 "password": password
             });
+
+            // This might sound crazy, but we tested this a lot.
+            // We need to create a useless poller interval. Don't even need to communicate with the web worker.
+            // This solves an issue on Firefox
+            // where the browser decides to kill the web worker without any feedback (no error / messages...)
+            // If we somehow keep the browser busy, it keeps working
+            // You can inspect the running workers via about:debugging#/runtime/this-firefox
+            statusPoller = window.setInterval(() => {
+                console.log("Polling worker status...")
+                //myWorker.postMessage({
+                //   "type": "status",
+                //})
+            }, 1000)
         })
     }
 
@@ -639,6 +715,7 @@ export class LoginHelper {
     }
 
     static async changePassword(session: Session, password: string, force = false) {
+        console.log("Change password. Start.")
         const keys = await this.createKeys(password)
 
         let userPrivateKey = session.getUserPrivateKey();

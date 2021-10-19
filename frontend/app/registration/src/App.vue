@@ -7,8 +7,9 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, ColorHelper, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
@@ -137,6 +138,15 @@ export default class App extends Vue {
                 })
             });
         } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization"))) {
+                    Toast.fromError(e).show()
+
+                    return new ComponentWithProperties(InvalidOrganizationView, {
+                        errorBox: new ErrorBox(e)
+                    })
+                }
+            }
             console.error(e)
             return new ComponentWithProperties(InvalidOrganizationView, {})
         }
@@ -152,6 +162,14 @@ export default class App extends Vue {
             ComponentWithProperties.debug = true
         }
         HistoryManager.activate();
+    }
+
+    mounted() {
+        const ua = navigator.userAgent;
+
+        if (ua.indexOf("FBAN") != -1 || ua.indexOf("FBAV") != -1) {
+            new Toast("Je zit in de ingebouwde Facebook browser. Deze werkt minder goed en is minder veilig. We raden je héél sterk aan om over te schakelen naar je vaste browser. Dat kan via één van de knoppen boven of onderaan of door zelf naar de site te surfen.", "red error").setHide(null).show()
+        }
     }
     
 }

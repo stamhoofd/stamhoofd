@@ -63,6 +63,13 @@ export class Organization extends AutoEncoder {
     groups: Group[] = []
 
     /**
+     * Get all groups that are in a category
+     */
+    get availableGroups() {
+        return this.categoryTree.getAllGroups()
+    }
+
+    /**
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     get categoryTree(): GroupCategoryTree {

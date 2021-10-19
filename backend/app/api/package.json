@@ -15,14 +15,14 @@
         "yalc:clear": "yalc remove --all && rm -rf node_modules && yarn install"
     },
     "devDependencies": {
-        "@types/libsodium-wrappers": "^0.7.7",
+        "@types/libsodium-wrappers": "^0.7.9",
         "@types/mailparser": "^2.7.4",
         "@types/node": "^14.0.26"
     },
     "dependencies": {
         "@mollie/api-client": "^3.4.0",
         "@simonbackx/simple-database": "^1.20",
-        "@simonbackx/simple-endpoints": "^1.7.3",
+        "@simonbackx/simple-endpoints": "^1.8.0",
         "@types/mysql": "^2.15.9",
         "aws-sdk": "^2.885.0",
         "axios": "^0.21.1",
@@ -30,7 +30,7 @@
         "dotenv": "^8.2.0",
         "formidable": "^1.2.2",
         "html-to-text": "^5.1.1",
-        "libsodium-wrappers": "^0.7.6",
+        "libsodium-wrappers": "^0.7.9",
         "mailparser": "^3.0.0",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",

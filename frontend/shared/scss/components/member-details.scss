@@ -1,6 +1,18 @@
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
 
+.member-view-details {
+    .accounts-description {
+        @extend .style-definition-description;
+        margin-top: 15px;
+    }
+
+    .account {
+        @extend .style-definition-description;
+        margin-bottom: 5px;
+    }
+}
+
 .member-view-details .registration-image {
     position: relative;
 
@@ -52,7 +64,7 @@
     }
 }
 
-.member-view-details {
+.member-view-details.split {
     padding-bottom: 30px;
     display: grid;
     grid-template-columns: 60% 40%;
@@ -65,32 +77,6 @@
     > div,
     > div > div {
         --st-horizontal-padding: 0px;
-        
-        > h2 {
-            @extend .style-title-2;
-            padding-bottom: 15px;
-        }
-
-        > p {
-            &:not([class]) {
-                @extend .style-definition-description;
-            }
-        }
-
-        > hr {
-            @extend .style-hr;
-            margin: 30px 0;
-        }
-    }
-
-    .accounts-description {
-        @extend .style-definition-description;
-        margin-top: 15px;
-    }
-
-    .account {
-        @extend .style-definition-description;
-        margin-bottom: 5px;
     }
 }
 
@@ -107,12 +93,19 @@
         align-items: center;
         vertical-align: middle;
 
-        &.High {
+        &:first-child {
+            margin-top: 0;
+        }
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &.Error {
             background: $color-error-background;
             color: $color-error-dark;
         }
 
-        &.Medium {
+        &.Warning {
             background: $color-warning-background;
             color: $color-warning-dark;
         }

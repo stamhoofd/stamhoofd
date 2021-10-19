@@ -38,8 +38,11 @@ export default class CodeInput extends Vue {
         if (value == this.getInternalValue()) {
             return
         }
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
+            return
+        }
         for (let index = 0; index < this.codeLength; index++) {
-            const element = this.$refs.numberInput[index];
+            const element = this.$refs.numberInput[index] as HTMLInputElement;
             
             if (index < value.length) {
                 const letter = value[index]
@@ -61,7 +64,11 @@ export default class CodeInput extends Vue {
     }
 
     onInput(index: number) {
-        const input = this.$refs.numberInput[index];
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
+            return
+        }
+
+        const input = this.$refs.numberInput[index] as HTMLInputElement;
         input.value = (input.value as string).replace(/\s/g, '')
         if (input.value.length >= 1) {
             this.selectNext(index + 1)
@@ -69,11 +76,15 @@ export default class CodeInput extends Vue {
     }
 
     clearInput(index: number, select = true) {
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
+            return
+        }
+
         // Move everything one to the left
-        const input = this.$refs.numberInput[index];
+        const input = this.$refs.numberInput[index] as HTMLInputElement;
         if (input.value.length == 0 && index < this.codeLength - 1) {
-            input.value = this.$refs.numberInput[index + 1].value;
-            this.$refs.numberInput[index + 1].value = ""
+            input.value = (this.$refs.numberInput[index + 1] as HTMLInputElement).value;
+            (this.$refs.numberInput[index + 1] as HTMLInputElement).value = ""
             this.clearInput(index + 1, false)
         }
 
@@ -93,15 +104,19 @@ export default class CodeInput extends Vue {
             return
         }
 
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
+            return
+        }
+
         console.log("select next ", index)
         if (index >= this.codeLength) {
-            const prev = this.$refs.numberInput[index - 1];
+            const prev = this.$refs.numberInput[index - 1] as HTMLInputElement;
             const val = prev.value;
             if (val.length > 1) {
                 prev.value = val.substr(0, 1)
             }
             for (let index = 0; index < this.codeLength; index++) {
-                const element = this.$refs.numberInput[index];
+                const element = this.$refs.numberInput[index] as HTMLInputElement;
                 element.blur()
             }
             this.updateValue()
@@ -112,24 +127,28 @@ export default class CodeInput extends Vue {
             return
         }
         if (index >= 1) {
-            const prev = this.$refs.numberInput[index - 1];
+            const prev = this.$refs.numberInput[index - 1] as HTMLInputElement;
             const val = prev.value;
             if (val.length > 1) {
-                prev.value = val.substr(0, 1)
-                this.$refs.numberInput[index].value = val.substr(1)
+                prev.value = val.substr(0, 1);
+                (this.$refs.numberInput[index] as HTMLInputElement).value = val.substr(1)
                 this.selectNext(index + 1)
                 return
             }
         }
-        this.$refs.numberInput[index].focus()
-        this.$refs.numberInput[index].select()
+        (this.$refs.numberInput[index] as HTMLInputElement).focus();
+        (this.$refs.numberInput[index] as HTMLInputElement).select();
         this.updateValue()
     }
 
     getInternalValue() {
+        if (!(this.$refs && this.$refs.numberInput && Array.isArray(this.$refs.numberInput))) {
+            return ""
+        }
+
         let val = ""
         for (let index = 0; index < this.codeLength; index++) {
-            const element = this.$refs.numberInput[index];
+            const element = this.$refs.numberInput[index] as HTMLInputElement;
             const letter = element.value.substr(0, 1).toUpperCase()
             val += letter
             if (letter.length == 0) {

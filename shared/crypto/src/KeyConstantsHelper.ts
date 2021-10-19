@@ -16,16 +16,18 @@ export class KeyConstantsHelper {
         // https://libsodium.gitbook.io/doc/password_hashing/default_phf#guidelines-for-choosing-the-parameters
 
         // For normal users we reduce memory needs because some older devices might crash if we try to allocate 1GB memory
-        let opslimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE // Increase to make the generation of the key slower
-        let memlimit = sodium.crypto_pwhash_MEMLIMIT_MODERATE
 
+        // Switched to interactive constants because it doesn't seem to work on Firefox with higher contants
+        let opslimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE // Increase to make the generation of the key slower
+        let memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
+        
         // We do inform admins that login takes longer due to encryption
         // 5 seconds on an up-to-date computer is okay
         // Admins can have access to more than 200 members, so this is a requirement
         // also the password requirements are more strong
         if (sensitivityLevel == SensitivityLevel.Admin) {
-            opslimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE
-            memlimit = sodium.crypto_pwhash_MEMLIMIT_SENSITIVE
+            opslimit = sodium.crypto_pwhash_OPSLIMIT_MODERATE
+            memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
         }
 
         if (sensitivityLevel == SensitivityLevel.Tests) {
@@ -33,7 +35,7 @@ export class KeyConstantsHelper {
             memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
         }
        
-        const algo = sodium.crypto_pwhash_ALG_ARGON2ID13
+        const algo = sodium.crypto_pwhash_ALG_DEFAULT
         const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
 
         return KeyConstants.create({
@@ -45,11 +47,11 @@ export class KeyConstantsHelper {
     }
 
     static async getSignKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
-        if (constants.opslimit < 3 && process.env.NODE_ENV != "test") {
-            throw new Error("These constants are too weak. Not going to use these.")
+        if (constants.opslimit < 2 && process.env.NODE_ENV != "test") {
+            throw new Error("These operation constants are too weak. Not going to use these.")
         }
         if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
-            throw new Error("These constants are too weak. We are not going to use these.")
+            throw new Error("These memory constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow
         const sodium = await Sodium.getSodium()
@@ -59,7 +61,10 @@ export class KeyConstantsHelper {
         const memlimit = constants.memlimit // in bytes
         const algo = constants.algo
 
+        //console.log("Generating sign seed", salt, opslimit, memlimit, algo)
         const seed = sodium.crypto_pwhash(sodium.crypto_sign_SEEDBYTES, password, salt, opslimit, memlimit, algo, "uint8array")
+
+        //console.log("Seeding keypair")
         const keypair = sodium.crypto_sign_seed_keypair(seed)
 
         return {
@@ -69,7 +74,7 @@ export class KeyConstantsHelper {
     }
 
     static async getEncryptionKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
-        if (constants.opslimit < 3 && process.env.NODE_ENV != "test") {
+        if (constants.opslimit < 2 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. Not going to use these.")
         }
         if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
@@ -84,7 +89,10 @@ export class KeyConstantsHelper {
         const memlimit = constants.memlimit // in bytes
         const algo = constants.algo
 
+        //console.log("Generating encryption seed")
         const seed = sodium.crypto_pwhash(sodium.crypto_box_SEEDBYTES, password, salt, opslimit, memlimit, algo, "uint8array")
+        
+        //console.log("Seeding keypair")
         const keypair = sodium.crypto_box_seed_keypair(seed)
 
         return {
@@ -94,7 +102,7 @@ export class KeyConstantsHelper {
     }
 
     static async getEncryptionKey(constants: KeyConstants, password: string): Promise<string> {
-        if (constants.opslimit < 3 && process.env.NODE_ENV != "test") {
+        if (constants.opslimit < 2 && process.env.NODE_ENV != "test") {
             throw new Error("These constants are too weak. Not going to use these.")
         }
         if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
@@ -109,6 +117,7 @@ export class KeyConstantsHelper {
         const memlimit = constants.memlimit // in bytes
         const algo = constants.algo
 
+        //console.log("Generating encryption key")
         const key = sodium.crypto_pwhash(sodium.crypto_secretbox_KEYBYTES, password, salt, opslimit, memlimit, algo, "uint8array")
         return Buffer.from(key).toString("base64");
     }

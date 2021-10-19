@@ -260,7 +260,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
             // Create a detailed payment without registrations
             const payment = PaymentGeneral.create({
                 ...encryptedPayment, 
-                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
+                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups, organization)
             })
 
             // Set payment reference
@@ -298,7 +298,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
             // Create a detailed payment without registrations
             const payment = PaymentGeneral.create({
                 ...encryptedPayment, 
-                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
+                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups, organization)
             })
 
             // Set payment reference

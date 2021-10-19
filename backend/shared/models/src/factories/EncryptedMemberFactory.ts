@@ -1,7 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
 import { VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { EncryptedMember, EncryptedMemberDetails, Gender, KeychainItem, MemberDetails, MemberDetailsMeta, ParentType, Record, RecordType, Version } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberDetails, Gender, KeychainItem, MemberDetails, MemberDetailsMeta, ParentType, LegacyRecord, LegacyRecordType, Version } from '@stamhoofd/structures';
 
 import { Organization } from "../models/Organization";
 import { UserWithOrganization } from "../models/User";
@@ -88,7 +88,7 @@ export class EncryptedMemberFactory extends Factory<Options, [EncryptedMember, K
 
         const recordFactory = new RecordFactory({});
         memberDetails.records = await recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
-        memberDetails.records.push(Record.create({ type: RecordType.DataPermissions }))
+        memberDetails.records.push(LegacyRecord.create({ type: LegacyRecordType.DataPermissions }))
 
         // Remove duplicates
         const unique = {};

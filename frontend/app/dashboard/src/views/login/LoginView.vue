@@ -19,7 +19,7 @@
             </STInputBox>
         </main>
 
-        <STFloatingFooter>
+        <STFloatingFooter class="no-sticky">
             <LoadingButton :loading="loading">
                 <button class="button primary full">
                     <span class="lock icon" />

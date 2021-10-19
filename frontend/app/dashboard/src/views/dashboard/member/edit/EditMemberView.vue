@@ -1,8 +1,8 @@
 <template>
-    <div class="st-view edit-member-view">
+    <form class="st-view edit-member-view" @submit.prevent="save">
         <STNavigationBar :title="member ? member.details.name : 'Nieuw lid'">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop" />
+            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -13,8 +13,57 @@
                 Nieuw lid toevoegen
             </h1>
 
-            <SegmentedControl v-model="changeTab" :items="tabs" :labels="tabLabels" />
-            <component :is="tab" ref="currentComponent" v-model="memberDetails" :member="member" :family-manager="familyManager" />
+            <STErrorsDefault :error-box="errorBox" />
+            <EditMemberGeneralView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
+
+            <EditMemberContactsView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
+
+            <template v-if="dataPermissionsEnabled">
+                <hr>
+                <h2>{{ dataPermissionsTitle }}</h2>
+                
+                <Checkbox v-model="dataPermissionsValue">
+                    Er werd toestemming gegeven
+                </Checkbox>
+
+                <p v-if="dataPermissionsChangeDate" class="style-description-small">
+                    Laatst gewijzigd op {{ formatDate(dataPermissionsChangeDate) }}
+                </p>
+            </template>
+
+            <template v-if="financialSupportEnabled">
+                <hr>
+                <h2>{{ financialSupportTitle }}</h2>
+                <Checkbox v-model="financialSupportValue">
+                    {{ financialSupportLabel }}
+                </Checkbox>
+
+                <p v-if="financialSupportChangeDate" class="style-description-small">
+                    Laatst gewijzigd op {{ formatDate(financialSupportChangeDate) }}
+                </p>
+            </template>
+
+            <div v-for="category of recordCategories" :key="category.id" class="container">
+                <hr>
+                <h2>{{ category.name }}</h2>
+
+                <STList v-if="category.childCategories.length > 0">
+                    <STListItem v-for="child of filterRecordCategories(category.childCategories)" :key="child.id" :selectable="true" @click="editRecordCategory(child)">
+                        <h3 class="style-title-list">
+                            {{ child.name }}
+                        </h3>
+                        <p v-if="getCategoryFillStatus(child)" class="style-description-small">
+                            {{ getCategoryFillStatus(child) }}
+                        </p>
+
+                        <button slot="right" type="button" class="button text">
+                            <span class="icon edit" />
+                            <span class="hide-small">Bewerken</span>
+                        </button>
+                    </STListItem>
+                </STList>
+                <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" :all-optional="true" />
+            </div>
         </main>
 
         <STToolbar>
@@ -26,24 +75,24 @@
                 </LoadingButton>
             </template>
         </STToolbar>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox,STNavigationTitle } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox,FillRecordCategoryView,RecordAnswerInput,STErrorsDefault,STList, STListItem,STNavigationTitle, Validator } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, Version } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { FamilyManager } from "../../../../classes/FamilyManager";
+import { FamilyManager } from "../../../../classes/FamilyManager";
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import EditMemberContactsView from './EditMemberContactsView.vue';
 import EditMemberGeneralView from './EditMemberGeneralView.vue';
 import EditMemberGroupView from './EditMemberGroupView.vue';
-import EditMemberRecordsView from './EditMemberRecordsView.vue';
 
 @Component({
     components: {
@@ -52,11 +101,17 @@ import EditMemberRecordsView from './EditMemberRecordsView.vue';
         SegmentedControl,
         BackButton,
         STToolbar,
-        LoadingButton
+        LoadingButton,
+        EditMemberGeneralView,
+        EditMemberContactsView,
+        STErrorsDefault,
+        STList,
+        STListItem,
+        RecordAnswerInput,
+        Checkbox
     },
 })
 export default class EditMemberView extends Mixins(NavigationMixin) {
-    tabLabels = ["Algemeen", "Contacten", "Steekkaart"];
     loading = false
 
     @Prop({ default: null })
@@ -65,36 +120,75 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     member!: MemberWithRegistrations | null;
 
-    @Prop({ default: null })
-    initialTabIndex!: number | null
-
-    tab: any = this.tabs[this.initialTabIndex ?? 0];
-
     familyManager = this.initialFamily ?? new FamilyManager(this.member ? [this.member] : []);
 
-    memberDetails = this.member ? this.member.details : null// do not link with member, only link on save!
+    memberDetails = this.member ? this.member.details.clone() : MemberDetails.create({})// do not link with member, only link on save!
 
-    get tabs() {
-        if (OrganizationManager.organization.meta.recordsConfiguration.shouldSkipRecords(this.memberDetails?.age ?? null)) {
-            return [EditMemberGeneralView, EditMemberContactsView]
-        }
-        return [EditMemberGeneralView, EditMemberContactsView, EditMemberRecordsView];
+    validator = new Validator()
+
+    errorBox: ErrorBox | null = null
+
+    OrganizationManager = OrganizationManager
+
+    get supportSettings(): FinancialSupportSettings {
+        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport ?? FinancialSupportSettings.create({})
     }
 
-    get changeTab() {
-        return this.tab
+    get financialSupportEnabled() {
+        return OrganizationManager.organization.meta.recordsConfiguration.financialSupport !== null
     }
 
-    set changeTab(tab: any) {
-        (this.$refs.currentComponent as any).validate().then((isValid) => {
-            if (isValid) {
-                this.tab = tab
-            }
-        })
+    get financialSupportTitle() {
+        return this.supportSettings.title || FinancialSupportSettings.defaultTitle
     }
 
-    get currentComponent() {
-        return (this.$refs.currentComponent as any)
+    get financialSupportLabel() {
+        return this.supportSettings.checkboxLabel || FinancialSupportSettings.defaultCheckboxLabel
+    }
+
+    get financialSupportValue() {
+        return this.memberDetails.requiresFinancialSupport?.value ?? false
+    }
+
+    set financialSupportValue(value: boolean) {
+        this.memberDetails.requiresFinancialSupport = BooleanStatus.create({ value })
+    }
+
+    get financialSupportChangeDate() {
+        return this.memberDetails.requiresFinancialSupport?.date
+    }
+
+
+    get dataPermissionsSettings(): DataPermissionsSettings {
+        return OrganizationManager.organization.meta.recordsConfiguration.dataPermission ?? DataPermissionsSettings.create({})
+    }
+
+    get dataPermissionsEnabled() {
+        return OrganizationManager.organization.meta.recordsConfiguration.dataPermission !== null
+    }
+
+    get dataPermissionsTitle() {
+        return this.dataPermissionsSettings.title || DataPermissionsSettings.defaultTitle
+    }
+
+    get dataPermissionsLabel() {
+        return this.dataPermissionsSettings.checkboxLabel || DataPermissionsSettings.defaultCheckboxLabel
+    }
+
+    get dataPermissionsValue() {
+        return this.memberDetails.dataPermissions?.value ?? false
+    }
+
+    set dataPermissionsValue(value: boolean) {
+        this.memberDetails.dataPermissions = BooleanStatus.create({ value })
+    }
+
+    get dataPermissionsChangeDate() {
+        return this.memberDetails.dataPermissions?.date
+    }
+
+    formatDate(date: Date) {
+        return Formatter.dateTime(date)
     }
 
     async save() {
@@ -102,7 +196,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             return;
         }
         
-        const isValid = await (this.$refs.currentComponent as any).validate()
+        const isValid = await this.validator.validate()
         if (!isValid) {
             return;
         }
@@ -124,11 +218,11 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         
         try {
             if (this.member) {
-                this.member.details = this.memberDetails
+                this.member.details.set(this.memberDetails)
                 await this.familyManager.patchAllMembersWith(this.member)
             }
           
-            this.currentComponent.errorBox = null
+            this.errorBox = null
             this.loading = false;
             this.pop({ force: true })
             return true
@@ -136,22 +230,68 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             if (this.member && o) {
                 this.member.details = o
             }
-            this.currentComponent.errorBox = new ErrorBox(e)
+            this.errorBox = new ErrorBox(e)
             this.loading = false;
             return false;
         }
     }
-}
-</script>
 
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
+    get recordCategories(): RecordCategory[] {
+        return this.filterRecordCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories)
+    }
 
-.edit-member-view {
-    > main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
+    getCategoryFillStatus(category: RecordCategory) {
+        // Check all the properties in this category and check their last review times
+        const records = category.getAllFilteredRecords(new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), this.dataPermissionsValue)
+
+        let hasValue = false
+        let hasMissingValue = false
+
+        for (const record of records) {
+            const answer = this.memberDetails.recordAnswers.find(a => a.settings.id === record.id)
+            if (answer) {
+                hasValue = true
+            } else {
+                hasMissingValue = true
+            }
+        }
+
+        if (hasValue && hasMissingValue) {
+            return "Onvolledig: sommige antwoorden ontbreken"
+        }
+
+        if (hasValue && !hasMissingValue) {
+            return ""
+        }
+
+        return "Niet ingevuld"
+    }
+
+    filterRecordCategories(categories: RecordCategory[]): RecordCategory[] {
+        return RecordCategory.filterCategories(categories, new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), this.dataPermissionsValue)
+    }
+
+    editRecordCategory(category: RecordCategory) {
+        const displayedComponent = new ComponentWithProperties(FillRecordCategoryView, {
+            category,
+            answers: this.memberDetails.recordAnswers,
+            dataPermission: this.dataPermissionsValue,
+            filterValue: new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []),
+            markReviewed: false,
+            saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => {
+                this.memberDetails.recordAnswers = answers
+                component.dismiss({ force: true })
+            }
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
+    }
+
+    async shouldNavigateAway() {
+        const compareTo = this.member ? this.member.details : MemberDetails.create({})
+        if (JSON.stringify(this.memberDetails.encode({ version: Version })) == JSON.stringify(compareTo.encode({ version: Version }))) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 }
-</style>
+</script>

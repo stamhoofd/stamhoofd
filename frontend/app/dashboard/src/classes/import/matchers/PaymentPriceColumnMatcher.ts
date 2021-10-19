@@ -10,7 +10,7 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
     category: MatcherCategory = MatcherCategory.Payment
 
     getName(): string {
-        return "Lidgeld (los van betaling)"
+        return "Bedrag (al dan niet betaald)"
     }
 
     doesMatch(columnName: string, examples: string[]): boolean {

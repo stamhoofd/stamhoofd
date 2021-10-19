@@ -1,16 +1,42 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder,Data,DateDecoder,EnumDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
+import { NumberFilterDefinition } from '../filters/NumberFilter';
+import { StringFilterDefinition } from '../filters/StringFilter';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
+import { Organization } from '../Organization';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
-import { OldRecord, Record } from './Record';
-import { OldRecordType, RecordType, RecordTypeHelper } from './RecordType';
+import { LegacyRecord,OldRecord } from './records/LegacyRecord';
+import { LegacyRecordType,OldRecordType } from './records/LegacyRecordType';
+import { RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordTextAnswer } from './records/RecordAnswer';
+import { RecordFactory } from './records/RecordFactory';
+import { RecordChoice, RecordType, RecordWarning, RecordWarningType } from './records/RecordSettings';
 import { ReviewTimes } from './ReviewTime';
+
+/**
+ * Keep track of date nad time of an edited boolean value
+ */
+export class BooleanStatus extends AutoEncoder {
+    @field({ decoder: BooleanDecoder })
+    value = false
+
+    @field({ decoder: DateDecoder })
+    date = new Date()
+
+    isOutdated(timeoutMs: number): boolean {
+        const time = this.date
+        if (time.getTime() < new Date().getTime() - timeoutMs) {
+            return true
+        }
+        return false
+    }
+}
 
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form. 
@@ -50,44 +76,50 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EmergencyContact) })
     emergencyContacts: EmergencyContact[] = [];
 
+    @field({ decoder: new ArrayDecoder(RecordAnswerDecoder), version: 120 })
+    recordAnswers: RecordAnswer[] = []
+
+    /**
+     * @deprecated
+     */
     @field({ decoder: new ArrayDecoder(OldRecord) })
     @field({ 
-        decoder: new ArrayDecoder(Record), version: 54, upgrade: (old: OldRecord[]): Record[] => {
-            const addIfNotFound = new Map<RecordType, boolean>()
-            addIfNotFound.set(RecordType.DataPermissions, true)
-            addIfNotFound.set(RecordType.PicturePermissions, true)
-            addIfNotFound.set(RecordType.GroupPicturePermissions, false)
-            addIfNotFound.set(RecordType.MedicinePermissions, true)
+        decoder: new ArrayDecoder(LegacyRecord), version: 54, upgrade: (old: OldRecord[]): LegacyRecord[] => {
+            const addIfNotFound = new Map<LegacyRecordType, boolean>()
+            addIfNotFound.set(LegacyRecordType.DataPermissions, true)
+            addIfNotFound.set(LegacyRecordType.PicturePermissions, true)
+            addIfNotFound.set(LegacyRecordType.GroupPicturePermissions, false)
+            addIfNotFound.set(LegacyRecordType.MedicinePermissions, true)
             
             const result = old.flatMap((o) => {
-                // Does this type exist in RecordType?
-                if (Object.values(RecordType).includes(o.type as any)) {
-                    return [Record.create(o as any)] // compatible
+                // Does this type exist in LegacyRecordType?
+                if (Object.values(LegacyRecordType).includes(o.type as any)) {
+                    return [LegacyRecord.create(o as any)] // compatible
                 }
 
                 if (o.type === OldRecordType.NoPictures) {
                     // Do not add picture permissions
-                    addIfNotFound.set(RecordType.PicturePermissions, false)
+                    addIfNotFound.set(LegacyRecordType.PicturePermissions, false)
                 }
                 if (o.type === OldRecordType.OnlyGroupPictures) {
                     // Yay
-                    addIfNotFound.set(RecordType.PicturePermissions, false)
-                    addIfNotFound.set(RecordType.GroupPicturePermissions, true)
+                    addIfNotFound.set(LegacyRecordType.PicturePermissions, false)
+                    addIfNotFound.set(LegacyRecordType.GroupPicturePermissions, true)
                 }
                 if (o.type === OldRecordType.NoData) {
                     // Yay
-                    addIfNotFound.set(RecordType.DataPermissions, false)
+                    addIfNotFound.set(LegacyRecordType.DataPermissions, false)
                 }
                 if (o.type === OldRecordType.NoPermissionForMedicines) {
                     // Yay
-                    addIfNotFound.set(RecordType.MedicinePermissions, false)
+                    addIfNotFound.set(LegacyRecordType.MedicinePermissions, false)
                 }
                 return []
             })
 
             for (const [key, add] of addIfNotFound.entries()) {
                 if (add) {
-                    result.push(Record.create({
+                    result.push(LegacyRecord.create({
                         type: key
                     }))
                 }
@@ -96,8 +128,20 @@ export class MemberDetails extends AutoEncoder {
             return result
         } 
     })
-    records: Record[] = [];
+    records: LegacyRecord[] = [];    
 
+    @field({ decoder: BooleanStatus, version: 117, optional: true })
+    requiresFinancialSupport?: BooleanStatus
+
+    /**
+     * Gave permission to collect sensitive information
+     */
+    @field({ decoder: BooleanStatus, version: 117, optional: true })
+    dataPermissions?: BooleanStatus
+
+    /**
+     * @deprecated
+     */
     @field({ decoder: EmergencyContact, nullable: true })
     doctor: EmergencyContact | null = null;
 
@@ -188,6 +232,13 @@ export class MemberDetails extends AutoEncoder {
             age--;
         }
         return age;
+    }
+
+    /**
+     * Age, set to 99 if missing
+     */
+    get defaultAge() {
+        return this.age ?? 99
     }
 
     get birthDayFormatted(): string | null {
@@ -324,9 +375,10 @@ export class MemberDetails extends AutoEncoder {
     }
 
     /**
+     * @deprecated
      * This will add or update the parent (possibily partially if not all data is present)
      */
-    addRecord(record: Record) {
+    addRecord(record: LegacyRecord) {
         for (const [index, _record] of this.records.entries()) {
             if (_record.type === record.type) {
                 this.records[index] = record
@@ -336,7 +388,10 @@ export class MemberDetails extends AutoEncoder {
         this.records.push(record)
     }
 
-    removeRecord(type: RecordType) {
+    /**
+     * @deprecated
+     */
+    removeRecord(type: LegacyRecordType) {
         for (let index = this.records.length - 1; index >= 0; index--) {
             const record = this.records[index];
 
@@ -441,13 +496,208 @@ export class MemberDetails extends AutoEncoder {
             this.addRecord(record)
         }
 
-        // If some records are missing in the incoming blob AND if they are public, we need to delete them. Always.
-        // E.g. permissions
-        for (const recordType of Object.values(RecordType)) {
-            if (RecordTypeHelper.isPublic(recordType) && !other.records.find(r => r.type === recordType)) {
-                this.removeRecord(recordType)
+        if (other.requiresFinancialSupport && (!this.requiresFinancialSupport || this.requiresFinancialSupport.date < other.requiresFinancialSupport.date)) {
+            this.requiresFinancialSupport = other.requiresFinancialSupport
+        }
+
+        if (other.dataPermissions && (!this.dataPermissions || this.dataPermissions.date < other.dataPermissions.date)) {
+            this.dataPermissions = other.dataPermissions
+        }
+
+        // Merge answers
+        const newAnswers: RecordAnswer[] = this.recordAnswers.slice()
+        for (const answer of other.recordAnswers) {
+            const existingIndex = newAnswers.findIndex(a => a.settings.id === answer.settings.id)
+
+            if (existingIndex == -1) {
+                newAnswers.push(answer)
+            } else if (answer.date >= newAnswers[existingIndex].date) {
+                newAnswers.splice(existingIndex, 1, answer)
+            } else {
+                // keep existing, this one is more up-to-date, don't add the other answer
+            }
+        }
+        this.recordAnswers = newAnswers
+    }
+
+    static getBaseFilterDefinitions() {
+        // When you make changes here, make sure the ID's match the those of MemberDetailsWithGroups
+        return [
+            new NumberFilterDefinition<MemberDetails>({
+                id: "member_age", 
+                name: "Leeftijd", 
+                getValue: (details) => {
+                    return details.age ?? 99
+                },
+                floatingPoint: false
+            }),
+             new ChoicesFilterDefinition<MemberDetails>({
+                id: "member_gender", 
+                name: "Geslacht", 
+                choices: [
+                    new ChoicesFilterChoice(Gender.Male, "Man"),
+                    new ChoicesFilterChoice(Gender.Female, "Vrouw"),
+                    new ChoicesFilterChoice(Gender.Other, "Andere"),
+                ], 
+                getValue: (details) => {
+                    return [details.gender]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            })
+        ]
+    }
+
+    upgradeFromLegacy(organization: Organization) {
+        console.log("Upgrading details")
+
+        if (!this.requiresFinancialSupport) {
+            this.requiresFinancialSupport = BooleanStatus.create({ 
+                value: !!this.records.find(r => r.type === LegacyRecordType.FinancialProblems),
+                date: this.reviewTimes.getLastReview("records") ?? new Date()
+            })
+        }
+
+        if (!this.dataPermissions) {
+            this.dataPermissions = BooleanStatus.create({ 
+                value: !!this.records.find(r => r.type === LegacyRecordType.DataPermissions),
+                date: this.reviewTimes.getLastReview("records") ?? new Date()
+            })
+        }
+
+        for (const record of this.records) {
+            // Mi ma migrate
+            const settings = RecordFactory.create(record.type)
+            if (!settings) {
+                continue
+            }
+
+            if (record.type === LegacyRecordType.PicturePermissions) {
+                const answer = RecordChooseOneAnswer.create({
+                    settings,
+                    selectedChoice: RecordChoice.create({
+                        id: "yes",
+                        name: "Ja, ik geef toestemming",
+                    }),
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+            } else if (record.type === LegacyRecordType.GroupPicturePermissions) {
+                // Do not add if we already have full permission
+                if (this.records.find(r => r.type === LegacyRecordType.PicturePermissions)) {
+                    continue;
+                }
+                const answer = RecordChooseOneAnswer.create({
+                    settings,
+                    selectedChoice: RecordChoice.create({
+                        id: "groups_only",
+                        name: "Ik geef enkel toestemming voor groepsfoto's",
+                        warning: RecordWarning.create({
+                            id: "",
+                            text: "Enkel toestemming voor groepsfoto's",
+                            type: RecordWarningType.Error
+                        })
+                    }),
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+
+            } else if (settings.type === RecordType.Checkbox) {
+                const answer = RecordCheckboxAnswer.create({
+                    settings,
+                    selected: true,
+                    comments: record.description ? record.description : undefined,
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+            } else if (settings.type === RecordType.Textarea) {
+                const answer = RecordTextAnswer.create({
+                    settings,
+                    value: record.description ? record.description : null,
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(answer)
+            } else {
+                throw new Error("Unsupported type "+settings.type)
             }
         }
 
+        // Complete with unselected properties
+        const age = this.age ?? 18
+
+        for (const record of organization.meta.recordsConfiguration.recordCategories.flatMap(c => c.getAllRecords())) {
+            const answer = this.recordAnswers.find(a => a.settings.id == record.id)
+            if (answer) {
+                continue
+            }
+
+            // Member is older than 18 years, and no permissions for medicines
+            if (record.id === "legacy-type-"+LegacyRecordType.PicturePermissions) {
+                const alternativeAnswer = this.recordAnswers.find(a => a.settings.id == "legacy-type-"+LegacyRecordType.GroupPicturePermissions)
+
+                if (alternativeAnswer) {
+                    continue
+                }
+
+                // No permissions
+                const a = RecordChooseOneAnswer.create({
+                    settings: record,
+                    selectedChoice: RecordChoice.create({
+                        id: "no",
+                        name: "Nee, ik geef geen toestemming",
+                        warning: RecordWarning.create({
+                            id: "",
+                            text: "Geen toestemming voor publicatie foto's",
+                            type: RecordWarningType.Error
+                        })
+                    }),
+                    date: new Date(2021, 0, 1), // Always give it the same date
+                    reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+                })
+                this.recordAnswers.push(a)
+                continue
+            }
+
+             if (record.type !== RecordType.Checkbox) {
+                continue
+            }
+            
+            // Member is older than 18 years, and no permissions for medicines
+            if (record.id === "legacy-type-"+LegacyRecordType.MedicinePermissions && (age ?? 18) >= 18) {
+                // Don't add this property
+                continue
+            }
+
+            const a = RecordCheckboxAnswer.create({
+                settings: record,
+                selected: false,
+                date: new Date(2021, 0, 1), // Always give it the same date
+                reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+            })
+            this.recordAnswers.push(a)
+        }
+
+        // Doctor
+        if (this.doctor) {
+            this.recordAnswers.push(RecordTextAnswer.create({
+                settings: RecordFactory.createDoctorName(),
+                value: this.doctor.name,
+                date: new Date(2021, 0, 1), // Always give it the same date
+                reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+            }))
+            this.recordAnswers.push(RecordTextAnswer.create({
+                settings: RecordFactory.createDoctorPhone(),
+                value: this.doctor.phone,
+                date: new Date(2021, 0, 1), // Always give it the same date
+                reviewedAt: this.reviewTimes.getLastReview("records") ?? null
+            }))
+        }
+
+        // Clear outdated data
+        this.doctor = null
+        this.records = []
     }
 }

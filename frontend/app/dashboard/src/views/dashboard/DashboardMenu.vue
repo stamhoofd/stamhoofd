@@ -269,7 +269,7 @@ export default class Menu extends Mixins(NavigationMixin) {
             localStorage.setItem("what-is-new", (WhatsNewCount as any).toString());
         }
 
-        if (!didSet) {
+        if (!didSet && this.fullAccess) {
             if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
                 LoadComponent(() => import(/* webpackChunkName: "SignupModulesView" */ "../signup/SignupModulesView.vue"), {}, { instant: true }).then((component) => {
                     this.present(component.setDisplayStyle("popup").setAnimated(false))

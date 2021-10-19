@@ -1,12 +1,17 @@
 import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
+import { DateFilterDefinition } from '../filters/DateFilter';
+import { NumberFilterDefinition } from '../filters/NumberFilter';
+import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from '../filters/RegistrationsFilter';
+import { StringFilterDefinition } from '../filters/StringFilter';
 import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
-import { WaitingListType } from '../GroupSettings';
 import { PaymentStatus } from '../PaymentStatus';
 import { User } from '../User';
 import { RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
+import { Gender } from './Gender';
 import { Member } from './Member';
 import { Registration } from './Registration';
 
@@ -230,5 +235,111 @@ export class MemberWithRegistrations extends Member {
         if (member.users !== this.users) {
             this.users.splice(0, this.users.length, ...member.users)
         }
+    }
+
+    static getBaseFilterDefinitions() {
+        return [
+            new StringFilterDefinition<MemberWithRegistrations>({
+                id: "member_name", 
+                name: "Naam lid", 
+                getValue: (member) => {
+                    return member?.name ?? ""
+                }
+            }),
+            new RegistrationsFilterDefinition<MemberWithRegistrations>({
+                id: "registrations", 
+                name: "Inschrijvingen",
+                getValue: (member) => {
+                    const groups = member.groups.map(g => RegistrationsFilterChoice.create({
+                        id: g.id,
+                        name: g.settings.name,
+                        waitingList: false
+                    })) ?? []
+
+                    const waitingGroups = member.waitingGroups.map(g => RegistrationsFilterChoice.create({
+                        id: g.id,
+                        name: g.settings.name,
+                        waitingList: true
+                    })) ?? []
+
+                    return [...groups, ...waitingGroups]
+                }
+            }),
+            new NumberFilterDefinition<MemberWithRegistrations>({
+                id: "member_age", 
+                name: "Leeftijd", 
+                getValue: (member) => {
+                    return member.details.age ?? 99
+                },
+                floatingPoint: false
+            }),
+            new DateFilterDefinition<MemberWithRegistrations>({
+                id: "member_birthDay", 
+                name: "Geboortedatum", 
+                getValue: (member) => {
+                    return member.details.birthDay ?? new Date(1900, 0, 1)
+                },
+                time: false
+            }),
+             new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "gender", 
+                name: "Geslacht", 
+                choices: [
+                    new ChoicesFilterChoice(Gender.Male, "Man"),
+                    new ChoicesFilterChoice(Gender.Female, "Vrouw"),
+                    new ChoicesFilterChoice(Gender.Other, "Andere"),
+                ], 
+                getValue: (member) => {
+                    return [member.details.gender]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "paid", 
+                name: "Betaling", 
+                choices: [
+                    new ChoicesFilterChoice("checked", "Betaald"),
+                    new ChoicesFilterChoice("not_checked", "Niet betaald"),
+                ], 
+                getValue: (member) => {
+                    // todo: remove spaces
+                    if (member.paid) {
+                        return ["checked"]
+                    }
+                    return ["not_checked"]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "financial_support", 
+                name: "Financiële ondersteuning", 
+                choices: [
+                    new ChoicesFilterChoice("checked", "Vroeg financiële ondersteuning aan"),
+                    new ChoicesFilterChoice("not_checked", "Geen financiële ondersteuning"),
+                ], 
+                getValue: (member) => {
+                    // todo: remove spaces
+                    if (member.details.requiresFinancialSupport?.value) {
+                        return ["checked"]
+                    }
+                    return ["not_checked"]
+                }
+            }),
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "data_permissions", 
+                name: "Toestemming gegevensverzameling", 
+                choices: [
+                    new ChoicesFilterChoice("checked", "Gaf toestemming"),
+                    new ChoicesFilterChoice("not_checked", "Gaf geen toestemming"),
+                ], 
+                getValue: (member) => {
+                    // todo: remove spaces
+                    if (member.details.dataPermissions?.value) {
+                        return ["checked"]
+                    }
+                    return ["not_checked"]
+                }
+            })
+        ]
     }
 }

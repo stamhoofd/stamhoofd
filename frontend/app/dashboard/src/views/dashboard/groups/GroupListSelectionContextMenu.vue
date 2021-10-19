@@ -60,7 +60,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
-import MemberSummaryView from "../member/MemberSummaryView.vue";
+import MemberSummaryBuilderView from "../member/MemberSummaryBuilderView.vue";
 import SMSView from "../sms/SMSView.vue";
 
 @Component({
@@ -127,7 +127,7 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
 
     samenvatting() {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberSummaryView, {
+            root: new ComponentWithProperties(MemberSummaryBuilderView, {
                 members: this.members,
                 group: this.group
             })

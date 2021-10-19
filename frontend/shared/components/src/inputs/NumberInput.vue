@@ -189,6 +189,10 @@ export default class NumberInput extends Vue {
         })
         
     }
+
+    focus() {
+        (this.$refs["input"] as any).focus()
+    }
 }
 </script>
 
@@ -199,6 +203,10 @@ export default class NumberInput extends Vue {
 
 .number-container {
     display: flex;
+
+    &.option {
+        margin-top: 7px
+    }
 
     .number-input {
         min-width: 0;

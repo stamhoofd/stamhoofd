@@ -1,55 +1,45 @@
 <template>
     <div class="st-view group-members-view background">
-        <STNavigationBar :sticky="false" :class="{ 'wrap': !canPop }">
+        <STNavigationBar :sticky="false">
             <template #left>
                 <BackButton v-if="canPop" slot="left" @click="pop" />
-                <STNavigationTitle v-else>
-                    <span class="icon-spacer">{{ title }}</span>
-                    <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
-
-                    <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
-                        <span class="icon clock-small" />
-                        <span>Wachtlijst</span>
-                    </button>
-
-                    <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
-                    
-                    <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
-                        <span class="icon add" />
-                        <span>Nieuw</span>
-                    </button>
-                </STNavigationTitle>
-            </template>
-            <template #middle>
-                <div />
             </template>
             <template #right>
-                <select v-if="!waitingList" v-model="selectedFilter" class="input hide-small">
-                    <option v-for="(filter, index) in filters" :key="index" :value="index">
-                        {{ filter.getName() }}
-                    </option>
-                </select>
-                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
+                    <span class="icon add" />
+                    <span class="hide-small">Nieuw</span>
+                </button>
+                <button v-if="group && hasFull" class="button text" @click="modifyGroup">
+                    <span class="icon settings" />
+                    <span class="hide-small">Instellingen</span>
+                </button>
+                <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
+                    <span class="icon clock-small" />
+                    <span class="hide-small">Wachtlijst</span>
+                </button>
             </template>
         </STNavigationBar>
     
         <main>
-            <h1 v-if="canPop" class="data-table-prefix">
+            <h1 class="data-table-prefix">
                 <span class="icon-spacer">{{ title }}</span>
-
-                <button v-if="hasWaitingList" class="button text" @click="openWaitingList">
-                    <span class="icon clock-small" />
-                    <span>Wachtlijst</span>
-                </button>
-
-                <button v-if="group && hasFull" class="button icon settings gray" @click="modifyGroup" />
-
-                <button v-if="cycleOffset === 0 && !waitingList && canCreate" class="button text" @click="addMember">
-                    <span class="icon add" />
-                    <span>Nieuw</span>
-                </button>
+                <span v-if="!loading && maxMembers" class="style-tag" :class="{ error: isFull}">{{ members.length }} / {{ maxMembers }}</span>
+                <span v-if="!loading && !maxMembers" class="style-tag">{{ members.length }}</span>
             </h1>
             <span v-if="titleDescription" class="style-description title-description data-table-prefix">{{ titleDescription }}</span>
+
+            <div class="input-with-buttons data-table-prefix title-description">
+                <div>
+                    <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                </div>
+                <div>
+                    <button class="button text" @click="editFilter">
+                        <span class="icon filter" />
+                        <span class="hide-small">Filter</span>
+                        <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                    </button>
+                </div>
+            </div>
 
             <BillingWarningBox filter-types="members" />
 
@@ -144,6 +134,21 @@
                 </tbody>
             </table>
 
+            <p v-if="totalFilteredCount == 1" class="info-box icon filter with-button">
+                De filters verbergen één lid
+
+                <button class="button text" @click="resetFilter">
+                    Reset
+                </button>
+            </p>
+            <p v-else-if="totalFilteredCount > 1" class="info-box icon filter with-button">
+                De filters verbergen {{ totalFilteredCount }} leden
+
+                <button class="button text" @click="resetFilter">
+                    Reset
+                </button>
+            </p>
+
             <template v-if="!loading && members.length == 0">
                 <p v-if="cycleOffset === 0" class="info-box">
                     Er zijn nog geen leden ingeschreven in deze inschrijvingsgroep.
@@ -227,22 +232,21 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { GlobalEventBus, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { FilterEditor, GlobalEventBus, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
 import { Checkbox } from "@stamhoofd/components"
 import { STToolbar } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, Registration } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, Filter,getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { CanNotSwimFilter, NoFilter, NotPaidFilter, RecordTypeFilter } from "../../../classes/member-filters";
 import { MemberChangeEvent,MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from '../member/edit/EditMemberView.vue';
 import MemberContextMenu from "../member/MemberContextMenu.vue";
-import MemberSummaryView from '../member/MemberSummaryView.vue';
+import MemberSummaryBuilderView from '../member/MemberSummaryBuilderView.vue';
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 import EditGroupView from "./EditGroupView.vue";
@@ -289,8 +293,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     members: SelectableMember[] = [];
     searchQuery = "";
-    filters = [new NoFilter(), new NotPaidFilter(), new CanNotSwimFilter(), ...RecordTypeFilter.generateAll()];
-    selectedFilter = 0;
+
+    selectedFilter: Filter<MemberWithRegistrations> | null = null;
+
     selectionCountHidden = 0;
     sortBy = "info";
     sortDirection = "ASC";
@@ -338,6 +343,121 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
     }
 
+    resetFilter() {
+        this.searchQuery = ""
+        this.selectedFilter = null
+    }
+
+     get recordCategories(): RecordCategory[] {
+        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
+        return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
+            if (category.childCategories.length > 0) {
+                return category.childCategories
+            }
+            return [category]
+        })
+    }
+
+    get records(): RecordSettings[] {
+        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
+        return this.recordCategories.flatMap(c => c.records)
+    }
+
+    get definitions() {
+        const base = MemberWithRegistrations.getBaseFilterDefinitions()
+
+        for (const recordCategory of this.recordCategories) {
+            for (const record of recordCategory.records) {
+                if (record.type === RecordType.Checkbox) {
+                    const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: [
+                            new ChoicesFilterChoice("checked", "Aangevinkt"),
+                            new ChoicesFilterChoice("not_checked", "Niet aangevinkt")
+                        ], 
+                        getValue: (member) => {
+                            const answer: RecordCheckboxAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+                            return answer?.selected ? ["checked"] : ["not_checked"]
+                        },
+                        defaultMode: ChoicesFilterMode.Or
+                    })
+                    base.push(def)
+                }
+
+                if (record.type === RecordType.MultipleChoice) {
+                    const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                        getValue: (member) => {
+                            const answer: RecordMultipleChoiceAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+
+                            if (!answer) {
+                                return []
+                            }
+
+                            return answer.selectedChoices.map(c => c.id)
+                        },
+                        defaultMode: ChoicesFilterMode.And
+                    })
+                    base.push(def)
+                }
+
+                if (record.type === RecordType.ChooseOne) {
+                    const def = new ChoicesFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                        getValue: (member) => {
+                            const answer: RecordChooseOneAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+
+                            if (!answer || !answer.selectedChoice) {
+                                return []
+                            }
+
+                            return [answer.selectedChoice.id]
+                        },
+                        defaultMode: ChoicesFilterMode.Or
+                    })
+                    base.push(def)
+                }
+
+                if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
+                    const def = new StringFilterDefinition<MemberWithRegistrations>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        getValue: (member) => {
+                            const answer: RecordTextAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+                            return answer?.value ?? ""
+                        }
+                    })
+                    base.push(def)
+                }
+            }
+        }
+
+
+        return base
+    }
+
+    editFilter() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(FilterEditor, {
+                definitions: this.definitions,
+                selectedFilter: this.selectedFilter,
+                organization: OrganizationManager.organization,
+                setFilter: (filter: Filter<MemberWithRegistrations>) => {
+                    this.selectedFilter = filter
+                }
+            })
+        }).setDisplayStyle("side-view"))
+    }
+
     /**
      * Return all groups a member was registered in, given the current cycle offset
      */
@@ -367,7 +487,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return
         }
         this.checkingInaccurate = true
-        let toast: Toast | null = null
+        let toast: Toast | null = null
         try {
             const inaccurate: MemberWithRegistrations[] = []
             for (const m of this.members) {
@@ -384,10 +504,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 toast = new Toast("Gegevens van leden updaten naar laatste versie...", "spinner").setHide(null).show()
 
                 // Patch member with new details
-                await MemberManager.patchMembersDetails(inaccurate)
+                await MemberManager.patchMembersDetails(inaccurate, false)
             }
         } catch (e) {
             console.error(e)
+            Toast.fromError(e).show()
         }
         toast?.hide()
         this.checkingInaccurate = false
@@ -762,29 +883,30 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return this.filteredMembers;
     }
 
-    isDescriptiveFilter() {
-        return !!((this.filters[this.selectedFilter] as any).getDescription)
-    }
-
     getMemberDescription(member: MemberWithRegistrations) {
         if (this.waitingList) {
             return this.formatDate(this.registrationDate(member))
         }
 
-        if (this.isDescriptiveFilter()) {
-            return (this.filters[this.selectedFilter] as any).getDescription(member, OrganizationManager.organization)
-        }
-
         return member.info
     }
 
+    filteredCount = 0
+
+    get totalFilteredCount() {
+        return this.members.length - this.filteredMembers.length
+    }
+
     get filteredMembers(): SelectableMember[] {
-        this.selectionCountHidden = 0;
-        const filtered = this.members.filter((member: SelectableMember) => {
-            if (this.filters[this.selectedFilter].doesMatch(member.member, OrganizationManager.organization)) {
+        this.selectionCountHidden = 0
+        this.filteredCount = 0
+
+        const filtered = this.selectedFilter === null ? this.members.slice() : this.members.filter((member: SelectableMember) => {
+            if (this.selectedFilter?.doesMatch(member.member)) {
                 return true;
             }
             this.selectionCountHidden += member.selected ? 1 : 0;
+            this.filteredCount += 1
             return false;
         });
 
@@ -994,7 +1116,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     openSamenvatting() {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberSummaryView, {
+            root: new ComponentWithProperties(MemberSummaryBuilderView, {
                 members: this.getSelectedMembers(),
                 group: this.group
             })
@@ -1006,7 +1128,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/base/text-styles.scss';
 
 .group-members-view {
     .new-member-bubble {
@@ -1037,7 +1158,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     .title-description {
-        margin-bottom: 20px;
+        padding-bottom: 20px;
     }
 }
 </style>

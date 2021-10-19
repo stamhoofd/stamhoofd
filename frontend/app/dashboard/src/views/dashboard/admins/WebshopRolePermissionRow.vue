@@ -4,9 +4,11 @@
         <h2 class="style-title-list">
             {{ role.name }}
         </h2>
-        <p class="style-description-small" v-if="isMe">Jij zit in deze groep</p>
+        <p v-if="isMe" class="style-description-small">
+            Jij zit in deze groep
+        </p>
 
-        <div slot="right" v-if="selected">
+        <div v-if="selected" slot="right">
             <button class="button text" @click.stop.prevent="choosePermissions($event)">
                 <span>{{ getLevelText(permissions) }}</span>
                 <span class="icon arrow-down-small" />
@@ -22,6 +24,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Checkbox, STListItem } from "@stamhoofd/components";
 import { Organization, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 

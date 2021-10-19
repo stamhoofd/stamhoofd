@@ -4,8 +4,8 @@ import { ObjectData } from "@simonbackx/simple-encoding"
 
 import { MemberDetails } from "./MemberDetails"
 import { Parent } from "./Parent"
-import { Record } from "./Record"
-import { RecordType } from "./RecordType"
+import { LegacyRecord } from "./records/LegacyRecord"
+import { LegacyRecordType } from "./records/LegacyRecordType"
 
 describe("Correctly merge multiple details together", () => {
     test("Delete public records", () => {
@@ -13,11 +13,11 @@ describe("Correctly merge multiple details together", () => {
         const original = MemberDetails.create({
             "firstName": "Robot",
             records: [
-                Record.create({
-                    type: RecordType.DataPermissions,
+                LegacyRecord.create({
+                    type: LegacyRecordType.DataPermissions,
                 }),
-                Record.create({
-                    type: RecordType.HeartDisease,
+                LegacyRecord.create({
+                    type: LegacyRecordType.HeartDisease,
                 })
             ]
         })
@@ -26,8 +26,8 @@ describe("Correctly merge multiple details together", () => {
         const incoming = MemberDetails.create({
             "firstName": "Robot",
             records: [
-                Record.create({
-                    type: RecordType.FoodAllergies,
+                LegacyRecord.create({
+                    type: LegacyRecordType.FoodAllergies,
                     description: "milk"
                 })
             ]
@@ -36,7 +36,7 @@ describe("Correctly merge multiple details together", () => {
         // Only keep the heart + food allergies
         original.merge(incoming)
 
-        expect(original.records.map(r => r.type)).toEqual([RecordType.HeartDisease, RecordType.FoodAllergies])
+        expect(original.records.map(r => r.type)).toEqual([LegacyRecordType.HeartDisease, LegacyRecordType.FoodAllergies])
     })
 
     test("Merge parents", () => {
@@ -113,7 +113,7 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.DataPermissions, RecordType.MedicinePermissions, RecordType.PicturePermissions ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.DataPermissions, LegacyRecordType.MedicinePermissions, LegacyRecordType.PicturePermissions ].sort())
     })
 
     test("no pictures", () => {
@@ -127,7 +127,7 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.DataPermissions, RecordType.MedicinePermissions ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.DataPermissions, LegacyRecordType.MedicinePermissions ].sort())
     })
 
     test("no medicines", () => {
@@ -141,7 +141,7 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.DataPermissions, RecordType.PicturePermissions ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.DataPermissions, LegacyRecordType.PicturePermissions ].sort())
     })
 
     test("no data", () => {
@@ -155,7 +155,7 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.PicturePermissions, RecordType.MedicinePermissions ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.PicturePermissions, LegacyRecordType.MedicinePermissions ].sort())
     })
 
     test("only group pictures", () => {
@@ -169,7 +169,7 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.DataPermissions, RecordType.GroupPicturePermissions, RecordType.MedicinePermissions ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.DataPermissions, LegacyRecordType.GroupPicturePermissions, LegacyRecordType.MedicinePermissions ].sort())
     })
 
     test("only group pictures and no pictures", () => {
@@ -189,7 +189,7 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.DataPermissions, RecordType.GroupPicturePermissions, RecordType.MedicinePermissions ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.DataPermissions, LegacyRecordType.GroupPicturePermissions, LegacyRecordType.MedicinePermissions ].sort())
     })
 
     test("only group pictures and no pictures reverse order", () => {
@@ -209,7 +209,7 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.DataPermissions, RecordType.GroupPicturePermissions, RecordType.MedicinePermissions ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.DataPermissions, LegacyRecordType.GroupPicturePermissions, LegacyRecordType.MedicinePermissions ].sort())
     })
 
     test("no permissions", () => {
@@ -257,6 +257,6 @@ describe("Upgrade records correctly from version 53 to latest version", () => {
         }
 
         const details = MemberDetails.decode(new ObjectData(encoded, { version: 53 }))
-        expect(details.records.map(r => r.type).sort()).toEqual([ RecordType.DataPermissions, RecordType.MedicinePermissions, RecordType.PicturePermissions, RecordType.Vegan, RecordType.CanNotSwim, RecordType.Other ].sort())
+        expect(details.records.map(r => r.type).sort()).toEqual([ LegacyRecordType.DataPermissions, LegacyRecordType.MedicinePermissions, LegacyRecordType.PicturePermissions, LegacyRecordType.Vegan, LegacyRecordType.CanNotSwim, LegacyRecordType.Other ].sort())
     })
 })

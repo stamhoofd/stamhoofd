@@ -1,7 +1,7 @@
 import { AutoEncoder, Data, Decoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { OldRecordType, RecordType, RecordTypeHelper } from "./RecordType";
+import { LegacyRecordType,OldRecordType } from "./LegacyRecordType";
 
 // Temporary fix for space in enum....
 class TrimEnumDecoder<E extends { [key: number]: string | number }> implements Decoder<E[keyof E]> {
@@ -41,10 +41,9 @@ class TrimEnumDecoder<E extends { [key: number]: string | number }> implements D
     }
 }
 
-
-export class Record extends AutoEncoder {
-    @field({ decoder: new EnumDecoder(RecordType) })
-    type: RecordType;
+export class LegacyRecord extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(LegacyRecordType) })
+    type: LegacyRecordType;
 
     @field({ decoder: StringDecoder })
     description = "";
@@ -56,37 +55,6 @@ export class Record extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, optional: true })
     author?: string
-
-    getText(): string {
-        return RecordTypeHelper.getName(this.type);
-    }
-
-    /**
-     * Invert all records that need to be reversed in order to get displayed correctly
-     */
-    static invertRecords(records: Record[]): Record[] {
-        const invertMap = new Map<RecordType, boolean>()
-        for (const type of Object.values(RecordType)) {
-            if (RecordTypeHelper.isInverted(type)) {
-                invertMap.set(type, true) // add this record if it was not found
-            }
-        }
-        const result = records.filter((record) => {
-            if (!RecordTypeHelper.isInverted(record.type)) {
-                return true
-            }
-            invertMap.set(record.type, false) // do not add again
-            return false
-
-        })
-
-        for (const [type, b] of invertMap.entries()) {
-            if (b) {
-                result.push(Record.create({ type }))
-            }
-        }
-        return result
-    }
 }
 
 

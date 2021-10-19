@@ -20,8 +20,14 @@ import STErrorBox from "./STErrorBox.vue"
         STErrorBox
     }
 })export default class STErrorsDefault extends Vue {
-    @Prop() errorBox: ErrorBox | null;
+    @Prop() 
+    errorBox: ErrorBox | null;
+    
     errors: SimpleError[] = [];
+
+    mounted() {
+        this.onNewErrors(this.errorBox)
+    }
 
     @Watch('errorBox')
     onNewErrors(val: ErrorBox | null ) {
