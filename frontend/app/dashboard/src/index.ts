@@ -1,15 +1,13 @@
 // import 'core-js/stable'; // only needed for entry or 'false' useBuiltIns
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
-//import * as Sentry from '@sentry/vue';
+import * as Sentry from '@sentry/vue';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
 Vue.use(VueMeta)
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-// There is a bug in Sentry wrapers that causes random click events to fire on the wrong elements.
-/*
 if (!isPrerender && process.env.NODE_ENV == "production") {
     Sentry.init({
         Vue,
@@ -17,7 +15,6 @@ if (!isPrerender && process.env.NODE_ENV == "production") {
         logErrors: true
     });
 }
-*/
 
 import App from "./App.vue";
 
@@ -94,7 +91,7 @@ if (!isPrerender) {
     document.body.addEventListener("touchstart", () => { }, { passive: true });
 
     // Load plausible if not production
-    if (process.env.NODE_ENV == "production-false") {
+    if (process.env.NODE_ENV == "production") {
         const script = document.createElement('script');
         script.onload = function () {
             //do stuff with the script
