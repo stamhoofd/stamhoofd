@@ -7,6 +7,10 @@
         <main>
             <h1>Groepsadministratie synchroniseren</h1>
 
+            <p class="warning-box">
+                De synchronisatie is pas gelukt als je een overzicht krijgt van alle wijzigingen. In sommige Chrome (en daarvan afgeleide browsers, zoals Edge of Brave) versies durft de synchronisatie te blokkeren door een bug in Chrome zelf, in dat geval blokkeren we dat en krijg je een melding of je de pagina wilt verlaten (klik dan om de pagina niet te verlaten). We zijn dit probleem nog verder aan het onderzoeken aangezien de oorzaak onduidelijk is.
+            </p>
+
             <p class="info-box">
                 Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via hallo@stamhoofd.be
             </p>
