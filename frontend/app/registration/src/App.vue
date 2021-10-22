@@ -8,16 +8,16 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
-import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
 import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
-import { TabBarItem } from "./classes/TabBarItem"
+import { TabBarItem } from "./classes/TabBarItem";
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
 import RegistrationTabBarController from './views/overview/RegistrationTabBarController.vue';

@@ -9,7 +9,7 @@
 
             <template slot="right">
                 <a class="button primary" href="/aansluiten" @click.prevent="gotoSignup">
-                    Aansluiten
+                    {{ $t("dashboard.join") }}
                 </a>
             </template>
         </STNavigationBar>
@@ -58,9 +58,10 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent,CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
-import { AppManager, NetworkManager,Session,SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AsyncComponent, CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { AppManager, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -153,7 +154,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         const parts =  UrlHelper.shared.getParts()
         const queryString =  UrlHelper.shared.getSearchParams()
 
-        HistoryManager.setUrl("/")
+        UrlHelper.setUrl("/")
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
             UrlHelper.shared.clear()
@@ -191,7 +192,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     activated() {
-        HistoryManager.setUrl("/")
+        UrlHelper.setUrl("/")
         this.updateDefault().catch(console.error)
     }
 
@@ -298,6 +299,15 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 }
                 return
             }
+
+            // Already load the organization
+            await session.fetchOrganization(false)
+
+            // Switch locale to other country if needed
+            if (session.organization) {
+                I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
+            }
+
             this.loadingSession = null
             this.present(new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(LoginView, { 

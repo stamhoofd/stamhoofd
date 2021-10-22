@@ -51,15 +51,16 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CartItemView,CenteredMessage,ErrorBox, GlobalEventBus, LoadingButton,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
-import { CartItem, Version } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { CartItemView, CenteredMessage, ErrorBox, GlobalEventBus, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { UrlHelper } from '@stamhoofd/networking';
+import { CartItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component } from 'vue-property-decorator';
-import { Mixins } from 'vue-property-decorator';
+import { Component, Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
+
 
 @Component({
     components: {
@@ -136,7 +137,7 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
         
         try {
             this.cart.validate(WebshopManager.webshop)

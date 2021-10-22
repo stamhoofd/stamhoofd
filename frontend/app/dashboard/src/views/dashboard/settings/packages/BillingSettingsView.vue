@@ -71,16 +71,14 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import { IN } from "../../../../pdfkit.standalone";
 import CreditsView from "./CreditsView.vue";
 import InvoiceDetailsView from "./InvoiceDetailsView.vue";
 
@@ -111,7 +109,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        HistoryManager.setUrl("/settings/billing");
+        UrlHelper.setUrl("/settings/billing");
         this.reload().catch(e => {
             console.error(e)
         })

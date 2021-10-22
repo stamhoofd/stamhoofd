@@ -31,13 +31,13 @@
                 <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
             </button>
 
-            <button v-if="fullAccess && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
+            <button v-if="fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
                 <span class="icon key" />
                 <span>Gebruikers goedkeuren</span>
                 <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
             </button>
 
-            <hr v-if="whatsNewBadge || (enableMemberModule && false) || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
+            <hr v-if="whatsNewBadge || (enableMemberModule && false) || (fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0)">
 
             <template v-if="enableMemberModule">
                 <div v-for="category in tree.categories" :key="category.id">
@@ -133,11 +133,10 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { StringDecoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadComponent, Logo, STNavigationBar,Toast,TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, LoadComponent, Logo, STNavigationBar,TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
@@ -156,7 +155,7 @@ import { WhatsNewCount } from '../../classes/WhatsNewCount';
         tooltip: TooltipDirective
     }
 })
-export default class Menu extends Mixins(NavigationMixin) {
+export default class DashboardMenu extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     currentlySelected: string | null = null
     whatsNewBadge = ""
@@ -188,7 +187,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     mounted() {
         const parts = UrlHelper.shared.getParts()
 
-        HistoryManager.setUrl("/")
+        UrlHelper.setUrl("/")
         let didSet = false
 
         if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {

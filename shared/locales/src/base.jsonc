@@ -1,0 +1,20 @@
+{
+    // We use one single file for all translations, because that makes it easier for the tooling to work properly.
+    // Depending on the app we are building, we'll remove specific parts from the translations, hence the need to 'build' the translations
+    // which allows us to remove unneeded keys for specific apps
+    "shared": {
+
+    },
+    "backend": {
+
+    },
+    "dashboard": {
+
+    },
+    "webshop": {
+
+    },
+    "registration": {
+        
+    }
+}

@@ -154,27 +154,20 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { FilterEditor, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
-import { Checkbox } from "@stamhoofd/components"
-import { STToolbar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, FilterEditor, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import { f } from "../../../../pdfkit.standalone";
 import MailView from '../../mail/MailView.vue';
 import { WebshopManager } from '../WebshopManager';
 import OrderContextMenu from './OrderContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
 import OrderView from './OrderView.vue';
-import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus"
+import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus";
 
 class SelectableOrder {
     order: PrivateOrder;
@@ -267,7 +260,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     mounted() {
         // Set url
-        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/orders")
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/orders")
         document.title = this.preview.meta.name+" - Bestellingen"
     }
 
@@ -565,7 +558,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         const paymentMethod = new ChoicesFilterDefinition<PrivateOrder>({
             id: "order_paymentMethod",
             name: "Betaalmethode",
-            choices: [PaymentMethod.Transfer, PaymentMethod.Payconiq, PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Unknown].map(method => {
+            choices: [PaymentMethod.Transfer, PaymentMethod.Payconiq, PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard, PaymentMethod.Unknown].map(method => {
                 return new ChoicesFilterChoice(method, Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(method)))
             }),
             defaultMode: ChoicesFilterMode.Or,
@@ -659,7 +652,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }))
         }
 
-        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL)) {
+        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.CreditCard)) {
             definitions.push(
                 new DateFilterDefinition<PrivateOrder>({
                     id: "order_settledAt",

@@ -93,8 +93,8 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CategoryBox,CenteredMessage, Checkbox,GlobalEventBus,LoadingView, Logo,OrganizationLogo,PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LoadingView, Logo, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { CartItem, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -281,7 +281,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         const path = this.webshop.removeSuffix(UrlHelper.shared.getParts());
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
-        HistoryManager.setUrl(this.webshop.getUrlSuffix())
+        UrlHelper.setUrl(this.webshop.getUrlSuffix())
 
         if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];

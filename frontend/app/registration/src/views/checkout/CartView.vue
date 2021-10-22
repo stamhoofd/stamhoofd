@@ -66,17 +66,18 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton,StepperInput,Steps,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Group, LegacyRecordType, RegisterItem } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, LoadingButton, StepperInput, Steps, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
+import { UrlHelper } from '@stamhoofd/networking';
+import { Group, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component } from 'vue-property-decorator';
-import { Mixins } from 'vue-property-decorator';
+import { Component, Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupView from '../groups/GroupView.vue';
+
 
 @Component({
     components: {
@@ -176,7 +177,7 @@ export default class CartView extends Mixins(NavigationMixin){
     activated() {
         console.log("set cart url")
         this.$nextTick(() => {
-            HistoryManager.setUrl("/cart")
+            UrlHelper.setUrl("/cart")
         })
 
         this.recalculate().catch(e => {

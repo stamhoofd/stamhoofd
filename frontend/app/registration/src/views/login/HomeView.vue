@@ -61,10 +61,9 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { GoogleTranslateHelper } from "@stamhoofd/utility";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LoadingButton, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
@@ -161,7 +160,7 @@ export default class HomeView extends Mixins(NavigationMixin){
         }
 
         if (clearPath) {
-            HistoryManager.setUrl("/")
+            UrlHelper.setUrl("/")
         }
 
         CenteredMessage.addListener(this, (centeredMessage) => {

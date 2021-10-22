@@ -82,15 +82,14 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import cartIcon from "@stamhoofd/assets/images/illustrations/cart.svg"
 import experimentIcon from "@stamhoofd/assets/images/illustrations/experiment.svg"
 import flagIcon from "@stamhoofd/assets/images/illustrations/flag.svg"
 import groupIcon from "@stamhoofd/assets/images/illustrations/group.svg"
 import singleCartIcon from "@stamhoofd/assets/images/illustrations/single-cart.svg"
 import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
@@ -165,7 +164,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        HistoryManager.setUrl("/settings/packages");
+        UrlHelper.setUrl("/settings/packages");
         this.reload().catch(e => {
             console.error(e)
         })

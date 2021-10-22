@@ -168,9 +168,9 @@
 
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Spinner,STErrorsDefault,STInputBox, STList,STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, SessionManager } from "@stamhoofd/networking";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { AppManager, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -271,7 +271,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
     
     mounted() {
-        HistoryManager.setUrl("/settings/referrals");
+        UrlHelper.setUrl("/settings/referrals");
     }
 
     openFacebookShare() {

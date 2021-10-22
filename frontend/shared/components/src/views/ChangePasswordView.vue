@@ -32,9 +32,9 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton, PasswordStrength,STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast,Validator } from "@stamhoofd/components"
-import { LoginHelper, SessionManager } from '@stamhoofd/networking';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
+import { LoginHelper, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
 @Component({
@@ -86,7 +86,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
         try {
             await LoginHelper.changePassword(SessionManager.currentSession!, this.password)
             this.dismiss({ force: true });
-            HistoryManager.setUrl("/")
+            UrlHelper.setUrl("/")
             new Toast('Jouw nieuwe wachtwoord is opgeslagen', "success").show()
         } catch (e) {
             this.loading = false;

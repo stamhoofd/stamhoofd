@@ -153,14 +153,15 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox,ErrorBox, LoadingButton,PropertyFilterView,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordCategory,Version  } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PropertyFilterView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
+import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../../../classes/OrganizationManager";
 import EditRecordCategoryView from './records/EditRecordCategoryView.vue';
-import RecordCategoryRow from "./records/RecordCategoryRow.vue"
+import RecordCategoryRow from "./records/RecordCategoryRow.vue";
 
 @Component({
     components: {
@@ -327,7 +328,7 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     }
    
     mounted() {
-        HistoryManager.setUrl("/settings/records");
+        UrlHelper.setUrl("/settings/records");
     }
 }
 </script>

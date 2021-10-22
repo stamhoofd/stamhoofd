@@ -34,8 +34,9 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -184,7 +185,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
     }
 }
 </script>

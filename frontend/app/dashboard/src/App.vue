@@ -7,10 +7,10 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, GlobalEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
-import { EmailAddress } from '@stamhoofd/email';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Logger } from "@stamhoofd/logger"
 import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
@@ -29,26 +29,38 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
 export default class App extends Vue {
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
-            await SessionManager.restoreLastSession()
+            try {
+                await SessionManager.restoreLastSession()
+                await I18nController.loadDefault("dashboard", SessionManager.currentSession?.organization?.address?.country)
 
-            if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
-                // Load Windows stylesheet
-                await import("@stamhoofd/scss/layout/windows-scrollbars.scss");
+                if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
+                    // Load Windows stylesheet
+                    try {
+                        await import("@stamhoofd/scss/layout/windows-scrollbars.scss");
+                    } catch (e) {
+                        console.error("Failed to load Windows scrollbars")
+                        console.error(e)
+                    }
+                }
+
+                return new ComponentWithProperties(AuthenticatedView, {
+                    root: new ComponentWithProperties(SplitViewController, {
+                        root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+                    }),
+                    loginRoot: new ComponentWithProperties(OrganizationSelectionView),
+                    noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
+                });
+            } catch (e) {
+                console.error(e)
+                Toast.fromError(e).setHide(null).show()
+                throw e
             }
-
-            return new ComponentWithProperties(AuthenticatedView, {
-                root: new ComponentWithProperties(SplitViewController, {
-                    root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-                }),
-                loginRoot: new ComponentWithProperties(OrganizationSelectionView),
-                noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
-            });
         }
     })
 
     created() {
         if (process.env.NODE_ENV == "development") {
-            ComponentWithProperties.debug = true
+            //ComponentWithProperties.debug = true
         }
 
         try {

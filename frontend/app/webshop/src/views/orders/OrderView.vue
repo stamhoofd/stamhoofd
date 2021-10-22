@@ -260,11 +260,12 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,CenteredMessage,ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, Order, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
@@ -416,13 +417,13 @@ export default class OrderView extends Mixins(NavigationMixin){
             })
         }
         if (this.order) {
-            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
+            UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
             this.checkTickets().catch(console.error)
             return;
         }
         // Load order
         if (this.orderId) {
-            HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.orderId)
+            UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.orderId)
 
              WebshopManager.server
                 .request({
@@ -451,7 +452,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }).then(response => {
                     const order = response.data
                     this.order = order
-                    HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
+                    UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
                     this.checkTickets().catch(console.error)
                 }).catch(e => {
                     // too: handle this

@@ -151,7 +151,15 @@ async function checkBounces() {
                             for (const recipient of b.bouncedRecipients) {
                                 const email = recipient.emailAddress
 
-                                if (type === "Permanent" || (recipient.diagnosticCode && (recipient.diagnosticCode as string).toLowerCase().includes("invalid domain"))) {
+                                if (
+                                    type === "Permanent" 
+                                    || (
+                                        recipient.diagnosticCode && (
+                                            (recipient.diagnosticCode as string).toLowerCase().includes("invalid domain") 
+                                            || (recipient.diagnosticCode as string).toLowerCase().includes('unable to lookup dns')
+                                        )
+                                    )
+                                ) {
                                     const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined
                                     if (organization) {
                                         const emailAddress = await EmailAddress.getOrCreate(email, organization.id)
@@ -270,7 +278,7 @@ async function checkPayments() {
         },
         method: {
             sign: "IN",
-            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
+            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
         },
         createdAt: {
             sign: ">",

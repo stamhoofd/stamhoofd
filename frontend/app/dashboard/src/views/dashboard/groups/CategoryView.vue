@@ -73,8 +73,9 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,ErrorBox, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Permissions } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -104,7 +105,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     category: GroupCategory
 
     mounted() {
-        HistoryManager.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
+        UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
         document.title = "Stamhoofd - "+ this.category.settings.name
     }
 

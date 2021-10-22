@@ -78,11 +78,10 @@
 
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties,HistoryManager,ModalStackComponent,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, GlobalEventBus, LoadingView, OrganizationLogo,PromiseView,STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components"
-import { Sodium } from "@stamhoofd/crypto";
-import { LoginHelper, SessionManager } from "@stamhoofd/networking";
-import { EncryptedPaymentDetailed, Member, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, GlobalEventBus, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { EncryptedPaymentDetailed, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -93,6 +92,7 @@ import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } fro
 import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import MemberView from "../members/MemberView.vue";
 import MissingKeyView from "./MissingKeyView.vue";
+
 
 @Component({
     components: {
@@ -228,7 +228,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
                                     })
 
                                 } else {
-                                    HistoryManager.setUrl("/")
+                                    UrlHelper.setUrl("/")
                                     this.dismiss({ force: true })
                                     new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
                                 }
@@ -241,7 +241,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }
 
         if (setPath) {
-            HistoryManager.setUrl("/")
+            UrlHelper.setUrl("/")
         }
 
         if (setPath && this.members.find(m => m.details.isRecovered)) {

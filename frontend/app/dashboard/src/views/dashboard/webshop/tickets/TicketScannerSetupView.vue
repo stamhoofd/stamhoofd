@@ -60,14 +60,16 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,Spinner,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Product, ProductType, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from "../WebshopManager";
 import TicketScannerView from "./TicketScannerView.vue";
+
 
 @Component({
     components: {
@@ -111,7 +113,7 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
 
     mounted() {
         // Set url
-        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.webshopManager.preview.meta.name)+"/tickets/setup")
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshopManager.preview.meta.name)+"/tickets/setup")
         document.title = this.webshopManager.preview.meta.name+" - Tickets scannen"
     }
 

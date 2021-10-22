@@ -59,13 +59,15 @@
 </template>
 
 <script lang="ts">
-import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast,TooltipDirective } from "@stamhoofd/components";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie"
-import { WhatsNewCount } from "../../../classes/WhatsNewCount"
+import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie";
+import { WhatsNewCount } from "../../../classes/WhatsNewCount";
+
 
 @Component({
     components: {
@@ -93,7 +95,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
     mounted() {
         SGVGroepsadministratie.checkUrl();
-        HistoryManager.setUrl("/scouts-en-gidsen-vlaanderen")
+        UrlHelper.setUrl("/scouts-en-gidsen-vlaanderen")
 
         if (WhatsNewCount as any == 5) {
             localStorage.setItem("what-is-new", WhatsNewCount.toString());

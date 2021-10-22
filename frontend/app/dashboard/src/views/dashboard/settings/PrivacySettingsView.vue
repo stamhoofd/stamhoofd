@@ -56,8 +56,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, ErrorBox, FileInput,LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -167,7 +168,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/privacy");
+        UrlHelper.setUrl("/settings/privacy");
     }
 }
 </script>

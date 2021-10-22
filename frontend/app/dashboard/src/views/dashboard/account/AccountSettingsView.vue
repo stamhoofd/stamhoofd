@@ -44,9 +44,10 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, ChangePasswordView,Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
+import { UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -80,7 +81,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
     mounted() {
-        HistoryManager.setUrl("/account")
+        UrlHelper.setUrl("/account")
         document.title = "Stamhoofd - Mijn account"
     }
 

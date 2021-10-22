@@ -95,10 +95,10 @@
                 <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
                     <h2 class="style-title-list">
-                        Betaalmethodes
+                        {{ $t('dashboard.settings.menu.paymentMethods.title') }}
                     </h2>
                     <p class="style-description">
-                        Bankrekeningnummer, Payconiq, Bancontact...
+                        {{ $t('dashboard.settings.menu.paymentMethods.description') }}
                     </p>
                     <template slot="right">
                         <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
@@ -274,7 +274,7 @@
 
 <script lang="ts">
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, BackButton, CenteredMessage, ErrorBox, STList, STListItem, STNavigationBar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite, PaymentMethod, User } from "@stamhoofd/structures"
@@ -486,7 +486,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         UrlHelper.shared.clear()
 
         // First set current url already, to fix back
-        HistoryManager.setUrl("/settings")
+        UrlHelper.setUrl("/settings")
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
             // Open mollie settings

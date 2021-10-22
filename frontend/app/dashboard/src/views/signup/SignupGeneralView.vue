@@ -100,14 +100,15 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { NetworkManager } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
+import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupAccountView from './SignupAccountView.vue';
+
 
 @Component({
     components: {
@@ -161,9 +162,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             } catch (e) {
                 console.error(e)
             }
-            //HistoryManager.setUrl("/aansluiten/?code="+encodeURIComponent(this.initialRegisterCode.code)+"&org="+encodeURIComponent(this.initialRegisterCode.organization))
+            //UrlHelper.setUrl("/aansluiten/?code="+encodeURIComponent(this.initialRegisterCode.code)+"&org="+encodeURIComponent(this.initialRegisterCode.organization))
         }
-        HistoryManager.setUrl("/aansluiten")   
+        UrlHelper.setUrl("/aansluiten")   
 
         if (!this.initialRegisterCode) {
             try {

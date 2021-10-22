@@ -120,12 +120,13 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput, IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
+import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 
@@ -327,7 +328,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     }
    
     mounted() {
-        HistoryManager.setUrl("/settings/personalize");
+        UrlHelper.setUrl("/settings/personalize");
     }
 }
 </script>

@@ -326,7 +326,8 @@ export class Session implements RequestMiddleware {
 
     async fetchOrganization(shouldRetry = true): Promise<Organization> {
         console.log("Fetching session organization...")
-        const response = await this.authenticatedServer.request({
+
+        const response = await (this.hasToken() ? this.authenticatedServer : this.server).request({
             method: "GET",
             path: "/organization",
             decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>),

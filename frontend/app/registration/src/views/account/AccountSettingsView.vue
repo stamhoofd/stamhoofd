@@ -69,14 +69,15 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components";
-import { LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, ChangePasswordView, Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { LoginHelper, SessionManager } from '@stamhoofd/networking';
+import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
-import PaymentsView from "./PaymentsView.vue"
+import PaymentsView from "./PaymentsView.vue";
+
 
 @Component({
     components: {

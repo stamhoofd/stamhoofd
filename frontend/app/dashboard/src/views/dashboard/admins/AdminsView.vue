@@ -203,13 +203,12 @@
 
 
 <script lang="ts">
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties,HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData,PermissionRoleDetailed, User } from '@stamhoofd/structures';
-import { PermissionRole } from "@stamhoofd/structures";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { Invite, Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed, User } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -237,7 +236,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
             console.error(e)
         })
 
-        HistoryManager.setUrl("/settings/admins")
+        UrlHelper.setUrl("/settings/admins")
         document.title = "Stamhoofd - Beheerders"
     }
 

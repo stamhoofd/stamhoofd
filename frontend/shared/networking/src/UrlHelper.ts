@@ -1,3 +1,6 @@
+import { HistoryManager } from "@simonbackx/vue-app-navigation"
+import { I18nController } from "@stamhoofd/frontend-i18n"
+
 export class UrlHelper {
 
     // Load initial paths
@@ -18,8 +21,15 @@ export class UrlHelper {
         this.hash = window.location.hash
     }
 
-    getParts() {
-        return this.path?.substring(1).split("/") ?? []
+    getParts(options?: { removeLocale?: boolean }) {
+        const parts = this.path?.substring(1).split("/") ?? []
+
+        if (parts.length > 0 && (options?.removeLocale === undefined || options?.removeLocale === true) && parts[0].length == 5 && I18nController.isValidLocale(parts[0])) {
+            parts.shift()
+        }
+
+        console.log("Checking url parts", parts)
+        return parts
     }
 
     getSearchParams() {
@@ -36,5 +46,17 @@ export class UrlHelper {
         this.path = null
         this.href = null
         this.hash = null
+    }
+
+    /**
+     * setURL, but add locale
+     */
+    static setUrl(url: string) {
+        if (I18nController.shared) {
+            HistoryManager.setUrl("/"+I18nController.shared.locale+url)
+        } else {
+            HistoryManager.setUrl(url)
+        }
+        console.log("Setting url to", url)
     }
 }

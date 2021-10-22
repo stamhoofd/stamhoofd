@@ -52,8 +52,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { FreeContributionSettings } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -192,7 +193,7 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/free-contribution");
+        UrlHelper.setUrl("/settings/free-contribution");
     }
 }
 </script>

@@ -30,13 +30,15 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { TicketPublic } from '@stamhoofd/structures';
-import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from '../../classes/WebshopManager';
 import TicketBox from '../products/TicketBox.vue';
+
 
 @Component({
     components: {
@@ -96,7 +98,7 @@ export default class TicketView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/tickets/"+this.secret)
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/tickets/"+this.secret)
     }
 }
 </script>

@@ -1,0 +1,17 @@
+{
+    "shared": {
+        "login": "Login"
+    },
+    "backend": {
+
+    },
+    "dashboard": {
+        "join": "Join us"
+    },
+    "webshop": {
+
+    },
+    "registration": {
+        
+    }
+}

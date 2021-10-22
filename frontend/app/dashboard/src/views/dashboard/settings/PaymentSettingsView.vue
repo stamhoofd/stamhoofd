@@ -18,22 +18,7 @@
                 <hr>
                 <h2>Betaalmethodes voor inschrijvingen</h2>
 
-                <Checkbox v-model="enableTransfers">
-                    Overschrijvingen (gratis, maar zelf op te volgen)
-                </Checkbox>
-                <Checkbox v-if="!isBelgium" v-model="enableIDEAL">
-                    iDEAL (29 cent)
-                </Checkbox>
-
-                <Checkbox v-model="enablePayconiq">
-                    Payconiq (20 cent)
-                </Checkbox>
-                <Checkbox v-model="enableBancontact">
-                    Bancontact (31 cent)
-                </Checkbox>
-                <Checkbox v-if="isBelgium" v-model="enableIDEAL">
-                    iDEAL (29 cent)
-                </Checkbox>
+                <EditPaymentMethodsBox :methods="organization.meta.paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
 
                 <hr>
             </template>
@@ -81,20 +66,22 @@
                 </p>
             </template>
 
-            <hr>
-            <h2>Payconiq activeren</h2>
-            <p class="st-list-description">
-                Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a href="https://www.stamhoofd.be/docs/aansluiten-bij-payconiq" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
-            </p>
+            <template v-if="isBelgium || payconiqApiKey">
+                <hr>
+                <h2>Payconiq activeren</h2>
+                <p class="st-list-description">
+                    Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a href="https://www.stamhoofd.be/docs/aansluiten-bij-payconiq" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
+                </p>
 
-            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
-                <input
-                    v-model="payconiqApiKey"
-                    class="input"
-                    type="text"
-                    placeholder="API-key van Payconiq"
-                >
-            </STInputBox>
+                <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
+                    <input
+                        v-model="payconiqApiKey"
+                        class="input"
+                        type="text"
+                        placeholder="API-key van Payconiq"
+                    >
+                </STInputBox>
+            </template>
 
             <hr>
             <h2 v-if="isBelgium">
@@ -171,15 +158,16 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray,patchContainsChanges } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData,PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures"
+import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
+import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
 @Component({
     components: {
@@ -188,16 +176,14 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        DateSelection,
         RadioGroup,
         Radio,
         BackButton,
-        AddressInput,
         LoadingButton,
         IBANInput,
-        ImageInput,
-        ColorInput,
-        FileInput
+        STList,
+        STListItem,
+        EditPaymentMethodsBox
     },
 })
 export default class PaymentSettingsView extends Mixins(NavigationMixin) {
@@ -215,6 +201,14 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
     get isBelgium() {
         return this.organization.address.country == Country.Belgium
+    }
+
+    patchPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
+        this.organizationPatch = this.organizationPatch.patch({
+            meta: OrganizationMetaData.patch({
+                paymentMethods: patch
+            })
+        })
     }
 
     get enableMemberModule() {
@@ -313,115 +307,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         this.$set(this.organizationPatch.privateMeta!, "payconiqApiKey", payconiqApiKey.length == 0 ? null : payconiqApiKey)
     }
    
-    get enableTransfers() {
-        return this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
-    }
-
-    set enableTransfers(enable: boolean) {
-        if (enable == this.enableTransfers) {
-            return;
-        }
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-        if (enable) {
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Transfer)
-        } else {
-            if (this.organization.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Transfer) 
-        }
-    }
-
-    get enablePayconiq() {
-        return this.organization.meta.paymentMethods.includes(PaymentMethod.Payconiq)
-    }
-
-    set enablePayconiq(enable: boolean) {
-        if (enable == this.enablePayconiq) {
-            return;
-        }
-
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-
-        if (enable) {
-            if (this.payconiqApiKey.length == 0) {
-                new Toast("Om Payconiq te activeren moet je eerst aansluiten bij Payconiq via jouw bank. Daarna kunnen we bij Payconiq een code aanvragen die we nodig hebben om betalingen te verwerken. Stuur ons zeker een mailtje via hallo@stamhoofd.be bij vragen in afwachting van onze documentatie.", "error red").setHide(15000).show();
-                return;
-            }
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Payconiq)
-        } else {
-            if (this.organization.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Payconiq) 
-        }
-    }
-    
-    get enableBancontact() {
-        return this.organization.meta.paymentMethods.includes(PaymentMethod.Bancontact)
-    }
-
-    set enableBancontact(enable: boolean) {
-        if (enable == this.enableBancontact) {
-            return;
-        }
-
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-
-        if (enable) {
-            if (!this.organization.privateMeta?.mollieOnboarding || !this.organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                new Toast("Je kan Bancontact niet activeren, daarvoor moet je eerst online betalingen hieronder activeren. Daarna kan je Bancontact betalingen accepteren.", "error red").show();
-                return
-            }
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.Bancontact)
-        } else {
-            if (this.organization.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.Bancontact) 
-        }
-    }
-
-    get enableIDEAL() {
-        return this.organization.meta.paymentMethods.includes(PaymentMethod.iDEAL)
-    }
-
-    set enableIDEAL(enable: boolean) {
-        if (enable == this.enableIDEAL) {
-            return;
-        }
-
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-
-        if (enable) {
-            if (!this.organization.privateMeta?.mollieOnboarding || !this.organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                new Toast("Je kan iDEAL niet activeren, daarvoor moet je eerst online betalingen hieronder activeren. Daarna kan je iDEAL betalingen accepteren.", "error red").show();
-                return
-            }
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addPut(PaymentMethod.iDEAL)
-        } else {
-            if (this.organization.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-
-            (this.organizationPatch.meta!.paymentMethods as PatchableArray<string, string, string>).addDelete(PaymentMethod.iDEAL) 
-        }
-    }
-
     async save() {
         if (this.saving) {
             return;
@@ -554,7 +439,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 this.updateMollie().catch(console.error);
             }
         }
-        HistoryManager.setUrl("/settings/payments")
+        UrlHelper.setUrl("/settings/payments")
     }
 
      async updateMollie() {
@@ -616,10 +501,3 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

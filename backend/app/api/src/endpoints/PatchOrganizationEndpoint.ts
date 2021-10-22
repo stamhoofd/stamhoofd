@@ -8,7 +8,7 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -160,11 +160,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                  // check payconiq + mollie
                 if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                    const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Bancontact)
+                    const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Bancontact || PaymentMethod.iDEAL || PaymentMethod.CreditCard)
                     if (i != -1) {
                         throw new SimpleError({
                             code: "invalid_field",
-                            message: "Je kan Bancontact niet activeren omdat Mollie niet correct gekoppeld is. Schakel Bancontact uit voor je verder gaat.",
+                            message: "Je kan "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" niet activeren omdat Mollie niet correct gekoppeld is. Schakel "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" uit voor je verder gaat.",
                             field: "paymentMethods"
                         })
                     }

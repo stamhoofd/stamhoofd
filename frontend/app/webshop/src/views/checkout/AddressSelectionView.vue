@@ -43,8 +43,9 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { ValidatedAddress } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -140,7 +141,7 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Address.toLowerCase())
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Address.toLowerCase())
     }
 }
 </script>

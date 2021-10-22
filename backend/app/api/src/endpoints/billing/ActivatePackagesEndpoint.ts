@@ -310,7 +310,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                             currency: 'EUR',
                             value: (price / 100).toFixed(2)
                         },
-                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
                         description,
                         customerId: user.organization.serverMeta.mollieCustomerId,
                         sequenceType: SequenceType.first,

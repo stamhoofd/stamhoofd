@@ -1,0 +1,19 @@
+{
+  "shared": {
+    "login": "Inloggen"
+  },
+  "backend": {},
+  "dashboard": {
+    "join": "Aansluiten",
+    "settings": {
+      "menu": {
+        "paymentMethods": {
+          "description": "Bankrekeningnummer, Payconiq, Bancontact...",
+          "title": "Betaalmethodes"
+        }
+      }
+    }
+  },
+  "webshop": {},
+  "registration": {}
+}

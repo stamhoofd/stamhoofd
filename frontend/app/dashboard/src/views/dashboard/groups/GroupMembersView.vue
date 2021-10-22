@@ -229,19 +229,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { FilterEditor, GlobalEventBus, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
-import { Checkbox } from "@stamhoofd/components"
-import { STToolbar } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, Filter,getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, FilterEditor, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, Filter, getPermissionLevelNumber, Group, GroupCategoryTree, Member, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberChangeEvent,MemberManager } from '../../../classes/MemberManager';
+import { MemberChangeEvent, MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from '../member/edit/EditMemberView.vue';
@@ -329,14 +324,14 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     mounted() {
         // Set url
         if (this.group) {
-            HistoryManager.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
+            UrlHelper.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
             document.title = "Stamhoofd - "+this.group.settings.name
         } else {
             if (this.category) {
-                HistoryManager.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
+                UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
                 document.title = "Stamhoofd - "+ this.category.settings.name +" - Alle leden"
             } else {
-                HistoryManager.setUrl("/groups/all")    
+                UrlHelper.setUrl("/groups/all")    
                 document.title = "Stamhoofd - Alle leden"
             }
             

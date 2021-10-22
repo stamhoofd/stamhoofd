@@ -42,14 +42,16 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,EmailInput,ErrorBox, LoadingButton, PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, FieldBox } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, EmailInput, ErrorBox, FieldBox, LoadingButton, PhoneInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
+
 
 @Component({
     components: {
@@ -160,7 +162,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
     }
 }
 </script>

@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';

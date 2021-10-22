@@ -1,0 +1,16 @@
+{
+    "name": "@stamhoofd/locales",
+    "version": "1.0.0",
+    "license": "UNLICENCED",
+    "main": "./dist/index.js",
+    "sideEffects": false,
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "scripts": {
+        "build": "node build.js"
+    },
+    "devDependencies": {},
+    "dependencies": {}
+}

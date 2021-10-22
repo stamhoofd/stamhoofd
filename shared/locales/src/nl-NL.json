@@ -1,0 +1,17 @@
+{
+  "shared": {
+    "login": "Inloggen"
+  },
+  "backend": {},
+  "dashboard": {
+    "settings": {
+      "menu": {
+        "paymentMethods": {
+          "description": "Bankrekeningnummer, iDEAL, Kredietkaart..."
+        }
+      }
+    }
+  },
+  "webshop": {},
+  "registration": {}
+}
