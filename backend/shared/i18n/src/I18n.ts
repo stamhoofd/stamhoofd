@@ -85,8 +85,8 @@ export class I18n {
     }
 
     static fromRequest(request: DecodedRequest<any, any, any>): I18n {
-        if ((request as any).i18n) {
-            return (request as any).i18n
+        if ((request as any)._cached_i18n) {
+            return (request as any)._cached_i18n
         }
 
         // Try using custom property
@@ -96,7 +96,7 @@ export class I18n {
             const c = localeHeader.substr(3, 2).toUpperCase()
             
             const i18n = new I18n(l, c);
-            (request as any).i18n = i18n;
+            (request as any)._cached_i18n = i18n;
             return i18n;
         }
 
@@ -118,7 +118,7 @@ export class I18n {
                         // Country can get overriden when matching a organization
                         // using .setCountry(country) method
                         const i18n = new I18n(locale, Country.Belgium);
-                        (request as any).i18n = i18n;
+                        (request as any)._cached_i18n = i18n;
                         return i18n
                     }
                 } else if (locale.length === 5 && this.isValidLocale(locale)) {
@@ -127,14 +127,14 @@ export class I18n {
 
                     // Lang + country
                     const i18n = new I18n(l, c);
-                    (request as any).i18n = i18n;
+                    (request as any)._cached_i18n = i18n;
                     return i18n
                 }
                 
             }
         }
         const i18n = new I18n(this.defaultLanguage, this.defaultCountry);
-        (request as any).i18n = i18n;
+        (request as any)._cached_i18n = i18n;
         return i18n;
     }
 
