@@ -38,6 +38,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - Limit the amount of failed attemps by IP (will only make it a bit harder)
         // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
         const organization = await Organization.fromApiHost(request.host);
+
         
         switch (request.body.grantType) {
         case "challenge": {

@@ -10,7 +10,7 @@
                 Betaalmethodes
             </h1>
 
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" href="https://stamhoofd.be/docs/online-betalen" target="_blank">deze pagina</a>.</p>
+            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
         
             <STErrorsDefault :error-box="errorBox" />
 
@@ -70,7 +70,7 @@
                 <hr>
                 <h2>Payconiq activeren</h2>
                 <p class="st-list-description">
-                    Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a href="https://www.stamhoofd.be/docs/aansluiten-bij-payconiq" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
+                    Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
                 </p>
 
                 <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
@@ -394,7 +394,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 throw new SimpleError({
                     code: "state_verification_failed",
                     message: "State is not the same",
-                    human: "Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via hallo@stamhoofd.be als je Mollie probeert te koppelen en het blijft mislukken."
+                    human: "Er ging iets mis bij het koppelen. Een onbekende pagina probeerde Mollie te koppelen. Contacteer ons via "+this.$t('shared.emails.general')+" als je Mollie probeert te koppelen en het blijft mislukken."
                 })
             }
             const response = await SessionManager.currentSession!.authenticatedServer.request({

@@ -51,15 +51,15 @@
 
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text">
-                    Ik heb kennis genomen van <a class="inline-link" href="https://voorwaarden.stamhoofd.be/privacy" target="_blank">het privacybeleid</a>.
+                    Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/privacy'" target="_blank">het privacybeleid</a>.
                 </Checkbox>
 
                 <Checkbox v-model="acceptTerms" class="long-text">
-                    Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    Ik heb <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
                 </Checkbox>
 
                 <Checkbox v-model="acceptDataAgreement" class="long-text">
-                    Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    Ik heb <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
                 </Checkbox>
             </div>
         </main>

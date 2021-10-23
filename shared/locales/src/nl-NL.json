@@ -8,6 +8,13 @@
       "iban": {
         "placeholder": "Bv. NL21 INGB 3115 4044 17"
       }
+    },
+    "domains": {
+      "marketing": "www.stamhoofd.nl"
+    },
+    "emails": {
+      "complaints": "klachten@stamhoofd.nl",
+      "general": "hallo@stamhoofd.nl"
     }
   },
   "backend": {},

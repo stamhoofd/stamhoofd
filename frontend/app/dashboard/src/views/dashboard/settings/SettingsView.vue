@@ -12,9 +12,9 @@
             <BillingWarningBox />
 
             <p class="info-box icon help with-button">
-                Hulp nodig? Neem contact met ons op via hallo@stamhoofd.be
+                Hulp nodig? Neem contact met ons op via {{ $t('shared.emails.general') }}
 
-                <a href="mailto:hallo@stamhoofd.be" class="button text">
+                <a :href="'mailto:'+$t('shared.emails.general')" class="button text">
                     E-mail
                 </a>
             </p>

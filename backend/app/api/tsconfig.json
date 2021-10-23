@@ -19,7 +19,8 @@
         ],
         "types": [
             "node",
-            "jest"
+            "jest",
+            "@stamhoofd/backend-i18n"
         ]
     },
     "include": [

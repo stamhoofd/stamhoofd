@@ -10,7 +10,7 @@
                 E-mailadressen
             </h1>
 
-            <p>Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" href="https://www.stamhoofd.be/docs/emails-versturen" target="_blank">deze pagina</a>.</p>
+            <p>Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">deze pagina</a>.</p>
 
         
             <p v-if="organization.privateMeta && organization.privateMeta.mailDomainActive" class="st-list-description">

@@ -1,15 +1,17 @@
 // Loop all locales
 import { promises as fs } from "fs";
-import { countries, languages } from "./src/index.js";
+import { countries, languages } from "./dist/index.js";
 
 const files = await fs.readdir("./src");
 
-await fs.rm("./dist", { recursive: true, force: true })
 
 const namespaces = ['dashboard', "webshop", "registration", "backend"]
 
 for (const namespace of namespaces) {
+    await fs.rm("./dist/"+namespace, { recursive: true, force: true })
+    await fs.rm("./esm/dist/"+namespace, { recursive: true, force: true })
     await fs.mkdir("./dist/"+namespace, { recursive: true })
+    await fs.mkdir("./esm/dist/"+namespace, { recursive: true })
 }
 
 function mergeObjects(into, from) {
@@ -77,8 +79,13 @@ for (const country of countries) {
                     [namespace]: json[namespace]
                 }
             ))
+
+            fs.writeFile("./esm/dist/"+namespace+"/"+locale+".json", JSON.stringify(
+                {
+                    shared: json.shared,
+                    [namespace]: json[namespace]
+                }
+            ))
         }
     }
 }
-
-fs.writeFile("./dist/index.js", await fs.readFile("./src/index.js"))

@@ -23,6 +23,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Address, Country, CountryHelper, ValidatedAddress} from "@stamhoofd/structures"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
@@ -59,7 +60,11 @@ export default class AddressInput extends Vue {
     addressLine1 = ""
     city = ""
     postalCode = ""
-    country: Country = Country.Belgium
+    country = this.getDefaultCountry()
+
+    getDefaultCountry() {
+        return I18nController.shared?.country ?? Country.Belgium
+    }
 
     hasFocus = false
 

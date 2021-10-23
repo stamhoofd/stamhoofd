@@ -211,7 +211,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
 
     get href() {
-        return "https://www.stamhoofd.be/?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(OrganizationManager.organization.name)+"&utm_medium=Referral&utm_source="+encodeURIComponent(OrganizationManager.organization.name)
+        return "https://"+this.$t('shared.domains.marketing')+"/?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(OrganizationManager.organization.name)+"&utm_medium=Referral&utm_source="+encodeURIComponent(OrganizationManager.organization.name)
     }
 
     get isYouth() {
@@ -275,7 +275,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
 
     openFacebookShare() {
-        window.open("https://www.facebook.com/sharer/sharer.php?u=https://www.stamhoofd.be&quote="+encodeURIComponent(this.referralText), "pop", "width=600, height=400, scrollbars=no");
+        window.open("https://www.facebook.com/sharer/sharer.php?u=https://"+this.$t('shared.domains.marketing')+"&quote="+encodeURIComponent(this.referralText), "pop", "width=600, height=400, scrollbars=no");
     }
 
     showBilling() {

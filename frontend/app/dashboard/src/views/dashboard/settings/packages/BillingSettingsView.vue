@@ -153,7 +153,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
             a.click();
         } else {
             this.present(new ComponentWithProperties(InvoiceDetailsView, { invoice }).setDisplayStyle("popup"))
-            new CenteredMessage("PDF ontbreekt", "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via hallo@stamhoofd.be als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
+            new CenteredMessage("PDF ontbreekt", "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via "+this.$t('shared.emails.general')+" als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
         }
         
     }

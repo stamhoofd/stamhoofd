@@ -8,6 +8,13 @@
       "iban": {
         "placeholder": "Bv. BE71 6316 1793 1969"
       }
+    },
+    "domains": {
+      "marketing": "www.stamhoofd.be"
+    },
+    "emails": {
+      "general": "hallo@stamhoofd.be",
+      "complaints": "klachten@stamhoofd.be"
     }
   },
   "backend": {},

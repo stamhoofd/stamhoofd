@@ -63,28 +63,28 @@
             <h2>Handige links</h2>
 
             <STList>
-                <STListItem :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
                     <span slot="left" class="icon link" />
                     Documentatie
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/domeinnaam-koppelen" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen'" target="_blank">
                     <span slot="left" class="icon link" />
                     Domeinnaam koppelen
                 </STListItem>
 
 
-                <STListItem :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/emails-versturen" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">
                     <span slot="left" class="icon link" />
                     E-mails versturen en e-mailadressen instellen
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/overschakelen-midden-werkjaar" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/overschakelen-midden-werkjaar'" target="_blank">
                     <span slot="left" class="icon link" />
                     Overschakelen midden in een werkjaar
                 </STListItem>
 
-                <STListItem v-if="isYouth" :selectable="true" element-name="a" href="https://www.stamhoofd.be/docs/online-inschrijvingen-kampen-weekends" target="_blank">
+                <STListItem v-if="isYouth" :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-inschrijvingen-kampen-weekends'" target="_blank">
                     <span slot="left" class="icon link" />
                     Online inschrijvingen voor kampen en weekends
                 </STListItem>

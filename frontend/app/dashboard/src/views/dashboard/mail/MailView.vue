@@ -342,7 +342,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         const missing = this.hardBounces
         this.present(new ComponentWithProperties(MissingFirstNameView, {
             title: "Deze e-mailadressen zijn ongeldig",
-            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd teruggestuurd. Dit komt voor als het e-mailadres ongeldig is of als de e-mailinbox van de afzender vol zit. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen. Als je denkt dat er een fout in zit, neem dan contact met ons op via hallo@stamhoofd.be om de blokkering op te heffen.",
+            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd teruggestuurd. Dit komt voor als het e-mailadres ongeldig is of als de e-mailinbox van de afzender vol zit. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen. Als je denkt dat er een fout in zit, neem dan contact met ons op via "+this.$t('shared.emails.general')+" om de blokkering op te heffen.",
             emails: missing.map((m) => {
                 return {
                     email: m,

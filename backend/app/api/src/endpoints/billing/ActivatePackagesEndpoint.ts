@@ -345,7 +345,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     }
                     throw new SimpleError({
                         code: "payment_failed",
-                        message: "Er ging iets mis bij het aanmaken van de betaling. Probeer later opnieuw of contacteer ons als het probleem zich blijft voordoen (hallo@stamhoofd.be)"
+                        message: "Er ging iets mis bij het aanmaken van de betaling. Probeer later opnieuw of contacteer ons als het probleem zich blijft voordoen ("+request.$t("shared.emails.general")+")"
                     })
                 }
             }

@@ -233,7 +233,7 @@ export default class App extends Vue {
             let unsubscribe = true
 
             if (details.unsubscribedMarketing) {
-                if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar klachten@stamhoofd.be")) {
+                if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar "+this.$t("shared.emails.complaints"))) {
                     return
                 }
 

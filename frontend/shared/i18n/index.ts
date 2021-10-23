@@ -1,6 +1,6 @@
 //i18n-setup.js
 import { countries, languages } from "@stamhoofd/locales"
-import { SessionManager, UrlHelper } from '@stamhoofd/networking'
+import { UrlHelper } from '@stamhoofd/networking'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 

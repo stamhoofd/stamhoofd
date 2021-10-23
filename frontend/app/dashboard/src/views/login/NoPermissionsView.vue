@@ -2,7 +2,7 @@
     <div class="st-view boxed">
         <STNavigationBar :large="true" :sticky="true">
             <template slot="left">
-                <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
+                <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <Logo class="responsive" />
                 </a>
             </template>

@@ -12,7 +12,7 @@
             </p>
 
             <p class="info-box">
-                Problemen, suggesties of vragen? Stuur een mailtje naar hallo@stamhoofd.be en we helpen je graag verder.
+                Problemen, suggesties of vragen? Stuur een mailtje naar {{ $t('shared.emails.general') }} en we helpen je graag verder.
             </p>
 
             <label class="upload-box">

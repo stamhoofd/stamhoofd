@@ -11,6 +11,8 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import { Email } from "@stamhoofd/email";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Webshop } from './Webshop';
+import { DecodedRequest } from '@simonbackx/simple-endpoints';
+import { I18n } from "@stamhoofd/backend-i18n"
 
 export class Organization extends Model {
     static table = "organizations";
@@ -145,6 +147,20 @@ export class Organization extends Model {
 
         // Read member + address from first row
         return this.fromRow(rows[0][this.table]);
+    }
+
+    /**
+     * Get an Organization by looking at the host of a request
+     * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
+     * + switch country if needed
+     */
+    static async getFromRequest(request: DecodedRequest<any, any, any>): Promise<Organization> {
+        const organization = await Organization.fromApiHost(request.host);
+
+        const i18n = I18n.fromRequest(request)
+        i18n.switchToLocale({ country: organization.address.country })
+
+        return organization
     }
 
     /**

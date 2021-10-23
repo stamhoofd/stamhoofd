@@ -1,17 +1,14 @@
 {
-    "shared": {
-        "login": "Login"
-    },
-    "backend": {
-
-    },
-    "dashboard": {
-        "join": "Join us"
-    },
-    "webshop": {
-
-    },
-    "registration": {
-        
+  "shared": {
+    "login": "Login",
+    "emails": {
+      "general": "hello@stamhoofd.be"
     }
+  },
+  "backend": {},
+  "dashboard": {
+    "join": "Join us"
+  },
+  "webshop": {},
+  "registration": {}
 }

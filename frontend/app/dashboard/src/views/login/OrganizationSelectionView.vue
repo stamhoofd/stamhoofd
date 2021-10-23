@@ -2,7 +2,7 @@
     <div class="st-view shade">
         <STNavigationBar v-if="!isNative" :large="true" :sticky="true">
             <template slot="left">
-                <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
+                <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <Logo class="responsive" />
                 </a>
             </template>
@@ -16,7 +16,7 @@
         <STNavigationBar v-else :sticky="true" title="Kies jouw vereniging" />
         <main class="limit-width">
             <div class="organization-selection-view" :class="{native: isNative}">
-                <a v-if="!isNative" class="button text" href="https://www.stamhoofd.be" rel="noopener">
+                <a v-if="!isNative" class="button text" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <span class="icon arrow-left" />
                     <span>Stamhoofd website</span>
                 </a>

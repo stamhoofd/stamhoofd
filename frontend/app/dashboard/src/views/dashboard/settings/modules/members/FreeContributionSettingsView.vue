@@ -11,7 +11,7 @@
             </h1>
 
             <p>
-                Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. We tonen dan drie opties waaruit ze kunnen kiezen, waarbij ze ook altijd zelf een bedrag kunnen ingeven. Je kan hieronder de drie standaard bedragen aanpassen. <a class="inline-link" href="https://stamhoofd.be/docs/vrije-bijdrage" target="_blank">Meer info</a>.
+                Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. We tonen dan drie opties waaruit ze kunnen kiezen, waarbij ze ook altijd zelf een bedrag kunnen ingeven. Je kan hieronder de drie standaard bedragen aanpassen. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/vrije-bijdrage'" target="_blank">Meer info</a>.
             </p>
 
             <Checkbox v-model="freeContribution">

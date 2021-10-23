@@ -77,7 +77,7 @@ export class Token extends Model {
      * Throws instead of returning undefined
      */
     static async authenticate(request: DecodedRequest<any, any, any>): Promise<UserWithOrganizationAndUser> {
-        const organization = await Organization.fromApiHost(request.host);
+        const organization = await Organization.getFromRequest(request);
         const header = request.headers.authorization
         if (!header) {
             throw new SimpleError({

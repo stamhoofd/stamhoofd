@@ -10,8 +10,12 @@
                 Domeinnaam kiezen
             </h1>
 
-            <p class="success-box" v-if="isOk">Jouw domeinnaam is correct ingesteld</p>
-            <p class="warning-box" v-else>Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via hallo@stamhoofd.be als je hulp nodig hebt.</p>
+            <p v-if="isOk" class="success-box">
+                Jouw domeinnaam is correct ingesteld
+            </p>
+            <p v-else class="warning-box">
+                Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via {{ $t('shared.emails.general') }} als je hulp nodig hebt.
+            </p>
         
             <STErrorsDefault :error-box="errorBox" />
 
@@ -24,13 +28,12 @@
                     @change="domainChanged"
                 >
             </STInputBox>
-            <p class="st-list-description" v-if="mailDomain && enableMemberModule">
+            <p v-if="mailDomain && enableMemberModule" class="st-list-description">
                 Jouw inschrijvingspagina zal bereikbaar zijn op inschrijven.{{ mailDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
             </p>
-            <p class="st-list-description" v-else-if="mailDomain">
-               Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.
+            <p v-else-if="mailDomain" class="st-list-description">
+                Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.
             </p>
-            
         </main>
 
         <STToolbar>
@@ -81,7 +84,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     
     validateDomain() {
         const d = this.mailDomain;
-        if (!d.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+        if (!(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/.exec(d))) {
             return false
         }
         return true

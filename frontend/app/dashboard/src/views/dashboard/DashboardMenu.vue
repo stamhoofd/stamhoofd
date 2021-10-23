@@ -15,11 +15,6 @@
                 </button>
             </div>
 
-            <a v-if="false" class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
-                <span class="icon info-filled" />
-                <span>Documentatie</span>
-            </a>
-
             <a v-if="false && enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
                 <span class="icon external" />
                 <span>Jouw inschrijvingspagina</span>
@@ -117,14 +112,20 @@
                     <span class="icon user" />
                     <span>Mijn account</span>
                 </button>
-                <button class="menu-button button heading" @click="logout">
-                    <span class="icon logout" />
-                    <span>Uitloggen</span>
-                </button>
+
+                <a class="menu-button button heading" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
+                    <span class="icon info-filled" />
+                    <span>Documentatie</span>
+                </a>
 
                 <button class="menu-button button heading" @click="gotoFeedback(false)">
                     <span class="icon feedback" />
                     <span>Feedback</span>
+                </button>
+
+                <button class="menu-button button heading" @click="logout">
+                    <span class="icon logout" />
+                    <span>Uitloggen</span>
                 </button>
             </div>
         </main>
@@ -373,7 +374,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     manageWhatsNew() {
         this.whatsNewBadge = ""
 
-        window.open('https://www.stamhoofd.be/release-notes', '_blank');
+        window.open('https://'+this.$t('shared.domains.marketing')+'/release-notes', '_blank');
         localStorage.setItem("what-is-new", WhatsNewCount.toString());
     }
 
