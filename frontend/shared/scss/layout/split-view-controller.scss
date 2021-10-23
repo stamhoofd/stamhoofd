@@ -27,6 +27,8 @@
 
     & > div {
         overscroll-behavior: contain;
+
+        height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 80px));
     }
 }
 

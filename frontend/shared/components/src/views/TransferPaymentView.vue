@@ -16,7 +16,7 @@
                     Bedrag overschrijven
                 </h1>
                 <p v-if="payment.price > 0 && payment.status != 'Succeeded' && created">
-                    Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
+                    Voer de overschrijving meteen uit. Vermeld zeker “{{ formattedTransferDescription }}” in je overschrijving.
                 </p>
                 <p v-if="payment.price > 0 && payment.status != 'Succeeded' && !created">
                     We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
@@ -58,14 +58,17 @@
                                     </td>
                                 </tr>
                                 <tr v-if="payment.price > 0">
-                                    <td v-if="isStructured">
+                                    <td v-if="isStructured && isBelgium">
                                         Gestructureerde mededeling
+                                    </td>
+                                    <td v-else-if="isStructured">
+                                        Betalingskenmerk
                                     </td>
                                     <td v-else>
                                         Mededeling
                                     </td>
                                     <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription">
-                                        {{ transferDescription }}
+                                        {{ formattedTransferDescription }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -323,6 +326,13 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             return this.payment.transferDescription + " " + this.additionalReference
         }
         return this.payment.transferDescription
+    }
+
+    get formattedTransferDescription() {
+        if (this.isStructured && !this.isBelgium && this.transferDescription) {
+            return this.transferDescription.match(/.{1,4}/g)?.join(" ") ?? this.transferDescription
+        }
+        return this.transferDescription
     }
 
     get qrMessage() {

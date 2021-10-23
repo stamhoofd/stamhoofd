@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input ref="input" v-model="emailRaw" class="input" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
+        <input ref="input" v-model="emailRaw" class="input" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" :required="required" @change="validate">
     </STInputBox>
 </template>
 

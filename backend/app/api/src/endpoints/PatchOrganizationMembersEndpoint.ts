@@ -410,7 +410,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             payment.organizationId = organization.id
             payment.method = Math.random() < 0.3 ? PaymentMethod.Payconiq : (Math.random()  < 0.5 ? PaymentMethod.Bancontact : PaymentMethod.Transfer )
             if (payment.method == PaymentMethod.Transfer) {
-                payment.transferDescription = Payment.generateDescription(organization.meta.transferSettings, "")
+                payment.transferDescription = Payment.generateDescription(organization, organization.meta.transferSettings, "")
 
                 if (payment.method == PaymentMethod.Transfer && Math.random() < 0.6) {
                     payment.status = PaymentStatus.Succeeded

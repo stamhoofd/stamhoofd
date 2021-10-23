@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view boxed">
+    <form class="st-view boxed" @submit.prevent="goNext">
         <STNavigationBar :large="true">
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
@@ -21,23 +21,23 @@
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="Jouw e-mailadres" :validator="validator" placeholder="Voor bevestingsemail" />
+                <EmailInput v-model="email" title="Jouw e-mailadres" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
 
-                <PhoneInput v-model="phone" title="Jouw GSM-nummer" :validator="validator" placeholder="Voor dringende info" />
+                <PhoneInput v-model="phone" title="Jouw GSM-nummer" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
                 <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
             </main>
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary">
                         <span>Doorgaan</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
             </STToolbar>
         </div>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">

@@ -175,7 +175,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (payment.method == PaymentMethod.Transfer) {
                 // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
-                payment.transferDescription = Payment.generateDescription(user.organization.meta.transferSettings, payNames.join(", "))
+                payment.transferDescription = Payment.generateDescription(user.organization, user.organization.meta.transferSettings, payNames.join(", "))
             }
             payment.paidAt = null
 
