@@ -92,11 +92,8 @@
             </h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p v-if="isBelgium" class="st-list-description">
-                    Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 31 cent voor een Bancontact betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.
-                </p>
-                <p v-else class="st-list-description">
-                    Momenteel werk je met (gratis) overschrijvingen, maar als je dat wilt kan je ook online betalingen accepteren aan een tarief van 29 cent voor een iDEAL betaling. Hiervoor werken we samen met onze betaalpartner, Mollie. Je kan een account in Mollie aanmaken en koppelen met de knop hieronder.
+                <p class="st-list-description">
+                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
                 </p>
                 <p v-if="isBelgium" class="info-box">
                     Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
@@ -111,7 +108,7 @@
             </template>
             <template v-else>
                 <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
-                    Online betalingen via Bancontact of iDEAL zijn mogelijk (je moet ze wel eerst aanzetten waar je ze wil gebruiken).
+                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
                 </p>
                 <p v-else class="warning-box">
                     Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.

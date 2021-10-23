@@ -56,6 +56,17 @@ function mergeObjects(into, from) {
     return into
 }
 
+// Step 1: build full list of all available keys with default values
+
+// Make sure English is loaded as last, because this should contain the default values for untranslated properties
+const enIndex = languages.findIndex((n) => n === "en")
+if (enIndex != -1) {
+    languages.splice(enIndex, 1)
+    languages.push("en")
+}
+
+let defaultKeys = {}
+
 for (const country of countries) {
     for (const language of languages) {
         const locale = language+"-"+country
@@ -66,6 +77,54 @@ for (const country of countries) {
         }
 
         let json = JSON.parse(await fs.readFile("./src/"+language+".json"))
+
+        if (files.includes(locale+".json")) {
+            const specifics = JSON.parse(await fs.readFile("./src/"+locale+".json"))
+            json = mergeObjects(json, specifics)
+        }
+
+        defaultKeys = mergeObjects(defaultKeys, json)
+    }
+}
+
+for (const country of countries) {
+    // Build country defatuls
+    let countryDefaults = JSON.parse(JSON.stringify(defaultKeys))
+
+    for (const language of languages) {
+        const locale = language+"-"+country
+        console.log(locale)
+
+        if (!files.includes(language+".json")) {
+            throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
+        }
+
+        let json = JSON.parse(await fs.readFile("./src/"+language+".json"))
+
+        if (files.includes(locale+".json")) {
+            const specifics = JSON.parse(await fs.readFile("./src/"+locale+".json"))
+            json = mergeObjects(json, specifics)
+        }
+
+        countryDefaults = mergeObjects(countryDefaults, json)
+    }
+
+
+    for (const language of languages) {
+        const locale = language+"-"+country
+        console.log(locale)
+
+        if (!files.includes(language+".json")) {
+            throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
+        }
+
+        let json = JSON.parse(JSON.stringify(countryDefaults))
+
+        const base = JSON.parse(await fs.readFile("./src/"+language+".json"))
+
+        // Replace default values with the right translations
+        // Missing translations will keep their default values
+        json = mergeObjects(json, base)
 
         if (files.includes(locale+".json")) {
             const specifics = JSON.parse(await fs.readFile("./src/"+locale+".json"))

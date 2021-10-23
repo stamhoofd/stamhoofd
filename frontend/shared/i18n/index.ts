@@ -1,6 +1,6 @@
 //i18n-setup.js
 import { countries, languages } from "@stamhoofd/locales"
-import { UrlHelper } from '@stamhoofd/networking'
+import { SessionManager, UrlHelper } from '@stamhoofd/networking'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 
@@ -50,7 +50,18 @@ export class I18nController {
         }
         this.country = options.country ?? this.country
         this.language = options.language ?? this.language
+
+        // Update url's
+        this.updateUrl()
+
+        // Load locale
         await this.loadLocale()
+    }
+
+    updateUrl() {
+         // Update url's
+        const current = new UrlHelper()
+        UrlHelper.setUrl(current.getPath({ removeLocale: true }))
     }
 
     async loadLocale() {
@@ -151,6 +162,22 @@ export class I18nController {
 
         const def = new I18nController(language, country, namespace)
         I18nController.shared = def
+
+        // Automatically set country when the organization is loaded
+        SessionManager.addListener(def, (changed) => {
+            if (!SessionManager.currentSession?.organization) {
+                return
+            }
+            if (changed == "session" || changed == "organization") {
+                def.switchToLocale({ country: SessionManager.currentSession.organization.address.country }).catch(console.error)
+            }
+        })
+
+        // If we go back, we might need to update the path of previous urls if the language has changed since then
+        window.addEventListener("popstate", (event) => {
+            I18nController.shared?.updateUrl()
+        })
+        
         await def.loadLocale()
     }
 

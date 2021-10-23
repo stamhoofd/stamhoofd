@@ -47,6 +47,9 @@ export class OrganizationManagerStatic {
             this.organization.invites = patch.invites.applyTo(invites)
         }
 
+        // Call handlers
+        SessionManager.currentSession!.callListeners("organization")
+
         // Save organization in localstorage
         this.save().catch(console.error)
     }

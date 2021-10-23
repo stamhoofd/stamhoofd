@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Organization, Version } from '@stamhoofd/structures';
 
 import { Keychain } from './Keychain';
@@ -192,9 +191,7 @@ export class SessionManagerStatic {
 
         if (session.organization) {
             this.addOrganizationToStorage(session.organization).catch(console.error)
-
-            // Already switch locale to other country if needed
-            I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
+            
         }
 
         this.callListeners("session")
@@ -202,9 +199,6 @@ export class SessionManagerStatic {
         this.currentSession.addListener(this, (changed: "userPrivateKey" | "user" | "organization" | "token") => {
             if (session.organization) {
                 this.addOrganizationToStorage(session.organization).catch(console.error)
-
-                // Switch locale to other country if needed
-                I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
             }
             this.setUserId();
             this.callListeners(changed)

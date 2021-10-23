@@ -177,7 +177,7 @@ export class Session implements RequestMiddleware {
         this.listeners.delete(owner)
     }
 
-    protected callListeners(changed: "userPrivateKey" | "user" | "organization" | "token") {
+    callListeners(changed: "userPrivateKey" | "user" | "organization" | "token") {
         for (const listener of this.listeners.values()) {
             listener(changed)
         }

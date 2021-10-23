@@ -21,6 +21,15 @@ export class UrlHelper {
         this.hash = window.location.hash
     }
 
+    /**
+     * Get full path, with the locale removed by default
+     * /your-path/test?q=t#hash
+     */
+    getPath(options?: { removeLocale?: boolean }) {
+        const search = new URL(this.href ?? "/", "https://"+window.location.hostname).search
+        return "/"+this.getParts(options).join("/")+search+this.hash
+    }
+
     getParts(options?: { removeLocale?: boolean }) {
         const parts = this.path?.substring(1).split("/") ?? []
 
@@ -54,9 +63,10 @@ export class UrlHelper {
     static setUrl(url: string) {
         if (I18nController.shared) {
             HistoryManager.setUrl("/"+I18nController.shared.locale+url)
+            console.log("Setting url to", "/"+I18nController.shared.locale+url)
         } else {
             HistoryManager.setUrl(url)
+            console.log("Setting url to", url)
         }
-        console.log("Setting url to", url)
     }
 }
