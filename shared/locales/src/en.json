@@ -3,6 +3,11 @@
     "login": "Login",
     "emails": {
       "general": "hello@stamhoofd.be"
+    },
+    "inputs": {
+      "iban": {
+        "placeholder": "E.g. BE71 6316 1793 1969"
+      }
     }
   },
   "backend": {},

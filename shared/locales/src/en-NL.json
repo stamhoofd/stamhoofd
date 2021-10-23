@@ -1,0 +1,13 @@
+{
+  "shared": {
+    "inputs": {
+      "iban": {
+        "placeholder": "E.g. NL21 INGB 3115 4044 17"
+      }
+    }
+  },
+  "backend": {},
+  "dashboard": {},
+  "webshop": {},
+  "registration": {}
+}
