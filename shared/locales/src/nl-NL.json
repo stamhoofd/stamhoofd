@@ -3,6 +3,11 @@
     "login": "Inloggen",
     "transferTypes": {
       "structured": "Betalingskenmerk"
+    },
+    "inputs": {
+      "iban": {
+        "placeholder": "Bv. NL21 INGB 3115 4044 17"
+      }
     }
   },
   "backend": {},
