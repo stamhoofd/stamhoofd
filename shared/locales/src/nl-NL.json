@@ -1,6 +1,9 @@
 {
   "shared": {
-    "login": "Inloggen"
+    "login": "Inloggen",
+    "transferTypes": {
+      "structured": "Betalingskenmerk"
+    }
   },
   "backend": {},
   "dashboard": {

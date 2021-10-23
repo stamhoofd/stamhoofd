@@ -1,6 +1,9 @@
 {
   "shared": {
-    "login": "Inloggen"
+    "login": "Inloggen",
+    "transferTypes": {
+      "structured": "Gestructureerde mededeling"
+    }
   },
   "backend": {},
   "dashboard": {

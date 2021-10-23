@@ -91,7 +91,7 @@
                 >
             </STInputBox>
             <p class="style-description-small">
-                Voorbeeld van een mededeling: “{{ transferExample }}”
+                Voorbeeld: “{{ transferExample }}”
             </p>
         </template>
 
@@ -171,7 +171,7 @@ import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from 
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, IBANInput,Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { WebshopField, WebshopOnSiteMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { Country, WebshopField, WebshopOnSiteMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -388,8 +388,8 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         return [
             { 
                 value: TransferDescriptionType.Structured,
-                name: "Gestructureerde mededeling",
-                description: "Geen kans op typefouten vanwege validatie in bankapps"
+                name: this.$t('shared.transferTypes.structured'),
+                description: "Willekeurig aangemaakt. Geen kans op typefouten vanwege validatie in bankapps"
             },
             { 
                 value: TransferDescriptionType.Reference,
@@ -464,8 +464,15 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         this.$emit("patch", p)
     }
 
+    get isBelgium() {
+        return this.organization.address.country == Country.Belgium
+    }
+
     get transferExample() {
         if (this.transferType == TransferDescriptionType.Structured) {
+            if (!this.isBelgium) {
+                return "4974 3024 6755 6964"
+            }
             return "+++705/1929/77391+++"
         }
 
