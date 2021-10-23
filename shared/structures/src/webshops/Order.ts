@@ -32,6 +32,9 @@ export class OrderStatusHelper {
 }
 
 export class OrderData extends Checkout {
+    @field({ decoder: StringDecoder, version: 129 })
+    consumerLanguage = "nl"
+
     // Payment method is required
     @field({ decoder: new EnumDecoder(PaymentMethod) })
     paymentMethod: PaymentMethod

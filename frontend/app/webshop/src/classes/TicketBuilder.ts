@@ -1,4 +1,5 @@
 /* eslint-disable no-irregular-whitespace */
+import { I18nController } from "@stamhoofd/frontend-i18n";
 import { Order, Organization, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 // PDFKit is used! Wrong warning below!
@@ -325,7 +326,7 @@ export class TicketBuilder {
             this.document.text("Scan de QR-code om op te slaan op jouw smartphone of om te delen.\nTicketverkoop via ", PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - badgeWidth - 4*MM , lineGap: 2, paragraphGap: 2, continued: true })
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
-            this.document.text("Stamhoofd", { continued: true, link: 'https://www.stamhoofd.be', })
+            this.document.text("Stamhoofd", { continued: true, link: 'https://'+I18nController.i18n.t("shared.domains.marketing"), })
             
             this.document.font('Metropolis-Medium');
             this.document.fillColor(COLOR_GRAY);

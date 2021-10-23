@@ -18,7 +18,7 @@
             <div>
                 <aside>
                     <a href="https://www.stamhoofd.be" class="inline-link secundary" target="_blank">
-                        Terug naar stamhoofd.be
+                        Terug naar Stamhoofd
                     </a>
                 </aside>
                 <div>

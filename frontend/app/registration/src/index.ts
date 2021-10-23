@@ -2,6 +2,7 @@
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
 import * as Sentry from "@sentry/vue";
+import { I18nController } from "@stamhoofd/frontend-i18n";
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
@@ -18,8 +19,10 @@ if (!isPrerender && process.env.NODE_ENV == "production") {
 }
 
 import App from "./App.vue";
+const i18n = I18nController.getI18n()
 
 const app = new Vue({
+    i18n,
     render: (h) => h(App),
 }).$mount("#app");
 

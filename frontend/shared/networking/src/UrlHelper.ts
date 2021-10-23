@@ -61,7 +61,7 @@ export class UrlHelper {
      * setURL, but add locale
      */
     static setUrl(url: string) {
-        if (I18nController.shared) {
+        if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
             HistoryManager.setUrl("/"+I18nController.shared.locale+url)
             console.log("Setting url to", "/"+I18nController.shared.locale+url)
         } else {

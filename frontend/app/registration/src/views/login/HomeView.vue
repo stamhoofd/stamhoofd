@@ -46,7 +46,7 @@
                         </aside>
                     </div>
                     <p class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be/ledenadministratie" target="_blank" class="button text">Ledenadministratie door <strong class="notranslate">Stamhoofd</strong></a>
+                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'" target="_blank" class="button text">Ledenadministratie door <strong class="notranslate">Stamhoofd</strong></a>
                     </p>
                 </main>
             </div>

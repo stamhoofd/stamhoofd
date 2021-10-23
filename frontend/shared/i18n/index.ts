@@ -1,20 +1,20 @@
 //i18n-setup.js
 import { countries, languages } from "@stamhoofd/locales"
-import { SessionManager, UrlHelper } from '@stamhoofd/networking'
+import { SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 
 Vue.use(VueI18n)
 
 export class I18nController {
+    static i18n: VueI18n
+    static shared: I18nController
+    static addUrlPrefix = true
+    static skipUrlPrefixForLocale?: string
+
     namespace = ""
     language = ""
     country = ""
-    
-    static i18n: VueI18n
-
-    static shared: I18nController
-
     loadedLocale?: string
 
     get locale() {
@@ -56,6 +56,8 @@ export class I18nController {
 
         // Load locale
         await this.loadLocale()
+
+        this.saveLocaleToStorage().catch(console.error)
     }
 
     updateUrl() {
@@ -86,6 +88,23 @@ export class I18nController {
         console.log("Successfully loaded locale", locale)
     }
 
+    static async getLocaleFromStorage(): Promise<{ language?: string, country?: string }> {
+        const country = await Storage.keyValue.getItem("country")
+        const language = await Storage.keyValue.getItem("language")
+
+        return {
+            country: country && countries.includes(country) ? country : undefined,
+            language: language && languages.includes(language) ? language : undefined,
+        }
+    }
+
+    async saveLocaleToStorage() {
+        await Storage.keyValue.setItem("language", this.language)
+        await Storage.keyValue.setItem("country", this.country)
+
+        console.info("Saved locale to storage", this.locale)
+    }
+
     static isValidLocale(locale: string) {
         if (locale.length == 5 && locale.substr(2, 1) == "-") {
             const l = locale.substr(0, 2).toLowerCase()
@@ -98,6 +117,7 @@ export class I18nController {
 
     static async loadDefault(namespace: string, country?: string) {
         let language: string | undefined = undefined
+        let needsSave = false
 
         // Check country if passed
         if (country && !countries.includes(country)) {
@@ -114,11 +134,13 @@ export class I18nController {
             if (!language) {
                 console.info("Using language from url", l)
                 language = l
+                needsSave = true
             }
 
             if (!country) {
+                console.info("Using country from url", c)
                 country = c
-                console.info("Using country from url", country)
+                needsSave = true
             } else {
                 if (country !== c) {
                     console.warn("Ignored country from url", c)
@@ -126,7 +148,22 @@ export class I18nController {
             }
         }
 
-        // 2. If it doesn't start with a locale: use the brower language and/or country by default
+        // 2. Get by storage
+        if (!language || !country) {
+            const storage = await I18nController.getLocaleFromStorage()
+
+            if (!language && storage.language) {
+                console.info("Using stored language", storage.language)
+                language = storage.language
+            }
+
+            if (!country && storage.country) {
+                console.info("Using stored country", storage.country)
+                country = storage.country
+            }
+        }
+
+        // 3. Use the browesr language and/or country
         if (!language && navigator.language && navigator.language.length >= 2) {
             const l = navigator.language.substr(0, 2).toLowerCase()
             if (languages.includes(l)) {
@@ -177,6 +214,10 @@ export class I18nController {
         window.addEventListener("popstate", (event) => {
             I18nController.shared?.updateUrl()
         })
+
+        if (needsSave) {
+            def.saveLocaleToStorage().catch(console.error)
+        }
         
         await def.loadLocale()
     }

@@ -36,6 +36,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { UrlHelper } from '@stamhoofd/networking';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -120,10 +121,12 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
         try {
            // Place order
+           const data = OrderData.create(CheckoutManager.checkout as any)
+           data.consumerLanguage = I18nController.shared?.language ?? "nl"
            const response = await WebshopManager.server.request({
                 method: "POST",
                 path: "/webshop/"+this.webshop.id+"/order",
-                body: OrderData.create(CheckoutManager.checkout as any), // todo: add some manual casting here
+                body: data, // todo: add some manual casting here
                 decoder: OrderResponse as Decoder<OrderResponse>
             })
 

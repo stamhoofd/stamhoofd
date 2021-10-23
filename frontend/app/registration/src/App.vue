@@ -10,6 +10,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
@@ -57,7 +58,8 @@ export default class App extends Vue {
                 },
                 decoder: Organization as Decoder<Organization>
             })
-            console.log("Organization fetched!")
+            I18nController.skipUrlPrefixForLocale = "nl-"+response.data.address.country
+            await I18nController.loadDefault("registration", response.data.address.country)
 
             if (!response.data.meta.modules.useMembers) {
                 throw new Error("Member module disabled")

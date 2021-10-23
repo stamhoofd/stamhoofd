@@ -80,8 +80,8 @@
                             {{ organization.meta.companyAddress || organization.address }}
                         </aside>
                         <div>
-                            <a v-if="hasTickets" href="https://www.stamhoofd.be/ticketverkoop">Ticketverkoop via <Logo /></a>
-                            <a v-else href="https://www.stamhoofd.be/webshops">Webshop via <Logo /></a>
+                            <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'/ticketverkoop'">Ticketverkoop via <Logo /></a>
+                            <a v-else :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
                         </div>
                     </div>
                 </div>

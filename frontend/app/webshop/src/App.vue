@@ -11,6 +11,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
@@ -42,6 +43,9 @@ export default class App extends Vue {
                     },
                     decoder: OrganizationWithWebshop as Decoder<OrganizationWithWebshop>
                 })
+
+                I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
+                await I18nController.loadDefault("webshop", response.data.organization.address.country)
 
                 WebshopManager.organization = response.data.organization
                 WebshopManager.webshop = response.data.webshop

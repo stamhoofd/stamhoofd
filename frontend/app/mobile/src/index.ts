@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { Haptics, NotificationType } from '@capacitor/haptics';
 import { Keyboard } from '@capacitor/keyboard';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 //import smoothscroll from 'smoothscroll-polyfill';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
@@ -99,8 +100,11 @@ window.addEventListener("touchstart", () => { }, { passive: true });
 
 // Override XMLHttpRequest in some situation (S&GV) since we don't have domain here
 AppManager.shared.overrideXMLHttpRequest = WrapperHTTPRequest
+const i18n = I18nController.getI18n()
+I18nController.addUrlPrefix = false
 
 const app = new Vue({
+    i18n,
     render: (h) => h(App),
 }).$mount("#app");
 
