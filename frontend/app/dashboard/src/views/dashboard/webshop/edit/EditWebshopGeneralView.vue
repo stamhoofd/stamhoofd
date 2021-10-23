@@ -399,7 +399,7 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
             { 
                 value: TransferDescriptionType.Fixed,
                 name: "Vaste mededeling",
-                description: "Altijd dezelfde mededeling voor alle bestellingen"
+                description: "Altijd dezelfde mededeling voor alle bestellingen. Opgelet: dit kan niet gewijzigd worden als bestellers de QR-code scannen, voorzie dus zelf geen eigen vervangingen zoals 'bestelling + naam'!"
             }
         ]
     }
