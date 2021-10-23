@@ -2,7 +2,7 @@
     <div ref="errors">
         <template v-for="error in errors">
             <STErrorBox :key="error.id">
-                {{ error.human || error.message }}
+                {{ getErrorMessage(error) }}
             </STErrorBox>
         </template>
     </div>
@@ -27,6 +27,13 @@ import STErrorBox from "./STErrorBox.vue"
 
     mounted() {
         this.onNewErrors(this.errorBox)
+    }
+
+    getErrorMessage(error: SimpleError) {
+        if (error.hasCode("network_error") || error.hasCode("network_timeout")) {
+            return "Geen of slechte internetverbinding"
+        }
+        return error.getHuman()
     }
 
     @Watch('errorBox')
