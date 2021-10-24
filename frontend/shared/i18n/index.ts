@@ -235,7 +235,7 @@ export class I18nController {
         def.defaultCountry = defaultCountry ?? def.defaultCountry
         def.defaultLanguage = defaultLanguage ?? def.defaultLanguage
         I18nController.shared = def
-        def.vueMetaApp = ((window as any).app as any).$meta().addApp('i18n-stamhoofd')
+        def.vueMetaApp = ((window as any).app as any).$meta().addApp('i18n')
 
         // Automatically set country when the organization is loaded
         SessionManager.addListener(def, (changed) => {
