@@ -65,6 +65,34 @@
     > div {
         width: 400px;
         overscroll-behavior: contain;
+
+        max-height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px));
+
+        > * {
+            --vh: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px) / 100);
+        }
+
+        @media (max-height: 900px) {
+            max-height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 20px));
+
+            > * {
+                --vh: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 20px) / 100);
+            }
+        }
+
+        @media (max-height: 600px) {
+            max-height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 0px));
+
+            > * {
+                --vh: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100) / 100);
+            }
+        }
+    }
+
+    @media (max-height: 900px) {
+        // Reduce navigation bar height if height is limited
+        --navigation-bar-margin: 10px;
+        //--navigation-bar-horizontal-padding: 10px;
     }
 }
 

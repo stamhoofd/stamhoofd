@@ -76,7 +76,8 @@ export default class LoginView extends Mixins(NavigationMixin){
 
     gotoPasswordForgot() {
         this.show(new ComponentWithProperties(ForgotPasswordView, {
-            session: this.session
+            session: this.session,
+            isAdmin: true
         }))
     }
 

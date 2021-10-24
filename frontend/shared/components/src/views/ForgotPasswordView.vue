@@ -6,9 +6,13 @@
         </STNavigationBar>
         <main>
             <h1>Wachtwoord vergeten</h1>
-            <div class="warning-box">
+
+            <p v-if="!isAdmin" class="warning-box">
                 Als je jouw wachtwoord vergeten bent kan je tijdelijk niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt tot we jou terug hebben goedgekeurd. Maar dat is niet echt een probleem, aangezien je ook alles opnieuw kan ingeven.
-            </div>
+            </p>
+            <p v-else class="error-box">
+                Opgelet! Gebruik je de ledenadministratie? Als je jouw wachtwoord vergeten bent, verlies je toegang tot alle data van je leden. Er is geen mogelijkheid om deze hierna nog te herstellen TENZIJ een andere beheerder van jouw vereniging nog toegang heeft tot zijn account.
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
 
@@ -48,6 +52,9 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
 
     @Prop({ default: ""})
     initialEmail!: string
+
+    @Prop({ default: false})
+    isAdmin!: boolean
 
     email = this.initialEmail
     validator = new Validator()
