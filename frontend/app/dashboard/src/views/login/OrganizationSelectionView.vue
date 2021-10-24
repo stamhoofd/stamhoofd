@@ -105,9 +105,6 @@ const throttle = (func, limit) => {
                     name: 'description',
                     content: "Via de Stamhoofd webapp kan je jouw vereniging beheren in je browser.",
                 }
-            ],
-            link: [
-                { rel: "canonical", href: "https://"+window.location.hostname }
             ]
         }
     }

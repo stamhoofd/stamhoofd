@@ -131,9 +131,6 @@ import SignupAccountView from './SignupAccountView.vue';
                     name: 'description',
                     content: "Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.",
                 }
-            ],
-            link: [
-                { rel: "canonical", href: "https://"+window.location.hostname+"/aansluiten" }
             ]
         }
     }
