@@ -177,39 +177,45 @@ export class I18nController {
         }
 
         // 2. Get by storage
-        if (!language || !country) {
-            const storage = await I18nController.getLocaleFromStorage()
+        const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-            if (!language && storage.language) {
-                console.info("Using stored language", storage.language)
-                language = storage.language
+        if (!isPrerender) {
+            // We never resolve the localstorage or browser language for crawlers, because that might mess up canonical urls
+
+            if (!language || !country) {
+                const storage = await I18nController.getLocaleFromStorage()
+
+                if (!language && storage.language) {
+                    console.info("Using stored language", storage.language)
+                    language = storage.language
+                }
+
+                if (!country && storage.country) {
+                    console.info("Using stored country", storage.country)
+                    country = storage.country
+                }
             }
 
-            if (!country && storage.country) {
-                console.info("Using stored country", storage.country)
-                country = storage.country
-            }
-        }
+            // 3. Use the browesr language and/or country
+            if (!language && navigator.language && navigator.language.length >= 2) {
+                const l = navigator.language.substr(0, 2).toLowerCase()
+                if (languages.includes(l)) {
+                    language = l
+                    console.info("Using browser language", l)
+                } else {
+                    console.warn("Browser language "+language+" is not supported")
+                }
 
-        // 3. Use the browesr language and/or country
-        if (!language && navigator.language && navigator.language.length >= 2) {
-            const l = navigator.language.substr(0, 2).toLowerCase()
-            if (languages.includes(l)) {
-                language = l
-                console.info("Using browser language", l)
-            } else {
-                console.warn("Browser language "+language+" is not supported")
             }
 
-        }
-
-        if (!country && navigator.language && navigator.language.length === 5) {
-            const c = navigator.language.substr(3, 2).toUpperCase()
-            if (countries.includes(c)) {
-                console.info("Using browser country", c)
-                country = c
-            } else {
-                console.warn("Browser country "+c+" is not supported")
+            if (!country && navigator.language && navigator.language.length === 5) {
+                const c = navigator.language.substr(3, 2).toUpperCase()
+                if (countries.includes(c)) {
+                    console.info("Using browser country", c)
+                    country = c
+                } else {
+                    console.warn("Browser country "+c+" is not supported")
+                }
             }
         }
 
