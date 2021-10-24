@@ -30,10 +30,34 @@ export class UrlHelper {
         return "/"+this.getParts(options).join("/")+search+this.hash
     }
 
+    getHostWithProtocol() {
+        const url = new URL(this.href ?? "/", "https://"+window.location.hostname)
+        return url.protocol+"//"+url.host
+    }
+
+    getFullHref(options?: { removeLocale?: boolean }) {
+        const url = new URL(this.href ?? "/", "https://"+window.location.hostname)
+        const search = url.search
+        return url.protocol+"//"+url.host+"/"+this.getParts(options).join("/")+search+this.hash
+    }
+
     getParts(options?: { removeLocale?: boolean }) {
         const parts = this.path?.substring(1).split("/") ?? []
 
-        if (parts.length > 0 && (options?.removeLocale === undefined || options?.removeLocale === true) && parts[0].length == 5 && I18nController.isValidLocale(parts[0])) {
+        if (
+            parts.length > 0 
+            && (
+                options?.removeLocale === undefined || options?.removeLocale === true
+            ) 
+            && (
+                (
+                    parts[0].length == 5 && I18nController.isValidLocale(parts[0])
+                )
+                || (
+                    parts[0].length == 2 && I18nController.isValidLanguage(parts[0])
+                )
+            )
+        ) {
             parts.shift()
         }
 
@@ -60,10 +84,31 @@ export class UrlHelper {
     /**
      * setURL, but add locale
      */
+    static transformUrlForLocale(url: string, language: string, country: string) {
+        const locale = language+"-"+country
+        if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== locale)) {
+            if (I18nController.fixedCountry) {
+                return "/"+language+url
+            } else {
+                return "/"+language+"-"+country+url
+            }
+        } else {
+            return url
+        }
+    }
+
+    /**
+     * setURL, but add locale
+     */
     static setUrl(url: string) {
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
-            HistoryManager.setUrl("/"+I18nController.shared.locale+url)
-            console.log("Setting url to", "/"+I18nController.shared.locale+url)
+            if (I18nController.fixedCountry) {
+                HistoryManager.setUrl("/"+I18nController.shared.language+url)
+                console.log("Setting url to", "/"+I18nController.shared.language+url)
+            } else {
+                HistoryManager.setUrl("/"+I18nController.shared.locale+url)
+                console.log("Setting url to", "/"+I18nController.shared.locale+url)
+            }
         } else {
             HistoryManager.setUrl(url)
             console.log("Setting url to", url)

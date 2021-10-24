@@ -59,7 +59,7 @@ export default class App extends Vue {
                 decoder: Organization as Decoder<Organization>
             })
             I18nController.skipUrlPrefixForLocale = "nl-"+response.data.address.country
-            await I18nController.loadDefault("registration", response.data.address.country)
+            await I18nController.loadDefault("registration", response.data.address.country, "nl", response.data.address.country)
 
             if (!response.data.meta.modules.useMembers) {
                 throw new Error("Member module disabled")

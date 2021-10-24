@@ -13,7 +13,7 @@ import { Sodium } from '@stamhoofd/crypto';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Logger } from "@stamhoofd/logger"
 import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
+import { Country, EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -31,7 +31,9 @@ export default class App extends Vue {
         promise: async () => {
             try {
                 await SessionManager.restoreLastSession()
-                await I18nController.loadDefault("dashboard", SessionManager.currentSession?.organization?.address?.country)
+
+                // Default language for dashboard is nl-BE, but if we are signed in, always force set the country to the organization country
+                await I18nController.loadDefault("dashboard", Country.Belgium, "nl", SessionManager.currentSession?.organization?.address?.country)
 
                 if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
                     // Load Windows stylesheet

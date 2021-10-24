@@ -1,8 +1,10 @@
 //i18n-setup.js
 import { countries, languages } from "@stamhoofd/locales"
 import { SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
+import { Country } from "@stamhoofd/structures"
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
+import { MetaInfo, VueMetaApp } from "vue-meta"
 
 Vue.use(VueI18n)
 
@@ -12,10 +14,24 @@ export class I18nController {
     static addUrlPrefix = true
     static skipUrlPrefixForLocale?: string
 
+    /**
+     * Whether only one country is enabled for the whole domain
+     * -> use for webshops and registration pages
+     * -> affects the generated SEO meta tags
+     */
+    static fixedCountry = false
+
     namespace = ""
     language = ""
     country = ""
     loadedLocale?: string
+
+    // Used for SEO
+    defaultCountry = Country.Belgium
+    defaultLanguage = "nl"
+
+    // Allows you to set and remove meta data
+    vueMetaApp?: VueMetaApp
 
     get locale() {
         return this.language+"-"+this.country
@@ -115,7 +131,11 @@ export class I18nController {
         return false
     }
 
-    static async loadDefault(namespace: string, country?: string) {
+    static isValidLanguage(language: string) {
+        return languages.includes(language)
+    }
+
+    static async loadDefault(namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: string) {
         let language: string | undefined = undefined
         let needsSave = false
 
@@ -145,6 +165,14 @@ export class I18nController {
                 if (country !== c) {
                     console.warn("Ignored country from url", c)
                 }
+            }
+        } else if (parts.length >= 1 && this.fixedCountry && parts[0].length == 2) {
+            const l = parts[0].substr(0, 2).toLowerCase()
+
+            if (!language && languages.includes(l)) {
+                console.info("Using language from url", l)
+                language = l
+                needsSave = true
             }
         }
 
@@ -188,17 +216,20 @@ export class I18nController {
         // Default language
         if (!language) {
             console.log("Using default language")
-            language = "nl"
+            language = defaultLanguage ?? "nl"
         }
 
         // Default country
         if (!country) {
             console.log("Using default country")
-            country = "BE"
+            country = defaultCountry ?? Country.Belgium
         }
 
         const def = new I18nController(language, country, namespace)
+        def.defaultCountry = defaultCountry ?? def.defaultCountry
+        def.defaultLanguage = defaultLanguage ?? def.defaultLanguage
         I18nController.shared = def
+        def.vueMetaApp = ((window as any).app as any).$meta().addApp('i18n-stamhoofd')
 
         // Automatically set country when the organization is loaded
         SessionManager.addListener(def, (changed) => {
@@ -218,6 +249,9 @@ export class I18nController {
         if (needsSave) {
             def.saveLocaleToStorage().catch(console.error)
         }
+
+        // Update meta data
+        def.updateMetaData()
         
         await def.loadLocale()
     }
@@ -230,6 +264,84 @@ export class I18nController {
     createFromLocale(namespace: string): I18nController {
         // todo
         return new I18nController("nl", "BE", namespace)
+    }
+
+    // Used to make metaInfo responsive
+    currentUrl: UrlHelper = UrlHelper.initial
+
+    updateMetaData() {
+        this.vueMetaApp?.set(this.metaInfo)
+    }
+
+    /**
+     * Build list for vue-meta with all the available locales
+     */
+    get metaInfo(): MetaInfo {
+        const listCountries = I18nController.fixedCountry ? [this.country] : countries
+        const url = new UrlHelper()
+        const path = url.getPath()
+        const hostProtocol = url.getHostWithProtocol()
+
+        const links: MetaInfo["link"] = []
+        const meta: MetaInfo["meta"] = []
+
+        // Add og:locale tag
+        meta.push({
+            hid: 'i18n-og',
+            property: 'og:locale',
+            // Replace dash with underscore as defined in spec: language_TERRITORY
+            content: this.language+"_"+this.country
+        })
+
+        // Alternate locations
+        for (const country of listCountries) {
+            for (const language of languages) {
+                const locale = language+"-"+country
+                links.push({
+                    hid: `i18n-alt-${locale}`,
+                    rel: "alternate",
+                    href: hostProtocol + UrlHelper.transformUrlForLocale(path, language, country),
+                    hreflang: locale
+                })
+
+                // Add og:locale:alternate
+                if (language != this.language || country !=this.country) {
+                    // Only list if not the same as current
+                    meta.push({
+                        hid: `i18n-og-alt-${locale}`,
+                        property: 'og:locale:alternate',
+                        content: language+"_"+country
+                    })
+                }
+                
+            }
+        }
+
+        // Add default locale
+        if (this.defaultCountry &&  this.defaultLanguage) {
+            links.push({
+                hid: `i18n-alt-default`,
+                rel: "alternate",
+                href: hostProtocol + UrlHelper.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountry),
+                hreflang: "x-default"
+            })
+        }
+
+        // Add canonical url
+        // For now, we keep all query parameters
+        links.push({
+            hid: 'i18n-can',
+            rel: 'canonical',
+            href: hostProtocol+UrlHelper.transformUrlForLocale(path, this.language, this.country)
+        })
+
+        return {
+            htmlAttrs: {
+                lang: this.locale
+            },
+            link: links,
+            meta
+        }
     }
 
 }

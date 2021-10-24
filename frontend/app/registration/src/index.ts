@@ -20,6 +20,7 @@ if (!isPrerender && process.env.NODE_ENV == "production") {
 
 import App from "./App.vue";
 const i18n = I18nController.getI18n()
+I18nController.fixedCountry = true
 
 const app = new Vue({
     i18n,
