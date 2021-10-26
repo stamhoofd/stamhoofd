@@ -572,7 +572,7 @@
                         "interval": "1d",
                         "burst": 50
                     },
-                    "ask": "http://127.0.0.1:9091/v2/organization-from-domain"
+                    "ask": "http://127.0.0.1:9091/v15/check-domain-cert"
                 }
             }
         }
