@@ -2273,6 +2273,15 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.18.0.tgz#89dd7922d78a3fc98ca88e7c7c8b337b95d8120d"
   integrity sha512-f4V01pbJjAXi1OV/Lj8SBIj3buuyaAFJrnyt7iVoiUARzH2RXIHVAuBBu6xPGSHWyvuP3cvnC0r5J2PUvy2tLQ==
 
+"@simonbackx/webfonts-loader@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/webfonts-loader/-/webfonts-loader-0.0.1.tgz#f68497b61c56554c4544ab6235170185bf307252"
+  integrity sha512-3DXpTM+D5UFf/I3cBBXybiFmlCfXGuVOdvfWXi8vn6369lP2mrEmdfp1nul8UZNwKjYyE1XwKfcxX9zFjksPcQ==
+  dependencies:
+    "@vusion/webfonts-generator" "^0.7.2"
+    glob "^7.1.6"
+    loader-utils "^2.0.0"
+
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.3.tgz#3802ddd21a50a949b6721ddd72da36e67e7f1b2d"

@@ -1,6 +1,21 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
+
+.icon-base {
+    line-height: 1;
+    
+
+    &:before {
+        line-height: 1;
+        font-size: 24px;
+        vertical-align: middle !important;
+        font-family: icons !important;
+        font-style: normal;
+        font-weight: normal !important;
+    }
+}
+
 .icon {
     width: 24px;
     font-size: 24px;

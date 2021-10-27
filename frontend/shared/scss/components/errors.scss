@@ -1,5 +1,6 @@
 @use '@stamhoofd/scss/base/variables' as *;
 @use '@stamhoofd/scss/base/responsive-helpers' as *;
+@use '@stamhoofd/scss/components/icons' as *;
 
 .error-box {
     background: $color-error-background;
@@ -12,6 +13,8 @@
     box-sizing: border-box;
     position: relative;
     margin: 15px 0;
+
+    @extend .icon-base;
 
     @media (max-width: 450px) {
         font-size: 14px;
@@ -54,6 +57,8 @@
     margin: 15px 0;
     position: relative;
 
+    @extend .icon-base;
+
     @media (max-width: 450px) {
         font-size: 14px;
     }
@@ -81,6 +86,8 @@
     box-sizing: border-box;
     margin: 15px 0;
     position: relative;
+    
+    @extend .icon-base;
 
     @media (max-width: 450px) {
         font-size: 14px;
@@ -109,6 +116,8 @@
     box-sizing: border-box;
     margin: 15px 0;
     position: relative;
+
+    @extend .icon-base;
 
     @media (max-width: 450px) {
         font-size: 14px;

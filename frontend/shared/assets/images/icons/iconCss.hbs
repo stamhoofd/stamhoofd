@@ -15,7 +15,13 @@ font-weight: normal !important;
 }
 
 {{#each codepoints}}
-{{baseSelector}}.{{@key}}:before, .icon-{{@key}}:before {
+{{baseSelector}}.{{@key}}:before{
+content: "\\{{this}}";
+}
+{{/each}}
+
+{{#each box_icons}}
+.{{@key}}-box:before {
 content: "\\{{this}}";
 }
 {{/each}}

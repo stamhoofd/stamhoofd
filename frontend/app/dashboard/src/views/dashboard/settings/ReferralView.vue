@@ -51,7 +51,7 @@
 
                 <STList>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
 
                         <h2 class="style-title-list">
                             Wees authentiek, voeg altijd wat meer uitleg toe
@@ -62,19 +62,19 @@
                         </p>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Vraag alle vrijwilligers om de link of Facebook post ook te delen
                         </h2>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Plaats een bericht op jullie website
                         </h2>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Herinner nog eens op het juiste moment
                         </h2>
@@ -83,7 +83,7 @@
                         </p>
                     </STListItem>
                     <STListItem v-if="isYouth">
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Promoot Stamhoofd op de jeugdraad
                         </h2>
@@ -92,7 +92,7 @@
                         </p>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Promoot Stamhoofd in een (lokale) Facebook groep
                         </h2>

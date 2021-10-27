@@ -109,7 +109,7 @@
                 </button>
 
                 <a class="menu-button button heading" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
-                    <span class="icon info-filled" />
+                    <span class="icon info" />
                     <span>Documentatie</span>
                 </a>
 

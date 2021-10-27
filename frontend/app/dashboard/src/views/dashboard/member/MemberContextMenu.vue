@@ -2,7 +2,7 @@
     <ContextMenu v-bind="{ x, y }">
         <ContextMenuItem @click="openMember">
             Openen
-            <span slot="right" class="icon info-filled" />
+            <span slot="right" class="icon info" />
         </ContextMenuItem>
 
         <template v-if="hasWrite">

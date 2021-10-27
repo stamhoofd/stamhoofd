@@ -13,6 +13,7 @@ require('dotenv').config({path: __dirname+'/.env'})
 const fs = require("fs")
 const path = require("path")
 
+
 const use_env = {}
 
 // This is a debug config as a replacement for process.env.NODE_ENV which seems to break webpack 5
@@ -212,17 +213,6 @@ module.exports = {
                 }
             },
             {
-                test: /\.font.scss\.js/,
-                use: [
-                    {
-                        loader: 'webfonts-loader',
-                        options: { 
-                            scssFile: true
-                        }
-                    }
-                ]
-            },
-            {
                 test: /\.font\.js/,
                 use: [
                     process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader',
@@ -233,7 +223,7 @@ module.exports = {
                         }
                     },
                     {
-                        loader: 'webfonts-loader',
+                        loader: '@simonbackx/webfonts-loader',
                         //options: { ... }
                     }
                 ]
