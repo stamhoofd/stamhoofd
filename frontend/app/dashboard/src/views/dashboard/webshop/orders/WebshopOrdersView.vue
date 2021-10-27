@@ -12,7 +12,9 @@
 
             <div class="input-with-buttons data-table-prefix title-description">
                 <div>
-                    <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
                 </div>
                 <div>
                     <button class="button text" @click="editFilter">
@@ -38,42 +40,46 @@
                         </th>
                         <th class="hide-smartphone tiny" @click="toggleSort('number')">
                             Nummer
+
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'number' && sortDirection == 'ASC',
-                                    down: sortBy == 'number' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'number' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'number' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th @click="toggleSort('name')">
                             Bestelling
+
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'name' && sortDirection == 'ASC',
-                                    down: sortBy == 'name' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'name' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'name' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th class="hide-smartphone" @click="toggleSort('checkout')">
                             Info
+
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'checkout' && sortDirection == 'ASC',
-                                    down: sortBy == 'checkout' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'checkout' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'checkout' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th @click="toggleSort('status')">
                             Status
-                            <span v-if="sortBy == 'status'"
-                                  class="sort-arrow"
-                                  :class="{
-                                      up: sortBy == 'status' && sortDirection == 'ASC',
-                                      down: sortBy == 'status' && sortDirection == 'DESC',
-                                  }"
+
+                            <span
+                                class="sort-arrow icon"
+                                :class="{
+                                    'arrow-up-small': sortBy == 'status' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'status' && sortDirection == 'DESC',
+                                }"
                             />
                         </th>
                     </tr>

@@ -31,11 +31,11 @@
                         <span class="icon settings" />
                         <span>Wijzigen</span>
                     </button>
-                    <select v-model="emailId" class="input">
+                    <Dropdown v-model="emailId">
                         <option v-for="email in emails" :key="email.id" :value="email.id">
                             {{ email.name ? (email.name+" <"+email.email+">") : email.email }}
                         </option>
-                    </select>
+                    </Dropdown>
                 </STInputBox>
             </div>
 
@@ -147,7 +147,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -185,6 +185,7 @@ class TmpFile {
         STList,
         STListItem,
         Checkbox,
+        Dropdown,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })

@@ -60,7 +60,7 @@
                             </Checkbox>
                         </td>
                         <td>
-                            <select v-model="column.matcherCode" class="input" @change="didChangeColumn(column)">
+                            <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
                                 <option :value="null" disabled>
                                     Maak een keuze
                                 </option>
@@ -69,7 +69,7 @@
                                         {{ matcher.getName() }} ({{ getCategoryName(cat.name) }})
                                     </option>
                                 </optgroup>
-                            </select>
+                            </Dropdown>
                         </td>
                     </tr>
                 </tbody>
@@ -97,7 +97,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Organization, OrganizationPatch } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
 import XLSX from "xlsx";
@@ -118,7 +118,8 @@ import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
         STErrorsDefault,
         Checkbox,
         BackButton,
-        LoadingButton
+        LoadingButton,
+        Dropdown
     },
 })
 export default class ImportMembersView extends Mixins(NavigationMixin) {

@@ -3,7 +3,6 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 //var FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // no 5 support atm
-const IconfontWebpackPlugin = require('iconfont-webpack-plugin');
 // const CircularDependencyPlugin = require('circular-dependency-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
@@ -80,7 +79,7 @@ module.exports = {
         filename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[id].'+Date.now()+'.js',
         chunkFilename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[id].'+Date.now()+'.js',
         globalObject: 'this', // needed for webworkers
-        pathinfo: process.env.NODE_ENV === "production" ? true : false,
+        //pathinfo: process.env.NODE_ENV === "production" ? true : false,
         assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[hash][ext][query]' : 'images/[id].'+Date.now()+'[ext][query]'
     },
     devServer: {
@@ -91,12 +90,12 @@ module.exports = {
         disableHostCheck: true,
         historyApiFallback: true,
     },
-    optimization: (process.env.NODE_ENV === "production" ? {} : {
+    /*optimization: (process.env.NODE_ENV === "production" ? {} : {
         runtimeChunk: true,
         removeAvailableModules: false,
         removeEmptyChunks: false,
         //splitChunks: false,
-    }),
+    }),*/
     devtool: "eval",
     module: {
         rules: [
@@ -107,7 +106,7 @@ module.exports = {
             { 
                 test: /\.tsx?$/, 
                 use: [
-                    ...(process.env.NODE_ENV === "production" || true ? [{
+                    ...(process.env.NODE_ENV === "production" ? [{
                         loader: 'babel-loader',
                         options: {
                             babelrc: false,
@@ -178,7 +177,13 @@ module.exports = {
                     {
                         loader: 'postcss-loader',
                         options: {
-                            postcssOptions: (loader) => {
+                            postcssOptions: {
+                                plugins: [
+                                    // Don't need icons here
+                                    "autoprefixer"
+                                ]
+                            }
+                            /*postcssOptions: (loader) => {
                                 return { 
                                     plugins: [
                                         // Add the plugin
@@ -186,7 +191,7 @@ module.exports = {
                                         autoprefixer
                                     ]
                                 }
-                            }
+                            }*/
                         }
                     },
                     'sass-loader',
@@ -205,6 +210,17 @@ module.exports = {
                 generator: {
                     filename: process.env.NODE_ENV === "production" ? 'fonts/[name].[contenthash][ext]' : 'fonts/[id].'+Date.now()+'[ext]',
                 }
+            },
+            {
+                test: /\.font.scss\.js/,
+                use: [
+                    {
+                        loader: 'webfonts-loader',
+                        options: { 
+                            scssFile: true
+                        }
+                    }
+                ]
             },
             {
                 test: /\.font\.js/,
@@ -280,8 +296,8 @@ module.exports = {
         //syncWebAssembly: true // temporary, until fixed
         asyncWebAssembly: true
     },
-    cache: false,
-    /*cache: {
+    //cache: false,
+    cache: {
         type: 'filesystem',
         //allowCollectingMemory: true,
         buildDependencies: {
@@ -294,5 +310,5 @@ module.exports = {
         managedPaths: [
             path.resolve(__dirname, '../node_modules')
         ],
-    }*/
+    }
 };

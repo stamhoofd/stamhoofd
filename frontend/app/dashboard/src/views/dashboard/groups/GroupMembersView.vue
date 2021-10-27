@@ -30,7 +30,9 @@
 
             <div class="input-with-buttons data-table-prefix title-description">
                 <div>
-                    <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
                 </div>
                 <div>
                     <button class="button text" @click="editFilter">
@@ -55,30 +57,30 @@
                         <th @click="toggleSort('name')">
                             Naam
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'name' && sortDirection == 'ASC',
-                                    down: sortBy == 'name' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'name' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'name' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th class="hide-smartphone" @click="toggleSort('info')">
                             Leeftijd
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'info' && sortDirection == 'ASC',
-                                    down: sortBy == 'info' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'info' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'info' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th class="hide-smartphone" @click="toggleSort('status')">
                             {{ waitingList ? "Op wachtlijst sinds" : "Status" }}
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'status' && sortDirection == 'ASC',
-                                    down: sortBy == 'status' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'status' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'status' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
@@ -217,7 +219,7 @@
                     <LoadingButton :loading="actionLoading">
                         <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
                             <span class="dropdown-text">E-mailen</span>
-                            <div class="dropdown" @click.stop="openMailDropdown" />
+                            <div class="dropdown icon arrow-down-small" @click.stop="openMailDropdown" />
                         </button>
                     </LoadingButton>
                 </template>

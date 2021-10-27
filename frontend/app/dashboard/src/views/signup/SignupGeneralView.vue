@@ -37,7 +37,7 @@
 
                 <div>
                     <STInputBox title="Soort vereniging" error-fields="type" :error-box="errorBox">
-                        <select v-model="type" class="input">
+                        <Dropdown v-model="type">
                             <option :value="null" disabled>
                                 Maak een keuze
                             </option>
@@ -47,21 +47,21 @@
                                     {{ _type.name }}
                                 </option>
                             </optgroup>
-                        </select>
+                        </Dropdown>
                     </STInputBox>
                     <p class="style-description-small">
                         Hiermee stellen we automatisch al enkele instellingen goed in.
                     </p>
 
                     <STInputBox v-if="type == 'Youth'" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
-                        <select v-model="umbrellaOrganization" class="input">
+                        <Dropdown v-model="umbrellaOrganization">
                             <option :value="null" disabled>
                                 Maak een keuze
                             </option>
                             <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                                 {{ item.name }}
                             </option>
-                        </select>
+                        </Dropdown>
                     </STInputBox>
                 </div>
             </div>
@@ -101,7 +101,7 @@
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Sorter } from '@stamhoofd/utility';
@@ -120,7 +120,8 @@ import SignupAccountView from './SignupAccountView.vue';
         BackButton,
         AddressInput,
         LoadingButton,
-        Checkbox
+        Checkbox,
+        Dropdown
     },
     metaInfo() {
         return {

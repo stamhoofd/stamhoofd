@@ -10,11 +10,11 @@
             </div>
         </div>
 
-        <select v-model="country" class="input" autocomplete="country" name="country" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+        <Dropdown v-model="country" autocomplete="country" name="country" @change="updateAddress" @focus="onFocus" @blur="onBlur">
             <option v-for="country in countries" :key="country.value" :value="country.value">
                 {{ country.text }}
             </option>
-        </select>
+        </Dropdown>
     </STInputBox>
 </template>
 
@@ -22,14 +22,15 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { Server } from "@simonbackx/simple-networking";
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Dropdown,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Address, Country, CountryHelper, ValidatedAddress} from "@stamhoofd/structures"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {
-        STInputBox
+        STInputBox,
+        Dropdown
     }
 })
 export default class AddressInput extends Vue {

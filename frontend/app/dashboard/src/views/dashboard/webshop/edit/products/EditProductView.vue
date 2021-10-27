@@ -32,14 +32,16 @@
                     >
                 </STInputBox>
                 <STInputBox v-if="isTicket" title="Type" error-fields="name" :error-box="errorBox">
-                    <select
+                    <Dropdown
                         v-model="type"
-                        class="input"
-                        type="text"
                     >
-                        <option>Ticket</option>
-                        <option>Voucher</option>
-                    </select>
+                        <option value="Ticket">
+                            Ticket
+                        </option>
+                        <option value="Voucher">
+                            Voucher
+                        </option>
+                    </Dropdown>
                 </STInputBox>
             </div>
 
@@ -166,7 +168,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, DateSelection, Dropdown,ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -200,7 +202,8 @@ import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
         ProductPriceBox,
         WebshopFieldsBox,
         ProductSelectLocationInput,
-        ProductSelectDateRangeInput
+        ProductSelectDateRangeInput,
+        Dropdown
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {

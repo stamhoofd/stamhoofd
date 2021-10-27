@@ -1,0 +1,21 @@
+@font-face {
+font-family: "{{fontName}}";
+font-display: block;
+src: {{{src}}};
+}
+
+{{baseSelector}} {
+line-height: 1;
+}
+
+{{baseSelector}}:before {
+font-family: {{fontName}} !important;
+font-style: normal;
+font-weight: normal !important;
+}
+
+{{#each codepoints}}
+{{baseSelector}}.{{@key}}:before, .icon-{{@key}}:before {
+content: "\\{{this}}";
+}
+{{/each}}

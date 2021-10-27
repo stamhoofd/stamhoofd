@@ -1,13 +1,13 @@
 <template>
     <div class="container">
-        <select v-if="group.filters.length > 1" v-model="mode" class="input">
+        <Dropdown v-if="group.filters.length > 1" v-model="mode">
             <option :value="GroupFilterMode.And">
                 Alle filters moeten matchen
             </option>
             <option :value="GroupFilterMode.Or">
                 Minstens één filter is voldoende
             </option>
-        </select>
+        </Dropdown>
 
         <div v-for="(filter, index) of group.filters" :key="'filters'+index" class="container">
             <hr>
@@ -53,7 +53,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STInputBox, STListItem } from "@stamhoofd/components"
+import { Dropdown,STInputBox, STListItem } from "@stamhoofd/components"
 import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, GroupFilterMode, NumberFilter, Organization, RegistrationsFilter, StringFilter } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -72,7 +72,8 @@ import StringFilterView from "./StringFilterView.vue"
         NumberFilterView,
         ChoicesFilterView,
         DateFilterView,
-        RegistrationsFilterView
+        RegistrationsFilterView,
+        Dropdown
     }
 })
 export default class FilterGroupView extends Mixins(NavigationMixin)  {

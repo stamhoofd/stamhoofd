@@ -1,13 +1,13 @@
 <template>
     <div>
-        <select v-model="mode" class="input">
+        <Dropdown v-model="mode">
             <option :value="RegistrationsFilterMode.Or">
                 Minstens één van de geselecteerde
             </option>
             <option :value="RegistrationsFilterMode.And">
                 Alle geselecteerde
             </option>
-        </select>
+        </Dropdown>
         <STList>
             <STListItem v-for="choice of choices" :key="choice.id" :selectable="true" element-name="label">
                 <Checkbox slot="left" :checked="isChoiceSelected(choice)" @change="setChoiceSelected(choice, $event)" />
@@ -21,7 +21,7 @@
 
 
 <script lang="ts">
-import { Checkbox, STList, STListItem } from "@stamhoofd/components"
+import { Checkbox, Dropdown,STList, STListItem } from "@stamhoofd/components"
 import { Organization, RegistrationsFilter,RegistrationsFilterChoice, RegistrationsFilterMode } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -29,7 +29,8 @@ import { Component, Prop,Vue } from "vue-property-decorator";
     components: {
         STListItem,
         STList,
-        Checkbox
+        Checkbox,
+        Dropdown
     }
 })
 export default class RegistrationsFilterView extends Vue {

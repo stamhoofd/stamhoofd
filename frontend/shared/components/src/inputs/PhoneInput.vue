@@ -80,8 +80,8 @@ export default class PhoneInput extends Vue {
                     "field": "phone"
                 }))
 
-                if (this.value !== null) {
-                    this.$emit("input", null)
+                if (this.value !== "") {
+                    this.$emit("input", "")
                 }
                 return false
 

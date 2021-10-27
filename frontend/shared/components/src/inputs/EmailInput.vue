@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input ref="input" v-model="emailRaw" class="input" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" :required="required" @change="validate">
+        <input ref="input" v-model="emailRaw" class="input" :name="name" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
     </STInputBox>
 </template>
 
@@ -40,6 +40,9 @@ export default class EmailInput extends Vue {
 
     @Prop({ default: "email" })
     autocomplete!: string
+
+    @Prop({ default: undefined })
+    name?: string
 
     errorBox: ErrorBox | null = null
 
@@ -85,8 +88,8 @@ export default class EmailInput extends Vue {
                 "message": "Ongeldig e-mailadres",
                 "field": "email"
             }))
-            if (this.value !== null) {
-                this.$emit("input", null)
+            if (this.value !== "") {
+                this.$emit("input", "")
             }
             return false
 

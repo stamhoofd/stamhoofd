@@ -6,7 +6,7 @@
         <main>
             <h1>Inloggen</h1>
                     
-            <EmailInput ref="emailInput" v-model="email" class="max" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
@@ -16,7 +16,7 @@
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
-                <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                <input v-model="password" name="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
             </STInputBox>
         </main>
 
@@ -37,7 +37,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
 
@@ -60,6 +60,9 @@ export default class LoginView extends Mixins(NavigationMixin){
 
     @Prop({ default: null})
     lock!: string | null
+
+    @Ref("emailInput")
+    emailInput: EmailInput
 
     email = this.initialEmail
     password = ""
@@ -132,6 +135,15 @@ export default class LoginView extends Mixins(NavigationMixin){
             this.loading = false;
             component.hide()
         }
+    }
+
+    mounted() {
+        setTimeout(() => {
+            // Needed the any here because typescript is getting mad only in production mode
+            if (this.emailInput) {
+                (this.emailInput as any).focus()
+            }
+        }, 300);
     }
 }
 </script>

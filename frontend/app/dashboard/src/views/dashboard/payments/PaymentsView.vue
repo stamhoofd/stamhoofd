@@ -4,7 +4,11 @@
             <BackButton v-if="canPop" slot="left" @click="pop" />
 
             <template #right>
-                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                <div class="input-icon-container icon search gray">
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
+                </div>
             </template>
         </STNavigationBar>
 

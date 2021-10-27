@@ -1,7 +1,7 @@
 <template>
     <STInputBox :title="title" error-fields="birthDay" :error-box="errorBox">
         <div class="input birth-day-selection">
-            <select v-model="day" class="input" autocomplete="bday-day" name="bday-day" @change="updateDate">
+            <Dropdown v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
                 <!-- name is needed for autocomplete in safari -->
                 <option :disabled="required" :value="null">
                     Dag
@@ -9,38 +9,39 @@
                 <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">
                     {{ day }}
                 </option>
-            </select>
+            </Dropdown>
 
-            <select v-model="month" class="input" autocomplete="bday-month" name="bday-month" @change="updateDate">
+            <Dropdown v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
                 <option :disabled="required" :value="null">
                     Maand
                 </option>
                 <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
                     {{ monthText(month) }}
                 </option>
-            </select>
+            </Dropdown>
 
-            <select v-model="year" class="input" autocomplete="bday-year" name="bday-year" @change="updateDate">
+            <Dropdown v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
                 <option :disabled="required" :value="null">
                     Jaar
                 </option>
                 <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
                     {{ currentYear - year + 1 }}
                 </option>
-            </select>
+            </Dropdown>
         </div>
     </STInputBox>
 </template>
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { Dropdown,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Formatter } from "@stamhoofd/utility"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({
     components: {
-        STInputBox
+        STInputBox,
+        Dropdown
     }
 })
 export default class BirthDayInput extends Vue {

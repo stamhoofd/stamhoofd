@@ -21,7 +21,9 @@
                     <span>Stamhoofd website</span>
                 </a>
                 <h1>Kies jouw vereniging</h1>
-                <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+                <div class="input-icon-container icon search gray">
+                    <input v-model="query" class="input" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+                </div>
                 <p v-if="!loading && filteredResults.length == 0 && !query">
                     Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
                 </p>
@@ -353,7 +355,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         padding: 10px 0;
     }
 
-    > input.search {
+    input.search {
         max-width: none;
     }
 

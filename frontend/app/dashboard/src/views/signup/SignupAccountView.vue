@@ -16,17 +16,17 @@
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" name="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
                 </div>
 
                 <div>
                     <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
-                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                                <input v-model="firstName" name="given-name" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                             </div>
                             <div>
-                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                                <input v-model="lastName" name="family-name" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
                             </div>
                         </div>
                     </STInputBox>
@@ -36,10 +36,10 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
-                        <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="password" name="new-password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
                     <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                        <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
                 </div>
 

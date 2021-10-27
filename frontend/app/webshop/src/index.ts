@@ -1,6 +1,9 @@
 // import 'core-js/stable'; // only needed for entry or 'false' useBuiltIns
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
 
+// Load icon font
+require('@stamhoofd/assets/images/icons/icons.font');
+
 import * as Sentry from "@sentry/vue";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import Vue from "vue";

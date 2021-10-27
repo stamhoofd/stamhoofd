@@ -1,3 +1,6 @@
+// Load icon font
+require('@stamhoofd/assets/images/icons/icons.font');
+
 import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Haptics, NotificationType } from '@capacitor/haptics';

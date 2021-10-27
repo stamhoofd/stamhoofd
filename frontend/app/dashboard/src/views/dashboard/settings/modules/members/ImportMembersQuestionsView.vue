@@ -117,11 +117,11 @@
                             {{ membersWithoutMatchingGroups.length }} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.
                         </p>
 
-                        <select v-model="defaultGroup" class="input">
+                        <Dropdown v-model="defaultGroup">
                             <option v-for="group of organization.groups" :key="group.id" :value="group">
                                 {{ group.settings.name }}
                             </option>
-                        </select>
+                        </Dropdown>
 
                         <button slot="right" class="button text" @click.stop="openWithoutMatchingGroups">
                             <span class="icon help" />
@@ -131,11 +131,11 @@
                 </template>
                 <template v-else>
                     <STInputBox title="In welke groep wil je deze leden inschrijven?" error-fields="group" :error-box="errorBox" class="max">
-                        <select v-model="defaultGroup" class="input">
+                        <Dropdown v-model="defaultGroup">
                             <option v-for="group of organization.groups" :key="group.id" :value="group">
                                 {{ group.settings.name }}
                             </option>
-                        </select>
+                        </Dropdown>
                     </STInputBox>
                 </template>
             </template>
@@ -160,8 +160,8 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArray,PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { Group, Organization, OrganizationPatch, Payment,PaymentMethod, PaymentStatus, Registration, WaitingListType } from "@stamhoofd/structures"
+import { BackButton, Checkbox, Dropdown,ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { Group, Organization, OrganizationPatch, Payment,PaymentMethod, PaymentStatus, Registration } from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -182,7 +182,8 @@ import ImportAutoAssignedViewView from './ImportAutoAssignedView.vue';
         BackButton,
         LoadingButton,
         STList,
-        STListItem
+        STListItem,
+        Dropdown
     },
 })
 export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) {

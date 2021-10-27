@@ -82,7 +82,7 @@
         .dropdown {
             position: relative;
 
-            &:before {
+            &:after {
                 left: -$border-width;
                 top: 0;
                 bottom: 0;
@@ -93,9 +93,6 @@
                 width: $border-width;
             }
             font-size: 24px;
-            &:after {
-                //font-icon: url(@stamhoofd/assets/images/icons/arrow-down-small.svg);
-            }
             //background: url(~@stamhoofd/assets/images/icons/white/arrow-down-small.svg) no-repeat center center;
             width: 40px;
             height: 42px;
@@ -218,24 +215,6 @@
             }
         }
     }
-
-    /*&.privacy {
-        width: 24px;
-        height: 24px;
-        padding: 10px;
-        display: inline-block;
-        vertical-align: middle;
-        cursor: pointer;
-        touch-action: manipulation;
-
-        background-image: url(~@stamhoofd/assets/images/icons/gray/privacy.svg);
-        background-position: center center;
-        background-repeat: no-repeat;
-
-        &:active {
-            opacity: 0.4;
-        }
-    }*/
 
     &.tooltip-only {
         cursor: help;

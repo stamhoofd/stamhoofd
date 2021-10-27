@@ -7,7 +7,7 @@
             <h1>Inloggen</h1>
 
             <STInputBox title="E-mailadres">
-                <input v-model="email" class="input" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
+                <input ref="emailInput" v-model="email" class="input" name="email" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
             </STInputBox>
 
             <STInputBox title="Wachtwoord">
@@ -15,7 +15,7 @@
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
-                <input v-model="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                <input v-model="password" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
             </STInputBox>
         </main>
 
@@ -40,7 +40,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
 import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -66,8 +66,20 @@ export default class LoginView extends Mixins(NavigationMixin){
         return AppManager.shared.isNative
     }
 
+    @Ref("emailInput")
+    emailInput: HTMLInputElement
+
     mounted() {
         this.email = this.session.user?.email ?? ""
+
+        if (this.email.length == 0) {
+            setTimeout(() => {
+                // Needed the any here because typescript is getting mad only in production mode
+                if (this.emailInput) {
+                    (this.emailInput as any).focus()
+                }
+            }, 300);
+        }
     }
 
     help() {

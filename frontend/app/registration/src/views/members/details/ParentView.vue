@@ -16,11 +16,11 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox title="Titel" error-fields="type" :error-box="errorBox">
-                        <select v-model="type" class="input">
+                        <Dropdown v-model="type">
                             <option v-for="type in parentTypes" :key="type" :value="type">
                                 {{ parentTypeName(type) }}
                             </option>
-                        </select>
+                        </Dropdown>
                     </STInputBox>
 
                     <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
@@ -53,7 +53,7 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, EmailInput,ErrorBox, PhoneInput, Radio, SelectionAddressInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { Checkbox, Dropdown,EmailInput,ErrorBox, PhoneInput, Radio, SelectionAddressInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -71,7 +71,8 @@ import { MemberManager } from '../../../classes/MemberManager';
         Checkbox,
         STList,
         STListItem,
-        SelectionAddressInput
+        SelectionAddressInput,
+        Dropdown
     }
 })
 export default class ParentView extends Mixins(NavigationMixin) {
