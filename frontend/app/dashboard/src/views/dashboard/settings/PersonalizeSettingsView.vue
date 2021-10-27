@@ -70,7 +70,7 @@
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
                 <p v-if="enableMemberModule" class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
                 </p>
                 <p v-else class="st-list-description">
                     Jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
@@ -90,7 +90,7 @@
 
             <template v-else>
                 <p v-if="enableMemberModule" class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.
                 </p>
                 <p v-else class="st-list-description">
                     Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.
@@ -165,15 +165,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     get enableMemberModule() {
         return this.organization.meta.modules.useMembers
     }
-
-    get registerUrl() {
-        if (this.organization.privateMeta && this.organization.privateMeta.mailDomain && this.organization.registerDomain) {
-            return "https://"+this.organization.registerDomain
-        } 
-
-        return "https://"+this.organization.uri + '.' + process.env.HOSTNAME_REGISTRATION
-    }
-
+    
     get squareLogoResolutions() {
         return [
             ResolutionRequest.create({

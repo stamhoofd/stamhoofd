@@ -139,7 +139,7 @@ export class EmailVerificationCode extends Model {
     getEmailVerificationUrl(user: UserWithOrganization) {
         let host: string;
         if (user.permissions) {
-            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
+            host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")
         } else {
             host = "https://"+user.organization.getHost()
         }

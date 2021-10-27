@@ -1,5 +1,5 @@
 <template>
-    <label class="price-input" :class="{ error: !valid }">
+    <label class="price-input input" :class="{ error: !valid }">
         <!-- 
             We use type = text here because the specs of number inputs ensure that we can't get 
             the raw string value, but we need this for our placeholder logic.
@@ -178,10 +178,8 @@ export default class PriceInput extends Vue {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
 @use "~@stamhoofd/scss/base/variables.scss" as *;
-@use "~@stamhoofd/scss/components/inputs.scss";
 
 .price-input {
-    @extend .input;
     position: relative;
 
     & > div {

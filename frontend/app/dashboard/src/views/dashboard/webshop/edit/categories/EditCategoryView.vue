@@ -249,12 +249,3 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.product-edit-view {
-    
-
-}
-</style>

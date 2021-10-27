@@ -19,7 +19,7 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
             return [false];
         }
 
-        if (!process.env.NOLT_SSO_SECRET_KEY) {
+        if (!STAMHOOFD.NOLT_SSO_SECRET_KEY) {
             return [false];
         }
 
@@ -61,7 +61,7 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
             imageUrl: user.organization.meta.squareLogo?.getPublicPath() ?? user.organization.meta.horizontalLogo?.getPublicPath() ?? undefined
         }
 
-        const str = jwt.sign(payload, process.env.NOLT_SSO_SECRET_KEY, { algorithm: 'HS256' });
+        const str = jwt.sign(payload, STAMHOOFD.NOLT_SSO_SECRET_KEY, { algorithm: 'HS256' });
         return new Response(ResponseBody.create({ "jwt": str }));      
     
     }

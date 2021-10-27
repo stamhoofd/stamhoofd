@@ -119,7 +119,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         value: (totalPrice / 100).toFixed(2)
                     },
                     method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                    testmode: process.env.NODE_ENV != 'production',
+                    testmode: STAMHOOFD.environment != 'production',
                     profileId,
                     description,
                     redirectUrl: "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id),

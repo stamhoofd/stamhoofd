@@ -226,7 +226,7 @@ export class STPendingInvoice extends Model {
             await invoice.markPaid()
         } else {
             // Mollie payment is required
-            const apiKey = process.env.MOLLIE_API_KEY
+            const apiKey = STAMHOOFD.MOLLIE_API_KEY
             if (!apiKey) {
                 throw new SimpleError({
                     code: "",
@@ -244,8 +244,8 @@ export class STPendingInvoice extends Model {
                 description,
                 customerId: organization.serverMeta.mollieCustomerId,
                 sequenceType: SequenceType.recurring,
-                redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
-                webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                redirectUrl: "https://"+STAMHOOFD.domains.dashboard+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
+                webhookUrl: 'https://'+STAMHOOFD.domains.api+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
                 metadata: {
                     invoiceId: invoice.id,
                     paymentId: payment.id,

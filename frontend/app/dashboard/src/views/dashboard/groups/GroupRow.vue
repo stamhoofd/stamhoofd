@@ -1,15 +1,17 @@
 <template>
     <STListItem :selectable="true" @click="editProduct()">
         <template slot="left">
-            <img v-if="imageSrc" :src="imageSrc" class="group-row-image" />
+            <img v-if="imageSrc" :src="imageSrc" class="group-row-image">
         </template>
         
-        <h2 class="style-title-list">{{ group.settings.name }}</h2>
+        <h2 class="style-title-list">
+            {{ group.settings.name }}
+        </h2>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" @click.stop="moveUp"/>
-            <button class="button icon arrow-down gray" @click.stop="moveDown"/>
-            <span  class="icon arrow-right-small gray"/>
+            <button class="button icon arrow-up gray" @click.stop="moveUp" />
+            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
 </template>
@@ -20,6 +22,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { STListItem } from "@stamhoofd/components";
 import { Group, Organization } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import EditGroupView from './EditGroupView.vue';
 
 @Component({
@@ -61,7 +64,6 @@ export default class GroupRow extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .group-row-image {

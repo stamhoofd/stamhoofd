@@ -110,7 +110,7 @@ export class PasswordToken extends Model {
 
         let host: string;
         if (user.permissions) {
-            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
+            host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")
         } else {
             host = "https://"+user.organization.getHost()
         }

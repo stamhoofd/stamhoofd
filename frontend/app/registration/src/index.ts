@@ -10,7 +10,7 @@ Vue.use(VueMeta)
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-if (!isPrerender && process.env.NODE_ENV == "production") {
+if (!isPrerender && STAMHOOFD.environment == "production") {
     Sentry.init({
         Vue,
         dsn: "https://23478e05aa5948959641d836213ba82c@o431770.ingest.sentry.io/6002543",

@@ -447,7 +447,6 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/base/text-styles.scss';
 
 .admins-list-view {
     background: $color-white;

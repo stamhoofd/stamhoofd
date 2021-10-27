@@ -187,6 +187,15 @@ export class Organization extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(Invite), optional: true, version: 60 })
     invites?: Invite[]
+
+
+    get registerUrl() {
+        if (this.registerDomain) {
+            return "https://"+this.registerDomain
+        } 
+
+        return "https://"+this.uri+'.'+(STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""])
+    }
 }
 
 export class OrganizationWithWebshop extends AutoEncoder {

@@ -26,7 +26,9 @@
         "src/**/*.ts",
         "tests/**/*.ts",
         "index.ts",
-        "migrations.ts"
+        "migrations.ts",
+        "../../../*.d.ts",
+        "../../*.d.ts"
     ],
     "exclude": [
         "node_modules"

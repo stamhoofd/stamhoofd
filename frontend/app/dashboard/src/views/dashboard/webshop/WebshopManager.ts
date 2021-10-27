@@ -227,7 +227,7 @@ export class WebshopManager {
                 console.error(event)
                 
                 // Try to delete this database if something goes wrong
-                //if (process.env.NODE_ENV == "development") {
+                //if (STAMHOOFD.environment == "development") {
                 window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
                 //}
 

@@ -61,7 +61,7 @@ export default class App extends Vue {
     })
 
     created() {
-        if (process.env.NODE_ENV == "development") {
+        if (STAMHOOFD.environment == "development") {
             //ComponentWithProperties.debug = true
         }
 

@@ -11,6 +11,7 @@ import { STList, STListItem } from "@stamhoofd/components";
 import { Option, OptionMenu } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
+
 import OptionRow from "./OptionRow.vue"
 
 @Component({
@@ -56,9 +57,3 @@ export default class OptionMenuOptions extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

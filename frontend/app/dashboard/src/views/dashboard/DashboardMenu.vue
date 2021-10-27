@@ -15,11 +15,6 @@
                 </button>
             </div>
 
-            <a v-if="false && enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
-                <span class="icon external" />
-                <span>Jouw inschrijvingspagina</span>
-            </a>
-
             <button v-if="whatsNewBadge" class="menu-button button heading" @click="manageWhatsNew()">
                 <span class="icon gift" />
                 <span>Wat is er nieuw?</span>
@@ -163,14 +158,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
-    }
-    
-    get registerUrl() {
-        if (this.organization.registerDomain) {
-            return "https://"+this.organization.registerDomain
-        } 
-
-        return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
     }
 
     get isNative() {

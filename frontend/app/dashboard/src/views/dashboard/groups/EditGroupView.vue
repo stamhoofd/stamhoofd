@@ -959,7 +959,6 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .group-edit-view {
     .cover-photo {

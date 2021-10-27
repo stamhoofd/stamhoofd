@@ -34,7 +34,7 @@ export class WebshopPreview extends AutoEncoder {
             return this.domain+this.getUrlSuffix()
         }
 
-        return organization.uri+"."+process.env.HOSTNAME_WEBSHOP+this.getUrlSuffix()
+        return organization.uri+"."+STAMHOOFD.domains.webshop+this.getUrlSuffix()
     }
 
      getUrlSuffix(): string {
@@ -81,7 +81,7 @@ export class Webshop extends AutoEncoder {
             return this.domain+this.getUrlSuffix()
         }
 
-        return organization.uri+"."+process.env.HOSTNAME_WEBSHOP+this.getUrlSuffix()
+        return organization.uri+"."+STAMHOOFD.domains.webshop+this.getUrlSuffix()
     }
 
     getUrlSuffix(): string {

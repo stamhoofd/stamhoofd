@@ -199,7 +199,6 @@ export default class MemberView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .member-view {
     > main {

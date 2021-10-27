@@ -194,15 +194,12 @@ export class Organization extends Model {
     }
 
     getDefaultHost(): string {
-        const defaultDomain = process.env.HOSTNAME_REGISTRATION;
-        if (!defaultDomain) {
-            throw new Error("Missing HOSTNAME_REGISTRATION in environment")
-        }
+        const defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""];
         return this.uri + "." + defaultDomain;
     }
 
     getApiHost(): string {
-        const defaultDomain = process.env.HOSTNAME_API;
+        const defaultDomain = STAMHOOFD.domains.api;
         if (!defaultDomain) {
             throw new Error("Missing hostname in environment")
         }
@@ -408,6 +405,7 @@ export class Organization extends Model {
         } else {
             // Clear register domain
             if (organization.registerDomain) {
+                // We need to clear it, to prevent sending e-mails with invalid links
                 organization.privateMeta.pendingRegisterDomain = organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain
                 organization.registerDomain = null
 
@@ -464,7 +462,7 @@ export class Organization extends Model {
                 await organization.save()
 
                 // Became invalid for longer than 2 hours -> send an e-mail to the organization admins
-                if (process.env.NODE_ENV === "production") {
+                if (STAMHOOFD.environment === "production") {
                     const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
                     Email.sendInternal({
                         to,
@@ -491,7 +489,7 @@ export class Organization extends Model {
             return
         }
 
-        if (process.env.NODE_ENV != "production") {
+        if (STAMHOOFD.environment != "production") {
             // Temporary ignore this
             return;
         }
@@ -554,7 +552,7 @@ export class Organization extends Model {
                     },
                     {
                         "Key": "Environment",
-                        "Value": process.env.NODE_ENV ?? "Unknown"
+                        "Value": STAMHOOFD.environment ?? "Unknown"
                     }
                 ]
 

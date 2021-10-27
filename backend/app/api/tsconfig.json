@@ -20,15 +20,16 @@
         "types": [
             "node",
             "jest",
-            "@stamhoofd/backend-i18n"
+            "@stamhoofd/backend-i18n",
         ]
     },
     "include": [
-        "*.d.ts",
         "src/**/*.ts",
         "tests/**/*.ts",
         "index.ts",
-        "migrations.ts"
+        "migrations.ts",
+        "../../../*.d.ts",
+        "../../*.d.ts"
     ],
     "exclude": [
         "node_modules"

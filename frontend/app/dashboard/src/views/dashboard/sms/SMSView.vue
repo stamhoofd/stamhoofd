@@ -218,7 +218,6 @@ export default class SMSView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .sms-view {
     > main {

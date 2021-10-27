@@ -15,14 +15,14 @@
             <h2 class="style-with-button">
                 <div>Jouw inschrijvingspagina</div>
                 <div>
-                    <a :href="registerUrl" target="_blank" rel="noopener" class="button text">
+                    <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
                         <span class="icon external" />
                         <span class="hide-small">Openen</span>
                     </a>
                 </div>
             </h2>
 
-            <input v-tooltip="'Klik om te kopiëren'" class="input" :value="registerUrl" readonly @click="copyElement">
+            <input v-tooltip="'Klik om te kopiëren'" class="input" :value="organization.registerUrl" readonly @click="copyElement">
 
             <p class="info-box">
                 Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be.
@@ -87,14 +87,6 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
 export default class RegistrationPageSettingsView extends Mixins(NavigationMixin) {
     get organization() {
         return OrganizationManager.organization
-    }
-
-    get registerUrl() {
-        if (this.organization.registerDomain) {
-            return "https://"+this.organization.registerDomain
-        } 
-
-        return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
     }
 
     get isYouth() {

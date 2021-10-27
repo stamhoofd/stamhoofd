@@ -5,7 +5,7 @@ import { Organization } from '../models/Organization';
 import { Group as GroupStruct } from "@stamhoofd/structures";
 
 export default new Migration(async () => {
-    if (process.env.NODE_ENV == "test") {
+    if (STAMHOOFD.environment == "test") {
         console.log("skipped in tests")
         return;
     }

@@ -37,11 +37,11 @@
         vertical-align: middle;
     }
 
-    &:after {
+    &:before {
         vertical-align: middle;
     }
 
-    &.add:after {
+    /*&.add:after {
         font-icon: url('@stamhoofd/assets/images/icons/gray/add.svg');
     }
 
@@ -315,13 +315,13 @@
 
     &.feedback:after {
         font-icon: url(@stamhoofd/assets/images/icons/feedback.svg);
-    }
+    }*/
 }
 
 .android-icons {
-    .icon {
+    /*.icon {
         &.share:after {
             font-icon: url(@stamhoofd/assets/images/icons/share-android.svg);
         }
-    }
+    }*/
 }

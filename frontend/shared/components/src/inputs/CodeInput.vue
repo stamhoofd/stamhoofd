@@ -167,8 +167,6 @@ export default class CodeInput extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use "~@stamhoofd/scss/components/inputs.scss";
 
 .code-input {
     > div {
@@ -184,11 +182,6 @@ export default class CodeInput extends Vue {
             font-size: 20px;
             caret-color: transparent;
             text-transform: uppercase;
-            //user-select: none;
-
-            &::selection {
-                //background: transparent
-            }
 
             &:nth-child(3) {
                 margin-right: 15px;

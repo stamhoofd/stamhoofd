@@ -4,7 +4,9 @@
             <PriceInput v-model="price" placeholder="Gratis" />
         </STInputBox>
 
-        <Checkbox v-model="useMinimumPrice">Andere leveringskost vanaf bestelbedrag</Checkbox>
+        <Checkbox v-model="useMinimumPrice">
+            Andere leveringskost vanaf bestelbedrag
+        </Checkbox>
 
         <div v-if="useMinimumPrice" class="split-inputs">
             <STInputBox error-fields="minimumPrice" title="Vanaf bestelbedrag" :error-box="errorBox">
@@ -21,7 +23,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STInputBox, PriceInput, Checkbox, ErrorBox } from "@stamhoofd/components";
+import { Checkbox, ErrorBox,PriceInput, STInputBox } from "@stamhoofd/components";
 import { CheckoutMethodPrice } from "@stamhoofd/structures"
 import { Component, Mixins, Prop, Vue } from "vue-property-decorator";
 
@@ -76,9 +78,3 @@ export default class CheckoutMethodPriceBox extends Vue {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

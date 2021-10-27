@@ -51,7 +51,7 @@ async function getProvince(name: string, provinces: Province[]): Promise<Provinc
 }
 
 export default new Migration(async () => {
-    if (process.env.NODE_ENV == "test") {
+    if (STAMHOOFD.environment == "test") {
         console.log("skipped in tests")
         return;
     }

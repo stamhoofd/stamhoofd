@@ -21,6 +21,7 @@ type ResponseBody = OrganizationStruct;
 
 export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>
+    registrationDomains = [... new Set(Object.values(STAMHOOFD.domains.registration))]
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
@@ -36,35 +37,32 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        // check if the domain ends on .stamhoofd.be
-        if (!process.env.HOSTNAME_REGISTRATION) {
-            throw new Error("Expected environment variable HOSTNAME_REGISTRATION")
-        }
-
         // Clean up google translate domains -> make sure we can translate register pages
         request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(request.query.domain)
 
-        if (request.query.domain.endsWith("." + process.env.HOSTNAME_REGISTRATION)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_REGISTRATION).length )
-            if (strippped.includes(".")) {
-                throw new SimpleError({
-                    code: "invalid_domain",
-                    message: "This domain format is not supported",
-                    statusCode: 404
-                })
-            }
+        for (const domain of this.registrationDomains) {
+            if (request.query.domain.endsWith("." + domain)) {
+                const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + domain).length )
+                if (strippped.includes(".")) {
+                    throw new SimpleError({
+                        code: "invalid_domain",
+                        message: "This domain format is not supported",
+                        statusCode: 404
+                    })
+                }
 
-            // Search for the URI
-            const organization = await Organization.getByURI(strippped)
+                // Search for the URI
+                const organization = await Organization.getByURI(strippped)
 
-            if (!organization) {
-                throw new SimpleError({
-                    code: "unknown_organization",
-                    message: "No organization registered with this domain name",
-                    statusCode: 404
-                })
+                if (!organization) {
+                    throw new SimpleError({
+                        code: "unknown_organization",
+                        message: "No organization registered with this domain name",
+                        statusCode: 404
+                    })
+                }
+                return new Response(await organization.getStructure());
             }
-            return new Response(await organization.getStructure());
         }
 
         // Check if we have an organization with a custom domain name

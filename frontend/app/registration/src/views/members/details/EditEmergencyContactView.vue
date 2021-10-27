@@ -254,10 +254,3 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-#emergency-contact-view {
-}
-</style>

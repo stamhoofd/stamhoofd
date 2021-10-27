@@ -206,7 +206,6 @@ export default class EditWebshopView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .webshop-view {
     > main {

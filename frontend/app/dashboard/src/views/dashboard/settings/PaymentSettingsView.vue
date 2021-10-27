@@ -351,7 +351,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
     async linkMollie() {
         // Start oauth flow
-        const client_id = process.env.MOLLIE_CLIENT_ID
+        const client_id = STAMHOOFD.MOLLIE_CLIENT_ID
         if (!client_id) {
             new Toast("Mollie wordt momenteel niet ondersteund. Probeer later opnieuw.", "error red").show()
             return

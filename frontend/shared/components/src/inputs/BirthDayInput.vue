@@ -1,7 +1,7 @@
 <template>
     <STInputBox :title="title" error-fields="birthDay" :error-box="errorBox">
         <div class="input birth-day-selection">
-            <select v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
+            <select v-model="day" class="input" autocomplete="bday-day" name="bday-day" @change="updateDate">
                 <!-- name is needed for autocomplete in safari -->
                 <option :disabled="required" :value="null">
                     Dag
@@ -11,7 +11,7 @@
                 </option>
             </select>
 
-            <select v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
+            <select v-model="month" class="input" autocomplete="bday-month" name="bday-month" @change="updateDate">
                 <option :disabled="required" :value="null">
                     Maand
                 </option>
@@ -20,7 +20,7 @@
                 </option>
             </select>
 
-            <select v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
+            <select v-model="year" class="input" autocomplete="bday-year" name="bday-year" @change="updateDate">
                 <option :disabled="required" :value="null">
                     Jaar
                 </option>
@@ -136,26 +136,12 @@ export default class BirthDayInput extends Vue {
 </script>
 
 <style lang="scss">
-    @use "~@stamhoofd/scss/base/variables.scss" as *;
-    @use "~@stamhoofd/scss/components/inputs.scss";
 
     .input.birth-day-selection {
         padding-right: 0;
         display: grid;
         grid-template-columns: auto 1fr auto;
         grid-template-rows: auto;
-
-        > select {
-            cursor: pointer;
-
-            @extend .input-dropdown;
-
-            // Remove dotted line in Firefox
-            &:-moz-focusring {
-                color: transparent;
-                text-shadow: 0 0 0 #000;
-            }
-        }
 
     }
 </style>

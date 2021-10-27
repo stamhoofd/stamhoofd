@@ -23,6 +23,8 @@
     },
     "include": [
         "src/index.ts",
+        "../../*.d.ts",
+        "../*.d.ts"
     ],
     "exclude": [
         "node_modules"

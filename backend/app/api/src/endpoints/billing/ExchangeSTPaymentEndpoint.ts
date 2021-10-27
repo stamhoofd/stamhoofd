@@ -95,7 +95,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                     if (molliePayments.length == 1) {
                         const molliePayment = molliePayments[0]
                         // check status
-                        const apiKey = process.env.MOLLIE_API_KEY
+                        const apiKey = STAMHOOFD.MOLLIE_API_KEY
                         if (apiKey) {
                             const mollieClient = createMollieClient({ apiKey });
                             const mollieData = await mollieClient.payments.get(molliePayment.mollieId)

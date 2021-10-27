@@ -42,7 +42,7 @@
                 <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
             </div>
         </editor-floating-menu>
-        <div ref="content" class="editor-container">
+        <div ref="content" class="editor-container input">
             <editor-content :editor="editor" class="editor-content" />
             <footer>
                 <slot name="footer" />
@@ -137,7 +137,6 @@ export default class MailEditor extends Vue {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/components/inputs.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .editor .ProseMirror {
@@ -150,7 +149,6 @@ export default class MailEditor extends Vue {
 }
 
 .editor .editor-container {
-    @extend .input;
     padding: 0;
     height: auto;
     min-height: $input-height * 2;

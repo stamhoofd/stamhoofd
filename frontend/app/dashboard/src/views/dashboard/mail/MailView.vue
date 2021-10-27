@@ -721,7 +721,6 @@ export default class MailView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .mail-view {
     > main {

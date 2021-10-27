@@ -238,8 +238,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
 #signup-account-view {
     .checkbox-box {
         margin-top: 15px;

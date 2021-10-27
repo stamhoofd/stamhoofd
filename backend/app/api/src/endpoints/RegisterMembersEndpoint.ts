@@ -243,7 +243,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             value: (totalPrice / 100).toFixed(2)
                         },
                         method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                        testmode: process.env.NODE_ENV != 'production',
+                        testmode: STAMHOOFD.environment != 'production',
                         profileId,
                         description,
                         redirectUrl: "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id),

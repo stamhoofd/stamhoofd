@@ -51,11 +51,7 @@ export default class NoPermissionsView extends Mixins(NavigationMixin){
     }
 
     gotoRegistration() {
-        if (this.organization.registerDomain) {
-            window.location.href = "https://"+this.organization.registerDomain
-        } else {
-            window.location.href = "https://"+this.organization.uri+"."+process.env.HOSTNAME_REGISTRATION
-        }
+        window.location.href = this.organization.registerUrl
     }
 
     logout() {
@@ -63,8 +59,3 @@ export default class NoPermissionsView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-</style>

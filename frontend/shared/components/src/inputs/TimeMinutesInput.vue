@@ -120,9 +120,3 @@ export default class TimeMinutesInput extends Vue {
     }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-
-</style>

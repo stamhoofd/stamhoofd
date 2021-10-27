@@ -66,7 +66,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
         }
 
 
-        if (!process.env.SPACES_BUCKET || !process.env.SPACES_ENDPOINT || !process.env.SPACES_KEY || !process.env.SPACES_SECRET) {
+        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: "not_available",
                 message: "This endpoint is temporarily not available",

@@ -205,9 +205,6 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
 .webshop-statistics-view {
     .stats-grid {
         display: grid;

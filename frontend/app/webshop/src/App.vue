@@ -82,7 +82,7 @@ export default class App extends Vue {
             document.documentElement.translate = true
         }
 
-        if (process.env.NODE_ENV == "development") {
+        if (STAMHOOFD.environment == "development") {
             ComponentWithProperties.debug = true
         }
         HistoryManager.activate();

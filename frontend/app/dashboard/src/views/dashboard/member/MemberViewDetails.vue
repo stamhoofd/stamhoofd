@@ -700,7 +700,3 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/components/member-details.scss";
-</style>

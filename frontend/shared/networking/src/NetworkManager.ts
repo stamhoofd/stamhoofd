@@ -24,7 +24,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
      * Normal, non authenticated requests
      */
     get server() {
-        const server = new Server("https://"+process.env.HOSTNAME_API)
+        const server = new Server("https://"+STAMHOOFD.domains.api)
         server.middlewares.push(this)
         return server
     }

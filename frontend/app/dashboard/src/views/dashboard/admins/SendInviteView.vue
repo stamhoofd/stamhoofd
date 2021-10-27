@@ -94,7 +94,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     }
 
     get url() {
-        return "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")+"/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
+        return "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
     }
 
     get canShare() {
@@ -158,8 +158,6 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
 
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #send-invite-view {
     .link-box {

@@ -26,7 +26,8 @@
         "app/**/*.vue",
         "shared/**/*.ts",
         "shared/**/*.vue",
-        "*.d.ts" // Include vue type definition for webpack
+        "../*.d.ts",
+        "*.d.ts"
     ],
     "exclude": [
         "node_modules"

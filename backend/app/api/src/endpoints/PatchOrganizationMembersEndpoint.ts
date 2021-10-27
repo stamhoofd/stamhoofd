@@ -89,7 +89,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
-            if (process.env.NODE_ENV == "development") {
+            if (STAMHOOFD.environment == "development") {
                 if (member.firstName == "create" || member.firstName == "Create") {
                     let group = groups[0];
 

@@ -47,10 +47,10 @@ export class KeyConstantsHelper {
     }
 
     static async getSignKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
-        if (constants.opslimit < 2 && process.env.NODE_ENV != "test") {
+        if (constants.opslimit < 2 && STAMHOOFD.environment != "test") {
             throw new Error("These operation constants are too weak. Not going to use these.")
         }
-        if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
+        if (constants.memlimit < 64 * 1000 * 1000 && STAMHOOFD.environment != "test") {
             throw new Error("These memory constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow
@@ -74,10 +74,10 @@ export class KeyConstantsHelper {
     }
 
     static async getEncryptionKeyPair(constants: KeyConstants, password: string): Promise<{ publicKey: string; privateKey: string }> {
-        if (constants.opslimit < 2 && process.env.NODE_ENV != "test") {
+        if (constants.opslimit < 2 && STAMHOOFD.environment != "test") {
             throw new Error("These constants are too weak. Not going to use these.")
         }
-        if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
+        if (constants.memlimit < 64 * 1000 * 1000 && STAMHOOFD.environment != "test") {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow
@@ -102,10 +102,10 @@ export class KeyConstantsHelper {
     }
 
     static async getEncryptionKey(constants: KeyConstants, password: string): Promise<string> {
-        if (constants.opslimit < 2 && process.env.NODE_ENV != "test") {
+        if (constants.opslimit < 2 && STAMHOOFD.environment != "test") {
             throw new Error("These constants are too weak. Not going to use these.")
         }
-        if (constants.memlimit < 64 * 1000 * 1000 && process.env.NODE_ENV != "test") {
+        if (constants.memlimit < 64 * 1000 * 1000 && STAMHOOFD.environment != "test") {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
         // Todo: validate salt, to check if it is not forged somehow

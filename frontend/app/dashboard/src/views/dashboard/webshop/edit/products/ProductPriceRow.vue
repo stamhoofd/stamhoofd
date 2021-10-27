@@ -55,9 +55,3 @@ export default class ProductPriceRow extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

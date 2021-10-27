@@ -397,10 +397,3 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-#signup-general-view {
-}
-</style>

@@ -32,7 +32,7 @@ export async function checkSettlements(checkAll = false) {
     lastSettlementCheck = new Date()
 
     // Mollie payment is required
-    const token = process.env.MOLLIE_ORGANIZATION_TOKEN
+    const token = STAMHOOFD.MOLLIE_ORGANIZATION_TOKEN
     if (!token) {
         console.error("Missing mollie organization token")
     } else {
@@ -137,7 +137,7 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
                     })
                     await payment.save()
 
-                    if (process.env.NODE_ENV === "development") {
+                    if (STAMHOOFD.environment === "development") {
                         console.log("Updated settlement of payment "+payment.id)
                         console.log(payment.settlement)
                     }

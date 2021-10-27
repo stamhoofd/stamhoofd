@@ -520,9 +520,9 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
             title += " "+this.group.settings.name
         }
 
-        const logoSrc = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png')).default
-        const metropolisMedium = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
-        const metropolisBold = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
+        const logoSrc = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png')).default
+        const metropolisMedium = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
+        const metropolisBold = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
 
         const buffer = await new Promise<Buffer>(resolve => {
             const doc = new PDFDocument({ size: [docWidth, docHeight], margin: 10*mm, bufferPages: true });

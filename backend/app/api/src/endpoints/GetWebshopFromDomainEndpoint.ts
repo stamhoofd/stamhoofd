@@ -40,15 +40,15 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // check if the domain ends on .stamhoofd.be
-        if (!process.env.HOSTNAME_WEBSHOP) {
+        if (!STAMHOOFD.domains.webshop) {
             throw new Error("Expected environment variable HOSTNAME_WEBSHOP")
         }
 
         // Clean up google translate domains -> make sure we can translate register pages
         request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(request.query.domain)
         
-        if (request.query.domain.endsWith("." + process.env.HOSTNAME_WEBSHOP)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_WEBSHOP).length )
+        if (request.query.domain.endsWith("." + STAMHOOFD.domains.webshop)) {
+            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.webshop).length )
             if (strippped.includes(".")) {
                 throw new SimpleError({
                     code: "invalid_domain",

@@ -34,7 +34,7 @@ class EmailStatic {
         if (this.transporter) {
             return;
         }
-        if (!process.env.SMTP_HOST || !process.env.SMTP_PORT) {
+        if (!STAMHOOFD.SMTP_HOST || !STAMHOOFD.SMTP_PORT) {
             throw new Error("Missing environment variables to send emails");
             return;
         }
@@ -42,11 +42,11 @@ class EmailStatic {
         // create reusable transporter object using the default SMTP transport
         this.transporter = nodemailer.createTransport({
             pool: true,
-            host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT),
+            host: STAMHOOFD.SMTP_HOST,
+            port: STAMHOOFD.SMTP_PORT,
             auth: {
-                user: process.env.SMTP_USERNAME, // generated ethereal user
-                pass: process.env.SMTP_PASSWORD // generated ethereal password
+                user: STAMHOOFD.SMTP_USERNAME, // generated ethereal user
+                pass: STAMHOOFD.SMTP_PASSWORD // generated ethereal password
             }
         });
 
@@ -173,7 +173,7 @@ class EmailStatic {
     }
 
     private async doSend(data: EmailInterface) {
-        if (process.env.NODE_ENV === 'test') {
+        if (STAMHOOFD.environment === 'test') {
             // Do not send any emails
             return;
         }
@@ -208,9 +208,9 @@ class EmailStatic {
         // send mail with defined transport object
         const mail: any = {
             from: data.from, // sender address
-            bcc: (process.env.NODE_ENV === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
+            bcc: (STAMHOOFD.environment === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
             replyTo: data.replyTo,
-            to: process.env.NODE_ENV === "production" ? to : "hallo@stamhoofd.be",
+            to: STAMHOOFD.environment === "production" ? to : "hallo@stamhoofd.be",
             subject: data.subject, // Subject line
             text: data.text, // plain text body
         };
@@ -268,7 +268,7 @@ class EmailStatic {
     }
 
     send(data: EmailInterface) {
-        if (process.env.NODE_ENV === 'test') {
+        if (STAMHOOFD.environment === 'test') {
             // Do not send any emails
             return;
         }

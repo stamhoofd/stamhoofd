@@ -1,6 +1,9 @@
 // import 'core-js/stable'; // only needed for entry or 'false' useBuiltIns
 // import 'regenerator-runtime/runtime'; // only needed for entry or 'false' useBuiltIns
+// Load icon font
+require('@stamhoofd/assets/images/icons/icons.font');
 
+// Continue
 import * as Sentry from '@sentry/vue';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import Vue from "vue";
@@ -9,7 +12,7 @@ import VueMeta from 'vue-meta'
 Vue.use(VueMeta)
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-if (!isPrerender && process.env.NODE_ENV == "production") {
+if (!isPrerender && STAMHOOFD.environment == "production") {
     Sentry.init({
         Vue,
         dsn: "https://00c3e526a886491e853cf060f3b00b05@o431770.ingest.sentry.io/6002539",
@@ -94,7 +97,7 @@ if (!isPrerender) {
     document.body.addEventListener("touchstart", () => { }, { passive: true });
 
     // Load plausible if not production
-    if (process.env.NODE_ENV == "production") {
+    if (STAMHOOFD.environment == "production") {
         const script = document.createElement('script');
         script.onload = function () {
             //do stuff with the script

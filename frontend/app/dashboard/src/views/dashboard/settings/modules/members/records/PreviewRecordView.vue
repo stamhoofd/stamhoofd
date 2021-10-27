@@ -63,7 +63,7 @@ export default class PreviewRecordView extends Mixins(NavigationMixin) {
     }
 
     get isDevelopment() {
-        return process.env.NODE_ENV === "development"
+        return STAMHOOFD.environment === "development"
     }
 }
 </script>

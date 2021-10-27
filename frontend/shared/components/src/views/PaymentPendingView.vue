@@ -1,6 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar title="Betaling"></STNavigationBar>
+        <STNavigationBar title="Betaling" />
         <div class="box">
             <main v-if="!payment || payment.status != 'Failed'">
                 <h1>Wachten op betaalbevestiging...</h1>
@@ -112,10 +112,3 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

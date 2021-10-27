@@ -192,7 +192,6 @@ export default class ParentView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables" as *;
 @use "@stamhoofd/scss/base/text-styles" as *;
 
 #parent-view {

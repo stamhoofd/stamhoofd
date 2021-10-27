@@ -7,7 +7,7 @@ var common = require("./webpack.config.js");
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 var { merge } = require('webpack-merge');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+//const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = merge(common, {
     mode: "production",
@@ -50,6 +50,7 @@ module.exports = merge(common, {
         maxEntrypointSize: 250000,
         maxAssetSize: 250000
     },
+    cache: false,
     /*plugins: [
         new BundleAnalyzerPlugin()
     ]*/

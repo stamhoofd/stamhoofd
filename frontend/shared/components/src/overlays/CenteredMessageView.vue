@@ -141,7 +141,6 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
-
 .centered-message {
     position: fixed;
     z-index: 10000;

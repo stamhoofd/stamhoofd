@@ -50,8 +50,8 @@ export class TicketBuilder {
 
     async download() {
 
-        const metropolisMedium = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
-        const metropolisBold = (await import('!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
+        const metropolisMedium = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
+        const metropolisBold = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
 
         const buffer = await new Promise<Buffer>((resolve, reject) => {
             try {
