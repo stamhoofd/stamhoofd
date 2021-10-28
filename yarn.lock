@@ -2253,10 +2253,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.4.4.tgz#0106eb5a6060f9f5210aae45f56c424ec9b71d51"
   integrity sha512-vK3fRK4VQesMN1nrC/6Ijos4X3s5xbcxk6yWOA7j7wWmn6ZSsufvwYGeMnKhJH+us93hAmoTp5SYscunz7caGw==
 
-"@simonbackx/simple-endpoints@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.8.0.tgz#b730c8234c8921b0b9873c69abf65e3d6b00e933"
-  integrity sha512-dwPBn2GQSr1DnshOSTmqjiWAkVYfv90AJvvPjWeuVLcB9j4uQTjjLI4whoV0e7r47G4dna2XB/zGnUw3Zp3rbg==
+"@simonbackx/simple-endpoints@^1.9.1":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.9.1.tgz#9f55aa110b1e26c6e04f96496b9931b98d629ff0"
+  integrity sha512-Ajdb8jpxLyAmT4vUf+KtcOlw8mBvuyYUxLb87yUPU7pA6z2nW7usplO1BVu7xRhdQkmRtI5rvQFf612vMKwEmQ==
 
 "@simonbackx/simple-errors@^1.3", "@simonbackx/simple-errors@^1.3.0":
   version "1.3.0"

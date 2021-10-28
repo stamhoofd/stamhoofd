@@ -22,7 +22,7 @@
     "dependencies": {
         "@mollie/api-client": "^3.4.0",
         "@simonbackx/simple-database": "^1.20",
-        "@simonbackx/simple-endpoints": "^1.9.0",
+        "@simonbackx/simple-endpoints": "^1.9.1",
         "@types/mysql": "^2.15.9",
         "aws-sdk": "^2.885.0",
         "axios": "^0.21.1",
