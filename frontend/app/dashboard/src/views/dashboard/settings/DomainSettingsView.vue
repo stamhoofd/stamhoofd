@@ -24,7 +24,7 @@
                     v-model="mailDomain"
                     class="input"
                     type="text"
-                    placeholder="bv. jouwvereniging.be"
+                    :placeholder="$t('dashboard.settings.domain.domainPlaceholder')"
                     @change="domainChanged"
                 >
             </STInputBox>

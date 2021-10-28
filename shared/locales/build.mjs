@@ -70,7 +70,6 @@ let defaultKeys = {}
 for (const country of countries) {
     for (const language of languages) {
         const locale = language+"-"+country
-        console.log(locale)
 
         if (!files.includes(language+".json")) {
             throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
@@ -93,7 +92,6 @@ for (const country of countries) {
 
     for (const language of languages) {
         const locale = language+"-"+country
-        console.log(locale)
 
         if (!files.includes(language+".json")) {
             throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
@@ -112,7 +110,6 @@ for (const country of countries) {
 
     for (const language of languages) {
         const locale = language+"-"+country
-        console.log(locale)
 
         if (!files.includes(language+".json")) {
             throw new Error("Language "+language+" has not been defined. Please add "+language+".json first.")
