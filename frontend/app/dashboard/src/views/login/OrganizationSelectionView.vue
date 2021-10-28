@@ -300,8 +300,21 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 return
             }
 
-            // Already load the organization
-            await session.fetchOrganization(false)
+            // Load the organization
+            try {
+                await session.fetchOrganization(false)
+            } catch (e) {
+                if (Request.isNetworkError(e)) {
+                    // ignore if we already have an organization
+                    if (!session.organization) {
+                        throw e;
+                    }
+                    // Show network warning only
+                    Toast.fromError(e).show()
+                } else {
+                    throw e;
+                }
+            }
 
             if (session.organization && this.defaultOrganizations.find(o => o.id === organizationId)) {
                 // Update saved session (only if it was already added to the storage)
