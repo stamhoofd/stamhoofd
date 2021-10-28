@@ -303,6 +303,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             // Already load the organization
             await session.fetchOrganization(false)
 
+            if (session.organization && this.defaultOrganizations.find(o => o.id === organizationId)) {
+                // Update saved session (only if it was already added to the storage)
+                SessionManager.addOrganizationToStorage(session.organization).catch(console.error)
+            }
+
             // Switch locale to other country if needed
             if (session.organization) {
                 I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
