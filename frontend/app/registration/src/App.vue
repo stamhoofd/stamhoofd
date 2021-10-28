@@ -140,6 +140,9 @@ export default class App extends Vue {
                 })
             });
         } catch (e) {
+            if (!I18nController.shared) {
+                await I18nController.loadDefault("registration", undefined, "nl")
+            }
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization"))) {
                     Toast.fromError(e).show()
