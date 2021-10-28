@@ -61,7 +61,6 @@ export class UrlHelper {
             parts.shift()
         }
 
-        console.log("Checking url parts", parts)
         return parts
     }
 
