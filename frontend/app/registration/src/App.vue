@@ -9,11 +9,11 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, LoadingView, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { LoginHelper, NetworkManager, Session, SessionManager } from '@stamhoofd/networking';
+import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { GoogleTranslateHelper } from '@stamhoofd/utility';
+import { GoogleTranslateHelper, sleep } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
 import { CheckoutManager } from './classes/CheckoutManager';
@@ -58,6 +58,13 @@ export default class App extends Vue {
                 },
                 decoder: Organization as Decoder<Organization>
             })
+
+            // Do we need to redirect?
+            if (window.location.hostname.toLowerCase() != response.data.resolvedRegisterDomain.toLowerCase()) {
+                // Redirect
+                window.location.href = UrlHelper.initial.getFullHref({ host: response.data.resolvedRegisterDomain })
+                return new ComponentWithProperties(LoadingView, {})
+            }
             I18nController.skipUrlPrefixForLocale = "nl-"+response.data.address.country
             await I18nController.loadDefault("registration", response.data.address.country, "nl", response.data.address.country)
 
@@ -141,7 +148,11 @@ export default class App extends Vue {
             });
         } catch (e) {
             if (!I18nController.shared) {
-                await I18nController.loadDefault("registration", undefined, "nl")
+                try {
+                    await I18nController.loadDefault("registration", undefined, "nl")
+                } catch (e) {
+                    console.error(e)
+                }
             }
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization"))) {

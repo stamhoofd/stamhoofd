@@ -62,6 +62,14 @@ export default class App extends Vue {
                 })
 
             } catch (e) {
+                if (!I18nController.shared) {
+                    try {
+                        await I18nController.loadDefault("webshop", undefined, "nl")
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization") || e.hasCode("unknown_webshop"))) {
                         Toast.fromError(e).show()

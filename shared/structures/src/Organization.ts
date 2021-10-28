@@ -188,13 +188,16 @@ export class Organization extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Invite), optional: true, version: 60 })
     invites?: Invite[]
 
-
-    get registerUrl() {
+    get resolvedRegisterDomain() {
         if (this.registerDomain) {
-            return "https://"+this.registerDomain
+            return this.registerDomain
         } 
 
-        return "https://"+this.uri+'.'+(STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""])
+        return this.uri+'.'+(STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""])
+    }
+
+    get registerUrl() {
+        return "https://"+this.resolvedRegisterDomain
     }
 }
 

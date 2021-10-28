@@ -26,8 +26,8 @@
                             
                             <div class="button-box">
                                 <button class="button primary full" @click="login()">
-                                    <span class="lock" />
-                                    Inloggen
+                                    <span class="icon lock" />
+                                    <span>Inloggen</span>
                                 </button>
                                 <button class="button secundary full" type="button" @click="createAccount()">
                                     Account aanmaken

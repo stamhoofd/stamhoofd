@@ -610,7 +610,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         switch (warning.type) {
             case RecordWarningType.Error: return " exclamation-two red"
             case RecordWarningType.Warning: return " exclamation yellow"
-            case RecordWarningType.Info: return " info"
+            case RecordWarningType.Info: return " info-text"
         }
     }
 

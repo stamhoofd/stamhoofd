@@ -23,8 +23,8 @@
         <STFloatingFooter>
             <LoadingButton :loading="loading">
                 <button class="button primary full">
-                    <span class="lock" />
-                    Inloggen
+                    <span class="icon lock" />
+                    <span>Inloggen</span>
                 </button>
             </LoadingButton>
         </STFloatingFooter>

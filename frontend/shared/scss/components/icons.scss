@@ -3,8 +3,6 @@
 
 
 .icon-base {
-    line-height: 1;
-    
 
     &:before {
         line-height: 1;
@@ -22,7 +20,10 @@
     box-sizing: content-box;
     overflow: hidden;
     white-space: nowrap;
-    display: inline;
+    
+    display: inline; // fallback
+    display: inline-flex; // needed for proper vertical alignemnt of icons
+    vertical-align: middle;
     
     &.light-gray {
         color: $color-gray-light;

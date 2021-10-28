@@ -35,10 +35,10 @@ export class UrlHelper {
         return url.protocol+"//"+url.host
     }
 
-    getFullHref(options?: { removeLocale?: boolean }) {
+    getFullHref(options?: { removeLocale?: boolean, host?: string }) {
         const url = new URL(this.href ?? "/", "https://"+window.location.hostname)
         const search = url.search
-        return url.protocol+"//"+url.host+"/"+this.getParts(options).join("/")+search+this.hash
+        return url.protocol+"//"+(options?.host ?? url.host)+"/"+this.getParts(options).join("/")+search+this.hash
     }
 
     getParts(options?: { removeLocale?: boolean }) {
