@@ -2,11 +2,27 @@ import { EncodedResponse, Request, RequestMiddleware,ResponseMiddleware } from "
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Version } from "@stamhoofd/structures";
 
+function getRequestIP(request: Request): string {
+    let ipAddress = request.request?.socket.remoteAddress;
+    if (request.headers["x-real-ip"] && typeof request.headers["x-real-ip"] == "string" && (ipAddress == "127.0.0.1" || ipAddress == "0.0.0.0")) {
+        ipAddress = request.headers["x-real-ip"];
+    }
+    if (!ipAddress) {
+        ipAddress = '?';
+    }
+
+    return ipAddress.split(":", 2)[0]
+}
+
+
 export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
     handleRequest(request: Request) {
         if (request.method == "OPTIONS") {
             return
         }
+
+        console.log(getRequestIP(request)+": "+request.method+" "+request.host+request.url)
+
         const platform = request.headers["x-platform"];
         const version = request.getVersion()
         if (version < 128) {
@@ -41,13 +57,15 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
             response.headers["X-Platform-Latest-Version"] = Version
         }
 
-        if (isSimpleError(error) || isSimpleErrors(error)) {
-            if (!error.hasCode("expired_access_token")) {
-                console.error("Request with error in response:\n"+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
+        if (error) {
+            if (isSimpleError(error) || isSimpleErrors(error)) {
+                if (!error.hasCode("expired_access_token")) {
+                    console.error("Request with error in response:\n"+getRequestIP(request)+": "+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
+                }
+            } else {
+                console.error("Request with internal error:\n"+getRequestIP(request)+": "+request.method+" "+request.host+request.url)
+                console.error(error)
             }
-        } else {
-            console.error("Request with internal error:\n"+request.method+" "+request.host+request.url)
-            console.error(error)
         }
     }
 }
