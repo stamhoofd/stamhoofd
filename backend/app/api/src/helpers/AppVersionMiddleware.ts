@@ -1,5 +1,5 @@
 import { EncodedResponse, Request, RequestMiddleware,ResponseMiddleware } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Version } from "@stamhoofd/structures";
 
 export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
@@ -28,7 +28,7 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         }
     },
 
-    handleResponse(request: Request, response: EncodedResponse) {
+    handleResponse(request: Request, response: EncodedResponse, error?: Error) {
         const platform = request.headers["x-platform"];
 
         if (platform === "android" && STAMHOOFD.LATEST_ANDROID_VERSION) {
@@ -39,6 +39,13 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         }
         if (platform === "web") {
             response.headers["X-Platform-Latest-Version"] = Version
+        }
+
+        if (isSimpleError(error) || isSimpleErrors(error)) {
+            console.error("Request with error in response:\n"+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
+        } else {
+            console.error("Request with internal error:\n"+request.method+" "+request.host+request.url)
+            console.error(error)
         }
     }
 }

@@ -234,28 +234,27 @@ class EmailStatic {
             const info = await this.transporter.sendMail(mail);
             console.log("Message sent: %s", info.messageId);
         } catch (e) {
-            if (e.responseCode && e.responseCode == 554) {
-                // Email address is not verified.
-                if (!data.from.includes("@stamhoofd.be")) {
-                    this.sendInternal({
-                        to: "hallo@stamhoofd.be",
-                        subject: "Ongeldige e-mail setup",
-                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd: \n\n"+e
-                    })
-                }
-            }
             console.error("Failed to send e-mail:")
             console.error(e);
             console.error(mail);
 
-            // Sleep one second to give servers some time to fix possible rate limits
-            await sleep(1000);
+            // Sleep 3 seconds to give servers some time to fix possible rate limits
+            await sleep(3000);
 
             // Reschedule twice (at maximum) to fix temporary connection issues
             data.retryCount = (data.retryCount ?? 0) + 1;
 
             if (data.retryCount <= 2) {
                 this.send(data);
+            } else {
+                // Email address is not verified.
+                if (!data.from.includes("hallo@stamhoofd.be")) {
+                    this.sendInternal({
+                        to: "hallo@stamhoofd.be",
+                        subject: "E-mail kon niet worden verzonden",
+                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? "")
+                    }, new I18n("nl", "BE"))
+                }
             }
         }
     }
