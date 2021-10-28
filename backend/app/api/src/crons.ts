@@ -1,4 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { EmailAddress } from '@stamhoofd/email';
 import { Group } from '@stamhoofd/models';
@@ -249,7 +250,7 @@ async function checkComplaints() {
                                         to: "simon@stamhoofd.be",
                                         subject: "Received a "+type+" email notification",
                                         text: "We received a "+type+" notification for an e-mail from the organization: "+organization?.name+". Please check and adjust if needed.\n"
-                                    })
+                                    }, new I18n("nl", "BE"))
                                 }
                             }
                         } else {
