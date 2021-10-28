@@ -110,7 +110,7 @@ export class UsedRegisterCode extends Model {
                 + (credit.change <= 90*100 ? ("Bij de volgende vereniging ontvangen jullie nog meer: "+Formatter.price(credit.change + 10*100)+". ") : "")
                 + (credit.change <= 80*100 ? ("En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt 🎁 ") : "")
                 + "Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen 😉\n\n— Stamhoofd"
-            })
+            }, organization.i18n)
         }
     }
 

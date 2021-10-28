@@ -94,6 +94,13 @@ export class Organization extends Model {
     })
     updatedAt: Date
 
+    /**
+     * Return default locale confiruation
+     */
+    get i18n() {
+        return new I18n("nl", this.address.country)
+    }
+
     // Methods
     static async getByURI(uri: string): Promise<Organization | undefined> {
         const [rows] = await Database.select(
@@ -433,11 +440,12 @@ export class Organization extends Model {
             if (!wasActive && this.privateMeta.mailDomainActive) {
                 // Became valid -> send an e-mail to the organization admins
                 const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
+
                 Email.sendInternal({
                     to, 
                     subject: "Jullie domeinnaam is nu actief", 
-                    text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via hallo@stamhoofd.be\n\nVeel succes!\n\nSimon van Stamhoofd"
-                })
+                    text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via "+this.i18n.$t("shared.emails.general")+"\n\nVeel succes!\n\nSimon van Stamhoofd"
+                }, this.i18n)
             }
         } else {
             // DNS settings gone broken
@@ -468,7 +476,7 @@ export class Organization extends Model {
                         to,
                         subject: "Domeinnaam instellingen ongeldig"+(organization.serverMeta.DNSRecordWarningCount == 2 ? " (herinnering)" : ""),
                         text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam niet geldig zijn. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam, maar maken we (tijdelijk) gebruik van @stamhoofd.email. "+(this.meta.modules.useMembers && organization.registerDomain === null ? " Ook jullie inschrijvingspagina is niet meer bereikbaar via jullie domeinnaam." : "")+" Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen -> personalisatie?\n\nBedankt!\n\nHet Stamhoofd team"
-                    })
+                    }, this.i18n)
                 }
             }
         }
@@ -483,7 +491,7 @@ export class Organization extends Model {
         }
 
         // Protect specific domain names
-        if (["stamhoofd.be", "stamhoofd.app", "stamhoofd.email"].includes(this.privateMeta.mailDomain)) {
+        if (["stamhoofd.be", "stamhoofd.nl", "stamhoofd.shop", "stamhoofd.app", "stamhoofd.email"].includes(this.privateMeta.mailDomain)) {
             console.error("Tried to validate AWS mail identity with protected domains @"+this.id)
             this.privateMeta.mailDomainActive = false;
             return

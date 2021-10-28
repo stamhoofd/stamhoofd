@@ -4,6 +4,7 @@ import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
 import htmlToText from 'html-to-text';
 import { sleep } from '@stamhoofd/utility';
+import { I18n } from "@stamhoofd/backend-i18n"
 
 export type EmailInterfaceBase = {
     to: string;
@@ -262,8 +263,8 @@ class EmailStatic {
     /**
      * Send an internal e-mail (from stamhoofd)
      */
-    sendInternal(data: EmailInterfaceBase) {
-        const mail = Object.assign(data, { from: '"Stamhoofd" <hallo@stamhoofd.be>'})
+    sendInternal(data: EmailInterfaceBase, i18n: I18n) {
+        const mail = Object.assign(data, { from: '"Stamhoofd" <'+ (i18n.$t("shared.emails.general")) +'>'})
         this.send(mail)
     }
 

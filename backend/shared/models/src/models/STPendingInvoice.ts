@@ -283,7 +283,7 @@ export class STPendingInvoice extends Model {
                             contentType: "application/pdf"
                         }
                     ]
-                })
+                }, organization.i18n)
             }
         }
     }

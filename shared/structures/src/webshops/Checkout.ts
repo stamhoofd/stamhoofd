@@ -148,7 +148,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "invalid_data_type",
                 message: "Invalid data type",
-                human: "Er ontbreekt data. Probeer het opnieuw of neem contact op met hallo@stamhoofd.be om dit te melden.",
+                human: "Er ontbreekt data. Probeer het opnieuw of neem contact op met de webshop eigenaar om dit te melden.",
                 field: "address"
             })
         }

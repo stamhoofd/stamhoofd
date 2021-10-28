@@ -256,7 +256,7 @@ export class STInvoice extends Model {
                         to: invoicingTo,
                         bcc: "simon@stamhoofd.be",
                         subject: "Jouw factuur voor "+organization.name,
-                        text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie de factuur van jullie aankoop. Neem gerust contact met ons op (via hallo@stamhoofd.be) als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie de factuur van jullie aankoop. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         attachments: [
                             {
                                 filename: "factuur-"+this.number+".pdf",
@@ -264,7 +264,7 @@ export class STInvoice extends Model {
                                 contentType: "application/pdf"
                             }
                         ]
-                    })
+                    }, organization.i18n)
                 }
             }
         }
@@ -382,7 +382,7 @@ export class STInvoice extends Model {
                         bcc: "simon@stamhoofd.be",
                         subject: "Betaling mislukt voor "+organization.name,
                         text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
-                    })
+                    }, organization.i18n)
                 }
             }
         }

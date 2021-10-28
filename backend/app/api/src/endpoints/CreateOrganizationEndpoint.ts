@@ -204,7 +204,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         code.send(user)
 
         for (const email of delayEmails) {
-            Email.sendInternal(email)
+            Email.sendInternal(email, organization.i18n)
         }
 
         return new Response(SignupResponse.create({
