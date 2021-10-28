@@ -59,6 +59,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
@@ -314,9 +315,19 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 }) 
             }).setDisplayStyle("sheet"))
         } catch (e) {
-            console.error(e)
             this.loadingSession = null
-            Toast.fromError(e).show()
+            if (e.hasCode("invalid_organization")) {
+                // Clear from session storage
+                await SessionManager.removeOrganizationFromStorage(organizationId)
+                Toast.fromError(new SimpleError({
+                    code: "invalid_organization",
+                    message: e.message,
+                    human: "Deze vereniging bestaat niet (meer)"
+                })).show()
+            } else {
+                Toast.fromError(e).show()
+            }
+            
             await this.updateDefault()
         }
     }
