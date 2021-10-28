@@ -42,7 +42,9 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         }
 
         if (isSimpleError(error) || isSimpleErrors(error)) {
-            console.error("Request with error in response:\n"+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
+            if (!error.hasCode("expired_access_token")) {
+                console.error("Request with error in response:\n"+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
+            }
         } else {
             console.error("Request with internal error:\n"+request.method+" "+request.host+request.url)
             console.error(error)
