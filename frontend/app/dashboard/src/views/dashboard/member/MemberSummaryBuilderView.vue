@@ -519,7 +519,6 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
             title += " "+this.group.settings.name
         }
 
-        //const logoSrc = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png')).default
         const logoSrc = await(await fetch(logoUrl)).arrayBuffer()
         const metropolisMedium = await(await fetch(metropolisMediumUrl)).arrayBuffer()
         const metropolisBold = await(await fetch(metropolisBoldUrl)).arrayBuffer()
