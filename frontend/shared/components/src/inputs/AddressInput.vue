@@ -63,6 +63,9 @@ export default class AddressInput extends Vue {
     postalCode = ""
     country = this.getDefaultCountry()
 
+    @Prop({ default: false })
+    linkCountryToLocale: boolean
+
     getDefaultCountry() {
         return I18nController.shared?.country ?? Country.Belgium
     }
@@ -175,6 +178,9 @@ export default class AddressInput extends Vue {
     }
 
     updateAddress() {
+        if (this.country && this.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(this.country)) {
+            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error)
+        }
        this.isValid().catch(console.error)
     }
 }

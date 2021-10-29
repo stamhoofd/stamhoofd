@@ -1,3 +1,4 @@
+import { Country } from "../../addresses/CountryDecoder"
 import { ChoicesFilterDefinition } from "../../filters/ChoicesFilter"
 import { FilterGroup, GroupFilterMode } from "../../filters/FilterGroup"
 import { NumberFilterDefinition, NumberFilterMode } from "../../filters/NumberFilter"
@@ -10,8 +11,8 @@ import { RecordCategory } from "./RecordCategory"
 import { RecordFactory } from "./RecordFactory"
 
 export class RecordConfigurationFactory {
-    static create(type: OrganizationType): OrganizationRecordsConfiguration {
-        const recordCategories = this.getDefaultRecordCategoriesFor(type)
+    static create(type: OrganizationType, country: Country): OrganizationRecordsConfiguration {
+        const recordCategories = this.getDefaultRecordCategoriesFor(type, country)
         const configuration = OrganizationRecordsConfiguration.create({
             recordCategories,
         })
@@ -132,8 +133,8 @@ export class RecordConfigurationFactory {
         }
     }
 
-    static getDefaultRecordCategoriesFor(type: OrganizationType): RecordCategory[] {
-        if (type === OrganizationType.Youth) {
+    static getDefaultRecordCategoriesFor(type: OrganizationType, country: Country): RecordCategory[] {
+        if (type === OrganizationType.Youth && country === Country.Belgium) {
             // Enable all
             const recordCategories = RecordFactory.convert(Object.values(LegacyRecordType))
 

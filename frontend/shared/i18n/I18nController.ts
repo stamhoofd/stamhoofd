@@ -135,6 +135,10 @@ export class I18nController {
         return languages.includes(language)
     }
 
+    static isValidCountry(country: string) {
+        return countries.includes(country)
+    }
+
     static async loadDefault(namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: string) {
         let language: string | undefined = undefined
         let needsSave = false
