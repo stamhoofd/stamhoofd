@@ -287,7 +287,7 @@ module.exports = {
         asyncWebAssembly: true
     },
     //cache: false,
-    cache: {
+    /*cache: {
         type: 'filesystem',
         //allowCollectingMemory: true,
         buildDependencies: {
@@ -295,7 +295,7 @@ module.exports = {
             config: [__filename],
             // By default webpack and loaders are build dependencies
         },
-    },
+    },*/
     snapshot: {
         managedPaths: [
             path.resolve(__dirname, '../node_modules')

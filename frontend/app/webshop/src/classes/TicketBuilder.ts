@@ -1,9 +1,11 @@
 /* eslint-disable no-irregular-whitespace */
+import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2'
+import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2'
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { Order, Organization, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 // PDFKit is used! Wrong warning below!
-import PDFKit from "pdfkit"
+//import PDFKit from "pdfkit"
 import QRCode from "qrcode"
 
 import PDFDocument from '../pdfkit.standalone';
@@ -25,6 +27,7 @@ const PAGE_MARGIN = 16*MM
 const END_MAX_Y = 567; // End of page line for last page
 const MAX_Y = PAGE_HEIGHT - 24*MM
 
+
 export class TicketBuilder {
     tickets: TicketPublic[]
 
@@ -36,7 +39,7 @@ export class TicketBuilder {
     webshop: Webshop
     organization: Organization
 
-    document: PDFKit.PDFDocument
+    document: PDFDocument
 
     private dataBuffer: any[] = []
 
@@ -49,9 +52,12 @@ export class TicketBuilder {
     }
 
     async download() {
+        console.log("Download tickets...")
 
-        const metropolisMedium = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
-        const metropolisBold = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
+        const metropolisMedium = await(await fetch(metropolisMediumUrl)).arrayBuffer()
+        const metropolisBold = await(await fetch(metropolisBoldUrl)).arrayBuffer()
+
+        console.log(metropolisMedium)
 
         const buffer = await new Promise<Buffer>((resolve, reject) => {
             try {
@@ -62,8 +68,8 @@ export class TicketBuilder {
                     resolve(buf)
                 });
 
-                this.document.registerFont('Metropolis-SemiBold', metropolisBold);
-                this.document.registerFont('Metropolis-Medium', metropolisMedium);
+                this.document.registerFont('Metropolis-SemiBold',  metropolisBold);
+                this.document.registerFont('Metropolis-Medium',  metropolisMedium);
 
                 // Initiate building
                 this.drawItems().then(() => {

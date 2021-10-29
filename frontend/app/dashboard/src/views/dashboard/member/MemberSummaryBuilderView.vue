@@ -67,14 +67,13 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ErrorBox, STErrorsDefault,STList, STListItem,STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
+import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2';
+import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
+import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
+import { BackButton, Checkbox, ErrorBox, LoadingButton, SegmentedControl, STErrorsDefault, STList, STListItem, STNavigationBar, STNavigationTitle, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { Group, Member, MemberWithRegistrations, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-// PDFKit is used! Wrong warning below!
-import PDFKit from "pdfkit"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
@@ -520,9 +519,10 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
             title += " "+this.group.settings.name
         }
 
-        const logoSrc = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png')).default
-        const metropolisMedium = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2')).default
-        const metropolisBold = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2')).default
+        //const logoSrc = (await import(/* webpackChunkName: "pdf-export" */ '!!arraybuffer-loader!@stamhoofd/assets/images/logo/logo-horizontal.png')).default
+        const logoSrc = await(await fetch(logoUrl)).arrayBuffer()
+        const metropolisMedium = await(await fetch(metropolisMediumUrl)).arrayBuffer()
+        const metropolisBold = await(await fetch(metropolisBoldUrl)).arrayBuffer()
 
         const buffer = await new Promise<Buffer>(resolve => {
             const doc = new PDFDocument({ size: [docWidth, docHeight], margin: 10*mm, bufferPages: true });
