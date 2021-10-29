@@ -162,6 +162,7 @@ module.exports = {
             // AND `<style>` blocks in `.vue` files
             {
                 test: /\.scss$/,
+                exclude: /\.url.scss$/,
                 use: [
                     process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader',  // vue-style-loader is not supported/maintained any longer and doesn't work without other changes
                     // If you enable this, HMR won't work. Replace it with a style loader
@@ -193,6 +194,32 @@ module.exports = {
                                     ]
                                 }
                             }*/
+                        }
+                    },
+                    'sass-loader',
+                ]
+            },
+            {
+                test: /\.url.scss$/,
+                use: [
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 2
+                            // 0 => no loaders (default);
+                            // 1 => postcss-loader;
+                            // 2 => postcss-loader, sass-loader
+                        },
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            postcssOptions: {
+                                plugins: [
+                                    // Don't need icons here
+                                    "autoprefixer"
+                                ]
+                            }
                         }
                     },
                     'sass-loader',
