@@ -73,6 +73,8 @@ import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
 import { BackButton, Checkbox, ErrorBox, LoadingButton, SegmentedControl, STErrorsDefault, STList, STListItem, STNavigationBar, STNavigationTitle, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { Group, Member, MemberWithRegistrations, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+// Keep for types only
+import PDFKit from "pdfkit"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";

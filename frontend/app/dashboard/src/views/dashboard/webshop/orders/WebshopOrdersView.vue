@@ -146,12 +146,14 @@
             </template>
             <template #right>
                 <button v-if="hasWrite" class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
-                    <span class="dropdown-text">Markeren als...</span>
+                    Markeren als...
                 </button>
                 <LoadingButton :loading="actionLoading">
                     <button class="button primary" :disabled="selectionCount == 0 || isLoadingOrders" @click="openMail()">
                         <span class="dropdown-text">E-mailen</span>
-                        <div class="dropdown" @click.stop="openMailDropdown" />
+                        <div class="dropdown" @click.stop="openMailDropdown">
+                            <span class="icon arrow-down-small" />
+                        </div>
                     </button>
                 </LoadingButton>
             </template>

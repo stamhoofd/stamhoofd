@@ -93,7 +93,6 @@
                 width: $border-width;
             }
             font-size: 24px;
-            //background: url(~@stamhoofd/assets/images/icons/white/arrow-down-small.svg) no-repeat center center;
             width: 40px;
             height: 42px;
             line-height: 42px;
@@ -184,7 +183,7 @@
     }
 
     &.secundary, &.primary, &.destructive {
-        .icon {
+        > .icon {
             align-self: center;
             
             &:first-child {

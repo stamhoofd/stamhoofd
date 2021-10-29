@@ -4,14 +4,14 @@ font-display: block;
 src: {{{src}}};
 }
 
-.icon:before {
+.icon:before, .icon-base:before {
 font-family: {{fontName}} !important;
 font-style: normal;
 font-weight: normal !important;
 }
 
 {{#each codepoints}}
-.icon.{{@key}}:before{
+.icon.{{@key}}:before, .icon-base.{{@key}}:before{
 content: "\\{{this}}";
 }
 {{/each}}

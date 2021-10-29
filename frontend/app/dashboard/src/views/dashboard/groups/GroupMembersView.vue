@@ -209,7 +209,9 @@
                         <span class="dropdown-text">
                             Toelaten
                         </span>
-                        <div class="dropdown" @click.stop="openMailDropdown" />
+                        <div class="dropdown" @click.stop="openMailDropdown">
+                            <span class="icon arrow-down-small" />
+                        </div>
                     </button>
                 </LoadingButton>
                 <template v-else>
@@ -219,7 +221,9 @@
                     <LoadingButton :loading="actionLoading">
                         <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
                             <span class="dropdown-text">E-mailen</span>
-                            <div class="dropdown icon arrow-down-small" @click.stop="openMailDropdown" />
+                            <div class="dropdown" @click.stop="openMailDropdown">
+                                <span class="icon arrow-down-small" />
+                            </div>
                         </button>
                     </LoadingButton>
                 </template>
