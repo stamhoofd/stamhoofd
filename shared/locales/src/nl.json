@@ -40,11 +40,35 @@
       },
       "domain": {
         "domainPlaceholder": "bv. jouwvereniging.be"
+      },
+      "email": {
+        "description": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen."
+      },
+      "personalize": {
+        "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
+        "domainDescription": "Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt."
+      },
+      "registrationPage": {
+        "linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be"
       }
     },
     "inputs": {
       "parentPhone": {
         "placeholder": "Mobiel nummer van ouder"
+      },
+      "website": {
+        "placeholder": "bv. https://www.vereniging.be"
+      },
+      "privacyUrl": {
+        "placeholder": "bv. https://www.vereniging.be/privacy"
+      },
+      "shopUrl": {
+        "placeholder": "bv. shop.domeinnaam.be/wafelbak"
+      }
+    },
+    "webshop": {
+      "customDomain": {
+        "description": "Hier kan je je eigen domeinnaam kiezen, en eventueel met een achtervoegsel. Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
       }
     }
   },

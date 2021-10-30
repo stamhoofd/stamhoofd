@@ -37,6 +37,32 @@
       },
       "domain": {
         "domainPlaceholder": "bv. jouwvereniging.nl"
+      },
+      "email": {
+        "description": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.nl), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen."
+      },
+      "personalize": {
+        "domainDescriptionSuffixForMemberRegistrations": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.nl) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
+        "domainDescription": "Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.nl). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt."
+      },
+      "registrationPage": {
+        "linkDescription": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.nl"
+      }
+    },
+    "inputs": {
+      "website": {
+        "placeholder": "bv. https://www.vereniging.nl"
+      },
+      "privacyUrl": {
+        "placeholder": "bv. https://www.vereniging.nl/privacy"
+      },
+      "shopUrl": {
+        "placeholder": "bv. shop.domeinnaam.nl/snoepen"
+      }
+    },
+    "webshop": {
+      "customDomain": {
+        "description": "Hier kan je je eigen domeinnaam kiezen, en eventueel met een achtervoegsel. Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.nl/snoepen, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook snoepen.domeinnaam.nl gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
       }
     }
   },

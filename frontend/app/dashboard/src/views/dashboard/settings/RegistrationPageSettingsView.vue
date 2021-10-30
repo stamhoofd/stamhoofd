@@ -25,7 +25,7 @@
             <input v-tooltip="'Klik om te kopiëren'" class="input" :value="organization.registerUrl" readonly @click="copyElement">
 
             <p class="info-box">
-                Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijnvereniging.be.
+                {{ $t('dashboard.settings.registrationPage.linkDescription') }}
             </p>
 
             <hr>

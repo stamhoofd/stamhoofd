@@ -26,7 +26,7 @@
                         >
                     </STInputBox>
 
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
+                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
                 </div>
 
                 <div>
@@ -35,7 +35,7 @@
                             v-model="website"
                             class="input"
                             type="url"
-                            placeholder="bv. https://www.vereniging.be"
+                            :placeholder="$t('dashboard.inputs.website.placeholder')"
                         >
                     </STInputBox>
                     <p class="style-description-small">
