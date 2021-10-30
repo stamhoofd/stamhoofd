@@ -139,7 +139,7 @@
                         </p>
 
                         <template slot="right">
-                            <span v-if="!hasGroups" v-tooltip="'Je hebt nog geen leeftijdsgroepen ingesteld'" class="icon warning yellow" />
+                            <span v-if="!hasGroups" v-tooltip="'Je hebt nog geen inschrijvingsgroepen ingesteld'" class="icon warning yellow" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -430,7 +430,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     importMembers(animated = true) {
         if (this.organization.groups.length == 0) {
-            new CenteredMessage("Voeg eerst leeftijdsgroepen toe", "Je kan leden pas importeren nadat je jouw leeftijdsgroepen hebt ingesteld.", "error").addCloseButton().show()
+            new CenteredMessage("Voeg eerst inschrijvingsgroepen toe", "Je kan leden pas importeren nadat je jouw inschrijvingsgroepen hebt ingesteld.", "error").addCloseButton().show()
             return
         }
 
