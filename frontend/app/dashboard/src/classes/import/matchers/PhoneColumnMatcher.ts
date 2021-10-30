@@ -1,5 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Parent, ParentType } from "@stamhoofd/structures";
+import { I18nController } from "@stamhoofd/frontend-i18n";
+import { Country, Parent, ParentType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
@@ -45,7 +46,7 @@ export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         const phoneRaw = ((cell.w ?? cell.v)+"").trim()
         const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js")
-        const phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, "BE")
+        const phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, I18nController.shared?.country ?? Country.Belgium)
 
         if (!phoneNumber || !phoneNumber.isValid()) {
             throw new SimpleError({
