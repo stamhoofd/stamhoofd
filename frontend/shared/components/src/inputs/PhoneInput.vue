@@ -40,6 +40,7 @@ export default class PhoneInput extends Vue {
     @Watch('value')
     onValueChanged(val: string | null) {
         if (val === null) {
+            this.phoneRaw = ""
             return
         }
         this.phoneRaw = val
@@ -72,23 +73,32 @@ export default class PhoneInput extends Vue {
             return true
         }
         try {
-            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js")
-            const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, I18nController.shared?.country ?? Country.Belgium)
+            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js/mobile")
+            const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, I18nController.shared?.country ?? Country.Belgium)
 
             if (!phoneNumber || !phoneNumber.isValid()) {
+                for (const country of Object.values(Country)) {
+                    const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, country)
+
+                    if (phoneNumber && phoneNumber.isValid()) {
+                        this.errorBox = new ErrorBox(new SimpleError({
+                            "code": "invalid_field",
+                            "message": this.$t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
+                            "field": "phone"
+                        }))
+                        return false
+                    }
+                }
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": "Ongeldig GSM-nummer",
+                    "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
                     "field": "phone"
                 }))
-
-                if (this.value !== "") {
-                    this.$emit("input", "")
-                }
                 return false
 
             } else {
                 const v = phoneNumber.formatInternational();
+                this.phoneRaw = v
         
                 if (this.value !== v) {
                     this.$emit("input", v)
@@ -98,7 +108,11 @@ export default class PhoneInput extends Vue {
             }
         } catch (e) {
             console.error(e)
-            this.errorBox = new ErrorBox(e)
+            this.errorBox = new ErrorBox(new SimpleError({
+                "code": "invalid_field",
+                "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
+                "field": "phone"
+            }))
             return false
         }
         

@@ -77,11 +77,11 @@ module.exports = {
     },
     output: {
         publicPath: "/",
-        filename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[id].'+Date.now()+'.js',
-        chunkFilename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[id].'+Date.now()+'.js',
+        filename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[contenthash].js',
+        chunkFilename: process.env.NODE_ENV === "production" ? '[name].[contenthash].js' : '[name].[contenthash].js',
         globalObject: 'this', // needed for webworkers
         //pathinfo: process.env.NODE_ENV === "production" ? true : false,
-        assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[hash][ext][query]' : 'images/[id].'+Date.now()+'[ext][query]'
+        assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext][query]' : 'images/[name].[contenthash][ext][query]'
     },
     devServer: {
         contentBase: './dist',
@@ -229,14 +229,14 @@ module.exports = {
                 test: /\.(png|jpe?g|gif|svg)$/i,
                 type: 'asset/resource',
                 generator: {
-                    filename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext]' : 'images/[id].'+Date.now()+'[ext]',
+                    filename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext]' : 'images/[name].[contenthash][ext]',
                 }
             },
             {
                 test: /\.(woff2?)$/i,
                 type: 'asset/resource',
                 generator: {
-                    filename: process.env.NODE_ENV === "production" ? 'fonts/[name].[contenthash][ext]' : 'fonts/[id].'+Date.now()+'[ext]',
+                    filename: process.env.NODE_ENV === "production" ? 'fonts/[name].[contenthash][ext]' : 'fonts/[name].[contenthash][ext]',
                 }
             },
             {

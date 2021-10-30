@@ -56,15 +56,24 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         if (platform === "web") {
             response.headers["X-Platform-Latest-Version"] = Version
         }
+        
 
         if (error) {
+            const IP = getRequestIP(request)
             if (isSimpleError(error) || isSimpleErrors(error)) {
                 if (!error.hasCode("expired_access_token")) {
-                    console.error("Request with error in response:\n"+getRequestIP(request)+": "+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
+                    console.error("Request with error in response:\n"+IP+": "+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
+
+                    request.body.then((body) => {
+                        console.error(IP+": Request body was\n"+body)
+                    }).catch(console.error)
                 }
             } else {
-                console.error("Request with internal error:\n"+getRequestIP(request)+": "+request.method+" "+request.host+request.url)
+                console.error("Request with internal error:\n"+IP+": "+request.method+" "+request.host+request.url)
                 console.error(error)
+                request.body.then((body) => {
+                    console.error(IP+": Request body was\n"+body)
+                }).catch(console.error)
             }
         }
     }

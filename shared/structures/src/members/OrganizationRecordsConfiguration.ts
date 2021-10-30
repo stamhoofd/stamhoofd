@@ -182,7 +182,7 @@ export class MemberDetailsWithGroups {
                 choices: [
                     new ChoicesFilterChoice("birthDay", "Geboortedatum"),
                     new ChoicesFilterChoice("address", "Adres", "Van lid zelf"),
-                    new ChoicesFilterChoice("phone", "GSM-nummer", "Van lid zelf"),
+                    new ChoicesFilterChoice("phone", "Telefoonnummer", "Van lid zelf"),
                     new ChoicesFilterChoice("email", "E-mailadres", "Van lid zelf"),
                     new ChoicesFilterChoice("parents", "Ouders"),
                     new ChoicesFilterChoice("secondParent", "Tweede ouder", "Als er maar één ouder is toegevoegd aan een lid. Handig om te selecteren op een eenoudergezin, om zo een extra contactpersoon mogelijk te maken"),

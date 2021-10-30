@@ -13,17 +13,17 @@
                 <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" name="given-name" type="text" placeholder="Voornaam" autocomplete="given-name">
+                            <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" name="family-name" type="text" placeholder="Achternaam" autocomplete="family-name">
+                            <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="Jouw e-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
+                <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
 
-                <PhoneInput v-model="phone" title="Jouw GSM-nummer" name="telephone" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
+                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
                 <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
             </main>

@@ -35,7 +35,7 @@
                         </div>
                     </STInputBox>
 
-                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer van ouder" :required="false" />
+                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('dashboard.inputs.parentPhone.placeholder')" :required="false" />
                     <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres van ouder" :required="false" />
                 </div>
 

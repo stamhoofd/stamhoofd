@@ -22,12 +22,12 @@
                 <STListItem>
                     <Checkbox slot="left" :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
                     <p class="style-title-list">
-                        GSM-nummer (van lid zelf)
+                        {{ $t('shared.inputs.mobile.label') }} (van lid zelf)
                     </p>
                     <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
                         {{ patchedOrganization.meta.recordsConfiguration.phone }}
                     </p>
-                    <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('phone', 'GSM-nummer')">
+                    <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))">
                         <span clas="icon edit" />
                         <span class="hide-small">Wijzig</span>
                     </button>

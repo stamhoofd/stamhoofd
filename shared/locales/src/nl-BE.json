@@ -1,16 +1,20 @@
 {
-    "shared": {
-        "login": "Inloggen"
-    },
-    "backend": {
-
-    },
-    "dashboard": {
-    },
-    "webshop": {
-
-    },
-    "registration": {
-        
+  "shared": {
+    "login": "Inloggen",
+    "inputs": {
+      "mobile": {
+        "label": "GSM-nummer"
+      }
     }
+  },
+  "backend": {},
+  "dashboard": {
+    "inputs": {
+      "parentPhone": {
+        "placeholder": "GSM-nummer van ouder"
+      }
+    }
+  },
+  "webshop": {},
+  "registration": {}
 }

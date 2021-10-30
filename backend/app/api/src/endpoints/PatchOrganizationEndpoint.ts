@@ -147,26 +147,28 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.meta.packages = savedPackages
 
                 // check payconiq + mollie
-                if (!organization.privateMeta.payconiqApiKey) {
-                    const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Payconiq)
-                    if (i != -1) {
-                        throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Je kan Payconiq niet activeren omdat je geen Payconiq API Key hebt ingesteld. Schakel Payconiq uit voor je verder gaat.",
-                            field: "paymentMethods"
-                        })
+                if (Array.isArray(request.body.meta.paymentMethods) || request.body.meta.paymentMethods.hasChanges) {
+                    if (!organization.privateMeta.payconiqApiKey) {
+                        const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Payconiq)
+                        if (i != -1) {
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "Je kan Payconiq niet activeren omdat je geen Payconiq API Key hebt ingesteld. Schakel Payconiq uit voor je verder gaat.",
+                                field: "paymentMethods"
+                            })
+                        }
                     }
-                }
 
-                 // check payconiq + mollie
-                if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                    const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Bancontact || PaymentMethod.iDEAL || PaymentMethod.CreditCard)
-                    if (i != -1) {
-                        throw new SimpleError({
-                            code: "invalid_field",
-                            message: "Je kan "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" niet activeren omdat Mollie niet correct gekoppeld is. Schakel "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" uit voor je verder gaat.",
-                            field: "paymentMethods"
-                        })
+                    // check payconiq + mollie
+                    if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
+                        const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Bancontact || p == PaymentMethod.iDEAL || p == PaymentMethod.CreditCard)
+                        if (i != -1) {
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "Je kan "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" niet activeren omdat Mollie niet correct gekoppeld is. Schakel "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" uit voor je verder gaat.",
+                                field: "paymentMethods"
+                            })
+                        }
                     }
                 }
 

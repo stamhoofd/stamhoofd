@@ -7,6 +7,11 @@
     "inputs": {
       "iban": {
         "placeholder": "Bv. BE71 6316 1793 1969"
+      },
+      "mobile": {
+        "label": "Mobiel nummer",
+        "invalidMessage": "Ongeldig GSM-nummer",
+        "invalidMessageTryCountry": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31."
       }
     },
     "domains": {
@@ -36,10 +41,27 @@
       "domain": {
         "domainPlaceholder": "bv. jouwvereniging.be"
       }
+    },
+    "inputs": {
+      "parentPhone": {
+        "placeholder": "Mobiel nummer van ouder"
+      }
     }
   },
-  "webshop": {},
-  "registration": {},
+  "webshop": {
+    "inputs": {
+      "phone": {
+        "invalidMessage": "Het GSM-nummer dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat."
+      }
+    }
+  },
+  "registration": {
+    "inputs": {
+      "parentPhone": {
+        "placeholder": "Mobiel nummer van ouder"
+      }
+    }
+  },
   "dasboard": {
     "settings": {
       "paymentMethods": {

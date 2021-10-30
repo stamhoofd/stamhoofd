@@ -29,7 +29,7 @@
             <h2>Welke gegevens wil je verzamelen?</h2>
             
             <p class="style-description-block">
-                Je kan zelf kiezen welke informatie je wilt verzamelen van jouw leden (bv. geboortedatum, emailadres, gsm-nummer, eigen vragen...). Wijzig dit via de knop hieronder, of later via de instellingen.
+                Je kan zelf kiezen welke informatie je wilt verzamelen van jouw leden (bv. geboortedatum, emailadres, telefoonnummer, eigen vragen...). Wijzig dit via de knop hieronder, of later via de instellingen.
             </p>
 
             <button class="button secundary" @click="manageRecords(true)">

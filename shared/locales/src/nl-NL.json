@@ -7,6 +7,10 @@
     "inputs": {
       "iban": {
         "placeholder": "Bv. NL21 INGB 3115 4044 17"
+      },
+      "mobile": {
+        "invalidMessage": "Ongeldig mobiel nummer",
+        "invalidMessageTryCountry": "Ongeldig mobiel nummer. Als je een nummer probeert in te geven uit een ander land dan Nederland, voeg dan de internationale code toe voor het nummer. Voor België is dat bijvoorbeeld +32."
       }
     },
     "domains": {

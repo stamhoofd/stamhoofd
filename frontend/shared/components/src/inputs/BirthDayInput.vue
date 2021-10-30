@@ -1,33 +1,39 @@
 <template>
     <STInputBox :title="title" error-fields="birthDay" :error-box="errorBox">
         <div class="input birth-day-selection">
-            <Dropdown v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
-                <!-- name is needed for autocomplete in safari -->
-                <option :disabled="required" :value="null">
-                    Dag
-                </option>
-                <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">
-                    {{ day }}
-                </option>
-            </Dropdown>
+            <div class="input-icon-container right icon arrow-down-small gray">
+                <select v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
+                    <!-- name is needed for autocomplete in safari -->
+                    <option :disabled="required" :value="null">
+                        Dag
+                    </option>
+                    <option v-for="day in 31" :key="day" :value="day" autocomplete="bday-day">
+                        {{ day }}
+                    </option>
+                </select>
+            </div>
 
-            <Dropdown v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
-                <option :disabled="required" :value="null">
-                    Maand
-                </option>
-                <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
-                    {{ monthText(month) }}
-                </option>
-            </Dropdown>
+            <div class="input-icon-container right icon arrow-down-small gray">
+                <select v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
+                    <option :disabled="required" :value="null">
+                        Maand
+                    </option>
+                    <option v-for="month in 12" :key="month" :value="month" autocomplete="bday-month">
+                        {{ monthText(month) }}
+                    </option>
+                </select>
+            </div>
 
-            <Dropdown v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
-                <option :disabled="required" :value="null">
-                    Jaar
-                </option>
-                <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
-                    {{ currentYear - year + 1 }}
-                </option>
-            </Dropdown>
+            <div class="input-icon-container right icon arrow-down-small gray">
+                <select v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
+                    <option :disabled="required" :value="null">
+                        Jaar
+                    </option>
+                    <option v-for="year in 100" :key="year" :value="currentYear - year + 1" autocomplete="bday-year">
+                        {{ currentYear - year + 1 }}
+                    </option>
+                </select>
+            </div>
         </div>
     </STInputBox>
 </template>
@@ -137,12 +143,31 @@ export default class BirthDayInput extends Vue {
 </script>
 
 <style lang="scss">
+@use "~@stamhoofd/scss/base/text-styles.scss" as *;
+@use "~@stamhoofd/scss/base/variables.scss" as *;
 
-    .input.birth-day-selection {
-        padding-right: 0;
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        grid-template-rows: auto;
+.input.birth-day-selection {
+    padding-right: 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto;
+    align-items: stretch;
 
+    > div {
+        display: flex;
+        align-items: stretch;
+
+        > select {
+            @extend .style-input;
+            color: $color-dark;
+        }
+
+        // Remove dotted line in Firefox
+        > select:-moz-focusring {
+            color: transparent;
+            text-shadow: 0 0 0 #000;
+        }
     }
+
+}
 </style>

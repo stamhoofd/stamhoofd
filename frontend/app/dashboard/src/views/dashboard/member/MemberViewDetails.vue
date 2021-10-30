@@ -29,7 +29,7 @@
                     </template>
 
                     <template v-if="member.details.phone">
-                        <dt>GSM-nummer</dt>
+                        <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                         <dd>{{ member.details.phone }}</dd>
                     </template>
 
@@ -108,7 +108,7 @@
                     <dd>{{ parent.name }}</dd>
 
                     <template v-if="parent.phone">
-                        <dt>GSM-nummer</dt>
+                        <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                         <dd>{{ parent.phone }}</dd>
                     </template>
 
@@ -143,7 +143,7 @@
                     <dt>Naam</dt>
                     <dd>{{ contact.name }}</dd>
 
-                    <dt>GSM-nummer</dt>
+                    <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                     <dd>{{ contact.phone }}</dd>
                 </dl>
             </div>
