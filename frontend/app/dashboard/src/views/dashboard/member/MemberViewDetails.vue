@@ -46,6 +46,9 @@
                         <dd>
                             {{ member.details.address.street }} {{ member.details.address.number }}<br>{{ member.details.address.postalCode }}
                             {{ member.details.address.city }}
+                            <template v-if="member.details.address.country !== currentCountry">
+                                <br>{{ formatCountry(member.details.address.country) }}
+                            </template>
                         </dd>
                     </template>
                 </dl>
@@ -125,6 +128,9 @@
                         <dd>
                             {{ parent.address.street }} {{ parent.address.number }}<br>{{ parent.address.postalCode }}
                             {{ parent.address.city }}
+                            <template v-if="parent.address.country !== currentCountry">
+                                <br>{{ formatCountry(parent.address.country) }}
+                            </template>
                         </dd>
                     </template>
                 </dl>
@@ -302,7 +308,8 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { CountryHelper } from "@stamhoofd/structures/esm/dist";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -341,6 +348,14 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         this.checkBounces().catch(e => console.error(e))
+    }
+
+    get currentCountry() {
+        return OrganizationManager.organization.address.country
+    }
+
+    formatCountry(country: Country) {
+        return CountryHelper.getName(country)
     }
 
     getGroup(groupId: string) {
