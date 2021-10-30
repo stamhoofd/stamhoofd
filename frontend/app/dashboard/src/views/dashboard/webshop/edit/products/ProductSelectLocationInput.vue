@@ -27,7 +27,8 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AddressInput,ErrorBox, Radio,STErrorsDefault, STInputBox, STList,STListItem,Validator } from "@stamhoofd/components"
-import { Address, ProductLocation } from "@stamhoofd/structures"
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { Address, Country, ProductLocation } from "@stamhoofd/structures"
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 import ProductLocationInput from "./ProductLocationInput.vue"
@@ -110,7 +111,7 @@ export default class ProductSelectLocationInput extends Vue {
                 } else {
                     this.$emit("input", ProductLocation.create({
                         name: "",
-                        address: Address.createDefault()
+                        address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
                     }))
                 }
             }
@@ -140,7 +141,7 @@ export default class ProductSelectLocationInput extends Vue {
             // Create a new custom one
             a = this.customLocation = ProductLocation.create({
                 name: "",
-                address: Address.createDefault()
+                address: Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
             })
         }
         if (a) {

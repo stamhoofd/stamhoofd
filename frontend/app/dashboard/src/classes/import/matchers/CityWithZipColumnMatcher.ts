@@ -1,5 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Address, Parent, ParentType } from "@stamhoofd/structures";
+import { I18nController } from "@stamhoofd/frontend-i18n";
+import { Address, Country, Parent, ParentType } from "@stamhoofd/structures";
 import { DataValidator, Formatter } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
@@ -90,7 +91,7 @@ export class CityWithZipColumnMatcher extends SharedMatcher implements ColumnMat
         
         if (this.category == MatcherCategory.Member) {
             if (!member.details.address) {
-                member.details.address = Address.createDefault()
+                member.details.address = Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
             }
             member.details.address.postalCode = zip
             member.details.address.city = city
@@ -102,7 +103,7 @@ export class CityWithZipColumnMatcher extends SharedMatcher implements ColumnMat
             }
 
             if (!member.details.parents[0].address) {
-                member.details.parents[0].address = Address.createDefault()
+                member.details.parents[0].address = Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
             }
             member.details.parents[0].address.postalCode = zip
             member.details.parents[0].address.city = city
@@ -113,7 +114,7 @@ export class CityWithZipColumnMatcher extends SharedMatcher implements ColumnMat
                 }))
             }
             if (!member.details.parents[1].address) {
-                member.details.parents[1].address = Address.createDefault()
+                member.details.parents[1].address = Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
             }
             member.details.parents[1].address.postalCode = zip
             member.details.parents[1].address.city = city

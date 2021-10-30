@@ -1,5 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Address, Parent, ParentType } from "@stamhoofd/structures";
+import { I18nController } from "@stamhoofd/frontend-i18n";
+import { Address, Country, Parent, ParentType } from "@stamhoofd/structures";
 import XLSX from "xlsx";
 
 import { ColumnMatcher } from "../ColumnMatcher";
@@ -64,7 +65,7 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
 
         if (this.category == MatcherCategory.Member) {
             if (!member.details.address) {
-                member.details.address = Address.createDefault()
+                member.details.address = Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
             }
             member.details.address.number = number
         } else if (this.category == MatcherCategory.Parent1) {
@@ -75,7 +76,7 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
             }
 
             if (!member.details.parents[0].address) {
-                member.details.parents[0].address = Address.createDefault()
+                member.details.parents[0].address = Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
             }
             member.details.parents[0].address.number = number
         } else if (this.category == MatcherCategory.Parent2) {
@@ -85,7 +86,7 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
                 }))
             }
             if (!member.details.parents[1].address) {
-                member.details.parents[1].address = Address.createDefault()
+                member.details.parents[1].address = Address.createDefault(I18nController.shared?.country ?? Country.Belgium)
             }
             member.details.parents[1].address.number = number
         }
