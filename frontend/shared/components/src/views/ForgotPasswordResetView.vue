@@ -87,17 +87,16 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
     @Prop({ default: () => SessionManager.currentSession })
     initialSession!: Session
 
-    @Prop({ default: null })
-    token!: string | null
+    @Prop({ required: true })
+    token!: string
 
     session: Session | null = null
 
     mounted() {
         this.loadingToken = true
 
-        const queryString = new URL(window.location.href).searchParams;
-        if (this.token || queryString.get('token')) {
-            const token = this.token ?? queryString.get('token')!;
+        if (this.token) {
+            const token = this.token
             
             this.loadingToken = true;
 

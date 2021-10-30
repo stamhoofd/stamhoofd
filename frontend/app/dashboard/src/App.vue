@@ -98,6 +98,10 @@ export default class App extends Vue {
 
         if (parts.length == 2 && parts[0] == 'reset-password') {
             UrlHelper.shared.clear()
+
+            // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
+            UrlHelper.setUrl("/")
+
             const token = queryString.get('token');
             (this.$refs.modalStack as any).present({
                 components: [
@@ -133,6 +137,7 @@ export default class App extends Vue {
 
         if (parts.length == 2 && parts[0] == 'verify-email') {
             UrlHelper.shared.clear()
+
             const token = queryString.get('token')
             const code = queryString.get('code')
                 
@@ -163,6 +168,9 @@ export default class App extends Vue {
             const secret = queryString.get('secret');
 
             if (key && secret) {
+                // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
+                UrlHelper.setUrl("/");
+
                 (this.$refs.modalStack as any).present({
                     components: [
                         new ComponentWithProperties(NavigationController, { 

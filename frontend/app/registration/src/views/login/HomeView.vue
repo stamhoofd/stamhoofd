@@ -134,19 +134,21 @@ export default class HomeView extends Mixins(NavigationMixin){
     session = SessionManager.currentSession!
 
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        let clearPath = true
-        const queryString = new URL(window.location.href).searchParams;
+        const parts =  UrlHelper.shared.getParts()
+        const queryString =  UrlHelper.shared.getSearchParams()
+
+        UrlHelper.setUrl("/")
 
         if (parts.length == 1 && parts[0] == 'reset-password') {
+            UrlHelper.shared.clear()
+
             const token = queryString.get('token');
             this.present(new ComponentWithProperties(ForgotPasswordResetView, { token }).setDisplayStyle("popup"));
-            clearPath = false
         }
 
         if (parts.length == 1 && parts[0] == 'login') {
-            clearPath = false
+            UrlHelper.shared.clear()
+
             const email = queryString.get('email')
             const hasAccount = queryString.get('hasAccount')
 
@@ -157,10 +159,6 @@ export default class HomeView extends Mixins(NavigationMixin){
                     this.createAccount(false, email, "Je kan jouw e-mailadres pas wijzigen nadat je een account hebt aangemaakt.")
                 }
             }
-        }
-
-        if (clearPath) {
-            UrlHelper.setUrl("/")
         }
 
         CenteredMessage.addListener(this, (centeredMessage) => {

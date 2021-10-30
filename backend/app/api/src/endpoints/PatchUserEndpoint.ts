@@ -101,7 +101,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             // Create an validation code
             // We always need the code, to return it. Also on password recovery -> may not be visible to the client whether the user exists or not
             const code = await EmailVerificationCode.createFor(editUser, request.body.email)
-            code.send(editUser.setRelation(User.organization, user.organization), editUser.id === user.id)
+            code.send(editUser.setRelation(User.organization, user.organization), request.i18n, editUser.id === user.id)
 
             throw new SimpleError({
                 code: "verify_email",

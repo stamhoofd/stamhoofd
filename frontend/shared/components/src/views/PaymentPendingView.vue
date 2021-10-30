@@ -45,8 +45,8 @@ import { Component, Mixins,  Prop } from "vue-property-decorator";
     }
 })
 export default class PaymentPendingView extends Mixins(NavigationMixin){
-    @Prop({ default: null })
-    paymentId: string | null;
+    @Prop({ required: true })
+    paymentId: string;
 
     @Prop({ required: true })
     server: Server
@@ -82,7 +82,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
     poll() {
         this.timer = null;
-        const paymentId = this.paymentId ?? new URL(window.location.href).searchParams.get("id");
+        const paymentId = this.paymentId
         this.server
             .request({
                 method: "POST",

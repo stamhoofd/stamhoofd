@@ -192,12 +192,19 @@ export default class OverviewView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        let setPath = true
+        const parts =  UrlHelper.shared.getParts()
+        const searchParams = UrlHelper.shared.getSearchParams()
+        UrlHelper.setUrl("/")
 
-        if (parts.length == 1 && parts[0] == 'payment') {
-            setPath = false
+        
+        let didShow = false
+
+        if (parts.length == 1 && parts[0] == 'payment' && searchParams.get("id")) {
+            UrlHelper.shared.clear()
+
+            const paymentId = searchParams.get("id")
+            didShow = true
+
             const session = SessionManager.currentSession!
             // tood: password reset view
             const component = new ComponentWithProperties(NavigationController, { 
@@ -206,7 +213,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
                         const PaymentPendingView = (await import(/* webpackChunkName: "Checkout" */ "@stamhoofd/components/src/views/PaymentPendingView.vue")).default
                         return new ComponentWithProperties(PaymentPendingView, {
                             server: session.authenticatedServer,
-                            paymentId: new URL(window.location.href).searchParams.get("id"),
+                            paymentId,
                             finishedHandler: async function(this: NavigationMixin, payment: Payment | null) {
                                 if (payment && payment.status == PaymentStatus.Succeeded) {
                                     const RegistrationSuccessView = (await import(/* webpackChunkName: "Checkout" */ "../checkout/RegistrationSuccessView.vue")).default
@@ -240,11 +247,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
             this.present(component.setAnimated(false))
         }
 
-        if (setPath) {
-            UrlHelper.setUrl("/")
-        }
-
-        if (setPath && this.members.find(m => m.details.isRecovered)) {
+        if (!didShow && this.members.find(m => m.details.isRecovered)) {
             // Show error message
             this.present(new ComponentWithProperties(MissingKeyView).setDisplayStyle("sheet"))
         }

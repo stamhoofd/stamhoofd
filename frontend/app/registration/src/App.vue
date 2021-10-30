@@ -84,15 +84,16 @@ export default class App extends Vue {
 
             await SessionManager.setCurrentSession(session)
 
-            const path = window.location.pathname;
-            const parts = path.substring(1).split("/");
+            const parts =  UrlHelper.shared.getParts()
+            const queryString = UrlHelper.shared.getSearchParams()
 
             if (parts.length == 1 && parts[0] == 'verify-email') {
-                const queryString = new URL(window.location.href).searchParams;
+
                 const token = queryString.get('token')
                 const code = queryString.get('code')
                     
                 if (token && code) {
+                    UrlHelper.shared.clear()
                     const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
                     LoginHelper.verifyEmail(session, code, token).then(() => {
                         toast.hide()

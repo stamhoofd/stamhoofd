@@ -45,10 +45,10 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
     @Prop({})
     paymentUrl: string;
 
-    @Prop({ default: null })
-    initialPayment!: Payment | null
+    @Prop({ required: true })
+    initialPayment!: Payment
 
-    payment: Payment | null = this.initialPayment
+    payment: Payment = this.initialPayment
 
     @Prop({ required: true })
     server: Server
@@ -84,7 +84,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
     poll() {
         this.timer = null;
-        const paymentId = this.payment?.id ?? new URL(window.location.href).searchParams.get("id");
+        const paymentId = this.payment.id
         this.server
             .request({
                 method: "POST",
@@ -109,7 +109,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
                 console.error(e)
             }).finally(() => {
                 this.pollCount++;
-                if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
+                if (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed) {
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000);
@@ -122,7 +122,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             this.timer = null
         }
 
-        if (!this.payment || (this.payment.status != PaymentStatus.Succeeded && this.payment.status != PaymentStatus.Failed)) {
+        if (this.payment.status != PaymentStatus.Succeeded && this.payment.status != PaymentStatus.Failed) {
             this.finishedHandler(this.payment)
         }
     }

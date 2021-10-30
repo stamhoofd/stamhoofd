@@ -201,7 +201,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         const code = await EmailVerificationCode.createFor(user, user.email)
-        code.send(user)
+        code.send(user, request.i18n)
 
         for (const email of delayEmails) {
             Email.sendInternal(email, organization.i18n)

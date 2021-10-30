@@ -289,13 +289,14 @@ export default class WebshopView extends Mixins(NavigationMixin){
         } else if (path.length == 2 && path[0] == 'tickets') {
             const secret = path[1];
             this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
-        } else if (path.length == 1 && path[0] == 'payment') {
+        } else if (path.length == 1 && path[0] == 'payment' && params.get("id")) {
+            const paymentId = params.get("id")
             const me = this
             this.show({
                 components: [
                     new ComponentWithProperties(PaymentPendingView, { 
                         server: WebshopManager.server, 
-                        paymentId: params.get("id"),
+                        paymentId,
                         finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
                             if (payment && payment.status == PaymentStatus.Succeeded) {
                                 // Can't use this.show, becaus this is deactivated -> no parents
