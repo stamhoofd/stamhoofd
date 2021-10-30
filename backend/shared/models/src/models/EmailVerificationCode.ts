@@ -245,7 +245,10 @@ export class EmailVerificationCode extends Model {
     }
 
     send(user: UserWithOrganization, withCode = true) {
-        const { from, replyTo } = user.organization.getDefaultEmail()
+        const { from, replyTo } = user.permissions !== null ? {
+            from: Email.getInternalEmailFor(user.organization.i18n),
+            replyTo: undefined
+        } : user.organization.getDefaultEmail()
 
         if (withCode) {
             const formattedCode = this.code.substr(0, 3)+" "+this.code.substr(3)

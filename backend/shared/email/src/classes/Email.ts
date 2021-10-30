@@ -259,11 +259,15 @@ class EmailStatic {
         }
     }
 
+    getInternalEmailFor(i18n: I18n) {
+        return '"Stamhoofd" <'+ (i18n.$t("shared.emails.general")) +'>'
+    }
+
     /**
      * Send an internal e-mail (from stamhoofd)
      */
     sendInternal(data: EmailInterfaceBase, i18n: I18n) {
-        const mail = Object.assign(data, { from: '"Stamhoofd" <'+ (i18n.$t("shared.emails.general")) +'>'})
+        const mail = Object.assign(data, { from: this.getInternalEmailFor(i18n) })
         this.send(mail)
     }
 
