@@ -71,7 +71,13 @@ export class Order extends Model {
     static organization = new ManyToOneRelation(Organization, "organization");
 
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
-        return "https://"+this.webshop.getHost()+"/order/"+this.id
+        // Country locales are disabled on webshops (always the same country). But we need to add the language if it isn't the same as the organization default language
+        let locale = ""
+        if (this.data.consumerLanguage != this.webshop.organization.i18n.language) {
+            locale = "/"+this.data.consumerLanguage
+        }
+
+        return "https://"+this.webshop.getHost()+locale+"/order/"+this.id
     }
 
     /**
