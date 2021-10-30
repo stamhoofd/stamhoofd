@@ -85,10 +85,10 @@
 
             <hr>
             <h2 v-if="isBelgium">
-                Bancontact &amp; iDEAL
+                Bancontact, kredietkaart of iDEAL
             </h2>
             <h2 v-else>
-                iDEAL &amp; Bancontact
+                iDEAL, kredietkaart of Bancontact
             </h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
