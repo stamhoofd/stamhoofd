@@ -23,7 +23,7 @@ export class I18nController {
 
     namespace = ""
     language = ""
-    country = ""
+    country = Country.Belgium
     loadedLocale?: string
 
     // Used for SEO
@@ -37,7 +37,7 @@ export class I18nController {
         return this.language+"-"+this.country
     }
 
-    constructor(language: string, country: string, namespace: string) {
+    constructor(language: string, country: Country, namespace: string) {
         this.namespace = namespace
         this.language = language
         this.country = country
@@ -59,7 +59,7 @@ export class I18nController {
 
     async switchToLocale(options: {
             language?: string,
-            country?: string
+            country?: Country
     }) {
         if ((options.country ?? this.country) == this.country && (options.language ?? this.language) == this.language) {
             return
@@ -135,17 +135,17 @@ export class I18nController {
         return languages.includes(language)
     }
 
-    static isValidCountry(country: string) {
+    static isValidCountry(country: string): country is Country {
         return countries.includes(country)
     }
 
-    static async loadDefault(namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: string) {
+    static async loadDefault(namespace: string, defaultCountry?: Country, defaultLanguage?: string, country?: Country) {
         let language: string | undefined = undefined
         let needsSave = false
 
         // Check country if passed
-        if (country && !countries.includes(country)) {
-            console.error("Invalid default country", country)
+        if (country && !this.isValidCountry(country)) {
+            console.error("Invalid forced country", country)
             country = undefined
         }
 
@@ -161,7 +161,7 @@ export class I18nController {
                 needsSave = true
             }
 
-            if (!country) {
+            if (!country && this.isValidCountry(c)) {
                 console.info("Using country from url", c)
                 country = c
                 needsSave = true
@@ -194,7 +194,7 @@ export class I18nController {
                     language = storage.language
                 }
 
-                if (!country && storage.country) {
+                if (!country && storage.country && this.isValidCountry(storage.country)) {
                     console.info("Using stored country", storage.country)
                     country = storage.country
                 }
@@ -236,7 +236,7 @@ export class I18nController {
 
             if (!country && navigator.language && navigator.language.length === 5) {
                 const c = navigator.language.substr(3, 2).toUpperCase()
-                if (countries.includes(c)) {
+                if (this.isValidCountry(c)) {
                     console.info("Using browser country", c)
                     country = c
                 } else {
@@ -304,16 +304,6 @@ export class I18nController {
         def.updateMetaData()
         
         await def.loadLocale()
-    }
-
-    createFromLocalStorage(): I18nController {
-        // todo
-        return new I18nController("", "", "")
-    }
-
-    createFromLocale(namespace: string): I18nController {
-        // todo
-        return new I18nController("nl", "BE", namespace)
     }
 
     // Used to make metaInfo responsive

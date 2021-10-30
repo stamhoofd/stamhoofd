@@ -7,6 +7,8 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { Country } from "@stamhoofd/structures"
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
@@ -71,7 +73,7 @@ export default class PhoneInput extends Vue {
         }
         try {
             const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js")
-            const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, "BE")
+            const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, I18nController.shared?.country ?? Country.Belgium)
 
             if (!phoneNumber || !phoneNumber.isValid()) {
                 this.errorBox = new ErrorBox(new SimpleError({
