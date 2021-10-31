@@ -21,8 +21,4 @@ export function load(settings?: { path?: string }) {
     process.env.AWS_ACCESS_KEY_ID = STAMHOOFD.AWS_ACCESS_KEY_ID+""
     process.env.AWS_SECRET_ACCESS_KEY = STAMHOOFD.AWS_SECRET_ACCESS_KEY+""
     process.env.AWS_REGION = STAMHOOFD.AWS_REGION+""
-
-    if (STAMHOOFD.environment !== "development" && STAMHOOFD.environment !== "test") {
-        throw new Error("Non-development environment temporary disabled")
-    }
 }
