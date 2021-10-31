@@ -22,10 +22,8 @@
 
     &::before {
         position: absolute;
-        content: "";
         color: $color-error;
         font-size: 24px;
-        //font-icon: url(@stamhoofd/assets/images/icons/error.svg);
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);
@@ -65,10 +63,8 @@
 
     &::before {
         position: absolute;
-        content: "";
         color: $color-warning-primary;
         font-size: 24px;
-        //font-icon: url(@stamhoofd/assets/images/icons/warning.svg);
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);
@@ -95,10 +91,8 @@
 
     &::before {
         position: absolute;
-        content: "";
         color: $color-primary;
         font-size: 24px;
-        //font-icon: url(@stamhoofd/assets/images/icons/info-filled.svg);
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);
@@ -125,10 +119,8 @@
 
     &::before {
         position: absolute;
-        content: "";
         color: $color-success;
         font-size: 24px;
-        //font-icon: url(@stamhoofd/assets/images/icons/success.svg);
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);
