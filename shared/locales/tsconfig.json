@@ -4,7 +4,7 @@
         "module": "commonjs",
         "jsx": "preserve",
         "outDir": "dist",
-        "importHelpers": false,
+        "importHelpers": true,
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "esModuleInterop": true,
