@@ -29,7 +29,7 @@ if (process.env.LOAD_ENV) {
     // We restringify to make sure encoding is minified
     use_env["STAMHOOFD"] = JSON.stringify(decode);
     use_env["process.env.NODE_ENV"] = JSON.stringify(decode.environment === "production" ? "production" : "development")
-} if (process.env.ENV_FILE) {
+} else if (process.env.ENV_FILE) {
     // Reading environment from a JSON env file (JSON is needed)
     const file = path.resolve(process.env.ENV_FILE)
 
