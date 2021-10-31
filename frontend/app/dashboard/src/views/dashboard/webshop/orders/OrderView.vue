@@ -187,12 +187,12 @@
 
             <LoadingButton v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" :loading="loadingPayment">
                 <p>
-                    <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" class="button text" @click="markPaid(patchedOrder.payment)">
+                    <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" class="button secundary" @click="markPaid(patchedOrder.payment)">
                         <span class="icon success" />
                         <span>Markeer als betaald</span>
                     </button>
 
-                    <button v-if="patchedOrder.payment && patchedOrder.payment.status == 'Succeeded'" class="button text" @click="markNotPaid(patchedOrder.payment)">
+                    <button v-if="patchedOrder.payment && patchedOrder.payment.status == 'Succeeded'" class="button secundary" @click="markNotPaid(patchedOrder.payment)">
                         <span class="icon canceled" />
                         <span>Markeer als niet betaald</span>
                     </button>

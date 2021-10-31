@@ -283,7 +283,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     get sortedAdmins() {
-        return this.admins.sort((a, b) => Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName))
+        return this.admins.slice().sort((a, b) => Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName))
     }
 
     createAdmin() {

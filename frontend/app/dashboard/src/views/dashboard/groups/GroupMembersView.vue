@@ -817,7 +817,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get sortedMembers(): SelectableMember[] {
         if (this.sortBy == "info") {
-            return this.filteredMembers.sort((a, b) => {
+            return this.filteredMembers.slice().sort((a, b) => {
                 if (!a.member.details && !b.member.details) {
                     return 0
                 }
@@ -836,12 +836,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
         if (this.sortBy == "name") {
             const s = Member.sorterByName(this.sortDirection)
-            return this.filteredMembers.sort((a, b) => s(a.member, b.member));
+            return this.filteredMembers.slice().sort((a, b) => s(a.member, b.member));
         }
 
         if (this.sortBy == "status") {
             if (this.waitingList) {
-                return this.filteredMembers.sort((a, b) => {
+                return this.filteredMembers.slice().sort((a, b) => {
                     if (this.sortDirection == "ASC") {
                         if (this.registrationDate(a.member) > this.registrationDate(b.member)) {
                             return 1;
@@ -860,7 +860,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     return 0;
                 });
             }
-            return this.filteredMembers.sort((a, b) => {
+            return this.filteredMembers.slice().sort((a, b) => {
                 const aa = this.getMemberDescription(a.member).toLowerCase()
                 const bb = this.getMemberDescription(b.member).toLowerCase()
                 if (this.sortDirection == "ASC") {

@@ -69,7 +69,7 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
     }
 
     get sortedSlots() {
-        return this.timeSlots.timeSlots.sort(WebshopTimeSlot.sort)
+        return this.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort)
     }
    
     addTimeSlot() {

@@ -66,7 +66,7 @@
                     </div>
                     <div v-if="payment.price > 0" class="hide-smartphone rectangle">
                         <div class="rectangle-top">
-                            Of kopieer met app
+                            Of scan met deze apps
                         </div>
                         <div class="rectangle-bottom">
                             <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
@@ -152,15 +152,12 @@
                     We hebben de betaling ontvangen.
                 </p>
                 <template v-else-if="payment.price > 0 && created">
-                    <p v-if="isBelgium" class="hide-smartphone warning-box">
+                    <p v-if="isBelgium" class="hide-smartphone info-box">
                         De QR-code is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
                     </p>     
-                    <p v-else class="hide-smartphone warning-box">
+                    <p v-else class="hide-smartphone info-box">
                         De QR-code is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
-                    </p>     
-                    <p class="only-smartphone warning-box">
-                        Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
-                    </p>              
+                    </p>          
                 </template>
             </main>
 

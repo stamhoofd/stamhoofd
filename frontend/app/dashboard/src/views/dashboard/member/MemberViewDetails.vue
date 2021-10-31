@@ -431,7 +431,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
 
     get sortedWarnings() {
-        return this.warnings.sort((warning1, warning2) => {
+        return this.warnings.slice().sort((warning1, warning2) => {
             const priority1: string = warning1.type
             const priority2: string = warning2.type
 

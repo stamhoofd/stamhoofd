@@ -93,7 +93,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
     }
 
     get timeSlots(): WebshopTimeSlot[] {
-        return CheckoutManager.checkout.checkoutMethod!.timeSlots.timeSlots.sort(WebshopTimeSlot.sort)
+        return CheckoutManager.checkout.checkoutMethod!.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort)
     }
 
     get selectedSlot(): WebshopTimeSlot {
