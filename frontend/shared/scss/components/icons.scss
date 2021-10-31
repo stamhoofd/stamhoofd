@@ -24,6 +24,7 @@
     display: inline; // fallback
     display: inline-flex; // needed for proper vertical alignemnt of icons
     vertical-align: middle;
+    align-items: center;
     
     &.light-gray {
         color: $color-gray-light;

@@ -64,6 +64,7 @@ export default class StepperInput extends Vue {
     border-radius: $border-radius;
     align-items: stretch;
     height: $input-height;
+    vertical-align: middle;
 
     hr {
         width: $border-width;
