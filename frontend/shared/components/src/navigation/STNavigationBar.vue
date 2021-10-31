@@ -128,12 +128,12 @@ export default class STNavigationBar extends Vue {
     &.large {
         height: 80px;
         margin-top: calc(-1 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px));
-        margin-bottom: 20px;
+        margin-bottom: 0px;
         padding: var(--st-safe-area-top, 0px) 20px 0 20px;
 
         @media (max-width: 450px) {
             padding: var(--st-safe-area-top, 0px) 15px 0 15px;
-        }    
+        }
     }
     -webkit-app-region: drag;
 

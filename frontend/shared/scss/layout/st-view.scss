@@ -82,9 +82,12 @@
     }
 
     &.boxed:not(.popup .st-view.boxed) {
-        @media (min-width: 801px) {
+        @media (min-width: 801px) and (min-height: 701px) {
             background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
+            
+            --navigation-bar-margin: 10px;
+            --navigation-bar-horizontal-padding: 15px;
         }
         width: 100%;
     }
@@ -100,14 +103,23 @@
                 flex-grow: 1;
             }
 
-            @media (min-width: 801px) {
+            @media (max-height: 700px)  {
+                max-width: 800px;
+                margin: 0px auto;
+                min-height: auto;
+                width: 100%;
+                box-sizing: border-box;
+                flex-grow: 1;
+            }
+
+            @media (min-width: 801px) and (min-height: 701px)  {
                 --st-safe-area-top: 0px;
                 max-width: 800px;
                 background: $color-background;
                 --color-current-background-shade: #{$color-background-shade};
                 @include style-side-view-shadow();
                 border-radius: $border-radius;
-                margin: 20px auto;
+                margin: 0px auto;
                 min-height: auto;
                 width: 100%;
                 box-sizing: border-box;

@@ -1,13 +1,13 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar :large="true" title="Overschrijven">
+        <STNavigationBar title="Overschrijven">
             <button v-if="isPopup" slot="right" class="button icon gray close" @click="pop" />
         </STNavigationBar>
 
         <div class="box">
             <main>
                 <h1 v-if="created && type == 'order'">
-                    Bestelling geplaatst!
+                    Bestelling geplaatst! Schrijf nu over.
                 </h1>
                 <h1 v-else-if="created">
                     Gelukt! Schrijf nu het bedrag over
@@ -23,19 +23,9 @@
                 </p>
 
                 <div class="payment-split">
-                    <div v-if="payment.price > 0" class="hide-smartphone rectangle">
-                        <div class="rectangle-top">
-                            Scan met deze apps
-                        </div>
-                        <div class="rectangle-bottom">
-                            <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
-                            <img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
-                        </div>
-                        <img v-if="QRCodeUrl" :src="QRCodeUrl">
-                    </div>
                     <div class="rectangle">
                         <div v-if="payment.price > 0" class="rectangle-top hide-smartphone">
-                            Of typ het over
+                            Typ het over
                         </div>
                         <table class="payment-transfer-table rectangle">
                             <tbody>
@@ -73,6 +63,16 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div v-if="payment.price > 0" class="hide-smartphone rectangle">
+                        <div class="rectangle-top">
+                            Of kopieer met app
+                        </div>
+                        <div class="rectangle-bottom">
+                            <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
+                            <img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
+                        </div>
+                        <img v-if="QRCodeUrl" :src="QRCodeUrl">
                     </div>
                 </div>
 
@@ -153,10 +153,10 @@
                 </p>
                 <template v-else-if="payment.price > 0 && created">
                     <p v-if="isBelgium" class="hide-smartphone warning-box">
-                        Typ de gegevens over als de QR-code niet lukt, dat is net hetzelfde. Dit is geen gewone Bancontact/Payconiq QR-code. Ze voert gewoon alle nodige gegevens in jouw bankapp in zodat je de overschrijving sneller kan uitvoeren. De website weet dus niet wanneer je al betaald hebt tot we dit zelf hebben aangeduid. Je kan enkel scannen met deze apps: KBC, ING, Belfius of Argenta, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
+                        De QR-code is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
                     </p>     
                     <p v-else class="hide-smartphone warning-box">
-                        Typ de gegevens over als de QR-code niet lukt, dat is net hetzelfde. Dit is geen gewone iDEAL QR-code. Ze voert gewoon alle nodige gegevens in jouw bankapp in zodat je de overschrijving sneller kan uitvoeren. De website weet dus niet wanneer je al betaald hebt tot we dit zelf hebben aangeduid. Je kan enkel scannen met deze apps: ING of Bunq; niet met je ingebouwde QR-scanner of andere apps.
+                        De QR-code is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
                     </p>     
                     <p class="only-smartphone warning-box">
                         Voer de overschrijving meteen uit. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
@@ -341,9 +341,9 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
         let message: string
         if (this.isStructured) {
-            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.transferDescription+"\n\nBetalen";
+            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.transferDescription+"\n\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
         } else {
-            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n\n"+this.transferDescription+"\nBetalen";
+            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n\n"+this.transferDescription+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
         }
         return message
     }
@@ -390,6 +390,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     padding: 15px 0;
 
     @media (max-width: 800px) {
+        padding: 0;
         flex-direction: column;
     }
 
@@ -402,6 +403,15 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        
+        > table {
+            align-self: flex-start;
+            margin-left: 20px;
+
+            @media (max-width: 800px) {
+                margin-left: 0px;
+            }
+        }
         
         @media (max-width: 800px) {
             padding: 0;
@@ -444,13 +454,21 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         }
 
         &:first-child {
+            flex-grow: 1;
             margin-right: 15px;;
             padding: 15px 15px;
 
             @media (max-width: 800px) {
                 margin-right: 0px;
                 margin-bottom: 30px;
+                padding: 0;
             }
+        }
+    }
+
+    @media (max-width: 800px) {
+        .hide-smartphone {
+            display: none;
         }
     }
 }

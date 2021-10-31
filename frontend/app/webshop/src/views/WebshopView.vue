@@ -402,7 +402,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         background: $color-gray;
         border-radius: $border-radius;
         margin-bottom: 30px;
-        margin-top: -20px;
+        margin-top: 0px;
         position: relative;
 
         @media (max-width: 801px) {

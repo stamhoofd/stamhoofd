@@ -1,6 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar :large="true">
+        <STNavigationBar>
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
