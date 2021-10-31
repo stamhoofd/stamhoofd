@@ -22,7 +22,7 @@
                 </a>
                 <h1>Kies jouw vereniging</h1>
                 <div class="input-icon-container icon search gray">
-                    <input v-model="query" class="input" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+                    <input v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" @input="query = $event.target.value">
                 </div>
                 <p v-if="!loading && filteredResults.length == 0 && !query">
                     Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.

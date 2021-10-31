@@ -26,7 +26,7 @@
                         </div>
                     </STInputBox>
 
-                    <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                    <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
 
                     <hr>
 
