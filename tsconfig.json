@@ -3,7 +3,7 @@
         "target": "es2017",
         "module": "esnext",
         "jsx": "preserve",
-        "importHelpers": true,
+        "importHelpers": false,
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "esModuleInterop": true,

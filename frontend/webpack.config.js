@@ -131,8 +131,8 @@ module.exports = {
                         loader: 'ts-loader',
                         options: { 
                             appendTsSuffixTo: [/\.vue$/],
-                            transpileOnly: process.env.NODE_ENV !== "production",
-                            happyPackMode: process.env.NODE_ENV !== "production",
+                            transpileOnly: process.env.NODE_ENV !== "production" || true,
+                            happyPackMode: process.env.NODE_ENV !== "production" || true,
                         },
                     }
                 ]
@@ -275,7 +275,7 @@ module.exports = {
             // add errors to webpack instead of warnings
             failOnError: true,
         })*/
-        ...(process.env.NODE_ENV === "production") ? [] : [new ForkTsCheckerWebpackPlugin(
+        ...(process.env.NODE_ENV === "production" && false) ? [] : [new ForkTsCheckerWebpackPlugin(
             {
                 typescript: {
                     enabled: true,
