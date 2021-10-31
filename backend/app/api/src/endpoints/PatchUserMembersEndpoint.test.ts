@@ -1,12 +1,12 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, KeychainedMembers, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
-
 import { EncryptedMemberFactory } from '@stamhoofd/models';
 import { MemberFactory } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { EncryptedMember, KeychainedMembers, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
+
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
 
 
@@ -26,14 +26,21 @@ describe("Endpoint.PatchUserMembersEndpoint", () => {
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("PATCH", "/v82/members", organization.getApiHost(), {
-            members: members.map(m => { return {
-                    put: m.encode({ version: 82 })
-                }
-            }),
-            keychainItems: keychainItems.map(m => { return {
-                    put: m.encode({ version: 82 })
-                }
-            })
+            members: {
+                _isPatch: true,
+                changes: members.map(m => { 
+                    return {
+                        put: m.encode({ version: 82 })
+                    }
+                })
+            },
+            keychainItems: {
+                _isPatch: true,
+                    changes: keychainItems.map(m => { return {
+                        put: m.encode({ version: 82 })
+                    }
+                })
+            }
         });
         r.headers.authorization = "Bearer " + token.accessToken
 

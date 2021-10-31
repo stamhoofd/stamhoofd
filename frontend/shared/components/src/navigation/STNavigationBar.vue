@@ -255,7 +255,6 @@ export default class STNavigationBar extends Vue {
     .input {
         width: 220px;
         display: inline-block;
-        margin: 5px 5px;
         flex-shrink: 10000000;
 
         @media (max-width: 500px) {

@@ -1,8 +1,9 @@
 /* eslint-disable jest/expect-expect */
 
-import { OrganizationEmail, PermissionLevel, Permissions } from "@stamhoofd/structures"
 import { OrganizationFactory } from "@stamhoofd/models"
 import { UserFactory } from "@stamhoofd/models"
+import { OrganizationEmail, PermissionLevel, Permissions } from "@stamhoofd/structures"
+
 import { ForwardHandler } from "./ForwardHandler"
 
 describe("ForwardHandler", () => {
@@ -112,23 +113,6 @@ describe("ForwardHandler", () => {
 
         // Check notice
         expect(options!.text).toContain("naar alle beheerders")
-    })
-
-    it("Skip email if organization doesn't have emails", async () => {
-        const organization = await new OrganizationFactory({}).create()
-
-        // Admin that should get ignored
-        await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create()
-
-        const options = await ForwardHandler.handle("From: someone@example.com\nSubject: Hello\nTo: "+organization.uri + "@stamhoofd.email\nContent-Type: text/plain\n\nContent hier", {
-            recipients: [organization.uri + "@stamhoofd.email"],
-            spamVerdict: { status: 'PASS' },
-            virusVerdict: { status: 'PASS' },
-            spfVerdict: { status: 'PASS' },
-            dkimVerdict: { status: 'PASS' },
-            dmarcVerdict: { status: 'PASS' },
-        })
-        expect(options).toBeUndefined()
     })
 
     it("should ignore aws bounce emails", async () => {

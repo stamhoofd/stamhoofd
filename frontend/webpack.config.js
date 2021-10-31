@@ -9,7 +9,6 @@ const PreloadWebpackPlugin = require('@vue/preload-webpack-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
 const autoprefixer = require('autoprefixer');
 const webpack = require("webpack")
-require('dotenv').config({path: __dirname+'/.env'})
 const fs = require("fs")
 const path = require("path")
 
