@@ -1,19 +1,20 @@
 <template>
-    <div class="st-view background">
+    <div class="st-view background payments-view">
         <STNavigationBar title="Overschrijvingen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-
-            <template #right>
-                <div class="input-icon-container icon search gray">
-                    <div class="input-icon-container icon search gray">
-                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
-                    </div>
-                </div>
-            </template>
         </STNavigationBar>
 
         <main>
             <h1>Overschrijvingen</h1>
+
+            <div class="input-with-buttons data-table-prefix title-description">
+                <div>
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
+                </div>
+                <div />
+            </div>
     
             <Spinner v-if="loading" />
             <STList v-else>
@@ -411,3 +412,11 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
     }
 }
 </script>
+
+<style lang="scss">
+.payments-view {
+    .title-description {
+        padding-bottom: 20px;
+    }
+}
+</style>
