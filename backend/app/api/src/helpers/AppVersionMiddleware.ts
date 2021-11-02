@@ -18,6 +18,9 @@ function getRequestIP(request: Request): string {
 export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
     handleRequest(request: Request) {
         if (request.method == "OPTIONS") {
+            if (STAMHOOFD.environment === "development") {
+                console.log(getRequestIP(request)+": "+request.method+" "+request.host+request.url)
+            }
             return
         }
 

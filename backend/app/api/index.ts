@@ -8,6 +8,7 @@ import { sleep } from "@stamhoofd/utility";
 
 import { areCronsRunning, crons } from './src/crons';
 import { AppVersionMiddleware } from "./src/helpers/AppVersionMiddleware";
+import { CORSMiddleware } from "./src/helpers/CORSMiddleware";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -43,14 +44,15 @@ const start = async () => {
     
     // Send the app version along
     routerServer.addResponseMiddleware(AppVersionMiddleware)
+    routerServer.addResponseMiddleware(CORSMiddleware)
     routerServer.addRequestMiddleware(AppVersionMiddleware)
-    routerServer.defaultHeaders = {
+    /*routerServer.defaultHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PATCH, PUT, DELETE",
         "Access-Control-Expose-Headers": "*",
         "Access-Control-Max-Age": "86400"
-    };
+    };*/
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
