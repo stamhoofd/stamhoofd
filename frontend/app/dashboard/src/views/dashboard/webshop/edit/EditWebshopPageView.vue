@@ -280,7 +280,7 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
         return DNSRecord.create({
             type: DNSRecordType.CNAME,
             name: this.webshop.domain+".",
-            value: "domains.stamhoofd.shop"
+            value: "domains.stamhoofd.shop."
         })
     }
 

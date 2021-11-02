@@ -347,14 +347,6 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
             margin-left: auto;
         }
     }
-
-    .data-table {
-
-
-        select.input {
-            width: auto;
-        }
-    }
 }
 
 </style>

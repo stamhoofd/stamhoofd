@@ -25,7 +25,7 @@ module.exports = merge(common, {
             mode: 'webapp', // optional can be 'webapp' or 'light' - 'webapp' by default
             devMode: 'webapp', // optional can be 'webapp' or 'light' - 'light' by default 
             favicons: {
-                theme_color: '#0053ff',
+                //theme_color: '#0053ff',
             }
         })]
     ],
