@@ -45,8 +45,7 @@
             <hr>
             <h2>Domeinnaam</h2>
 
-            <p>Alle informatie over domeinnamen vind je op <a class="inline-link" href="https://stamhoofd.be/docs/domeinnaam-koppelen" target="_blank">deze pagina</a>.</p>
-
+            <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen'" target="_blank">deze pagina</a>.</p>
 
             <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
                 <p class="warning-box">
@@ -70,7 +69,7 @@
 
             <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
                 <p v-if="enableMemberModule" class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
                 </p>
                 <p v-else class="st-list-description">
                     Jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
@@ -90,10 +89,10 @@
 
             <template v-else>
                 <p v-if="enableMemberModule" class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="registerUrl" target="_blank">{{ registerUrl }}</a>. Je kan ook je eigen domeinnaam (bv. inschrijven.mijnvereniging.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.
+                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
                 </p>
                 <p v-else class="st-list-description">
-                    Je kan e-mails versturen vanaf je eigen domeinnaam (bv. info@jouw-domeinnaam.be). Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.
+                    {{ $t('dashboard.settings.personalize.domainDescription') }}
                 </p>
 
                 <p class="st-list-description">
@@ -120,12 +119,13 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput,IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
-import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput, IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
+import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import DNSRecordsView from './DNSRecordsView.vue';
 import DomainSettingsView from './DomainSettingsView.vue';
 
@@ -164,15 +164,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     get enableMemberModule() {
         return this.organization.meta.modules.useMembers
     }
-
-    get registerUrl() {
-        if (this.organization.privateMeta && this.organization.privateMeta.mailDomain && this.organization.registerDomain) {
-            return "https://"+this.organization.registerDomain
-        } 
-
-        return "https://"+this.organization.uri + '.' + process.env.HOSTNAME_REGISTRATION
-    }
-
+    
     get squareLogoResolutions() {
         return [
             ResolutionRequest.create({
@@ -327,7 +319,7 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     }
    
     mounted() {
-        HistoryManager.setUrl("/settings/personalize");
+        UrlHelper.setUrl("/settings/personalize");
     }
 }
 </script>

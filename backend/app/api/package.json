@@ -22,7 +22,7 @@
     "dependencies": {
         "@mollie/api-client": "^3.4.0",
         "@simonbackx/simple-database": "^1.20",
-        "@simonbackx/simple-endpoints": "^1.8.0",
+        "@simonbackx/simple-endpoints": "^1.9.2",
         "@types/mysql": "^2.15.9",
         "aws-sdk": "^2.885.0",
         "axios": "^0.21.1",
@@ -37,7 +37,6 @@
         "mysql": "^2.18.1",
         "node-rsa": "^1.1.1",
         "nodemailer": "^6.6",
-        "sharp": "^0.25.4",
-        "tslib": "^1.11.1"
+        "sharp": "^0.25.4"
     }
 }

@@ -46,20 +46,9 @@
         <hr>
         <h2>Betaalmethodes</h2>
 
-        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" href="https://stamhoofd.be/docs/online-betalen" target="_blank">deze pagina</a>.</p>
+        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
 
-        <Checkbox v-model="enableTransfers">
-            Overschrijvingen (gratis, maar zelf op te volgen)
-        </Checkbox>
-        <Checkbox v-model="enablePayconiq">
-            Payconiq (20 cent)
-        </Checkbox>
-        <Checkbox v-model="enableBancontact">
-            Bancontact (31 cent)
-        </Checkbox>
-        <Checkbox v-model="enableIDEAL">
-            iDEAL (29 cent)
-        </Checkbox>
+        <EditPaymentMethodsBox :methods="paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
 
         <p v-if="isAnyTicketType" class="warning-box">
             Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddelijk.
@@ -102,7 +91,7 @@
                 >
             </STInputBox>
             <p class="style-description-small">
-                Voorbeeld van een mededeling: “{{ transferExample }}”
+                Voorbeeld: “{{ transferExample }}”
             </p>
         </template>
 
@@ -178,15 +167,16 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, DateSelection, ErrorBox, IBANInput,Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem,TimeInput,Toast,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { WebshopField, WebshopOnSiteMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { Country, WebshopField, WebshopOnSiteMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import WebshopRolePermissionRow from '../../admins/WebshopRolePermissionRow.vue';
 import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';
 import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
@@ -205,7 +195,8 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
         RadioGroup,
         Radio,
         WebshopRolePermissionRow,
-        WebshopFieldsBox
+        WebshopFieldsBox,
+        EditPaymentMethodsBox
     },
     directives: { Tooltip },
 })
@@ -397,8 +388,8 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         return [
             { 
                 value: TransferDescriptionType.Structured,
-                name: "Gestructureerde mededeling",
-                description: "Geen kans op typefouten vanwege validatie in bankapps"
+                name: this.$t('shared.transferTypes.structured'),
+                description: "Willekeurig aangemaakt. Geen kans op typefouten vanwege validatie in bankapps"
             },
             { 
                 value: TransferDescriptionType.Reference,
@@ -408,7 +399,7 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
             { 
                 value: TransferDescriptionType.Fixed,
                 name: "Vaste mededeling",
-                description: "Altijd dezelfde mededeling voor alle bestellingen"
+                description: "Altijd dezelfde mededeling voor alle bestellingen. Opgelet: dit kan niet gewijzigd worden als bestellers de QR-code scannen, voorzie dus zelf geen eigen vervangingen zoals 'bestelling + naam'!"
             }
         ]
     }
@@ -473,8 +464,15 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         this.$emit("patch", p)
     }
 
+    get isBelgium() {
+        return this.organization.address.country == Country.Belgium
+    }
+
     get transferExample() {
         if (this.transferType == TransferDescriptionType.Structured) {
+            if (!this.isBelgium) {
+                return "4974 3024 6755 6964"
+            }
             return "+++705/1929/77391+++"
         }
 
@@ -489,128 +487,16 @@ export default class EditWebshopGeneralView extends Mixins(NavigationMixin) {
         return this.webshop.meta.paymentMethods.includes(PaymentMethod.Transfer)
     }
 
-    set enableTransfers(enable: boolean) {
-        if (enable == this.enableTransfers) {
-            return;
-        }
-
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        p.meta = meta
-
-        if (enable) {
-            meta.paymentMethods.addPut(PaymentMethod.Transfer)
-        } else {
-            if (this.webshop.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-            meta.paymentMethods.addDelete(PaymentMethod.Transfer) 
-        }
-
-        this.$emit("patch", p)
+    get paymentMethods() {
+        return this.webshop.meta.paymentMethods
     }
 
-    get enablePayconiq() {
-        return this.webshop.meta.paymentMethods.includes(PaymentMethod.Payconiq)
+    patchPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
+        this.$emit("patch", PrivateWebshop.patch({
+            meta: WebshopMetaData.patch({
+                paymentMethods: patch
+            })
+        }))
     }
-
-    set enablePayconiq(enable: boolean) {
-        if (enable == this.enablePayconiq) {
-            return;
-        }
-
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        p.meta = meta
-
-        if (enable) {
-            if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
-                new Toast("Om Payconiq te activeren moet je eerst een API-key invullen bij de instellingen van je vereniging (links in het menu). Stuur ons zeker een mailtje via hallo@stamhoofd.be bij vragen in afwachting van onze documentatie.", "error red").setHide(15000).show();
-                return;
-            }
-            meta.paymentMethods.addPut(PaymentMethod.Payconiq)
-        } else {
-            if (this.organization.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-
-            meta.paymentMethods.addDelete(PaymentMethod.Payconiq) 
-        }
-
-        this.$emit("patch", p)
-    }
-    
-    get enableBancontact() {
-        return this.webshop.meta.paymentMethods.includes(PaymentMethod.Bancontact)
-    }
-
-    set enableBancontact(enable: boolean) {
-        if (enable == this.enableBancontact) {
-            return;
-        }
-
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        p.meta = meta
-
-        if (enable) {
-            if (!this.organization.privateMeta?.mollieOnboarding || !this.organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                new Toast("Je kan Bancontact niet activeren, daarvoor moet je eerst online betalingen activeren bij instellingen. Daarna kan je Bancontact betalingen accepteren.", "error red").show();
-                return
-            }
-            meta.paymentMethods.addPut(PaymentMethod.Bancontact)
-        } else {
-            if (this.webshop.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-
-            meta.paymentMethods.addDelete(PaymentMethod.Bancontact) 
-        }
-
-        this.$emit("patch", p)
-    }
-
-    get enableIDEAL() {
-        return this.webshop.meta.paymentMethods.includes(PaymentMethod.iDEAL)
-    }
-
-    set enableIDEAL(enable: boolean) {
-        if (enable == this.enableIDEAL) {
-            return;
-        }
-
-        const p = PrivateWebshop.patch({})
-        const meta = WebshopMetaData.patch({})
-        p.meta = meta
-
-        if (enable) {
-            if (!this.organization.privateMeta?.mollieOnboarding || !this.organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                new Toast("Je kan iDEAL niet activeren, daarvoor moet je eerst online betalingen activeren bij instellingen. Daarna kan je iDEAL betalingen accepteren.", "error red").show();
-                return
-            }
-            meta.paymentMethods.addPut(PaymentMethod.iDEAL)
-        } else {
-            if (this.webshop.meta.paymentMethods.length == 1) {
-                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
-                return
-            }
-
-            meta.paymentMethods.addDelete(PaymentMethod.iDEAL) 
-        }
-
-        this.$emit("patch", p)
-    }
-
-
-  
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/base/text-styles.scss';
-
-</style>

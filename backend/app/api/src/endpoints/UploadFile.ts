@@ -68,7 +68,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         }
 
 
-        if (!process.env.SPACES_BUCKET || !process.env.SPACES_ENDPOINT || !process.env.SPACES_KEY || !process.env.SPACES_SECRET) {
+        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: "not_available",
                 message: "This endpoint is temporarily not available",
@@ -93,7 +93,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         });
 
 
-        if (!process.env.SPACES_BUCKET || !process.env.SPACES_ENDPOINT || !process.env.SPACES_KEY || !process.env.SPACES_SECRET) {
+        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: "not_available",
                 message: "Uploading is not available",
@@ -104,12 +104,12 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         const fileContent = await fs.readFile(file.path);
 
         const s3 = new AWS.S3({
-            endpoint: process.env.SPACES_ENDPOINT,
-            accessKeyId: process.env.SPACES_KEY,
-            secretAccessKey: process.env.SPACES_SECRET
+            endpoint: STAMHOOFD.SPACES_ENDPOINT,
+            accessKeyId: STAMHOOFD.SPACES_KEY,
+            secretAccessKey: STAMHOOFD.SPACES_SECRET
         });
 
-        let prefix = (process.env.SPACES_PREFIX ?? "")
+        let prefix = (STAMHOOFD.SPACES_PREFIX ?? "")
         if (prefix.length > 0) {
             prefix += "/"
         }
@@ -117,9 +117,9 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         // Also include the source, in private mode
         const fileId = uuidv4();
         const uploadExt = file.type == "application/pdf" ? "pdf" : "pdf"
-        const key = prefix+(process.env.NODE_ENV ?? "development")+"/"+fileId+"/"+(file.name ?? (fileId+"."+uploadExt));
+        const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+fileId+"/"+(file.name ?? (fileId+"."+uploadExt));
         const params = {
-            Bucket: process.env.SPACES_BUCKET,
+            Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
             Body: fileContent, // todo
             ContentType: file.type ?? "application/pdf",
@@ -128,7 +128,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const fileStruct = new File({
             id: fileId,
-            server: "https://"+process.env.SPACES_BUCKET+"."+process.env.SPACES_ENDPOINT,
+            server: "https://"+STAMHOOFD.SPACES_BUCKET+"."+STAMHOOFD.SPACES_ENDPOINT,
             path: key,
             size: fileContent.length,
             name: file.name

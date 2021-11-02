@@ -5,7 +5,9 @@
         <p>Voeg de gemeenten, provincies en landen toe waarin je wilt leveren.</p>
 
         <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
-            <input v-model="searchQuery" class="input search" placeholder="Toevoegen" @input="searchQuery = $event.target.value">
+            <div class="input-icon-container icon search gray">
+                <input v-model="searchQuery" class="input" placeholder="Toevoegen" @input="searchQuery = $event.target.value">
+            </div>
         </LoadingButton>
     
         <STList>

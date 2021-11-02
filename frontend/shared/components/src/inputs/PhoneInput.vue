@@ -7,6 +7,8 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { Country } from "@stamhoofd/structures"
 import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 
 @Component({
@@ -38,6 +40,7 @@ export default class PhoneInput extends Vue {
     @Watch('value')
     onValueChanged(val: string | null) {
         if (val === null) {
+            this.phoneRaw = ""
             return
         }
         this.phoneRaw = val
@@ -70,23 +73,32 @@ export default class PhoneInput extends Vue {
             return true
         }
         try {
-            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js")
-            const phoneNumber = libphonenumber.parsePhoneNumberFromString(this.phoneRaw, "BE")
+            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js/mobile")
+            const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, I18nController.shared?.country ?? Country.Belgium)
 
             if (!phoneNumber || !phoneNumber.isValid()) {
+                for (const country of Object.values(Country)) {
+                    const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, country)
+
+                    if (phoneNumber && phoneNumber.isValid()) {
+                        this.errorBox = new ErrorBox(new SimpleError({
+                            "code": "invalid_field",
+                            "message": this.$t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
+                            "field": "phone"
+                        }))
+                        return false
+                    }
+                }
                 this.errorBox = new ErrorBox(new SimpleError({
                     "code": "invalid_field",
-                    "message": "Ongeldig GSM-nummer",
+                    "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
                     "field": "phone"
                 }))
-
-                if (this.value !== null) {
-                    this.$emit("input", null)
-                }
                 return false
 
             } else {
                 const v = phoneNumber.formatInternational();
+                this.phoneRaw = v
         
                 if (this.value !== v) {
                     this.$emit("input", v)
@@ -96,16 +108,14 @@ export default class PhoneInput extends Vue {
             }
         } catch (e) {
             console.error(e)
-            this.errorBox = new ErrorBox(e)
+            this.errorBox = new ErrorBox(new SimpleError({
+                "code": "invalid_field",
+                "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
+                "field": "phone"
+            }))
             return false
         }
         
     }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-
-</style>

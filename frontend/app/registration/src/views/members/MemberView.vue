@@ -83,7 +83,7 @@
                     </template>
 
                     <template v-if="member.details.phone">
-                        <dt>GSM-nummer</dt>
+                        <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                         <dd>{{ member.details.phone }}</dd>
                     </template>
 
@@ -147,7 +147,7 @@
                     <dt>Naam</dt>
                     <dd>{{ contact.name }}</dd>
 
-                    <dt>GSM-nummer</dt>
+                    <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                     <dd>{{ contact.phone }}</dd>
                 </dl>
                 <hr>
@@ -354,7 +354,3 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/components/member-details.scss";
-</style>

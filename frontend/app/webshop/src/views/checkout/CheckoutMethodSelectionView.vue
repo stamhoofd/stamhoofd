@@ -1,6 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar :large="true">
+        <STNavigationBar>
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
@@ -40,8 +40,9 @@
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,ErrorBox, LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, ErrorBox, LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -138,14 +139,8 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Method.toLowerCase())
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Method.toLowerCase())
     }
 }
 </script>
 
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

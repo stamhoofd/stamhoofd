@@ -26,7 +26,7 @@
                         >
                     </STInputBox>
 
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
+                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
                 </div>
 
                 <div>
@@ -35,7 +35,7 @@
                             v-model="website"
                             class="input"
                             type="url"
-                            placeholder="bv. https://www.vereniging.be"
+                            :placeholder="$t('dashboard.inputs.website.placeholder')"
                         >
                     </STInputBox>
                     <p class="style-description-small">
@@ -98,12 +98,13 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator, VATNumberInput } from "@stamhoofd/components";
-import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures"
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator, VATNumberInput } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
+import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 @Component({
     components: {
@@ -295,7 +296,7 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/general")
+        UrlHelper.setUrl("/settings/general")
     }
 }
 </script>

@@ -43,7 +43,7 @@
                 </div>
 
                 <div>
-                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer" :required="false" />
+                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('shared.inputs.mobile.label')" :required="false" />
                 </div>
             </div>
         </main>

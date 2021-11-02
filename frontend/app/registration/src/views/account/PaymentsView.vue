@@ -4,7 +4,9 @@
             <h1>Afrekeningen</h1>
             <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
 
-            <p v-if="payments.length === 0" class="info-box">Er zijn momenteel nog geen afrekeningen beschikbaar voor jouw account</p>
+            <p v-if="payments.length === 0" class="info-box">
+                Er zijn momenteel nog geen afrekeningen beschikbaar voor jouw account
+            </p>
 
             <STList v-else>
                 <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="canOpenPayment(payment)" @click="openPayment(payment)">
@@ -35,10 +37,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, LoadingView, OrganizationLogo,STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components"
-import { SessionManager } from "@stamhoofd/networking";
-import { Payment, PaymentDetailed, PaymentMethod,RegistrationWithMember } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox, LoadingView, OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { PaymentMethodHelper } from "@stamhoofd/structures";
+import { Payment, PaymentDetailed, PaymentMethod, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -102,13 +105,7 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     paymentMethodName(method: PaymentMethod) {
-        switch (method) {
-            case PaymentMethod.Transfer: return "Betaald via overschrijving"
-            case PaymentMethod.Bancontact: return "Betaald via Bancontact"
-            case PaymentMethod.iDEAL: return "Betaald via iDEAL"
-            case PaymentMethod.Payconiq: return "Betaald via Payconiq by Bancontact"
-        }
-        return "Onbekende betaalmethode"
+        return "Betaald via "+PaymentMethodHelper.getName(method)
     }
 
     get payments() {
@@ -154,7 +151,7 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl("/")
+        UrlHelper.setUrl("/")
     }
 
     canOpenPayment(payment: PaymentDetailed) {

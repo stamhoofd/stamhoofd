@@ -47,7 +47,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
             return new Response(undefined)
         }
         const user = users[0].setRelation(User.organization, organization);
-        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user)
+        const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, request.i18n)
         
         // Send email
         Email.send({

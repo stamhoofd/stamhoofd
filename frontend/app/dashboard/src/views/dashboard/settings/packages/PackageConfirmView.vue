@@ -136,7 +136,7 @@
             </template>
 
             <Checkbox v-model="terms">
-                Ik ga akkoord met de <a href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank" class="inline-link">algemene voorwaarden</a>
+                Ik ga akkoord met de <a :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank" class="inline-link">algemene voorwaarden</a>
             </Checkbox>
 
             <hr>
@@ -497,8 +497,6 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .package-confirm-view {
     .pricing-box {

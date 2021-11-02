@@ -5,16 +5,22 @@
             <dd>{{ record.type }}</dd>
 
             <dt>Naam</dt>
-            <dd class="selectable" @click="copyElement" v-tooltip="'Klik om te kopiëren'">{{ record.name }}</dd>
+            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" @click="copyElement">
+                {{ record.name }}
+            </dd>
 
             <dt>Waarde</dt>
-            <dd class="selectable" @click="copyElement" v-tooltip="'Klik om te kopiëren'">{{ record.value }}</dd>
+            <dd v-tooltip="'Klik om te kopiëren'" class="selectable" @click="copyElement">
+                {{ record.value }}
+            </dd>
 
             <dt>TTL</dt>
-            <dd class="selectable" @click="copyElement">3600</dd>
+            <dd class="selectable" @click="copyElement">
+                3600
+            </dd>
 
-            <span class="icon green success" v-if="record.status == 'Valid'"/>
-            <span class="icon error" v-if="record.status == 'Failed'"/>
+            <span v-if="record.status == 'Valid'" class="icon green success" />
+            <span v-if="record.status == 'Failed'" class="icon error" />
         </dl>
         <template v-if="record.errors">
             <div v-for="error in record.errors.errors" :key="error.id" class="error-box" style="word-wrap: break-word">
@@ -26,13 +32,10 @@
 
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective, Tooltip } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, DNSRecord, OrganizationDomains } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { DNSRecord } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {

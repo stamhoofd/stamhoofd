@@ -26,8 +26,8 @@
                             
                             <div class="button-box">
                                 <button class="button primary full" @click="login()">
-                                    <span class="lock" />
-                                    Inloggen
+                                    <span class="icon lock" />
+                                    <span>Inloggen</span>
                                 </button>
                                 <button class="button secundary full" type="button" @click="createAccount()">
                                     Account aanmaken
@@ -46,7 +46,7 @@
                         </aside>
                     </div>
                     <p class="stamhoofd-footer">
-                        <a href="https://www.stamhoofd.be/ledenadministratie" target="_blank" class="button text">Ledenadministratie door <strong class="notranslate">Stamhoofd</strong></a>
+                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'" target="_blank" class="button text">Ledenadministratie door <strong class="notranslate">Stamhoofd</strong></a>
                     </p>
                 </main>
             </div>
@@ -61,10 +61,9 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
-import { GoogleTranslateHelper } from "@stamhoofd/utility";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LoadingButton, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
@@ -135,19 +134,21 @@ export default class HomeView extends Mixins(NavigationMixin){
     session = SessionManager.currentSession!
 
     mounted() {
-        const path = window.location.pathname;
-        const parts = path.substring(1).split("/");
-        let clearPath = true
-        const queryString = new URL(window.location.href).searchParams;
+        const parts =  UrlHelper.shared.getParts()
+        const queryString =  UrlHelper.shared.getSearchParams()
+
+        UrlHelper.setUrl("/")
 
         if (parts.length == 1 && parts[0] == 'reset-password') {
+            UrlHelper.shared.clear()
+
             const token = queryString.get('token');
             this.present(new ComponentWithProperties(ForgotPasswordResetView, { token }).setDisplayStyle("popup"));
-            clearPath = false
         }
 
         if (parts.length == 1 && parts[0] == 'login') {
-            clearPath = false
+            UrlHelper.shared.clear()
+
             const email = queryString.get('email')
             const hasAccount = queryString.get('hasAccount')
 
@@ -158,10 +159,6 @@ export default class HomeView extends Mixins(NavigationMixin){
                     this.createAccount(false, email, "Je kan jouw e-mailadres pas wijzigen nadat je een account hebt aangemaakt.")
                 }
             }
-        }
-
-        if (clearPath) {
-            HistoryManager.setUrl("/")
         }
 
         CenteredMessage.addListener(this, (centeredMessage) => {

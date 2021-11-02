@@ -1,12 +1,14 @@
-require('dotenv').config()
+require('@stamhoofd/backend-env').load()
 import { Column, Database } from "@simonbackx/simple-database";
-import { CORSPreflightEndpoint, EncodedResponse, Request, Router, RouterServer } from "@simonbackx/simple-endpoints";
+import { CORSPreflightEndpoint, Router, RouterServer } from "@simonbackx/simple-endpoints";
+import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
 import { Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 
 import { areCronsRunning, crons } from './src/crons';
 import { AppVersionMiddleware } from "./src/helpers/AppVersionMiddleware";
+import { CORSMiddleware } from "./src/helpers/CORSMiddleware";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -26,7 +28,12 @@ if (new Date().getTimezoneOffset() != 0) {
 }
 
 
-const start = async () => {
+
+const start = async () => {    
+    console.log("Loading locales...")
+    await I18n.load()
+
+    console.log("Initialising server...")
     const router = new Router();
     await router.loadAllEndpoints(__dirname + "/src/endpoints");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/*");
@@ -37,16 +44,17 @@ const start = async () => {
     
     // Send the app version along
     routerServer.addResponseMiddleware(AppVersionMiddleware)
+    routerServer.addResponseMiddleware(CORSMiddleware)
     routerServer.addRequestMiddleware(AppVersionMiddleware)
-    routerServer.defaultHeaders = {
+    /*routerServer.defaultHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PATCH, PUT, DELETE",
         "Access-Control-Expose-Headers": "*",
         "Access-Control-Max-Age": "86400"
-    };
+    };*/
 
-    routerServer.listen(parseInt(process.env.PORT ?? "9090"));
+    routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
     const cronInterval = setInterval(crons, 5 * 60 * 1000);
     crons()

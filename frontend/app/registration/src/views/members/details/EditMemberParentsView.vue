@@ -246,7 +246,6 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #member-parents-view {

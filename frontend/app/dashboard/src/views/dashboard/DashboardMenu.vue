@@ -15,29 +15,19 @@
                 </button>
             </div>
 
-            <a v-if="false" class="menu-button button heading" href="https://docs.stamhoofd.be" target="_blank">
-                <span class="icon info-filled" />
-                <span>Documentatie</span>
-            </a>
-
-            <a v-if="false && enableMemberModule" class="menu-button button heading" :href="registerUrl" target="_blank">
-                <span class="icon external" />
-                <span>Jouw inschrijvingspagina</span>
-            </a>
-
             <button v-if="whatsNewBadge" class="menu-button button heading" @click="manageWhatsNew()">
                 <span class="icon gift" />
                 <span>Wat is er nieuw?</span>
                 <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
             </button>
 
-            <button v-if="fullAccess && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
+            <button v-if="fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
                 <span class="icon key" />
                 <span>Gebruikers goedkeuren</span>
                 <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
             </button>
 
-            <hr v-if="whatsNewBadge || (enableMemberModule && false) || (fullAccess && organization.privateMeta.requestKeysCount > 0)">
+            <hr v-if="whatsNewBadge || (enableMemberModule && false) || (fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0)">
 
             <template v-if="enableMemberModule">
                 <div v-for="category in tree.categories" :key="category.id">
@@ -117,14 +107,20 @@
                     <span class="icon user" />
                     <span>Mijn account</span>
                 </button>
-                <button class="menu-button button heading" @click="logout">
-                    <span class="icon logout" />
-                    <span>Uitloggen</span>
-                </button>
+
+                <a class="menu-button button heading" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
+                    <span class="icon info" />
+                    <span>Documentatie</span>
+                </a>
 
                 <button class="menu-button button heading" @click="gotoFeedback(false)">
                     <span class="icon feedback" />
                     <span>Feedback</span>
+                </button>
+
+                <button class="menu-button button heading" @click="logout">
+                    <span class="icon logout" />
+                    <span>Uitloggen</span>
                 </button>
             </div>
         </main>
@@ -133,11 +129,10 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { StringDecoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadComponent, Logo, STNavigationBar,Toast,TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, LoadComponent, Logo, STNavigationBar,TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
@@ -156,21 +151,13 @@ import { WhatsNewCount } from '../../classes/WhatsNewCount';
         tooltip: TooltipDirective
     }
 })
-export default class Menu extends Mixins(NavigationMixin) {
+export default class DashboardMenu extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     currentlySelected: string | null = null
     whatsNewBadge = ""
 
     get organization() {
         return OrganizationManager.organization
-    }
-    
-    get registerUrl() {
-        if (this.organization.registerDomain) {
-            return "https://"+this.organization.registerDomain
-        } 
-
-        return "https://"+this.organization.uri+'.'+process.env.HOSTNAME_REGISTRATION
     }
 
     get isNative() {
@@ -188,7 +175,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     mounted() {
         const parts = UrlHelper.shared.getParts()
 
-        HistoryManager.setUrl("/")
+        UrlHelper.setUrl("/")
         let didSet = false
 
         if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {
@@ -374,7 +361,7 @@ export default class Menu extends Mixins(NavigationMixin) {
     manageWhatsNew() {
         this.whatsNewBadge = ""
 
-        window.open('https://www.stamhoofd.be/release-notes', '_blank');
+        window.open('https://'+this.$t('shared.domains.marketing')+'/release-notes', '_blank');
         localStorage.setItem("what-is-new", WhatsNewCount.toString());
     }
 

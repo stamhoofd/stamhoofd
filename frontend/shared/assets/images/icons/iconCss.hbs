@@ -1,0 +1,23 @@
+@font-face {
+font-family: "{{fontName}}";
+font-display: block;
+src: {{{src}}};
+}
+
+.icon:before, .icon-base:before {
+font-family: {{fontName}} !important;
+font-style: normal;
+font-weight: normal !important;
+}
+
+{{#each codepoints}}
+.icon.{{@key}}:before, .icon-base.{{@key}}:before{
+content: "\\{{this}}";
+}
+{{/each}}
+
+{{#each box_icons}}
+.{{@key}}-box:before {
+content: "\\{{this}}";
+}
+{{/each}}

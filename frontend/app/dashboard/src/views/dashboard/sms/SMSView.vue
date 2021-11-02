@@ -14,7 +14,7 @@
                 SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone of Mac.
             </div>
             <STInputBox v-if="customers.length == 0" title="Naar wie?">
-                <select id="sms-who" v-model="smsFilter" class="input">
+                <Dropdown id="sms-who" v-model="smsFilter">
                     <option value="parents">
                         Enkel naar ouders
                     </option>
@@ -24,7 +24,7 @@
                     <option value="all">
                         Ouders en leden
                     </option>
-                </select>
+                </Dropdown>
             </STInputBox>
 
             <STInputBox v-if="canUseBody" id="message-title" title="Bericht" />
@@ -52,12 +52,9 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, STNavigationTitle } from "@stamhoofd/components";
-import { STInputBox,STToolbar } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { SegmentedControl } from "@stamhoofd/components";
+import { CenteredMessage, Dropdown, SegmentedControl, STInputBox, STNavigationBar, STNavigationTitle, STToolbar } from "@stamhoofd/components";
 import { Customer, MemberWithRegistrations } from '@stamhoofd/structures';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -66,6 +63,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
         SegmentedControl,
         STInputBox,
         STToolbar,
+        Dropdown
     },
 })
 export default class SMSView extends Mixins(NavigationMixin) {
@@ -218,7 +216,6 @@ export default class SMSView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .sms-view {
     > main {

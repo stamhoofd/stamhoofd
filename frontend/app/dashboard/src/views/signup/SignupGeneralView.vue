@@ -29,15 +29,15 @@
                         >
                     </STInputBox>
 
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" />
+                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
                     <p class="style-description-small">
                         Geen adres? Vul dan een adres in dat in de buurt ligt
                     </p>
                 </div>
 
                 <div>
-                    <STInputBox title="Soort vereniging" error-fields="type" :error-box="errorBox">
-                        <select v-model="type" class="input">
+                    <STInputBox title="Type vereniging" error-fields="type" :error-box="errorBox">
+                        <Dropdown v-model="type">
                             <option :value="null" disabled>
                                 Maak een keuze
                             </option>
@@ -47,21 +47,21 @@
                                     {{ _type.name }}
                                 </option>
                             </optgroup>
-                        </select>
+                        </Dropdown>
                     </STInputBox>
                     <p class="style-description-small">
                         Hiermee stellen we automatisch al enkele instellingen goed in.
                     </p>
 
-                    <STInputBox v-if="type == 'Youth'" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
-                        <select v-model="umbrellaOrganization" class="input">
+                    <STInputBox v-if="type == 'Youth' && isBelgium" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
+                        <Dropdown v-model="umbrellaOrganization">
                             <option :value="null" disabled>
                                 Maak een keuze
                             </option>
                             <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                                 {{ item.name }}
                             </option>
-                        </select>
+                        </Dropdown>
                     </STInputBox>
                 </div>
             </div>
@@ -100,14 +100,16 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { NetworkManager } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper} from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
+import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import SignupAccountView from './SignupAccountView.vue';
+
 
 @Component({
     components: {
@@ -119,7 +121,8 @@ import SignupAccountView from './SignupAccountView.vue';
         BackButton,
         AddressInput,
         LoadingButton,
-        Checkbox
+        Checkbox,
+        Dropdown
     },
     metaInfo() {
         return {
@@ -130,9 +133,6 @@ import SignupAccountView from './SignupAccountView.vue';
                     name: 'description',
                     content: "Maak een gratis account aan om alles van Stamhoofd uit te proberen. Geheel zonder verplichtingen.",
                 }
-            ],
-            link: [
-                { rel: "canonical", href: "https://"+window.location.hostname+"/aansluiten" }
             ]
         }
     }
@@ -150,6 +150,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     registerCode = this.initialRegisterCode
     loading = false
 
+    // Make reactive
+    I18nController = I18nController.shared
+
     type: OrganizationType | null = null
     umbrellaOrganization: UmbrellaOrganization | null = null
 
@@ -161,9 +164,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             } catch (e) {
                 console.error(e)
             }
-            //HistoryManager.setUrl("/aansluiten/?code="+encodeURIComponent(this.initialRegisterCode.code)+"&org="+encodeURIComponent(this.initialRegisterCode.organization))
+            //UrlHelper.setUrl("/aansluiten/?code="+encodeURIComponent(this.initialRegisterCode.code)+"&org="+encodeURIComponent(this.initialRegisterCode.organization))
         }
-        HistoryManager.setUrl("/aansluiten")   
+        UrlHelper.setUrl("/aansluiten")   
 
         if (!this.initialRegisterCode) {
             try {
@@ -199,6 +202,10 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 localStorage.removeItem("savedRegisterCodeDate")
             })
         }
+    }
+
+    get isBelgium() {
+        return I18nController.shared.country === Country.Belgium && (!this.address  || this.address.country === Country.Belgium)
     }
 
     get AcquisitionType() {
@@ -259,12 +266,16 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 })
             }
 
-            if (this.umbrellaOrganization === null && this.type == OrganizationType.Youth) {
-                throw new SimpleError({
-                    code: "invalid_field",
-                    message: "Maak een keuze",
-                    field: "umbrellaOrganization"
-                })
+            if (this.type == OrganizationType.Youth && this.isBelgium) {
+                if (this.umbrellaOrganization === null) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Maak een keuze",
+                        field: "umbrellaOrganization"
+                    })
+                }
+            } else {
+                this.umbrellaOrganization = null
             }
 
             this.loading = true;
@@ -297,7 +308,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 meta: OrganizationMetaData.create({
                     type: this.type,
                     umbrellaOrganization: this.umbrellaOrganization,
-                    recordsConfiguration: RecordConfigurationFactory.create(this.type),
+                    recordsConfiguration: RecordConfigurationFactory.create(this.type, this.address.country),
                     defaultStartDate,
                     defaultEndDate
                 }),
@@ -399,10 +410,3 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-#signup-general-view {
-}
-</style>

@@ -4,7 +4,7 @@ import { Organization } from '../models/Organization';
 import { STPackage } from '../models/STPackage';
 
 export default new Migration(async () => {
-    if (process.env.NODE_ENV == "test") {
+    if (STAMHOOFD.environment == "test") {
         console.log("skipped in tests")
         return;
     }
@@ -54,7 +54,7 @@ export default new Migration(async () => {
             d.enabledLegacyRecords = []
         } else {
             // Use defaults as when creating a new organization
-            organization.meta.recordsConfiguration = RecordConfigurationFactory.create(organization.meta.type)
+            organization.meta.recordsConfiguration = RecordConfigurationFactory.create(organization.meta.type, organization.address.country)
         }
         
         await organization.save()

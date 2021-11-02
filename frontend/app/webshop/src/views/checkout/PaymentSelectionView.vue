@@ -1,6 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar :large="true">
+        <STNavigationBar>
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
@@ -34,8 +34,10 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, PaymentHandler,PaymentSelectionList, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { UrlHelper } from '@stamhoofd/networking';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -119,10 +121,12 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
         try {
            // Place order
+           const data = OrderData.create(CheckoutManager.checkout as any)
+           data.consumerLanguage = I18nController.shared?.language ?? "nl"
            const response = await WebshopManager.server.request({
                 method: "POST",
                 path: "/webshop/"+this.webshop.id+"/order",
-                body: OrderData.create(CheckoutManager.checkout as any), // todo: add some manual casting here
+                body: data, // todo: add some manual casting here
                 decoder: OrderResponse as Decoder<OrderResponse>
             })
 
@@ -184,14 +188,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
     }
 }
 </script>
 
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

@@ -29,7 +29,7 @@
                     </template>
 
                     <template v-if="member.details.phone">
-                        <dt>GSM-nummer</dt>
+                        <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                         <dd>{{ member.details.phone }}</dd>
                     </template>
 
@@ -46,6 +46,9 @@
                         <dd>
                             {{ member.details.address.street }} {{ member.details.address.number }}<br>{{ member.details.address.postalCode }}
                             {{ member.details.address.city }}
+                            <template v-if="member.details.address.country !== currentCountry">
+                                <br>{{ formatCountry(member.details.address.country) }}
+                            </template>
                         </dd>
                     </template>
                 </dl>
@@ -108,7 +111,7 @@
                     <dd>{{ parent.name }}</dd>
 
                     <template v-if="parent.phone">
-                        <dt>GSM-nummer</dt>
+                        <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                         <dd>{{ parent.phone }}</dd>
                     </template>
 
@@ -125,6 +128,9 @@
                         <dd>
                             {{ parent.address.street }} {{ parent.address.number }}<br>{{ parent.address.postalCode }}
                             {{ parent.address.city }}
+                            <template v-if="parent.address.country !== currentCountry">
+                                <br>{{ formatCountry(parent.address.country) }}
+                            </template>
                         </dd>
                     </template>
                 </dl>
@@ -143,7 +149,7 @@
                     <dt>Naam</dt>
                     <dd>{{ contact.name }}</dd>
 
-                    <dt>GSM-nummer</dt>
+                    <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
                     <dd>{{ contact.phone }}</dd>
                 </dl>
             </div>
@@ -302,7 +308,8 @@ import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { CountryHelper } from "@stamhoofd/structures/esm/dist";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -341,6 +348,14 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         this.checkBounces().catch(e => console.error(e))
+    }
+
+    get currentCountry() {
+        return OrganizationManager.organization.address.country
+    }
+
+    formatCountry(country: Country) {
+        return CountryHelper.getName(country)
     }
 
     getGroup(groupId: string) {
@@ -416,7 +431,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
 
     get sortedWarnings() {
-        return this.warnings.sort((warning1, warning2) => {
+        return this.warnings.slice().sort((warning1, warning2) => {
             const priority1: string = warning1.type
             const priority2: string = warning2.type
 
@@ -610,7 +625,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         switch (warning.type) {
             case RecordWarningType.Error: return " exclamation-two red"
             case RecordWarningType.Warning: return " exclamation yellow"
-            case RecordWarningType.Info: return " info"
+            case RecordWarningType.Info: return " info-text"
         }
     }
 
@@ -700,7 +715,3 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/components/member-details.scss";
-</style>

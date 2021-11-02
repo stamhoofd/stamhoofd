@@ -1,5 +1,6 @@
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Parent, ParentType } from "@stamhoofd/structures";
+import { I18nController } from "@stamhoofd/frontend-i18n";
+import { Country, Parent, ParentType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import XLSX from "xlsx";
 
@@ -10,7 +11,7 @@ import { SharedMatcher } from "../SharedMatcher";
 
 export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
     getName(): string {
-        return "GSM-nummer"
+        return I18nController.i18n.t("shared.inputs.mobile.label").toString()
     }
 
     get id() {
@@ -26,7 +27,7 @@ export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
             }
         }
         
-        const possibleMatch = ["telefoon", "gsm", "nummer", "phone", "tel"]
+        const possibleMatch = ["telefoon", "gsm", "nummer", "mobiel", "mobile", "phone", "tel"]
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
@@ -44,13 +45,24 @@ export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
 
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         const phoneRaw = ((cell.w ?? cell.v)+"").trim()
-        const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js")
-        const phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, "BE")
+        const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js/mobile")
+        const phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, I18nController.shared?.country ?? Country.Belgium)
 
         if (!phoneNumber || !phoneNumber.isValid()) {
+            for (const country of Object.values(Country)) {
+                const phoneNumber = libphonenumber.parsePhoneNumber(phoneRaw, country)
+
+                if (phoneNumber && phoneNumber.isValid()) {
+                    throw new SimpleError({
+                        "code": "invalid_field",
+                        "message": I18nController.i18n.t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
+                        "field": "phone"
+                    })
+                }
+            }
             throw new SimpleError({
                 "code": "invalid_field",
-                "message": "Ongeldig GSM-nummer",
+                "message": I18nController.i18n.t("shared.inputs.mobile.invalidMessage").toString(),
                 "field": "phone"
             })
         }

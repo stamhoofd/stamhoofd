@@ -1,14 +1,15 @@
 <template>
     <div class="code-input">
         <div>
+            <!-- Name incluses 'search' to disable safari autocomplete, who tries to autocomplete an email in a number input?! -->
             <input 
                 v-for="index in codeLength" 
                 :key="index"
                 ref="numberInput" 
-                type="text"
-                inputmode="decimal" 
+                type="number"
+                inputmode="numeric" 
                 class="input" 
-                autocomplete="no"
+                :name="'search-code_'+index" 
                 @input="onInput(index - 1)" 
                 @click="selectNext(index - 1)" 
                 @keyup.delete="clearInput(index - 1)" 
@@ -137,7 +138,11 @@ export default class CodeInput extends Vue {
             }
         }
         (this.$refs.numberInput[index] as HTMLInputElement).focus();
-        (this.$refs.numberInput[index] as HTMLInputElement).select();
+
+        if ((this.$refs.numberInput[index] as HTMLInputElement).value.length > 0) {
+            // iOS fix
+            (this.$refs.numberInput[index] as HTMLInputElement).select();
+        }
         this.updateValue()
     }
 
@@ -167,10 +172,11 @@ export default class CodeInput extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use "~@stamhoofd/scss/components/inputs.scss";
 
 .code-input {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+
     > div {
         display: inline-flex;
         flex-direction: row;
@@ -184,11 +190,8 @@ export default class CodeInput extends Vue {
             font-size: 20px;
             caret-color: transparent;
             text-transform: uppercase;
-            //user-select: none;
-
-            &::selection {
-                //background: transparent
-            }
+            -webkit-touch-callout: none !important;
+            user-select: none;
 
             &:nth-child(3) {
                 margin-right: 15px;

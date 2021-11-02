@@ -9,12 +9,12 @@ async function setAWSConfigurationSet(this: Organization) {
         }
 
         // Protect specific domain names
-        if (["stamhoofd.be", "stamhoofd.app", "stamhoofd.email"].includes(this.privateMeta.mailDomain)) {
+        if (["stamhoofd.be", "stamhoofd.nl", "stamhoofd.app", "stamhoofd.email"].includes(this.privateMeta.mailDomain)) {
             console.error("Tried to validate AWS mail identity with protected domains @"+this.id)
             return
         }
 
-        if (process.env.NODE_ENV != "production") {
+        if (STAMHOOFD.environment != "production") {
             // Temporary ignore this
             return;
         }
@@ -61,7 +61,7 @@ async function setAWSConfigurationSet(this: Organization) {
     }
     
 export default new Migration(async () => {
-    if (process.env.NODE_ENV == "test") {
+    if (STAMHOOFD.environment == "test") {
         console.log("skipped in tests")
         return;
     }

@@ -2,7 +2,7 @@
     <div class="st-view boxed">
         <STNavigationBar :large="true" :sticky="true">
             <template slot="left">
-                <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
+                <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <Logo class="responsive" />
                 </a>
             </template>
@@ -51,11 +51,7 @@ export default class NoPermissionsView extends Mixins(NavigationMixin){
     }
 
     gotoRegistration() {
-        if (this.organization.registerDomain) {
-            window.location.href = "https://"+this.organization.registerDomain
-        } else {
-            window.location.href = "https://"+this.organization.uri+"."+process.env.HOSTNAME_REGISTRATION
-        }
+        window.location.href = this.organization.registerUrl
     }
 
     logout() {
@@ -63,8 +59,3 @@ export default class NoPermissionsView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-</style>

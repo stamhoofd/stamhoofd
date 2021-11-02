@@ -92,7 +92,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {
                 
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
+                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
                     if (molliePayments.length == 1) {
@@ -103,7 +103,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         if (token) {
                             const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
                             const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
-                                testmode: process.env.NODE_ENV != 'production',
+                                testmode: STAMHOOFD.environment != 'production',
                             })
 
                             console.log(mollieData) // log to log files to check issues

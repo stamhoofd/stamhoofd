@@ -1,0 +1,20 @@
+{
+  "shared": {
+    "inputs": {
+      "iban": {
+        "placeholder": "E.g. NL21 INGB 3115 4044 17"
+      }
+    },
+    "domains": {
+      "marketing": "www.stamhoofd.nl"
+    },
+    "emails": {
+      "complaints": "complaints@stamhoofd.nl",
+      "general": "hello@stamhoofd.nl"
+    }
+  },
+  "backend": {},
+  "dashboard": {},
+  "webshop": {},
+  "registration": {}
+}

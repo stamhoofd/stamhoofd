@@ -1,5 +1,6 @@
 
 import { column,Database,ManyToOneRelation,Model } from "@simonbackx/simple-database";
+import { I18n } from "@stamhoofd/backend-i18n";
 import basex from "base-x";
 import crypto from "crypto";
 
@@ -104,15 +105,19 @@ export class PasswordToken extends Model {
         return token;
     }
 
-    static async getPasswordRecoveryUrl(user: UserWithOrganization) {
+    static async getPasswordRecoveryUrl(user: UserWithOrganization, i18n: I18n) {
         // Send an e-mail to say you already have an account + follow password forgot flow
         const token = await PasswordToken.createToken(user)
 
         let host: string;
         if (user.permissions) {
-            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
+            host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
         } else {
             host = "https://"+user.organization.getHost()
+
+            if (i18n.language != user.organization.i18n.language) {
+                host += "/"+i18n.language
+            }
         }
 
         return host+"/reset-password"+(user.permissions ? "/"+encodeURIComponent(user.organization.id) : "")+"?token="+encodeURIComponent(token.token);

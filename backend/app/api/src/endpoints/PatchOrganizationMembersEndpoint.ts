@@ -89,7 +89,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
-            if (process.env.NODE_ENV == "development") {
+            if (STAMHOOFD.environment == "development") {
                 if (member.firstName == "create" || member.firstName == "Create") {
                     let group = groups[0];
 
@@ -410,7 +410,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             payment.organizationId = organization.id
             payment.method = Math.random() < 0.3 ? PaymentMethod.Payconiq : (Math.random()  < 0.5 ? PaymentMethod.Bancontact : PaymentMethod.Transfer )
             if (payment.method == PaymentMethod.Transfer) {
-                payment.transferDescription = Payment.generateDescription(organization.meta.transferSettings, "")
+                payment.transferDescription = Payment.generateDescription(organization, organization.meta.transferSettings, "")
 
                 if (payment.method == PaymentMethod.Transfer && Math.random() < 0.6) {
                     payment.status = PaymentStatus.Succeeded

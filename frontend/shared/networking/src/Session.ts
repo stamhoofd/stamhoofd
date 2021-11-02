@@ -177,7 +177,7 @@ export class Session implements RequestMiddleware {
         this.listeners.delete(owner)
     }
 
-    protected callListeners(changed: "userPrivateKey" | "user" | "organization" | "token") {
+    callListeners(changed: "userPrivateKey" | "user" | "organization" | "token") {
         for (const listener of this.listeners.values()) {
             listener(changed)
         }
@@ -203,11 +203,11 @@ export class Session implements RequestMiddleware {
 
         if (AppManager.shared.isNative && this.organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
             // Use demo server for app reviews
-            server.host = "https://" + this.organizationId + "." + process.env.HOSTNAME_DEMO_API;
+            server.host = "https://" + this.organizationId + "." + STAMHOOFD.domains.demoApi;
             return server
         }
         
-        server.host = "https://" + this.organizationId + "." + process.env.HOSTNAME_API;
+        server.host = "https://" + this.organizationId + "." + STAMHOOFD.domains.api;
         return server
     }
 
@@ -326,7 +326,8 @@ export class Session implements RequestMiddleware {
 
     async fetchOrganization(shouldRetry = true): Promise<Organization> {
         console.log("Fetching session organization...")
-        const response = await this.authenticatedServer.request({
+
+        const response = await (this.hasToken() ? this.authenticatedServer : this.server).request({
             method: "GET",
             path: "/organization",
             decoder: new KeychainedResponseDecoder(Organization as Decoder<Organization>),

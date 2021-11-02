@@ -71,16 +71,14 @@
 </template>
 
 <script lang="ts">
-import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import { IN } from "../../../../pdfkit.standalone";
 import CreditsView from "./CreditsView.vue";
 import InvoiceDetailsView from "./InvoiceDetailsView.vue";
 
@@ -111,7 +109,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        HistoryManager.setUrl("/settings/billing");
+        UrlHelper.setUrl("/settings/billing");
         this.reload().catch(e => {
             console.error(e)
         })
@@ -155,7 +153,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
             a.click();
         } else {
             this.present(new ComponentWithProperties(InvoiceDetailsView, { invoice }).setDisplayStyle("popup"))
-            new CenteredMessage("PDF ontbreekt", "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via hallo@stamhoofd.be als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
+            new CenteredMessage("PDF ontbreekt", "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via "+this.$t('shared.emails.general')+" als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
         }
         
     }
@@ -180,10 +178,3 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

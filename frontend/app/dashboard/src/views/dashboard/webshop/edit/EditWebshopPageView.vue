@@ -53,13 +53,13 @@
                     v-model="customUrl"
                     class="input"
                     type="text"
-                    placeholder="bv. shop.domeinnaam.be/wafelbak"
+                    :placeholder="$t('dashboard.inputs.shopUrl.placeholder')"
                     autocomplete=""
                     @blur="resetCache"
                 >
             </STInputBox>
             <p class="st-list-description">
-                Hier kan je je eigen domeinnaam kiezen, en eventueel met een achtervoegsel. Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS wijzigingen moet doen.
+                {{ $t('dashboard.webshop.customDomain.description') }}
             </p>
             
             <template v-if="dnsRecord">

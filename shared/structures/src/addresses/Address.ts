@@ -24,13 +24,13 @@ export class Address extends AutoEncoder {
         return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + CountryHelper.getName(this.country)
     }
 
-    static createDefault(): Address {
+    static createDefault(country = Country.Belgium): Address {
         return Address.create({
             street: "",
             number: "",
             postalCode: "",
             city: "",
-            country: Country.Belgium
+            country
         })
     }
 

@@ -16,17 +16,17 @@
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" name="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
                 </div>
 
                 <div>
                     <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
-                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                                <input v-model="firstName" name="given-name" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                             </div>
                             <div>
-                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                                <input v-model="lastName" name="family-name" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
                             </div>
                         </div>
                     </STInputBox>
@@ -36,10 +36,10 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
-                        <input v-model="password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="password" name="new-password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
                     <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                        <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
                     </STInputBox>
                 </div>
 
@@ -51,15 +51,15 @@
 
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text">
-                    Ik heb kennis genomen van <a class="inline-link" href="https://voorwaarden.stamhoofd.be/privacy" target="_blank">het privacybeleid</a>.
+                    Ik heb kennis genomen van <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/privacy'" target="_blank">het privacybeleid</a>.
                 </Checkbox>
 
                 <Checkbox v-model="acceptTerms" class="long-text">
-                    Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/algemene-voorwaarden" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    Ik heb <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank">de algemene voorwaarden</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
                 </Checkbox>
 
                 <Checkbox v-model="acceptDataAgreement" class="long-text">
-                    Ik heb <a class="inline-link" href="https://voorwaarden.stamhoofd.be/verwerkersovereenkomst" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
+                    Ik heb <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
                 </Checkbox>
             </div>
         </main>
@@ -238,8 +238,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
 #signup-account-view {
     .checkbox-box {
         margin-top: 15px;

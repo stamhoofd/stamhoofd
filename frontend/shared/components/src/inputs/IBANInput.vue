@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="iban" :error-box="errorBox">
-        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
+        <input v-model="ibanRaw" class="input" type="text" :class="{ error: !valid }" :placeholder="placeholder !== null ? placeholder : $t('shared.inputs.iban.placeholder')" :autocomplete="autocomplete" @change="validate">
     </STInputBox>
 </template>
 
@@ -30,8 +30,8 @@ export default class IBANInput extends Vue {
     @Prop({ default: true })
     required!: boolean
 
-    @Prop({ default: "Bv. BE71 6316 1793 1969" })
-    placeholder!: string
+    @Prop({ default: null })
+    placeholder!: string | null
 
     @Prop({ default: "email" })
     autocomplete!: string
@@ -92,9 +92,3 @@ export default class IBANInput extends Vue {
     }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-
-</style>

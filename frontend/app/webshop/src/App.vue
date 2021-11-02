@@ -9,8 +9,9 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationWithWebshop } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
@@ -43,6 +44,9 @@ export default class App extends Vue {
                     decoder: OrganizationWithWebshop as Decoder<OrganizationWithWebshop>
                 })
 
+                I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
+                await I18nController.loadDefault("webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
+
                 WebshopManager.organization = response.data.organization
                 WebshopManager.webshop = response.data.webshop
 
@@ -58,6 +62,14 @@ export default class App extends Vue {
                 })
 
             } catch (e) {
+                if (!I18nController.shared) {
+                    try {
+                        await I18nController.loadDefault("webshop", undefined, "nl")
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization") || e.hasCode("unknown_webshop"))) {
                         Toast.fromError(e).show()
@@ -78,7 +90,7 @@ export default class App extends Vue {
             document.documentElement.translate = true
         }
 
-        if (process.env.NODE_ENV == "development") {
+        if (STAMHOOFD.environment == "development") {
             ComponentWithProperties.debug = true
         }
         HistoryManager.activate();

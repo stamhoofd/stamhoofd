@@ -17,11 +17,11 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox title="Titel" error-fields="type" :error-box="errorBox">
-                        <select v-model="type" class="input">
+                        <Dropdown v-model="type">
                             <option v-for="type in parentTypes" :key="type" :value="type">
                                 {{ parentTypeName(type) }}
                             </option>
-                        </select>
+                        </Dropdown>
                     </STInputBox>
 
                     <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
@@ -35,7 +35,7 @@
                         </div>
                     </STInputBox>
 
-                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer van ouder" :required="false" />
+                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('dashboard.inputs.parentPhone.placeholder')" :required="false" />
                     <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres van ouder" :required="false" />
                 </div>
 
@@ -56,7 +56,7 @@
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, SelectionAddressInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { BackButton, Checkbox, Dropdown,EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, SelectionAddressInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
 import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -77,6 +77,7 @@ import { FamilyManager } from '../../../../classes/FamilyManager';
         STListItem,
         BackButton,
         LoadingButton,
+        Dropdown
     }
 })
 export default class EditMemberParentView extends Mixins(NavigationMixin) {

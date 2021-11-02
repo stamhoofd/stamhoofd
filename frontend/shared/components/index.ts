@@ -79,6 +79,7 @@ export { default as TimeInput } from "./src/inputs/TimeInput.vue"
 export { default as TimeMinutesInput } from "./src/inputs/TimeMinutesInput.vue"
 export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 export { default as VATNumberInput } from "./src/inputs/VATNumberInput.vue"
+export { default as Dropdown } from "./src/inputs/Dropdown.vue"
 
 // Shared views should be last
 export { default as CartItemView } from "./src/views/CartItemView.vue"

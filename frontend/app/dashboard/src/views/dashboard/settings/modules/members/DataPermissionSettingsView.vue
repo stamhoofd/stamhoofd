@@ -10,7 +10,7 @@
                 Toestemming gegevensverzameling
             </h1>
             <p>
-                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a href="https://www.stamhoofd.be/docs/toestemming-gegevens-verzamelen" class="inline-link" target="_blank" rel="noopener">
+                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a :href="'https://'+$t('shared.domains.marketing')+'/docs/toestemming-gegevens-verzamelen'" class="inline-link" target="_blank" rel="noopener">
                     Lees onze gids
                 </a>
             </p>
@@ -70,8 +70,9 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { DataPermissionsSettings } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from "@stamhoofd/structures"
 import { Component, Mixins } from "vue-property-decorator";
@@ -247,7 +248,7 @@ export default class DataPermissionSettingsView extends Mixins(NavigationMixin) 
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/data-permission");
+        UrlHelper.setUrl("/settings/data-permission");
     }
 }
 </script>

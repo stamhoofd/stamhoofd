@@ -2,26 +2,28 @@
     <div class="st-view shade">
         <STNavigationBar v-if="!isNative" :large="true" :sticky="true">
             <template slot="left">
-                <a alt="Stamhoofd" href="https://www.stamhoofd.be" rel="noopener">
+                <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <Logo class="responsive" />
                 </a>
             </template>
 
             <template slot="right">
                 <a class="button primary" href="/aansluiten" @click.prevent="gotoSignup">
-                    Aansluiten
+                    {{ $t("dashboard.join") }}
                 </a>
             </template>
         </STNavigationBar>
         <STNavigationBar v-else :sticky="true" title="Kies jouw vereniging" />
         <main class="limit-width">
             <div class="organization-selection-view" :class="{native: isNative}">
-                <a v-if="!isNative" class="button text" href="https://www.stamhoofd.be" rel="noopener">
+                <a v-if="!isNative" class="button text" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <span class="icon arrow-left" />
                     <span>Stamhoofd website</span>
                 </a>
                 <h1>Kies jouw vereniging</h1>
-                <input v-model="query" class="input search" placeholder="Zoek op postcode of naam" @input="query = $event.target.value">
+                <div class="input-icon-container icon search gray">
+                    <input v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" @input="query = $event.target.value">
+                </div>
                 <p v-if="!loading && filteredResults.length == 0 && !query">
                     Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
                 </p>
@@ -57,10 +59,12 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties,HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent,CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
-import { AppManager, NetworkManager,Session,SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AsyncComponent, CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { AppManager, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationSimple } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -104,9 +108,6 @@ const throttle = (func, limit) => {
                     name: 'description',
                     content: "Via de Stamhoofd webapp kan je jouw vereniging beheren in je browser.",
                 }
-            ],
-            link: [
-                { rel: "canonical", href: "https://"+window.location.hostname }
             ]
         }
     }
@@ -153,7 +154,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         const parts =  UrlHelper.shared.getParts()
         const queryString =  UrlHelper.shared.getSearchParams()
 
-        HistoryManager.setUrl("/")
+        UrlHelper.setUrl("/")
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
             UrlHelper.shared.clear()
@@ -191,7 +192,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     activated() {
-        HistoryManager.setUrl("/")
+        UrlHelper.setUrl("/")
         this.updateDefault().catch(console.error)
     }
 
@@ -298,6 +299,33 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 }
                 return
             }
+
+            // Load the organization
+            try {
+                await session.fetchOrganization(false)
+            } catch (e) {
+                if (Request.isNetworkError(e)) {
+                    // ignore if we already have an organization
+                    if (!session.organization) {
+                        throw e;
+                    }
+                    // Show network warning only
+                    Toast.fromError(e).show()
+                } else {
+                    throw e;
+                }
+            }
+
+            if (session.organization && this.defaultOrganizations.find(o => o.id === organizationId)) {
+                // Update saved session (only if it was already added to the storage)
+                SessionManager.addOrganizationToStorage(session.organization).catch(console.error)
+            }
+
+            // Switch locale to other country if needed
+            if (session.organization) {
+                I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
+            }
+
             this.loadingSession = null
             this.present(new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(LoginView, { 
@@ -305,9 +333,19 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                 }) 
             }).setDisplayStyle("sheet"))
         } catch (e) {
-            console.error(e)
             this.loadingSession = null
-            Toast.fromError(e).show()
+            if (e.hasCode("invalid_organization")) {
+                // Clear from session storage
+                await SessionManager.removeOrganizationFromStorage(organizationId)
+                Toast.fromError(new SimpleError({
+                    code: "invalid_organization",
+                    message: e.message,
+                    human: "Deze vereniging bestaat niet (meer)"
+                })).show()
+            } else {
+                Toast.fromError(e).show()
+            }
+            
             await this.updateDefault()
         }
     }
@@ -346,7 +384,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         padding: 10px 0;
     }
 
-    > input.search {
+    input.search {
         max-width: none;
     }
 

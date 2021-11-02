@@ -11,7 +11,7 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
+import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentMethodHelper,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 type Params = Record<string, never>;
 type Query = undefined;
@@ -94,7 +94,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (totalPrice !== clientSidePrice) {
             throw new SimpleError({
                 code: "empty_data",
-                message: "Oeps! De prijs is gewijzigd terwijl je aan het inschrijven was. De totaalprijs kwam op "+Formatter.price(totalPrice)+", in plaats van "+Formatter.price(clientSidePrice)+". Herlaad je pagina en probeer opnieuw om de aanpassingen te zien doorkomen. Daarna kan je verder met inschrijven. Neem contact op met hallo@stamhoofd.be als je dit probleem blijft krijgen."
+                message: "Oeps! De prijs is gewijzigd terwijl je aan het inschrijven was. De totaalprijs kwam op "+Formatter.price(totalPrice)+", in plaats van "+Formatter.price(clientSidePrice)+". Herlaad je pagina en probeer opnieuw om de aanpassingen te zien doorkomen. Daarna kan je verder met inschrijven. Neem contact op met "+request.$t("shared.emails.general")+" als je dit probleem blijft krijgen."
             })
         }
 
@@ -175,7 +175,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (payment.method == PaymentMethod.Transfer) {
                 // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
-                payment.transferDescription = Payment.generateDescription(user.organization.meta.transferSettings, payNames.join(", "))
+                payment.transferDescription = Payment.generateDescription(user.organization, user.organization.meta.transferSettings, payNames.join(", "))
             }
             payment.paidAt = null
 
@@ -219,21 +219,21 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             let paymentUrl: string | null = null
             const description = 'Inschrijving bij '+user.organization.name
             if (payment.status != PaymentStatus.Succeeded) {
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
+                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard) {
                     
                     // Mollie payment
                     const token = await MollieToken.getTokenFor(user.organizationId)
                     if (!token) {
                         throw new SimpleError({
                             code: "",
-                            message: "Betaling via "+(payment.method == PaymentMethod.Bancontact ? "Bancontact" : "iDEAL") +" is onbeschikbaar"
+                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
                         })
                     }
                     const profileId = await token.getProfileId()
                     if (!profileId) {
                         throw new SimpleError({
                             code: "",
-                            message: "Betaling via "+(payment.method == PaymentMethod.Bancontact ? "Bancontact" : "iDEAL") +" is tijdelijk onbeschikbaar"
+                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is tijdelijk onbeschikbaar"
                         })
                     }
                     const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -242,8 +242,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             currency: 'EUR',
                             value: (totalPrice / 100).toFixed(2)
                         },
-                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
-                        testmode: process.env.NODE_ENV != 'production',
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                        testmode: STAMHOOFD.environment != 'production',
                         profileId,
                         description,
                         redirectUrl: "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id),

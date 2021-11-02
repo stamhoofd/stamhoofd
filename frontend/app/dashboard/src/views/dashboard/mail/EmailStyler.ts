@@ -1,10 +1,11 @@
 import { Organization } from "@stamhoofd/structures";
-
  
 export class EmailStyler {
     static async format(html: string, subject: string, organization: Organization): Promise<{ text: string; html: string }> {
         const primaryColor = organization.meta.color ?? "#0053ff"
-        const scss = ((await import("!!raw-loader!sass-loader!./email.scss")).default as string).replaceAll("#0053ff", primaryColor)
+
+        const imported = ((await import(/* webpackChunkName: "email-css" */ "./email.url.scss")).default)
+        const scss = imported[0][1].replaceAll("#0053ff", primaryColor)
 
         let styles = scss;
             const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";

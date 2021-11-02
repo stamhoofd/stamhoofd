@@ -38,7 +38,7 @@
                 v-model="url"
                 class="input"
                 type="url"
-                placeholder="bv. https://www.vereniging.be/privacy"
+                :placeholder="$t('dashboard.inputs.privacyUrl.placeholder')"
             >
         </STInputBox>
 

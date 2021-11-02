@@ -1,6 +1,8 @@
 <template>
-    <div class="input input-dropdown" @click="openContextMenu">
-        {{ dateText }}
+    <div class="input-icon-container right icon arrow-down-small gray">
+        <div class="input" @click="openContextMenu">
+            {{ dateText }}
+        </div>
     </div>
 </template>
 

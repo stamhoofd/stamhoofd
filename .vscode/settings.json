@@ -41,5 +41,14 @@
     "vetur.format.defaultFormatter.js": "none",
     "vetur.format.defaultFormatter.ts": "none",
     "search.useIgnoreFiles": false,
-    "vetur.trace.server": "messages"
+    "vetur.trace.server": "messages",
+
+    "i18n-ally.autoDetection": false,
+    "i18n-ally.localesPaths": [
+        "shared/locales/src"
+    ],
+    "i18n-ally.sourceLanguage": "nl",
+    "i18n-ally.displayLanguage": "nl",
+    "i18n-ally.keepFulfilled": false,
+    "i18n-ally.keystyle": "nested"
 }

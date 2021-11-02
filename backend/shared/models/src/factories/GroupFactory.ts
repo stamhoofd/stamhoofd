@@ -1,5 +1,5 @@
 import { Factory } from "@simonbackx/simple-database";
-import { GroupPrice, GroupPrices,GroupSettings } from "@stamhoofd/structures";
+import { GroupCategory, GroupPrice, GroupPrices,GroupSettings } from "@stamhoofd/structures";
 
 import { Group } from "../models/Group";
 import { Organization } from "../models/Organization";
@@ -13,6 +13,7 @@ class Options {
     delayDate?: Date
     delayPrice?: number
     delayReducedPrice?: number
+    skipCategory?: boolean
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -48,6 +49,12 @@ export class GroupFactory extends Factory<Options, Group> {
         }
 
         await group.save()
+
+        if (!this.options.skipCategory) {
+            organization.meta.rootCategory!.groupIds.push(group.id)
+            await organization.save()
+        }
+        
         return group;
     }
 }

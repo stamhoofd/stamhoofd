@@ -30,7 +30,9 @@
 
             <div class="input-with-buttons data-table-prefix title-description">
                 <div>
-                    <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
                 </div>
                 <div>
                     <button class="button text" @click="editFilter">
@@ -55,30 +57,30 @@
                         <th @click="toggleSort('name')">
                             Naam
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'name' && sortDirection == 'ASC',
-                                    down: sortBy == 'name' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'name' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'name' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th class="hide-smartphone" @click="toggleSort('info')">
                             Leeftijd
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'info' && sortDirection == 'ASC',
-                                    down: sortBy == 'info' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'info' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'info' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th class="hide-smartphone" @click="toggleSort('status')">
                             {{ waitingList ? "Op wachtlijst sinds" : "Status" }}
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'status' && sortDirection == 'ASC',
-                                    down: sortBy == 'status' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'status' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'status' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
@@ -207,7 +209,9 @@
                         <span class="dropdown-text">
                             Toelaten
                         </span>
-                        <div class="dropdown" @click.stop="openMailDropdown" />
+                        <div class="dropdown" @click.stop="openMailDropdown">
+                            <span class="icon arrow-down-small" />
+                        </div>
                     </button>
                 </LoadingButton>
                 <template v-else>
@@ -217,7 +221,9 @@
                     <LoadingButton :loading="actionLoading">
                         <button class="button primary" :disabled="selectionCount == 0" @click="openMail()">
                             <span class="dropdown-text">E-mailen</span>
-                            <div class="dropdown" @click.stop="openMailDropdown" />
+                            <div class="dropdown" @click.stop="openMailDropdown">
+                                <span class="icon arrow-down-small" />
+                            </div>
                         </button>
                     </LoadingButton>
                 </template>
@@ -229,19 +235,14 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
-import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { FilterEditor, GlobalEventBus, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
-import { Checkbox } from "@stamhoofd/components"
-import { STToolbar } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, Filter,getPermissionLevelNumber, Group, GroupCategoryTree, Member,MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, FilterEditor, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, Filter, getPermissionLevelNumber, Group, GroupCategoryTree, Member, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { MemberChangeEvent,MemberManager } from '../../../classes/MemberManager';
+import { MemberChangeEvent, MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from '../member/edit/EditMemberView.vue';
@@ -329,14 +330,14 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     mounted() {
         // Set url
         if (this.group) {
-            HistoryManager.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
+            UrlHelper.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
             document.title = "Stamhoofd - "+this.group.settings.name
         } else {
             if (this.category) {
-                HistoryManager.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
+                UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
                 document.title = "Stamhoofd - "+ this.category.settings.name +" - Alle leden"
             } else {
-                HistoryManager.setUrl("/groups/all")    
+                UrlHelper.setUrl("/groups/all")    
                 document.title = "Stamhoofd - Alle leden"
             }
             
@@ -816,7 +817,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get sortedMembers(): SelectableMember[] {
         if (this.sortBy == "info") {
-            return this.filteredMembers.sort((a, b) => {
+            return this.filteredMembers.slice().sort((a, b) => {
                 if (!a.member.details && !b.member.details) {
                     return 0
                 }
@@ -835,12 +836,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
         if (this.sortBy == "name") {
             const s = Member.sorterByName(this.sortDirection)
-            return this.filteredMembers.sort((a, b) => s(a.member, b.member));
+            return this.filteredMembers.slice().sort((a, b) => s(a.member, b.member));
         }
 
         if (this.sortBy == "status") {
             if (this.waitingList) {
-                return this.filteredMembers.sort((a, b) => {
+                return this.filteredMembers.slice().sort((a, b) => {
                     if (this.sortDirection == "ASC") {
                         if (this.registrationDate(a.member) > this.registrationDate(b.member)) {
                             return 1;
@@ -859,7 +860,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     return 0;
                 });
             }
-            return this.filteredMembers.sort((a, b) => {
+            return this.filteredMembers.slice().sort((a, b) => {
                 const aa = this.getMemberDescription(a.member).toLowerCase()
                 const bb = this.getMemberDescription(b.member).toLowerCase()
                 if (this.sortDirection == "ASC") {

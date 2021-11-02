@@ -1,6 +1,6 @@
+import { Organization } from "@stamhoofd/models";
 import { Formatter } from "@stamhoofd/utility";
 import { simpleParser } from "mailparser";
-import { Organization } from "@stamhoofd/models";
 
 export class ForwardHandler {
     static async handle(content: any, receipt: {
@@ -25,7 +25,7 @@ export class ForwardHandler {
         const from = parsed.from?.value[0]?.address
 
         if (from && from.endsWith("amazonses.com") && organization) {
-            console.error("Bounce e-mails from AWS SES for organizations are not forwarded")
+            console.log("Bounce e-mails from AWS SES for organizations are not forwarded. Received from "+from+", to "+email)
             return;
         }
 
@@ -35,10 +35,15 @@ export class ForwardHandler {
         if (organization) {
             organizationEmails = await organization.getReplyEmails()
             if (!organizationEmails) {
-                console.error("Missing reply emails for organization "+organization.id)
-                return
+                if (STAMHOOFD.environment === "test") {
+                    // ignore
+                } else {
+                    console.error("Missing reply emails for organization "+organization.id)
+                    // Still send to default
+                }
+            } else {
+                defaultEmail = organizationEmails.emails
             }
-            defaultEmail = organizationEmails.emails
         }
 
         console.log("Forward to "+defaultEmail)       

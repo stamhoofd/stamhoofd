@@ -7,13 +7,13 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, GlobalEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
-import { EmailAddress } from '@stamhoofd/email';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Logger } from "@stamhoofd/logger"
 import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
+import { Country, EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -29,26 +29,40 @@ import OrganizationSelectionView from './views/login/OrganizationSelectionView.v
 export default class App extends Vue {
     root = new ComponentWithProperties(PromiseView, {
         promise: async () => {
-            await SessionManager.restoreLastSession()
+            try {
+                await SessionManager.restoreLastSession()
 
-            if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
-                // Load Windows stylesheet
-                await import("@stamhoofd/scss/layout/windows-scrollbars.scss");
+                // Default language for dashboard is nl-BE, but if we are signed in, always force set the country to the organization country
+                await I18nController.loadDefault("dashboard", Country.Belgium, "nl", SessionManager.currentSession?.organization?.address?.country)
+
+                if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
+                    // Load Windows stylesheet
+                    try {
+                        await import("@stamhoofd/scss/layout/windows-scrollbars.scss");
+                    } catch (e) {
+                        console.error("Failed to load Windows scrollbars")
+                        console.error(e)
+                    }
+                }
+
+                return new ComponentWithProperties(AuthenticatedView, {
+                    root: new ComponentWithProperties(SplitViewController, {
+                        root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+                    }),
+                    loginRoot: new ComponentWithProperties(OrganizationSelectionView),
+                    noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
+                });
+            } catch (e) {
+                console.error(e)
+                Toast.fromError(e).setHide(null).show()
+                throw e
             }
-
-            return new ComponentWithProperties(AuthenticatedView, {
-                root: new ComponentWithProperties(SplitViewController, {
-                    root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
-                }),
-                loginRoot: new ComponentWithProperties(OrganizationSelectionView),
-                noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})
-            });
         }
     })
 
     created() {
-        if (process.env.NODE_ENV == "development") {
-            ComponentWithProperties.debug = true
+        if (STAMHOOFD.environment == "development") {
+            //ComponentWithProperties.debug = true
         }
 
         try {
@@ -84,6 +98,10 @@ export default class App extends Vue {
 
         if (parts.length == 2 && parts[0] == 'reset-password') {
             UrlHelper.shared.clear()
+
+            // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
+            UrlHelper.setUrl("/")
+
             const token = queryString.get('token');
             (this.$refs.modalStack as any).present({
                 components: [
@@ -119,6 +137,7 @@ export default class App extends Vue {
 
         if (parts.length == 2 && parts[0] == 'verify-email') {
             UrlHelper.shared.clear()
+
             const token = queryString.get('token')
             const code = queryString.get('code')
                 
@@ -149,6 +168,9 @@ export default class App extends Vue {
             const secret = queryString.get('secret');
 
             if (key && secret) {
+                // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
+                UrlHelper.setUrl("/");
+
                 (this.$refs.modalStack as any).present({
                     components: [
                         new ComponentWithProperties(NavigationController, { 
@@ -221,7 +243,7 @@ export default class App extends Vue {
             let unsubscribe = true
 
             if (details.unsubscribedMarketing) {
-                if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar klachten@stamhoofd.be")) {
+                if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar "+this.$t("shared.emails.complaints"))) {
                     return
                 }
 

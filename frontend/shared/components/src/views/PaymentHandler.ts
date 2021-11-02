@@ -4,7 +4,6 @@ import { Organization, Payment, PaymentMethod, PaymentStatus, TransferSettings }
 
 import PayconiqBannerView from "./PayconiqBannerView.vue"
 import PayconiqButtonView from "./PayconiqButtonView.vue"
-import PaymentPendingView from "./PaymentPendingView.vue"
 import TransferPaymentView from "./TransferPaymentView.vue"
 
 export class PaymentHandler {

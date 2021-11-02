@@ -12,9 +12,9 @@
             <BillingWarningBox />
 
             <p class="info-box icon help with-button">
-                Hulp nodig? Neem contact met ons op via hallo@stamhoofd.be
+                Hulp nodig? Neem contact met ons op via {{ $t('shared.emails.general') }}
 
-                <a href="mailto:hallo@stamhoofd.be" class="button text">
+                <a :href="'mailto:'+$t('shared.emails.general')" class="button text">
                     E-mail
                 </a>
             </p>
@@ -95,10 +95,10 @@
                 <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
                     <h2 class="style-title-list">
-                        Betaalmethodes
+                        {{ $t('dashboard.settings.menu.paymentMethods.title') }}
                     </h2>
                     <p class="style-description">
-                        Bankrekeningnummer, Payconiq, Bancontact...
+                        {{ $t('dashboard.settings.menu.paymentMethods.description') }}
                     </p>
                     <template slot="right">
                         <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
@@ -139,7 +139,7 @@
                         </p>
 
                         <template slot="right">
-                            <span v-if="!hasGroups" v-tooltip="'Je hebt nog geen leeftijdsgroepen ingesteld'" class="icon warning yellow" />
+                            <span v-if="!hasGroups" v-tooltip="'Je hebt nog geen inschrijvingsgroepen ingesteld'" class="icon warning yellow" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -274,7 +274,7 @@
 
 <script lang="ts">
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, HistoryManager,NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, BackButton, CenteredMessage, ErrorBox, STList, STListItem, STNavigationBar, TooltipDirective,Validator} from "@stamhoofd/components";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { Invite, PaymentMethod, User } from "@stamhoofd/structures"
@@ -430,7 +430,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     importMembers(animated = true) {
         if (this.organization.groups.length == 0) {
-            new CenteredMessage("Voeg eerst leeftijdsgroepen toe", "Je kan leden pas importeren nadat je jouw leeftijdsgroepen hebt ingesteld.", "error").addCloseButton().show()
+            new CenteredMessage("Voeg eerst inschrijvingsgroepen toe", "Je kan leden pas importeren nadat je jouw inschrijvingsgroepen hebt ingesteld.", "error").addCloseButton().show()
             return
         }
 
@@ -486,7 +486,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         UrlHelper.shared.clear()
 
         // First set current url already, to fix back
-        HistoryManager.setUrl("/settings")
+        UrlHelper.setUrl("/settings")
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
             // Open mollie settings
@@ -563,7 +563,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #settings-view {

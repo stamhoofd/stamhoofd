@@ -6,10 +6,10 @@
                 <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" name="given-name" autocomplete="given-name">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" name="family-name" autocomplete="family-name">
                         </div>
                     </div>
                 </STInputBox>
@@ -32,9 +32,9 @@
             </div>
 
             <div>
-                <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" title="Adres van dit lid" :validator="validator" :required="false" />
-                <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" title="E-mailadres van dit lid" placeholder="Enkel van lid zelf" :required="false" :validator="validator" />
-                <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" title="GSM-nummer van dit lid" :validator="validator" :required="false" placeholder="Enkel van lid zelf" />
+                <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" title="Adres (van dit lid)" :validator="validator" :required="false" />
+                <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" title="E-mailadres (van dit lid)" placeholder="Enkel van lid zelf" :required="false" name="email" :validator="validator" />
+                <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label')+' (van dit lid)'" :validator="validator" :required="false" name="mobile_phone" placeholder="Enkel van lid zelf" />
             </div>
         </div>
     </div>

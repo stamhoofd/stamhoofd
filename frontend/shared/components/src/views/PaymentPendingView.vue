@@ -1,6 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar title="Betaling"></STNavigationBar>
+        <STNavigationBar title="Betaling" />
         <div class="box">
             <main v-if="!payment || payment.status != 'Failed'">
                 <h1>Wachten op betaalbevestiging...</h1>
@@ -45,8 +45,8 @@ import { Component, Mixins,  Prop } from "vue-property-decorator";
     }
 })
 export default class PaymentPendingView extends Mixins(NavigationMixin){
-    @Prop({ default: null })
-    paymentId: string | null;
+    @Prop({ required: true })
+    paymentId: string;
 
     @Prop({ required: true })
     server: Server
@@ -82,7 +82,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
     poll() {
         this.timer = null;
-        const paymentId = this.paymentId ?? new URL(window.location.href).searchParams.get("id");
+        const paymentId = this.paymentId
         this.server
             .request({
                 method: "POST",
@@ -112,10 +112,3 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

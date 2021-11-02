@@ -26,6 +26,7 @@ import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.sv
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
 import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
 import { LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { PaymentMethodHelper } from "@stamhoofd/structures";
 import { Country, Organization, PaymentMethod } from '@stamhoofd/structures';
 import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
 
@@ -103,11 +104,8 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: return "Payconiq, KBC mobile of ING-app (snelst)"
             case PaymentMethod.Transfer: return "Via overschrijving"
-            case PaymentMethod.Bancontact: return "Bancontact"
-            case PaymentMethod.iDEAL: return "iDEAL"
-            case PaymentMethod.Unknown: return "?"
-            case PaymentMethod.DirectDebit: return "?"
         }
+        return PaymentMethodHelper.getNameCapitalized(paymentMethod)
     }
 
     getDescription(paymentMethod: PaymentMethod): string {
@@ -118,6 +116,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.iDEAL: return ""
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
+            case PaymentMethod.CreditCard: return ""
         }
     }
 
@@ -129,6 +128,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.iDEAL: return idealLogo
             case PaymentMethod.Unknown: return null
             case PaymentMethod.DirectDebit: return null
+            case PaymentMethod.CreditCard: return null
         }
     }
 }

@@ -74,7 +74,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
             if (u.hasAccount()) {
                 // Send an e-mail to say you already have an account + follow password forgot flow
-                const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user)
+                const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, request.i18n)
                 const { from, replyTo } = organization.getDefaultEmail()
                 
                 // Send email
@@ -105,7 +105,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         const code = await EmailVerificationCode.createFor(user, user.email)
 
         if (sendCode) {
-            code.send(user)
+            code.send(user, request.i18n)
         }
 
         return new Response(SignupResponse.create({

@@ -80,8 +80,8 @@
                             {{ organization.meta.companyAddress || organization.address }}
                         </aside>
                         <div>
-                            <a v-if="hasTickets" href="https://www.stamhoofd.be/ticketverkoop">Ticketverkoop via <Logo /></a>
-                            <a v-else href="https://www.stamhoofd.be/webshops">Webshop via <Logo /></a>
+                            <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'/ticketverkoop'">Ticketverkoop via <Logo /></a>
+                            <a v-else :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
                         </div>
                     </div>
                 </div>
@@ -93,8 +93,8 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CategoryBox,CenteredMessage, Checkbox,GlobalEventBus,LoadingView, Logo,OrganizationLogo,PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LoadingView, Logo, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
 import { CartItem, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -281,7 +281,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         const path = this.webshop.removeSuffix(UrlHelper.shared.getParts());
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
-        HistoryManager.setUrl(this.webshop.getUrlSuffix())
+        UrlHelper.setUrl(this.webshop.getUrlSuffix())
 
         if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];
@@ -289,13 +289,14 @@ export default class WebshopView extends Mixins(NavigationMixin){
         } else if (path.length == 2 && path[0] == 'tickets') {
             const secret = path[1];
             this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
-        } else if (path.length == 1 && path[0] == 'payment') {
+        } else if (path.length == 1 && path[0] == 'payment' && params.get("id")) {
+            const paymentId = params.get("id")
             const me = this
             this.show({
                 components: [
                     new ComponentWithProperties(PaymentPendingView, { 
                         server: WebshopManager.server, 
-                        paymentId: params.get("id"),
+                        paymentId,
                         finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
                             if (payment && payment.status == PaymentStatus.Succeeded) {
                                 // Can't use this.show, becaus this is deactivated -> no parents
@@ -401,7 +402,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         background: $color-gray;
         border-radius: $border-radius;
         margin-bottom: 30px;
-        margin-top: -20px;
+        margin-top: 0px;
         position: relative;
 
         @media (max-width: 801px) {

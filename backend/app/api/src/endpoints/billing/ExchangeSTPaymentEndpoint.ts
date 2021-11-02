@@ -89,13 +89,13 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {    
 
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.DirectDebit) {
+                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard || payment.method == PaymentMethod.DirectDebit) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
                     if (molliePayments.length == 1) {
                         const molliePayment = molliePayments[0]
                         // check status
-                        const apiKey = process.env.MOLLIE_API_KEY
+                        const apiKey = STAMHOOFD.MOLLIE_API_KEY
                         if (apiKey) {
                             const mollieClient = createMollieClient({ apiKey });
                             const mollieData = await mollieClient.payments.get(molliePayment.mollieId)

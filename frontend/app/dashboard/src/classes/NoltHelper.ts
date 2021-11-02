@@ -9,7 +9,7 @@ class ResponseBody extends AutoEncoder {
 
 export async function openNolt(check = false) {
     if (check) {
-        if (!document.referrer || (!document.referrer.startsWith("https://"+process.env.NOLT_URL) && !document.referrer.startsWith("https://www.stamhoofd.be") && !document.referrer.startsWith("https://www.stamhoofd.nl"))) {
+        if (!document.referrer || (!document.referrer.startsWith("https://"+STAMHOOFD.NOLT_URL) && !document.referrer.startsWith("https://www.stamhoofd.be") && !document.referrer.startsWith("https://www.stamhoofd.nl"))) {
             if (!await CenteredMessage.confirm("Wil je inloggen in het feedback systeem?", "Ja, open Feedback", "Je logt in op het feedback systeem met dit account: "+SessionManager.currentSession!.user!.email+". Je kan eerst van vereniging veranderen als je met een ander account wilt inloggen.", undefined, false)) {
                 return
             }
@@ -24,7 +24,7 @@ export async function openNolt(check = false) {
             decoder: ResponseBody as Decoder<ResponseBody>,
             shouldRetry: false
         })
-        window.location.href = "https://"+process.env.NOLT_URL+"/sso/"+encodeURIComponent(response.data.jwt)
+        window.location.href = "https://"+STAMHOOFD.NOLT_URL+"/sso/"+encodeURIComponent(response.data.jwt)
     } catch (e) {
         console.error(e)
         Toast.fromError(e).show()

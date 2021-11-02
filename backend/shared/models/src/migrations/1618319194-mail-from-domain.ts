@@ -2,7 +2,7 @@ import { Migration } from '@simonbackx/simple-database';
 import { Organization } from '../models/Organization';
 
 export default new Migration(async () => {
-    if (process.env.NODE_ENV == "test") {
+    if (STAMHOOFD.environment == "test") {
         console.log("skipped in tests")
         return;
     }

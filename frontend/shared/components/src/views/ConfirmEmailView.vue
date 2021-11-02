@@ -11,11 +11,11 @@
                     Verifieer jouw e-mailadres. Vul de code in uit de e-mail die we hebben gestuurd
                 </h1>
 
-                <p>Of klik op de link in de e-mail en wacht enkele seconden.</p>
+                <p>Of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
 
                 <div><CodeInput v-model="code" @complete="submit" /></div>
 
-                <STErrorsDefault :error-box="errorBox" />
+                <div><STErrorsDefault :error-box="errorBox" /></div>
             </main>
 
             <STToolbar>

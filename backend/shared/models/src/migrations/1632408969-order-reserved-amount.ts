@@ -5,7 +5,7 @@ import { Order } from '../models/Order';
  * Set the reservedAmount for all orders if they were included in the stock
  */
 export default new Migration(async () => {
-    if (process.env.NODE_ENV == "test") {
+    if (STAMHOOFD.environment == "test") {
         console.log("skipped in tests")
         return;
     }

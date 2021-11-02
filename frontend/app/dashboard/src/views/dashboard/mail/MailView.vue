@@ -31,11 +31,11 @@
                         <span class="icon settings" />
                         <span>Wijzigen</span>
                     </button>
-                    <select v-model="emailId" class="input">
+                    <Dropdown v-model="emailId">
                         <option v-for="email in emails" :key="email.id" :value="email.id">
                             {{ email.name ? (email.name+" <"+email.email+">") : email.email }}
                         </option>
-                    </select>
+                    </Dropdown>
                 </STInputBox>
             </div>
 
@@ -147,7 +147,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
@@ -185,6 +185,7 @@ class TmpFile {
         STList,
         STListItem,
         Checkbox,
+        Dropdown,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
@@ -342,7 +343,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         const missing = this.hardBounces
         this.present(new ComponentWithProperties(MissingFirstNameView, {
             title: "Deze e-mailadressen zijn ongeldig",
-            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd teruggestuurd. Dit komt voor als het e-mailadres ongeldig is of als de e-mailinbox van de afzender vol zit. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen. Als je denkt dat er een fout in zit, neem dan contact met ons op via hallo@stamhoofd.be om de blokkering op te heffen.",
+            description: "Er werd eerder al een e-mail verstuurd naar deze e-mailadressen, maar die werd teruggestuurd. Dit komt voor als het e-mailadres ongeldig is of als de e-mailinbox van de afzender vol zit. Om de reputatie van jullie en onze e-mailadressen te beschermen, mogen we geen e-mails versturen naar deze e-mailadressen. Als je denkt dat er een fout in zit, neem dan contact met ons op via "+this.$t('shared.emails.general')+" om de blokkering op te heffen.",
             emails: missing.map((m) => {
                 return {
                     email: m,
@@ -721,7 +722,6 @@ export default class MailView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .mail-view {
     > main {

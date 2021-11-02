@@ -9,6 +9,7 @@ import { Webshop } from './Webshop';
 import { WebshopCounter } from '../helpers/WebshopCounter';
 import { QueueHandler } from "@stamhoofd/queues";
 import { Ticket } from "./Ticket";
+import { I18n } from "@stamhoofd/backend-i18n";
 
 
 export class Order extends Model {
@@ -70,7 +71,13 @@ export class Order extends Model {
     static organization = new ManyToOneRelation(Organization, "organization");
 
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
-        return "https://"+this.webshop.getHost()+"/order/"+this.id
+        // Country locales are disabled on webshops (always the same country). But we need to add the language if it isn't the same as the organization default language
+        let locale = ""
+        if (this.data.consumerLanguage != this.webshop.organization.i18n.language) {
+            locale = "/"+this.data.consumerLanguage
+        }
+
+        return "https://"+this.webshop.getHost()+locale+"/order/"+this.id
     }
 
     /**
@@ -278,6 +285,8 @@ export class Order extends Model {
     sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getDefaultEmail()
+
+        const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
     
         const customer = this.data.customer
 
@@ -292,13 +301,15 @@ export class Order extends Model {
             text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen (via overschrijving). Je kan jouw bestelling nakijken via de volgende link:"
             + "\n"
             + this.getUrl()
-            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",
         })
     }
 
     sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getDefaultEmail()
+
+        const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
     
         const customer = this.data.customer
 
@@ -313,7 +324,7 @@ export class Order extends Model {
             text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu downloaden via de link hieronder:"
             + "\n"
             + this.getUrl()
-            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
+            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
         })
     }
 
@@ -339,7 +350,8 @@ export class Order extends Model {
             const organization = webshop.organization
             
             const { from, replyTo } = organization.getDefaultEmail()
-           
+            
+            const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
             const customer = this.data.customer
 
             const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
@@ -355,7 +367,7 @@ export class Order extends Model {
                         "Je kan jouw tickets downloaden en jouw bestelling nakijken via deze link::"
                     + "\n"
                     + this.setRelation(Order.webshop, webshop).getUrl()
-                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
+                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
                 })
             } else {
                 if (this.webshop.meta.ticketType === WebshopTicketType.None) {
@@ -369,7 +381,7 @@ export class Order extends Model {
                             ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
                         + "\n"
                         + this.setRelation(Order.webshop, webshop).getUrl()
-                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/webshops\n\n",
+                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",
                     })
                 } else {
                     // Also send a copy
@@ -382,7 +394,7 @@ export class Order extends Model {
                             ((payment && payment.method === PaymentMethod.Transfer) ? "Zodra jouw overschrijving op onze rekening aankomt, ontvang je jouw tickets via e-mail. Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
                         + "\n"
                         + this.setRelation(Order.webshop, webshop).getUrl()
-                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://www.stamhoofd.be/ticketverkoop\n\n",
+                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
                     })
                 }
             }

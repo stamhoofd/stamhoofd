@@ -1,3 +1,5 @@
+require('@stamhoofd/backend-env').load({path: __dirname+'/../../.env.test.json'})
+
 import { Database, Migration } from "@simonbackx/simple-database";
 const emailPath = require.resolve("@stamhoofd/email")
 const modelsPath = require.resolve("@stamhoofd/models")

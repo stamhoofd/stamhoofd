@@ -1,6 +1,6 @@
 <template>
-    <div class="st-view boxed">
-        <STNavigationBar :large="true">
+    <form class="st-view boxed" @submit.prevent="goNext">
+        <STNavigationBar>
             <BackButton v-if="canPop" slot="left" @click="pop" />
         </STNavigationBar>
 
@@ -13,43 +13,45 @@
                 <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                            <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                            <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
                         </div>
                     </div>
                 </STInputBox>
 
-                <EmailInput v-model="email" title="Jouw e-mailadres" :validator="validator" placeholder="Voor bevestingsemail" />
+                <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
 
-                <PhoneInput v-model="phone" title="Jouw GSM-nummer" :validator="validator" placeholder="Voor dringende info" />
+                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
                 <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
             </main>
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary">
                         <span>Doorgaan</span>
                         <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
             </STToolbar>
         </div>
-    </div>
+    </form>
 </template>
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,EmailInput,ErrorBox, LoadingButton, PhoneInput,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, FieldBox } from "@stamhoofd/components"
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, EmailInput, ErrorBox, FieldBox, LoadingButton, PhoneInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
+
 
 @Component({
     components: {
@@ -160,14 +162,8 @@ export default class CustomerView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
+        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
     }
 }
 </script>
 
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

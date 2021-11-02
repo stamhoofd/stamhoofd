@@ -122,18 +122,18 @@ export default class STNavigationBar extends Vue {
     // Todo: replace padding with variable padding
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     margin-top: calc(-1 * var(--st-vertical-padding, 20px) + var(--navigation-bar-margin, 20px) - var(--st-safe-area-top, 0px));
-    padding: var(--st-safe-area-top, 0px) var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
+    padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
     height: 60px;
 
     &.large {
         height: 80px;
         margin-top: calc(-1 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px));
-        margin-bottom: 20px;
+        margin-bottom: 0px;
         padding: var(--st-safe-area-top, 0px) 20px 0 20px;
 
         @media (max-width: 450px) {
             padding: var(--st-safe-area-top, 0px) 15px 0 15px;
-        }    
+        }
     }
     -webkit-app-region: drag;
 
@@ -255,7 +255,6 @@ export default class STNavigationBar extends Vue {
     .input {
         width: 220px;
         display: inline-block;
-        margin: 5px 5px;
         flex-shrink: 10000000;
 
         @media (max-width: 500px) {

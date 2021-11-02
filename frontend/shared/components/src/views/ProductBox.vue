@@ -33,11 +33,14 @@
                     <span v-else-if="remainingStock && remainingStock <= 10" class="style-tag warn">Nog {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }}</span>
                 </p>
             </div>
+            <figure v-if="imageSrc">
+                <img :src="imageSrc">
+            </figure>
+            <figure v-else>
+                <span class="icon arrow-right-small gray" />
+            </figure>
             <hr>
         </div>
-        <figure v-if="imageSrc">
-            <img :src="imageSrc">
-        </figure>
     </article>
 </template>
 
@@ -175,14 +178,13 @@ export default class ProductBox extends Mixins(NavigationMixin){
         border: 0;
         outline: 0;
         height: $border-width;
-        width: 100%;
         background: var(--color-current-border, #{$color-border});
         border-radius: $border-width/2;
         margin: 0;
         position: absolute;
         bottom: 0;
         left: 0;
-        right: 0;
+        right: calc(-1 * var(--st-horizontal-padding, 15px));
     }
 
     &:last-child {
@@ -303,7 +305,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
         }
     }
 
-    > figure {
+    figure {
         flex-shrink: 0;
         padding: 15px 0 15px 15px;
 
@@ -311,6 +313,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
             width: 70px;
             height: 70px;
             border-radius: $border-radius;
+            display: block;
 
             @media (min-width: 340px) {
                 width: 80px;
@@ -328,6 +331,11 @@ export default class ProductBox extends Mixins(NavigationMixin){
         @include style-side-view-shadow();
         padding-right: 0;
 
+        &:active {
+            transition: none;
+            background: $color-primary-background;
+        }
+
         > .content > hr {
             display: none;
         }
@@ -340,8 +348,8 @@ export default class ProductBox extends Mixins(NavigationMixin){
             padding: 15px;
         }
 
-        > figure {
-            padding: 15px 15px 0 15px;
+        figure {
+            padding: 15px 15px 15px 15px;
 
             img {
                 width: 100px;

@@ -61,7 +61,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: "email_in_use",
                         message: "This e-mail is already in use, we cannot set it",
-                        human: "We kunnen het e-mailadres van deze gebruiker niet instellen naar "+code.email+", omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons (hallo@stamhoofd.be) als we de gebruikers moeten combineren tot één gebruiker."
+                        human: "We kunnen het e-mailadres van deze gebruiker niet instellen naar "+code.email+", omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons ("+request.$t("shared.emails.general")+") als we de gebruikers moeten combineren tot één gebruiker."
                     })
                 }
 
@@ -93,7 +93,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: "email_in_use",
                     message: "This e-mail is already in use, we cannot set it",
-                    human: "We kunnen het e-mailadres van deze gebruiker niet instellen naar "+code.email+", omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons (hallo@stamhoofd.be) als we de gebruikers moeten combineren tot één gebruiker."
+                    human: "We kunnen het e-mailadres van deze gebruiker niet instellen naar "+code.email+", omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons ("+request.$t("shared.emails.general")+") als we de gebruikers moeten combineren tot één gebruiker."
                 })
             }
             throw e;

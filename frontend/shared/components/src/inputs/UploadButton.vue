@@ -87,8 +87,6 @@ export default class UploadButton extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .upload-button {
     .file-upload {

@@ -5,7 +5,7 @@ import { User } from '../models/User';
 import { Invite } from '../models/Invite';
 
 export default new Migration(async () => {
-    if (process.env.NODE_ENV == "test") {
+    if (STAMHOOFD.environment == "test") {
         console.log("skipped in tests")
         return;
     }

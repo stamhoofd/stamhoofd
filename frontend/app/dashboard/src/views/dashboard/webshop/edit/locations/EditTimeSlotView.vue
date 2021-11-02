@@ -2,8 +2,8 @@
     <div class="st-view product-price-edit-view">
         <STNavigationBar :title="isNew ? 'Tijdvak toevoegen' : 'Tijdvak bewerken'">
             <template slot="right">
-                <button class="button text" v-if="!isNew" @click="deleteMe">
-                    <span class="icon trash"/>
+                <button v-if="!isNew" class="button text" @click="deleteMe">
+                    <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <button class="button icon close gray" @click="pop" />
@@ -21,11 +21,11 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <STInputBox title="Datum" error-fields="date" :error-box="errorBox">
-                <DateSelection v-model="date"/>
+                <DateSelection v-model="date" />
             </STInputBox>
 
-            <TimeMinutesInput title="Van" :validator="validator" v-model="startTime" />
-            <TimeMinutesInput title="Tot" :validator="validator" v-model="endTime" />
+            <TimeMinutesInput v-model="startTime" title="Van" :validator="validator" />
+            <TimeMinutesInput v-model="endTime" title="Tot" :validator="validator" />
         </main>
 
         <STToolbar>
@@ -44,7 +44,7 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, DateSelection, Validator, CenteredMessage, TimeMinutesInput } from "@stamhoofd/components";
+import { CenteredMessage, DateSelection, ErrorBox, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeMinutesInput,Validator } from "@stamhoofd/components";
 import { Category, Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Organization, PrivateWebshop, Product, ProductPrice, Version, WaitingListType, Webshop, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -149,9 +149,3 @@ export default class EditTimeSlotView extends Mixins(NavigationMixin) {
     
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

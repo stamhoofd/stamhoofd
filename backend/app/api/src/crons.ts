@@ -1,4 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { EmailAddress } from '@stamhoofd/email';
 import { Group } from '@stamhoofd/models';
@@ -51,7 +52,7 @@ async function checkDNS() {
 }
 
 async function checkReplies() {
-    if (process.env.NODE_ENV !== "production") {
+    if (STAMHOOFD.environment !== "production") {
         console.log("Skippping replies checking")
         return
     }
@@ -63,7 +64,7 @@ async function checkReplies() {
             console.log("Received message from forwarding queue");
 
             if (message.ReceiptHandle) {
-                if (process.env.NODE_ENV === "production") {
+                if (STAMHOOFD.environment === "production") {
                     await sqs.deleteMessage({
                         QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding",
                         ReceiptHandle: message.ReceiptHandle
@@ -94,7 +95,7 @@ async function checkReplies() {
 
                             const options = await ForwardHandler.handle(content, receipt)
                             if (options) {
-                                if (process.env.NODE_ENV === "production") {
+                                if (STAMHOOFD.environment === "production") {
                                     Email.send(options)
                                 }
                             }
@@ -109,7 +110,7 @@ async function checkReplies() {
 }
 
 async function checkBounces() {
-    if (process.env.NODE_ENV !== "production") {
+    if (STAMHOOFD.environment !== "production") {
         console.log("Skippping bounce checking")
         return
     }
@@ -122,7 +123,7 @@ async function checkBounces() {
             console.log(message);
 
             if (message.ReceiptHandle) {
-                if (process.env.NODE_ENV === "production") {
+                if (STAMHOOFD.environment === "production") {
                     await sqs.deleteMessage({
                         QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue",
                         ReceiptHandle: message.ReceiptHandle
@@ -151,7 +152,15 @@ async function checkBounces() {
                             for (const recipient of b.bouncedRecipients) {
                                 const email = recipient.emailAddress
 
-                                if (type === "Permanent" || (recipient.diagnosticCode && (recipient.diagnosticCode as string).toLowerCase().includes("invalid domain"))) {
+                                if (
+                                    type === "Permanent" 
+                                    || (
+                                        recipient.diagnosticCode && (
+                                            (recipient.diagnosticCode as string).toLowerCase().includes("invalid domain") 
+                                            || (recipient.diagnosticCode as string).toLowerCase().includes('unable to lookup dns')
+                                        )
+                                    )
+                                ) {
                                     const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined
                                     if (organization) {
                                         const emailAddress = await EmailAddress.getOrCreate(email, organization.id)
@@ -183,7 +192,7 @@ async function checkBounces() {
 }
 
 async function checkComplaints() {
-    if (process.env.NODE_ENV !== "production") {
+    if (STAMHOOFD.environment !== "production") {
         console.log("Skippping complaints checking")
         return
     }
@@ -197,7 +206,7 @@ async function checkComplaints() {
             console.log(message)
 
             if (message.ReceiptHandle) {
-                if (process.env.NODE_ENV === "production") {
+                if (STAMHOOFD.environment === "production") {
                     await sqs.deleteMessage({
                         QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue",
                         ReceiptHandle: message.ReceiptHandle
@@ -236,12 +245,12 @@ async function checkComplaints() {
                              if (type == "virus" || type == "fraud") {
                                 console.error("Received virus / fraud complaint!")
                                 console.error(complaint)
-                                if (process.env.NODE_ENV === "production") {
+                                if (STAMHOOFD.environment === "production") {
                                     Email.sendInternal({
                                         to: "simon@stamhoofd.be",
                                         subject: "Received a "+type+" email notification",
                                         text: "We received a "+type+" notification for an e-mail from the organization: "+organization?.name+". Please check and adjust if needed.\n"
-                                    })
+                                    }, new I18n("nl", "BE"))
                                 }
                             }
                         } else {
@@ -270,7 +279,7 @@ async function checkPayments() {
         },
         method: {
             sign: "IN",
-            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
+            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
         },
         createdAt: {
             sign: ">",
@@ -355,7 +364,7 @@ async function checkBilling() {
     }
     
     const organizations = await Organization.where({ id: { sign: '>', value: lastBillingId } }, {
-        limit: process.env.NODE_ENV === "development" ? 10 : 10,
+        limit: STAMHOOFD.environment === "development" ? 10 : 10,
         sort: ["id"]
     })
 

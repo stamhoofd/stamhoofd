@@ -4,6 +4,7 @@ import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
 import htmlToText from 'html-to-text';
 import { sleep } from '@stamhoofd/utility';
+import { I18n } from "@stamhoofd/backend-i18n"
 
 export type EmailInterfaceBase = {
     to: string;
@@ -34,7 +35,7 @@ class EmailStatic {
         if (this.transporter) {
             return;
         }
-        if (!process.env.SMTP_HOST || !process.env.SMTP_PORT) {
+        if (!STAMHOOFD.SMTP_HOST || !STAMHOOFD.SMTP_PORT) {
             throw new Error("Missing environment variables to send emails");
             return;
         }
@@ -42,11 +43,11 @@ class EmailStatic {
         // create reusable transporter object using the default SMTP transport
         this.transporter = nodemailer.createTransport({
             pool: true,
-            host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT),
+            host: STAMHOOFD.SMTP_HOST,
+            port: STAMHOOFD.SMTP_PORT,
             auth: {
-                user: process.env.SMTP_USERNAME, // generated ethereal user
-                pass: process.env.SMTP_PASSWORD // generated ethereal password
+                user: STAMHOOFD.SMTP_USERNAME, // generated ethereal user
+                pass: STAMHOOFD.SMTP_PASSWORD // generated ethereal password
             }
         });
 
@@ -173,7 +174,7 @@ class EmailStatic {
     }
 
     private async doSend(data: EmailInterface) {
-        if (process.env.NODE_ENV === 'test') {
+        if (STAMHOOFD.environment === 'test') {
             // Do not send any emails
             return;
         }
@@ -208,9 +209,9 @@ class EmailStatic {
         // send mail with defined transport object
         const mail: any = {
             from: data.from, // sender address
-            bcc: (process.env.NODE_ENV === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
+            bcc: (STAMHOOFD.environment === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
             replyTo: data.replyTo,
-            to: process.env.NODE_ENV === "production" ? to : "hallo@stamhoofd.be",
+            to: STAMHOOFD.environment === "production" ? to : "hallo@stamhoofd.be",
             subject: data.subject, // Subject line
             text: data.text, // plain text body
         };
@@ -233,42 +234,45 @@ class EmailStatic {
             const info = await this.transporter.sendMail(mail);
             console.log("Message sent: %s", info.messageId);
         } catch (e) {
-            if (e.responseCode && e.responseCode == 554) {
-                // Email address is not verified.
-                if (!data.from.includes("@stamhoofd.be")) {
-                    this.sendInternal({
-                        to: "hallo@stamhoofd.be",
-                        subject: "Ongeldige e-mail setup",
-                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd: \n\n"+e
-                    })
-                }
-            }
             console.error("Failed to send e-mail:")
             console.error(e);
             console.error(mail);
 
-            // Sleep one second to give servers some time to fix possible rate limits
-            await sleep(1000);
+            // Sleep 3 seconds to give servers some time to fix possible rate limits
+            await sleep(3000);
 
             // Reschedule twice (at maximum) to fix temporary connection issues
             data.retryCount = (data.retryCount ?? 0) + 1;
 
             if (data.retryCount <= 2) {
                 this.send(data);
+            } else {
+                // Email address is not verified.
+                if (!data.from.includes("hallo@stamhoofd.be")) {
+                    this.sendInternal({
+                        to: "hallo@stamhoofd.be",
+                        subject: "E-mail kon niet worden verzonden",
+                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? "")
+                    }, new I18n("nl", "BE"))
+                }
             }
         }
+    }
+
+    getInternalEmailFor(i18n: I18n) {
+        return '"Stamhoofd" <'+ (i18n.$t("shared.emails.general")) +'>'
     }
 
     /**
      * Send an internal e-mail (from stamhoofd)
      */
-    sendInternal(data: EmailInterfaceBase) {
-        const mail = Object.assign(data, { from: '"Stamhoofd" <hallo@stamhoofd.be>'})
+    sendInternal(data: EmailInterfaceBase, i18n: I18n) {
+        const mail = Object.assign(data, { from: this.getInternalEmailFor(i18n) })
         this.send(mail)
     }
 
     send(data: EmailInterface) {
-        if (process.env.NODE_ENV === 'test') {
+        if (STAMHOOFD.environment === 'test') {
             // Do not send any emails
             return;
         }

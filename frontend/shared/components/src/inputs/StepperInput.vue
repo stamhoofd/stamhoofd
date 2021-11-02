@@ -56,7 +56,6 @@ export default class StepperInput extends Vue {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
 @use "~@stamhoofd/scss/base/variables.scss" as *;
-@use "~@stamhoofd/scss/components/inputs.scss" as *;
 
 .stepper-input {
     display: inline-flex;
@@ -65,6 +64,7 @@ export default class StepperInput extends Vue {
     border-radius: $border-radius;
     align-items: stretch;
     height: $input-height;
+    vertical-align: middle;
 
     hr {
         width: $border-width;

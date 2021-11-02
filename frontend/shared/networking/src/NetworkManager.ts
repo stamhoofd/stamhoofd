@@ -1,6 +1,7 @@
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Version } from '@stamhoofd/structures';
 
 import { AppManager } from './AppManager';
@@ -23,7 +24,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
      * Normal, non authenticated requests
      */
     get server() {
-        const server = new Server("https://"+process.env.HOSTNAME_API)
+        const server = new Server("https://"+STAMHOOFD.domains.api)
         server.middlewares.push(this)
         return server
     }
@@ -33,6 +34,10 @@ export class NetworkManagerStatic implements RequestMiddleware {
         (request as any).retryCount = ((request as any).retryCount ?? 0) + 1
 
         request.headers["X-Platform"] = AppManager.shared.platform
+
+        if (I18nController.shared) {
+            request.headers["X-Locale"] = I18nController.shared.locale
+        }
         return Promise.resolve()
     }
 

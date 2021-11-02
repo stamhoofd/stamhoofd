@@ -283,7 +283,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 try {
                     // Mollie payment is required
-                    const apiKey = process.env.MOLLIE_API_KEY
+                    const apiKey = STAMHOOFD.MOLLIE_API_KEY
                     if (!apiKey) {
                         throw new SimpleError({
                             code: "",
@@ -310,12 +310,12 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                             currency: 'EUR',
                             value: (price / 100).toFixed(2)
                         },
-                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
                         description,
                         customerId: user.organization.serverMeta.mollieCustomerId,
                         sequenceType: SequenceType.first,
-                        redirectUrl: "https://"+process.env.HOSTNAME_DASHBOARD+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
-                        webhookUrl: 'https://'+process.env.HOSTNAME_API+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                        redirectUrl: "https://"+STAMHOOFD.domains.dashboard+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
+                        webhookUrl: 'https://'+STAMHOOFD.domains.api+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
                         metadata: {
                             invoiceId: invoice.id,
                             paymentId: payment.id,
@@ -345,7 +345,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     }
                     throw new SimpleError({
                         code: "payment_failed",
-                        message: "Er ging iets mis bij het aanmaken van de betaling. Probeer later opnieuw of contacteer ons als het probleem zich blijft voordoen (hallo@stamhoofd.be)"
+                        message: "Er ging iets mis bij het aanmaken van de betaling. Probeer later opnieuw of contacteer ons als het probleem zich blijft voordoen ("+request.$t("shared.emails.general")+")"
                     })
                 }
             }

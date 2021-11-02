@@ -73,20 +73,21 @@
 
 <script lang="ts">
 import { Request } from '@simonbackx/simple-networking';
-import { ComponentWithProperties, HistoryManager,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective} from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { getPermissionLevelNumber, PermissionLevel, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopView from './edit/EditWebshopView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
+
 
 @Component({
     components: {
@@ -182,7 +183,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         UrlHelper.shared.clear()
 
         // Set url
-        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name))
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name))
         document.title = "Stamhoofd - " + this.preview.meta.name
 
         if (parts.length == 3 && parts[0] == 'webshops' && parts[2] == 'orders') {
@@ -207,7 +208,6 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 #webshop-overview {

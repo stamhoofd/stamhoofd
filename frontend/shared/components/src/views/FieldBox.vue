@@ -55,9 +55,6 @@ export default class FieldBox extends Mixins(NavigationMixin){
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
 .field-box {
     .style-description-small {
         padding-top: 5px;

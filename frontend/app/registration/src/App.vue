@@ -8,16 +8,17 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager,ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
-import { LoginHelper, NetworkManager, Session,SessionManager } from '@stamhoofd/networking';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, LoadingView, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { GoogleTranslateHelper } from '@stamhoofd/utility';
+import { GoogleTranslateHelper, sleep } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
 import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
-import { TabBarItem } from "./classes/TabBarItem"
+import { TabBarItem } from "./classes/TabBarItem";
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
 import RegistrationTabBarController from './views/overview/RegistrationTabBarController.vue';
@@ -57,7 +58,15 @@ export default class App extends Vue {
                 },
                 decoder: Organization as Decoder<Organization>
             })
-            console.log("Organization fetched!")
+
+            // Do we need to redirect?
+            if (window.location.hostname.toLowerCase() != response.data.resolvedRegisterDomain.toLowerCase()) {
+                // Redirect
+                window.location.href = UrlHelper.initial.getFullHref({ host: response.data.resolvedRegisterDomain })
+                return new ComponentWithProperties(LoadingView, {})
+            }
+            I18nController.skipUrlPrefixForLocale = "nl-"+response.data.address.country
+            await I18nController.loadDefault("registration", response.data.address.country, "nl", response.data.address.country)
 
             if (!response.data.meta.modules.useMembers) {
                 throw new Error("Member module disabled")
@@ -75,15 +84,16 @@ export default class App extends Vue {
 
             await SessionManager.setCurrentSession(session)
 
-            const path = window.location.pathname;
-            const parts = path.substring(1).split("/");
+            const parts =  UrlHelper.shared.getParts()
+            const queryString = UrlHelper.shared.getSearchParams()
 
             if (parts.length == 1 && parts[0] == 'verify-email') {
-                const queryString = new URL(window.location.href).searchParams;
+
                 const token = queryString.get('token')
                 const code = queryString.get('code')
                     
                 if (token && code) {
+                    UrlHelper.shared.clear()
                     const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
                     LoginHelper.verifyEmail(session, code, token).then(() => {
                         toast.hide()
@@ -138,6 +148,13 @@ export default class App extends Vue {
                 })
             });
         } catch (e) {
+            if (!I18nController.shared) {
+                try {
+                    await I18nController.loadDefault("registration", undefined, "nl")
+                } catch (e) {
+                    console.error(e)
+                }
+            }
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 if (!(e.hasCode("invalid_domain") || e.hasCode("unknown_organization"))) {
                     Toast.fromError(e).show()
@@ -158,7 +175,7 @@ export default class App extends Vue {
             document.documentElement.translate = true
         }
 
-        if (process.env.NODE_ENV == "development") {
+        if (STAMHOOFD.environment == "development") {
             ComponentWithProperties.debug = true
         }
         HistoryManager.activate();

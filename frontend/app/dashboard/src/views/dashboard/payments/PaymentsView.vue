@@ -1,15 +1,20 @@
 <template>
-    <div class="st-view background">
+    <div class="st-view background payments-view">
         <STNavigationBar title="Overschrijvingen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-
-            <template #right>
-                <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
-            </template>
         </STNavigationBar>
 
         <main>
             <h1>Overschrijvingen</h1>
+
+            <div class="input-with-buttons data-table-prefix title-description">
+                <div>
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
+                </div>
+                <div />
+            </div>
     
             <Spinner v-if="loading" />
             <STList v-else>
@@ -68,9 +73,10 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import {NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton,Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
+import { UrlHelper } from '@stamhoofd/networking';
 import { EncryptedPaymentGeneral, PaymentDetailed, PaymentGeneral, PaymentMethod,PaymentPatch, PaymentStatus, RegistrationWithMember, TransferDescriptionType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -125,7 +131,7 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
             this.loading = false
         })
 
-        HistoryManager.setUrl("/transfers")
+        UrlHelper.setUrl("/transfers")
         document.title = "Stamhoofd - Overschrijvingen"
     }
 
@@ -408,7 +414,9 @@ export default class PaymentsView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/base/text-styles.scss';
-
+.payments-view {
+    .title-description {
+        padding-bottom: 20px;
+    }
+}
 </style>

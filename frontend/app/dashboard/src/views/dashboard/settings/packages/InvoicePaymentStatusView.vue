@@ -25,11 +25,11 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingButton,LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { SessionManager } from '@stamhoofd/networking';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, LoadingButton, LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { PaymentStatus, STInvoice } from '@stamhoofd/structures';
-import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import PackageSettingsView from './PackageSettingsView.vue';
 
@@ -59,7 +59,7 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/billing/payment?id="+encodeURIComponent(this.paymentId))
+        UrlHelper.setUrl("/settings/billing/payment?id="+encodeURIComponent(this.paymentId))
         this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
     }
 
@@ -120,10 +120,3 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
 
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-
-</style>

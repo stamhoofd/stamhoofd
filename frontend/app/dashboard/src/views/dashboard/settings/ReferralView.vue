@@ -51,7 +51,7 @@
 
                 <STList>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
 
                         <h2 class="style-title-list">
                             Wees authentiek, voeg altijd wat meer uitleg toe
@@ -62,19 +62,19 @@
                         </p>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Vraag alle vrijwilligers om de link of Facebook post ook te delen
                         </h2>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Plaats een bericht op jullie website
                         </h2>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Herinner nog eens op het juiste moment
                         </h2>
@@ -83,7 +83,7 @@
                         </p>
                     </STListItem>
                     <STListItem v-if="isYouth">
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Promoot Stamhoofd op de jeugdraad
                         </h2>
@@ -92,7 +92,7 @@
                         </p>
                     </STListItem>
                     <STListItem>
-                        <span slot="left" class="icon info-filled gray" />
+                        <span slot="left" class="icon info gray" />
                         <h2 class="style-title-list">
                             Promoot Stamhoofd in een (lokale) Facebook groep
                         </h2>
@@ -168,9 +168,9 @@
 
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, HistoryManager, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Spinner,STErrorsDefault,STInputBox, STList,STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, SessionManager } from "@stamhoofd/networking";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { AppManager, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { OrganizationType, RegisterCodeStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -211,7 +211,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
 
     get href() {
-        return "https://www.stamhoofd.be/?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(OrganizationManager.organization.name)+"&utm_medium=Referral&utm_source="+encodeURIComponent(OrganizationManager.organization.name)
+        return "https://"+this.$t('shared.domains.marketing')+"/?code="+encodeURIComponent(this.status?.code ?? "")+"&org="+encodeURIComponent(OrganizationManager.organization.name)+"&utm_medium=Referral&utm_source="+encodeURIComponent(OrganizationManager.organization.name)
     }
 
     get isYouth() {
@@ -271,11 +271,11 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
     
     mounted() {
-        HistoryManager.setUrl("/settings/referrals");
+        UrlHelper.setUrl("/settings/referrals");
     }
 
     openFacebookShare() {
-        window.open("https://www.facebook.com/sharer/sharer.php?u=https://www.stamhoofd.be&quote="+encodeURIComponent(this.referralText), "pop", "width=600, height=400, scrollbars=no");
+        window.open("https://www.facebook.com/sharer/sharer.php?u=https://"+this.$t('shared.domains.marketing')+"&quote="+encodeURIComponent(this.referralText), "pop", "width=600, height=400, scrollbars=no");
     }
 
     showBilling() {

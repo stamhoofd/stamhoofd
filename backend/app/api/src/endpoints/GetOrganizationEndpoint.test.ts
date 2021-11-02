@@ -1,10 +1,10 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { KeychainedResponse, Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
-
 import { GroupFactory } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { KeychainedResponse, Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
+
 import { GetOrganizationEndpoint } from './GetOrganizationEndpoint';
 
 describe("Endpoint.GetOrganization", () => {
@@ -15,8 +15,6 @@ describe("Endpoint.GetOrganization", () => {
         const organization = await new OrganizationFactory({}).create()
         const user = await new UserFactory({ organization }).create()
         const groups = await new GroupFactory({ organization }).createMultiple(2)
-        organization.meta.rootCategory!.groupIds.push(...groups.map(g => g.id))
-        await organization.save()
         const token = await Token.createToken(user)
 
         const r = Request.buildJson("GET", "/v3/organization", organization.getApiHost());

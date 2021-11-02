@@ -18,7 +18,9 @@ type ResponseBody = undefined;
  */
 
 export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = Query as Decoder<Query>
+    queryDecoder = Query as Decoder<Query>;
+
+    registrationDomains = [... new Set(Object.values(STAMHOOFD.domains.registration))]
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
@@ -34,35 +36,35 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        // check if the domain ends on .stamhoofd.be
-        if (!process.env.HOSTNAME_REGISTRATION) {
-            throw new Error("Expected environment variable HOSTNAME_REGISTRATION")
-        }
-        if (request.query.domain.endsWith("." + process.env.HOSTNAME_REGISTRATION)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_REGISTRATION).length )
-            if (strippped.includes(".")) {
-                throw new SimpleError({
-                    code: "invalid_domain",
-                    message: "This domain format is not supported",
-                    statusCode: 404
-                })
+        // check if the domain ends on one of our localized registration domains
+        for (const domain of this.registrationDomains) {
+            if (request.query.domain.endsWith("." + domain)) {
+                const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + domain).length )
+                if (strippped.includes(".")) {
+                    throw new SimpleError({
+                        code: "invalid_domain",
+                        message: "This domain format is not supported",
+                        statusCode: 404
+                    })
+                }
+
+                // Search for the URI
+                const organization = await Organization.getByURI(strippped)
+
+                if (!organization) {
+                    throw new SimpleError({
+                        code: "unknown_domain",
+                        message: "Not known",
+                        statusCode: 404
+                    })
+                }
+                return new Response(undefined);
             }
-
-            // Search for the URI
-            const organization = await Organization.getByURI(strippped)
-
-            if (!organization) {
-                throw new SimpleError({
-                    code: "unknown_domain",
-                    message: "Not known",
-                    statusCode: 404
-                })
-            }
-            return new Response(undefined);
         }
+        
 
-        if (request.query.domain.endsWith("." + process.env.HOSTNAME_WEBSHOP)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + process.env.HOSTNAME_WEBSHOP).length )
+        if (request.query.domain.endsWith("." + STAMHOOFD.domains.webshop)) {
+            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.webshop).length )
             if (strippped.includes(".")) {
                 throw new SimpleError({
                     code: "invalid_domain",

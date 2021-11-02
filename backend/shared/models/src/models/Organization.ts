@@ -11,6 +11,8 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import { Email } from "@stamhoofd/email";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Webshop } from './Webshop';
+import { DecodedRequest } from '@simonbackx/simple-endpoints';
+import { I18n } from "@stamhoofd/backend-i18n"
 
 export class Organization extends Model {
     static table = "organizations";
@@ -92,6 +94,13 @@ export class Organization extends Model {
     })
     updatedAt: Date
 
+    /**
+     * Return default locale confiruation
+     */
+    get i18n() {
+        return new I18n("nl", this.address.country)
+    }
+
     // Methods
     static async getByURI(uri: string): Promise<Organization | undefined> {
         const [rows] = await Database.select(
@@ -150,6 +159,20 @@ export class Organization extends Model {
     /**
      * Get an Organization by looking at the host of a request
      * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
+     * + switch country if needed
+     */
+    static async getFromRequest(request: DecodedRequest<any, any, any>): Promise<Organization> {
+        const organization = await Organization.fromApiHost(request.host);
+
+        const i18n = I18n.fromRequest(request)
+        i18n.switchToLocale({ country: organization.address.country })
+
+        return organization
+    }
+
+    /**
+     * Get an Organization by looking at the host of a request
+     * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
      */
     static async fromApiHost(host: string): Promise<Organization> {
         const splitted = host.split('.')
@@ -178,15 +201,12 @@ export class Organization extends Model {
     }
 
     getDefaultHost(): string {
-        const defaultDomain = process.env.HOSTNAME_REGISTRATION;
-        if (!defaultDomain) {
-            throw new Error("Missing HOSTNAME_REGISTRATION in environment")
-        }
+        const defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[""];
         return this.uri + "." + defaultDomain;
     }
 
     getApiHost(): string {
-        const defaultDomain = process.env.HOSTNAME_API;
+        const defaultDomain = STAMHOOFD.domains.api;
         if (!defaultDomain) {
             throw new Error("Missing hostname in environment")
         }
@@ -392,6 +412,7 @@ export class Organization extends Model {
         } else {
             // Clear register domain
             if (organization.registerDomain) {
+                // We need to clear it, to prevent sending e-mails with invalid links
                 organization.privateMeta.pendingRegisterDomain = organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain
                 organization.registerDomain = null
 
@@ -419,11 +440,12 @@ export class Organization extends Model {
             if (!wasActive && this.privateMeta.mailDomainActive) {
                 // Became valid -> send an e-mail to the organization admins
                 const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
+
                 Email.sendInternal({
                     to, 
                     subject: "Jullie domeinnaam is nu actief", 
-                    text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via hallo@stamhoofd.be\n\nVeel succes!\n\nSimon van Stamhoofd"
-                })
+                    text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via "+this.i18n.$t("shared.emails.general")+"\n\nVeel succes!\n\nSimon van Stamhoofd"
+                }, this.i18n)
             }
         } else {
             // DNS settings gone broken
@@ -448,13 +470,13 @@ export class Organization extends Model {
                 await organization.save()
 
                 // Became invalid for longer than 2 hours -> send an e-mail to the organization admins
-                if (process.env.NODE_ENV === "production") {
+                if (STAMHOOFD.environment === "production") {
                     const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
                     Email.sendInternal({
                         to,
                         subject: "Domeinnaam instellingen ongeldig"+(organization.serverMeta.DNSRecordWarningCount == 2 ? " (herinnering)" : ""),
                         text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam niet geldig zijn. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam, maar maken we (tijdelijk) gebruik van @stamhoofd.email. "+(this.meta.modules.useMembers && organization.registerDomain === null ? " Ook jullie inschrijvingspagina is niet meer bereikbaar via jullie domeinnaam." : "")+" Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen -> personalisatie?\n\nBedankt!\n\nHet Stamhoofd team"
-                    })
+                    }, this.i18n)
                 }
             }
         }
@@ -469,13 +491,13 @@ export class Organization extends Model {
         }
 
         // Protect specific domain names
-        if (["stamhoofd.be", "stamhoofd.app", "stamhoofd.email"].includes(this.privateMeta.mailDomain)) {
+        if (["stamhoofd.be", "stamhoofd.nl", "stamhoofd.shop", "stamhoofd.app", "stamhoofd.email"].includes(this.privateMeta.mailDomain)) {
             console.error("Tried to validate AWS mail identity with protected domains @"+this.id)
             this.privateMeta.mailDomainActive = false;
             return
         }
 
-        if (process.env.NODE_ENV != "production") {
+        if (STAMHOOFD.environment != "production") {
             // Temporary ignore this
             return;
         }
@@ -538,7 +560,7 @@ export class Organization extends Model {
                     },
                     {
                         "Key": "Environment",
-                        "Value": process.env.NODE_ENV ?? "Unknown"
+                        "Value": STAMHOOFD.environment ?? "Unknown"
                     }
                 ]
 

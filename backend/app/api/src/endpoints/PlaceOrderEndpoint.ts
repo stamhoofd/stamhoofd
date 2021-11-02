@@ -10,7 +10,7 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData
@@ -51,7 +51,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization)
             const webshopStruct = WebshopStruct.create(webshop)
 
-            request.body.validate(webshopStruct, organization.meta)
+            request.body.validate(webshopStruct, organization.meta, request.i18n)
             
 
             const order = new Order().setRelation(Order.webshop, webshop)
@@ -87,7 +87,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 await order.markValid(payment, [])
 
                 // Only now we can update the transfer description, since we need the order number as a reference
-                payment.transferDescription = Payment.generateDescription(webshop.meta.transferSettings, (order.number ?? "")+"")
+                payment.transferDescription = Payment.generateDescription(organization, webshop.meta.transferSettings, (order.number ?? "")+"")
                 await payment.save()
             }
 
@@ -96,20 +96,20 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             let paymentUrl: string | null = null
             const description = 'Betaling bij '+organization.name+" voor "+webshop.meta.name
 
-            if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL) {
+            if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard) {
                 // Mollie payment
                 const token = await MollieToken.getTokenFor(webshop.organizationId)
                 if (!token) {
                     throw new SimpleError({
                         code: "",
-                        message: "Betaling via "+(payment.method == PaymentMethod.Bancontact ? "Bancontact" : "iDEAL") +" is onbeschikbaar"
+                        message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
                     })
                 }
                 const profileId = await token.getProfileId()
                 if (!profileId) {
                     throw new SimpleError({
                         code: "",
-                        message: "Betaling via "+(payment.method == PaymentMethod.Bancontact ? "Bancontact" : "iDEAL") +" is tijdelijk onbeschikbaar"
+                        message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is tijdelijk onbeschikbaar"
                     })
                 }
                 const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
@@ -118,8 +118,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         currency: 'EUR',
                         value: (totalPrice / 100).toFixed(2)
                     },
-                    method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : molliePaymentMethod.ideal,
-                    testmode: process.env.NODE_ENV != 'production',
+                    method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                    testmode: STAMHOOFD.environment != 'production',
                     profileId,
                     description,
                     redirectUrl: "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id),

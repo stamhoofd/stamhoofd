@@ -69,7 +69,7 @@
                 </div>
 
                 <div>
-                    <PhoneInput v-model="phone" title="GSM-nummer" :validator="validator" placeholder="GSM-nummer" />
+                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('shared.inputs.mobile.label')" />
                 </div>
             </div>
         </main>
@@ -254,10 +254,3 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-#emergency-contact-view {
-}
-</style>

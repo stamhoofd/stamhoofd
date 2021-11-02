@@ -19,7 +19,7 @@
                     <h2 v-if="error.member" class="style-title-list">
                         {{ error.member.firstName }} {{ error.member.lastName || error.member.details.lastName }}<span v-if="canClickError(error)" class="icon arrow-right-small" />
                     </h2>
-                    {{ error.human || error.message }}
+                    {{ getErrorMessage(error) }}
                 </div>
             </div>
 
@@ -109,6 +109,7 @@
 </template>
 
 <script lang="ts">
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';
@@ -145,6 +146,17 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
         }
 
         this.dismiss({ force: true })
+    }
+
+    getErrorMessage(error: Error) {
+        if (!isSimpleError(error) || !isSimpleErrors(error)) {
+            return error.message
+        }
+        
+        if (error.hasCode("network_error") || error.hasCode("network_timeout")) {
+            return "Geen of slechte internetverbinding"
+        }
+        return error.getHuman()
     }
 
     canClickError(error) {

@@ -15,25 +15,25 @@
 
             <div class="split-inputs">
                 <STInputBox title="Soort vereniging" error-fields="type" :error-box="errorBox">
-                    <select v-model="type" class="input">
+                    <Dropdown v-model="type">
                         <option :value="null" disabled>
                             Maak een keuze
                         </option>
                         <option v-for="_type in availableTypes" :key="_type.value" :value="_type.value">
                             {{ _type.name }}
                         </option>
-                    </select>
+                    </Dropdown>
                 </STInputBox>
 
                 <STInputBox v-if="type == 'Youth'" title="Koepelorganisatie" error-fields="umbrellaOrganization" :error-box="errorBox">
-                    <select v-model="umbrellaOrganization" class="input">
+                    <Dropdown v-model="umbrellaOrganization">
                         <option :value="null" disabled>
                             Maak een keuze
                         </option>
                         <option v-for="item in availableUmbrellaOrganizations" :key="item.value" :value="item.value">
                             {{ item.name }}
                         </option>
-                    </select>
+                    </Dropdown>
                 </STInputBox>
             </div>
 
@@ -62,7 +62,7 @@
 import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator} from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, DateSelection, Dropdown,ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
 import { Organization, OrganizationGenderType, OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationType,OrganizationTypeHelper, UmbrellaOrganization, UmbrellaOrganizationHelper, Version } from "@stamhoofd/structures"
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -83,6 +83,7 @@ import MembersYearSetupView from './MembersYearSetupView.vue';
         BackButton,
         TimeInput,
         LoadingButton,
+        Dropdown
     },
 })
 export default class MembersStructureSetupView extends Mixins(NavigationMixin) {

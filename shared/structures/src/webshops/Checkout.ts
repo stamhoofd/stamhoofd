@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, EnumDecoder, field } from '@simonbackx/simpl
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 
 import { ValidatedAddress } from '../addresses/Address';
+import { I18n } from '../I18nInterface';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
@@ -148,7 +149,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "invalid_data_type",
                 message: "Invalid data type",
-                human: "Er ontbreekt data. Probeer het opnieuw of neem contact op met hallo@stamhoofd.be om dit te melden.",
+                human: "Er ontbreekt data. Probeer het opnieuw of neem contact op met de webshop eigenaar om dit te melden.",
                 field: "address"
             })
         }
@@ -216,7 +217,7 @@ export class Checkout extends AutoEncoder {
         this.timeSlot = timeSlot
     }
 
-    validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+    validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n) {
         if (this.customer.firstName.length < 2) {
             throw new SimpleError({
                 code: "invalid_first_name",
@@ -239,7 +240,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "invalid_phone",
                 message: "Invalid phone",
-                human: "Het GSM-nummer dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                human: i18n.t('webshop.inputs.phone.invalidMessage').toString(),
                 field: "customer.phone"
             })
         }
@@ -277,12 +278,12 @@ export class Checkout extends AutoEncoder {
         }
     }
 
-    validate(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n) {
         this.validateCart(webshop, organizationMeta)
         this.validateCheckoutMethod(webshop, organizationMeta)
         this.validateDeliveryAddress(webshop, organizationMeta)
         this.validateTimeSlot(webshop, organizationMeta)
-        this.validateCustomer(webshop, organizationMeta)
+        this.validateCustomer(webshop, organizationMeta, i18n)
         this.validatePayment(webshop, organizationMeta)
     }
 

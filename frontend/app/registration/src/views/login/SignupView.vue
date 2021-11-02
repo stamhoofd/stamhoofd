@@ -10,7 +10,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <EmailInput ref="emailInput" v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+                <EmailInput ref="emailInput" v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
                 <p v-if="lock" class="style-description-small">
                     {{ lock }}
                 </p>
@@ -18,11 +18,11 @@
                 <div class="split-inputs">
                     <div>
                         <STInputBox title="Kies een wachtwoord">
-                            <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                            <input v-model="password" name="new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                         </STInputBox>
 
                         <STInputBox title="Herhaal wachtwoord">
-                            <input v-model="passwordRepeat" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                            <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
                         </STInputBox>
                     </div>
                     <div>
@@ -184,9 +184,3 @@ export default class SignupView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-    @use "~@stamhoofd/scss/base/variables.scss" as *;
-    @use "~@stamhoofd/scss/base/text-styles.scss" as *;
-
-</style>

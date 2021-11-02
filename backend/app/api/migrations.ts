@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('@stamhoofd/backend-env').load()
 import { Column, Migration } from "@simonbackx/simple-database";
 import { Version } from "@stamhoofd/structures";
 import path from "path";
@@ -15,9 +15,6 @@ if (new Date().getTimezoneOffset() != 0) {
 }
 
 const start = async () => {
-    // We currently have no migrations in api
-    //await Migration.runAll(__dirname + "/src/migrations");
-
     // External migrations
     await Migration.runAll(path.dirname(modelsPath) + "/migrations");
     await Migration.runAll(path.dirname(emailPath) + "/migrations");

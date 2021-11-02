@@ -58,8 +58,8 @@ export class MemberDetailsMeta extends AutoEncoder {
     static createFor(details: MemberDetails): MemberDetailsMeta {
         const meta = MemberDetailsMeta.create({
             hasMemberGeneral: details.lastName.length > 0 && details.birthDay !== null,
-            hasParents: details.address !== null || details.parents.length > 0 || (details.age !== null && details.age > 18),
-            hasEmergency: details.emergencyContacts.length > 0,
+            hasParents: details.parents.length > 0 && !details.parents.find(p => !p.address || !p.phone),
+            hasEmergency: details.emergencyContacts.length > 0 && !details.emergencyContacts.find(p => !p.phone),
             hasRecords: false,
             isRecovered: details.isRecovered,
             reviewTimes: details.reviewTimes,

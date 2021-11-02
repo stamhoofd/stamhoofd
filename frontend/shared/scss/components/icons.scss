@@ -1,13 +1,30 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
+
+.icon-base {
+
+    &:before {
+        line-height: 1;
+        font-size: 24px;
+        vertical-align: middle !important;
+        font-family: icons !important;
+        font-style: normal;
+        font-weight: normal !important;
+    }
+}
+
 .icon {
     width: 24px;
     font-size: 24px;
     box-sizing: content-box;
     overflow: hidden;
     white-space: nowrap;
-    display: inline;
+    
+    display: inline; // fallback
+    display: inline-flex; // needed for proper vertical alignemnt of icons
+    vertical-align: middle;
+    align-items: center;
     
     &.light-gray {
         color: $color-gray-light;
@@ -37,11 +54,11 @@
         vertical-align: middle;
     }
 
-    &:after {
-        vertical-align: middle;
+    &:before {
+        vertical-align: middle !important;
     }
 
-    &.add:after {
+    /*&.add:after {
         font-icon: url('@stamhoofd/assets/images/icons/gray/add.svg');
     }
 
@@ -315,13 +332,13 @@
 
     &.feedback:after {
         font-icon: url(@stamhoofd/assets/images/icons/feedback.svg);
-    }
+    }*/
 }
 
 .android-icons {
-    .icon {
+    /*.icon {
         &.share:after {
             font-icon: url(@stamhoofd/assets/images/icons/share-android.svg);
         }
-    }
+    }*/
 }

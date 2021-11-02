@@ -12,7 +12,9 @@
 
             <div class="input-with-buttons data-table-prefix title-description">
                 <div>
-                    <input v-model="searchQuery" class="input search" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
                 </div>
                 <div>
                     <button class="button text" @click="editFilter">
@@ -38,42 +40,46 @@
                         </th>
                         <th class="hide-smartphone tiny" @click="toggleSort('number')">
                             Nummer
+
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'number' && sortDirection == 'ASC',
-                                    down: sortBy == 'number' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'number' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'number' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th @click="toggleSort('name')">
                             Bestelling
+
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'name' && sortDirection == 'ASC',
-                                    down: sortBy == 'name' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'name' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'name' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th class="hide-smartphone" @click="toggleSort('checkout')">
                             Info
+
                             <span
-                                class="sort-arrow"
+                                class="sort-arrow icon"
                                 :class="{
-                                    up: sortBy == 'checkout' && sortDirection == 'ASC',
-                                    down: sortBy == 'checkout' && sortDirection == 'DESC',
+                                    'arrow-up-small': sortBy == 'checkout' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'checkout' && sortDirection == 'DESC',
                                 }"
                             />
                         </th>
                         <th @click="toggleSort('status')">
                             Status
-                            <span v-if="sortBy == 'status'"
-                                  class="sort-arrow"
-                                  :class="{
-                                      up: sortBy == 'status' && sortDirection == 'ASC',
-                                      down: sortBy == 'status' && sortDirection == 'DESC',
-                                  }"
+
+                            <span
+                                class="sort-arrow icon"
+                                :class="{
+                                    'arrow-up-small': sortBy == 'status' && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy == 'status' && sortDirection == 'DESC',
+                                }"
                             />
                         </th>
                     </tr>
@@ -140,12 +146,14 @@
             </template>
             <template #right>
                 <button v-if="hasWrite" class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
-                    <span class="dropdown-text">Markeren als...</span>
+                    Markeren als...
                 </button>
                 <LoadingButton :loading="actionLoading">
                     <button class="button primary" :disabled="selectionCount == 0 || isLoadingOrders" @click="openMail()">
                         <span class="dropdown-text">E-mailen</span>
-                        <div class="dropdown" @click.stop="openMailDropdown" />
+                        <div class="dropdown" @click.stop="openMailDropdown">
+                            <span class="icon arrow-down-small" />
+                        </div>
                     </button>
                 </LoadingButton>
             </template>
@@ -154,27 +162,20 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, HistoryManager } from "@simonbackx/vue-app-navigation";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { FilterEditor, SegmentedControl,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,Spinner, STNavigationTitle } from "@stamhoofd/components";
-import { Checkbox } from "@stamhoofd/components"
-import { STToolbar } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, FilterEditor, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import { f } from "../../../../pdfkit.standalone";
 import MailView from '../../mail/MailView.vue';
 import { WebshopManager } from '../WebshopManager';
 import OrderContextMenu from './OrderContextMenu.vue';
 import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
 import OrderView from './OrderView.vue';
-import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus"
+import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus";
 
 class SelectableOrder {
     order: PrivateOrder;
@@ -267,7 +268,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     mounted() {
         // Set url
-        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/orders")
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/orders")
         document.title = this.preview.meta.name+" - Bestellingen"
     }
 
@@ -565,7 +566,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         const paymentMethod = new ChoicesFilterDefinition<PrivateOrder>({
             id: "order_paymentMethod",
             name: "Betaalmethode",
-            choices: [PaymentMethod.Transfer, PaymentMethod.Payconiq, PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Unknown].map(method => {
+            choices: [PaymentMethod.Transfer, PaymentMethod.Payconiq, PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard, PaymentMethod.Unknown].map(method => {
                 return new ChoicesFilterChoice(method, Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(method)))
             }),
             defaultMode: ChoicesFilterMode.Or,
@@ -659,7 +660,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }))
         }
 
-        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL)) {
+        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.CreditCard)) {
             definitions.push(
                 new DateFilterDefinition<PrivateOrder>({
                     id: "order_settledAt",

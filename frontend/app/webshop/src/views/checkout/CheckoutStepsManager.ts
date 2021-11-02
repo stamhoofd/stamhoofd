@@ -1,3 +1,4 @@
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, Webshop } from '@stamhoofd/structures';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
@@ -43,8 +44,8 @@ export class CheckoutStep {
             case CheckoutStepType.Method: checkout.validateCheckoutMethod(webshop, organizationMeta); return;
             case CheckoutStepType.Address: checkout.validateDeliveryAddress(webshop, organizationMeta); return;
             case CheckoutStepType.Time: checkout.validateTimeSlot(webshop, organizationMeta); return;
-            case CheckoutStepType.Payment: checkout.validate(webshop, organizationMeta); return;
-            case CheckoutStepType.Customer: checkout.validateCustomer(webshop, organizationMeta); return;
+            case CheckoutStepType.Payment: checkout.validate(webshop, organizationMeta, I18nController.i18n); return;
+            case CheckoutStepType.Customer: checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n); return;
 
             default: {
                 // If you get a compile error here, a type is missing in the switch and you should add it

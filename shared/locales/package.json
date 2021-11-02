@@ -1,0 +1,18 @@
+{
+    "name": "@stamhoofd/locales",
+    "version": "1.0.0",
+    "license": "UNLICENCED",
+    "main": "./dist/index.js",
+    "module": "./esm/dist/index.js",
+    "types": "./dist/index.d.ts",
+    "sideEffects": false,
+    "files": [
+        "dist",
+        "esm/dist"
+    ],
+    "scripts": {
+        "build": "tsc -b . esm && node build.mjs"
+    },
+    "devDependencies": {},
+    "dependencies": {}
+}

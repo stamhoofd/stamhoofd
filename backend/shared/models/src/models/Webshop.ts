@@ -158,10 +158,10 @@ export class Webshop extends Model {
         }
 
         if (this.uri.length > 0) {
-            return this.organization.uri+"."+process.env.HOSTNAME_WEBSHOP+"/"+this.uri
+            return this.organization.uri+"."+STAMHOOFD.domains.webshop+"/"+this.uri
         }
 
-        return this.organization.uri+"."+process.env.HOSTNAME_WEBSHOP
+        return this.organization.uri+"."+STAMHOOFD.domains.webshop
     }
 
  

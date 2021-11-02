@@ -25,7 +25,7 @@ export class Image extends Model {
     createdAt: Date = new Date()
 
     static async create(fileContent: any, type: string | undefined, resolutions: ResolutionRequest[]): Promise<Image> {
-        if (!process.env.SPACES_BUCKET || !process.env.SPACES_ENDPOINT || !process.env.SPACES_KEY || !process.env.SPACES_SECRET) {
+        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
             throw new SimpleError({
                 code: "not_available",
                 message: "Uploading is not available",
@@ -72,12 +72,12 @@ export class Image extends Model {
         const files = await Promise.all(promises);
 
         const s3 = new AWS.S3({
-            endpoint: process.env.SPACES_ENDPOINT,
-            accessKeyId: process.env.SPACES_KEY,
-            secretAccessKey: process.env.SPACES_SECRET
+            endpoint: STAMHOOFD.SPACES_ENDPOINT,
+            accessKeyId: STAMHOOFD.SPACES_KEY,
+            secretAccessKey: STAMHOOFD.SPACES_SECRET
         });
 
-        let prefix = (process.env.SPACES_PREFIX ?? "")
+        let prefix = (STAMHOOFD.SPACES_PREFIX ?? "")
         if (prefix.length > 0) {
             prefix += "/"
         }
@@ -89,9 +89,9 @@ export class Image extends Model {
         for (const f of files) {
             const fileId = uuidv4();
 
-            const key = prefix+(process.env.NODE_ENV ?? "development")+"/"+image.id+"/"+fileId+(!png ? '.jpg' : '.png');
+            const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+image.id+"/"+fileId+(!png ? '.jpg' : '.png');
             const params = {
-                Bucket: process.env.SPACES_BUCKET,
+                Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: key,
                 Body: f.data,
                 ContentType: !png ? 'image/jpeg' : 'image/png',
@@ -102,7 +102,7 @@ export class Image extends Model {
 
             const _file = new File({
                 id: fileId,
-                server: "https://"+process.env.SPACES_BUCKET+"."+process.env.SPACES_ENDPOINT,
+                server: "https://"+STAMHOOFD.SPACES_BUCKET+"."+STAMHOOFD.SPACES_ENDPOINT,
                 path: key,
                 size: f.info.size
             });
@@ -118,9 +118,9 @@ export class Image extends Model {
         // Also include the source, in private mode
         const fileId = uuidv4();
         const uploadExt = png ? 'png' : 'jpg'
-        const key = prefix+(process.env.NODE_ENV ?? "development")+"/"+image.id+"/"+fileId+"."+uploadExt;
+        const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+image.id+"/"+fileId+"."+uploadExt;
         const params = {
-            Bucket: process.env.SPACES_BUCKET,
+            Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
             Body: fileContent, // todo
             ContentType: type ?? "image/jpeg",
@@ -129,7 +129,7 @@ export class Image extends Model {
 
         image.source = new File({
             id: fileId,
-            server: "https://"+process.env.SPACES_BUCKET+"."+process.env.SPACES_ENDPOINT,
+            server: "https://"+STAMHOOFD.SPACES_BUCKET+"."+STAMHOOFD.SPACES_ENDPOINT,
             path: key,
             size: fileContent.length
         });

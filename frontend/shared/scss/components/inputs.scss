@@ -1,8 +1,6 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
-$input-height: 44px;
-
 .input-spacing {
     max-width: 340px;
 
@@ -28,6 +26,10 @@ $input-height: 44px;
     transition: border-color 0.2s;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 
     &:hover {
         border-color: $color-primary-gray-light;
@@ -94,22 +96,8 @@ textarea.input {
     resize: none;
 }
 
-.input-dropdown {
-    // Add a background arrow to our selection field.
-    background: transparent url(~@stamhoofd/assets/images/icons/gray/arrow-down-small.svg) no-repeat right 10px center;
-
-    // Increase the right padding just a little.
-    padding-right: 35px;
-
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
 select.input {
     cursor: pointer;
-
-    @extend .input-dropdown;
 
     // Remove dotted line in Firefox
     &:-moz-focusring {
@@ -146,12 +134,43 @@ select.input {
     }
 }
 
-// Icons and other things
-.input.search {
-    padding-left: 43px;
-    background-image: url(~@stamhoofd/assets/images/icons/gray/search.svg);
-    background-position: 8px center;
-    background-repeat: no-repeat;
+.input-icon-container {
+    position: relative;
+
+    &.icon {
+        display: block;
+        width: auto;
+        height: auto;
+        overflow: visible;
+        white-space: inherit;
+    }
+
+    &::before {
+        position: absolute;
+        top: 50%;
+        transform: translate(0, -50%);
+        pointer-events: none;
+    }
+
+    &:not(.right) {
+        > * {
+            padding-left: 43px;
+        }
+
+        &::before {
+            left: 12px;
+        }
+    }
+  
+    &.right {
+        > * {
+            padding-right: 35px;
+        }
+
+        &::before {
+            right: 10px;
+        }
+    }
 }
 
 .input-with-buttons {

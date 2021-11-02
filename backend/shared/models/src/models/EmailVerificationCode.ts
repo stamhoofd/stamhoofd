@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Email } from "@stamhoofd/email";
 import { Organization } from "./Organization";
 import { User, UserWithOrganization } from "./User";
+import { I18n } from "@stamhoofd/backend-i18n";
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = basex(ALPHABET)
 
@@ -136,12 +137,17 @@ export class EmailVerificationCode extends Model {
         this.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3)
     }
 
-    getEmailVerificationUrl(user: UserWithOrganization) {
+    getEmailVerificationUrl(user: UserWithOrganization, i18n: I18n) {
         let host: string;
         if (user.permissions) {
-            host = "https://"+(process.env.HOSTNAME_DASHBOARD ?? "stamhoofd.app")
+            host = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale
         } else {
+            // Add language if different than default
             host = "https://"+user.organization.getHost()
+
+            if (i18n.language != user.organization.i18n.language) {
+                host += "/"+i18n.language
+            }
         }
 
         return host+"/verify-email"+(user.permissions ? "/"+encodeURIComponent(user.organization.id) : "")+"?code="+encodeURIComponent(this.code)+"&token="+encodeURIComponent(this.token);
@@ -244,19 +250,23 @@ export class EmailVerificationCode extends Model {
         }
     }
 
-    send(user: UserWithOrganization, withCode = true) {
-        const { from, replyTo } = user.organization.getDefaultEmail()
+    send(user: UserWithOrganization, i18n: I18n, withCode = true) {
+        const { from, replyTo } = user.permissions !== null ? {
+            from: Email.getInternalEmailFor(user.organization.i18n),
+            replyTo: undefined
+        } : user.organization.getDefaultEmail()
 
+        const url = this.getEmailVerificationUrl(user, i18n)
+        
         if (withCode) {
             const formattedCode = this.code.substr(0, 3)+" "+this.code.substr(3)
-            
             Email.send({
                 from,
                 replyTo,
                 to: this.email,
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`,
-                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${this.getEmailVerificationUrl(user)}<br><br>${user.permissions ? "Stamhoofd" : user.organization.name}`
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`,
+                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>${user.permissions ? "Stamhoofd" : user.organization.name}`
             })
         } else {
             Email.send({
@@ -264,12 +274,12 @@ export class EmailVerificationCode extends Model {
                 replyTo,
                 to: this.email,
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${this.getEmailVerificationUrl(user)}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
             })
         }
     }
 
-    static async resend(organization: Organization, token: string): Promise<undefined | string> {
+    static async resend(organization: Organization, token: string, i18n: I18n): Promise<undefined | string> {
         const verificationCodes = await this.where({ token, organizationId: organization.id }, { limit: 1 })
 
         if (verificationCodes.length == 0) {
@@ -288,7 +298,7 @@ export class EmailVerificationCode extends Model {
         if (!user) {
             return
         }
-        verificationCode.send(user.setRelation(User.organization, organization))
+        verificationCode.send(user.setRelation(User.organization, organization), i18n)
     }
 
     /**

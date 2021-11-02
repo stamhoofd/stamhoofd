@@ -40,25 +40,8 @@
                             <dd>{{ payment.transferDescription }}</dd>
                         </template>
 
-                        <template v-if="payment.method == 'Bancontact'">
-                            <dt>Betaald via </dt>
-                            <dd>Bancontact</dd>
-                        </template>
-
-                        <template v-if="payment.method == 'iDEAL'">
-                            <dt>Betaald via </dt>
-                            <dd>iDEAL</dd>
-                        </template>
-
-                        <template v-if="payment.method == 'Payconiq'">
-                            <dt>Betaald via </dt>
-                            <dd>Payconiq</dd>
-                        </template>
-
-                        <template v-if="payment.method == 'Unknown'">
-                            <dt>Betaalmethode</dt>
-                            <dd>Onbekend</dd>
-                        </template>
+                        <dt>Betaalmethode</dt>
+                        <dd>{{ getMethodName(payment.method) }}</dd>
 
                         <dt>Status</dt>
                         <dd v-if="payment.status == 'Succeeded'">
@@ -99,7 +82,7 @@ import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, LoadingButton,Spinner,STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { FinancialSupportSettings } from '@stamhoofd/structures';
+import { FinancialSupportSettings, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
 import { CreatePaymentGeneral, EncryptedPaymentDetailed, EncryptedPaymentGeneral, getPermissionLevelNumber, LegacyRecordType, MemberWithRegistrations, PaymentDetailed, PaymentGeneral, PaymentPatch, PaymentStatus, PermissionLevel, RegisterCart, RegisterItem } from '@stamhoofd/structures';
 import { RegisterCartPriceCalculator } from '@stamhoofd/structures/src/members/checkout/RegisterCartPriceCalculator';
 import { Formatter } from '@stamhoofd/utility';
@@ -175,6 +158,10 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
 
     get financialSupportWarningText() {
         return this.organization.meta.recordsConfiguration.financialSupport?.warningText || FinancialSupportSettings.defaultWarningText
+    }
+
+    getMethodName(method: PaymentMethod) {
+        return PaymentMethodHelper.getNameCapitalized(method)
     }
 
     addPayment() {
@@ -384,7 +371,6 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .view-payments {

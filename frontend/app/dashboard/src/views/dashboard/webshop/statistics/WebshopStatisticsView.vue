@@ -89,17 +89,14 @@
 </template>
 
 <script lang="ts">
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STInputBox,Toast } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, Spinner } from "@stamhoofd/components";
-import { Checkbox } from "@stamhoofd/components"
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, Spinner, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from '../WebshopManager';
-
 
 @Component({
     components: {
@@ -149,7 +146,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
         this.reload().catch(console.error)
 
         // Set url
-        HistoryManager.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/statistics")
+        UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name)+"/statistics")
         document.title = this.preview.meta.name+" - Statistieken"
     }
 
@@ -208,9 +205,6 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
 .webshop-statistics-view {
     .stats-grid {
         display: grid;

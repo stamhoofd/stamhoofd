@@ -7,8 +7,6 @@
 </template>
 
 <style lang="scss">
-@use "~@stamhoofd/scss/base/variables.scss" as *;
-@use '~@stamhoofd/scss/base/text-styles.scss';
 
 .st-floating-footer {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));

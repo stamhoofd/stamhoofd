@@ -139,7 +139,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 model.method = patch.method
 
                 if (model.method === PaymentMethod.Transfer && patch.transferDescription === undefined && !model.transferDescription) {
-                    model.transferDescription = Payment.generateDescription(user.organization.meta.transferSettings, pay?.registrations.map(r => r.member.firstName).join(", ") ?? orderPay?.order.number?.toString() ?? "")
+                    model.transferDescription = Payment.generateDescription(user.organization, user.organization.meta.transferSettings, pay?.registrations.map(r => r.member.firstName).join(", ") ?? orderPay?.order.number?.toString() ?? "")
                 }
             }
 

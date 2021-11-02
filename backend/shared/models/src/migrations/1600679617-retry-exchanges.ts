@@ -32,7 +32,7 @@ export default new Migration(async () => {
                         if (token) {
                             const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
                             const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
-                                testmode: process.env.NODE_ENV != 'production',
+                                testmode: STAMHOOFD.environment != 'production',
                             })
 
                             console.log(mollieData) // log to log files to check issues

@@ -76,13 +76,13 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { HistoryManager, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { FinancialSupportSettings } from '@stamhoofd/structures';
-import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from "@stamhoofd/structures"
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
+import { FinancialSupportSettings, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../../../classes/OrganizationManager";
 
 @Component({
     components: {
@@ -254,7 +254,7 @@ export default class FinancialSupportSettingsView extends Mixins(NavigationMixin
     }
 
     mounted() {
-        HistoryManager.setUrl("/settings/financial-support");
+        UrlHelper.setUrl("/settings/financial-support");
     }
 }
 </script>
