@@ -577,7 +577,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
         const paidStatus = new ChoicesFilterDefinition<PrivateOrder>({
             id: "order_paid",
-            name: "Betaling",
+            name: "Betaalstatus",
             choices: [
                 new ChoicesFilterChoice("paid", "Betaald"),
                 new ChoicesFilterChoice("not_paid", "Niet betaald")
@@ -762,15 +762,17 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return null;
     }
 
-    openMail(subject = "") {
+    openMail(subject = "Bestelling {{nr}}") {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MailView, {
-                otherRecipients: this.getSelectedOrders().flatMap((o) => {
+                orders: this.getSelectedOrders(),
+                webshop: this.webshop,
+                /*otherRecipients: this.getSelectedOrders().flatMap((o) => {
                     if ( o.data.customer.email.length > 0) {
                         return [o.data.customer]
                     }
                     return []
-                }),
+                }),*/
                 defaultSubject: subject
             })
         });

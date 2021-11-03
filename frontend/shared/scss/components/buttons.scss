@@ -79,6 +79,12 @@
             padding-right: 40px;
         }
 
+        > .bubble {
+            @extend .style-bubble;
+            background: $color-background;
+            color: $color-primary;
+        }
+
         .dropdown {
             position: relative;
 
@@ -183,7 +189,7 @@
     }
 
     &.secundary, &.primary, &.destructive {
-        > .icon {
+        > .icon, > .bubble {
             align-self: center;
             
             &:first-child {

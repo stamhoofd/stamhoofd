@@ -109,12 +109,8 @@ export default class OrderContextMenu extends Mixins(NavigationMixin) {
     }
     mail() {
         const displayedComponent = new ComponentWithProperties(MailView, {
-            otherRecipients: this.orders.flatMap((o) => {
-                if ( o.data.customer.email.length > 0) {
-                    return [o.data.customer]
-                }
-                return []
-            }),
+            orders: this.orders,
+            webshop: this.webshop
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }

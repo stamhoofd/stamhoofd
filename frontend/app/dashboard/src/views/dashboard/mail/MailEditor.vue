@@ -212,7 +212,7 @@ export default class MailEditor extends Vue {
             padding: 5px;
             box-sizing: content-box;
 
-            &::before {
+            &::after {
                 position: absolute;
                 content: '';
                 left: 0;
@@ -227,21 +227,21 @@ export default class MailEditor extends Vue {
             }
 
             &:hover {
-                &::before {
+                &::after {
                     background: $color-gray-dark;
                     transform: scale(1, 1);
                 }
             }
 
             &.is-active {
-                &::before {
+                &::after {
                     background: $color-primary;
                     transform: scale(1, 1);
                 }
             }
 
             &:active {
-                &::before {
+                &::after {
                     transform: scale(0.8, 0.8);
                 }
             }

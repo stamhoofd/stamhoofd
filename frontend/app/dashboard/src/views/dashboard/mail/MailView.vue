@@ -7,7 +7,9 @@
         </STNavigationBar>
 
         <main>
-            <h1>E-mail versturen</h1>
+            <h1>
+                E-mail versturen
+            </h1>
 
             <template v-if="emails.length == 0">
                 <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
@@ -52,11 +54,18 @@
             </STInputBox>
             
             <MailEditor ref="editor" :has-first-name="hasFirstName">
-                <div v-if="addButton" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
+                <div v-if="addButton && orders.length == 0" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
                     <hr>
                     <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
                     <p class="style-description-small button-description">
                         <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
+                    </p>
+                </div>
+                <div v-if="addButton && orders.length > 0 && webshop" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
+                    <hr>
+                    <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
+                    <p class="style-description-small button-description">
+                        <em>Via de bovenstaande knop kan je jouw bestelling bekijken.</em>
                     </p>
                 </div>
                 <template v-if="files.length > 0" slot="footer">
@@ -74,6 +83,47 @@
                     </STList>
                 </template>
             </MailEditor>
+
+            <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
+                E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
+                    (of leden met onbekende leeftijd)
+                </template> zelf sturen
+            </Checkbox>
+
+            <Checkbox v-if="members.length > 0 && hasGrownUpParents" v-model="includeGrownUpParents">
+                E-mail ook naar ouders van 18+ leden<template v-if="hasUnknownAge">
+                    (of leden met onbekende leeftijd)
+                </template> sturen
+            </Checkbox>
+
+            <Checkbox v-if="members.length > 0" v-model="addButton" :disabled="!hasAllUsers">
+                <h3 class="style-title-list">
+                    Voeg magische inlogknop toe (aangeraden)
+                </h3>
+                <p v-if="addButton" class="style-description-small">
+                    Als een lid op de knop duwt, wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.
+                </p>
+            </Checkbox>
+            <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
+                Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
+            </p>
+
+            <Checkbox v-if="orders.length > 0 && webshop" v-model="addButton">
+                <h3 v-if="webshop.meta.ticketType == 'None'" class="style-title-list">
+                    Voeg knop naar bestelling toe
+                </h3>
+                <h3 v-else class="style-title-list">
+                    Voeg knop naar tickets en bestelling toe
+                </h3>
+                <p v-if="addButton" class="style-description-small">
+                    <template v-if="webshop.meta.ticketType == 'None'">
+                        Daar staan ook de betaalinstructies indien de bestelling nog niet betaald werd.
+                    </template>
+                    <template v-else>
+                        Als de tickets nog niet betaald werden, zal de knop enkel naar de bestelling wijzen (met daar de betaalinstructies).
+                    </template>
+                </p>
+            </Checkbox>
 
             <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openHardBounces">
                 {{ hardBounces.length != 1 ? hardBounces.length+' e-mailadressen zijn' : 'Eén e-mailadres is' }} ongeldig. Deze worden uitgesloten.
@@ -95,47 +145,19 @@
                     Toon
                 </span>
             </p>
-
-            <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
-                E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
-                    (of leden met onbekende leeftijd)
-                </template> zelf sturen
-            </Checkbox>
-
-            <Checkbox v-if="members.length > 0 && hasGrownUpParents" v-model="includeGrownUpParents">
-                E-mail ook naar ouders van 18+ leden<template v-if="hasUnknownAge">
-                    (of leden met onbekende leeftijd)
-                </template> sturen
-            </Checkbox>
-
-            <Checkbox v-if="members.length > 0" v-model="addButton" :disabled="!hasAllUsers">
-                <h3 class="style-title-list">
-                    Voeg magische inlogknop toe (aangeraden)
-                </h3>
-                <span v-if="addButton" class="radio-description">Als een lid op de knop duwt, wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.</span>
-            </Checkbox>
-            <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
-                Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
-            </p>
+            <p v-if="webshop" class="info-box" v-text="'Gebruik slimme vervangingen in jouw tekst: {{nr}} wordt automatisch vervangen door het bestelnummer van de klant. Test het uit en klik op \'Voorbeeld\'.'" />
         </main>
 
-        <STToolbar>
-            <template #left>
-                {{
-                    recipients.length
-                        ? recipients.length > 1
-                            ? recipients.length + " ontvangers"
-                            : "Eén ontvanger"
-                        : "Geen ontvangers"
-                }}
-            </template>
+        <STToolbar :sticky="false">
             <template #right>
                 <button class="button secundary" @click="openPreview">
-                    Voorbeeld
+                    <span class="icon eye" />
+                    <span>Voorbeeld</span>
                 </button>
                 <LoadingButton :loading="sending">
                     <button class="button primary" :disabled="recipients.length == 0 || emails.length == 0" @click="send">
-                        Versturen
+                        <span>Versturen</span>
+                        <span class="bubble">{{ recipients.length }}</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -152,7 +174,7 @@ import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, Webshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
 
@@ -194,11 +216,17 @@ export default class MailView extends Mixins(NavigationMixin) {
     members!: MemberWithRegistrations[];
 
     @Prop({ default: () => []})
+    orders!: PrivateOrder[];
+
+    @Prop({ default: null})
+    webshop!: WebshopPreview | null
+
+    @Prop({ default: () => []})
     otherRecipients: { firstName?: string; lastName?: string; email: string }[]
 
     sending = false
 
-    addButton = this.members.length > 0 && this.hasAllUsers
+    addButton = (this.orders.length > 0 && this.webshop) || (this.members.length > 0 && this.hasAllUsers)
 
     @Prop({ default: null })
     defaultSubject!: string | null
@@ -277,6 +305,28 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
         }
         return false;
+    }
+
+    get orderButtonType() {
+        for (const order of this.orders) {
+            if (order.payment?.paidAt !== null) {
+                if (!this.webshop || this.webshop.meta.ticketType === WebshopTicketType.None) {
+                    return "order"
+                }
+                return "tickets"
+            }
+        }
+        return "payment"
+    }
+
+    get orderButtonText() {
+        if (this.orderButtonType === "payment") {
+            return "Betaalinstructies"
+        }
+        if (this.orderButtonType === "tickets") {
+            return "Tickets bekijken"
+        }
+        return "Bestelling bekijken"
     }
 
     activated() {
@@ -407,6 +457,52 @@ export default class MailView extends Mixins(NavigationMixin) {
     // Unfiltered
     get allRecipients(): Map<string, Recipient> {
         const recipients: Map<string, Recipient> = new Map()
+
+        if (this.webshop) {
+            for (const order of this.orders) {
+                if (order.data.customer.email.length > 0) {
+                    const email = order.data.customer.email.toLowerCase()
+
+                    // Send one e-mail for every order
+                    const id = "order-"+order.id
+
+                    const existing = recipients.get(id)
+
+                    if (existing) {
+                        if (!existing.firstName && order.data.customer.firstName) {
+                            existing.firstName = order.data.customer.firstName
+                        }
+                        continue
+                    }
+
+                    recipients.set(id, Recipient.create({
+                        firstName: order.data.customer.firstName,
+                        lastName: order.data.customer.lastName,
+                        email,
+                        replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: order.data.customer.firstName ?? ""
+                            }),
+                            Replacement.create({
+                                token: "email",
+                                value: email
+                            }),
+                            Replacement.create({
+                                token: "orderUrl",
+                                value: "https://"+this.webshop.getUrl(OrganizationManager.organization)+"/order/"+(order.id)
+                            }),
+                            Replacement.create({
+                                token: "nr",
+                                value: (order.number ?? "")+""
+                            })
+                        ]
+                    }))
+
+                }
+            }
+        }
+        
 
         for (const member of this.members) {
             const isMinor = (member.details.age == null || member.details.age < 18 || (member.details.age < 24 && !member.details.address && !member.details.email))

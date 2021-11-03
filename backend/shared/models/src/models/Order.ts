@@ -270,6 +270,10 @@ export class Order extends Model {
         if (this.validAt === null) {
             await this.setRelation(Order.webshop, webshop).markValid(payment, tickets)
         } else {
+            if (this.data.timeSlot && (this.data.timeSlot.date.getTime() + 1000*60*60*24) < new Date().getTime()) {
+                console.log("Skip sending paid email for order "+this.id)
+                return
+            }
             if (this.data.customer.email.length > 0){
                 if (didCreateTickets) {
                     this.setRelation(Order.webshop, webshop).sendTickets()
