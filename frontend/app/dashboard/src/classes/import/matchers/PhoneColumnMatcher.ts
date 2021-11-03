@@ -45,7 +45,7 @@ export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
 
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         const phoneRaw = ((cell.w ?? cell.v)+"").trim()
-        const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js/mobile")
+        const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js/max")
         const phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, I18nController.shared?.country ?? Country.Belgium)
 
         if (!phoneNumber || !phoneNumber.isValid()) {
