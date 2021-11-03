@@ -5,6 +5,7 @@ import { STBillingStatus } from "../billing/STBillingStatus";
 import { Organization } from "../Organization";
 import { OrganizationEmail } from "../OrganizationEmail";
 import { OrganizationPackages } from "../OrganizationMetaData";
+import { AcquisitionType } from "../OrganizationPrivateMetaData";
 import { OrganizationType } from "../OrganizationType";
 import { UmbrellaOrganization } from "../UmbrellaOrganization";
 import { User } from "../User";
@@ -38,6 +39,9 @@ export class OrganizationSummary extends Organization {
 
     @field({ decoder: OrganizationStats })
     stats: OrganizationStats
+
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), version: 130 })
+    acquisitionTypes: AcquisitionType[] = [];
 }
 
 export class OrganizationOverview extends AutoEncoder {

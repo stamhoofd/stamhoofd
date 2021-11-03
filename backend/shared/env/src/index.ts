@@ -1,15 +1,19 @@
 import fs from "fs"
 
-export function load(settings?: { path?: string }) {
+export function load(settings?: { path?: string, service?: "redirecter" | "api" | "admin" }) {
     // Read environment from file: .env.json
     (global as any).STAMHOOFD = JSON.parse(fs.readFileSync(settings?.path ?? ".env.json", "utf-8"))
+
+    // Mapping out environment for dependencies that need environment variables
+    process.env.NODE_ENV = STAMHOOFD.environment === "production" ? "production" : "development"
+
+    if (settings?.service === "redirecter") {
+        return
+    }
 
     if (!STAMHOOFD.domains.registration) {
         throw new Error("Expected environment variable domains.registration")
     }
-
-    // Mapping out environment for dependencies that need environment variables
-    process.env.NODE_ENV = STAMHOOFD.environment === "production" ? "production" : "development"
 
     // Database
     process.env.DB_DATABASE = STAMHOOFD.DB_DATABASE+""

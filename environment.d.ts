@@ -104,6 +104,18 @@ declare global {
         readonly NOLT_URL: string
         readonly MOLLIE_CLIENT_ID: string
     }
+
+    /** 
+     * The environment that is available everywhere: frontend, backend and shared
+     */ 
+    type RedirecterEnvironment = {
+        /**
+         * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
+         */
+        readonly environment: "production" | "development" | "staging" | "test"
+        readonly PORT: number
+        readonly domains: string[]
+    }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment
 }

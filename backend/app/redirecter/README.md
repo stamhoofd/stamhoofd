@@ -1,0 +1,1 @@
+This service redirects to stamhoofd.be or stamhoofd.nl, depending on the country (based by IP and/or Accept-Language header)
