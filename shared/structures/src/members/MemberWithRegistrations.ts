@@ -9,6 +9,7 @@ import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
 import { Organization } from '../Organization';
 import { PaymentStatus } from '../PaymentStatus';
+import { UmbrellaOrganization } from '../UmbrellaOrganization';
 import { User } from '../User';
 import { RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
@@ -305,6 +306,7 @@ export class MemberWithRegistrations extends Member {
                 name: "Ontbrekende gegevens", 
                 description: "Toon leden als één van de geselecteerde gegevens ontbreekt of niet is ingevuld.",
                 choices: [
+                    ...(organization.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen ? [new ChoicesFilterChoice("memberNumber", "Lidnummer")] : []),
                     new ChoicesFilterChoice("birthDay", "Geboortedatum"),
                     new ChoicesFilterChoice("address", "Adres", "Van lid zelf"),
                     new ChoicesFilterChoice("phone", "Telefoonnummer", "Van lid zelf"),
@@ -318,6 +320,10 @@ export class MemberWithRegistrations extends Member {
                 ], 
                 getValue: (member) => {
                     const missing: string[] = []
+                    if (!member.details.memberNumber) {
+                        missing.push("memberNumber")
+                    }
+
                     if (!member.details.birthDay) {
                         missing.push("birthDay")
                     }
