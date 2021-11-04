@@ -89,9 +89,17 @@ textarea.input {
     padding: 12px 15px;
     // 3 lines height
     line-height: $input-height - 18px - 2 * $border-width;
+    height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 4;
 
-    height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 2;
     resize: none;
+
+    &.large {
+        height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 8;
+    }
+
+    &.small {
+        height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 3;
+    }
 }
 
 select.input {

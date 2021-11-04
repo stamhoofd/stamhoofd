@@ -49,7 +49,7 @@
 
         <!-- Comments if checkbox is selected -->
         <div v-if="answer.settings.type == RecordType.Checkbox && answer.selected && answer.settings.askComments" class="textarea-container">
-            <textarea v-model="answer.comments" class="input" :placeholder="inputPlaceholder" />
+            <textarea v-model="answer.comments" class="input small" :placeholder="inputPlaceholder" />
             <p v-if="answer.settings.commentsDescription" class="info-box">
                 {{ answer.settings.commentsDescription }}
             </p>

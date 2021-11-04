@@ -14,7 +14,7 @@
         <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errorBox" class="max">
             <textarea
                 v-model="description"
-                class="input"
+                class="input large"
                 type="text"
                 placeholder="Beschrijving die op jouw webshop staat"
                 autocomplete=""
