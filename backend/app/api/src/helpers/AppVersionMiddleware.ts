@@ -29,6 +29,7 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         const platform = request.headers["x-platform"];
         const version = request.getVersion()
         if (version < 128) {
+            // WARNING: update caddy config for on demand certificates, because we don't want to throw errors over there!
             if (platform === "web" || platform === undefined) {
                 throw new SimpleError({
                     code: "client_update_required",
