@@ -205,7 +205,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         }
 
         if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
-            this.gotoFeedback(true).catch(console.error)
+            this.gotoFeedback(true).catch(console.error).finally(() => UrlHelper.shared.clear())
         }
 
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "category") {
