@@ -27,9 +27,11 @@
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    &:not(textarea) {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
 
     &:hover {
         border-color: $color-primary-gray-light;
@@ -69,10 +71,6 @@
             border-color: $color-error-border-focus;
         }
     }
-}
-
-input.input {
-    text-overflow: ellipsis;
 }
 
 .input-errors {
