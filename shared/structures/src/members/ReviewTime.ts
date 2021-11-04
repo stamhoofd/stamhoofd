@@ -39,7 +39,13 @@ export class ReviewTimes extends AutoEncoder {
         this.times = this.times.filter(t => t.name !== name)
     }
 
-    getLastReview(name: "records" | "parents" | "emergencyContacts" | "details"): Date | undefined {
+    getLastReview(name?: "records" | "parents" | "emergencyContacts" | "details"): Date | undefined {
+        if (!name) {
+            if (this.times.length == 0) {
+                return
+            }
+            return new Date(Math.min(...this.times.map(t => t.reviewedAt.getTime())))
+        }
         for (const time of this.times) {
             if (time.name === name) {
                 return time.reviewedAt

@@ -365,7 +365,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get definitions() {
-        const base = MemberWithRegistrations.getBaseFilterDefinitions()
+        const base = MemberWithRegistrations.getBaseFilterDefinitions(OrganizationManager.organization)
 
         for (const recordCategory of this.recordCategories) {
             for (const record of recordCategory.records) {

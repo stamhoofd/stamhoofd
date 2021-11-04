@@ -7,12 +7,16 @@ import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from '../fil
 import { StringFilterDefinition } from '../filters/StringFilter';
 import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
+import { Organization } from '../Organization';
 import { PaymentStatus } from '../PaymentStatus';
 import { User } from '../User';
 import { RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
 import { Gender } from './Gender';
 import { Member } from './Member';
+import { MemberDetailsWithGroups } from './OrganizationRecordsConfiguration';
+import { RecordCategory } from './records/RecordCategory';
+import { RecordType } from './records/RecordSettings';
 import { Registration } from './Registration';
 
 
@@ -237,7 +241,7 @@ export class MemberWithRegistrations extends Member {
         }
     }
 
-    static getBaseFilterDefinitions() {
+    static getBaseFilterDefinitions(organization: Organization) {
         return [
             new StringFilterDefinition<MemberWithRegistrations>({
                 id: "member_name", 
@@ -281,6 +285,88 @@ export class MemberWithRegistrations extends Member {
                 },
                 time: false
             }),
+
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "member_missing_data", 
+                name: "Ontbrekende gegevens", 
+                description: "Toon leden als één van de geselecteerde gegevens ontbreekt of niet is ingevuld.",
+                choices: [
+                    new ChoicesFilterChoice("birthDay", "Geboortedatum"),
+                    new ChoicesFilterChoice("address", "Adres", "Van lid zelf"),
+                    new ChoicesFilterChoice("phone", "Telefoonnummer", "Van lid zelf"),
+                    new ChoicesFilterChoice("email", "E-mailadres", "Van lid zelf"),
+                    new ChoicesFilterChoice("parents", "Ouders"),
+                    new ChoicesFilterChoice("secondParent", "Tweede ouder", "Als er maar één ouder is toegevoegd aan een lid. Handig om te selecteren op een eenoudergezin."),
+                    new ChoicesFilterChoice("emergencyContact", "Noodcontact"),
+                    ...organization.meta.recordsConfiguration.recordCategories.flatMap(c => c.childCategories.length > 0 ? c.childCategories : [c]).map(category => {
+                        return new ChoicesFilterChoice("record-category-"+category.id, category.name)
+                    })
+                ], 
+                getValue: (member) => {
+                    const missing: string[] = []
+                    if (!member.details.birthDay) {
+                        missing.push("birthDay")
+                    }
+
+                    if (!member.details.address) {
+                        missing.push("address")
+                    }
+
+                    if (!member.details.phone) {
+                        missing.push("phone")
+                    }
+
+                    if (!member.details.email) {
+                        missing.push("email")
+                    }
+
+                    if (member.details.parents.length == 0) {
+                        missing.push("parents")
+                    }
+
+                    if (member.details.parents.length == 1) {
+                        missing.push("secondParent")
+                    }
+
+                    if (member.details.emergencyContacts.length == 0) {
+                        missing.push("emergencyContact")
+                    }
+
+                    const categories = organization.meta.recordsConfiguration.recordCategories.flatMap(c => c.childCategories.length > 0 ? c.childCategories : [c])
+                    const m = new MemberDetailsWithGroups(member.details, member, [])
+                    for (const category of categories) {
+                        const records = category.getAllFilteredRecords(m, member.details.dataPermissions?.value ?? false)
+                        const missingRecord = records.find(r => (r.required || r.type === RecordType.Checkbox || records.length == 1) && !member.details.recordAnswers.find(a => a.settings.id === r.id))
+                        if (missingRecord) {
+                            missing.push("record-category-"+category.id)
+                        }
+                    }
+                    return missing
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "members_accounts", 
+                name: "Accounts", 
+                description: "Filter leden die wel of geen account hebben om de gegevens van leden te wijzigen via de inschrijvingspagina.",
+                choices: [
+                    new ChoicesFilterChoice("no_account", "Heeft geen account"),
+                    new ChoicesFilterChoice("has_account", "Heeft een account")
+                ], 
+                getValue: (member) => {
+                    const missing: string[] = []
+                    if (member.users.find(u => u.publicKey !== null)) {
+                        missing.push("has_account")
+                    } else {
+                        missing.push("no_account")
+                    }
+
+                    return missing
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+
              new ChoicesFilterDefinition<MemberWithRegistrations>({
                 id: "gender", 
                 name: "Geslacht", 
