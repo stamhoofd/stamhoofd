@@ -287,6 +287,20 @@ export class MemberWithRegistrations extends Member {
             }),
 
             new ChoicesFilterDefinition<MemberWithRegistrations>({
+                id: "gender", 
+                name: "Geslacht", 
+                choices: [
+                    new ChoicesFilterChoice(Gender.Male, "Man"),
+                    new ChoicesFilterChoice(Gender.Female, "Vrouw"),
+                    new ChoicesFilterChoice(Gender.Other, "Andere"),
+                ], 
+                getValue: (member) => {
+                    return [member.details.gender]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+
+            new ChoicesFilterDefinition<MemberWithRegistrations>({
                 id: "member_missing_data", 
                 name: "Ontbrekende gegevens", 
                 description: "Toon leden als één van de geselecteerde gegevens ontbreekt of niet is ingevuld.",
@@ -367,19 +381,6 @@ export class MemberWithRegistrations extends Member {
                 defaultMode: ChoicesFilterMode.Or
             }),
 
-             new ChoicesFilterDefinition<MemberWithRegistrations>({
-                id: "gender", 
-                name: "Geslacht", 
-                choices: [
-                    new ChoicesFilterChoice(Gender.Male, "Man"),
-                    new ChoicesFilterChoice(Gender.Female, "Vrouw"),
-                    new ChoicesFilterChoice(Gender.Other, "Andere"),
-                ], 
-                getValue: (member) => {
-                    return [member.details.gender]
-                },
-                defaultMode: ChoicesFilterMode.Or
-            }),
             new ChoicesFilterDefinition<MemberWithRegistrations>({
                 id: "paid", 
                 name: "Betaling", 
