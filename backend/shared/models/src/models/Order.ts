@@ -368,7 +368,7 @@ export class Order extends Model {
                     to: toStr,
                     subject: "["+webshop.meta.name+"] Jouw tickets (bestelling "+this.number+")",
                     text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                        "Je kan jouw tickets downloaden en jouw bestelling nakijken via deze link::"
+                        "Je kan jouw tickets downloaden en jouw bestelling nakijken via deze link:"
                     + "\n"
                     + this.setRelation(Order.webshop, webshop).getUrl()
                     +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
