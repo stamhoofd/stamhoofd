@@ -120,10 +120,13 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         this.loading = true
 
         try {
-           // Place order
-           const data = OrderData.create(CheckoutManager.checkout as any)
-           data.consumerLanguage = I18nController.shared?.language ?? "nl"
-           const response = await WebshopManager.server.request({
+            if (!CheckoutManager.checkout.paymentMethod) {
+                CheckoutManager.checkout.paymentMethod = PaymentMethod.Unknown
+            }
+            // Place order
+            const data = OrderData.create(CheckoutManager.checkout as any)
+            data.consumerLanguage = I18nController.shared?.language ?? "nl"
+            const response = await WebshopManager.server.request({
                 method: "POST",
                 path: "/webshop/"+this.webshop.id+"/order",
                 body: data, // todo: add some manual casting here

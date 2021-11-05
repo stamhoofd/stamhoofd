@@ -284,7 +284,10 @@ export class Checkout extends AutoEncoder {
         this.validateDeliveryAddress(webshop, organizationMeta)
         this.validateTimeSlot(webshop, organizationMeta)
         this.validateCustomer(webshop, organizationMeta, i18n)
-        this.validatePayment(webshop, organizationMeta)
+
+        if (this.totalPrice != 0) {
+            this.validatePayment(webshop, organizationMeta)
+        }
     }
 
 

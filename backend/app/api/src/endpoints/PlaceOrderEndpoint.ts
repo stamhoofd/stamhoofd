@@ -69,6 +69,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const totalPrice = request.body.totalPrice
 
         if (totalPrice == 0) {
+            // Force unknown payment method
+            order.data.paymentMethod = PaymentMethod.Unknown
+
             // Mark this order as paid
             await order.markPaid(null, organization, webshop)
             await order.save()
