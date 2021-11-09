@@ -151,7 +151,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     }
 
     set financialSupportValue(value: boolean) {
-        this.memberDetails.requiresFinancialSupport = BooleanStatus.create({ value })
+        this.$set(this.memberDetails, "requiresFinancialSupport", BooleanStatus.create({ value }))
     }
 
     get financialSupportChangeDate() {
@@ -180,7 +180,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     }
 
     set dataPermissionsValue(value: boolean) {
-        this.memberDetails.dataPermissions = BooleanStatus.create({ value })
+        this.$set(this.memberDetails, "dataPermissions", BooleanStatus.create({ value }))
     }
 
     get dataPermissionsChangeDate() {
