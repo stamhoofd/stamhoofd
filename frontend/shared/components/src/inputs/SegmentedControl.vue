@@ -3,17 +3,23 @@
         <div
             v-for="(item, index) in items"
             :key="index"
+            class="item"
             :class="{ selected: item == value }"
             @click="selectItem(index)"
         >
-            <span :data-text="labels ? labels[index] : item" />
+            <div :data-text="labels ? labels[index] : item" />
         </div>
-        <span><span
-            :style="{
-                left: (selectedIndex / items.length) * 100 + '%',
-                width: 100 / items.length + '%',
-            }"
-        /></span>
+        <div class="pointer"
+             :style="{
+                 transform: pointerTransform
+             }"
+        >
+            <div
+                :style="{
+                    width: 100 / items.length + '%',
+                }"
+            />
+        </div>
     </div>
 </template>
 
@@ -40,6 +46,11 @@ export default class SegmentedControl extends Vue {
         return this.items.indexOf(this.value);
     }
 
+    get pointerTransform() {
+        const percentage = (this.selectedIndex / this.items.length) * 100
+        return "translateX("+percentage.toFixed(2)+"%)";
+    }
+
     selectItem(index) {
         this.$emit("input", this.items[index]);
     }
@@ -57,22 +68,19 @@ export default class SegmentedControl extends Vue {
 .segmented-control {
     background: $color-gray-lighter;
     padding: $border-width;
-    border-radius: $border-radius;
+    border-radius: 6px;
     width: 100%;
     box-sizing: border-box;
     display: flex;
     position: relative;
     z-index: 0;
     overflow: hidden;
-    @extend .style-input;
+    @extend .style-button-smaller;
+    height: 36px;
 
-    @media (max-width: 450px) {
-        font-size: 14px;
-    }
-
-    & > div {
+    & > .item {
         flex-grow: 1;
-        height: 34px;
+        height: 32px;
         padding: 0 10px;
 
         cursor: pointer;
@@ -103,7 +111,7 @@ export default class SegmentedControl extends Vue {
             }
         }
 
-        & > span {
+        & > div {
             display: block;
 
             &::before {
@@ -112,8 +120,8 @@ export default class SegmentedControl extends Vue {
                 left: 10px;
                 right: 10px;
                 top: 0;
-                height: 100%;
-                line-height: 34px;
+                height: 32px;
+                line-height: 32px;
                 text-align: center;
                 text-overflow: ellipsis;
                 opacity: 1;
@@ -129,8 +137,8 @@ export default class SegmentedControl extends Vue {
                 left: 10px;
                 right: 10px;
                 top: 0;
-                height: 100%;
-                line-height: 34px;
+                height: 32px;
+                line-height: 32px;
                 text-align: center;
                 text-overflow: ellipsis;
                 font-weight: 600;
@@ -141,14 +149,14 @@ export default class SegmentedControl extends Vue {
             }
         }
 
-        &:active > span {
+        &:active > div {
             &::before {
                 opacity: 0.4;
             }
         }
 
         // Animate font weight change
-        &.selected > span {
+        &.selected > div {
             &::before {
                 opacity: 0;
             }
@@ -158,29 +166,32 @@ export default class SegmentedControl extends Vue {
         }
 
         // Animate font weight change
-        &.selected:active > span {
+        &.selected:active > div {
             &::after {
                 opacity: 0.4;
             }
         }
     }
-    & > span {
+    & > .pointer {
+        // Width needs to be correct, because transformX will use percentages!
         position: absolute;
         top: $border-width;
-        bottom: $border-width;
+        height: 32px;
         left: $border-width;
         right: $border-width;
         z-index: -1;
         pointer-events: none;
 
-        & > span {
+        transition: transform 0.3s ease;
+        transform: translate(0, 0);
+
+        & > div {
             position: absolute;
             left: 0;
             top: 0;
-            bottom: 0;
+            height: 32px;
             background: $color-white-highlight;
             border-radius: 4px;
-            transition: left 0.25s;
             box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
         }
     }

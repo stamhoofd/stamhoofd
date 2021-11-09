@@ -413,13 +413,13 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
             meta
         })
         
-        this.show(new ComponentWithProperties(EditCategoryGroupsView, { 
+        this.present(new ComponentWithProperties(EditCategoryGroupsView, { 
             category: category, 
             organization: this.patchedOrganization.patch(p), 
             saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
                 this.addPatch(p.patch(patch))
             }
-        }))
+        }).setDisplayStyle("popup"))
     }
 
     async deleteMe() {

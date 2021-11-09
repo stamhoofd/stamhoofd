@@ -46,8 +46,7 @@
     }
 
     &.primary {
-        font-size: 18px;
-        font-weight: 600;
+        @extend .style-button;
         color: white;
 
         padding: 0 27px;
@@ -125,8 +124,7 @@
     }
 
     &.destructive {
-        font-size: 18px;
-        font-weight: 600;
+        @extend .style-button;
         color: white;
 
         padding: 0 27px;
@@ -153,8 +151,7 @@
     }
 
     &.secundary {
-        font-size: 18px;
-        font-weight: 600;
+        @extend .style-button;
         color: $color-gray-dark;
         padding: 0 27px;
         background: $color-gray-lighter;
@@ -235,7 +232,7 @@
         height: 34px;
         line-height: 34px;
         white-space: nowrap;
-        transition: 0.2s opacity, 0.2s color;
+        transition: 0.2s opacity ease-out 0.1s, 0.2s color;
         position: relative;
         max-width: 100%;
 
@@ -287,7 +284,7 @@
 
         &:active {
             opacity: 0.4;
-            transition: 0.2s color;
+            transition: 0s opacity, 0.2s color;
         }
 
         @media (max-width: 500px) {
@@ -304,11 +301,11 @@
     &.icon {
         padding: 10px;
         margin: -10px;
-        transition: 0.2s opacity, 0.2s transform;
+        transition: 0.2s opacity ease-out, 0.2s color;
 
         &:active {
             opacity: 0.4;
-            transform: scale(0.8, 0.8);
+            transition: 0s opacity, 0.2s color;
         }
     }
 }

@@ -32,7 +32,7 @@ export default class GroupCategoryRow extends Mixins(NavigationMixin) {
     organization: Organization
 
     editCategory() {
-        this.show(new ComponentWithProperties(EditCategoryGroupsView, { 
+        this.present(new ComponentWithProperties(EditCategoryGroupsView, { 
             category: this.category, 
             organization: this.organization, 
             saveHandler: (patch: AutoEncoderPatchType<Organization>) => {

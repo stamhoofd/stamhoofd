@@ -4,7 +4,10 @@ export { default as STErrorBox } from "./src/errors/STErrorBox.vue"
 export { default as STErrorsDefault } from "./src/errors/STErrorsDefault.vue"
 export { default as STErrorsInput } from "./src/errors/STErrorsInput.vue"
 export * from "./src/errors/Validator"
+
+// Classes
 export * from "./src/EventBus"
+export * from "./src/ViewportHelper"
 
 // Navigation
 export { default as BackButton } from "./src/navigation/BackButton.vue"
@@ -59,6 +62,7 @@ export { default as CodeInput } from "./src/inputs/CodeInput.vue"
 export { default as ColorInput } from "./src/inputs/ColorInput.vue"
 export { default as CompanyNumberInput } from "./src/inputs/CompanyNumberInput.vue"
 export { default as DateSelection } from "./src/inputs/DateSelection.vue"
+export { default as Dropdown } from "./src/inputs/Dropdown.vue"
 export { default as EmailInput } from "./src/inputs/EmailInput.vue"
 export { default as FileInput } from "./src/inputs/FileInput.vue"
 export { default as IBANInput } from "./src/inputs/IBANInput.vue"
@@ -79,7 +83,6 @@ export { default as TimeInput } from "./src/inputs/TimeInput.vue"
 export { default as TimeMinutesInput } from "./src/inputs/TimeMinutesInput.vue"
 export { default as UploadButton } from "./src/inputs/UploadButton.vue"
 export { default as VATNumberInput } from "./src/inputs/VATNumberInput.vue"
-export { default as Dropdown } from "./src/inputs/Dropdown.vue"
 
 // Shared views should be last
 export { default as CartItemView } from "./src/views/CartItemView.vue"

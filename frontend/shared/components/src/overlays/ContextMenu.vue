@@ -119,7 +119,8 @@ export default class ContextMenu extends Vue {
     z-index: 10000;
     left: 0;
     top: 0;
-    background: $color-white;
+    background: $color-background-shade;
+    border: 1px solid $color-border-shade;
     padding: 4px 0;
     border-radius: $border-radius;
     @extend .style-overlay-shadow;
