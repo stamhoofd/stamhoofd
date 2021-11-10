@@ -2253,10 +2253,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.4.4.tgz#0106eb5a6060f9f5210aae45f56c424ec9b71d51"
   integrity sha512-vK3fRK4VQesMN1nrC/6Ijos4X3s5xbcxk6yWOA7j7wWmn6ZSsufvwYGeMnKhJH+us93hAmoTp5SYscunz7caGw==
 
-"@simonbackx/simple-endpoints@^1.9.2":
-  version "1.9.2"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.9.2.tgz#6644633fe369bdb3dce1ff2f9737b1b654433cfa"
-  integrity sha512-fQTmk0eVH+/fvAY9g8kj3nekIqG8i7pH9/SPdKbLBHViG3FVYLy1x3ugrO5j0iG5Yq2k9+gD5QZjN6UjOxL6ig==
+"@simonbackx/simple-endpoints@^1.10.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.10.0.tgz#d341d7a7fb4acfd97eb84150339f663536214134"
+  integrity sha512-PpCWLZLEHtcTySD4DKsqEzBIItUwXagGBgCHRHilWMdo3xHWyxGDJcVaRb659GjhJLqdM98IcM+uUxOiXPHcrQ==
 
 "@simonbackx/simple-errors@^1.3", "@simonbackx/simple-errors@^1.3.0":
   version "1.3.0"
@@ -2268,10 +2268,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.10.0.tgz#f6669e4012a6aec4b1ea8d67a802b880b0cf023c"
   integrity sha512-YVyV/XnSBprBEmGmitUxQmnTVzYSfI1IymxlAh0YjbMoy6i55uX/2RjU6TILbI0gerdolXCNljPHC4xzWYNehQ==
 
-"@simonbackx/vue-app-navigation@^1.18.1":
-  version "1.18.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.18.1.tgz#0cc137cb7902eb170a745aa5c577f8de91f52c36"
-  integrity sha512-qeoJ26H77Tm5iOjSNw9nr9+shZowBN1pZCS5iJQYd2cxk2efw4Spf4Pu96bfiOk5+fSSb6KFbGpKl4iK7BedeQ==
+"@simonbackx/vue-app-navigation@1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.18.0.tgz#89dd7922d78a3fc98ca88e7c7c8b337b95d8120d"
+  integrity sha512-f4V01pbJjAXi1OV/Lj8SBIj3buuyaAFJrnyt7iVoiUARzH2RXIHVAuBBu6xPGSHWyvuP3cvnC0r5J2PUvy2tLQ==
 
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"

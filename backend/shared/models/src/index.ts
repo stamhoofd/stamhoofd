@@ -43,3 +43,4 @@ export * from "./factories/UserFactory"
 
 export * from "./helpers/GroupBuilder"
 export * from "./helpers/WebshopCounter"
+export * from "./helpers/FacebookPixel"

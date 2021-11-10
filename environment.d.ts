@@ -93,6 +93,10 @@ declare global {
  
          // Nolt
         readonly NOLT_SSO_SECRET_KEY: string
+
+        readonly FACEBOOK_ACCESS_TOKEN?: string
+        readonly FACEBOOK_PIXEL_ID?: string
+        readonly FACEBOOK_TEST_EVENT_CODE?: string
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

@@ -87,6 +87,8 @@ import { LoginHelper, Session } from "@stamhoofd/networking"
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { FacebookHelper } from '../../classes/FacebookHelper';
+
 @Component({
     components: {
         STToolbar,
@@ -203,7 +205,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             plausible('signupKeys');
             try {
 
-                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code)
+                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code, FacebookHelper.id)
                 plausible('signup');
 
                 this.loading = false;

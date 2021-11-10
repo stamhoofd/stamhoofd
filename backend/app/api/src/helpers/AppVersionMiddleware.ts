@@ -2,29 +2,16 @@ import { EncodedResponse, Request, RequestMiddleware,ResponseMiddleware } from "
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Version } from "@stamhoofd/structures";
 
-function getRequestIP(request: Request): string {
-    let ipAddress = request.request?.socket.remoteAddress;
-    if (request.headers["x-real-ip"] && typeof request.headers["x-real-ip"] == "string" && (ipAddress == "127.0.0.1" || ipAddress == "0.0.0.0")) {
-        ipAddress = request.headers["x-real-ip"];
-    }
-    if (!ipAddress) {
-        ipAddress = '?';
-    }
-
-    return ipAddress.split(":", 2)[0]
-}
-
-
 export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
     handleRequest(request: Request) {
         if (request.method == "OPTIONS") {
             if (STAMHOOFD.environment === "development") {
-                console.log(getRequestIP(request)+": "+request.method+" "+request.host+request.url)
+                console.log(request.getIP()+": "+request.method+" "+request.host+request.url)
             }
             return
         }
 
-        console.log(getRequestIP(request)+": "+request.method+" "+request.host+request.url)
+        console.log(request.getIP()+": "+request.method+" "+request.host+request.url)
 
         const platform = request.headers["x-platform"];
         const version = request.getVersion()
@@ -63,7 +50,7 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         
 
         if (error) {
-            const IP = getRequestIP(request)
+            const IP = request.getIP()
             if (isSimpleError(error) || isSimpleErrors(error)) {
                 if (!error.hasCode("expired_access_token")) {
                     console.error("Request with error in response:\n"+IP+": "+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))

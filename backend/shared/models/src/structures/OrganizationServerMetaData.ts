@@ -1,4 +1,5 @@
 import { AutoEncoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { FBId } from '@stamhoofd/structures';
 
 export class OrganizationServerMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
@@ -26,4 +27,7 @@ export class OrganizationServerMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder, optional: true, version: 86 })
     mollieCustomerId?: string
+
+    @field({ decoder: FBId, optional: true, version: 132 })
+    fb?: FBId
 }

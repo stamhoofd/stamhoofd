@@ -175,7 +175,6 @@ export default class CodeInput extends Vue {
 
 .code-input {
     -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
 
     > div {
         display: inline-flex;
@@ -191,7 +190,6 @@ export default class CodeInput extends Vue {
             caret-color: transparent;
             text-transform: uppercase;
             -webkit-touch-callout: none !important;
-            user-select: none;
 
             &:nth-child(3) {
                 margin-right: 15px;
