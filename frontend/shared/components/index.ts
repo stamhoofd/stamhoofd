@@ -114,3 +114,6 @@ export { default as PropertyFilterInput } from "./src/filters/PropertyFilterInpu
 export { default as PropertyFilterView } from "./src/filters/PropertyFilterView.vue"
 export { default as RegistrationsFilterView } from "./src/filters/RegistrationsFilterView.vue"
 export { default as StringFilterView } from "./src/filters/StringFilterView.vue"
+
+// tables
+export { default as TableView } from "./src/tables/TableView.vue"

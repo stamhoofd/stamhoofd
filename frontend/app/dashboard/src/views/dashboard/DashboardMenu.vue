@@ -118,6 +118,11 @@
                     <span>Feedback</span>
                 </button>
 
+                <button class="menu-button button heading" @click="openTest(true)">
+                    <span class="icon new" />
+                    <span>Test</span>
+                </button>
+
                 <button class="menu-button button heading" @click="logout">
                     <span class="icon logout" />
                     <span>Uitloggen</span>
@@ -132,7 +137,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadComponent, Logo, STNavigationBar,TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, LoadComponent, Logo, STNavigationBar,TableView,TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
@@ -354,6 +359,14 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         this.showDetail(
             new ComponentWithProperties(NavigationController, { 
                 root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ './account/AccountSettingsView.vue'), {}, { instant: !animated })
+            }).setAnimated(animated)
+        );
+    }
+
+    openTest(animated = true) {
+        this.showDetail(
+            new ComponentWithProperties(NavigationController, { 
+                root: new ComponentWithProperties(TableView, {})
             }).setAnimated(animated)
         );
     }
