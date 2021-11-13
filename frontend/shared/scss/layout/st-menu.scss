@@ -42,13 +42,13 @@
     > .padding-group {
     }
 
-    hr {
+    > main > hr {
         height: $border-width;
         border-radius: $border-width/2;
         background: $color-gray-light;
         border: 0;
         outline: 0;
-        margin: 20px 0;
+        margin: 15px 0;
     }
 
     .menu-button {
@@ -103,6 +103,10 @@
         &.heading {
             @extend .style-button-small;
             color: $color-gray-dark;
+        }
+
+        &.cta {
+            color: $color-primary;
         }
 
         &.selected {

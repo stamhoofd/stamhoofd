@@ -63,6 +63,11 @@
     "webshop": {
       "customDomain": {
         "description": "Hier kan je je eigen domeinnaam kiezen, en eventueel met een achtervoegsel. Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.nl/snoepen, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook snoepen.domeinnaam.nl gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
+      },
+      "deliveryMethod": {
+        "name": {
+          "placeholder": "bv. PostNL"
+        }
       }
     }
   },

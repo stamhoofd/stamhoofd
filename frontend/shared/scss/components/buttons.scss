@@ -173,6 +173,11 @@
             transform: scale(0.95, 0.95);
         }
 
+        &.danger {
+            color: $color-error-dark;
+            background: $color-error-background;
+        }
+
         &:disabled {
             color: $color-gray-light;
             background: $color-white-shade;
@@ -198,6 +203,8 @@
                 margin-left: 10px;
                 margin-right: -5px;
             }
+
+            
         }
 
         &.full {

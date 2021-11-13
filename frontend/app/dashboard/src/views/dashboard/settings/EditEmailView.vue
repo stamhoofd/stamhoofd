@@ -1,9 +1,9 @@
 <template>
     <div class="st-view">
         <STNavigationBar title="E-mailadres">
-            <BackButton slot="left" v-if="canPop" @click="pop"/>
-            <button class="button text" slot="right" v-if="!isNew" @click="deleteMe">
-                <span class="icon trash"/>
+            <BackButton v-if="canPop" slot="left" @click="pop" />
+            <button v-if="!isNew" slot="right" class="button text" @click="deleteMe">
+                <span class="icon trash" />
                 <span>Verwijderen</span>
             </button>
         </STNavigationBar>
@@ -23,37 +23,38 @@
                     v-model="name"
                     class="input"
                     type="text"
-                    placeholder="Optioneel. bv. Kapoenleiding"
+                    placeholder="Optioneel. bv. Webshopverantwoordelijke"
                     autocomplete=""
                 >
             </STInputBox>
 
-            <EmailInput title="E-mailadres" :validator="validator" v-model="email" placeholder="E-mailadres waarmee je wilt versturen"/>
+            <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres waarmee je wilt versturen" />
         
             <hr>
             <h2>Standaard e-mailadres voor...</h2>
-            <p class="st-list-description">Selecteer de groepen die standaard met dit e-mailadres moeten versturen.</p>
+            <p class="st-list-description">
+                Selecteer de groepen die standaard met dit e-mailadres moeten versturen.
+            </p>
 
             <STList>
-                <STListItem element-name="label" :selectable="true" v-for="group in groups" :key="group.group.id">
-                    <Checkbox slot="left" v-model="group.selected"/>
+                <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
+                    <Checkbox slot="left" v-model="group.selected" />
                     {{ group.group.settings.name }}
                 </STListItem>
                 <STListItem element-name="label" :selectable="true">
-                    <Checkbox slot="left" v-model="isDefault"/>
+                    <Checkbox slot="left" v-model="isDefault" />
                     Algemene e-mails
                 </STListItem>
             </STList>
-
         </main>
 
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save" v-if="isNew">
+                    <button v-if="isNew" class="button primary" @click="save">
                         Toevoegen
                     </button>
-                    <button class="button primary" @click="save" v-else>
+                    <button v-else class="button primary" @click="save">
                         Opslaan
                     </button>
                 </LoadingButton>
@@ -63,20 +64,21 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, Validator, EmailInput, STList, STListItem } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Organization, OrganizationPatch, Address, OrganizationDomains, DNSRecord, OrganizationEmail, OrganizationPrivateMetaData, Version, GroupPrivateSettingsPatch } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchableArray,PatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Address, DNSRecord, Group, GroupGenderType, GroupPatch, GroupPrivateSettingsPatch,GroupSettings, GroupSettingsPatch, Organization, OrganizationDomains, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version } from "@stamhoofd/structures"
+import { Component, Mixins,Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager"
 import DNSRecordsView from './DNSRecordsView.vue';
 
 class SelectableGroup {
     group: Group;
-    selected: boolean = false;
-    constructor(group: Group, selected: boolean = false) {
+    selected = false;
+    constructor(group: Group, selected = false) {
         this.selected = selected
         this.group = group
     }

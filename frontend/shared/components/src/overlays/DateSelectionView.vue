@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
+    <ContextMenu v-bind="{ x, y, xPlacement: 'left', preferredWidth }">
         <aside class="date-selection-view">
             <header>
                 <button class="button icon gray arrow-left" @click="previousMonth" />
@@ -44,6 +44,9 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
 
     @Prop({ default: 0 })
     y!: number;
+
+    @Prop()
+    preferredWidth?: number;
 
     @Prop()
     setDate!: (date: Date) => void;
@@ -201,7 +204,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
             padding: 0px 10px;
             padding-bottom: 7px;
             margin-bottom: 5px;
-            border-bottom: 2px solid $color-gray-lighter;
+            border-bottom: 2px solid var(--color-current-border, #{$color-border});
 
             > div {
                 flex-grow: 1;
@@ -230,6 +233,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                 cursor: pointer;
                 touch-action: manipulation;
                 user-select: none;
+                transition: color 0.2s;
 
                 @extend .style-interactive-small;
 
@@ -243,8 +247,26 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                     z-index: -1;
                     border-radius: $border-radius;
                     background: $color-white;
+                    background: var(--color-current-background, #{$color-background});
                     transition: background-color 0.2s, transform 0.2s;
                     transform: scale(0.9, 0.9);
+                }
+
+                &:active, &:hover {
+
+                    &::after {
+                        background: var(--color-current-background-shade, #{$color-background-shade});
+                        transform: scale(1, 1);
+                    }
+                }
+
+                &:active {
+                    color: white;
+
+                    &::after {
+                        background: $color-gray;
+                        transform: scale(0.9, 0.9);
+                    }
                 }
 
                 &.selected {
@@ -255,13 +277,17 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                         background: $color-primary;
                         transform: scale(1, 1);
                     }
-                }
 
-                &:active, &:hover {
+                    &:hover {
+                        &::after {
+                            background: $color-dark;
+                        }
+                    }
 
-                    &::after {
-                        background: $color-white-shade;
-                        transform: scale(1, 1);
+                    &:active {
+                        &::after {
+                            transform: scale(0.9, 0.9);
+                        }
                     }
                 }
 

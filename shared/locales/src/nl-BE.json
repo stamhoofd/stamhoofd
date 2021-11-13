@@ -13,6 +13,13 @@
       "parentPhone": {
         "placeholder": "GSM-nummer van ouder"
       }
+    },
+    "webshop": {
+      "deliveryMethod": {
+        "name": {
+          "placeholder": ""
+        }
+      }
     }
   },
   "webshop": {},

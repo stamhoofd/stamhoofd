@@ -13,7 +13,7 @@
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openOrders(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/box.svg">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg">
                     <h2 class="style-title-list">
                         Bestellingen
                     </h2>
@@ -24,7 +24,7 @@
                 </STListItem>
 
                 <STListItem v-if="hasTickets && hasWritePermissions" :selectable="true" class="left-center" @click="openTickets(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/scanner.svg">
                     <h2 class="style-title-list">
                         Scan tickets
                     </h2>
@@ -42,7 +42,7 @@
                     <p class="style-description">
                         Jouw webshop is bereikbaar via {{ webshopUrl }}
                     </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
+                    <span slot="right" class="icon external gray" />
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openStatistics(true)">
@@ -55,18 +55,99 @@
                     </p>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
-
-                <STListItem v-if="hasFullPermissions" :selectable="true" class="left-center" @click="openSettings(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/shop-settings.svg">
-                    <h2 class="style-title-list">
-                        Instellingen
-                    </h2>
-                    <p class="style-description">
-                        Bewerk de producten in jouw webshop of andere instellingen
-                    </p>
-                    <span slot="right" class="icon arrow-right-small gray" />
-                </STListItem>
             </STList>
+
+            <template v-if="hasFullPermissions">
+                <hr>
+                <h2>Instellingen</h2>
+
+                <STList class="illustration-list">
+                    <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg">
+                        <h2 class="style-title-list">
+                            Algemeen
+                        </h2>
+                        <p class="style-description">
+                            Naam en beschikbaarheid
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg">
+                        <h2 class="style-title-list">
+                            Wijzig verkochte artikels
+                        </h2>
+                        <p class="style-description">
+                            Bewerk welke artikels je verkoopt in jouw webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem v-else :selectable="true" class="left-center" @click="editProducts(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg">
+                        <h2 class="style-title-list">
+                            Wijzig verkochte tickets en vouchers
+                        </h2>
+                        <p class="style-description">
+                            Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="openSettings(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/bike.svg">
+                        <h2 class="style-title-list">
+                            Afhalen, leveren, ter plaatse eten
+                        </h2>
+                        <p class="style-description">
+                            Wijzig tijdstippen, locaties en afhaalmethodes
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="openSettings(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
+                        <h2 class="style-title-list">
+                            Betaalmethodes
+                        </h2>
+                        <p class="style-description">
+                            Welke betaalmethodes je wilt activeren op jouw webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editPage(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/palette.svg">
+                        <h2 class="style-title-list">
+                            Tekst, link en omslagfoto
+                        </h2>
+                        <p class="style-description">
+                            Wijzig de teksten en uitzicht van jouw webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+
+                <hr>
+                <h2>Gevaarlijke acties</h2>
+                <p>Deze acties kan je niet meer ongedaan maken. Let heel goed op wat je doet.</p>
+
+                <STList>
+                    <STListItem :selectable="true" @click="openSettings(true)">
+                        <h2 class="style-title-list">
+                            Webshop verwijderen
+                        </h2>
+                        <p class="style-description">
+                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen
+                        </p>
+                        <button slot="right" class="button secundary danger hide-smartphone">
+                            Verwijder webshop
+                        </button>
+                        <button slot="right" class="button icon trash only-smartphone" />
+                    </STListItem>
+                </STList>
+            </template>
         </main>
     </div>
 </template>
@@ -82,6 +163,9 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
+import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
+import EditWebshopPageView from './edit/EditWebshopPageView.vue';
+import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
 import EditWebshopView from './edit/EditWebshopView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
@@ -133,6 +217,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)
     }
 
+    get isTicketsOnly() {
+        return this.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets
+    }
+
     get hasTickets() {
         return this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None
     }
@@ -163,6 +251,66 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                         // Make sure we have an up to date webshop
                         await this.webshopManager.loadWebshopIfNeeded(false)
                         return new ComponentWithProperties(EditWebshopView, {
+                            webshopManager: this.webshopManager
+                        })
+                    } catch (e) {
+                        Toast.fromError(e).show()
+                        throw e
+                    }
+                }
+            })
+        }).setAnimated(animated);
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    editGeneral(animated = true) {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    try {
+                        // Make sure we have an up to date webshop
+                        await this.webshopManager.loadWebshopIfNeeded(false)
+                        return new ComponentWithProperties(EditWebshopGeneralView, {
+                            webshopManager: this.webshopManager
+                        })
+                    } catch (e) {
+                        Toast.fromError(e).show()
+                        throw e
+                    }
+                }
+            })
+        }).setAnimated(animated);
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    editProducts(animated = true) {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    try {
+                        // Make sure we have an up to date webshop
+                        await this.webshopManager.loadWebshopIfNeeded(false)
+                        return new ComponentWithProperties(EditWebshopProductsView, {
+                            webshopManager: this.webshopManager
+                        })
+                    } catch (e) {
+                        Toast.fromError(e).show()
+                        throw e
+                    }
+                }
+            })
+        }).setAnimated(animated);
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    editPage(animated = true) {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    try {
+                        // Make sure we have an up to date webshop
+                        await this.webshopManager.loadWebshopIfNeeded(false)
+                        return new ComponentWithProperties(EditWebshopPageView, {
                             webshopManager: this.webshopManager
                         })
                     } catch (e) {

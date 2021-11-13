@@ -64,24 +64,31 @@
         
 
             <div v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
-                <button class="menu-button heading">
-                    <span class="icon basket" />
-                    <span>Webshops</span>
-                    <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
-                        <span class="icon add" />
-                        <span>Nieuw</span>
-                    </button>
+                <button v-if="webshops.length == 0" class="menu-button button heading cta" @click="addWebshop()">
+                    <span class="icon add" />
+                    <span>Maak je eerste webshop aan</span>
                 </button>
 
-                <button
-                    v-for="webshop in webshops"
-                    :key="webshop.id"
-                    class="menu-button button"
-                    :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
-                    @click="openWebshop(webshop)"
-                >
-                    {{ webshop.meta.name }}
-                </button>
+                <template v-else>
+                    <button class="menu-button heading">
+                        <span class="icon basket" />
+                        <span>Webshops</span>
+                        <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
+                            <span class="icon add" />
+                            <span>Nieuw</span>
+                        </button>
+                    </button>
+
+                    <button
+                        v-for="webshop in webshops"
+                        :key="webshop.id"
+                        class="menu-button button"
+                        :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
+                        @click="openWebshop(webshop)"
+                    >
+                        {{ webshop.meta.name }}
+                    </button>
+                </template>
             </div>
             <hr v-if="enableWebshopModule && (canCreateWebshops || webshops.length > 0)">
 
