@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
+    <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
         <ContextMenuItem @click="sms">
             SMS'en
         </ContextMenuItem>
@@ -51,6 +51,12 @@ export default class OrderContextMenu extends Mixins(NavigationMixin) {
 
     @Prop({ default: 0 })
     y!: number;
+
+    @Prop()
+    xPlacement?: string;
+
+    @Prop()
+    yPlacement?: string;
 
     @Prop()
     webshopManager!: WebshopManager;

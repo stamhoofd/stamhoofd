@@ -139,9 +139,9 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadComponent, Logo, STNavigationBar,TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, GlobalEventBus, LoadComponent, Logo, STNavigationBar,TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -281,6 +281,10 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
                 }).catch(console.error)
             }
         }
+
+        GlobalEventBus.addListener(this, "new-webshop", async (webshop: PrivateWebshop) => {
+            await this.openWebshop(webshop, false)
+        })
     }
 
     get webshops() {
@@ -390,7 +394,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     async addWebshop() {
         this.present(
-            (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopView" */ './webshop/edit/EditWebshopView.vue'))).setDisplayStyle("popup")
+            (await LoadComponent(() => import(/* webpackChunkName: "EditWebshopGeneralView" */ './webshop/edit/EditWebshopGeneralView.vue'))).setDisplayStyle("popup")
         )
     }
 

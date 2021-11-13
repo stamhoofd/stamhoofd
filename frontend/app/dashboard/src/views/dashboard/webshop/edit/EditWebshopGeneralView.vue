@@ -24,6 +24,20 @@
             </STInputBox>
 
             <hr>
+            <h2>Beschikbaarheid</h2>
+
+            <Checkbox v-model="useAvailableUntil">
+                Stop bestellingen op een bepaalde datum
+            </Checkbox>
+
+            <div v-if="useAvailableUntil" class="split-inputs">
+                <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
+                    <DateSelection v-model="availableUntil" />
+                </STInputBox>
+                <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
+            </div>
+
+            <hr>
             <h2>Scannen van tickets en bestellingen</h2>
             <p>Stamhoofd kan automatisch scanbare tickets aanmaken. Je kan dan via de scanner van Stamhoofd tickets scannen. Die worden dan automatisch gemarkeerd als 'gescand' waardoor je ze niet onopgemerkt dubbel kan scannen. De scanner blijft werken als het internet wegvalt, maar bij de start van het evenement is even een internetverbinding nodig.</p>
 
@@ -53,127 +67,6 @@
                     </p>
                 </Radio>
             </RadioGroup>
-
-            <hr>
-            <h2>Betaalmethodes</h2>
-
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
-
-            <EditPaymentMethodsBox :methods="paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
-
-            <p v-if="isAnyTicketType" class="warning-box">
-                Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddelijk.
-            </p>
-
-            <template v-if="enableTransfers">
-                <hr>
-                <h2>Overschrijvingen</h2>
-
-                <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
-                    <input
-                        v-model="creditor"
-                        class="input"
-                        type="text"
-                        :placeholder="organization.meta.transferSettings.creditor || organization.name"
-                        autocomplete=""
-                    >
-                </STInputBox>
-
-                <IBANInput v-model="iban" title="Bankrekeningnummer" :placeholder="organization.meta.transferSettings.iban || 'Op deze rekening schrijft men over'" :validator="validator" :required="false" />
-
-                <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
-                    <RadioGroup>
-                        <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
-                            {{ _type.name }}
-                        </Radio>
-                    </RadioGroup>
-                </STInputBox>
-                <p class="style-description-small">
-                    {{ transferTypeDescription }}
-                </p>
-
-                <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
-                    <input
-                        v-model="prefix"
-                        class="input"
-                        type="text"
-                        placeholder="bv. Bestelling"
-                        autocomplete=""
-                    >
-                </STInputBox>
-                <p class="style-description-small">
-                    Voorbeeld: “{{ transferExample }}”
-                </p>
-            </template>
-
-            <hr>
-            <h2>Beschikbaarheid</h2>
-
-            <Checkbox v-model="useAvailableUntil">
-                Stop bestellingen op een bepaalde datum
-            </Checkbox>
-
-            <div v-if="useAvailableUntil" class="split-inputs">
-                <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
-                    <DateSelection v-model="availableUntil" />
-                </STInputBox>
-                <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
-            </div>
-
-            <template v-if="!isTicketType">
-                <hr>
-                <h2>Afhaal- en leveringsopties</h2>
-                <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel.</p>
-
-                <STList>
-                    <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" @click="editCheckoutMethod(method)">
-                        {{ method.type == 'OnSite' ? 'Ter plaatse consumeren' : (method.type == 'Takeout' ? 'Afhalen' : 'Leveren') }}: {{ method.name }}
-
-                        <template slot="right">
-                            <button class="button icon arrow-up gray" @click.stop="moveCheckoutUp(method)" />
-                            <button class="button icon arrow-down gray" @click.stop="moveCheckoutDown(method)" />
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                </STList>
-            
-                <p>
-                    <button class="button text" @click="addOnSiteMethod">
-                        <span class="icon add" />
-                        <span>Ter plaatse consumeren toevoegen</span>
-                    </button>
-                </p>
-
-                <p>
-                    <button class="button text" @click="addTakeoutMethod">
-                        <span class="icon add" />
-                        <span>Afhaallocatie toevoegen</span>
-                    </button>
-                </p>
-
-                <p>
-                    <button class="button text" @click="addDeliveryMethod">
-                        <span class="icon add" />
-                        <span>Leveringsoptie toevoegen</span>
-                    </button>
-                </p>
-            </template>
-
-            <hr>
-            <h2>Open vragen</h2>
-            <p>Je kan zelf nog open vragen stellen (bv. 'naam lid') op bestelniveau (je kan dat ook doen per artikel, maar daarvoor moet je het artikel bewerken). Kies dus verstandig of je het bij een artikel ofwel op bestelniveau toevoegt! Op bestelniveau wordt het maar één keer gevraagd voor de volledige bestelling.</p>
-
-            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
-
-            <div v-if="roles.length > 0" class="container">
-                <hr>
-                <h2>Toegangsbeheer</h2>
-                <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
-
-                <STList>
-                    <WebshopRolePermissionRow v-for="role in roles" :key="role.id" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
-                </STList>
-            </div>
         </main>
         <STToolbar>
             <template slot="right">

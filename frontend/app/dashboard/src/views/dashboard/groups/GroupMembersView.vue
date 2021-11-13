@@ -1104,7 +1104,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (this.selectionCount == 0) {
             return;
         }
-        const el = event.target.parentElement;
+        const el = event.currentTarget.parentElement;
         const displayedComponent = new ComponentWithProperties(GroupListSelectionContextMenu, {
             x: el.getBoundingClientRect().left + el.offsetWidth,
             y: el.getBoundingClientRect().top,

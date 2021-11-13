@@ -29,7 +29,7 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     openContextMenu(event) {
         const el = this.$el as HTMLElement;
         const displayedComponent = new ComponentWithProperties(DateSelectionView, {
-            x: el.getBoundingClientRect().left + el.offsetWidth - 2,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
             y: el.getBoundingClientRect().top + el.offsetHeight - 2,
             //preferredWidth: el.offsetWidth, 
             selectedDay: this.value,

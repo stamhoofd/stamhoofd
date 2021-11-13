@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
+    <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
         <ContextMenuItem @click="markAs(OrderStatus.Created)">
             Nieuw
         </ContextMenuItem>
@@ -44,6 +44,12 @@ export default class OrderStatusContextMenu extends Mixins(NavigationMixin) {
 
     @Prop({ default: 0 })
     y!: number;
+
+    @Prop()
+    xPlacement?: string;
+
+    @Prop()
+    yPlacement?: string;
 
     @Prop()
     webshopManager!: WebshopManager;

@@ -105,6 +105,9 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
     takeoutMethod!: WebshopTakeoutMethod | WebshopOnSiteMethod
 
     @Prop({ required: true })
+    isNew!: boolean
+
+    @Prop({ required: true })
     webshop: PrivateWebshop
 
     patchTakeoutMethod: AutoEncoderPatchType<WebshopTakeoutMethod | WebshopOnSiteMethod> = this.takeoutMethod.type === CheckoutMethodType.Takeout ? WebshopTakeoutMethod.patch({ id: this.takeoutMethod.id }) : WebshopOnSiteMethod.patch({ id: this.takeoutMethod.id })
@@ -128,10 +131,6 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
 
     get patchedTakeoutMethod() {
         return this.takeoutMethod.patch(this.patchTakeoutMethod)
-    }
-
-    get isNew() {
-        return this.takeoutMethod.name.length == 0
     }
 
     get name() {

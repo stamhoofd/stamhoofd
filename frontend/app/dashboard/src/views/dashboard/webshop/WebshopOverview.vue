@@ -34,17 +34,6 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" element-name="a" :href="'https://'+webshopUrl" target="_blank">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/earth.svg">
-                    <h2 class="style-title-list">
-                        Ga naar jouw webshop
-                    </h2>
-                    <p class="style-description">
-                        Jouw webshop is bereikbaar via {{ webshopUrl }}
-                    </p>
-                    <span slot="right" class="icon external gray" />
-                </STListItem>
-
                 <STListItem :selectable="true" class="left-center" @click="openStatistics(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/diagram.svg">
                     <h2 class="style-title-list">
@@ -54,6 +43,17 @@
                         Bekijk jouw omzet en andere statistieken
                     </p>
                     <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+
+                <STListItem :selectable="true" class="left-center" element-name="a" :href="'https://'+webshopUrl" target="_blank">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/earth.svg">
+                    <h2 class="style-title-list">
+                        Bekijk jouw webshop
+                    </h2>
+                    <p class="style-description">
+                        Jouw webshop is bereikbaar via {{ webshopUrl }}
+                    </p>
+                    <span slot="right" class="icon external gray" />
                 </STListItem>
             </STList>
 
@@ -74,7 +74,7 @@
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
                         <h2 class="style-title-list">
                             Wijzig verkochte artikels
                         </h2>
@@ -95,7 +95,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="openSettings(true)">
+                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/bike.svg">
                         <h2 class="style-title-list">
                             Afhalen, leveren, ter plaatse eten
@@ -106,7 +106,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="openSettings(true)">
+                    <STListItem :selectable="true" class="left-center" @click="editPaymentMethods(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
                         <h2 class="style-title-list">
                             Betaalmethodes
@@ -127,6 +127,28 @@
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
+
+                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editInputFields(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                        <h2 class="style-title-list">
+                            Vrije invoervelden
+                        </h2>
+                        <p class="style-description">
+                            Verzamel extra informatie van bestellers bij het afrekenen.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/lock.svg">
+                        <h2 class="style-title-list">
+                            Toegangsbeheer
+                        </h2>
+                        <p class="style-description">
+                            Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
                 </STList>
 
                 <hr>
@@ -134,7 +156,7 @@
                 <p>Deze acties kan je niet meer ongedaan maken. Let heel goed op wat je doet.</p>
 
                 <STList>
-                    <STListItem :selectable="true" @click="openSettings(true)">
+                    <STListItem :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
                             Webshop verwijderen
                         </h2>
@@ -155,16 +177,20 @@
 <script lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
+import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { getPermissionLevelNumber, PermissionLevel, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
+import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
+import EditWebshopInputFieldsView from './edit/EditWebshopInputFieldsView.vue';
 import EditWebshopPageView from './edit/EditWebshopPageView.vue';
+import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
+import EditWebshopPermissionsView from './edit/EditWebshopPermissionsView.vue';
 import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
 import EditWebshopView from './edit/EditWebshopView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
@@ -264,53 +290,41 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 
     editGeneral(animated = true) {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    try {
-                        // Make sure we have an up to date webshop
-                        await this.webshopManager.loadWebshopIfNeeded(false)
-                        return new ComponentWithProperties(EditWebshopGeneralView, {
-                            webshopManager: this.webshopManager
-                        })
-                    } catch (e) {
-                        Toast.fromError(e).show()
-                        throw e
-                    }
-                }
-            })
-        }).setAnimated(animated);
-        this.present(displayedComponent.setDisplayStyle("popup"));
-    }
-
-    editProducts(animated = true) {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    try {
-                        // Make sure we have an up to date webshop
-                        await this.webshopManager.loadWebshopIfNeeded(false)
-                        return new ComponentWithProperties(EditWebshopProductsView, {
-                            webshopManager: this.webshopManager
-                        })
-                    } catch (e) {
-                        Toast.fromError(e).show()
-                        throw e
-                    }
-                }
-            })
-        }).setAnimated(animated);
-        this.present(displayedComponent.setDisplayStyle("popup"));
+        this.displayEditComponent(EditWebshopGeneralView, animated)
     }
 
     editPage(animated = true) {
+        this.displayEditComponent(EditWebshopPageView, animated)
+    }
+
+    editProducts(animated = true) {
+        this.displayEditComponent(EditWebshopProductsView, animated)
+    }
+
+    editPaymentMethods(animated = true) {
+        this.displayEditComponent(EditWebshopPaymentMethodsView, animated)
+    }
+
+    editInputFields(animated = true) {
+        this.displayEditComponent(EditWebshopInputFieldsView, animated)
+    }
+
+    editCheckoutMethods(animated = true) {
+        this.displayEditComponent(EditWebshopCheckoutMethodsView, animated)
+    }
+
+    editPermissions(animated = true) {
+        this.displayEditComponent(EditWebshopPermissionsView, animated)
+    }
+
+    displayEditComponent(component, animated = true) {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PromiseView, {
                 promise: async () => {
                     try {
                         // Make sure we have an up to date webshop
                         await this.webshopManager.loadWebshopIfNeeded(false)
-                        return new ComponentWithProperties(EditWebshopPageView, {
+                        return new ComponentWithProperties(component, {
                             webshopManager: this.webshopManager
                         })
                     } catch (e) {
@@ -344,6 +358,41 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
         if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'statistics') {
             this.openStatistics(false)
+        }
+    }
+
+    async deleteWebshop() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '"+this.webshopManager.preview.meta.name+"' wilt verwijderen?", "Ja, verwijderen", "Alle bijhorende bestellingen worden ook definitief verwijderd. Je kan dit niet ongedaan maken.")) {
+            return;
+        }
+
+        try {
+            await SessionManager.currentSession!.authenticatedServer.request({
+                method: "DELETE",
+                path: "/webshop/"+this.webshopManager.preview.id,
+                shouldRetry: false
+            })
+            new Toast("Webshop verwijderd", "success green").show()
+
+            OrganizationManager.organization.webshops = OrganizationManager.organization.webshops.filter(w => w.id != this.webshopManager.preview.id)
+
+             // Save updated organization to cache
+            OrganizationManager.save().catch(console.error)
+
+            if (this.canPop) {
+                this.pop({ force: true })
+            } else {
+                await this.splitViewController!.showDetail({
+                    components: [
+                        new ComponentWithProperties(NavigationController, { 
+                            root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ '../account/AccountSettingsView.vue'), {}, { instant: false })
+                        })
+                    ],
+                    animated: false
+                });
+            }
+        } catch (e) {
+            Toast.fromError(e).show()
         }
     }
 

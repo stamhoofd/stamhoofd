@@ -67,7 +67,6 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                 })
 
                 const preview = WebshopPreview.create(response.data)
-                new Toast("Webshop opgeslagen", "success green").show()
                 OrganizationManager.organization.webshops.push(preview)
 
                 // Save updated organization to cache

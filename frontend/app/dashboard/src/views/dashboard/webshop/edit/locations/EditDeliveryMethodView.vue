@@ -104,6 +104,9 @@ export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
     deliveryMethod!: WebshopDeliveryMethod
 
     @Prop({ required: true })
+    isNew!: boolean
+
+    @Prop({ required: true })
     webshop: PrivateWebshop
 
     patchDeliveryMethod: AutoEncoderPatchType<WebshopDeliveryMethod> = WebshopDeliveryMethod.patch({ id: this.deliveryMethod.id })
@@ -116,10 +119,6 @@ export default class EditDeliveryMethodView extends Mixins(NavigationMixin) {
 
     get patchedDeliveryMethod() {
         return this.deliveryMethod.patch(this.patchDeliveryMethod)
-    }
-
-    get isNew() {
-        return this.deliveryMethod.name.length == 0
     }
 
     get name() {

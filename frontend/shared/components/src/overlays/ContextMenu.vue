@@ -75,7 +75,7 @@ export default class ContextMenu extends Vue {
             }
 
         } else {
-            this.right = Math.min(clientWidth - this.x, clientWidth - viewPadding - width) - 2
+            this.right = Math.min(clientWidth - this.x, clientWidth - viewPadding - width)
 
             if (this.right < viewPadding) {
                 this.right = viewPadding
