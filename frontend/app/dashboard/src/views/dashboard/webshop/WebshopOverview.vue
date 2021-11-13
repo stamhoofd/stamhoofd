@@ -76,7 +76,7 @@
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
                         <h2 class="style-title-list">
-                            Wijzig verkochte artikels
+                            Productaanbod
                         </h2>
                         <p class="style-description">
                             Bewerk welke artikels je verkoopt in jouw webshop.
