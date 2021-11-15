@@ -5,7 +5,7 @@
             {{ webshop.meta.name }}
         </h2>
 
-        <div slot="right" v-if="selected">
+        <div v-if="selected" slot="right">
             <button class="button text" @click.stop.prevent="choosePermissions($event)">
                 <span>{{ getLevelText(permissions) }}</span>
                 <span class="icon arrow-down-small" />
@@ -19,8 +19,9 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, STListItem } from "@stamhoofd/components";
-import { Organization, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, PermissionsByRole, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { Organization, PermissionRole, PermissionRoleDetailed, PermissionsByRole, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 
 @Component({
@@ -164,9 +165,12 @@ export default class WebshopPermissionRow extends Mixins(NavigationMixin) {
     }
 
     choosePermissions(event) {
+        const el = event.currentTarget
         const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
             callback: (level: "none" | "write" | "read" | "full") => {
                 this.permissions = level
             }
