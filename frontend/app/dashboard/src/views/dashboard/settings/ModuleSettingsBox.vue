@@ -5,7 +5,7 @@
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg"></div>
                 <div>
                     <h2 class="style-title-list">Ledenadministratie en online inschrijvingen</h2>
-                    <p v-if="enableMemberModule && !isMembersTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-if="enableMemberModule && !isMembersTrial && !loadingMembers" class="style-description">Dit zit in jouw pakket inbegrepen</p>
                     <p v-else class="style-description">Probeer gratis 14 dagen uit</p>
                 </div>
                 <div>
@@ -18,7 +18,7 @@
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg"></div>
                 <div>
                     <h2 class="style-title-list">Activiteiten</h2>
-                    <p v-if="enableActivities && !isMembersTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-if="enableActivities && !isMembersTrial && !loadingMembers" class="style-description">Dit zit in jouw pakket inbegrepen</p>
                     <p v-else class="style-description">Probeer het gratis 14 dagen uit</p>
                 </div>
                 <div>
@@ -31,7 +31,7 @@
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
                     <h2 class="style-title-list">Webshops &amp; tickets</h2>
-                    <p v-if="enableWebshopModule && !isWebshopsTrial" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-if="enableWebshopModule && !isWebshopsTrial && !loadingWebshopModule" class="style-description">Dit zit in jouw pakket inbegrepen</p>
                     <p v-else class="style-description">Probeer het gratis uit met fictieve bestellingen, zolang je wilt</p>
                 </div>
                 <div>
@@ -41,7 +41,7 @@
             </label>
         </div>
 
-        <h3>Verwacht in de toekomst</h3>
+        <h3>Verwacht in de loop van 2022</h3>
 
         <div class="module-box">
             <label class="box disabled">
@@ -50,9 +50,7 @@
                     <h2 class="style-title-list">Bouw zelf je website</h2>
                     <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
                 </div>
-                <div>
-                    <span class="style-tag">2022</span>
-                </div>
+                <div />
             </label>
 
             <label class="box disabled">
@@ -61,26 +59,24 @@
                     <h2 class="style-title-list">Verhuur materiaal en lokalen</h2>
                     <p class="style-description">Online reservaties, automatische contracten en kalenders</p>
                 </div>
-                <div>
-                    <span class="style-tag">2022</span>
-                </div>
+                <div />
             </label>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, Decoder, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, Spinner, Toast } from "@stamhoofd/components";
+import { Checkbox, LoadComponent, Spinner, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { OrganizationMetaData, OrganizationModules, OrganizationPatch, OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures"
+import { OrganizationType, PaymentMethod, STInvoiceResponse, STPackageBundle, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
-import { buildManageGroupsComponent } from './buildManageGroupsComponent';
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import ActivatedView from './modules/members/ActivatedView.vue';
 import MembersStructureSetupView from './modules/members/MembersStructureSetupView.vue';
+
 
 @Component({
     components: {
@@ -106,6 +102,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
 
     get hasLegacy() {
         return this.organization.meta.packages.isActive(STPackageType.LegacyMembers)
+    }
+
+    get loadingMembers() {
+        return this.loadingModule === STPackageType.TrialMembers
     }
 
     get enableMemberModule() {
@@ -170,6 +170,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
+    get loadingWebshopModule() {
+        return this.loadingModule === STPackageType.TrialWebshops
+    }
+
     get enableWebshopModule() {
         return this.organization.meta.packages.useWebshops || this.loadingModule === STPackageType.TrialWebshops
     }
@@ -178,7 +182,18 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         //this.organization.meta.modules.useWebshops = enable
 
         if (enable && !this.enableWebshopModule) {
-            this.checkout(STPackageBundle.TrialWebshops, "Je kan nu webshops uittesten").catch(console.error)
+            this.checkout(STPackageBundle.TrialWebshops, "Je kan nu webshops uittesten").then(async () => {
+                // Create new webshop view
+                this.present(
+                    (
+                        await LoadComponent(
+                            () => import(/* webpackChunkName: "EditWebshopGeneralView" */ '../webshop/edit/EditWebshopGeneralView.vue'),
+                            {},
+                            { instant: true }
+                        )
+                    ).setDisplayStyle("popup")
+                )
+            }).catch(console.error)
         } else {
             if (!enable && this.enableWebshopModule) {
                 this.deactivate(STPackageType.TrialWebshops, "Het testen van webshops is uitgeschakeld").catch(console.error)
@@ -309,9 +324,14 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             }
 
             > div:last-child {
+                flex-basis: 30px;
+                width: 30px;
+                min-width: 30px;
+                max-width: 30px;
                 margin-left: auto;
                 flex-shrink: 0;
                 padding-left: 10px;
+                overflow: visible;
             }
         }
     }
