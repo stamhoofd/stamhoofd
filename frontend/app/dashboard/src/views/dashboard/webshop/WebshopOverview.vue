@@ -192,7 +192,6 @@ import EditWebshopPageView from './edit/EditWebshopPageView.vue';
 import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
 import EditWebshopPermissionsView from './edit/EditWebshopPermissionsView.vue';
 import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
-import EditWebshopView from './edit/EditWebshopView.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
@@ -267,26 +266,6 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         this.show(new ComponentWithProperties(TicketScannerSetupView, {
             webshopManager: this.webshopManager
         }).setAnimated(animated))
-    }
-
-    openSettings(animated = true) {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PromiseView, {
-                promise: async () => {
-                    try {
-                        // Make sure we have an up to date webshop
-                        await this.webshopManager.loadWebshopIfNeeded(false)
-                        return new ComponentWithProperties(EditWebshopView, {
-                            webshopManager: this.webshopManager
-                        })
-                    } catch (e) {
-                        Toast.fromError(e).show()
-                        throw e
-                    }
-                }
-            })
-        }).setAnimated(animated);
-        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     editGeneral(animated = true) {
