@@ -35,14 +35,14 @@
         overscroll-behavior: contain;
         height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px));
 
-        > * {
+       > .scrollable-container {
             --vh: calc(min(max(50vh, 1000px), var(--saved-vh, 1vh) * 100 - 40px) / 100);
         }
 
         @media (max-height: 900px) {
             height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 20px));
 
-            > * {
+            > .scrollable-container {
                 --vh: calc(min(max(50vh, 1000px), var(--saved-vh, 1vh) * 100 - 20px) / 100);
             }
         }
@@ -50,7 +50,7 @@
         @media (max-height: 600px) {
             height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 0px));
 
-            > * {
+            > .scrollable-container {
                 --vh: calc(min(max(50vh, 1000px), var(--saved-vh, 1vh) * 100) / 100);
             }
         }
