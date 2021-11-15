@@ -44,6 +44,10 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
+    validate() {
+        // override if needed
+    }
+
     async save() {
         if (this.saving) {
             return
@@ -56,6 +60,8 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                 this.saving = false
                 return
             }
+
+            this.validate()
 
             if (this.isNew) {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({

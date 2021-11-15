@@ -87,7 +87,7 @@
                     <STListItem v-else :selectable="true" class="left-center" @click="editProducts(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/tickets.svg">
                         <h2 class="style-title-list">
-                            Wijzig verkochte tickets en vouchers
+                            Aanbod tickets en vouchers
                         </h2>
                         <p class="style-description">
                             Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.

@@ -30,7 +30,7 @@
             <hr v-if="whatsNewBadge || (enableMemberModule && false) || (fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0)">
 
             <template v-if="enableMemberModule">
-                <div v-for="category in tree.categories" :key="category.id">
+                <div v-for="category in tree.categories" :key="category.id" class="container">
                     <div>
                         <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                             <span class="icon group" />

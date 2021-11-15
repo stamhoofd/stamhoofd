@@ -42,7 +42,7 @@
     > .padding-group {
     }
 
-    > main > hr {
+    > main > hr, > main > .container > hr {
         height: $border-width;
         border-radius: $border-width/2;
         background: $color-gray-light;

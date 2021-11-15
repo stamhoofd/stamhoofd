@@ -95,9 +95,9 @@ import ProductRow from './products/ProductRow.vue';
 export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
     get title() {
         if (this.isTickets) {
-            return "Wijzig tickets en vouchers"
+            return "Aanbod tickets en vouchers"
         }
-        return "Wijzig verkochte artikels"
+        return "Productaanbod"
     }
 
     get isTickets() {
