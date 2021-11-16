@@ -6,7 +6,6 @@
                 v-for="index in codeLength" 
                 :key="index"
                 ref="numberInput" 
-                type="number"
                 inputmode="numeric" 
                 class="input" 
                 :name="'search-code_'+index" 
@@ -70,7 +69,7 @@ export default class CodeInput extends Vue {
         }
 
         const input = this.$refs.numberInput[index] as HTMLInputElement;
-        input.value = (input.value as string).replace(/\s/g, '')
+        input.value = (input.value as string).replace(/[^0-9]/g, '')
         if (input.value.length >= 1) {
             this.selectNext(index + 1)
         }

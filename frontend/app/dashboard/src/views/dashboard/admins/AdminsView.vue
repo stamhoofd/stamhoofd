@@ -20,78 +20,22 @@
             <h1>Beheerders</h1>
             <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan in meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
 
-            <p v-if="admins.length == 1 && enableMemberModule" class="error-box">
-                Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
-            </p>
-
             <Spinner v-if="loading" />
-            
-            <hr>
-            <h2>
-                Hoofdbeheerders
-            </h2>
-            <p>Hoofdbeheerders hebben toegang tot alles, zonder beperkingen.</p>
 
-            <Spinner v-if="loading" />
-            <STList v-else>
-                <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
-                    <h2 class="style-title-list">
-                        {{ admin.firstName }} {{ admin.lastName }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ admin.email }}
-                    </p>
-                    <p class="style-description-small">
-                        {{ permissionList(admin) }}
-                    </p>
+            <template v-else>
+                <p v-if="admins.length == 1 && enableMemberModule" class="error-box">
+                    Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
+                </p>
 
-                    <template slot="right">
-                        <span><span class="icon gray edit" /></span>
-                    </template>
-                </STListItem>
-
-                <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
-                    <h2 class="style-title-list">
-                        {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ invite.userDetails.email }}
-                    </p>
-                    <p class="style-description-small">
-                        {{ permissionList(invite) }}
-                    </p>
-
-                    <template slot="right">
-                        <p v-if="isExpired(invite)">
-                            Uitnodiging vervallen
-                        </p>
-                        <p v-else>
-                            Uitnodiging nog niet geaccepteerd
-                        </p>
-                        <span><span class="icon gray edit" /></span>
-                    </template>
-                </STListItem>
-            </STList>
-
-            <div v-for="(role, index) in roles" :key="role.id" class="container">
                 <hr>
-                <h2 class="style-with-button">
-                    <div>
-                        {{ role.name }}
-                    </div>
-                    <div>
-                        <button class="button icon gray arrow-up" @click="moveRoleUp(index, role)" />
-                        <button class="button icon gray arrow-down" @click="moveRoleDown(index, role)" />
-                        <button class="button text" @click="editRole(role)">
-                            <span class="icon settings" />
-                            <span class="hide-smartphone">Bewerken</span>
-                        </button>
-                    </div>
+                <h2>
+                    Hoofdbeheerders
                 </h2>
+                <p>Hoofdbeheerders hebben toegang tot alles, zonder beperkingen.</p>
 
                 <Spinner v-if="loading" />
                 <STList v-else>
-                    <STListItem v-for="admin in getAdminsForRole(role)" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                    <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
                         <h2 class="style-title-list">
                             {{ admin.firstName }} {{ admin.lastName }}
                         </h2>
@@ -107,7 +51,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-for="invite in getInvitesForRole(role)" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                    <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
                         <h2 class="style-title-list">
                             {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
                         </h2>
@@ -130,73 +74,131 @@
                     </STListItem>
                 </STList>
 
-                <p v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0" class="info-box">
-                    Geen beheerders in deze groep
-                </p>
-            </div>
+                <div v-for="(role, index) in roles" :key="role.id" class="container">
+                    <hr>
+                    <h2 class="style-with-button">
+                        <div>
+                            {{ role.name }}
+                        </div>
+                        <div>
+                            <button class="button icon gray arrow-up" @click="moveRoleUp(index, role)" />
+                            <button class="button icon gray arrow-down" @click="moveRoleDown(index, role)" />
+                            <button class="button text" @click="editRole(role)">
+                                <span class="icon settings" />
+                                <span class="hide-smartphone">Bewerken</span>
+                            </button>
+                        </div>
+                    </h2>
 
-            <div v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0" class="container">
+                    <Spinner v-if="loading" />
+                    <STList v-else>
+                        <STListItem v-for="admin in getAdminsForRole(role)" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                            <h2 class="style-title-list">
+                                {{ admin.firstName }} {{ admin.lastName }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ admin.email }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ permissionList(admin) }}
+                            </p>
+
+                            <template slot="right">
+                                <span><span class="icon gray edit" /></span>
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-for="invite in getInvitesForRole(role)" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                            <h2 class="style-title-list">
+                                {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ invite.userDetails.email }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ permissionList(invite) }}
+                            </p>
+
+                            <template slot="right">
+                                <p v-if="isExpired(invite)">
+                                    Uitnodiging vervallen
+                                </p>
+                                <p v-else>
+                                    Uitnodiging nog niet geaccepteerd
+                                </p>
+                                <span><span class="icon gray edit" /></span>
+                            </template>
+                        </STListItem>
+                    </STList>
+
+                    <p v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0" class="info-box">
+                        Geen beheerders in deze groep
+                    </p>
+                </div>
+
+                <div v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0" class="container">
+                    <hr>
+                    <h2>
+                        Beheerders die niet in een groep zitten
+                    </h2>
+                    <p>Deze beheerders hebben nergens toegang toe, deel ze op in groepen op basis van hun functie in de vereniging.</p>
+
+                    <STList v-if="!loading">
+                        <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                            <h2 class="style-title-list">
+                                {{ admin.firstName }} {{ admin.lastName }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ admin.email }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ permissionList(admin) }}
+                            </p>
+
+                            <template slot="right">
+                                <span><span class="icon gray edit" /></span>
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                            <h2 class="style-title-list">
+                                {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ invite.userDetails.email }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ permissionList(invite) }}
+                            </p>
+
+                            <template slot="right">
+                                <p v-if="isExpired(invite)">
+                                    Uitnodiging vervallen
+                                </p>
+                                <p v-else>
+                                    Uitnodiging nog niet geaccepteerd
+                                </p>
+                                <span><span class="icon gray edit" /></span>
+                            </template>
+                        </STListItem>
+                    </STList>
+                </div>
+
                 <hr>
-                <h2>
-                    Beheerders die niet in een groep zitten
-                </h2>
-                <p>Deze beheerders hebben nergens toegang toe, deel ze op in groepen op basis van hun functie in de vereniging.</p>
 
-                <STList v-if="!loading">
-                    <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
-                        <h2 class="style-title-list">
-                            {{ admin.firstName }} {{ admin.lastName }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ admin.email }}
-                        </p>
-                        <p class="style-description-small">
-                            {{ permissionList(admin) }}
-                        </p>
-
-                        <template slot="right">
-                            <span><span class="icon gray edit" /></span>
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
-                        <h2 class="style-title-list">
-                            {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ invite.userDetails.email }}
-                        </p>
-                        <p class="style-description-small">
-                            {{ permissionList(invite) }}
-                        </p>
-
-                        <template slot="right">
-                            <p v-if="isExpired(invite)">
-                                Uitnodiging vervallen
-                            </p>
-                            <p v-else>
-                                Uitnodiging nog niet geaccepteerd
-                            </p>
-                            <span><span class="icon gray edit" /></span>
-                        </template>
-                    </STListItem>
-                </STList>
-            </div>
-
-            <hr>
-
-            <p>
-                <button class="button text" @click="addRole">
-                    <span class="icon add" />
-                    <span>Nieuwe beheerdersgroep toevoegen</span>
-                </button>
-            </p>
-            <p>
-                <button class="button text" @click="createAdmin">
-                    <span class="icon add" />
-                    <span>Nieuwe beheerder toevoegen</span>
-                </button>
-            </p>
+                <p>
+                    <button class="button text" @click="addRole">
+                        <span class="icon add" />
+                        <span>Nieuwe beheerdersgroep toevoegen</span>
+                    </button>
+                </p>
+                <p>
+                    <button class="button text" @click="createAdmin">
+                        <span class="icon add" />
+                        <span>Nieuwe beheerder toevoegen</span>
+                    </button>
+                </p>
+            </template>
         </main>
     </div>
 </template>
@@ -331,7 +333,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     editAdmin(admin: User) {
-       this.present(new ComponentWithProperties(NavigationController, { 
+        this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(AdminInviteView, { 
                 editUser: admin,
                 onUpdateUser: (patched: User | null) => {
@@ -423,7 +425,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     editInvite(invite: Invite) {
-       this.present(new ComponentWithProperties(NavigationController, { 
+        this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(AdminInviteView, { 
                 editInvite: invite,
                 onUpdateInvite: (patched: Invite | null) => {
