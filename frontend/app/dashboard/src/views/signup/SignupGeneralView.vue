@@ -1,6 +1,6 @@
 <template>
     <form id="signup-general-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Stamhoofd gratis uitproberen">
+        <STNavigationBar title="Aansluiten">
             <button slot="right" type="button" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         
@@ -274,7 +274,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                     code: "invalid_field",
                     message: "",
                     human: "De naam van jouw vereniging is te kort",
-                     field: "name"
+                    field: "name"
                 })
             }
 
@@ -365,9 +365,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
         // Group by category
         const map = new Map<string, {
-                value: OrganizationType;
-                name: string;
-            }[]>()
+            value: OrganizationType;
+            name: string;
+        }[]>()
 
         for (const type of types) {
             const cat = OrganizationTypeHelper.getCategory(type.value)
@@ -410,7 +410,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         return false;
     }
 
-     // Helpers ---
+    // Helpers ---
 
     getBooleanType(type: AcquisitionType) {
         return !!this.acquisitionTypes.find(r => r == type)
