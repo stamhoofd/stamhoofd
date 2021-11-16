@@ -284,6 +284,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
         })
 
+        const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
         const path = this.webshop.removeSuffix(UrlHelper.shared.getParts());
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
@@ -314,6 +315,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 adjustHistory: false,
                 animated: false,
                 force: true,
+                url: currentPath,
                 components: [
                     new ComponentWithProperties(PaymentPendingView, { 
                         server: WebshopManager.server, 

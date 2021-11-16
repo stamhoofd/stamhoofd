@@ -93,14 +93,10 @@ export default class CartView extends Mixins(NavigationMixin){
             return
         }
 
-        if (WebshopManager.organization.meta.packages.isWebshopsTrial) {
-            new CenteredMessage("Dit is een demo", "De bestelling die je gaat plaatsen is enkel om te testen.").addCloseButton("Ik begrijp het").show()
-        }
-        
         this.loading = true
         this.errorBox = null
 
-         try {
+        try {
             await GlobalEventBus.sendEvent("checkout", this)
         } catch (e) {
             console.error(e)
