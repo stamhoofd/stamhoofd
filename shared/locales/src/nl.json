@@ -15,7 +15,8 @@
       }
     },
     "domains": {
-      "marketing": "www.stamhoofd.be"
+      "marketing": "www.stamhoofd.be",
+      "email": "stamhoofd.be"
     },
     "emails": {
       "general": "hallo@stamhoofd.be",

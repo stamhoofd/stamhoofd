@@ -212,7 +212,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 component.hide()
 
                 const session = new Session(this.organization.id)
-                this.show(new ComponentWithProperties(ConfirmEmailView, { token, session }))
+                this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
                 
             } catch (e) {
                 this.loading = false;

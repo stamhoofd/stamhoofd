@@ -12,14 +12,18 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
+import { DateTime } from 'luxon';
 
 import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
 
-let isRunningCrons = false
+// Importing postmark returns undefined (this is a bug, so we need to use require)
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const postmark = require("postmark")
 
+let isRunningCrons = false
 
 let lastDNSCheck: Date | null = null
 let lastDNSId = ""
@@ -42,8 +46,12 @@ async function checkDNS() {
         return
     }
 
+    console.log("Checking DNS...")
+
     for (const organization of organizations) {
-        console.log("Checking dns for "+organization.name)
+        if (STAMHOOFD.environment === "production") {
+            console.log("Checking dns for "+organization.name)
+        }
         await organization.updateDNSRecords()
     }
 
@@ -106,6 +114,57 @@ async function checkReplies() {
                 console.error(e)
             }
         }
+    }
+}
+
+let lastPostmarkCheck: Date | null = null
+async function checkPostmarkBounces() {
+    const token = STAMHOOFD.POSTMARK_SERVER_TOKEN
+    if (!token) {
+        console.log("No postmark token, skipping postmark bounces")
+        return
+    }
+    const fromDate = (lastPostmarkCheck ?? new Date(new Date().getTime() - 24 * 60 * 60 * 1000 * 5))
+    const ET = DateTime.fromJSDate(fromDate).setZone('EST').toISO({ includeOffset: false})
+    console.log("Checking bounces from Postmark since", fromDate, ET)
+    const client = new postmark.ServerClient(token)
+
+    ;
+
+    const bounces = await client.getBounces({
+        fromdate: ET,
+        todate: DateTime.now().setZone('EST').toISO({ includeOffset: false}),
+        count: 500,
+        offset: 0
+    })
+
+    if (bounces.TotalCount == 0) {
+        console.log("No Postmark bounces at this time")
+    }
+
+    for (const bounce of bounces.Bounces) {
+        // Try to get the organization, if possible, else default to global blocking: "null", which is not visible for an organization, but it is applied
+        const source = bounce.From
+        const organization = source ? await Organization.getByEmail(source) : undefined
+
+        if (bounce.Type === "HardBounce" || bounce.Type === "BadEmailAddress" || bounce.Type === "Blocked") {
+            // Block for everyone, but not visible
+            console.log("Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
+            const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null)
+            emailAddress.hardBounce = true
+            await emailAddress.save()
+        } else if (bounce.Type === "SpamComplaint" || bounce.Type === "SpamNotification" || bounce.Type === "VirusNotification") {
+            console.log("Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
+            const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null)
+            emailAddress.markedAsSpam = true
+            await emailAddress.save()
+        } else {
+            console.log("Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
+            console.error("Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
+        }
+
+        const bouncedAt = new Date(bounce.BouncedAt)
+        lastPostmarkCheck = lastPostmarkCheck ? new Date(Math.max(bouncedAt.getTime(), lastPostmarkCheck.getTime())) : bouncedAt
     }
 }
 
@@ -193,7 +252,7 @@ async function checkBounces() {
 
 async function checkComplaints() {
     if (STAMHOOFD.environment !== "production") {
-        console.log("Skippping complaints checking")
+        console.log("Skipping complaints checking")
         return
     }
 
@@ -399,7 +458,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkSettlements().then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
+        checkSettlements().then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

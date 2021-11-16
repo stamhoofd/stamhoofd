@@ -65,6 +65,16 @@ declare global {
         readonly SMTP_USERNAME: string,
         readonly SMTP_PASSWORD: string,
         readonly SMTP_PORT: number,
+
+        // E-mail (transactional e-mails)
+        readonly TRANSACTIONAL_SMTP_HOST: string,
+        readonly TRANSACTIONAL_SMTP_USERNAME: string,
+        readonly TRANSACTIONAL_SMTP_PASSWORD: string,
+        readonly TRANSACTIONAL_SMTP_PORT: number,
+
+        // Postmark
+        // To catch email bounces
+        readonly POSTMARK_SERVER_TOKEN?: string,
         
         // AWS
         // Mapped to process.env for dependencies

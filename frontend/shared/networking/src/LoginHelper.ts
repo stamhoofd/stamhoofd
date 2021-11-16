@@ -362,6 +362,44 @@ export class LoginHelper {
         //await SessionManager.setCurrentSession(session)
     }
 
+    static async retryEmail(session: Session, token: string): Promise<boolean> {
+        const response = await session.server.request({
+            method: "POST",
+            path: "/verify-email/retry",
+            body: PollEmailVerificationRequest.create({
+                token
+            }),
+            decoder: PollEmailVerificationResponse as Decoder<PollEmailVerificationResponse>
+        })
+
+        if (!response.data.valid) {
+            // the code has been used or is expired
+            session.loadFromStorage()
+            if (session.canGetCompleted()) {
+                // yay! We are signed in
+                await session.updateData(true)
+                return true
+            }
+
+            const savedKeys = this.getTemporaryKey(token)
+            if (!savedKeys) {
+                return true
+            }
+
+            // Try to login with stored key
+            try {
+                console.log("Trying to login with a saved key...")
+                await this.login(session, savedKeys.email, savedKeys)
+            } catch (e) {
+                // If it fails: just dismiss. The token is invalid
+                console.error(e)
+                return true
+            }
+            return true
+        }
+        return false
+    }
+
     /**
      * Return true when the polling should end + confirmation should stop
      */

@@ -121,7 +121,7 @@ export default class LoginView extends Mixins(NavigationMixin){
             const result = await LoginHelper.login(this.session, this.email, this.password)
 
             if (result.verificationToken) {
-                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken }))
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken, email: this.email }))
             }
         } catch (e) {
             if (Request.isNetworkError(e)) {

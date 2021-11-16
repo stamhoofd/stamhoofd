@@ -72,18 +72,26 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
             user = u
 
+
+
             if (u.hasAccount()) {
                 // Send an e-mail to say you already have an account + follow password forgot flow
                 const recoveryUrl = await PasswordToken.getPasswordRecoveryUrl(user, request.i18n)
-                const { from, replyTo } = organization.getDefaultEmail()
+                const { from, replyTo } = {
+                    from: (user.permissions ? Email.getInternalEmailFor(request.i18n) : user.organization.getStrongEmail(request.i18n)),
+                    replyTo: undefined
+                }
                 
+                const footer = (!user.permissions ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+request.i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
+
                 // Send email
                 Email.send({
                     from,
                     replyTo,
                     to: user.email,
                     subject: `[${organization.name}] Je hebt al een account`,
-                    text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe probeerde een account aan te maken, maar je hebt eigenlijk al een account met e-mailadres "+user.email+". Als je jouw wachtwoord niet meer weet, kan je een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de adresbalk van jouw browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet proberen te registreren? Dan mag je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? "Stamhoofd" : organization.name)
+                    type: "transactional",
+                    text: (user.firstName ? "Hey "+user.firstName : "Hey") + ", \n\nJe probeerde een account aan te maken, maar je hebt eigenlijk al een account met e-mailadres "+user.email+". Als je jouw wachtwoord niet meer weet, kan je een nieuw wachtwoord instellen door op de volgende link te klikken of door deze te kopiëren in de adresbalk van jouw browser:\n"+recoveryUrl+"\n\nWachtwoord al teruggevonden of heb je helemaal niet proberen te registreren? Dan mag je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\n"+(user.permissions ? "Stamhoofd" : organization.name)+footer
                 });
 
                 // Don't send the code

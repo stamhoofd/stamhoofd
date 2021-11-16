@@ -26,6 +26,7 @@
     transition: border-color 0.2s;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    word-break: normal;
 
     &:not(textarea) {
         text-overflow: ellipsis;

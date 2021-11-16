@@ -704,6 +704,13 @@ export class Organization extends Model {
         }
     }
 
+    /**
+     * Return default e-mail address for important e-mails that should have the highest deliverability
+     */
+    getStrongEmail(i18n: I18n) {
+        return '"'+this.name.replace("\"", "\\\"")+'" <'+ (this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
+    }
+
     getDefaultEmail(): { from: string; replyTo: string | undefined } {
         // Send confirmation e-mail
         let from = this.uri+"@stamhoofd.email";

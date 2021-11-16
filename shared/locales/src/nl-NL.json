@@ -14,7 +14,8 @@
       }
     },
     "domains": {
-      "marketing": "www.stamhoofd.nl"
+      "marketing": "www.stamhoofd.nl",
+      "email": "stamhoofd.nl"
     },
     "emails": {
       "complaints": "klachten@stamhoofd.nl",
