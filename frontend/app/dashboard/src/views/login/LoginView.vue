@@ -1,5 +1,5 @@
 <template>
-    <form class=" st-view login-view" @submit.prevent="submit">
+    <form class=" st-view login-view" autocomplete="off" @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
@@ -8,7 +8,7 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
@@ -72,22 +72,31 @@ export default class LoginView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
+    // Prevent browsers from already autofocusing the input on animation
+    animating = true
+
     get isNative() {
         return AppManager.shared.isNative
     }
 
     @Ref("emailInput")
-    emailInput: HTMLInputElement
+    emailInput: EmailInput
 
     mounted() {
-        this.email = this.initialEmail ? this.initialEmail : (this.session.user?.email ?? "")
+        this.email = this.initialEmail ? this.initialEmail : (this.session.user?.email ?? "");
 
         if (this.email.length == 0) {
             setTimeout(() => {
+                this.animating = false;
                 // Needed the any here because typescript is getting mad only in production mode
                 if (this.emailInput) {
                     (this.emailInput as any).focus()
                 }
+            }, 300);
+        } else {
+            setTimeout(() => {
+                // Needed the any here because typescript is getting mad only in production mode
+                this.animating = false;
             }, 300);
         }
     }

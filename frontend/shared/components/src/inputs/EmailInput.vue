@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input ref="input" v-model="emailRaw" class="input" :name="name" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" :name="name" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
     </STInputBox>
 </template>
 
@@ -104,3 +104,10 @@ export default class EmailInput extends Vue {
     }
 }
 </script>
+
+<style lang="scss">
+    .email-input-field {
+        // Fix safari bug that shows the autofill on the wrong position
+        transform: translate3d(0, 0, 0);
+    }
+</style>
