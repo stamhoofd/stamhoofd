@@ -303,4 +303,12 @@ export class User extends Model {
         return this.permissions ? await organization.getPrivateStructure(this.permissions) : await organization.getStructure()
     }
 
+    getEmailTo() {
+        return this.firstName && this.lastName ? ('"'+(this.firstName+" "+this.lastName).replace("\"", "\\\"")+"\" <"+this.email+">") 
+        : (
+            this.firstName ? ('"'+this.firstName.replace("\"", "\\\"")+"\" <"+this.email+">") 
+            : this.email
+        )
+    }
+
 }

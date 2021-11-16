@@ -20,7 +20,8 @@
     },
     "emails": {
       "general": "hallo@stamhoofd.be",
-      "complaints": "klachten@stamhoofd.be"
+      "complaints": "klachten@stamhoofd.be",
+      "personal": "simon@stamhoofd.be"
     }
   },
   "backend": {},

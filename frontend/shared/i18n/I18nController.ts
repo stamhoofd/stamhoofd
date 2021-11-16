@@ -1,4 +1,5 @@
 //i18n-setup.js
+import { HistoryManager } from "@simonbackx/vue-app-navigation"
 import { countries, languages } from "@stamhoofd/locales"
 import { SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
@@ -290,6 +291,13 @@ export class I18nController {
                 def.switchToLocale({ country: SessionManager.currentSession.organization.address.country }).catch(console.error)
             }
         })
+
+        // Update already pushed urls
+        for (const state of HistoryManager.states) {
+            if (state.url) {
+                state.url = UrlHelper.transformUrlForLocale(state.url, def.language, def.country)
+            }
+        }
 
         // If we go back, we might need to update the path of previous urls if the language has changed since then
         window.addEventListener("popstate", (event) => {

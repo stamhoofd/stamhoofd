@@ -1,9 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Email, EmailInterface } from "@stamhoofd/email";
 import { Invite } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
-import { OrganizationSimple, PermissionLevel,Permissions, TradedInvite, User as UserStruct } from "@stamhoofd/structures";
+import { Organization, OrganizationSimple, PermissionLevel,Permissions, TradedInvite, User as UserStruct } from "@stamhoofd/structures";
 
 type Params = { key: string };
 type Query = undefined;
@@ -83,10 +84,11 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
             })
         }
       
-
+        let shouldSend = false
         if (invite.permissions) {
             if (!user.permissions) {
                 user.permissions = Permissions.create({ level: PermissionLevel.None })
+                shouldSend = true
             }
 
             // Check invites of old administrators
@@ -107,6 +109,19 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
        
         // Delete invite
         await invite.delete()
+
+        if (shouldSend) {
+            // Send a welcome e-mail to the user
+            const email: EmailInterface = {
+                to: user.getEmailTo(),
+                from: Email.getPersonalEmailFor(request.i18n),
+                subject: "Welkom bij Stamhoofd: goed om te weten",
+                type: "transactional",
+                text: "Dag "+user.firstName+",\n\nSuper, je hebt net een nieuw beheerdersaccount aangemaakt bij "+user.organization.name+". Ik mag jou dus, samen met meer dan 3.000 andere vrijwilligers verwelkomen bij Stamhoofd! Met Stamhoofd willen we verenigingen, zoals "+user.organization.name+", ondersteunen in hun digitalisatie. Dat doen we door een aantal tools te bouwen en die aan heel betaalbare prijzen aan te bieden, specifiek voor verenigingen: bv. onze ledenadministratie, webshops en ticketverkoop.\n\nOm in te loggen in Stamhoofd, surf je naar https://"+request.i18n.$t("shared.domains.marketing")+", klik je op 'Inloggen' en zoek je naar '"+user.organization.name+"'. Daar kan je inloggen met jouw account.\n\nHeb je vragen, opmerkingen of ideeën? Dan kan je me altijd persoonlijk een e-mail sturen via "+request.i18n.$t("shared.emails.personal")+". Die beantwoord ik met alle plezier.\n\nWist je trouwens dat we ook een app hebben? Je kan hem downloaden via de App Store of Google Play Store.\n\nMet vriendelijke groeten,\nSimon Backx\nOprichter van Stamhoofd"
+            }
+
+            Email.send(email)
+        }
         return new Response(TradedInvite.create(Object.assign({}, invite, {
             receiver: token ? UserStruct.create(token.user) : null,
             sender: UserStruct.create(sender),

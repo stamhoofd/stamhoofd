@@ -74,6 +74,10 @@ module.exports = {
                         order: ["template", "script", "style"],
                     },
                 ],
+
+                // Warning: the eslint indent rule is a bit broken (check github issue). Disabled for now. Enabled temporarily if needed
+                "indent": "off",
+                "@typescript-eslint/indent": ["warn", 4]
             },
         }
     ]

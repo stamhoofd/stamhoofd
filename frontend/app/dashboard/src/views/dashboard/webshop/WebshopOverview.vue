@@ -251,21 +251,39 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
    
     openOrders(animated = true) {
-        this.show(new ComponentWithProperties(WebshopOrdersView, {
-            webshopManager: this.webshopManager
-        }).setAnimated(animated))
+        this.show({
+            animated,
+            adjustHistory: animated,
+            components: [
+                new ComponentWithProperties(WebshopOrdersView, {
+                    webshopManager: this.webshopManager
+                })
+            ]
+        })
     }
 
     openStatistics(animated = true) {
-        this.show(new ComponentWithProperties(WebshopStatisticsView, {
-            webshopManager: this.webshopManager
-        }).setAnimated(animated))
+        this.show({
+            animated,
+            adjustHistory: animated,
+            components: [
+                new ComponentWithProperties(WebshopStatisticsView, {
+                    webshopManager: this.webshopManager
+                })
+            ]
+        })
     }
 
     openTickets(animated = true) {
-        this.show(new ComponentWithProperties(TicketScannerSetupView, {
-            webshopManager: this.webshopManager
-        }).setAnimated(animated))
+        this.show({
+            animated,
+            adjustHistory: animated,
+            components: [
+                new ComponentWithProperties(TicketScannerSetupView, {
+                    webshopManager: this.webshopManager
+                })
+            ]
+        })
     }
 
     editGeneral(animated = true) {
@@ -312,8 +330,16 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                     }
                 }
             })
-        }).setAnimated(animated);
-        this.present(displayedComponent.setDisplayStyle("popup"));
+        })
+
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                displayedComponent
+            ]
+        });
     }
 
     mounted() {
@@ -355,7 +381,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
             OrganizationManager.organization.webshops = OrganizationManager.organization.webshops.filter(w => w.id != this.webshopManager.preview.id)
 
-             // Save updated organization to cache
+            // Save updated organization to cache
             OrganizationManager.save().catch(console.error)
 
             if (this.canPop) {

@@ -36,6 +36,7 @@ export default class App extends Vue {
                 // Default language for dashboard is nl-BE, but if we are signed in, always force set the country to the organization country
                 await I18nController.loadDefault("dashboard", Country.Belgium, "nl", SessionManager.currentSession?.organization?.address?.country)
 
+
                 if (navigator.platform.indexOf("Win32")!=-1 || navigator.platform.indexOf("Win64")!=-1){
                     // Load Windows stylesheet
                     try {
@@ -45,6 +46,8 @@ export default class App extends Vue {
                         console.error(e)
                     }
                 }
+
+                this.checkGlobalRoutes()
 
                 return new ComponentWithProperties(AuthenticatedView, {
                     root: new ComponentWithProperties(SplitViewController, {
@@ -77,24 +80,11 @@ export default class App extends Vue {
         FacebookHelper.init()
     }
 
-    mounted() {
-        SessionManager.addListener(this, (changed) => {
-            if (changed == "organization") {
-                this.checkKey().catch(console.error)
-            }
-        })
-        CenteredMessage.addListener(this, async (centeredMessage) => {
-            if (this.$refs.modalStack === undefined) {
-                // Could be a webpack dev server error (HMR) (not fixable) or called too early
-                await this.$nextTick()
-            }
-            (this.$refs.modalStack as any).present({
-                components: [
-                    new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay")
-                ]
-            })
-        })
+    checkGlobalRoutes() {
+        // Always set initial route
+        UrlHelper.setUrl("/")
 
+        const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
         const parts = UrlHelper.shared.getParts();
         const queryString = UrlHelper.shared.getSearchParams()
 
@@ -102,10 +92,11 @@ export default class App extends Vue {
             UrlHelper.shared.clear()
 
             // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
-            UrlHelper.setUrl("/")
 
             const token = queryString.get('token');
             (this.$refs.modalStack as any).present({
+                url: currentPath,
+                adjustHistory: false,
                 components: [
                     new ComponentWithProperties(PromiseView, {
                         promise: async () => {
@@ -147,14 +138,14 @@ export default class App extends Vue {
                 const session = new Session(parts[1]);
                 const toast = new Toast("E-mailadres valideren...", "spinner").setHide(null).show()
                 session.loadFromStorage()
-                .then(() => LoginHelper.verifyEmail(session, code, token))
-                .then(() => {
-                    toast.hide()
-                    new Toast("E-mailadres is gevalideerd", "success green").show()
-                }).catch(e => {
-                    toast.hide()
-                    CenteredMessage.fromError(e).addCloseButton().show()
-                })
+                    .then(() => LoginHelper.verifyEmail(session, code, token))
+                    .then(() => {
+                        toast.hide()
+                        new Toast("E-mailadres is gevalideerd", "success green").show()
+                    }).catch(e => {
+                        toast.hide()
+                        CenteredMessage.fromError(e).addCloseButton().show()
+                    })
             }
         }
 
@@ -171,9 +162,10 @@ export default class App extends Vue {
 
             if (key && secret) {
                 // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
-                UrlHelper.setUrl("/");
 
                 (this.$refs.modalStack as any).present({
+                    url: currentPath,
+                    adjustHistory: false,
                     components: [
                         new ComponentWithProperties(NavigationController, { 
                             root: new ComponentWithProperties(PromiseView, {
@@ -223,6 +215,27 @@ export default class App extends Vue {
         if (ua.indexOf("FBAN") != -1 || ua.indexOf("FBAV") != -1) {
             new Toast("Je zit in de ingebouwde Facebook browser. Deze werkt minder goed en is minder veilig. We raden je héél sterk aan om over te schakelen naar je vaste browser. Dat kan via één van de knoppen boven of onderaan of door zelf naar de site te surfen.", "red error").setHide(null).show()
         }
+    }
+
+    mounted() {
+        SessionManager.addListener(this, (changed) => {
+            if (changed == "organization") {
+                this.checkKey().catch(console.error)
+            }
+        })
+        CenteredMessage.addListener(this, async (centeredMessage) => {
+            if (this.$refs.modalStack === undefined) {
+                // Could be a webpack dev server error (HMR) (not fixable) or called too early
+                await this.$nextTick()
+            }
+            (this.$refs.modalStack as any).present({
+                components: [
+                    new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay")
+                ]
+            })
+        })
+
+       
     }
 
     async unsubscribe(id: string, token: string) {

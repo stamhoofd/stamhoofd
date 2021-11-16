@@ -47,15 +47,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Tooltip,TooltipDirective } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, DNSRecord, Group, GroupGenderType, GroupPatch, GroupSettings, GroupSettingsPatch, Invite,Organization, OrganizationPatch } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
-
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { I18nController } from "@stamhoofd/frontend-i18n";
+import { UrlHelper } from "@stamhoofd/networking";
+import { Invite } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -94,7 +91,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     }
 
     get url() {
-        return "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key)
+        return "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+UrlHelper.transformUrlForLocale("/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key), I18nController.shared.language, I18nController.shared.country)
     }
 
     get canShare() {

@@ -19,7 +19,8 @@
     },
     "emails": {
       "complaints": "klachten@stamhoofd.nl",
-      "general": "hallo@stamhoofd.nl"
+      "general": "hallo@stamhoofd.nl",
+      "personal": "simon@stamhoofd.nl"
     }
   },
   "backend": {},

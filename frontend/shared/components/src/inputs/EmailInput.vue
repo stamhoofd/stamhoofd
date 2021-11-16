@@ -88,9 +88,6 @@ export default class EmailInput extends Vue {
                 "message": "Ongeldig e-mailadres",
                 "field": "email"
             }))
-            if (this.value !== "") {
-                this.$emit("input", "")
-            }
             return false
 
         } else {

@@ -145,7 +145,7 @@ import TicketView from "./orders/TicketView.vue";
                     content: WebshopManager.webshop.meta.title ?? WebshopManager.webshop.meta.name
                 },
                 ...(this.bannerImageSrc ? [
-                     {
+                    {
                         hid: 'og:image',
                         name: 'og:image',
                         content: this.bannerImageSrc
@@ -214,7 +214,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     openCart(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView) }).setAnimated(animated).setDisplayStyle("popup"))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            components: [
+                new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView) }).setDisplayStyle("popup")
+            ]
+        })
     }
 
     get bannerImage() {
@@ -285,14 +291,29 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
         if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];
-            this.show(new ComponentWithProperties(OrderView, { orderId }).setAnimated(false))
+            this.show({
+                animated: false,
+                adjustHistory: false,
+                components: [
+                    new ComponentWithProperties(OrderView, { orderId })
+                ]
+            })
         } else if (path.length == 2 && path[0] == 'tickets') {
             const secret = path[1];
-            this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
+            this.show({
+                animated: false,
+                adjustHistory: false,
+                components: [
+                    new ComponentWithProperties(TicketView, { secret })
+                ]
+            })
         } else if (path.length == 1 && path[0] == 'payment' && params.get("id")) {
             const paymentId = params.get("id")
             const me = this
             this.show({
+                adjustHistory: false,
+                animated: false,
+                force: true,
                 components: [
                     new ComponentWithProperties(PaymentPendingView, { 
                         server: WebshopManager.server, 
@@ -318,8 +339,6 @@ export default class WebshopView extends Mixins(NavigationMixin){
                         } 
                     })
                 ],
-                animated: false,
-                force: true
             })
         } else if (path.length == 2 && path[0] == 'checkout') {
             const stepName = Formatter.capitalizeFirstLetter(path[1])
@@ -335,7 +354,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     async resumeStep(destination: CheckoutStepType, animated = true) {
-         // Quickly recreate all steps
+        // Quickly recreate all steps
         let step: CheckoutStepType | undefined = undefined
         const components: Promise<any>[] = []
 
@@ -364,6 +383,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         await this.navigationController!.push({
             components: replaceWith,
             animated,
+            adjustHistory: animated,
         })
     }
 

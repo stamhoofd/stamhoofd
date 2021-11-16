@@ -1,6 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Email, EmailInterface, EmailInterfaceBase } from '@stamhoofd/email';
 import { EmailVerificationCode, Member } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
 import { Token } from '@stamhoofd/models';
@@ -83,6 +84,12 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             // If already in use: will fail, so will verification
         }
 
+        let shouldSend = false
+
+        if (!user.verified && user.permissions !== null) {
+            shouldSend = true
+        }
+
         user.verified = true
 
         try {
@@ -101,6 +108,23 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const token = await Token.createToken(user);
         const st = new TokenStruct(token);
+
+        if (shouldSend) {
+            const admins = await organization.getAdmins()
+
+            if (admins.length == 1) {
+                // Send a welcome e-mail to the user
+                const email: EmailInterface = {
+                    to: user.getEmailTo(),
+                    from: Email.getPersonalEmailFor(request.i18n),
+                    subject: "Welkom bij Stamhoofd: goed om te weten",
+                    type: "transactional",
+                    text: "Dag "+user.firstName+",\n\nSuper, je hebt "+organization.name+" aansloten bij Stamhoofd. Ik mag jou dus, samen met meer dan 3.000 andere vrijwilligers verwelkomen bij Stamhoofd! Met Stamhoofd willen we verenigingen ondersteunen in hun digitalisatie. Dat doen we door een aantal tools te bouwen en die aan heel betaalbare prijzen aan te bieden, specifiek voor verenigingen.\n\nHeb je vragen, opmerkingen of ideeën? Dan kan je me altijd persoonlijk een e-mail sturen via "+request.i18n.$t("shared.emails.personal")+". Die beantwoord ik met alle plezier.\n\nWist je trouwens dat we ook een app hebben? Je kan hem downloaden via de App Store of Google Play Store.\n\nVeel succes en bedankt voor het vertrouwen,\nSimon Backx\nOprichter van Stamhoofd"
+                }
+
+                Email.send(email)
+            }
+        }
         return new Response(st);
     }
 }

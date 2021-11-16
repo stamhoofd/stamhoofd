@@ -679,7 +679,7 @@ export class Organization extends Model {
         const filtered = await this.getAdmins()
 
         if (filtered.length > 0) {
-            return filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", ")
+            return filtered.map(f => f.getEmailTo() ).join(", ")
         }
 
         return undefined
@@ -695,7 +695,7 @@ export class Organization extends Model {
         const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
 
         if (filtered.length > 0) {
-            return filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", ")
+            return filtered.map(f => f.getEmailTo() ).join(", ")
         }
 
         return undefined
