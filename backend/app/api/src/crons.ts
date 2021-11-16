@@ -118,13 +118,14 @@ async function checkReplies() {
 }
 
 let lastPostmarkCheck: Date | null = null
+let lastPostmarkId: string | null = null
 async function checkPostmarkBounces() {
     const token = STAMHOOFD.POSTMARK_SERVER_TOKEN
     if (!token) {
         console.log("No postmark token, skipping postmark bounces")
         return
     }
-    const fromDate = (lastPostmarkCheck ?? new Date(new Date().getTime() - 24 * 60 * 60 * 1000 * 5))
+    const fromDate = (lastPostmarkCheck ?? new Date(new Date().getTime() - 24 * 60 * 60 * 1000 * 2))
     const ET = DateTime.fromJSDate(fromDate).setZone('EST').toISO({ includeOffset: false})
     console.log("Checking bounces from Postmark since", fromDate, ET)
     const client = new postmark.ServerClient(token)
@@ -140,7 +141,10 @@ async function checkPostmarkBounces() {
 
     if (bounces.TotalCount == 0) {
         console.log("No Postmark bounces at this time")
+        return
     }
+
+    let lastId: string | null = null
 
     for (const bounce of bounces.Bounces) {
         // Try to get the organization, if possible, else default to global blocking: "null", which is not visible for an organization, but it is applied
@@ -165,7 +169,20 @@ async function checkPostmarkBounces() {
 
         const bouncedAt = new Date(bounce.BouncedAt)
         lastPostmarkCheck = lastPostmarkCheck ? new Date(Math.max(bouncedAt.getTime(), lastPostmarkCheck.getTime())) : bouncedAt
+
+        lastId = bounce.ID
     }
+
+    if (lastId && lastPostmarkId) {
+        if (lastId === lastPostmarkId) {
+            console.log("Postmark has no new bounces")
+            // Increase timestamp by one second to avoid refetching it every time
+            if (lastPostmarkCheck) {
+                lastPostmarkCheck = new Date(lastPostmarkCheck.getTime() + 1000)
+            }
+        }
+    }
+    lastPostmarkId = lastId
 }
 
 async function checkBounces() {
