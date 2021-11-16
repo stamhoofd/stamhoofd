@@ -118,8 +118,21 @@ export class Organization extends Model {
 
     // Methods
     static async getByEmail(email: string): Promise<Organization | undefined> {
+        if (["hallo@stamhoofd.be", "hallo@stamhoofd.nl"].includes(email)) {
+            return
+        }
         if (email.endsWith("@stamhoofd.email")) {
             const uri = email.substring(0, email.length - "@stamhoofd.email".length)
+            return await Organization.getByURI(uri)
+        }
+
+        if (email.endsWith("@stamhoofd.be")) {
+            const uri = email.substring(0, email.length - "@stamhoofd.be".length)
+            return await Organization.getByURI(uri)
+        }
+
+        if (email.endsWith("@stamhoofd.nl")) {
+            const uri = email.substring(0, email.length - "@stamhoofd.nl".length)
             return await Organization.getByURI(uri)
         }
 
