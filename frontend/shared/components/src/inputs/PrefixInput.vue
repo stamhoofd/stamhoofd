@@ -1,13 +1,14 @@
 <template>
     <label class="prefix-input input" :class="{ error: !valid }">
-        <div class="prefix">
-            {{ prefix }}
+        <div class="prefix" :class="{ fade: fadePrefix || focussed }">
+            {{ focusPrefix !== null && focussed ? focusPrefix : prefix }}
         </div>
         <input
             ref="input"
             v-model="internalValue"
             type="text"
-            @blur="$emit('blur', $event)"
+            @focus="onFocus"
+            @blur="onBlur"
         >
     </label>
 </template>
@@ -28,6 +29,24 @@ export default class PrefixInput extends Vue {
 
     @Prop({ default: "" })
     placeholder!: string
+
+    @Prop({ default: true })
+    fadePrefix!: boolean
+
+    @Prop({ default: null })
+    focusPrefix!: string | null
+
+    focussed = false
+
+    onFocus(event) {
+        this.focussed = true
+        this.$emit("focus", event);
+    }
+
+    onBlur(event) {
+        this.focussed = false
+        this.$emit("blur", event);
+    }
 
     get internalValue() {
         return this.value
@@ -55,7 +74,12 @@ export default class PrefixInput extends Vue {
         pointer-events: none;
         user-select: none;
         white-space: nowrap;
-        opacity: 0.5;
+        opacity: 1;
+        transition: opacity 0.2s;
+
+        &.fade {
+            opacity: 0.5;
+        }
 
         box-sizing: border-box;
         

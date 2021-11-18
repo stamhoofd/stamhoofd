@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { EmailAddress } from '@stamhoofd/email';
-import { Group } from '@stamhoofd/models';
+import { Group, Webshop } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
@@ -28,14 +28,14 @@ let isRunningCrons = false
 let lastDNSCheck: Date | null = null
 let lastDNSId = ""
 async function checkDNS() {
-    // Wait an half hour between every complete check
-    if (lastDNSCheck && lastDNSCheck > new Date(new Date().getTime() - 30 * 60 * 1000)) {
+    // Wait 6 hours between every complete check
+    if (lastDNSCheck && lastDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
         console.log("Skip DNS check")
         return
     }
     
     const organizations = await Organization.where({ id: { sign: '>', value: lastDNSId } }, {
-        limit: 10,
+        limit: 50,
         sort: ["id"]
     })
 
@@ -57,6 +57,42 @@ async function checkDNS() {
 
     lastDNSId = organizations[organizations.length - 1].id
     
+}
+
+let lastWebshopDNSCheck: Date | null = null
+let lastWebshopDNSId = ""
+async function checkWebshopDNS() {
+    // Wait 6 hours between every complete check
+    if (lastWebshopDNSCheck && lastWebshopDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
+        console.log("Skip webshop DNS check")
+        return
+    }
+    
+    const webshops = await Webshop.where({ 
+        id: { sign: '>', value: lastWebshopDNSId },
+        domain: { sign: '!=', value: null }
+    }, {
+        limit: 10,
+        sort: ["id"]
+    })
+
+    if (webshops.length == 0) {
+        // Wait an half hour before starting again
+        lastWebshopDNSId = ""
+        lastWebshopDNSCheck = new Date()
+        return
+    }
+
+    console.log("Checking webshop DNS...")
+
+    for (const webshop of webshops) {
+        if (STAMHOOFD.environment === "production" || true) {
+            console.log("Checking dns for webshop "+webshop.meta.name+" ("+webshop.id+")"+" ("+webshop.domain+")")
+        }
+        await webshop.updateDNSRecords()
+    }
+
+    lastWebshopDNSId = webshops[webshops.length - 1].id
 }
 
 async function checkReplies() {
@@ -475,7 +511,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkSettlements().then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkPayments).catch(e => {
+        checkSettlements().then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

@@ -81,7 +81,7 @@
                         <span class="icon copy" />
                         <span>Kopiëren</span>
                     </button>
-                    <PrefixInput v-model="domainUri" placeholder="bv. wafelbak" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" @blur="resetCache" />
+                    <PrefixInput v-model="domainUri" placeholder="bv. wafelbak" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" @blur="resetCache" />
                 </STInputBox>
                 <p class="style-description-small">
                     Vul eventueel iets in na het streepje (/), maar dat is niet verplicht.
@@ -409,7 +409,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
 
     set domainUri(domainUri: string | null) {
         this.resetCache()
-        const patch = PrivateWebshop.patch({ domainUri: domainUri ? Formatter.slug(domainUri) : null })
+        const patch = PrivateWebshop.patch({ domainUri: domainUri ? Formatter.slug(domainUri) : "" })
         this.addPatch(patch)
     }
 
@@ -535,6 +535,11 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
                     field: "uri",
                     message: "Kies een andere link, deze is ongeldig of al in gebruik."
                 })
+            }
+            this.addPatch(PrivateWebshop.patch({ domainUri: null, domain: null }))
+        } else {
+            if (this.webshop.domainUri === null) {
+                this.addPatch(PrivateWebshop.patch({ domainUri: "" }))
             }
         }
     }

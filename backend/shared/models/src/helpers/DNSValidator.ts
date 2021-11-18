@@ -114,14 +114,21 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[]) {
 
             }
         } catch (e) {
-            console.error(e)
             record.status = DNSRecordStatus.Pending
 
-            if (e.code && e.code == "ENOTFOUND") {
+            if (e.code && (e.code == "ENOTFOUND" || e.code == "ENODATA")) {
                 record.errors = new SimpleErrors(new SimpleError({
                     code: "not_found",
                     message: "",
                     human: "We konden de record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
+                }))
+            } else {
+                console.error(e)
+
+                record.errors = new SimpleErrors(new SimpleError({
+                    code: "not_found",
+                    message: "",
+                    human: "Er ging iets mis. Deze record lijkt niet goed ingesteld te zijn."
                 }))
             }
             allValid = false

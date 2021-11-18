@@ -35,11 +35,11 @@
         <STToolbar>
             <template slot="right">
                 <button class="button secundary" @click="skip">
-                    Later
+                    Overslaan
                 </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" @click="validate">
-                        Verifieer
+                        Ik heb het ingesteld
                     </button>
                 </LoadingButton>
             </template>
@@ -119,6 +119,8 @@ export default class WebshopDNSRecordsView extends Mixins(NavigationMixin) {
             if (response.data.meta.domainActive) {
                 new Toast("Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.", "success green").show()
                 this.dismiss({ force: true })
+            } else {
+                new Toast("We konden jouw domeinnaam nog niet activeren (zie foutmeldingen bij de DNS-records). Soms kan het even duren voor de wijzigingen doorkomen, we sturen je een e-mail zodra we ze wel opmerken.", "error red").show()
             }
         } catch (e) {
             console.error(e)
