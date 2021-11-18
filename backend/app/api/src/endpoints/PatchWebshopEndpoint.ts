@@ -1,10 +1,11 @@
-import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType,Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
+import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string };
 type Query = undefined;
@@ -45,7 +46,6 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
 
         // Halt all order placement and validation + pause stock updates
         return await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
-            const errors = new SimpleErrors()
             const webshop = await Webshop.getByID(request.params.id)
             if (!webshop || webshop.organizationId != user.organizationId) {
                 throw new SimpleError({
@@ -65,10 +65,13 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
 
             // Do all updates
             if (request.body.meta) {
+                request.body.meta.domainActive = undefined
                 webshop.meta.patchOrPut(request.body.meta)
             }
 
             if (request.body.privateMeta) {
+                // Prevent editing internal fields
+                (request.body.privateMeta as any).dnsRecords = undefined
                 webshop.privateMeta.patchOrPut(request.body.privateMeta)
             }
 
@@ -81,14 +84,77 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             if (request.body.domain !== undefined) {
-                webshop.domain = request.body.domain
+                if (request.body.domain !== null) {
+                    const cleaned = request.body.domain.toLowerCase().replace(/[^a-zA-Z0-9-.]/g, '');
+
+                    if (cleaned != webshop.domain) {
+                        webshop.domain = cleaned
+                        webshop.meta.domainActive = false
+                        webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(cleaned)
+
+                        // Check if this is a known domain
+                        const known = await Webshop.getByDomainOnly(cleaned)
+
+                        if (known && known?.organizationId === user.organizationId && known.meta.domainActive) {
+                            // Automatically update the dns records already.
+                            // This domain was already used, so no risk of making DNS-caches dirty
+                            console.log("Automatically updating dns records for", cleaned, "during patch")
+                            await webshop.updateDNSRecords()
+                        }
+
+                        if (cleaned.length < 4 || !cleaned.includes(".")) {
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "Invalid domain",
+                                human: "Ongeldige domeinnaam",
+                                field: "customUrl"
+                            })
+                        }
+                    }
+                } else {
+                    webshop.domain = null
+                    webshop.privateMeta.dnsRecords = []
+                    webshop.meta.domainActive = false
+                }
             }
 
             if (request.body.domainUri !== undefined) {
-                webshop.domainUri = request.body.domainUri
+                if (webshop.domain !== null) {
+                    webshop.domainUri = request.body.domainUri ?? ""
+
+                    if (webshop.domainUri != Formatter.slug(webshop.domainUri)) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "domainUri contains invalid characters",
+                            human: "Een link mag geen spaties of speciale tekens bevatten",
+                            field: "customUrl"
+                        })
+                    }
+                } else {
+                    webshop.domainUri = null
+                }
             }
 
             if (request.body.uri !== undefined) {
+                // Validate
+                if (request.body.uri.length == 0) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Uri cannot be empty",
+                        human: "De link mag niet leeg zijn",
+                        field: "uri"
+                    })
+                }
+
+                if (request.body.uri != Formatter.slug(request.body.uri)) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Uri contains invalid characters",
+                        human: "Een link mag geen spaties of speciale tekens bevatten",
+                        field: "uri"
+                    })
+                }
+
                 webshop.uri = request.body.uri
             }
 
@@ -101,9 +167,21 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                 })
             }
 
-            await webshop.save()
-            
-            errors.throwIfNotEmpty()
+            try {
+                await webshop.save()
+            } catch (e) {
+                // Duplicate key probably
+                if (e.code && e.code == "ER_DUP_ENTRY") {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Uri already in use",
+                        human: "De link die je hebt gekozen is al in gebruik. Kies een andere.",
+                        field: "uri"
+                    })
+                }
+                throw e;
+            }
+                
             return new Response(PrivateWebshop.create(webshop));
         })
     }

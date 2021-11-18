@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
+import { DNSRecord, DNSRecordType } from '../DNSRecord';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from '../Organization';
 import { Category } from './Category';
@@ -35,12 +36,24 @@ export class WebshopPreview extends AutoEncoder {
     @field({ decoder: WebshopPrivateMetaData, version: 62 })
     privateMeta = WebshopPrivateMetaData.create({})
 
+    getDefaultDomain(organization: Organization): string  {
+        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])
+    }
+
+    getDefaultUrl(organization: Organization): string {
+        return this.getDefaultDomain(organization)+this.getDefaultSuffix()
+    }
+
+    getDomainUrl(): string {
+        return this.domain+this.getDomainSuffix()
+    }
+
     getUrl(organization: Organization): string {
-        if (this.domain) {
-            return this.domain+this.getDomainSuffix()
+        if (this.domain && this.meta.domainActive) {
+            return this.getDomainUrl()
         }
 
-        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])+this.getDefaultSuffix()
+        return this.getDefaultUrl(organization)
     }
 
     getCanonicalUrl(organization: Organization): string {
@@ -107,12 +120,24 @@ export class Webshop extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Category) })
     categories: Category[] = []
 
+    getDefaultDomain(organization: Organization): string  {
+        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])
+    }
+
+    getDefaultUrl(organization: Organization): string {
+        return this.getDefaultDomain(organization)+this.getDefaultSuffix()
+    }
+
+    getDomainUrl(): string {
+        return this.domain+this.getDomainSuffix()
+    }
+
     getUrl(organization: Organization): string {
-        if (this.domain) {
-            return this.domain+this.getDomainSuffix()
+        if (this.domain && this.meta.domainActive) {
+            return this.getDomainUrl()
         }
 
-        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])+this.getDefaultSuffix()
+        return this.getDefaultUrl(organization)
     }
 
     getCanonicalUrl(organization: Organization): string {
@@ -145,6 +170,13 @@ export class Webshop extends AutoEncoder {
             return this.getDomainSuffix()
         }
         return this.getDefaultSuffix()
+    }
+
+    buildDNSRecords(): DNSRecord[] {
+        if (!this.domain) {
+            return []
+        }
+        return WebshopPrivateMetaData.buildDNSRecords(this.domain)
     }
 }
 

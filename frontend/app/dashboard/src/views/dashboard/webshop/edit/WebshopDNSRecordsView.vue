@@ -1,8 +1,8 @@
 <template>
-    <div id="dns-records-view" class="st-view">
-        <STNavigationBar title="Instellingen">
+    <div class="st-view">
+        <STNavigationBar title="DNS-instellingen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -15,21 +15,28 @@
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
+
+            <p v-if="isComplete" class="success-box">
+                Alles is correct ingesteld.
+            </p>
             
             <div v-for="record in records" :key="record.id">
                 <DNSRecordBox :record="record" />
             </div>
 
-            <p class="warning-box">
+            <p v-if="!isComplete" class="warning-box">
                 Kijk alles goed na voor je aanpassingen maakt, verwijder zeker geen bestaande DNS-records. Als je DNS-records verwijdert, kan jouw huidige website onbereikbaar worden.
             </p>
-            <p class="warning-box">
+            <p v-if="!isComplete" class="warning-box">
                 Het kan tot 24 uur duren tot de aanpassingen zijn doorgevoerd, in de meeste gevallen zou het binnen 1 uur al in orde moeten zijn. Je mag dit scherm sluiten als je de aanpassingen hebt gemaakt, we blijven op de achtergrond proberen en sturen jou een mailtje als alles in orde is.
             </p>
         </main>
 
         <STToolbar>
             <template slot="right">
+                <button class="button secundary" @click="skip">
+                    Later
+                </button>
                 <LoadingButton :loading="saving">
                     <button class="button primary" @click="validate">
                         Verifieer
@@ -42,15 +49,14 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Organization, OrganizationDomains } from "@stamhoofd/structures"
-import { Component, Mixins } from "vue-property-decorator";
+import { DNSRecordStatus, PrivateWebshop } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
-import DNSRecordBox from '../../../components/DNSRecordBox.vue';
-import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
+import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
+import { WebshopManager } from '../WebshopManager';
 
 @Component({
     components: {
@@ -67,44 +73,52 @@ import DNSRecordsDoneView from './DNSRecordsDoneView.vue';
         tooltip: TooltipDirective
     }
 })
-export default class DNSRecordsView extends Mixins(NavigationMixin) {
+export default class WebshopDNSRecordsView extends Mixins(NavigationMixin) {
+    @Prop({ required: true })
+    webshopManager: WebshopManager
+
     errorBox: ErrorBox | null = null
     saving = false
 
     session = SessionManager.currentSession
 
     get records() {
-        return OrganizationManager.organization.privateMeta?.dnsRecords ?? []
+        return this.webshopManager.webshop?.privateMeta.dnsRecords ?? []
     }
 
-    get mailDomain() {
-        return OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain  ?? "?"
+    get isComplete() {
+        return !this.records.find(r => r.status !== DNSRecordStatus.Valid)
     }
-   
+
+    skip() {
+        if (!this.isComplete) {
+            new Toast("Hou er rekening mee dat jouw webshop voorlopig nog niet bereikbaar is op de door jou gekozen link. We gebruiken intussen de standaard domeinnaam van Stamhoofd. Wijzig eventueel de link terug tot iemand dit in orde kan brengen.", "warning yellow").setHide(15*1000).show()
+        }
+        this.dismiss()
+    }
+
     async validate() {
         if (this.saving) {
             return;
         }
 
-    
         this.saving = true
 
         try {
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
-                path: "/organization/domain",
-                body: OrganizationDomains.create({
-                    mailDomain: this.mailDomain,
-                    registerDomain: "inschrijven."+this.mailDomain
-                }),
-                decoder: Organization as Decoder<Organization>
+                path: "/webshop/"+this.webshopManager.webshop!.id+"/verify-domain",
+                decoder: PrivateWebshop as Decoder<PrivateWebshop>,
+                shouldRetry: false
             })
 
-            OrganizationManager.organization.set(response.data)
             this.saving = false
 
-            if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null) {
-                this.show(new ComponentWithProperties(DNSRecordsDoneView, {}))
+            this.webshopManager.updateWebshop(response.data)
+
+            if (response.data.meta.domainActive) {
+                new Toast("Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.", "success green").show()
+                this.dismiss({ force: true })
             }
         } catch (e) {
             console.error(e)

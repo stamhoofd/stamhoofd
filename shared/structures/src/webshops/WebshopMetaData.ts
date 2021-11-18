@@ -7,6 +7,7 @@ import { Address } from '../addresses/Address';
 import { City } from '../addresses/City';
 import { Country, CountryDecoder } from '../addresses/CountryDecoder';
 import { Province } from '../addresses/Province';
+import { DNSRecord, DNSRecordType } from '../DNSRecord';
 import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
@@ -278,6 +279,14 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true, version: 43 })
     availableUntil: Date | null = null
+
+    /**
+     * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.
+     * This is to prevent invalid url's from being used in emails.
+     * Lookups for a given domain still work if not active
+     */
+    @field({ decoder: BooleanDecoder, version: 135 })
+    domainActive = false
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {
@@ -289,6 +298,22 @@ export class WebshopPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: PermissionsByRole, version: 60, optional: true })
     permissions = PermissionsByRole.create({})
+
+    /**
+     * DNS records that need to be set in order to activate mail domain and registration domain
+     */
+    @field({ decoder: new ArrayDecoder(DNSRecord), version: 135 })
+    dnsRecords: DNSRecord[] = [];
+
+    static buildDNSRecords(domain: string): DNSRecord[] {
+        return [
+            DNSRecord.create({
+                type: DNSRecordType.CNAME,
+                name: domain+".",
+                value: "domains.stamhoofd.shop."
+            })
+        ]
+    }
 }
 
 export class WebshopServerMetaData extends AutoEncoder {

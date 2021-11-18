@@ -1,7 +1,9 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { Category, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
+import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+import { validateDNSRecords } from "../helpers/DNSValidator";
+const { Resolver } = require('dns').promises;
 
 import { Organization } from './Organization';
 
@@ -181,5 +183,25 @@ export class Webshop extends Model {
         return domain+"/"+this.uri
     }
 
- 
+    async updateDNSRecords(background = false) {
+        // Check initial status
+        let isValidRecords = true
+        for (const record of this.privateMeta.dnsRecords) {
+            if (record.status != DNSRecordStatus.Valid) {
+                isValidRecords = false
+            }
+        }
+
+        const { allValid } = await validateDNSRecords(this.privateMeta.dnsRecords)
+
+        if (allValid) {
+            if (!this.meta.domainActive && background) {
+                // todo: send an email
+            }
+            this.meta.domainActive = true
+        } else {
+            this.meta.domainActive = false
+        }
+        await this.save()
+    }
 }

@@ -169,10 +169,23 @@
                 <STList>
                     <STListItem :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
-                            Webshop verwijderen
+                            Webshop afsluiten
                         </h2>
                         <p class="style-description">
-                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen
+                            Sluit de webshop, verplaats de webshop naar het archief maar behoud alle gegevens.
+                        </p>
+                        <button slot="right" class="button secundary hide-smartphone">
+                            Webshop sluiten
+                        </button>
+                        <button slot="right" class="button icon lock only-smartphone" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" @click="deleteWebshop()">
+                        <h2 class="style-title-list">
+                            Webshop definitief verwijderen
+                        </h2>
+                        <p class="style-description">
+                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Het is meestal beter om je webshop af te sluiten.
                         </p>
                         <button slot="right" class="button secundary danger hide-smartphone">
                             Verwijder webshop

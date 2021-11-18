@@ -17,6 +17,7 @@
     background: var(--color-white, white);
     border-radius: $border-radius;
     padding: 5px 15px;
+
     height: $input-height;
     line-height: $input-height - 10px - 2 * $border-width;
     margin: 0;
@@ -32,6 +33,7 @@
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
+        padding-right: 0; // More visible text for long texts that overflow
     }
 
     &:hover {
@@ -81,6 +83,17 @@
         &:focus,
         &:focus-within {
             border-color: $color-error-border-focus;
+        }
+    }
+}
+
+.input-success {
+    .input {
+        border-color: $color-success-border;
+
+        &:focus,
+        &:focus-within {
+            border-color: $color-success-border-focus;
         }
     }
 }

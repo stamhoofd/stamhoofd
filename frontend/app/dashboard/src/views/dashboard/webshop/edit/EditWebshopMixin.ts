@@ -44,8 +44,12 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
-    validate() {
+    validate(): Promise<void> | void {
         // override if needed
+    }
+
+    shouldDismiss(): Promise<boolean> | boolean {
+        return true
     }
 
     async save() {
@@ -61,7 +65,7 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                 return
             }
 
-            this.validate()
+            await this.validate()
 
             if (this.isNew) {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
@@ -92,9 +96,15 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
             } else {
                 await this.webshopManager!.patchWebshop(this.webshopPatch)
                 new Toast("Jouw wijzigingen zijn opgeslagen", "success green").show()
+
+                // Clear the patch
+                this.webshopPatch = PrivateWebshop.patch({})
             }
 
-            this.dismiss({ force: true })
+            const dis = await this.shouldDismiss()
+            if (dis) {
+                this.dismiss({ force: true })
+            }
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
