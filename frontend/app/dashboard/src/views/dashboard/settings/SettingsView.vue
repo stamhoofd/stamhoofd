@@ -340,6 +340,7 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         this.present({
             animated,
             adjustHistory: animated,
+            modalDisplayStyle: "popup",
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(ReferralView, {})

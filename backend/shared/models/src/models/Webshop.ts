@@ -31,9 +31,14 @@ export class Webshop extends Model {
     domainUri: string | null = null;
 
     // Unique representation of this webshop from a string, that is used to provide the default domains
-    // in org.stamhoofd.shop/name-of-webshop
+    // in shop.stamhoofd.be/uri, and stamhoofd.be/shop/uri
     @column({ type: "string" })
     uri: string;
+
+    // Old uri format, which was only unique on a per-organization basis
+    // in org.stamhoofd.shop/legacyUri
+    @column({ type: "string", nullable: true })
+    legacyUri: string | null = null;
 
     /**
      * Public meta data
@@ -91,10 +96,25 @@ export class Webshop extends Model {
     static organization = new ManyToOneRelation(Organization, "organization");
 
     // Methods
-    static async getByURI(organizationId: string, uri: string): Promise<Webshop | undefined> {
+    static async getByLegacyURI(organizationId: string, uri: string): Promise<Webshop | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`organizationId\` = ? AND \`uri\` = ? LIMIT 1`,
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`organizationId\` = ? AND \`legacyUri\` = ? LIMIT 1`,
             [organizationId, uri]
+        );
+
+        if (rows.length == 0) {
+            return undefined;
+        }
+
+        // Read member + address from first row
+        return this.fromRow(rows[0][this.table]);
+    }
+
+    // Methods
+    static async getByURI(uri: string): Promise<Webshop | undefined> {
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`uri\` = ? LIMIT 1`,
+            [uri]
         );
 
         if (rows.length == 0) {
@@ -157,11 +177,8 @@ export class Webshop extends Model {
             return this.domain
         }
 
-        if (this.uri.length > 0) {
-            return this.organization.uri+"."+STAMHOOFD.domains.webshop+"/"+this.uri
-        }
-
-        return this.organization.uri+"."+STAMHOOFD.domains.webshop
+        const domain = STAMHOOFD.domains.webshop[this.organization.address.country] ?? STAMHOOFD.domains.webshop[""];
+        return domain+"/"+this.uri
     }
 
  

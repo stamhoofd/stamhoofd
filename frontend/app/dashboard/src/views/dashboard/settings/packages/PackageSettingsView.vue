@@ -83,11 +83,10 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import cartIcon from "@stamhoofd/assets/images/illustrations/cart.svg"
-import experimentIcon from "@stamhoofd/assets/images/illustrations/experiment.svg"
-import flagIcon from "@stamhoofd/assets/images/illustrations/flag.svg"
-import groupIcon from "@stamhoofd/assets/images/illustrations/group.svg"
-import singleCartIcon from "@stamhoofd/assets/images/illustrations/single-cart.svg"
+import flagIcon from "@stamhoofd/assets/images/illustrations/package-activities.svg"
+import groupIcon from "@stamhoofd/assets/images/illustrations/package-members.svg"
+import experimentIcon from "@stamhoofd/assets/images/illustrations/package-trial.svg"
+import cartIcon from "@stamhoofd/assets/images/illustrations/package-webshops.svg"
 import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from "@stamhoofd/structures";
@@ -191,7 +190,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
             case STPackageType.TrialMembers: return experimentIcon
             case STPackageType.TrialWebshops: return experimentIcon
             case STPackageType.Webshops: return cartIcon
-            case STPackageType.SingleWebshop: return singleCartIcon
+            case STPackageType.SingleWebshop: return cartIcon
         }
         return null
     }

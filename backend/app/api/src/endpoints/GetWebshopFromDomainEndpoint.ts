@@ -22,8 +22,14 @@ type ResponseBody = OrganizationWithWebshop;
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
  */
 
-export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>
+    webshopDomains = [
+        ...new Set([
+            ...Object.values(STAMHOOFD.domains.webshop), 
+            ...Object.values(STAMHOOFD.domains.marketing)
+        ])
+    ]
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
@@ -46,9 +52,42 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
 
         // Clean up google translate domains -> make sure we can translate register pages
         request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(request.query.domain)
+
+        if (request.query.uri) {
+            for (const domain of this.webshopDomains) {
+                if (request.query.domain === domain) {
+                    // Search webshop
+                    const webshop = await Webshop.getByURI(request.query.uri)
+
+                    if (!webshop) {
+                        throw new SimpleError({
+                            code: "unknown_webshop",
+                            message: "No webshop registered with this name",
+                            statusCode: 404
+                        })
+                    }
+
+                    const organization = await Organization.getByID(webshop.organizationId)
+
+                    if (!organization) {
+                        throw new SimpleError({
+                            code: "unknown_organization",
+                            message: "No organization registered with this domain name",
+                            statusCode: 404
+                        })
+                    }
+
+                    return new Response(OrganizationWithWebshop.create({
+                        organization: await organization.getStructure(),
+                        webshop: WebshopStruct.create(webshop)
+                    }));
+                }
+            }
+        }
         
-        if (request.query.domain.endsWith("." + STAMHOOFD.domains.webshop)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.webshop).length )
+        // If ends with the legacy webshop domain
+        if (request.query.domain.endsWith("." + STAMHOOFD.domains.legacyWebshop)) {
+            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.legacyWebshop).length )
             if (strippped.includes(".")) {
                 throw new SimpleError({
                     code: "invalid_domain",
@@ -69,7 +108,7 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
             }
 
             // Search webshop
-            const webshop = await Webshop.getByURI(organization.id, request.query.uri ?? "")
+            const webshop = await Webshop.getByLegacyURI(organization.id, request.query.uri ?? "")
 
             if (!webshop) {
                 throw new SimpleError({
@@ -100,12 +139,12 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
         const organization = await Organization.getByID(webshop.organizationId)
 
         if (!organization) {
-                throw new SimpleError({
-                    code: "unknown_organization",
-                    message: "No organization registered with this domain name",
-                    statusCode: 404
-                })
-            }
+            throw new SimpleError({
+                code: "unknown_organization",
+                message: "No organization registered with this domain name",
+                statusCode: 404
+            })
+        }
 
         return new Response(OrganizationWithWebshop.create({
             organization: await organization.getStructure(),

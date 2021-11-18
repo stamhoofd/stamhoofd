@@ -51,59 +51,6 @@
                 <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
             </figure>
 
-            <hr>
-            <h2>Link van jouw webshop</h2>
-
-            <Checkbox v-model="hasCustomDomain">
-                Eigen domeinnaam gebruiken
-            </Checkbox>
-
-            <template v-if="hasCustomDomain">
-                <STInputBox title="Eigen link" error-fields="customUrl" :error-box="errorBox" class="max">
-                    <input
-                        v-model="customUrl"
-                        class="input"
-                        type="text"
-                        :placeholder="$t('dashboard.inputs.shopUrl.placeholder')"
-                        autocomplete=""
-                        @blur="resetCache"
-                    >
-                </STInputBox>
-                <p class="st-list-description">
-                    {{ $t('dashboard.webshop.customDomain.description') }}
-                </p>
-            
-                <template v-if="dnsRecord">
-                    <STInputBox title="Stel deze DNS-records in" class="max">
-                        <DNSRecordBox :record="dnsRecord" />
-                    </STInputBox>
-                </template>
-            </template>
-
-            <template v-else>
-                <STInputBox title="Eigen achtervoegsel (optioneel)" error-fields="uri" :error-box="errorBox">
-                    <input
-                        v-model="uri"
-                        class="input"
-                        type="text"
-                        placeholder="bv. wafelbak"
-                        autocomplete=""
-                        @blur="resetCache"
-                    >
-                </STInputBox>
-
-                <STInputBox title="Jouw link" error-fields="url" :error-box="errorBox" class="max">
-                    <input
-                        v-tooltip="'Klik om te kopiëren'"
-                        :value="url"
-                        class="input"
-                        type="text"
-                        autocomplete=""
-                        readonly
-                        @click="copyElement"
-                    >
-                </STInputBox>
-            </template>
 
             <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
 
@@ -169,10 +116,6 @@ import EditWebshopMixin from "./EditWebshopMixin";
     directives: { Tooltip: TooltipDirective },
 })
 export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
-    cachedHasCustomDomain: boolean | null = null
-    cachedCustomUrl: string | null = null
-    cachedUri: string | null = null
-
     get organization() {
         return OrganizationManager.organization
     }
@@ -222,92 +165,6 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
         this.addPatch(PrivateWebshop.patch({ meta: patch}) )
     }
 
-    resetCache() {
-        this.cachedCustomUrl = null
-        this.cachedUri = null
-    }
-
-    get hasCustomDomain() {
-        if (this.cachedHasCustomDomain) {
-            return this.cachedHasCustomDomain
-        }
-        return !!this.webshop.domain
-    }
-
-    set hasCustomDomain(hasCustomDomain: boolean) {
-        this.cachedHasCustomDomain = hasCustomDomain
-
-        if (!hasCustomDomain) {
-            const patch = PrivateWebshop.patch({  })
-            patch.domain = null
-            patch.domainUri = null
-            this.addPatch(patch)
-        } else {
-            // Force patch
-            this.customUrl = this.customUrl as any
-        }
-    }
-
-    get url() {
-        return "https://"+this.webshop.getUrl(SessionManager.currentSession!.organization!)
-    }
-
-    get customUrl() {
-        if (this.cachedCustomUrl) {
-            return this.cachedCustomUrl
-        }
-
-        if (!this.webshop.domain) {
-            return ""
-        }
-        return this.webshop.getUrl(SessionManager.currentSession!.organization!)
-    }
-
-    set customUrl(customUrl: string) {
-        this.cachedCustomUrl = customUrl
-        const split = customUrl.split("/")
-
-        const patch = PrivateWebshop.patch({  })
-        if (split[0].length == 0) {
-            patch.domain = null
-            patch.domainUri = null
-        } else {
-            patch.domain = split[0]
-
-            if (!split[1] || split[1].length == 0) {
-                patch.domainUri = null
-            } else {
-                patch.domainUri = split[1]
-            }
-        }
-
-        this.addPatch(patch)
-    }
-
-    get uri() {
-        return this.webshop.uri
-    }
-
-    set uri(uri: string) {
-        this.cachedUri = uri
-
-        const patch = PrivateWebshop.patch({  })
-        patch.uri = uri
-
-        this.addPatch(patch)
-    }
-
-    get dnsRecord() {
-        if (!this.webshop.domain) {
-            return null;
-        }
-        return DNSRecord.create({
-            type: DNSRecordType.CNAME,
-            name: this.webshop.domain+".",
-            value: "domains.stamhoofd.shop."
-        })
-    }
-
     get coverPhoto() {
         return this.webshop.meta.coverPhoto
     }
@@ -317,7 +174,7 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
         this.addPatch(PrivateWebshop.patch({ meta: patch }) )
     }
 
-     get hs() {
+    get hs() {
         return [
             ResolutionRequest.create({
                 width: 1600
@@ -351,33 +208,6 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     get coverImageHeight() {
         return this.coverPhotoResolution?.height
     }
-
-    copyElement(event) {
-        event.target.contentEditable = true;
-
-        document.execCommand('selectAll', false);
-        document.execCommand('copy')
-
-        event.target.contentEditable = false;
-
-        const el = event.target;
-        const rect = event.target.getBoundingClientRect();
-
-        // Present
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "📋 Gekopieerd!",
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-
-        setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
-        }, 1000);
-    }
-
-  
 }
 </script>
 

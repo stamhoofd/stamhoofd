@@ -162,7 +162,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
+        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Customer.toLowerCase())
     }
 }
 </script>

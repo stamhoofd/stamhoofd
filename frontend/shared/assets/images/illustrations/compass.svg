@@ -1,0 +1,22 @@
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="24" cy="6" r="5" stroke="#DCDCDC" stroke-width="2"/>
+<path d="M22.5 8H25.5V13H22.5V8Z" fill="#868686"/>
+<path d="M21 6.5C21 5.67157 21.6716 5 22.5 5H25.5C26.3284 5 27 5.67157 27 6.5V6.87868C27 7.2765 26.842 7.65804 26.5607 7.93934L25.9393 8.56066C25.658 8.84196 25.2765 9 24.8787 9H23.1213C22.7235 9 22.342 8.84196 22.0607 8.56066L21.4393 7.93934C21.158 7.65804 21 7.2765 21 6.87868V6.5Z" fill="#0053FF"/>
+<path d="M24 46C33.3888 46 41 38.3888 41 29C41 19.6112 33.3888 12 24 12C14.6112 12 7 19.6112 7 29C7 38.3888 14.6112 46 24 46Z" fill="white" stroke="#0053FF" stroke-width="3"/>
+<path d="M32 20.9999L31 22" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<path d="M24 18V19" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<path d="M24 39V40" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<path d="M13 29H14" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<path d="M15.5 21.4999L16.5001 22.5" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<path d="M16 36.9999L17 35.9999" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<path d="M32.0001 37L31 35.9999" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<path d="M34 29H35" stroke="#DCDCDC" stroke-width="2" stroke-linecap="round"/>
+<mask id="mask0_9586:1729" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="16" y="21" width="16" height="16">
+<path d="M26.4326 33.0082C27.1407 32.7048 27.7048 32.1406 28.0083 31.4325L30.8693 24.7569C31.5805 23.0974 29.9026 21.4195 28.2432 22.1307L21.5675 24.9917C20.8594 25.2952 20.2953 25.8594 19.9918 26.5674L17.1308 33.2431C16.4197 34.9026 18.0975 36.5804 19.757 35.8692L26.4326 33.0082Z" fill="#FF1741"/>
+</mask>
+<g mask="url(#mask0_9586:1729)">
+<path d="M16.1461 35.5411C15.7905 36.3708 16.6294 37.2097 17.4591 36.8541L27.5356 32.5356L20.4646 25.4646L16.1461 35.5411Z" fill="#868686"/>
+<path d="M30.541 21.1461C31.3707 20.7905 32.2097 21.6294 31.8541 22.4591L27.5356 32.5356L20.4645 25.4646L30.541 21.1461Z" fill="#FF1741"/>
+</g>
+<circle cx="24" cy="29" r="2" transform="rotate(45 24 29)" fill="white"/>
+</svg>

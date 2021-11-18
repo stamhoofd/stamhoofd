@@ -17,6 +17,12 @@ export class WebshopPreview extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 89 })
     uri = ""
 
+    /**
+     * Not writeable
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 134 })
+    legacyUri: string | null = null
+
     @field({ decoder: StringDecoder, nullable: true, version: 89 })
     domain: string | null = null;
 
@@ -31,23 +37,42 @@ export class WebshopPreview extends AutoEncoder {
 
     getUrl(organization: Organization): string {
         if (this.domain) {
-            return this.domain+this.getUrlSuffix()
+            return this.domain+this.getDomainSuffix()
         }
 
-        return organization.uri+"."+STAMHOOFD.domains.webshop+this.getUrlSuffix()
+        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])+this.getDefaultSuffix()
     }
 
-     getUrlSuffix(): string {
-        if (this.domain) {
-            if (!this.domainUri) {
-                return ""
-            }
-            return "/"+this.domainUri
+    getCanonicalUrl(organization: Organization): string {
+        return (STAMHOOFD.domains.marketing[organization.address.country] ?? STAMHOOFD.domains.marketing[""])+"/"+STAMHOOFD.domains.webshopPrefix+this.getDefaultSuffix()
+    }
+
+    getLegacyUrl(organization: Organization): string | null {
+        if (this.legacyUri === null) {
+            return null
         }
+        return organization.uri+"."+STAMHOOFD.domains.legacyWebshop+(this.legacyUri ? "/"+this.legacyUri : "")
+    }
+
+    getDomainSuffix(): string {
+        if (!this.domainUri) {
+            return ""
+        }
+        return "/"+this.domainUri
+    }
+
+    getDefaultSuffix(): string {
         if (!this.uri) {
             return ""
         }
         return "/"+this.uri
+    }
+
+    getUrlSuffix(): string {
+        if (this.domain) {
+            return this.getDomainSuffix()
+        }
+        return this.getDefaultSuffix()
     }
 }
 
@@ -60,6 +85,12 @@ export class Webshop extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     uri = ""
+
+    /**
+     * Not writeable
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 134 })
+    legacyUri: string | null = null
 
     @field({ decoder: StringDecoder, nullable: true })
     domain: string | null = null;
@@ -78,35 +109,42 @@ export class Webshop extends AutoEncoder {
 
     getUrl(organization: Organization): string {
         if (this.domain) {
-            return this.domain+this.getUrlSuffix()
+            return this.domain+this.getDomainSuffix()
         }
 
-        return organization.uri+"."+STAMHOOFD.domains.webshop+this.getUrlSuffix()
+        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])+this.getDefaultSuffix()
     }
 
-    getUrlSuffix(): string {
-        if (this.domain) {
-            if (!this.domainUri) {
-                return ""
-            }
-            return "/"+this.domainUri
+    getCanonicalUrl(organization: Organization): string {
+        return (STAMHOOFD.domains.marketing[organization.address.country] ?? STAMHOOFD.domains.marketing[""])+"/"+STAMHOOFD.domains.webshopPrefix+this.getDefaultSuffix()
+    }
+
+    getLegacyUrl(organization: Organization): string | null {
+        if (this.legacyUri === null) {
+            return null
         }
+        return organization.uri+"."+STAMHOOFD.domains.legacyWebshop+(this.legacyUri ? "/"+this.legacyUri : "")
+    }
+
+    getDomainSuffix(): string {
+        if (!this.domainUri) {
+            return ""
+        }
+        return "/"+this.domainUri
+    }
+
+    getDefaultSuffix(): string {
         if (!this.uri) {
             return ""
         }
         return "/"+this.uri
     }
 
-    removeSuffix(url: string[]) {
-        const suff = this.getUrlSuffix()
-        if (suff.length == 0) {
-            return url
+    getUrlSuffix(): string {
+        if (this.domain) {
+            return this.getDomainSuffix()
         }
-        
-        if (url[0] && url[0] == suff.substr(1)) {
-            return url.slice(1)
-        }
-        return url
+        return this.getDefaultSuffix()
     }
 }
 

@@ -28,10 +28,13 @@ declare global {
 
     type StamhoofdDomains = {
         dashboard: string,
-        registration: LocalizedDomain,  // requires wildcard prefix DNS
-        webshop: string,                // requires wildcard prefix DNS
-        api: string,                    // requires wildcard prefix DNS
-        demoApi: string,                // requires wildcard prefix DNS
+        registration: LocalizedDomain,      // requires wildcard prefix DNS
+        marketing: LocalizedDomain,         // main landing page
+        webshopPrefix: string,              // Webshop prefix that is used on the marketing domain, e.g. 'shop', for stamhoofd.be/shop/my-webshop
+        webshop: LocalizedDomain,           // E.g. shop.stamhoofd.be
+        legacyWebshop: string,        // E.g. stamhoofd.shop for *.stamhoofd.shop
+        api: string,                        // requires wildcard prefix DNS
+        demoApi: string,                    // requires wildcard prefix DNS
         admin: string,
         adminApi: string
     }

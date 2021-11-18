@@ -138,7 +138,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Time.toLowerCase())
+        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Time.toLowerCase())
     }
 }
 </script>

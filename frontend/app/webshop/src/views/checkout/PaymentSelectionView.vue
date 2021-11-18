@@ -204,7 +204,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
+        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Payment.toLowerCase())
     }
 }
 </script>

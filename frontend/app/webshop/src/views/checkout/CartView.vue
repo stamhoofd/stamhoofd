@@ -133,7 +133,7 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
+        UrlHelper.setUrl("/cart")
         
         try {
             this.cart.validate(WebshopManager.webshop)

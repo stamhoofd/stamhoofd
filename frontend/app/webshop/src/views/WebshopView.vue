@@ -285,10 +285,10 @@ export default class WebshopView extends Mixins(NavigationMixin){
         })
 
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
-        const path = this.webshop.removeSuffix(UrlHelper.shared.getParts());
+        const path = UrlHelper.shared.getParts();
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
-        UrlHelper.setUrl(this.webshop.getUrlSuffix())
+        UrlHelper.setUrl("/")
 
         if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];

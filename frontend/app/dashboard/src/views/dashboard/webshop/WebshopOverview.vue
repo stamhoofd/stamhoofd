@@ -74,7 +74,7 @@
                     </STListItem>
 
                     <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-package.svg">
                         <h2 class="style-title-list">
                             Productaanbod
                         </h2>
@@ -120,10 +120,21 @@
                     <STListItem :selectable="true" class="left-center" @click="editPage(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/palette.svg">
                         <h2 class="style-title-list">
-                            Tekst, link en omslagfoto
+                            Tekst, omslagfoto en externe links
                         </h2>
                         <p class="style-description">
                             Wijzig de teksten en uitzicht van jouw webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editLink(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/compass.svg">
+                        <h2 class="style-title-list">
+                            Link
+                        </h2>
+                        <p class="style-description">
+                            Wijzig de link van jouw webshop.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
@@ -188,6 +199,7 @@ import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
 import EditWebshopInputFieldsView from './edit/EditWebshopInputFieldsView.vue';
+import EditWebshopLinkView from './edit/EditWebshopLinkView.vue';
 import EditWebshopPageView from './edit/EditWebshopPageView.vue';
 import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
 import EditWebshopPermissionsView from './edit/EditWebshopPermissionsView.vue';
@@ -226,6 +238,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     get webshopUrl() {
         return this.preview.getUrl(OrganizationManager.organization)
+    }
+
+    get canonicalUrl() {
+        return this.preview.getCanonicalUrl(OrganizationManager.organization)
     }
 
     get hasFullPermissions() {
@@ -292,6 +308,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     editPage(animated = true) {
         this.displayEditComponent(EditWebshopPageView, animated)
+    }
+
+    editLink(animated = true) {
+        this.displayEditComponent(EditWebshopLinkView, animated)
     }
 
     editProducts(animated = true) {

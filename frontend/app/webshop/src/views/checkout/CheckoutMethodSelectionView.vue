@@ -139,7 +139,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Method.toLowerCase())
+        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Method.toLowerCase())
     }
 }
 </script>

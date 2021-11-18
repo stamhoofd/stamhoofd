@@ -32,17 +32,41 @@ export default class App extends Vue {
         promise: async () => {
             // get organization
             try {
+                // Check if we are on a global domain, and ignore /shops prefixes if needed
+                let prefix: string | null = null
+                const initialPath = UrlHelper.shared.getParts()
+                const hostname = window.location.hostname
+
+                if (Object.values(STAMHOOFD.domains.marketing).includes(hostname) && initialPath.length > 0 && initialPath[0] === STAMHOOFD.domains.webshopPrefix) {
+                    console.info("Currently on our main domain, using fixed prefix:", STAMHOOFD.domains.webshopPrefix)
+                    prefix = STAMHOOFD.domains.webshopPrefix
+                }
+
+                // Ignore this fixed prefix in our next lookup
+                UrlHelper.fixedPrefix = prefix
+
                 const ignorePath = ["checkout", "order", "cart", "payment", "tickets"];
                 const path = UrlHelper.shared.getParts()
+                const usedUri = path[0] && !ignorePath.includes(path[0]) ? path[0] : ''
                 const response = await NetworkManager.server.request({
                     method: "GET",
                     path: "/webshop-from-domain",
                     query: {
-                        domain: window.location.hostname,
-                        uri: path[0] && !ignorePath.includes(path[0]) ? path[0] : ''
+                        domain: hostname,
+                        uri: usedUri
                     },
                     decoder: OrganizationWithWebshop as Decoder<OrganizationWithWebshop>
                 })
+
+                // Yay, we have a webshop! Now mark the full suffix of this webshop as the fixed prefix, so we can just forget about it
+                if (usedUri) {
+                    if (UrlHelper.fixedPrefix) {
+                        UrlHelper.fixedPrefix = UrlHelper.fixedPrefix + "/" + usedUri
+                    } else {
+                        UrlHelper.fixedPrefix = usedUri
+                    }
+                    console.info("Using fixed prefix", UrlHelper.fixedPrefix)
+                }
 
                 I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
                 await I18nController.loadDefault("webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)

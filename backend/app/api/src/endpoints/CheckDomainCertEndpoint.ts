@@ -62,9 +62,8 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
         
-
-        if (request.query.domain.endsWith("." + STAMHOOFD.domains.webshop)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.webshop).length )
+        if (request.query.domain.endsWith("." + STAMHOOFD.domains.legacyWebshop)) {
+            const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.legacyWebshop).length )
             if (strippped.includes(".")) {
                 throw new SimpleError({
                     code: "invalid_domain",
