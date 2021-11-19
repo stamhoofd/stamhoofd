@@ -1,11 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
-
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
+import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = { };
 type Query = undefined;
@@ -56,6 +55,37 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.categories = request.body.categories
         webshop.organizationId = user.organizationId
         webshop.uri = request.body.uri.length > 0 ? request.body.uri : Formatter.slug(webshop.meta.name)
+        
+        // Check if this uri is inique
+
+        const original = webshop.uri
+        const possibleSuffixes = [Formatter.slug(user.organization.uri), new Date().getFullYear().toString()]
+        let tried = 0
+        while (await Webshop.getByURI(webshop.uri) !== undefined) {
+            console.log("Webshop already exists", webshop.uri)
+
+            if (tried < possibleSuffixes.length) {
+                webshop.uri = original + "-" + possibleSuffixes[tried]
+            } else if (tried > 9) {
+                webshop.uri = original + "-" + Math.floor(Math.random() * 100000)
+            } else {
+                webshop.uri = original + "-" + (tried - possibleSuffixes.length + 2)
+            }
+            
+            tried++
+
+            if (tried > 15) {
+                console.log("Failed to generate unique webshop uri")
+
+                throw new SimpleError({
+                    code: "failed_to_generate_unique_uri",
+                    message: "Failed to generate unique uri",
+                    human: "Er is een fout opgetreden bij het maken van de webshop, kies een andere naam voor jouw webshop",
+                    statusCode: 500
+                })
+            }
+        }
+
 
         if (request.body.domain !== undefined) {
             webshop.domain = request.body.domain
