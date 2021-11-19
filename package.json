@@ -19,6 +19,7 @@
     "scripts": {
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
+        "build:structures": "cd shared/structures && yarn build && cd ../..",
         "build:shared": "yarn build && cd backend/shared/email && yarn build && cd ../models && yarn build && cd ../queues && yarn build && cd ../i18n && yarn build && cd ../env && yarn build && cd ../..",
         "build:locales": "cd shared/locales && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",

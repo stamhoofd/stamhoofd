@@ -15,13 +15,21 @@ export class WebshopPreview extends AutoEncoder {
     /**
      * Not writeable
      */
-    @field({ decoder: StringDecoder, version: 89 })
+    @field({ decoder: StringDecoder, version: 134 })
     uri = ""
 
     /**
      * Not writeable
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 134 })
+    @field({ decoder: StringDecoder, version: 89, field: "uri" })
+    @field({ 
+        decoder: StringDecoder, 
+        nullable: true, 
+        version: 134, 
+        downgrade: function(this: Webshop) {
+            return this.legacyUri ?? this.uri
+        } 
+    })
     legacyUri: string | null = null
 
     @field({ decoder: StringDecoder, nullable: true, version: 89 })
@@ -103,13 +111,21 @@ export class Webshop extends AutoEncoder {
     /**
      * Not writeable
      */
-    @field({ decoder: StringDecoder })
+    @field({ decoder: StringDecoder, version: 134 })
     uri = ""
 
     /**
      * Not writeable
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 134 })
+    @field({ decoder: StringDecoder, field: "uri"  })
+    @field({ 
+        decoder: StringDecoder, 
+        nullable: true, 
+        version: 134, 
+        downgrade: function(this: Webshop) {
+            return this.legacyUri ?? this.uri
+        }
+    })
     legacyUri: string | null = null
 
     @field({ decoder: StringDecoder, nullable: true })

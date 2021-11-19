@@ -135,6 +135,11 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                 }
             }
 
+            if (request.body.legacyUri !== undefined) {
+                // Support editing the legacy uri (e.g. delete it, or for older clients)
+                webshop.legacyUri = request.body.legacyUri
+            }
+
             if (request.body.uri !== undefined) {
                 if (request.request.getVersion() < 134) {   
                     // Only set the legacy url

@@ -55,14 +55,19 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.categories = request.body.categories
         webshop.organizationId = user.organizationId
 
-        if (request.request.getVersion() < 134) {   
-            // Also set the legacy url
-            webshop.legacyUri = request.body.uri
-        }
-        webshop.uri = request.body.uri.length > 0 ? request.body.uri : Formatter.slug(webshop.meta.name)
-        
-        // Check if this uri is inique
+        console.log(request.body)
 
+        if (request.request.getVersion() < 134 && request.body.legacyUri !== null) {   
+            console.log("Tried to create webshop with legacy uri", request.body.legacyUri)
+
+            // Also set the legacy url
+            webshop.legacyUri = request.body.legacyUri.length > 0 ? request.body.legacyUri : Formatter.slug(webshop.meta.name)
+            webshop.uri = webshop.legacyUri
+        } else {
+            webshop.uri = request.body.uri.length > 0 ? request.body.uri : Formatter.slug(webshop.meta.name)
+        }
+
+        // Check if this uri is inique
         const original = webshop.uri
         const possibleSuffixes = [Formatter.slug(user.organization.uri), new Date().getFullYear().toString()]
         let tried = 0
@@ -90,7 +95,6 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 })
             }
         }
-
 
         if (request.body.domain !== undefined) {
             webshop.domain = request.body.domain
