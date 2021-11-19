@@ -136,26 +136,31 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             if (request.body.uri !== undefined) {
-                // Validate
-                if (request.body.uri.length == 0) {
-                    throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Uri cannot be empty",
-                        human: "De link mag niet leeg zijn",
-                        field: "uri"
-                    })
-                }
+                if (request.request.getVersion() < 134) {   
+                    // Only set the legacy url
+                    webshop.legacyUri = request.body.uri
+                } else {
+                    // Validate
+                    if (request.body.uri.length == 0) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Uri cannot be empty",
+                            human: "De link mag niet leeg zijn",
+                            field: "uri"
+                        })
+                    }
 
-                if (request.body.uri != Formatter.slug(request.body.uri)) {
-                    throw new SimpleError({
-                        code: "invalid_field",
-                        message: "Uri contains invalid characters",
-                        human: "Een link mag geen spaties of speciale tekens bevatten",
-                        field: "uri"
-                    })
-                }
+                    if (request.body.uri != Formatter.slug(request.body.uri)) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Uri contains invalid characters",
+                            human: "Een link mag geen spaties of speciale tekens bevatten",
+                            field: "uri"
+                        })
+                    }
 
-                webshop.uri = request.body.uri
+                    webshop.uri = request.body.uri
+                }
             }
 
             // Verify if we still have full access

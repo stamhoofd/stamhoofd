@@ -54,6 +54,11 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.products = request.body.products
         webshop.categories = request.body.categories
         webshop.organizationId = user.organizationId
+
+        if (request.request.getVersion() < 134) {   
+            // Also set the legacy url
+            webshop.legacyUri = request.body.uri
+        }
         webshop.uri = request.body.uri.length > 0 ? request.body.uri : Formatter.slug(webshop.meta.name)
         
         // Check if this uri is inique
