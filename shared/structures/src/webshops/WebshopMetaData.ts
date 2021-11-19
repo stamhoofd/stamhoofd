@@ -231,6 +231,12 @@ export enum WebshopTicketType {
     "Tickets" = "Tickets"
 }
 
+export enum WebshopStatus {
+    "Open" = "Open",
+    "Closed" = "Closed",
+    "Archived" = "Archived"
+}
+
 export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
@@ -279,6 +285,12 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true, version: 43 })
     availableUntil: Date | null = null
+
+    /**
+     * Manually close a webshop
+     */
+    @field({ decoder: new EnumDecoder(WebshopStatus), version: 136 })
+    status = WebshopStatus.Open
 
     /**
      * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.

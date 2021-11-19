@@ -538,6 +538,9 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
             }
             this.addPatch(PrivateWebshop.patch({ domainUri: null, domain: null }))
         } else {
+            // Don't change the uri, because error handling could get weird if it is duplicate (the user won't notice it is changed)
+            this.addPatch(PrivateWebshop.patch({ uri: this.originalWebshop.uri }))
+
             if (this.webshop.domainUri === null) {
                 this.addPatch(PrivateWebshop.patch({ domainUri: "" }))
             }

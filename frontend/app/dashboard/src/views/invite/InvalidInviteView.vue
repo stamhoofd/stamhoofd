@@ -6,8 +6,6 @@
         <main>
             <h1>Deze uitnodiging is niet langer geldig 😢</h1>
             
-            <STErrorsDefault :error-box="errorBox" />
-
             <p v-if="invite && invite.sender.firstName" class="st-list-description">
                 {{ invite.sender.firstName }} heeft jou uitgenodigd als beheerder van {{ invite.organization.name }}. Vraag om de uitnodiging opnieuw te versturen, want hij is verlopen.
             </p>

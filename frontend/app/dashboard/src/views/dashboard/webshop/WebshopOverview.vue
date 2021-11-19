@@ -7,6 +7,10 @@
         <main>
             <h1>
                 {{ title }}
+
+                <span v-if="isOpen" class="icon dot green" />
+                <span v-else-if="isArchive" class="icon archive" />
+                <span v-else class="icon dot red" />
             </h1>
 
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
@@ -163,32 +167,75 @@
                 </STList>
 
                 <hr>
-                <h2>Gevaarlijke acties</h2>
-                <p>Deze acties kan je niet meer ongedaan maken. Let heel goed op wat je doet.</p>
+                <h2>Acties</h2>
 
                 <STList>
-                    <STListItem :selectable="true" @click="deleteWebshop()">
+                    <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
-                            Webshop afsluiten
+                            Webshop sluiten
                         </h2>
                         <p class="style-description">
-                            Sluit de webshop, verplaats de webshop naar het archief maar behoud alle gegevens.
+                            Sluit de webshop, zodat geen nieuwe bestellingen meer mogelijk zijn.
                         </p>
-                        <button slot="right" class="button secundary hide-smartphone">
-                            Webshop sluiten
+                        <button slot="right" class="button secundary danger hide-smartphone">
+                            <span class="icon power" />
+                            <span>Sluiten</span>
                         </button>
-                        <button slot="right" class="button icon lock only-smartphone" />
+                        <button slot="right" class="button icon power only-smartphone" />
                     </STListItem>
 
-                    <STListItem :selectable="true" @click="deleteWebshop()">
+                    <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
+                        <h2 class="style-title-list">
+                            Webshop terug openen
+                        </h2>
+                        <p class="style-description">
+                            Open de webshop opnieuw.
+                        </p>
+                        <button slot="right" class="button secundary green hide-smartphone">
+                            <span class="icon power" />
+                            <span>Openen</span>
+                        </button>
+                        <button slot="right" class="button icon power only-smartphone" />
+                    </STListItem>
+
+                    <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
+                        <h2 class="style-title-list">
+                            Webshop archiveren
+                        </h2>
+                        <p class="style-description">
+                            Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.
+                        </p>
+                        <button slot="right" class="button secundary hide-smartphone">
+                            <span class="icon archive" />
+                            <span>Archiveren</span>
+                        </button>
+                        <button slot="right" class="button icon archive only-smartphone" />
+                    </STListItem>
+
+                    <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
+                        <h2 class="style-title-list">
+                            Webshop uit archief halen
+                        </h2>
+                        <p class="style-description">
+                            Verplaats de webshop terug naar het hoofdmenu.
+                        </p>
+                        <button slot="right" class="button secundary hide-smartphone">
+                            <span class="icon undo" />
+                            <span>Terugzetten</span>
+                        </button>
+                        <button slot="right" class="button icon undo only-smartphone" />
+                    </STListItem>
+
+                    <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
                             Webshop definitief verwijderen
                         </h2>
                         <p class="style-description">
-                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Het is meestal beter om je webshop af te sluiten.
+                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.
                         </p>
                         <button slot="right" class="button secundary danger hide-smartphone">
-                            Verwijder webshop
+                            <span class="icon trash" />
+                            <span>Verwijderen</span>
                         </button>
                         <button slot="right" class="button icon trash only-smartphone" />
                     </STListItem>
@@ -203,7 +250,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { getPermissionLevelNumber, PermissionLevel, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, PermissionLevel, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -240,6 +287,14 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     preview!: WebshopPreview;
 
     webshopManager = new WebshopManager(this.preview)
+
+    get isOpen() {
+        return !this.webshopManager.preview.isClosed()
+    }
+
+    get isArchive() {
+        return this.webshopManager.preview.meta.status == WebshopStatus.Archived
+    }
 
     get organization() {
         return OrganizationManager.organization
@@ -396,6 +451,70 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
         if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'statistics') {
             this.openStatistics(false)
+        }
+    }
+
+    async closeWebshop() {
+        if (this.isArchive) {
+            if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop wilt terugzetten?", "Ja, terugzetten", "Je kan daarna de webshop eventueel terug openen.")) {
+                return;
+            }
+        } else {
+            if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '"+this.webshopManager.preview.meta.name+"' wilt sluiten?", "Ja, sluiten", "Er kunnen daarna geen nieuwe bestellingen worden gemaakt. Je kan de webshop later terug openen.")) {
+                return;
+            }
+        }
+
+        try {
+            await this.webshopManager.patchWebshop(
+                PrivateWebshop.patch({
+                    meta: WebshopMetaData.patch({
+                        status: WebshopStatus.Closed
+                    })
+                })
+            )
+            new Toast("De webshop is gesloten", "success green").show()
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+    }
+
+    async openWebshop() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop terug wilt openen?", "Ja, openen")) {
+            return;
+        }
+
+        try {
+            await this.webshopManager.patchWebshop(
+                PrivateWebshop.patch({
+                    meta: WebshopMetaData.patch({
+                        status: WebshopStatus.Open,
+                        availableUntil: null
+                    })
+                })
+            )
+            new Toast("De webshop is terug open", "success green").show()
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+    }
+
+    async archiveWebshop() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop wilt archiveren?", "Ja, archiveren", "De gegevens van de webshop blijven daarna nog bereikbaar, maar de webshop wordt niet meer zo prominent in het menu weergegeven.")) {
+            return;
+        }
+
+        try {
+            await this.webshopManager.patchWebshop(
+                PrivateWebshop.patch({
+                    meta: WebshopMetaData.patch({
+                        status: WebshopStatus.Archived
+                    })
+                })
+            )
+            new Toast("De webshop is gearchiveerd", "success green").show()
+        } catch (e) {
+            Toast.fromError(e).show()
         }
     }
 

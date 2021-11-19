@@ -91,10 +91,17 @@
                     :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
                     @click="openWebshop(webshop)"
                 >
-                    {{ webshop.meta.name }}
+                    <span>{{ webshop.meta.name }}</span>
+
+                    <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon" />
                 </button>
             </div>
             <hr v-if="enableWebshopModule && webshops.length > 0">
+
+            <button v-if="enableWebshopModule && hasWebshopArchive" class="menu-button button heading" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
+                <span class="icon archive" />
+                <span>Webshop archief</span>
+            </button>
 
             <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
                 <span class="icon card" />
@@ -112,7 +119,7 @@
                     <span>Groepsadministratie</span>
                 </button>
             </div>
-            <hr v-if="fullAccess || canManagePayments">
+            <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             <div class="">
                 <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(true)">
                     <span class="icon user" />
@@ -143,8 +150,8 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, GlobalEventBus, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview } from '@stamhoofd/structures';
-import { Formatter } from "@stamhoofd/utility";
+import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { openNolt } from "../../classes/NoltHelper";
@@ -164,6 +171,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     currentlySelected: string | null = null
     whatsNewBadge = ""
+    OrganizationManager = OrganizationManager
 
     get organization() {
         return OrganizationManager.organization
@@ -179,6 +187,10 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     get tree() {
         return this.organization.categoryTreeForPermissions(OrganizationManager.user.permissions ?? Permissions.create({}))
+    }
+
+    isWebshopOpen(webshop: WebshopPreview) {
+        return !webshop.isClosed()
     }
 
     mounted() {
@@ -290,6 +302,12 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     get webshops() {
         return this.organization.webshops
+            .filter(webshop => webshop.meta.status !== WebshopStatus.Archived)
+            .sort((a, b) => Sorter.stack(Sorter.byBooleanValue(b.isClosed(), a.isClosed()), Sorter.byStringValue(a.meta.name, b.meta.name)))
+    }
+
+    get hasWebshopArchive() {
+        return this.organization.webshops.some(webshop => webshop.meta.status == WebshopStatus.Archived)
     }
 
     switchOrganization() {
@@ -329,7 +347,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "CategoryView" */ "./groups/CategoryView.vue"), { category }, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "CategoryView", webpackPrefetch: true */ "./groups/CategoryView.vue"), { category }, { instant: !animated })
                 })
             ]}
         );
@@ -358,11 +376,26 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOverview" */ './webshop/WebshopOverview.vue'), { preview: webshop }, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "WebshopOverview", webpackPrefetch: true */ './webshop/WebshopOverview.vue'), { preview: webshop }, { instant: !animated })
                 })
             ]}
         );
     }
+
+    async openWebshopArchive(animated = true) {
+        this.currentlySelected = "webshop-archive"
+
+        this.showDetail({
+            adjustHistory: animated,
+            animated,
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: await LoadComponent(() => import(/* webpackChunkName: "WebshopArchiveView" */  "./webshop/WebshopArchiveView.vue"), {  }, { instant: !animated })
+                })
+            ]}
+        );
+    }
+
 
     async managePayments(animated = true) {
         this.currentlySelected = "manage-payments"
@@ -371,7 +404,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "PaymentsView" */ './payments/PaymentsView.vue'), {}, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "PaymentsView", webpackPrefetch: true */ './payments/PaymentsView.vue'), {}, { instant: !animated })
                 })
             ]
         });
@@ -385,7 +418,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "SettingsView" */ './settings/SettingsView.vue'), {}, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "SettingsView", webpackPrefetch: true */ './settings/SettingsView.vue'), {}, { instant: !animated })
                 })
             ],
         });
@@ -398,7 +431,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView" */ './account/AccountSettingsView.vue'), {}, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "AccountSettingsView", webpackPrefetch: true */ './account/AccountSettingsView.vue'), {}, { instant: !animated })
                 })
             ]
         });
@@ -425,7 +458,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */'./settings/SGVGroepsadministratieView.vue'), {}, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView", webpackPrefetch: true */'./settings/SGVGroepsadministratieView.vue'), {}, { instant: !animated })
                 })
             ]
         });
@@ -451,11 +484,14 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get canCreateWebshops() {
-        return OrganizationManager.user.permissions?.canCreateWebshops(OrganizationManager.organization.privateMeta?.roles ?? [])
+        console.log(SessionManager.currentSession!.user!.permissions!, this.organization.privateMeta?.roles)
+        const result = SessionManager.currentSession!.user!.permissions!.canCreateWebshops(this.organization.privateMeta?.roles ?? [])
+        console.log(result)
+        return result
     }
 
     get canManagePayments() {
-        return OrganizationManager.user.permissions?.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])
+        return SessionManager.currentSession!.user!.permissions!.canManagePayments(this.organization.privateMeta?.roles ?? [])
     }
 
     get fullAccess() {

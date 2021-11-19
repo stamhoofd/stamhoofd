@@ -245,17 +245,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get closed() {
         // 2 minutes in advance already
-        if (this.webshop.meta.availableUntil && this.webshop.meta.availableUntil.getTime() < new Date().getTime() + 2*60*1000) {
-            return true
-        }
-        return false
+        return this.webshop.isClosed(2*60*1000)
     }
 
     get almostClosed() {
-        if (this.webshop.meta.availableUntil && this.webshop.meta.availableUntil.getTime() < new Date().getTime() + 6*60*60*1000) {
-            return true
-        }
-        return false
+        return this.webshop.isClosed(6*60*60*1000) && !this.closed
     }
     
     onAddItem(cartItem: CartItem) {

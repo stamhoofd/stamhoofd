@@ -6,7 +6,7 @@ import { DNSRecord, DNSRecordType } from '../DNSRecord';
 import { Organization } from '../Organization';
 import { Category } from './Category';
 import { Product } from './Product';
-import { WebshopMetaData, WebshopPrivateMetaData } from './WebshopMetaData';
+import { WebshopMetaData, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData';
 
 export class WebshopPreview extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -86,6 +86,13 @@ export class WebshopPreview extends AutoEncoder {
             return this.getDomainSuffix()
         }
         return this.getDefaultSuffix()
+    }
+
+    isClosed(margin = 0) {
+        if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin)) {
+            return true
+        }
+        return false
     }
 }
 
@@ -177,6 +184,13 @@ export class Webshop extends AutoEncoder {
             return []
         }
         return WebshopPrivateMetaData.buildDNSRecords(this.domain)
+    }
+
+    isClosed(margin = 0) {
+        if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin)) {
+            return true
+        }
+        return false
     }
 }
 
