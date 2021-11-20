@@ -269,7 +269,6 @@ import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
 import { WebshopManager } from './WebshopManager';
 
-
 @Component({
     components: {
         STNavigationBar,

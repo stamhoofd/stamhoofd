@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
+import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 type Params = { };
@@ -54,8 +54,51 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.products = request.body.products
         webshop.categories = request.body.categories
         webshop.organizationId = user.organizationId
+        let updateDNS = false
 
-        console.log(request.body)
+        // Check if we can decide the domain
+        if (!request.body.domain && !request.body.domainUri) {
+            const webshops = await Webshop.where({ 
+                organizationId: user.organizationId, 
+                domain: { 
+                    value: null,
+                    sign: "!="
+                },
+                domainUri: {
+                    value: "",
+                    sign: "!="
+                }
+            })
+
+            const counters = new Map<string, number>()
+            for (const webshop of webshops) {
+                if (!webshop.domain || !webshop.meta.domainActive) {
+                    continue
+                }
+                const count  = (counters.get(webshop.domain) ?? 0) + 1
+                counters.set(webshop.domain, count)
+            }
+
+            if (counters.size > 0) {
+                const maxDomain = [...counters.entries()].reduce((a, e ) => e[1] > a[1] ? e : a)[0]
+                console.log("Choosing default domain for new webshop: ", maxDomain)
+
+                webshop.domain = maxDomain
+                webshop.domainUri = Formatter.slug(webshop.meta.name)
+                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(maxDomain)
+                await this.checkDomainUri(webshop)
+                updateDNS = true
+            }
+
+        } else {
+            if (request.body.domain !== undefined) {
+                webshop.domain = request.body.domain
+            }
+
+            if (request.body.domainUri !== undefined) {
+                webshop.domainUri = request.body.domainUri
+            }
+        }
 
         if (request.request.getVersion() < 134 && request.body.legacyUri !== null) {   
             console.log("Tried to create webshop with legacy uri", request.body.legacyUri)
@@ -96,14 +139,6 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         }
 
-        if (request.body.domain !== undefined) {
-            webshop.domain = request.body.domain
-        }
-
-        if (request.body.domainUri !== undefined) {
-            webshop.domainUri = request.body.domainUri
-        }
-
         // Verify if we have full access
         if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
             throw new SimpleError({
@@ -114,8 +149,46 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         await webshop.save()
+
+        if (updateDNS) {
+            await webshop.updateDNSRecords()
+        }
         
         errors.throwIfNotEmpty()
         return new Response(PrivateWebshop.create(webshop));
+    }
+
+    async checkDomainUri(webshop: Webshop) {
+        if (!webshop.domain) {
+            return
+        }
+        // Check if this uri is inique
+        const original = webshop.domainUri
+        const possibleSuffixes = [new Date().getFullYear().toString()]
+        let tried = 0
+        while (await Webshop.getByDomain(webshop.domain, webshop.domainUri) !== undefined) {
+            console.log("Webshop already exists", webshop.domainUri)
+
+            if (tried < possibleSuffixes.length) {
+                webshop.domainUri = original + "-" + possibleSuffixes[tried]
+            } else if (tried > 9) {
+                webshop.domainUri = original + "-" + Math.floor(Math.random() * 100000)
+            } else {
+                webshop.domainUri = original + "-" + (tried - possibleSuffixes.length + 2)
+            }
+            
+            tried++
+
+            if (tried > 15) {
+                console.log("Failed to generate unique webshop domainUri")
+
+                throw new SimpleError({
+                    code: "failed_to_generate_unique_domainUri",
+                    message: "Failed to generate unique domainUri",
+                    human: "Er is een fout opgetreden bij het maken van de webshop, kies een andere naam voor jouw webshop",
+                    statusCode: 500
+                })
+            }
+        }
     }
 }
