@@ -146,6 +146,8 @@
 
     @extend .view;
 
+    background: var(--color-current-background, #{$color-background} );
+
     &.background {
         background: $color-background;
         --color-current-background: #{$color-background};
