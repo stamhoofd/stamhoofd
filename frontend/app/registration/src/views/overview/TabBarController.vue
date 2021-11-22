@@ -167,11 +167,12 @@ export default class TabBarController extends Mixins(NavigationMixin) {
         @media (min-width: 701px) {
             display: none;
         }
-        position: fixed;
+        position: sticky;
         bottom: 0;
         left: 0;
         right: 0;
         height: 60px;
+        margin-top: -60px;
         border-top: 2px solid $color-border;
         padding-bottom: var(--st-safe-area-bottom, 0px);
         background: rgba($color-background, 0.7);
