@@ -69,6 +69,7 @@ export default class App extends Vue {
                 }
 
                 I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
+                I18nController.forceCanonicalHostProtocolAndPrefix = "https://"+response.data.webshop.getCanonicalUrl(response.data.organization)
                 await I18nController.loadDefault("webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
 
                 WebshopManager.organization = response.data.organization

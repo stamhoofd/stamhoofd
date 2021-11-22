@@ -353,7 +353,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         navigator.share({
             title: "Bestelling "+WebshopManager.webshop.meta.name,
             text: "Bekijk mijn bestelling bij "+WebshopManager.webshop.meta.name+" via deze link.",
-            url: WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order!.id,
+            url: WebshopManager.webshop.getUrl(this.organization)+"/order/"+this.order!.id,
         }).catch(e => console.error(e))
     }
 

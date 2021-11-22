@@ -2,6 +2,12 @@ export class ViewportHelper {
     static currentVh: number | null = null
 
     static setup() {
+        const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
+
+        if (isPrerender) {
+            return
+        }
+        
         // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
         this.setVh(document.documentElement.clientHeight)
 

@@ -100,8 +100,8 @@ export class UrlHelper {
     /**
      * setURL, but add locale
      */
-    static transformUrlForLocale(url: string, language: string, country: string) {
-        const prefix = this.fixedPrefix ? "/"+this.fixedPrefix : ""
+    static transformUrlForLocale(url: string, language: string, country: string, addPrefix = true) {
+        const prefix = this.fixedPrefix && addPrefix ? "/"+this.fixedPrefix : ""
         const locale = language+"-"+country
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== locale)) {
             if (I18nController.fixedCountry) {
@@ -131,5 +131,6 @@ export class UrlHelper {
             HistoryManager.setUrl(prefix+url)
             console.log("Setting url to", prefix+url)
         }
+        I18nController.shared?.updateMetaData()
     }
 }
