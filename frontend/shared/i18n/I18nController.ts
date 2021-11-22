@@ -403,7 +403,7 @@ export class I18nController {
             }
             meta.push({
                 hid: `prerender-status-code`,
-                property: 'prerender-status-code',
+                name: 'prerender-status-code',
                 content: redirected ? "302" : "200"
             })
 
@@ -411,7 +411,7 @@ export class I18nController {
             // Don't use canonical host (for now)
                 meta.push({
                     hid: `prerender-header`,
-                    property: 'prerender-header',
+                    name: 'prerender-header',
                     content: "Location: "+url.getHostWithProtocol()+currentPath
                 })
             }
