@@ -448,12 +448,33 @@
                             ]
                         },
                         {
+                            "match": [
+                                {
+                                    "vars_regexp": {
+                                        "{http.request.host}": {
+                                            "pattern": "^inschrijven\\."
+                                        }
+                                    }
+                                }
+                            ],
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8081"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:8082"
                                         }
                                     ]
                                 }
@@ -497,7 +518,7 @@
                         "interval": "1d",
                         "burst": 50
                     },
-                    "ask": "http://127.0.0.1:9091/v15/check-domain-cert"
+                    "ask": "http://127.0.0.1:9091/v136/check-domain-cert"
                 }
             }
         }

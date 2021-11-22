@@ -216,6 +216,9 @@ export class I18nController {
                 case "de": country = Country.Germany; break;
                 case "lu": country = Country.Luxembourg; break;
                 case "fr": country = Country.France; break;
+
+                // We used .shop before, but were only active in Belgium
+                case "shop": country = Country.Belgium; break;
             }
 
             if (country) {

@@ -93,13 +93,28 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(cleaned)
 
                         // Check if this is a known domain
-                        const known = await Webshop.getByDomainOnly(cleaned)
+                        const knownWebshops = await Webshop.getByDomainOnly(cleaned)
 
-                        if (known && known?.organizationId === user.organizationId && known.meta.domainActive) {
-                            // Automatically update the dns records already.
-                            // This domain was already used, so no risk of making DNS-caches dirty
-                            console.log("Automatically updating dns records for", cleaned, "during patch")
-                            await webshop.updateDNSRecords()
+                        if (knownWebshops.length > 0) {
+                            const active = !!knownWebshops.find(k => k.meta.domainActive)
+
+                            if (active) {
+                                const sameOrg = knownWebshops.find(w => w.organizationId === user.organizationId)
+                                const otherOrg = knownWebshops.find(w => w.organizationId !== user.organizationId)
+                                if (otherOrg && !sameOrg) {
+                                    throw new SimpleError({
+                                        code: "domain_already_used",
+                                        message: "This domain is already used by another organization",
+                                        human: "Deze domeinnaam is al in gebruik door een andere vereniging. Neem contact op met Stamhoofd als je denkt dat je toch toegang zou moeten krijgen.",
+                                        statusCode: 400
+                                    })
+                                }
+
+                                // Automatically update the dns records already.
+                                // This domain was already used, so no risk of making DNS-caches dirty
+                                console.log("Automatically updating dns records for", cleaned, "during patch")
+                                await webshop.updateDNSRecords()
+                            }
                         }
 
                         if (cleaned.length < 4 || !cleaned.includes(".")) {

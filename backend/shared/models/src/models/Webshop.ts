@@ -128,18 +128,14 @@ export class Webshop extends Model {
     }
 
     // Methods
-    static async getByDomainOnly(host: string): Promise<Webshop | undefined> {
+    static async getByDomainOnly(host: string): Promise<Webshop[]> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? LIMIT 1`,
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? LIMIT 200`,
             [host]
         );
 
-        if (rows.length == 0) {
-            return undefined;
-        }
-
         // Read member + address from first row
-        return this.fromRow(rows[0][this.table]);
+        return this.fromRows(rows, this.table);
     }
 
     // Methods
@@ -192,11 +188,16 @@ export class Webshop extends Model {
             }
         }
 
-        const { allValid } = await validateDNSRecords(this.privateMeta.dnsRecords)
+        let { allValid } = await validateDNSRecords(this.privateMeta.dnsRecords)
+
+        if (STAMHOOFD.environment === "development") {
+            allValid = true
+        }
 
         if (allValid) {
             if (!this.meta.domainActive && background) {
                 // todo: send an email
+                // + prevent ping pong emails when the dns is not workign properly
             }
             this.meta.domainActive = true
         } else {

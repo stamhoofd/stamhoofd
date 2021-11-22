@@ -3,6 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
+import { WebshopStatus } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -92,8 +93,8 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
             return new Response(undefined);
         }
 
-        const webshop = await Webshop.getByDomainOnly(request.query.domain)
-        if (webshop) {
+        const webshops = await Webshop.getByDomainOnly(request.query.domain)
+        if (webshops.length > 0) {
             return new Response(undefined);
         }
 

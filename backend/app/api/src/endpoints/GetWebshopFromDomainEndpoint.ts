@@ -3,8 +3,8 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { OrganizationWithWebshop, Webshop as WebshopStruct } from "@stamhoofd/structures";
-import { GoogleTranslateHelper } from "@stamhoofd/utility";
+import { GetWebshopFromDomainResult, Webshop as WebshopStruct, WebshopPreview } from "@stamhoofd/structures";
+import { GoogleTranslateHelper, Sorter } from "@stamhoofd/utility";
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -16,7 +16,7 @@ class Query extends AutoEncoder {
 }
 
 type Body = undefined
-type ResponseBody = OrganizationWithWebshop;
+type ResponseBody = GetWebshopFromDomainResult;
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -77,7 +77,7 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
                         })
                     }
 
-                    return new Response(OrganizationWithWebshop.create({
+                    return new Response(GetWebshopFromDomainResult.create({
                         organization: await organization.getStructure(),
                         webshop: WebshopStruct.create(webshop)
                     }));
@@ -111,14 +111,15 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
             const webshop = await Webshop.getByLegacyURI(organization.id, request.query.uri ?? "")
 
             if (!webshop) {
-                throw new SimpleError({
-                    code: "unknown_webshop",
-                    message: "No webshop registered with this name",
-                    statusCode: 404
-                })
+                // Return organization, so we know the locale + can do some custom logic
+                return new Response(GetWebshopFromDomainResult.create({
+                    organization: await organization.getStructure(),
+                    webshop: null,
+                    webshops: []
+                }));
             }
 
-            return new Response(OrganizationWithWebshop.create({
+            return new Response(GetWebshopFromDomainResult.create({
                 organization: await organization.getStructure(),
                 webshop: WebshopStruct.create(webshop)
             }));
@@ -129,6 +130,38 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
         const webshop = await Webshop.getByDomain(request.query.domain, request.query.uri)
 
         if (!webshop) {
+            // If uri is empty, check if we have multiple webshops with the same domain
+            // Check organization
+            if (!request.query.uri) {
+                const webshops = await Webshop.getByDomainOnly(request.query.domain)
+                const organizationId = Sorter.getMostOccuringElement(webshops.map(w => w.organizationId))
+
+                if (webshops.length == 0 || !organizationId) {
+                    throw new SimpleError({
+                        code: "unknown_webshop",
+                        message: "No webshop registered with this domain name",
+                        statusCode: 404
+                    })
+                }
+
+                const organization = await Organization.getByID(organizationId)
+
+                if (!organization) {
+                    throw new SimpleError({
+                        code: "unknown_webshop",
+                        message: "No webshop registered with this domain name",
+                        statusCode: 404
+                    })
+                }
+
+                // Return organization, and the known webshops on this domain
+                return new Response(GetWebshopFromDomainResult.create({
+                    organization: await organization.getStructure(),
+                    webshop: null,
+                    webshops: webshops.map(w => WebshopPreview.create(w)).filter(w => w.isClosed(0) === false).sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name))
+                }));
+            }
+            
             throw new SimpleError({
                 code: "unknown_webshop",
                 message: "No webshop registered with this domain name",
@@ -146,7 +179,7 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
             })
         }
 
-        return new Response(OrganizationWithWebshop.create({
+        return new Response(GetWebshopFromDomainResult.create({
             organization: await organization.getStructure(),
             webshop: WebshopStruct.create(webshop)
         }));
