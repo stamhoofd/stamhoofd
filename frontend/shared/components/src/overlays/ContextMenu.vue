@@ -5,7 +5,8 @@
                 ref="context"
                 oncontextmenu="return false;"
                 class="context-menu"
-                :style="{ top: top + 'px', left: left + 'px', width: preferredWidth ? (preferredWidth + 'px') : undefined }"
+                :class="xPlacement+' '+yPlacement"
+                :style="{ transformOrigin, top: top ? top + 'px' : undefined, left: left ? (left + 'px') : undefined, right: right ? (right + 'px') : undefined, bottom: bottom ? (bottom + 'px') : undefined, width: preferredWidth ? (preferredWidth + 'px') : undefined }"
                 @click.stop=""
             >
                 <slot />
@@ -35,8 +36,22 @@ export default class ContextMenu extends Vue {
     })
     y!: number;
 
-    top = 0;
-    left = 0;
+    top: number | null = null
+    left: number | null = null
+    right: number | null = null
+    bottom: number | null = null
+
+    transformOrigin = "0 0"
+
+    @Prop({
+        default: "right",
+    })
+    xPlacement: "right" | "left";
+
+    @Prop({
+        default: "bottom",
+    })
+    yPlacement: "bottom" | "top";
 
     mounted() {
         // Calculate position
@@ -52,12 +67,35 @@ export default class ContextMenu extends Vue {
             clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth,
             clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
 
-        this.left = this.x - Math.max(0, width - (clientWidth - viewPadding - this.x));
-        this.top = this.y - Math.max(0, height - (clientHeight - viewPadding - this.y));
-        if (this.left < viewPadding) {
-            this.left = viewPadding
+        if (this.xPlacement === "right") {
+            this.left = this.x - Math.max(0, width - (clientWidth - viewPadding - this.x));
+
+            if (this.left < viewPadding) {
+                this.left = viewPadding
+            }
+
+        } else {
+            this.right = Math.min(clientWidth - this.x, clientWidth - viewPadding - width)
+
+            if (this.right < viewPadding) {
+                this.right = viewPadding
+            }
         }
 
+        if (this.yPlacement === "bottom") {
+            this.top = this.y - Math.max(0, height - (clientHeight - viewPadding - this.y)); // remove border
+        } else {
+            this.bottom = Math.min(clientHeight - this.y, clientHeight - viewPadding - height); // remove border
+        }
+
+        const objLeft = this.left ? this.left : (clientWidth - this.right! - width)
+        const xTransform = ((this.x - objLeft) / width * 100).toFixed(2)
+
+        const objTop = this.top ? this.top : (clientHeight - this.right! - height)
+        const yTransform = ((this.y - objTop) / height * 100).toFixed(2)
+
+        this.transformOrigin = xTransform + "% "+yTransform+"%"
+        
         this.$el.addEventListener("contextmenu", this.pop, { passive: true });
     }
 
@@ -104,24 +142,60 @@ export default class ContextMenu extends Vue {
     bottom: 0;
     right: 0;
 
+    .context-menu {
+        transform-origin: 0% 0%;
+        transition: transform 0.2s;
+
+        &.top {
+            transform-origin: 0% 100%;
+        }
+
+        &.left {
+            transform-origin: 100% 0%;
+
+            &.top {
+                transform-origin: 100% 100%;
+            }
+        }
+
+        
+    }
+
     &.show-enter-active,
     &.show-leave-active {
         transition: opacity 0.2s;
     }
+
+    &.show-enter /* .fade-leave-active below version 2.1.8 */ {
+        // Instant appearing context menu! (only leave animation)
+        opacity: 0;
+
+        .context-menu {
+            transform: scale(0.8, 0.8);
+        }
+    }
+
     &.show-leave-to /* .fade-leave-active below version 2.1.8 */ {
         // Instant appearing context menu! (only leave animation)
         opacity: 0;
+
+        .context-menu {
+            transform: scale(0.8, 0.8);
+        }
     }
 }
 
 .context-menu {
     position: fixed;
     z-index: 10000;
-    left: 0;
-    top: 0;
     background: $color-background-shade;
-    border: 1px solid $color-border-shade;
+    
+    --color-current-background: #{$color-background-shade};
+    --color-current-background-shade: #{$color-background-shade-darker};
+
+    border: 2px solid $color-border-shade;
     padding: 4px 0;
+
     border-radius: $border-radius;
     @extend .style-overlay-shadow;
     border-radius: $border-radius;
@@ -164,6 +238,7 @@ export default class ContextMenu extends Vue {
 
         &.clicked {
             background: transparent;
+            color: $color-dark;
         }
     }
 

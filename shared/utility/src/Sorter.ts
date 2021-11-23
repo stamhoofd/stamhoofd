@@ -80,4 +80,25 @@ export class Sorter {
         }
         return 0
     }
+
+    static getMostOccuringElement<T>(array: T[]): T | undefined {
+        const counts = new Map<T, number>()
+        for (const element of array) {
+            const count = counts.get(element)
+            if (count) {
+                counts.set(element, count + 1)
+            } else {
+                counts.set(element, 1)
+            }
+        }
+        let maxCount = 0
+        let mostOccuringElement: T | undefined
+        for (const [element, count] of counts) {
+            if (count > maxCount) {
+                maxCount = count
+                mostOccuringElement = element
+            }
+        }
+        return mostOccuringElement
+    }
 }

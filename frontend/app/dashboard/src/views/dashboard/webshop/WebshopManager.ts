@@ -77,19 +77,23 @@ export class WebshopManager {
             decoder: PrivateWebshop as Decoder<PrivateWebshop>
         })
 
+        this.updateWebshop(response.data)
+    }
+
+    updateWebshop(webshop: PrivateWebshop) {
         if (this.webshop) {
-            this.webshop.set(response.data)
+            this.webshop.set(webshop)
         } else {
-            this.webshop = response.data
+            this.webshop = webshop
         }
 
         // Clone data and keep references
-        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
-        this.preview.set(response.data)
+        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(webshop)
+        this.preview.set(webshop)
         OrganizationManager.save().catch(console.error)
 
         // Save async (could fail in some unsupported browsers)
-        this.storeWebshop(response.data).catch(console.error)
+        this.storeWebshop(webshop).catch(console.error)
     }
 
     async loadWebshopFromDatabase(): Promise<PrivateWebshop | undefined> {
@@ -450,7 +454,7 @@ export class WebshopManager {
                 const cursor = event.target.result;
                 if (cursor) {
                     const rawOrder = cursor.value
-                     // Todo: need version fix here
+                    // Todo: need version fix here
                     const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
                     callback(order)
                     cursor.continue();

@@ -127,6 +127,12 @@
     }
 }
 
+.custom-bottom-box {
+    + .error-box, + .success-box, + .info-box, + .warning-box, + .loading-box {
+        margin-top: 5px;
+    }
+}
+
 .error-box, .success-box, .info-box, .warning-box {
     &.icon {
         display: block;
@@ -166,5 +172,31 @@
                 color: inherit;
             }
         }
+    }
+}
+
+
+.loading-box {
+    background: $color-primary-background;
+    border-radius: $border-radius;
+    color: $color-dark;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    padding: 15px 15px 15px 50px;
+    box-sizing: border-box;
+    margin: 15px 0;
+    position: relative;
+    
+    @media (max-width: 450px) {
+        font-size: 14px;
+    }
+
+    > .spinner-container {
+        position: absolute;
+        color: $color-primary;
+        left: 12px;
+        top: 50%;
+        transform: translate(0, -50%);
     }
 }

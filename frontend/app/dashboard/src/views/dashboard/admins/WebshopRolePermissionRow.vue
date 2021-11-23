@@ -168,9 +168,12 @@ export default class WebshopRolePermissionRow extends Mixins(NavigationMixin) {
     }
 
     choosePermissions(event) {
+        const el = event.currentTarget
         const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
             callback: (level: "none" | "write" | "read" | "full") => {
                 this.permissions = level
             }

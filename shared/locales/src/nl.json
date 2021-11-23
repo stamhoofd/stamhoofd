@@ -15,11 +15,13 @@
       }
     },
     "domains": {
-      "marketing": "www.stamhoofd.be"
+      "marketing": "www.stamhoofd.be",
+      "email": "stamhoofd.be"
     },
     "emails": {
       "general": "hallo@stamhoofd.be",
-      "complaints": "klachten@stamhoofd.be"
+      "complaints": "klachten@stamhoofd.be",
+      "personal": "simon@stamhoofd.be"
     }
   },
   "backend": {},
@@ -68,7 +70,12 @@
     },
     "webshop": {
       "customDomain": {
-        "description": "Hier kan je je eigen domeinnaam kiezen, en eventueel met een achtervoegsel. Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
+        "description": "Hier kan je jouw eigen domeinnaam kiezen (die moet je wel zelf al in bezit hebben), eventueel met iets na het streepje (/). Zo kan je bijvoorbeeld al je verkopen organiseren op shop.domeinnaam.be/wafelbak, met daarachter telkens een ander achtervoegsel. Maar dat achtervoegsel is optioneel, je kan ook wafelbak.domeinnaam.be gebruiken. Het voordeel van de eerste oplossing is dat jouw webmaster maar één keer DNS-wijzigingen moet doen."
+      },
+      "deliveryMethod": {
+        "name": {
+          "placeholder": "bv. Bpost"
+        }
       }
     }
   },

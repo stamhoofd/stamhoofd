@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input ref="input" v-model="emailRaw" class="input" :name="name" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" :name="name" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate(false)">
     </STInputBox>
 </template>
 
@@ -57,7 +57,7 @@ export default class EmailInput extends Vue {
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate()
+                return this.validate(true)
             })
         }
 
@@ -70,7 +70,7 @@ export default class EmailInput extends Vue {
         }
     }
 
-    validate() {
+    validate(final = true) {
         this.emailRaw = this.emailRaw.trim().toLowerCase()
 
         if (!this.required && this.emailRaw.length == 0) {
@@ -81,6 +81,16 @@ export default class EmailInput extends Vue {
             }
             return true
         }
+
+        if (this.required && this.emailRaw.length == 0 && !final) {
+            // Ignore empty email if not final
+            this.errorBox = null
+
+            if (this.value !== "") {
+                this.$emit("input", "")
+            }
+            return true
+        }
         
         if (!DataValidator.isEmailValid(this.emailRaw)) {
             this.errorBox = new ErrorBox(new SimpleError({
@@ -88,9 +98,6 @@ export default class EmailInput extends Vue {
                 "message": "Ongeldig e-mailadres",
                 "field": "email"
             }))
-            if (this.value !== "") {
-                this.$emit("input", "")
-            }
             return false
 
         } else {
@@ -107,3 +114,10 @@ export default class EmailInput extends Vue {
     }
 }
 </script>
+
+<style lang="scss">
+    .email-input-field {
+        // Fix safari bug that shows the autofill on the wrong position
+        transform: translate3d(0, 0, 0);
+    }
+</style>

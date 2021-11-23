@@ -4,6 +4,22 @@ import { KeychainItem } from '../KeychainItem';
 import { Organization } from '../Organization';
 import { NewUser } from '../User';
 
+export class FBId extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    fbp: string
+
+    @field({ decoder: StringDecoder, nullable: true })
+    fbc: string | null = null
+
+    merge(id: FBId) {
+        this.fbp = id.fbp
+
+        if (id.fbc !== null && id.fbc) {
+            this.fbc = id.fbc
+        }
+    }
+}
+
 export class CreateOrganization extends AutoEncoder {
     @field({ decoder: Organization })
     organization: Organization
@@ -26,4 +42,7 @@ export class CreateOrganization extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 24 })
     registerCode: string | null = null
+
+    @field({ decoder: FBId, nullable: true, version: 132 })
+    fb: FBId | null = null
 }

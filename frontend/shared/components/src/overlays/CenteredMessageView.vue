@@ -161,7 +161,8 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     > *:first-child {
         margin-top: 10px;
     }
-    > .center {
+    
+    > img.center, > .icon.center {
         display: block;
         margin: 0 auto;
     }
@@ -200,7 +201,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         transition: opacity 0.30s;
 
         > .centered-message  {
-            transition: transform 0.30s;
+            transition: transform 0.30s cubic-bezier(0.0, 0.0, 0.2, 1);
         }
     }
 
@@ -209,7 +210,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         transition: opacity 0.25s;
 
         > .centered-message  {
-            transition: transform 0.25s;
+            transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1);
         }
     }
 

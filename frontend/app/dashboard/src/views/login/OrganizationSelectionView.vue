@@ -154,8 +154,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         const parts =  UrlHelper.shared.getParts()
         const queryString =  UrlHelper.shared.getSearchParams()
 
-        UrlHelper.setUrl("/")
-
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
             UrlHelper.shared.clear()
             try {
@@ -169,14 +167,20 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                     code = null;
                     organization = null;
                 }
-                this.present(new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
-                        initialRegisterCode: code && organization ? {
-                            code,
-                            organization
-                        } : null
-                    })
-                }).setDisplayStyle("popup").setAnimated(false))
+                this.present({
+                    url: "/aansluiten",
+                    adjustHistory: false,
+                    components: [
+                        new ComponentWithProperties(NavigationController, {
+                            root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
+                                initialRegisterCode: code && organization ? {
+                                    code,
+                                    organization
+                                } : null
+                            })
+                        }).setDisplayStyle("popup").setAnimated(false)
+                    ]
+                })
                 
             } catch (e) {
                 console.error(e)
@@ -192,7 +196,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     activated() {
-        UrlHelper.setUrl("/")
         this.updateDefault().catch(console.error)
     }
 

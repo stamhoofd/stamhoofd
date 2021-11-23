@@ -3,7 +3,7 @@ import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDec
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, MyUser, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, FBId, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, MyUser, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
 
 import { Keychain } from './Keychain';
@@ -362,6 +362,44 @@ export class LoginHelper {
         //await SessionManager.setCurrentSession(session)
     }
 
+    static async retryEmail(session: Session, token: string): Promise<boolean> {
+        const response = await session.server.request({
+            method: "POST",
+            path: "/verify-email/retry",
+            body: PollEmailVerificationRequest.create({
+                token
+            }),
+            decoder: PollEmailVerificationResponse as Decoder<PollEmailVerificationResponse>
+        })
+
+        if (!response.data.valid) {
+            // the code has been used or is expired
+            session.loadFromStorage()
+            if (session.canGetCompleted()) {
+                // yay! We are signed in
+                await session.updateData(true)
+                return true
+            }
+
+            const savedKeys = this.getTemporaryKey(token)
+            if (!savedKeys) {
+                return true
+            }
+
+            // Try to login with stored key
+            try {
+                console.log("Trying to login with a saved key...")
+                await this.login(session, savedKeys.email, savedKeys)
+            } catch (e) {
+                // If it fails: just dismiss. The token is invalid
+                console.error(e)
+                return true
+            }
+            return true
+        }
+        return false
+    }
+
     /**
      * Return true when the polling should end + confirmation should stop
      */
@@ -585,7 +623,7 @@ export class LoginHelper {
         return {}
     }
 
-    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null): Promise<string> {
+    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null, fb: FBId | null = null): Promise<string> {
         const keys = await this.createKeys(password)
 
         const userKeyPair = await Sodium.generateEncryptionKeyPair();
@@ -619,7 +657,8 @@ export class LoginHelper {
                 keychainItems: [
                     item
                 ],
-                registerCode
+                registerCode,
+                fb
             }),
             decoder: SignupResponse as Decoder<SignupResponse>
         })

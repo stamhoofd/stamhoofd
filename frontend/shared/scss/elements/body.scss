@@ -43,4 +43,11 @@ html {
     -webkit-overflow-scrolling: auto;
     /* Disabel text resize as this doesn't work across animations */
     text-size-adjust: none;
+
+    // Allow word break if it doesn't fit only
+    word-break: break-word;
+
+    will-change: scroll-position;
+
+    // don't combine with hyphens, as that will choose random words as break points, which is not what we want
 }

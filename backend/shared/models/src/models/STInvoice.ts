@@ -12,6 +12,7 @@ import { Sorter } from "@stamhoofd/utility";
 import { STCredit } from "./STCredit";
 import { Email } from "@stamhoofd/email";
 import { UsedRegisterCode } from "./UsedRegisterCode";
+import { FacebookPixel } from "../helpers/FacebookPixel";
 
 
 export class STInvoice extends Model {
@@ -265,6 +266,17 @@ export class STInvoice extends Model {
                             }
                         ]
                     }, organization.i18n)
+                }
+
+                // Track
+                FacebookPixel.trackPurchase(organization, this).catch(console.error)
+            }
+        } else {
+            if (this.organizationId && this.meta.priceWithoutVAT == 0 && this.meta.items.find(i => i.package?.meta.type.includes("Trial"))) {
+                // Track
+                const organization = await Organization.getByID(this.organizationId)
+                if (organization) {
+                    FacebookPixel.trackFreeTrial(organization, this).catch(console.error)
                 }
             }
         }

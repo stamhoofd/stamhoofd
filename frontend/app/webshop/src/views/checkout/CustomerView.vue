@@ -143,7 +143,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
         // Clear old open fields
 
         try {
-           const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Customer, true)
+            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Customer, true)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",
@@ -162,7 +162,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Customer.toLowerCase())
+        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Customer.toLowerCase())
     }
 }
 </script>

@@ -83,12 +83,15 @@ module.exports = {
         assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext][query]' : 'images/[name].[contenthash][ext][query]'
     },
     devServer: {
-        contentBase: './dist',
+        // contentBase: './dist',
         host: '0.0.0.0',
         port: 8080,
         sockPort: 443, // needed because the dev server runs behind a reverse proxy (Caddy)
+        sockPath: '/sockjs-node',
         disableHostCheck: true,
-        historyApiFallback: true,
+        historyApiFallback: {
+            disableDotRule: true, // default behaviour is to ignore all urls with a dot character. lol.
+        },
     },
     /*optimization: (process.env.NODE_ENV === "production" ? {} : {
         runtimeChunk: true,
@@ -250,7 +253,7 @@ module.exports = {
                     },
                     {
                         loader: '@simonbackx/webfonts-loader',
-                        //options: { ... }
+                        options: {}
                     }
                 ]
             }

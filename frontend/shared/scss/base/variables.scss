@@ -23,10 +23,13 @@ $color-error-border-focus: $color-error;
 $color-success-original: #0CBB69;
 $color-success-background-original: #E5F6EE;
 $color-success-dark-original: #0C4529;
+$color-success-border-original: #AEDBC6;
 
 $color-success: var(--color-success, $color-success-original);
 $color-success-background: var(--color-success-background, $color-success-background-original);
 $color-success-dark: var(--color-success-dark, $color-success-dark-original);
+$color-success-border: var(--color-success-border, $color-success-border-original);
+$color-success-border-focus: $color-success;
 
 $color-gray-dark-original: #5e5e5e;
 $color-gray-dark: var(--color-gray-dark, $color-gray-dark-original);

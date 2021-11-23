@@ -16,8 +16,8 @@
 
             <Checkbox v-model="freeContribution">
                 Vraag een vrije bijdrage bij het inschrijven (optioneel)
-                <p v-if="financialProblems" class="style-description-small">
-                    We slaan deze stap altijd over bij kansarme gezinnen
+                <p v-if="enableFinancialSupport" class="style-description-small">
+                    We slaan deze stap altijd over bij leden met financiële ondersteuning.
                 </p>
             </Checkbox>
 
@@ -85,6 +85,10 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get enableFinancialSupport() {
+        return this.organization.meta.recordsConfiguration.financialSupport !== null
     }
 
     get freeContribution() {

@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
+    <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
         <!--<ContextMenuItem @click="excel">
             Etiketten maken
         </ContextMenuItem>
@@ -76,6 +76,12 @@ export default class GroupListSelectionContextMenu extends Mixins(NavigationMixi
 
     @Prop({ default: 0 })
     y!: number;
+
+    @Prop()
+    xPlacement?: string;
+
+    @Prop()
+    yPlacement?: string;
 
     @Prop()
     members!: MemberWithRegistrations[];

@@ -19,6 +19,7 @@
     "scripts": {
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
+        "build:structures": "cd shared/structures && yarn build && cd ../..",
         "build:shared": "yarn build && cd backend/shared/email && yarn build && cd ../models && yarn build && cd ../queues && yarn build && cd ../i18n && yarn build && cd ../env && yarn build && cd ../..",
         "build:locales": "cd shared/locales && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
@@ -35,7 +36,7 @@
         "@simonbackx/simple-encoding": "^2.4.4",
         "@simonbackx/simple-errors": "^1.3.0",
         "@simonbackx/simple-networking": "~1.10.0",
-        "@simonbackx/vue-app-navigation": "^1.18.1",
+        "@simonbackx/vue-app-navigation": "1.22.1",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",
         "@zxcvbn-ts/language-nl-be": "^0.3.0",

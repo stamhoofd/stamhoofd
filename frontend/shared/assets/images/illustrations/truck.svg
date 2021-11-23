@@ -1,0 +1,33 @@
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="10.5" cy="36.5" r="4.5" fill="#000716"/>
+<circle cx="33.5" cy="36.5" r="4.5" fill="#000716"/>
+<rect x="20" y="30" width="26" height="6" fill="#000716"/>
+<rect x="9" y="29" width="28" height="6" fill="#002573"/>
+<rect x="2" y="9" width="31" height="26" rx="1" fill="#DCDCDC"/>
+<rect x="3" y="10" width="6" height="24" rx="1" fill="#868686"/>
+<path d="M35 17H47V34C47 34.5523 46.5523 35 46 35H35V17Z" fill="#0053FF"/>
+<mask id="mask0_6855:703" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="7" y="30" width="38" height="6">
+<rect x="7" y="30" width="38" height="6" fill="#C4C4C4"/>
+</mask>
+<g mask="url(#mask0_6855:703)">
+<circle cx="39.5" cy="36.5" r="5.5" fill="#000716"/>
+<circle cx="16.5" cy="36.5" r="5.5" fill="#000716"/>
+</g>
+<path d="M35 12L45 15L47 17H35V12Z" fill="#868686"/>
+<rect x="33" y="17" width="2" height="18" fill="#002573"/>
+<rect x="33" y="12" width="2" height="5" fill="#5E5E5E"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M38 19C37.4477 19 37 19.4477 37 20V24C37 24.5523 37.4477 25 38 25H39C39.5523 25 40 25.4477 40 26C40 26.5523 40.4477 27 41 27H44C44.5523 27 45 26.5523 45 26V24V20C45 19.4477 44.5523 19 44 19H41H38Z" fill="#EAF1FF"/>
+<circle cx="39.5" cy="36.5" r="4.5" fill="#000716"/>
+<circle cx="39.5" cy="36.5" r="1.5" fill="#DCDCDC"/>
+<circle cx="16.5" cy="36.5" r="4.5" fill="#000716"/>
+<circle cx="16.5" cy="36.5" r="1.5" fill="#DCDCDC"/>
+<path d="M9 25L3 21H9V25Z" fill="#5E5E5E"/>
+<path d="M40 19H41L39 25H38L40 19Z" fill="white"/>
+<path d="M43 19H44L41 27C40.5161 27 40.1812 26.5167 40.3511 26.0637L43 19Z" fill="white"/>
+<rect x="3" y="10" width="6" height="11" fill="#C4C4C4"/>
+<rect x="3" y="12" width="6" height="1" fill="#868686"/>
+<rect x="3" y="15" width="6" height="1" fill="#868686"/>
+<rect x="3" y="18" width="6" height="1" fill="#868686"/>
+<rect x="5" y="20" width="2" height="1" fill="#868686"/>
+<path d="M44.5 34H47V35C47 35.5523 46.5523 36 46 36H45L44.5 34Z" fill="#DCDCDC"/>
+</svg>

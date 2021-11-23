@@ -98,7 +98,7 @@ export default class TicketView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/tickets/"+this.secret)
+        UrlHelper.setUrl("/tickets/"+this.secret)
     }
 }
 </script>

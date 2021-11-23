@@ -42,13 +42,13 @@
     > .padding-group {
     }
 
-    hr {
+    > main > hr, > main > .container > hr {
         height: $border-width;
         border-radius: $border-width/2;
         background: $color-gray-light;
         border: 0;
         outline: 0;
-        margin: 20px 0;
+        margin: 15px 0;
     }
 
     .menu-button {
@@ -98,11 +98,16 @@
         .right-icon {
             margin-left: auto;
             flex-shrink: 0;
+            padding-right: 0
         }
 
         &.heading {
             @extend .style-button-small;
             color: $color-gray-dark;
+        }
+
+        &.cta {
+            color: $color-primary;
         }
 
         &.selected {

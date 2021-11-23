@@ -20,9 +20,12 @@
                 </div>
 
                 <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px'}">
-                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', height: rowHeight+'px' }">
+                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', height: rowHeight+'px', visibility: row.row === null ? 'hidden' : 'visible' }">
                         <div v-for="column of columns" :key="column.id">
-                            {{ column.getValue(row.value) }}
+                            <span v-if="row.row && !row.row.value" class="placeholder-skeleton" />
+                            <span v-else>
+                                {{ row.row && row.row.value ? column.getValue(row.row.value) : "" }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -34,7 +37,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationBar } from "@stamhoofd/components"
+import { BackButton, STNavigationBar } from "@stamhoofd/components"
 import { sleep } from "@stamhoofd/networking";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Vue } from "vue-property-decorator";
@@ -54,8 +57,13 @@ class TestValue {
 }
 
 class Row {
-    /// Null is still loading the value
+    /// Null means it is still loading the value
     value: TestValue | null = null
+
+    /**
+     * The index in the table, if we know this
+     */
+    knownIndex = -1
 
     selected = false
     cachedRow?: CachedRow
@@ -78,12 +86,18 @@ class Column<T> {
 class CachedRow {
     id = uuidv4()
     y = 0
-    row: Row
+
+    /**
+     * If row is not set, this means that it can be reused again + that it shouldn't get rendered
+     */
+    row: Row | null = null
+
 }
 
 @Component({
     components: {
-        STNavigationBar
+        STNavigationBar,
+        BackButton
     },
 })
 export default class TableView extends Mixins(NavigationMixin) {
@@ -101,7 +115,8 @@ export default class TableView extends Mixins(NavigationMixin) {
     visibleRows: CachedRow[] = []
 
     // When the system detects that we need to load more rows, we'll fill this array
-    loadedRows: Row[] = []
+    // This is the memory buffer. We'll clear it if it gets too big
+    loadedRows = new Map<number, Row>()
 
     // Total amount of values we know we have.
     totalValues = 0
@@ -150,46 +165,108 @@ export default class TableView extends Mixins(NavigationMixin) {
         }
     }
 
+    /**
+     * Cached offset between scroll and top of the table
+     */
+    cachedTableYPosition: number | null = 0
+
     updateVisibleRows() {
         if (this.values.length == 0) {
             return
         }
 
-        const tableBody = this.$refs["tableBody"] as HTMLElement
-        const rect = tableBody.getBoundingClientRect();
+        const scrollElement = document.documentElement; //this.getScrollElement()
 
-        let topOffset = 0
+        if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
+            const tableBody = this.$refs["tableBody"] as HTMLElement
+            const rect = tableBody.getBoundingClientRect();
 
-        if (rect.top >= 0) {
+            const top = rect.top
+
+            if (top >= 0) {
+                this.cachedTableYPosition = top + scrollElement.scrollTop
+            } else {
+                this.cachedTableYPosition = scrollElement.scrollTop + top
+            }
+
+            console.log("Cached table y position at "+this.cachedTableYPosition)
+        }
+
+        let topOffset = scrollElement.scrollTop - this.cachedTableYPosition
+
+        if (topOffset >= 0) {
             // The table is not yet scrolled
             // topOffset = 0
         } else {
-            topOffset = -rect.top
+            topOffset = -topOffset
         }
 
         const extraItems = 5
 
-        const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, this.values.length - 1))
+        const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, this.totalValues - 1))
 
         const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 
-        const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, this.values.length - 1))
+        const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, this.totalValues - 1))
 
-        const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
+        //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
 
-
-
-        const cell = this.visibleRows.length > 0 ? this.visibleRows[0] : new CachedRow()
-        cell.value = this.values[firstVisibleItem]
-        cell.y = firstVisibleItem * this.rowHeight
-
-        if (this.visibleRows.length == 0) {
-            this.visibleRows.push(cell)
+        // Make all visible rows available if not visible any longer
+        for (const cachedRow of this.visibleRows) {
+            if (cachedRow.row && (cachedRow.row.knownIndex < firstVisibleItemIndex || cachedRow.row.knownIndex > lastVisibleItemIndex)) {
+                //console.log("Freed cachedRow at index "+cachedRow.row.knownIndex)
+                cachedRow.row = null
+            }
         }
+
+        for (let index = firstVisibleItemIndex; index <= lastVisibleItemIndex; index++) {
+            // Is this already visible?
+            let cachedRow = this.visibleRows.find(r => r.row?.knownIndex === index)
+            if (cachedRow) {
+                // Nothing to do, it's already visible
+                continue
+            }
+
+            //console.log("Row at index "+index+" is not yet loaded. Searching for a spot...")
+            cachedRow = this.visibleRows.find(r => r.row === null)
+
+            if (!cachedRow) {
+                //console.log("Created new cached row for index "+index)
+                cachedRow = new CachedRow()
+                this.visibleRows.push(cachedRow)
+            }
+
+            // todo: simulate loading here
+            const loadedRow = this.loadedRows.get(index)
+            let row = loadedRow
+            if (!row) {
+                row = new Row()
+                row.value = this.values[index]
+
+                // In the future, we'll load a value here instead
+                // row.value = this.values[index]
+                this.loadedRows.set(index, row)
+
+                //console.log("Start loading row at index "+index)
+                /*setTimeout(() => {
+                    console.log("Loaded row at index "+index)
+                    row!.value = this.values[index]
+                }, 1000)*/
+            }
+
+            row.knownIndex = index
+            row.cachedRow = cachedRow
+            cachedRow.row = row
+            this.values[index]
+            cachedRow.y = index * this.rowHeight
+            
+        }
+
+        //console.log("Rendered rows: "+this.visibleRows.length)
     }
 
     get rowHeight() {
-        return 40
+        return 60
     }
 
     get totalHeight() {
@@ -208,13 +285,15 @@ export default class TableView extends Mixins(NavigationMixin) {
     .table-body {
         contain: layout;
         position: relative;
+        overflow: hidden;
     }
 
     .table-row, .table-head {
         width: 100%;
-        height: 40px;
-        border-bottom: 1px solid gray;
+        height: 60px;
+        border-bottom: 2px solid $color-border;
         box-sizing: border-box;
+        overflow: hidden;
 
         display: flex;
         flex-wrap: nowrap;
@@ -230,6 +309,15 @@ export default class TableView extends Mixins(NavigationMixin) {
     .table-row {
         contain: layout;
         position: absolute;
+        will-change: transform;
+
+        .placeholder-skeleton {
+            display: block;
+            height: 1em;
+            width: 150px;
+            border-radius: 5px;
+            background: $color-background-shade-darker;
+        }
     }
 }
 </style>

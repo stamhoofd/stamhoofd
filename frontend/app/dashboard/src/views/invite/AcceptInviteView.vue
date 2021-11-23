@@ -155,9 +155,11 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 return
             }
         }
+        console.log("email", this.invite.userDetails?.email ?? "")
         this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(LoginView, { 
             session,
-            initialEmail: this.email,
+            initialEmail: this.invite.userDetails?.email ?? "",
+            lock: this.invite.userDetails && this.invite.userDetails.email ? "Je moet inloggen via dit e-mailadres om de uitnodiging te kunnen accepteren" : undefined,
             organization: this.invite.organization
         }) }).setDisplayStyle("sheet"))
     }
@@ -217,7 +219,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 try {
                     const token = await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
                     LoginHelper.saveInvite(this.invite, this.secret)
-                    this.show(new ComponentWithProperties(ConfirmEmailView, { token, session: this.session }))
+                    this.show(new ComponentWithProperties(ConfirmEmailView, { token, session: this.session, email: this.email }))
                 } catch (e) {
                     component.hide()
                     throw e;

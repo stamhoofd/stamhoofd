@@ -391,9 +391,12 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     markAs(event) {
+        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
         const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
             orders: [this.order],
             webshopManager: this.webshopManager
         });

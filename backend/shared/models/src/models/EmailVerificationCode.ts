@@ -251,13 +251,16 @@ export class EmailVerificationCode extends Model {
     }
 
     send(user: UserWithOrganization, i18n: I18n, withCode = true) {
-        const { from, replyTo } = user.permissions !== null ? {
-            from: Email.getInternalEmailFor(user.organization.i18n),
-            replyTo: undefined
-        } : user.organization.getDefaultEmail()
+        const { from, replyTo } = {
+            from: (user.permissions ? Email.getInternalEmailFor(i18n) : user.organization.getStrongEmail(i18n)),
+            replyTo: undefined // Don't use replyTo because it affects deliverability rates due to spam filters
+        }
 
         const url = this.getEmailVerificationUrl(user, i18n)
-        
+
+        const footer = (!user.permissions ? "\n\n—\n\nOnze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\n\n" : '')
+        const footerHTML = (!user.permissions ? "<br><br>—<br><br>Onze ledenadministratie werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via <a href=\"https://"+i18n.$t("shared.domains.marketing")+"/ledenadministratie\">Stamhoofd</a><br><br>" : '')
+
         if (withCode) {
             const formattedCode = this.code.substr(0, 3)+" "+this.code.substr(3)
             Email.send({
@@ -265,24 +268,27 @@ export class EmailVerificationCode extends Model {
                 replyTo,
                 to: this.email,
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`,
-                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>${user.permissions ? "Stamhoofd" : user.organization.name}`
+                type: "transactional",
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`+footer,
+                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>${user.permissions ? "Stamhoofd" : user.organization.name}`+footerHTML
             })
         } else {
             Email.send({
                 from,
                 replyTo,
                 to: this.email,
+                type: "transactional",
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`+footer
             })
         }
     }
 
-    static async resend(organization: Organization, token: string, i18n: I18n): Promise<undefined | string> {
+    static async resend(organization: Organization, token: string, i18n: I18n) {
         const verificationCodes = await this.where({ token, organizationId: organization.id }, { limit: 1 })
 
         if (verificationCodes.length == 0) {
+            console.log("Can't resend code, no coded found for token", token)
             // Todo: maybe send a note via email
             return
         }
@@ -291,6 +297,7 @@ export class EmailVerificationCode extends Model {
 
         if (verificationCode.expiresAt < new Date()) {
             // Don't report error, could be brute forced
+            console.log("Can't resend code, token is expired", token)
             return 
         }
 

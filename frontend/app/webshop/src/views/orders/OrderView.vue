@@ -353,7 +353,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         navigator.share({
             title: "Bestelling "+WebshopManager.webshop.meta.name,
             text: "Bekijk mijn bestelling bij "+WebshopManager.webshop.meta.name+" via deze link.",
-            url: WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order!.id,
+            url: WebshopManager.webshop.getUrl(this.organization)+"/order/"+this.order!.id,
         }).catch(e => console.error(e))
     }
 
@@ -417,15 +417,15 @@ export default class OrderView extends Mixins(NavigationMixin){
             })
         }
         if (this.order) {
-            UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
+            UrlHelper.setUrl("/order/"+this.order.id)
             this.checkTickets().catch(console.error)
             return;
         }
         // Load order
         if (this.orderId) {
-            UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.orderId)
+            UrlHelper.setUrl("/order/"+this.orderId)
 
-             WebshopManager.server
+            WebshopManager.server
                 .request({
                     method: "GET",
                     path: "/webshop/" +WebshopManager.webshop.id + "/order/"+this.orderId,
@@ -452,7 +452,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }).then(response => {
                     const order = response.data
                     this.order = order
-                    UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/order/"+this.order.id)
+                    UrlHelper.setUrl("/order/"+this.order.id)
                     this.checkTickets().catch(console.error)
                 }).catch(e => {
                     // too: handle this

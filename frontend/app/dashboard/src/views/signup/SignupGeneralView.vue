@@ -1,14 +1,14 @@
 <template>
     <form id="signup-general-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Stamhoofd gratis uitproberen">
+        <STNavigationBar title="Aansluiten">
             <button slot="right" type="button" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         
         <main>
             <h1>
-                Nieuwe vereniging aansluiten bij Stamhoofd
+                Jouw vereniging aansluiten bij Stamhoofd
             </h1>
-            <p>Met een account kan je alle functies eerst gratis uitproberen.</p>
+            <p>Met een account kan je alle functies eerst gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen.</p>
 
             <p v-if="registerCode" class="success-box icon gift">
                 Je ontvangt 25 euro tegoed van <strong>{{ registerCode.organization }}</strong> als je nu registreert
@@ -104,10 +104,11 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
+import { AcquisitionType, Address, Country, FBId, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { FacebookHelper } from '../../classes/FacebookHelper';
 import SignupAccountView from './SignupAccountView.vue';
 
 
@@ -202,6 +203,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 localStorage.removeItem("savedRegisterCodeDate")
             })
         }
+
+        this.sendId().catch(console.error)
+
     }
 
     get isBelgium() {
@@ -235,6 +239,22 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         }
     }
 
+    async sendId() {
+        // Check register code
+        const id = FacebookHelper.id
+        if (id) {
+            try {
+                await NetworkManager.server.request({
+                    method: "POST",
+                    path: "/organizations/open",
+                    body: id
+                })
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
+
     async goNext() {
         if (this.loading) {
             return
@@ -254,7 +274,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                     code: "invalid_field",
                     message: "",
                     human: "De naam van jouw vereniging is te kort",
-                     field: "name"
+                    field: "name"
                 })
             }
 
@@ -345,9 +365,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
 
         // Group by category
         const map = new Map<string, {
-                value: OrganizationType;
-                name: string;
-            }[]>()
+            value: OrganizationType;
+            name: string;
+        }[]>()
 
         for (const type of types) {
             const cat = OrganizationTypeHelper.getCategory(type.value)
@@ -390,7 +410,7 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         return false;
     }
 
-     // Helpers ---
+    // Helpers ---
 
     getBooleanType(type: AcquisitionType) {
         return !!this.acquisitionTypes.find(r => r == type)

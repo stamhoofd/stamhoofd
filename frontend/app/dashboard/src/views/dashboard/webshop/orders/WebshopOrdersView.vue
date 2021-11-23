@@ -783,9 +783,12 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         if (this.selectionCount == 0) {
             return;
         }
+        const el = event.currentTarget.parentElement;
         const displayedComponent = new ComponentWithProperties(OrderContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top,
+            xPlacement: "left",
+            yPlacement: "top",
             orders: this.getSelectedOrders(),
             webshopManager: this.webshopManager
         });
@@ -796,9 +799,13 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         if (this.selectionCount == 0) {
             return;
         }
+
+        const el = event.currentTarget;
         const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top,
+            xPlacement: "left",
+            yPlacement: "top",
             orders: this.getSelectedOrders(),
             webshopManager: this.webshopManager
         });

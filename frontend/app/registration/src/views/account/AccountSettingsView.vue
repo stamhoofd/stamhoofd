@@ -181,7 +181,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
             const result = await LoginHelper.patchUser(SessionManager.currentSession!, this.userPatch)
 
             if (result.verificationToken) {
-                this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken }).setDisplayStyle("sheet"))
+                this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken, email: SessionManager.currentSession?.user?.email ?? "" }).setDisplayStyle("sheet"))
             } else {
                 const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
                 toast.show()

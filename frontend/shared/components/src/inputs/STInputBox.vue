@@ -55,6 +55,10 @@ export default class STInputBox extends Vue {
         }
     }
 
+    &.custom-bottom-box {
+        padding-bottom: 0;
+    }
+
     &.no-padding {
         // Keep 5px padding at bottom to compensate height of label
         padding: 0 0 5px 0;

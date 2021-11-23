@@ -11,6 +11,8 @@
                 E-mail versturen
             </h1>
 
+            <STErrorsDefault :error-box="errorBox" />
+
             <template v-if="emails.length == 0">
                 <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
                     Stel eerst jouw e-mailadressen in
@@ -169,12 +171,12 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, Webshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
 
@@ -208,6 +210,7 @@ class TmpFile {
         STListItem,
         Checkbox,
         Dropdown,
+        STErrorsDefault,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
