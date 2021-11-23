@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Logo, STErrorsDefault } from "@stamhoofd/components"
+import { Logo } from "@stamhoofd/components"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
