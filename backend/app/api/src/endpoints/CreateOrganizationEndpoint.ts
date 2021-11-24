@@ -54,6 +54,15 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         const uri = Formatter.slug(request.body.organization.name);
+
+        if (uri.length > 100) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Field is too long",
+                human: "De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
+                field: "organization.name"
+            })
+        }
         const alreadyExists = await Organization.getByURI(uri);
 
         if (alreadyExists) {
