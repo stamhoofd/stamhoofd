@@ -1,31 +1,73 @@
 <template>
     <div class="st-view group-members-view background">
-        <STNavigationBar :sticky="false">
+        <STNavigationBar :sticky="true">
             <template #left>
                 <BackButton v-if="canPop" slot="left" @click="pop" />
             </template>
             <template #right>
-                Buttons todo
+                <button class="button text" @click="showSelection = !showSelection">
+                    Select...
+                </button>
+                <button class="button text" @click="wrapColumns = !wrapColumns">
+                    Wrap...
+                </button>
+                <button class="button text" @click="simulateDataChange">
+                    Change
+                </button>
             </template>
         </STNavigationBar>
     
         <main>
             <h1>Table</h1>
 
-            <div class="table-with-columns">
+            <div class="input-with-buttons title-description">
+                <div>
+                    <div class="input-icon-container icon search gray">
+                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
+                    </div>
+                </div>
+                <div>
+                    <button class="button text" @click="editFilter">
+                        <span class="icon filter" />
+                        <span class="hide-small">Filter</span>
+                        <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-with-columns" :class="{ wrap: wrapColumns }">
                 <div class="table-head">
-                    <div v-for="column of columns" :key="column.id">
-                        {{ column.name }}
+                    <div v-if="showSelection" class="selection-column">
+                        <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
+                    </div>
+
+                    <div class="columns" :class="{ 'show-checkbox': showSelection }">
+                        <div v-for="column of columns" :key="column.id" @click="toggleSort(column)">
+                            {{ column.name }}
+
+                            <span
+                                class="sort-arrow icon"
+                                :class="{
+                                    'arrow-up-small': sortBy === column && sortDirection == 'ASC',
+                                    'arrow-down-small': sortBy === column && sortDirection == 'DESC',
+                                }"
+                            />
+                        </div>
                     </div>
                 </div>
 
                 <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px'}">
-                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', height: rowHeight+'px', visibility: row.row === null ? 'hidden' : 'visible' }">
-                        <div v-for="column of columns" :key="column.id">
-                            <span v-if="row.row && !row.row.value" class="placeholder-skeleton" />
-                            <span v-else>
-                                {{ row.row && row.row.value ? column.getValue(row.row.value) : "" }}
-                            </span>
+                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: !!clickHandler }" :style="{ transform: 'translateY('+row.y+'px)', height: rowHeight+'px', display: row.currentIndex === null ? 'none' : '' }">
+                        <div v-if="showSelection" class="selection-column">
+                            <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
+                        </div>
+                        <div class="columns" :class="{ 'show-checkbox': showSelection }">
+                            <div v-for="column of columns" :key="column.id">
+                                <span v-if="!row.value" class="placeholder-skeleton" />
+                                <span v-else>
+                                    {{ row.value ? column.getValue(row.value) : "" }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -36,13 +78,20 @@
 
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, STNavigationBar } from "@stamhoofd/components"
-import { sleep } from "@stamhoofd/networking";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, FilterEditor, STNavigationBar } from "@stamhoofd/components"
+import { Filter, FilterDefinition } from "@stamhoofd/structures";
+import { StringFilterDefinition } from "@stamhoofd/structures/esm/dist";
+import { StringCompare } from "@stamhoofd/utility";
+import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins, Vue } from "vue-property-decorator";
+import { Component, Mixins, Watch } from "vue-property-decorator";
 
-class TestValue {
+interface Searchable {
+    matchQuery(query: string): boolean;
+}
+
+class TestValue implements Searchable {
     id: string
     name: string
     age: number
@@ -54,28 +103,21 @@ class TestValue {
         this.age = age
         this.status = status
     }
-}
 
-class Row {
-    /// Null means it is still loading the value
-    value: TestValue | null = null
-
-    /**
-     * The index in the table, if we know this
-     */
-    knownIndex = -1
-
-    selected = false
-    cachedRow?: CachedRow
+    matchQuery(query: string): boolean {
+        return StringCompare.contains(this.name, query)
+    }
 }
 
 class Column<T> {
     name: string
     getValue: (val: T) => string
+    compare: (a: T, b: T) => number
 
-    constructor(name: string, getValue: (val: T) => string) {
+    constructor(name: string, getValue: (val: T) => string, compare: (a: T, b: T) => number) {
         this.name = name
         this.getValue = getValue
+        this.compare = compare
     }
 
     get id() {
@@ -83,52 +125,219 @@ class Column<T> {
     }
 }
 
-class CachedRow {
+class VisibleRow<T> {
     id = uuidv4()
     y = 0
+    currentIndex: null | number = null
 
     /**
      * If row is not set, this means that it can be reused again + that it shouldn't get rendered
      */
-    row: Row | null = null
+    value: T | null = null
+
+    cachedSelectionValue = false
 
 }
 
 @Component({
     components: {
         STNavigationBar,
-        BackButton
+        BackButton,
+        Checkbox
     },
 })
 export default class TableView extends Mixins(NavigationMixin) {
-    pageSize = 20
 
-    // For testing only
-    values: TestValue[] = []
+    // This contains the data we want to show, already sorted
+    allValues: TestValue[] = []
 
-    columns: Column<TestValue>[] = [
-        new Column("Naam", (v) => v.name),
-        new Column("Leeftijd", (v) => v.age+" jaar"),
-        new Column("Status", (v) => v.status)
+    //@Prop({ required: true})
+    filterDefinitions: FilterDefinition<TestValue, any, any>[] = [
+        new StringFilterDefinition({
+            id: "name",
+            name: "Name",
+            getValue: (value: TestValue) => value.name,
+        }),
     ]
 
-    visibleRows: CachedRow[] = []
+    selectedFilter: Filter<TestValue> | null = null
+    searchQuery = ""
 
-    // When the system detects that we need to load more rows, we'll fill this array
-    // This is the memory buffer. We'll clear it if it gets too big
-    loadedRows = new Map<number, Row>()
+    //@Prop({ required: true})
+    columns: Column<TestValue>[] = [
+        new Column("Naam", (v) => v.name, (a, b) => Sorter.byStringValue(a.name, b.name)),
+        new Column("Leeftijd", (v) => v.age+" jaar", (a, b) => -1 * Sorter.byNumberValue(a.age, b.age)),
+        new Column("Status", (v) => v.status, (a, b) => Sorter.byStringValue(a.status, b.status))
+    ]
 
-    // Total amount of values we know we have.
-    totalValues = 0
+    //@Prop({ default: true})
+    showSelection = true
+    wrapColumns = true
+
+    //@Prop({ default: null })
+    clickHandler: ((value: TestValue) => void) | null = (val: TestValue) => {
+        // todo: show details
+    }
+
+    sortBy: Column<TestValue> = this.columns[0]
+    sortDirection: "ASC" | "DESC" = "ASC"
+
+    visibleRows: VisibleRow<TestValue>[] = []
+
+    // If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows, 
+    // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
+    markedRows = new Map<string, TestValue>()
+
+    /**
+     * When true: only the marked rows are selected.
+     * When false: all rows are selected, except the marked rows
+     */
+    markedRowsAreSelected = true
+
+    get filteredCount() {
+        return this.allValues.length - this.filteredValues.length
+    }
+
+    get filteredValues() {
+        const filtered = this.selectedFilter === null ? this.allValues.slice() : this.allValues.filter((val: TestValue) => {
+            if (this.selectedFilter?.doesMatch(val)) {
+                return true;
+            }
+            return false;
+        });
+
+        if (this.searchQuery == "") {
+            return filtered;
+        }
+        return filtered.filter((val: TestValue) => val.matchQuery(this.searchQuery));
+    }
+
+    editFilter() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(FilterEditor, {
+                definitions: this.filterDefinitions,
+                selectedFilter: this.selectedFilter,
+                //organization: OrganizationManager.organization,
+                setFilter: (filter: Filter<any>) => {
+                    this.selectedFilter = filter
+                }
+            })
+        }).setDisplayStyle("side-view"))
+    }
+
+
+    get sortedValues() {
+        const m = (this.sortDirection === "ASC" ? 1 : -1)
+        return this.filteredValues.sort((a, b) => this.sortBy.compare(a, b) * m)
+    }
+
+    toggleSort(column: Column<any>) {
+        if (this.sortBy === column) {
+            if (this.sortDirection == "ASC") {
+                this.sortDirection = "DESC";
+            } else {
+                this.sortDirection = "ASC";
+            }
+            return;
+        }
+        this.sortBy = column;
+    }
+
+    setValues(allValues: TestValue[]) {
+        this.allValues = allValues
+    }
+
+    getSelectionValue(row: VisibleRow<TestValue>) {
+        const value = row.value
+        if (!value) {
+            return false
+        }
+
+        const found = this.markedRows.has(value.id)
+
+        if (this.markedRowsAreSelected) {
+            return found
+        } else {
+            return !found
+        }
+    }
+
+    setSelectionValue(row: VisibleRow<TestValue>, selected: boolean) {
+        const value = row.value
+        if (!value) {
+            return
+        }
+        if (selected) {
+            if (this.markedRowsAreSelected) {
+                this.markedRows.set(value.id, value)
+            } else {
+                this.markedRows.delete(value.id)
+            }
+        } else {
+            if (!this.markedRowsAreSelected) {
+                this.markedRows.set(value.id, value)
+            } else {
+                this.markedRows.delete(value.id)
+            }
+        }
+
+        row.cachedSelectionValue = selected
+        
+
+        // Update cached all selection
+        this.cachedAllSelected = this.getSelectAll()
+    }
+
+    cachedAllSelected = false
+
+    /**
+     * This is not reactive, due to the use of maps, which are not reactive in vue.
+     * Thats why we need a cached value.
+     */
+    getSelectAll(): boolean {
+        if (this.markedRowsAreSelected) {
+            return this.markedRows.size === this.filteredValues.length
+        } else {
+            return this.markedRows.size === 0
+        }
+    }
+
+    setSelectAll(selected: boolean) {
+        this.markedRowsAreSelected = !selected
+        this.markedRows.clear()
+
+        for (const visibleRow of this.visibleRows) {
+            visibleRow.cachedSelectionValue = selected
+        }
+        this.cachedAllSelected = selected
+    }
+
+    @Watch("sortedValues", { deep: false })
+    onUpdateValues() {
+        console.info("Sorted values has changed")
+
+        for (const visibleRow of this.visibleRows) {
+            // has this row changed and should it now display a different value? -> clear it and mark it for reuse
+            if (visibleRow.value && visibleRow.currentIndex !== null && (visibleRow.currentIndex >= this.sortedValues.length || visibleRow.value !== this.sortedValues[visibleRow.currentIndex])) {
+                // Mark this row to be reused
+                visibleRow.value = null
+                visibleRow.currentIndex = null
+            }
+        }
+
+        // Update all rows
+        this.updateVisibleRows()
+    }
+
+    simulateDataChange() {
+        this.sortedValues[0].name = this.sortedValues[0].name.split("").reverse().join("")
+    }
 
     mounted() {
         // Initialise visible Rows
-
-        for (let index = 0; index < 5000; index++) {
-            this.values.push(new TestValue(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
+        for (let index = 0; index < 10000; index++) {
+            this.allValues.push(new TestValue(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
         }
-
-        this.totalValues = this.values.length
 
         this.updateVisibleRows();
 
@@ -137,33 +346,6 @@ export default class TableView extends Mixins(NavigationMixin) {
         }, { passive: true })
     }
 
-    // Placeholder function, should get moved outside of the table implementation
-    async fetchValues(startIndex: number, previousValue: TestValue, amount = 20) {
-        await sleep(200)
-        return this.values.slice(startIndex, startIndex + amount)
-    }
-
-    loadIfNeeded(startIndex: number, previousValue: TestValue, amount = 20) {
-        // Check if we need to load
-
-        // Load them
-    }
-
-    getScrollElement(element: HTMLElement | null = null): HTMLElement {
-        if (!element) {
-            element = this.$el as HTMLElement;
-        }
-
-        const style = window.getComputedStyle(element);
-        if (style.overflowY == "scroll" || style.overflow == "scroll" || style.overflow == "auto" || style.overflowY == "auto") {
-            return element;
-        } else {
-            if (!element.parentElement) {
-                return document.documentElement;
-            }
-            return this.getScrollElement(element.parentElement);
-        }
-    }
 
     /**
      * Cached offset between scroll and top of the table
@@ -171,12 +353,13 @@ export default class TableView extends Mixins(NavigationMixin) {
     cachedTableYPosition: number | null = 0
 
     updateVisibleRows() {
-        if (this.values.length == 0) {
+        if (this.sortedValues.length == 0) {
             return
         }
 
         const scrollElement = document.documentElement; //this.getScrollElement()
-
+        
+        // innerHeight is a fix for animations, causing wrong initial bouding client rect
         if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
             const tableBody = this.$refs["tableBody"] as HTMLElement
             const rect = tableBody.getBoundingClientRect();
@@ -203,74 +386,66 @@ export default class TableView extends Mixins(NavigationMixin) {
 
         const extraItems = 5
 
-        const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, this.totalValues - 1))
+        const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, this.sortedValues.length - 1))
 
         const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 
-        const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, this.totalValues - 1))
+        const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, this.sortedValues.length - 1))
 
         //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
 
         // Make all visible rows available if not visible any longer
-        for (const cachedRow of this.visibleRows) {
-            if (cachedRow.row && (cachedRow.row.knownIndex < firstVisibleItemIndex || cachedRow.row.knownIndex > lastVisibleItemIndex)) {
-                //console.log("Freed cachedRow at index "+cachedRow.row.knownIndex)
-                cachedRow.row = null
+        for (const visibleRow of this.visibleRows) {
+            if (visibleRow.value && (visibleRow.currentIndex === null || visibleRow.currentIndex < firstVisibleItemIndex || visibleRow.currentIndex > lastVisibleItemIndex)) {
+                //console.log("Freed visibleRow at index "+visibleRow.currentIndex)
+                visibleRow.value = null
+                visibleRow.currentIndex = null
             }
         }
 
         for (let index = firstVisibleItemIndex; index <= lastVisibleItemIndex; index++) {
             // Is this already visible?
-            let cachedRow = this.visibleRows.find(r => r.row?.knownIndex === index)
-            if (cachedRow) {
+            let visibleRow = this.visibleRows.find(r => r.currentIndex === index)
+            if (visibleRow) {
                 // Nothing to do, it's already visible
                 continue
             }
 
             //console.log("Row at index "+index+" is not yet loaded. Searching for a spot...")
-            cachedRow = this.visibleRows.find(r => r.row === null)
+            visibleRow = this.visibleRows.find(r => r.currentIndex === null)
 
-            if (!cachedRow) {
+            if (!visibleRow) {
                 //console.log("Created new cached row for index "+index)
-                cachedRow = new CachedRow()
-                this.visibleRows.push(cachedRow)
+                visibleRow = new VisibleRow<TestValue>()
+                this.visibleRows.push(visibleRow)
             }
 
             // todo: simulate loading here
-            const loadedRow = this.loadedRows.get(index)
-            let row = loadedRow
-            if (!row) {
-                row = new Row()
-                row.value = this.values[index]
+            const value = this.sortedValues[index]
 
-                // In the future, we'll load a value here instead
-                // row.value = this.values[index]
-                this.loadedRows.set(index, row)
-
-                //console.log("Start loading row at index "+index)
-                /*setTimeout(() => {
-                    console.log("Loaded row at index "+index)
-                    row!.value = this.values[index]
-                }, 1000)*/
-            }
-
-            row.knownIndex = index
-            row.cachedRow = cachedRow
-            cachedRow.row = row
-            this.values[index]
-            cachedRow.y = index * this.rowHeight
-            
+            visibleRow.value = value
+            visibleRow.y = index * this.rowHeight
+            visibleRow.currentIndex = index
+            visibleRow.cachedSelectionValue = this.getSelectionValue(visibleRow)
         }
 
         //console.log("Rendered rows: "+this.visibleRows.length)
     }
 
     get rowHeight() {
+        if (this.wrapColumns) {
+            const padding = 15
+            const firstColumnHeight = 16
+            const otherColumnsHeight = 16
+            const borderHeight = 2
+            const margin = 5
+            return padding * 2 + firstColumnHeight + ((otherColumnsHeight + margin) * Math.max(this.columns.length - 1, 0)) + borderHeight
+        }
         return 60
     }
 
     get totalHeight() {
-        return this.rowHeight * this.values.length
+        return this.rowHeight * this.filteredValues.length
     }
 }
 </script>
@@ -281,6 +456,7 @@ export default class TableView extends Mixins(NavigationMixin) {
 
 .table-with-columns {
     contain: layout;
+    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
 
     .table-body {
         contain: layout;
@@ -290,19 +466,105 @@ export default class TableView extends Mixins(NavigationMixin) {
 
     .table-row, .table-head {
         width: 100%;
-        height: 60px;
-        border-bottom: 2px solid $color-border;
-        box-sizing: border-box;
         overflow: hidden;
+        position: relative;
+        box-sizing: border-box;
 
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: stretch;
-        align-items: center;
+        padding-left: var(--st-horizontal-padding, 40px);
+
+        .selection-column {
+            position: absolute;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: stretch;
+            align-items: center;
+            padding-bottom: 2px;
+        }
+
+        .columns {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            transform: translateX(0);
+            transition: transform 0.2s;
+
+            &.show-checkbox {
+                width: calc(100% - 50px);
+                transform: translateX(50px);
+            }
+
+            > div {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+
+    &:not(.wrap) {
+        .table-head, .table-row {
+            .columns {
+                display: flex;
+                flex-wrap: nowrap;
+                justify-content: stretch;
+                align-items: center;
+
+                > div {
+                    flex-shrink: 0;
+                    flex-grow: 1;
+                    flex-basis: 0;
+                }
+            }
+        }
+    }
+
+    &.wrap {
+        .table-head {
+            display: none;
+        }
+
+        .table-row {
+            .columns {
+                padding: 15px 0;
+
+                > div {
+                    font-size: 16px;
+                    height: 16px;
+                    line-height: 16px;
+                    color: $color-gray;
+                    box-sizing: content-box;
+
+                    padding-bottom: 5px;
+
+                    &:first-child {
+                        font-size: 16px;
+                        height: 16px;
+                        line-height: 16px;
+                        color: $color-dark;
+                    }
+
+                    &:last-child {
+                        padding-bottom: 0;
+                    }
+                }
+
+                
+            }
+        }
+    }
+
+    .table-head {
+        height: 50px;
+        border-bottom: 2px solid $color-border;
 
         > div {
-            flex-shrink: 1;
-            flex-grow: 1;
+            @extend .style-table-head;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            user-select: none;
         }
     }
 
@@ -311,12 +573,35 @@ export default class TableView extends Mixins(NavigationMixin) {
         position: absolute;
         will-change: transform;
 
+        .columns {
+            border-bottom: 2px solid $color-border;
+        }
+
         .placeholder-skeleton {
             display: block;
             height: 1em;
             width: 150px;
             border-radius: 5px;
             background: $color-background-shade-darker;
+        }
+
+        &.selectable {
+            will-change: transform, background-color;
+            transition: background-color 0.15s;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            user-select: none;
+
+            @media (hover: hover) {
+                &:hover {
+                    background-color: $color-primary-lighter;
+                }
+            }
+
+            &:active {
+                background-color: $color-primary-light;
+            }
         }
     }
 }

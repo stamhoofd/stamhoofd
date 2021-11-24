@@ -18,6 +18,9 @@ export class Sorter {
         return this.byNumberValue(a[field], b[field])
     }
 
+    /**
+     * Sort strings ASC order
+     */
     static byStringValue( a: string, b: string ) {
         const af = a.toLowerCase()
         const bf = b.toLowerCase()
