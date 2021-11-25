@@ -2,6 +2,7 @@ export class ViewportHelper {
     static currentVh: number | null = null
 
     static setup() {
+        return;
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
         if (isPrerender) {

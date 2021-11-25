@@ -11,7 +11,7 @@
                 <button class="button text" @click="wrapColumns = !wrapColumns">
                     Wrap...
                 </button>
-                <button class="button text" @click="simulateDataChange">
+                <button class="button text" @click="simulateColumnWidthChange">
                     Change
                 </button>
             </template>
@@ -20,7 +20,7 @@
         <main>
             <h1>Table</h1>
 
-            <div class="input-with-buttons title-description">
+            <div class="input-with-buttons">
                 <div>
                     <div class="input-icon-container icon search gray">
                         <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
@@ -34,45 +34,47 @@
                     </button>
                 </div>
             </div>
+        </main>
 
-            <div class="table-with-columns" :class="{ wrap: wrapColumns }">
+        <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns, scroll: shouldScroll }">
+            <div class="inner-size" :style="!wrapColumns ? { height: totalHeight+'px', width: totalRenderWidth+'px'} : {}">
                 <div class="table-head">
                     <div v-if="showSelection" class="selection-column">
                         <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
                     </div>
 
-                    <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                        <div v-for="column of columns" :key="column.id" @click="toggleSort(column)">
-                            {{ column.name }}
+                    <div class="columns" :class="{ 'show-checkbox': showSelection }" :style="!wrapColumns ? { 'grid-template-columns': gridTemplateColumns } : {}">
+                        <div v-for="(column, index) of columns" :key="column.id">
+                            <span @click="toggleSort(column)">{{ column.name }}</span>
 
-                            <span
-                                class="sort-arrow icon"
-                                :class="{
-                                    'arrow-up-small': sortBy === column && sortDirection == 'ASC',
-                                    'arrow-down-small': sortBy === column && sortDirection == 'DESC',
-                                }"
+                            <span v-if="sortBy === column"
+                                  class="sort-arrow icon"
+                                  :class="{
+                                      'arrow-up-small': sortDirection == 'ASC',
+                                      'arrow-down-small': sortDirection == 'DESC',
+                                  }"
                             />
+
+                            <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="handleDragStart($event, column)" @touchstart="handleDragStart($event, column)" /></span>
+                            <button v-else-if="canCollapse" class="button light-gray icon collapse-left" @click="collapse" />
                         </div>
                     </div>
                 </div>
 
-                <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px'}">
+                <div ref="tableBody" class="table-body" :style="!wrapColumns ? { height: totalHeight+'px', width: totalRenderWidth+'px'} : { height: totalHeight+'px'}">
                     <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: !!clickHandler }" :style="{ transform: 'translateY('+row.y+'px)', height: rowHeight+'px', display: row.currentIndex === null ? 'none' : '' }">
                         <div v-if="showSelection" class="selection-column">
                             <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                         </div>
-                        <div class="columns" :class="{ 'show-checkbox': showSelection }">
+                        <div class="columns" :class="{ 'show-checkbox': showSelection }" :style="!wrapColumns ? { 'grid-template-columns': gridTemplateColumns } : {}">
                             <div v-for="column of columns" :key="column.id">
-                                <span v-if="!row.value" class="placeholder-skeleton" />
-                                <span v-else>
-                                    {{ row.value ? column.getValue(row.value) : "" }}
-                                </span>
+                                {{ row.value ? column.getValue(row.value) : "" }}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 </template>
 
@@ -114,15 +116,54 @@ class Column<T> {
     getValue: (val: T) => string
     compare: (a: T, b: T) => number
 
-    constructor(name: string, getValue: (val: T) => string, compare: (a: T, b: T) => number) {
-        this.name = name
-        this.getValue = getValue
-        this.compare = compare
+    constructor(settings: {
+        name: string, 
+        getValue: (val: T) => string, 
+        compare: (a: T, b: T) => number,
+        grow?: number,
+        minimumWidth?: number,
+        recommendedWidth?: number,
+    }) {
+        this.name = settings.name
+        this.getValue = settings.getValue
+        this.compare = settings.compare
+        this.grow = settings?.grow ?? 1
+        this.minimumWidth = settings?.minimumWidth ?? 100
+        this.recommendedWidth = settings?.recommendedWidth ?? 100
+
+        this.width = this.recommendedWidth
     }
 
     get id() {
         return this.name
     }
+
+    didReachMinimum() {
+        return this.width && this.width <= this.minimumWidth
+    }
+
+    /**
+     * null means: generate width + save it,  based on grow property
+     */
+    width: number | null = null
+
+    /**
+     * renderWidth is floored version of width, to use in CSS
+     */
+    renderWidth: number | null = null
+
+    /**
+     * Minimum width in pixels. Best minimum is 100, because this is needed for sort icon + drag handle + padding
+     */
+    minimumWidth = 100
+
+    recommendedWidth = 100
+
+    /**
+     * Used for default width (behaves like flex-grow)
+     * and for resizing
+     */
+    grow = 1
 }
 
 class VisibleRow<T> {
@@ -136,7 +177,6 @@ class VisibleRow<T> {
     value: T | null = null
 
     cachedSelectionValue = false
-
 }
 
 @Component({
@@ -148,7 +188,7 @@ class VisibleRow<T> {
 })
 export default class TableView extends Mixins(NavigationMixin) {
 
-    // This contains the data we want to show, already sorted
+    // This contains the data we want to show
     allValues: TestValue[] = []
 
     //@Prop({ required: true})
@@ -165,14 +205,34 @@ export default class TableView extends Mixins(NavigationMixin) {
 
     //@Prop({ required: true})
     columns: Column<TestValue>[] = [
-        new Column("Naam", (v) => v.name, (a, b) => Sorter.byStringValue(a.name, b.name)),
-        new Column("Leeftijd", (v) => v.age+" jaar", (a, b) => -1 * Sorter.byNumberValue(a.age, b.age)),
-        new Column("Status", (v) => v.status, (a, b) => Sorter.byStringValue(a.status, b.status))
+        new Column({
+            name: "Naam", 
+            getValue: (v) => v.name, 
+            compare: (a, b) => Sorter.byStringValue(a.name, b.name),
+            grow: 1,
+            minimumWidth: 100,
+            recommendedWidth: 150
+        }),
+        new Column({
+            name: "Leeftijd", 
+            getValue: (v) => v.age+" jaar", 
+            compare: (a, b) => -1 * Sorter.byNumberValue(a.age, b.age),
+            minimumWidth: 100,
+            recommendedWidth: 150
+        }),
+        new Column({
+            name: "Status", 
+            getValue: (v) => v.status, 
+            compare: (a, b) => Sorter.byStringValue(a.status, b.status),
+            minimumWidth: 150,
+            recommendedWidth: 200
+        })
     ]
 
     //@Prop({ default: true})
-    showSelection = true
-    wrapColumns = true
+    wrapColumns = window.innerWidth < 600
+    showSelection = !this.wrapColumns
+    shouldScroll = window.innerWidth >= 600
 
     //@Prop({ default: null })
     clickHandler: ((value: TestValue) => void) | null = (val: TestValue) => {
@@ -193,6 +253,305 @@ export default class TableView extends Mixins(NavigationMixin) {
      * When false: all rows are selected, except the marked rows
      */
     markedRowsAreSelected = true
+
+    // Column drag helpers:
+    isDraggingColumn: Column<any> | null = null
+    draggingStartX = 0
+    draggingInitialWidth = 0
+
+    getEventX(event: any) {
+        let x = 0;
+        if (event.changedTouches) {
+            const touches = event.changedTouches;
+            for (const touch of touches) {
+                x = touch.pageX;
+            }
+        } else {
+            x = event.pageX;
+        }
+        return x;
+    }
+
+    handleDragStart(event, column: Column<any>) {
+        this.draggingStartX = this.getEventX(event);
+        this.isDraggingColumn = column
+        this.draggingInitialWidth = column.width ?? 0
+        this.attachDragHandlers()
+    }
+
+    attachDragHandlers() {
+        this.updateRecommendedWidths();
+        (this.$refs["table"] as HTMLElement).style.cursor = "col-resize"
+        document.addEventListener("mousemove", this.mouseMove, {
+            passive: false,
+        });
+        document.addEventListener("touchmove", this.mouseMove, {
+            passive: false,
+        });
+
+        document.addEventListener("mouseup", this.mouseUp, { passive: false });
+        document.addEventListener("touchend", this.mouseUp, { passive: false });
+    }
+
+    detachDragHandlers() {
+        (this.$refs["table"] as HTMLElement).style.cursor = ""
+        document.removeEventListener("mousemove", this.mouseMove);
+        document.removeEventListener("touchmove", this.mouseMove);
+
+        document.removeEventListener("mouseup", this.mouseUp);
+        document.removeEventListener("touchend", this.mouseUp);
+    }
+
+    mouseMove(event) {
+        if (!this.isDraggingColumn) {
+            return
+        }
+        const currentX = this.getEventX(event)
+        const difference = currentX - this.draggingStartX
+
+        const currentWidth = this.totalWidth
+
+        const newWidth = this.draggingInitialWidth + difference
+        this.isDraggingColumn.width =  Math.max(newWidth, this.isDraggingColumn.minimumWidth)
+        this.isDraggingColumn.renderWidth = Math.floor(this.isDraggingColumn.width)
+
+        this.updateColumnWidth(this.isDraggingColumn, "move", currentWidth)
+
+        // Prevent scrolling (on mobile) and other stuff
+        event.preventDefault();
+        return false;
+    }
+
+    mouseUp(_event) {
+        if (this.isDraggingColumn) {
+            this.detachDragHandlers();
+            this.isDraggingColumn = null;
+        }
+    }
+
+    // Methods
+
+    mounted() {
+        // Initialise visible Rows
+        for (let index = 0; index < 1000; index++) {
+            this.allValues.push(new TestValue(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
+        }
+
+        this.updateVisibleRows();
+        this.updateRecommendedWidths();
+        this.updateColumnWidth()
+
+        if (this.shouldScroll) {
+            (this.$refs["table"] as HTMLElement).addEventListener("scroll", () => {
+                this.updateVisibleRows()
+            }, { passive: true })
+        } else {
+            document.addEventListener("scroll", () => {
+                this.updateVisibleRows()
+            }, { passive: true })
+        }
+
+        window.addEventListener("resize", () => {
+            if (this.canCollapse) {
+                // Keep existing width
+                this.updateCanCollapse()
+            } else {
+                // shrink or grow width
+                this.updateColumnWidth()
+            }
+            this.updateVisibleRows()
+        }, { passive: true })
+    }
+
+    /**
+     * Loop all visible rows, and sets the recommended width of each column to the maximum width of the column.
+     */
+    updateRecommendedWidths() {
+        const measureDiv = document.createElement("div")
+        measureDiv.style.position = "absolute"
+        measureDiv.style.visibility = "hidden"
+        measureDiv.className = "table-column-content-style"
+        document.body.appendChild(measureDiv)
+
+        for (const column of this.columns) {
+            let maximum = column.minimumWidth
+
+            // Title
+            const text = column.name
+            measureDiv.innerText = text
+            const width = measureDiv.clientWidth
+            if (width > maximum) {
+                maximum = width
+            }
+
+            for (const visibleRow of this.visibleRows) {
+                const value = visibleRow.value
+
+                if (!value) {
+                    continue
+                }
+
+                const text = column.getValue(value)
+
+                measureDiv.innerText = text
+                const width = measureDiv.clientWidth
+                if (width > maximum) {
+                    maximum = width
+                }
+            }
+
+            // Also add some padding
+            column.recommendedWidth = maximum + 50
+        }
+
+        document.body.removeChild(measureDiv)
+    }
+
+    canCollapse = false
+
+    /**
+     * Update the width of the columns by distributing the available width across the columns, except the ignored column (optional)
+     */
+    updateColumnWidth(afterColumn: Column<any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
+        const leftPadding = 40
+        const rightPadding = 40
+
+        const availableWidth = (forceWidth ?? (this.$refs["table"] as HTMLElement).clientWidth) - this.selectionColumnWidth - leftPadding - rightPadding;
+        const currentWidth = this.columns.reduce((acc, col) => acc + (col.width ?? 0), 0);
+        let distributeWidth = availableWidth - currentWidth;
+
+        const affectedColumns = afterColumn ? this.columns.slice(this.columns.findIndex(c => c === afterColumn ) + 1) : this.columns
+
+        if (strategy === "grow") {
+            // Step 1: use recommendedWidth as minimum width in first round
+            let growTotal = affectedColumns.reduce((acc, col) => acc + ((distributeWidth < 0 && col.width !== null && col.width <= col.recommendedWidth) ? 0 : col.grow), 0);
+            
+            while (distributeWidth != 0 && growTotal > 0) {
+                const widthPerGrow = distributeWidth / growTotal;
+                distributeWidth = 0
+                growTotal = 0
+
+                for (let col of affectedColumns) {
+                    if (widthPerGrow < 0 && col.width !== null && col.width <= col.recommendedWidth) {
+                        continue;
+                    }
+
+                    if (col.width == null) {
+                        col.width = 0
+                    } 
+                    const change = col.grow * widthPerGrow
+                    col.width += change;
+
+                    if (change < 0 && col.width <= col.recommendedWidth) {
+                        // we hit the minimum width, so we need to distribute the width that we couldn't absorb
+                        const couldNotAbsorb = col.recommendedWidth - col.width
+                        distributeWidth -= couldNotAbsorb;
+                        col.width = col.recommendedWidth;
+                    }
+                    
+                    // Can we absorb the next shrink? (if shrinking)
+                    if (!(widthPerGrow < 0 && col.width !== null && col.width <= col.recommendedWidth)) {
+                        growTotal += col.grow;
+                    }
+
+                    col.renderWidth = Math.floor(col.width);
+                }
+            }
+
+            if (distributeWidth != 0) {
+                // Step 2: use real minimum width (if still needed)
+                growTotal = affectedColumns.reduce((acc, col) => acc + ((distributeWidth < 0 && col.width !== null && col.width <= col.minimumWidth) ? 0 : col.grow), 0);
+            
+                while (distributeWidth != 0 && growTotal > 0) {
+                    const widthPerGrow = distributeWidth / growTotal;
+
+                    distributeWidth = 0
+                    growTotal = 0
+
+                    for (let col of affectedColumns) {
+                        if (widthPerGrow < 0 && col.width !== null && col.width <= col.minimumWidth) {
+                            continue;
+                        }
+
+                        if (col.width == null) {
+                            col.width = 0
+                        } 
+                        const change = col.grow * widthPerGrow
+                        col.width += change;
+
+                        if (change < 0 && col.width <= col.minimumWidth) {
+                            // we hit the minimum width, so we need to distribute the width that we couldn't absorb
+                            const couldNotAbsorb = col.minimumWidth - col.width
+                            distributeWidth -= couldNotAbsorb;
+                            col.width = col.minimumWidth;
+                        }
+                        
+                        // Can we absorb the next shrink? (if shrinking)
+                        if (!(widthPerGrow < 0 && col.width !== null && col.width <= col.minimumWidth)) {
+                            growTotal += col.grow;
+                        }
+
+                        col.renderWidth = Math.floor(col.width);
+                    }
+                }
+            }
+        } else {
+            // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
+
+            for (const column of affectedColumns) {
+                if (column.width == null) {
+                    continue;
+                }
+
+                if (distributeWidth < 0) {
+                    if (column.width > column.recommendedWidth) {
+                        const shrinkAmount = Math.min(-distributeWidth, column.width - column.recommendedWidth);
+                        column.width -= shrinkAmount
+                        column.renderWidth = Math.floor(column.width);
+                        distributeWidth += shrinkAmount;
+
+                        if (distributeWidth >= 0) {
+                            break
+                        }
+                    }
+                } else {
+                    column.width += distributeWidth
+                    column.renderWidth = Math.floor(column.width);
+                    break
+                }
+            }
+        }
+
+        this.updateCanCollapse()
+    }
+
+    updateCanCollapse() {
+        this.canCollapse = Math.floor(this.totalWidth) > Math.floor((this.$refs["table"] as HTMLElement).clientWidth);
+    }
+
+    collapse() {
+        this.updateColumnWidth(null, "grow")
+    }
+
+    get selectionColumnWidth() {
+        return this.showSelection ? 50 : 0
+    }
+
+    get totalWidth() {
+        const leftPadding = 40
+        const rightPadding = 40
+        return this.selectionColumnWidth + this.columns.reduce((acc, col) => acc + (col.width ?? 0), 0) + leftPadding + rightPadding
+    }
+
+    get totalRenderWidth() {
+        const leftPadding = 40
+        const rightPadding = 40
+        return this.selectionColumnWidth + this.columns.reduce((acc, col) => acc + (col.renderWidth ?? 0), 0) + leftPadding + rightPadding
+    }
+
+    get gridTemplateColumns() {
+        return this.columns.map(col => `${(col.renderWidth ?? 0)}px`).join(" ")
+    }
 
     get filteredCount() {
         return this.allValues.length - this.filteredValues.length
@@ -333,19 +692,11 @@ export default class TableView extends Mixins(NavigationMixin) {
         this.sortedValues[0].name = this.sortedValues[0].name.split("").reverse().join("")
     }
 
-    mounted() {
-        // Initialise visible Rows
-        for (let index = 0; index < 10000; index++) {
-            this.allValues.push(new TestValue(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
-        }
-
-        this.updateVisibleRows();
-
-        document.addEventListener("scroll", () => {
-            this.updateVisibleRows()
-        }, { passive: true })
+    simulateColumnWidthChange() {
+        this.columns[0].width = Math.random() * 400
+        this.columns[0].renderWidth = Math.floor(this.columns[0].width)
+        this.updateColumnWidth(this.columns[0])
     }
-
 
     /**
      * Cached offset between scroll and top of the table
@@ -357,32 +708,41 @@ export default class TableView extends Mixins(NavigationMixin) {
             return
         }
 
-        const scrollElement = document.documentElement; //this.getScrollElement()
+        let topOffset = 0
+
+        if (this.shouldScroll) {
+            // Easy case: we can use the table scroll position
+            topOffset = (this.$refs["table"] as HTMLElement).scrollTop
+        } else {
+            const scrollElement = document.documentElement; //this.getScrollElement()
         
-        // innerHeight is a fix for animations, causing wrong initial bouding client rect
-        if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
-            const tableBody = this.$refs["tableBody"] as HTMLElement
-            const rect = tableBody.getBoundingClientRect();
+            // innerHeight is a fix for animations, causing wrong initial bouding client rect
+            if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
+                const tableBody = this.$refs["tableBody"] as HTMLElement
+                const rect = tableBody.getBoundingClientRect();
 
-            const top = rect.top
+                const top = rect.top
 
-            if (top >= 0) {
-                this.cachedTableYPosition = top + scrollElement.scrollTop
-            } else {
-                this.cachedTableYPosition = scrollElement.scrollTop + top
+                if (top >= 0) {
+                    this.cachedTableYPosition = top + scrollElement.scrollTop
+                } else {
+                    this.cachedTableYPosition = scrollElement.scrollTop + top
+                }
+
+                console.log("Cached table y position at "+this.cachedTableYPosition)
             }
 
-            console.log("Cached table y position at "+this.cachedTableYPosition)
+            let topOffset = scrollElement.scrollTop - this.cachedTableYPosition
+
+            if (topOffset >= 0) {
+                // The table is not yet scrolled
+                // topOffset = 0
+            } else {
+                topOffset = -topOffset
+            }
         }
 
-        let topOffset = scrollElement.scrollTop - this.cachedTableYPosition
-
-        if (topOffset >= 0) {
-            // The table is not yet scrolled
-            // topOffset = 0
-        } else {
-            topOffset = -topOffset
-        }
+        
 
         const extraItems = 5
 
@@ -454,9 +814,40 @@ export default class TableView extends Mixins(NavigationMixin) {
 @use '~@stamhoofd/scss/base/variables' as *;
 @use '~@stamhoofd/scss/base/text-styles' as *;
 
+.table-column-content-style {
+    font-size: 16px;
+}
+
 .table-with-columns {
-    contain: layout;
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
+    padding-bottom: var(--st-vertical-padding, 40px);
+    overflow: hidden;
+
+    .inner-size {
+        // This container determines the horizontal width and height.
+        // And this should always be fixed for efficient layout calculations.
+        // Why required? For the horizontal + vertical scrolling to work properly.
+
+        contain: layout;
+        // position: absolute;
+        // width: 150%;
+        // height: 100%;
+    }
+
+    &.scroll {
+        overflow: auto;
+        flex-grow: 1;
+        position: relative;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+
+        .inner-size {
+            // Should be absolute because the size of the parent should not be affected by the size
+            // of the child.
+            position: absolute;
+        }
+    }
 
     .table-body {
         contain: layout;
@@ -476,9 +867,10 @@ export default class TableView extends Mixins(NavigationMixin) {
             position: absolute;
             box-sizing: border-box;
             height: 100%;
+            top: 0;
             display: flex;
             flex-wrap: nowrap;
-            justify-content: stretch;
+            justify-content: center;
             align-items: center;
             padding-bottom: 2px;
         }
@@ -494,33 +886,37 @@ export default class TableView extends Mixins(NavigationMixin) {
                 width: calc(100% - 50px);
                 transform: translateX(50px);
             }
-
-            > div {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
         }
     }
 
     &:not(.wrap) {
         .table-head, .table-row {
             .columns {
-                display: flex;
-                flex-wrap: nowrap;
-                justify-content: stretch;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
                 align-items: center;
 
-                > div {
+                 will-change: grid-template-columns;
+
+                
+
+                /*display: flex;
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                align-items: center;*/
+
+                /*> div {
                     flex-shrink: 0;
-                    flex-grow: 1;
                     flex-basis: 0;
-                }
+                    min-width: 0;
+                }*/
             }
         }
     }
 
     &.wrap {
+        padding-top: 20px;
+
         .table-head {
             display: none;
         }
@@ -556,15 +952,111 @@ export default class TableView extends Mixins(NavigationMixin) {
     }
 
     .table-head {
-        height: 50px;
+        height: 70px;
         border-bottom: 2px solid $color-border;
+        position: sticky;
+        top: 0px;
+        z-index: 100;
+        background: var(--color-current-background, #{$color-background} );
+        padding-top: 20px;
 
-        > div {
+        .selection-column {
+            // Fix height
+            padding-top: 20px;
+        }
+
+        .columns > div {
             @extend .style-table-head;
-            cursor: pointer;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            
             user-select: none;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding-right: 20px;
+
+            span:first-child {
+                cursor: pointer;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                &:active {
+                    opacity: 0.6;
+                }
+            }
+
+            span {
+                vertical-align: middle;
+                min-width: 0;
+            }
+
+            .icon {
+                flex-shrink: 0;
+            }
+
+            .icon.collapse-left {
+                margin-left: auto;
+            }
+
+            .drag-handle-container {
+                width: 2px;
+                height: 20px;
+                display: inline-block;
+                margin-left: auto;
+                position: relative;
+                padding-left: 20px;
+                flex-shrink: 0;
+
+                &:before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 20px;
+                    width: 2px;
+                    height: 20px;
+                    background: $color-border;
+                    border-radius: 2px;
+                }
+
+                // The drag area
+                .drag-handle {
+                    content: '';
+                    position: absolute;
+                    top: -10px;
+                    left: 19px;
+                    bottom: -20px;
+                    right: -1px;
+                    cursor: col-resize;
+                    touch-action: pan-x;
+                    z-index: 1;
+                    background: rgb(0, 89, 255);
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                    border-radius: 2px;
+
+                    &.reached-minimum {
+                        cursor: e-resize;
+                    }
+
+                    &:hover {
+                        opacity: 1;
+                        transition: opacity 0.2s 0.6s;
+                    }
+
+                    &:active {
+                         opacity: 1;
+                        transition: opacity 0.1s 0s;
+                    }
+                }
+            }
+            
+
+            &:last-child {
+                padding-right: 0;
+            }
         }
     }
 
@@ -575,6 +1067,13 @@ export default class TableView extends Mixins(NavigationMixin) {
 
         .columns {
             border-bottom: 2px solid $color-border;
+
+            > div {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                will-change: contents, width;
+            }
         }
 
         .placeholder-skeleton {
