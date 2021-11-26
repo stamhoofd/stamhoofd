@@ -37,36 +37,37 @@
         </main>
 
         <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns, scroll: shouldScroll }">
-            <div class="inner-size" :style="!wrapColumns ? { height: totalHeight+'px', width: totalRenderWidth+'px'} : {}">
-                <div class="table-head">
+            <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+70)+'px', width: totalRenderWidth+'px'} : {}">
+                <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                     <div v-if="showSelection" class="selection-column">
                         <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
                     </div>
 
-                    <div class="columns" :class="{ 'show-checkbox': showSelection }" :style="!wrapColumns ? { 'grid-template-columns': gridTemplateColumns } : {}">
+                    <div class="columns" :class="{ 'show-checkbox': showSelection }">
                         <div v-for="(column, index) of columns" :key="column.id">
-                            <span @click="toggleSort(column)">{{ column.name }}</span>
+                            <button @click="toggleSort(column)">
+                                <span>{{ column.name }}</span>
 
-                            <span v-if="sortBy === column"
-                                  class="sort-arrow icon"
-                                  :class="{
-                                      'arrow-up-small': sortDirection == 'ASC',
-                                      'arrow-down-small': sortDirection == 'DESC',
-                                  }"
-                            />
-
+                                <span v-if="sortBy === column"
+                                      class="sort-arrow icon"
+                                      :class="{
+                                          'arrow-up-small': sortDirection == 'ASC',
+                                          'arrow-down-small': sortDirection == 'DESC',
+                                      }"
+                                />
+                            </button>
                             <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="handleDragStart($event, column)" @touchstart="handleDragStart($event, column)" /></span>
-                            <button v-else-if="canCollapse" class="button light-gray icon collapse-left" @click="collapse" />
+                            <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" class="button light-gray icon collapse-left" @click="collapse" />
                         </div>
                     </div>
                 </div>
 
-                <div ref="tableBody" class="table-body" :style="!wrapColumns ? { height: totalHeight+'px', width: totalRenderWidth+'px'} : { height: totalHeight+'px'}">
-                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: !!clickHandler }" :style="{ transform: 'translateY('+row.y+'px)', height: rowHeight+'px', display: row.currentIndex === null ? 'none' : '' }">
+                <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
+                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: !!clickHandler }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }">
                         <div v-if="showSelection" class="selection-column">
                             <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                         </div>
-                        <div class="columns" :class="{ 'show-checkbox': showSelection }" :style="!wrapColumns ? { 'grid-template-columns': gridTemplateColumns } : {}">
+                        <div class="columns" :class="{ 'show-checkbox': showSelection }">
                             <div v-for="column of columns" :key="column.id">
                                 {{ row.value ? column.getValue(row.value) : "" }}
                             </div>
@@ -80,9 +81,11 @@
 
 
 <script lang="ts">
+import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, FilterEditor, STNavigationBar } from "@stamhoofd/components"
-import { Filter, FilterDefinition } from "@stamhoofd/structures";
+import { BackButton, Checkbox, FilterEditor, STNavigationBar, TooltipDirective } from "@stamhoofd/components"
+import { Storage } from "@stamhoofd/networking";
+import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
 import { StringFilterDefinition } from "@stamhoofd/structures/esm/dist";
 import { StringCompare } from "@stamhoofd/utility";
 import { Sorter } from "@stamhoofd/utility";
@@ -113,17 +116,20 @@ class TestValue implements Searchable {
 
 class Column<T> {
     name: string
+    enabled = true
     getValue: (val: T) => string
     compare: (a: T, b: T) => number
 
     constructor(settings: {
         name: string, 
+        enabled?: boolean,
         getValue: (val: T) => string, 
         compare: (a: T, b: T) => number,
         grow?: number,
         minimumWidth?: number,
         recommendedWidth?: number,
     }) {
+        this.enabled = settings.enabled ?? true
         this.name = settings.name
         this.getValue = settings.getValue
         this.compare = settings.compare
@@ -179,12 +185,43 @@ class VisibleRow<T> {
     cachedSelectionValue = false
 }
 
+enum SortDirection {
+    "Ascending" = "ASC",
+    "Descending" = "DESC"
+}
+
+class EnabledColumnConfiguration extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string
+
+    @field({ decoder: NumberDecoder })
+    width: number
+
+}
+
+/**
+ * We store this configuration in storage, so we can reuse the previous configuration every time
+ */
+class ColumnConfiguration extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(EnabledColumnConfiguration) })
+    columns: EnabledColumnConfiguration[] = []
+
+    @field({ decoder: StringDecoder, optional: true })
+    sortColumnId?: string
+
+    @field({ decoder: new EnumDecoder(SortDirection), optional: true })
+    sortDirection:  SortDirection = SortDirection.Ascending
+}
+
 @Component({
     components: {
         STNavigationBar,
         BackButton,
         Checkbox
     },
+    directives: {
+        tooltip: TooltipDirective
+    }
 })
 export default class TableView extends Mixins(NavigationMixin) {
 
@@ -203,8 +240,12 @@ export default class TableView extends Mixins(NavigationMixin) {
     selectedFilter: Filter<TestValue> | null = null
     searchQuery = ""
 
+    // Where to store the latest column configuration, so we can reload it instead of switching to the defaults each time
     //@Prop({ required: true})
-    columns: Column<TestValue>[] = [
+    columnConfigurationId = "test"
+
+    //@Prop({ required: true})
+    allColumns: Column<TestValue>[] = [
         new Column({
             name: "Naam", 
             getValue: (v) => v.name, 
@@ -229,6 +270,10 @@ export default class TableView extends Mixins(NavigationMixin) {
         })
     ]
 
+    get columns() {
+        return this.allColumns.filter(c => c.enabled)
+    }
+
     //@Prop({ default: true})
     wrapColumns = window.innerWidth < 600
     showSelection = !this.wrapColumns
@@ -240,7 +285,7 @@ export default class TableView extends Mixins(NavigationMixin) {
     }
 
     sortBy: Column<TestValue> = this.columns[0]
-    sortDirection: "ASC" | "DESC" = "ASC"
+    sortDirection: SortDirection = SortDirection.Ascending
 
     visibleRows: VisibleRow<TestValue>[] = []
 
@@ -300,6 +345,8 @@ export default class TableView extends Mixins(NavigationMixin) {
 
         document.removeEventListener("mouseup", this.mouseUp);
         document.removeEventListener("touchend", this.mouseUp);
+
+        this.saveColumnConfiguration()
     }
 
     mouseMove(event) {
@@ -329,17 +376,14 @@ export default class TableView extends Mixins(NavigationMixin) {
         }
     }
 
-    // Methods
-
     mounted() {
         // Initialise visible Rows
-        for (let index = 0; index < 1000; index++) {
+        for (let index = 0; index < 10000; index++) {
             this.allValues.push(new TestValue(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
         }
-
-        this.updateVisibleRows();
-        this.updateRecommendedWidths();
-        this.updateColumnWidth()
+        
+        this.loadColumnConfiguration().catch(console.error)
+        
 
         if (this.shouldScroll) {
             (this.$refs["table"] as HTMLElement).addEventListener("scroll", () => {
@@ -361,6 +405,66 @@ export default class TableView extends Mixins(NavigationMixin) {
             }
             this.updateVisibleRows()
         }, { passive: true })
+    }
+
+    async loadColumnConfiguration() {
+        try {
+            const json = await Storage.keyValue.getItem("column-configuration-"+this.columnConfigurationId)
+            if (json !== null) {
+                const parsed = new ObjectData(JSON.parse(json), { version: Version })
+                const decoded = (new VersionBoxDecoder(ColumnConfiguration as Decoder<ColumnConfiguration>).decode(parsed)).data
+
+                for (const col of this.allColumns) {
+                    const config = decoded.columns.find(c => c.id === col.id)
+                    if (!config) {
+                        col.enabled = false
+                    } else {
+                        col.enabled = true
+                        col.width = config.width
+                        col.renderWidth = Math.floor(col.width)
+                        // Don't set renderWidth here, we'll call updateColumnWidth after this
+                    }
+                }
+
+                if (decoded.sortColumnId) {
+                    const sortBy = this.allColumns.find(c => c.id === decoded.sortColumnId)
+                    if (sortBy) {
+                        this.sortBy = sortBy
+                        this.sortDirection = decoded.sortDirection ?? SortDirection.Ascending
+                    }
+                }
+
+                console.info("Loaded existing column configuration")
+            }
+        } catch (error) {
+            console.error(error)
+        }
+        this.updateVisibleRows();
+        this.updateRecommendedWidths();
+        this.updateColumnWidth()
+    }
+
+    @Watch("columns")
+    onColumnsChanged() {
+        console.info("Columns changed")
+        this.updateColumnWidth()
+        this.saveColumnConfiguration()
+    }
+
+    saveColumnConfiguration() {
+        const configuration = ColumnConfiguration.create({
+            columns: this.columns.map(c => EnabledColumnConfiguration.create({ id: c.id, width: c.width ?? 0 })),
+            sortColumnId: this.sortBy.id,
+            sortDirection: this.sortDirection,
+        })
+
+        const versionBox = new VersionBox(configuration)
+        const json = JSON.stringify(versionBox.encode({ version: Version }))
+        Storage.keyValue.setItem("column-configuration-"+this.columnConfigurationId, json).catch(console.error)
+    }
+
+    onTableHeadRightClick() {
+        // Show a context menu to select the available columns
     }
 
     /**
@@ -553,6 +657,13 @@ export default class TableView extends Mixins(NavigationMixin) {
         return this.columns.map(col => `${(col.renderWidth ?? 0)}px`).join(" ")
     }
 
+    @Watch("gridTemplateColumns")
+    updateGridSize(val: string) {
+        if (!this.wrapColumns) {
+            (this.$refs["table"] as HTMLElement).style.setProperty("--table-columns", val);
+        }
+    }
+
     get filteredCount() {
         return this.allValues.length - this.filteredValues.length
     }
@@ -586,20 +697,21 @@ export default class TableView extends Mixins(NavigationMixin) {
 
 
     get sortedValues() {
-        const m = (this.sortDirection === "ASC" ? 1 : -1)
+        const m = (this.sortDirection === SortDirection.Ascending ? 1 : -1)
         return this.filteredValues.sort((a, b) => this.sortBy.compare(a, b) * m)
     }
 
     toggleSort(column: Column<any>) {
         if (this.sortBy === column) {
-            if (this.sortDirection == "ASC") {
-                this.sortDirection = "DESC";
+            if (this.sortDirection === SortDirection.Ascending) {
+                this.sortDirection = SortDirection.Descending;
             } else {
-                this.sortDirection = "ASC";
+                this.sortDirection = SortDirection.Ascending;
             }
-            return;
+        } else {
+            this.sortBy = column;
         }
-        this.sortBy = column;
+        this.saveColumnConfiguration()
     }
 
     setValues(allValues: TestValue[]) {
@@ -732,17 +844,8 @@ export default class TableView extends Mixins(NavigationMixin) {
                 console.log("Cached table y position at "+this.cachedTableYPosition)
             }
 
-            let topOffset = scrollElement.scrollTop - this.cachedTableYPosition
-
-            if (topOffset >= 0) {
-                // The table is not yet scrolled
-                // topOffset = 0
-            } else {
-                topOffset = -topOffset
-            }
-        }
-
-        
+            topOffset = (scrollElement.scrollTop - this.cachedTableYPosition)
+        }        
 
         const extraItems = 5
 
@@ -804,6 +907,11 @@ export default class TableView extends Mixins(NavigationMixin) {
         return 60
     }
 
+    @Watch("rowHeight")
+    updateRowHeight(val: number) {
+        (this.$refs["table"] as HTMLElement).style.setProperty("--table-row-height", `${val}px`);
+    }
+
     get totalHeight() {
         return this.rowHeight * this.filteredValues.length
     }
@@ -833,12 +941,17 @@ export default class TableView extends Mixins(NavigationMixin) {
         // position: absolute;
         // width: 150%;
         // height: 100%;
+
+        // If the total width of all the columns is smaller than the total width, still force the table
+        // to be 100% width
+        min-width: 100%;
     }
 
     &.scroll {
         overflow: auto;
         flex-grow: 1;
         position: relative;
+        z-index: 101;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
 
@@ -853,6 +966,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         contain: layout;
         position: relative;
         overflow: hidden;
+        width: 100%;
     }
 
     .table-row, .table-head {
@@ -893,23 +1007,8 @@ export default class TableView extends Mixins(NavigationMixin) {
         .table-head, .table-row {
             .columns {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+                grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(0, 1fr)));
                 align-items: center;
-
-                 will-change: grid-template-columns;
-
-                
-
-                /*display: flex;
-                flex-wrap: nowrap;
-                justify-content: flex-start;
-                align-items: center;*/
-
-                /*> div {
-                    flex-shrink: 0;
-                    flex-basis: 0;
-                    min-width: 0;
-                }*/
             }
         }
     }
@@ -975,17 +1074,30 @@ export default class TableView extends Mixins(NavigationMixin) {
             align-items: center;
             padding-right: 20px;
 
-            span:first-child {
+            > button:first-child {
+                flex-grow: 1;
+                flex-shrink: 1;
+
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                min-width: 0;
+                height: 40px;
+
+                // This is the clickable part
                 cursor: pointer;
                 touch-action: manipulation;
                 -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
 
                 &:active {
                     opacity: 0.6;
                 }
+            }
+
+            span:first-child {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             span {
@@ -997,15 +1109,10 @@ export default class TableView extends Mixins(NavigationMixin) {
                 flex-shrink: 0;
             }
 
-            .icon.collapse-left {
-                margin-left: auto;
-            }
-
             .drag-handle-container {
                 width: 2px;
                 height: 20px;
                 display: inline-block;
-                margin-left: auto;
                 position: relative;
                 padding-left: 20px;
                 flex-shrink: 0;
@@ -1063,7 +1170,10 @@ export default class TableView extends Mixins(NavigationMixin) {
     .table-row {
         contain: layout;
         position: absolute;
-        will-change: transform;
+        
+        // will-change performance slower on safari
+        //will-change: transform;
+        height: var(--table-row-height, 60px);
 
         .columns {
             border-bottom: 2px solid $color-border;
@@ -1072,6 +1182,7 @@ export default class TableView extends Mixins(NavigationMixin) {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                // will-change width makes column resizing a bit smoother on Safari (is more laggy in Safari)
                 will-change: contents, width;
             }
         }
@@ -1085,7 +1196,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         }
 
         &.selectable {
-            will-change: transform, background-color;
+           // will-change: transform, background-color;
             transition: background-color 0.15s;
             cursor: pointer;
             touch-action: manipulation;
