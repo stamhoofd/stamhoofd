@@ -14,7 +14,7 @@
 
     &[data-has-detail="true"] {
         > .master {
-            border-right: 2px solid $color-border;
+            border-right: $border-width-thin solid $color-border;
             background: $color-white-shade;
             --color-current-background: #{$color-background-shade};
             --color-current-background-shade: #{$color-background-shade-darker};
@@ -32,6 +32,7 @@
     }
 
     & > div {
+        border-radius: $border-radius-modals;
         overscroll-behavior: contain;
         height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px));
 
@@ -63,6 +64,7 @@
     transform: translate3d(0, 0, 0);
 
     > div {
+        border-radius: $border-radius-modals;
         width: 400px;
         overscroll-behavior: contain;
 

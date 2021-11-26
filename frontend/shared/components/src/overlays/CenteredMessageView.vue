@@ -148,8 +148,8 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     top: 50%;
     transform: translate(-50%, -50%);
     @extend .style-overlay-shadow;
-    border-radius: $border-radius;
-    background: $color-white;
+    border-radius: $border-radius-modals;
+    background: $color-white-shade;
     max-width: calc(100vw - 30px);
     width: 350px;
     padding: 20px 20px;
@@ -172,8 +172,8 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     > h1 {
-        padding-bottom: 20px;
-        padding-top: 20px;
+        padding-bottom: 15px;
+        padding-top: 15px;
         text-align: center;
         @extend .style-title-1;
 

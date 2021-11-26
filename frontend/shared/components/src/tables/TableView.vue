@@ -92,6 +92,9 @@ import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
+import { Column } from "./Column";
+import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
+
 interface Searchable {
     matchQuery(query: string): boolean;
 }
@@ -112,64 +115,6 @@ class TestValue implements Searchable {
     matchQuery(query: string): boolean {
         return StringCompare.contains(this.name, query)
     }
-}
-
-class Column<T> {
-    name: string
-    enabled = true
-    getValue: (val: T) => string
-    compare: (a: T, b: T) => number
-
-    constructor(settings: {
-        name: string, 
-        enabled?: boolean,
-        getValue: (val: T) => string, 
-        compare: (a: T, b: T) => number,
-        grow?: number,
-        minimumWidth?: number,
-        recommendedWidth?: number,
-    }) {
-        this.enabled = settings.enabled ?? true
-        this.name = settings.name
-        this.getValue = settings.getValue
-        this.compare = settings.compare
-        this.grow = settings?.grow ?? 1
-        this.minimumWidth = settings?.minimumWidth ?? 100
-        this.recommendedWidth = settings?.recommendedWidth ?? 100
-
-        this.width = this.recommendedWidth
-    }
-
-    get id() {
-        return this.name
-    }
-
-    didReachMinimum() {
-        return this.width && this.width <= this.minimumWidth
-    }
-
-    /**
-     * null means: generate width + save it,  based on grow property
-     */
-    width: number | null = null
-
-    /**
-     * renderWidth is floored version of width, to use in CSS
-     */
-    renderWidth: number | null = null
-
-    /**
-     * Minimum width in pixels. Best minimum is 100, because this is needed for sort icon + drag handle + padding
-     */
-    minimumWidth = 100
-
-    recommendedWidth = 100
-
-    /**
-     * Used for default width (behaves like flex-grow)
-     * and for resizing
-     */
-    grow = 1
 }
 
 class VisibleRow<T> {
@@ -465,8 +410,14 @@ export default class TableView extends Mixins(NavigationMixin) {
         Storage.keyValue.setItem("column-configuration-"+this.columnConfigurationId, json).catch(console.error)
     }
 
-    onTableHeadRightClick() {
+    onTableHeadRightClick(event) {
         // Show a context menu to select the available columns
+        const displayedComponent = new ComponentWithProperties(ColumnSelectorContextMenu, {
+            x: event.clientX,
+            y: event.clientY + 10,
+            columns: this.allColumns,
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
     /**

@@ -188,19 +188,19 @@ export default class ContextMenu extends Vue {
 .context-menu {
     position: fixed;
     z-index: 10000;
-    background: $color-background-shade;
+
+    background: $color-background-shade-darker;
     
-    --color-current-background: #{$color-background-shade};
-    --color-current-background-shade: #{$color-background-shade-darker};
+    --color-current-background: #{$color-background-shade-darker};
+    --color-current-background-shade: #{$color-border};
 
     border: 2px solid $color-border-shade;
-    padding: 4px 0;
+    padding: 6px 20px;
 
-    border-radius: $border-radius;
     @extend .style-overlay-shadow;
-    border-radius: $border-radius;
+    border-radius: $border-radius-modals;
     box-sizing: border-box;
-    min-width: 250px;
+    min-width: 200px;
     max-width: 100vw;
     max-width: calc(100vw - 30px);
     overflow: hidden;
@@ -214,9 +214,19 @@ export default class ContextMenu extends Vue {
         flex-direction: row;
         align-items: center;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        min-height: 32px;
+        margin: 0 -14px;
+        padding: 0 14px;
+        border-radius: $border-radius;
 
         > .middle {
-            padding: 10px 20px;
+            padding: 2px 0;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
         }
 
         > .right {
@@ -225,7 +235,7 @@ export default class ContextMenu extends Vue {
             }
             margin-left: auto;
             flex-shrink: 0;
-            padding-right: 20px;
+            padding-left: 20px;
         }
 
         &:hover {
@@ -243,12 +253,12 @@ export default class ContextMenu extends Vue {
     }
 
     .context-menu-line {
-        background: $color-border;
+        background: $color-border-shade;
         border: 0;
         outline: 0;
         border-radius: $border-width/2;
         height: $border-width;
-        margin: 4px 0;
+        margin: 6px 0;
     }
 }
 </style>

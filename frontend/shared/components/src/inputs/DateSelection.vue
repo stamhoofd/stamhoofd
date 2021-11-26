@@ -1,6 +1,6 @@
 <template>
     <div class="input-icon-container right icon arrow-down-small gray">
-        <div class="input" @click="openContextMenu">
+        <div class="input selectable" @click="openContextMenu">
             {{ dateText }}
         </div>
     </div>

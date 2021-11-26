@@ -184,7 +184,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     > header{
-        padding: 10px 10px;
+        padding: 10px 0px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -201,7 +201,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
 
         > .days {
             display: flex;
-            padding: 0px 10px;
+            padding: 0px 0px;
             padding-bottom: 7px;
             margin-bottom: 5px;
             border-bottom: 2px solid var(--color-current-border, #{$color-border});
@@ -220,7 +220,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
 
         > .row {
             display: flex;
-            padding: 3px 10px;
+            padding: 3px 0px;
 
             > button {
                 flex-grow: 1;

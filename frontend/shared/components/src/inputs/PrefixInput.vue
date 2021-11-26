@@ -7,6 +7,11 @@
             ref="input"
             v-model="internalValue"
             type="text"
+            spellcheck="false"
+            autocorrect="off"
+            autocomplete="off"
+            autocapitalize="none"
+            @input="internalValue = $event.target.value"
             @focus="onFocus"
             @blur="onBlur"
         >

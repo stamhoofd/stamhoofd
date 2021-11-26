@@ -1,5 +1,8 @@
 // Colors
 $input-height: 44px;
+$font-weight-default: normal;
+$font-weight-medium: 500;
+$font-weight-bold: 600;
 
 $color-primary-original: #0053ff;
 $color-primary: var(--color-primary, $color-primary-original);
@@ -12,8 +15,8 @@ $color-dark: var(--color-dark, $color-dark-original);
 
 $color-primary-destination: var(--color-primary, #2700ff);
 
-$color-error: #FF1741;
-
+//$color-error: #FF1741;
+$color-error: #f0153d;
 
 $color-error-border-original: #FFCAD3;
 $color-error-border: var(--color-error-border, $color-error-border-original);
@@ -34,7 +37,7 @@ $color-success-border-focus: $color-success;
 $color-gray-dark-original: #5e5e5e;
 $color-gray-dark: var(--color-gray-dark, $color-gray-dark-original);
 
-$color-gray-text: #777777;
+$color-gray-text: $color-gray-dark;
 
 $color-gray-original: #868686;
 $color-gray: var(--color-gray, $color-gray-original);
@@ -90,13 +93,18 @@ $color-warning-dark: var(--color-warning-dark, $color-warning-dark-original);
 // Other
 $border-width: 2px;
 $border-width-thin: 2px;
-$border-radius: 5px;
+$border-radius: 6px;
+$border-radius-modals: 10px;
 
 // Aliasses
-$color-border: $color-gray-lighter; 
-$color-border-shade: $color-gray-light;
+
+$color-border-lighter: $color-gray-lighter; 
+$color-border: $color-gray-light; 
+$color-border-shade: #D1D1D1;
+
 $color-background-shade: $color-white-shade;
-$color-background-shade-darker: $color-gray-lighter;
+$color-background-shade-darker: #EBEBEB;
+$color-border-shade-darker: #D1D1D1;
 
 $color-shadow-original: rgba(0, 0, 0, 0.05);
 $color-shadow: var(--color-shadow, $color-shadow-original);
@@ -104,7 +112,7 @@ $color-shadow: var(--color-shadow, $color-shadow-original);
 $color-side-view-shadow-original: rgba(0, 0, 0, 0.1);
 $color-side-view-shadow: var(--color-side-view-shadow, $color-side-view-shadow-original);
 
-$color-overlay-shadow-original: rgba(0, 0, 0, 0.15);
+$color-overlay-shadow-original: rgba(0, 0, 0, 0.2);
 $color-overlay-shadow: var(--color-overlay-shadow, $color-overlay-shadow-original);
 
 $color-box-shadow-original: rgba(0, 0, 0, 0.05);

@@ -269,6 +269,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     > h3 {
         @extend .style-label;
         padding-bottom: 10px;
+        padding-top: 15px;
     }
 
     .module-box {

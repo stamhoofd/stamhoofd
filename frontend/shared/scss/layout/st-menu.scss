@@ -43,8 +43,8 @@
     }
 
     > main > hr, > main > .container > hr {
-        height: $border-width;
-        border-radius: $border-width/2;
+        height: $border-width-thin;
+        border-radius: $border-width-thin/2;
         background: $color-gray-light;
         border: 0;
         outline: 0;
@@ -113,7 +113,6 @@
         &.selected {
             background-color: $color-primary-light;
             color: $color-primary;
-            font-weight: 600;
         }
 
         &.button {

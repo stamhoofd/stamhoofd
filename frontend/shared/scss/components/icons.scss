@@ -25,6 +25,9 @@
     display: inline-flex; // needed for proper vertical alignemnt of icons
     vertical-align: middle;
     align-items: center;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     
     &.light-gray {
         color: $color-gray-light;

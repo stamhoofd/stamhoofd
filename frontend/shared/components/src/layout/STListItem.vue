@@ -176,10 +176,10 @@ a.st-list-item {
         > hr {
             border: 0;
             outline: 0;
-            height: $border-width;
+            height: $border-width-thin;
             width: 100%;
-            background: var(--color-current-border, #{$color-border});
-            border-radius: $border-width/2;
+            background: var(--color-current-border, #{$color-border-lighter});
+            border-radius: $border-width-thin/2;
             margin: 0;
             margin-right: calc(-1 * var(--st-horizontal-padding, 15px));
 
