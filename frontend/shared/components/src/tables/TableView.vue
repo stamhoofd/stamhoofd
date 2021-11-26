@@ -439,6 +439,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         } catch (error) {
             console.error(error)
         }
+        this.updateRowHeight()
         this.updateVisibleRows();
         this.updateRecommendedWidths();
         this.updateColumnWidth()
@@ -447,6 +448,7 @@ export default class TableView extends Mixins(NavigationMixin) {
     @Watch("columns")
     onColumnsChanged() {
         console.info("Columns changed")
+        this.updateRowHeight()
         this.updateColumnWidth()
         this.saveColumnConfiguration()
     }
@@ -907,9 +909,9 @@ export default class TableView extends Mixins(NavigationMixin) {
         return 60
     }
 
-    @Watch("rowHeight")
-    updateRowHeight(val: number) {
-        (this.$refs["table"] as HTMLElement).style.setProperty("--table-row-height", `${val}px`);
+    // Can't use a watcher since rowHeight is never used
+    updateRowHeight() {
+        (this.$refs["table"] as HTMLElement).style.setProperty("--table-row-height", `${this.rowHeight}px`);
     }
 
     get totalHeight() {
