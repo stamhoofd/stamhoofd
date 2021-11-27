@@ -352,8 +352,8 @@ export default class TableView extends Mixins(NavigationMixin) {
                 if (!column || column.width === null) {
                     break
                 }
-                // Move the column if they overlap at least 40px
-                const neededMove = 40
+                // Move the column if they overlap at least 50%
+                const neededMove = column.width / 2
                 if (Math.abs(remainingDifference) > neededMove) {
                     remainingDifference -= column.width*shouldMove
                     columnMoveIndex += shouldMove
@@ -471,7 +471,6 @@ export default class TableView extends Mixins(NavigationMixin) {
 
     @Watch("columns")
     onColumnsChanged() {
-        console.info("Columns changed")
         this.updateRowHeight()
         this.updateColumnWidth()
         this.saveColumnConfiguration()
@@ -1050,15 +1049,6 @@ export default class TableView extends Mixins(NavigationMixin) {
                 display: grid;
                 grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(0, 1fr)));
                 align-items: center;
-
-                > div {
-                    transition: transform 0.2s;
-
-                    &.isDragging {
-                        transform: translateX(var(--drag-x, 0px));
-                        transition: none;
-                    }
-                }
             }
         }
 
@@ -1073,6 +1063,16 @@ export default class TableView extends Mixins(NavigationMixin) {
 
                     &.isDragging {
                         opacity: 0.5;
+                    }
+
+                    transition: transform 0.2s, opacity 0.2s;
+
+                    &.isDragging {
+                        transform: translateX(var(--drag-x, 0px));
+                        opacity: 0.5;
+
+                        // Don't animate transform during drags
+                        transition: opacity 0.2s;
                     }
                 }
             }
@@ -1157,8 +1157,28 @@ export default class TableView extends Mixins(NavigationMixin) {
                 touch-action: manipulation;
                 -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
+                // For drags
+                transition: transform 0.2s, opacity 0.2s;
+
                 &:active {
                     opacity: 0.6;
+                }
+            }
+
+            &.isDragging {
+                
+                // During drag, we move all, except the column drag indicator
+                > button:first-child {
+                    transform: translateX(var(--drag-x, 0px));
+                    opacity: 0.5;
+                    cursor: grabbing;
+
+                    // Don't animate transform during drags
+                    transition: opacity 0.2s;
+
+                    &:active {
+                        opacity: 0.5;
+                    }
                 }
             }
 
