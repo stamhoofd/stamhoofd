@@ -201,6 +201,11 @@ export default class ContextMenu extends Vue {
     border-radius: $border-radius-modals;
     box-sizing: border-box;
     min-width: 200px;
+
+    @media (max-width: 400px) {
+        min-width: 70vw;
+    }
+
     max-width: 100vw;
     max-width: calc(100vw - 30px);
     overflow: hidden;
@@ -218,6 +223,18 @@ export default class ContextMenu extends Vue {
         margin: 0 -14px;
         padding: 0 14px;
         border-radius: $border-radius;
+
+        @media (max-width: 400px) {
+            min-height: 40px;
+        }
+
+        > .left {
+            &:empty {
+                display: none;
+            }
+            flex-shrink: 0;
+            padding-right: 15px;
+        }
 
         > .middle {
             padding: 2px 0;
@@ -238,12 +255,11 @@ export default class ContextMenu extends Vue {
             padding-left: 20px;
         }
 
+
         &:hover {
             background: $color-primary;
             color: $color-white;
-            > * {
-                --color-primary: #{$color-white};
-            }
+
         }
 
         &.clicked {

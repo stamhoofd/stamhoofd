@@ -17,7 +17,7 @@
     background: var(--color-white, white);
     border-radius: $border-radius;
     padding: 5px 15px;
-
+    text-align: left;
     height: $input-height;
     line-height: $input-height - 10px - 2 * $border-width;
     margin: 0;
@@ -28,6 +28,11 @@
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     word-break: normal;
+
+    // On iOS, the time is centered on inputs, this is not what we want
+    &::-webkit-date-and-time-value {
+        text-align: left;
+    }
 
     &.selectable {
         touch-action: manipulation;

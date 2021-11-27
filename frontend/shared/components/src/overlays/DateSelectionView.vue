@@ -179,8 +179,8 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     min-width: 300px;
     user-select: none;
 
-    @media (max-width: 330px) {
-        min-width: calc(100vw - 30px);
+    @media (max-width: 400px) {
+        min-width: calc(100vw - 30px - 40px - 4px);
     }
 
     > header{
@@ -229,6 +229,10 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                 z-index: 1;
                 margin: 0;
                 padding: 7px 0;
+
+                @media (max-width: 400px) {
+                    padding: 12px 0;
+                }
 
                 cursor: pointer;
                 touch-action: manipulation;

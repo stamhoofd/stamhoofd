@@ -1,9 +1,8 @@
 <template>
     <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
-        <ContextMenuItem v-for="column of columns" :key="column.id">
-            <Checkbox v-model="column.enabled">
-                {{ column.name }}
-            </Checkbox>
+        <ContextMenuItem v-for="column of columns" :key="column.id" element-name="label">
+            <Checkbox slot="left" v-model="column.enabled" :only-line="true" />
+            {{ column.name }}
         </ContextMenuItem>
     </ContextMenu>
 </template>

@@ -329,14 +329,29 @@ export default class TableView extends Mixins(NavigationMixin) {
         
         this.loadColumnConfiguration().catch(console.error)
         
-
+        let ticking = false
         if (this.shouldScroll) {
             (this.$refs["table"] as HTMLElement).addEventListener("scroll", () => {
-                this.updateVisibleRows()
+                
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        this.updateVisibleRows()
+                        ticking = false;
+                    });
+
+                    ticking = true;
+                }
             }, { passive: true })
         } else {
             document.addEventListener("scroll", () => {
-                this.updateVisibleRows()
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        this.updateVisibleRows()
+                        ticking = false;
+                    });
+
+                    ticking = true;
+                }
             }, { passive: true })
         }
 
@@ -852,9 +867,9 @@ export default class TableView extends Mixins(NavigationMixin) {
         if (this.wrapColumns) {
             const padding = 15
             const firstColumnHeight = 16
-            const otherColumnsHeight = 16
+            const otherColumnsHeight = 14
             const borderHeight = 2
-            const margin = 5
+            const margin = 6
             return padding * 2 + firstColumnHeight + ((otherColumnsHeight + margin) * Math.max(this.columns.length - 1, 0)) + borderHeight
         }
         return 60
@@ -978,22 +993,24 @@ export default class TableView extends Mixins(NavigationMixin) {
                 padding: 15px 0;
 
                 > div {
-                    font-size: 16px;
-                    height: 16px;
-                    line-height: 16px;
+                    font-size: 14px;
+                    height: 14px;
+                    line-height: 14px;
                     color: $color-gray;
                     box-sizing: content-box;
 
-                    padding-bottom: 5px;
+                    padding-bottom: 6px;
 
                     &:first-child {
                         font-size: 16px;
                         height: 16px;
                         line-height: 16px;
+                        font-weight: $font-weight-medium;
                         color: $color-dark;
                     }
 
                     &:last-child {
+                        
                         padding-bottom: 0;
                     }
                 }
@@ -1005,7 +1022,7 @@ export default class TableView extends Mixins(NavigationMixin) {
 
     .table-head {
         height: 70px;
-        border-bottom: 2px solid $color-border;
+        border-bottom: 2px solid $color-border-lighter;
         position: sticky;
         top: 0px;
         z-index: 100;
@@ -1129,7 +1146,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         height: var(--table-row-height, 60px);
 
         .columns {
-            border-bottom: 2px solid $color-border;
+            border-bottom: 2px solid $color-border-lighter;
 
             > div {
                 white-space: nowrap;

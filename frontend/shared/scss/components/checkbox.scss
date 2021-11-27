@@ -1,6 +1,50 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
+.checkbox-line {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    touch-action: manipulation;
+    user-select: none;
+
+    display: inline-block; // needed to not cover whole width, since that might cause accidental clicks
+    cursor: pointer;
+
+    > input {
+        display: none;
+    }
+
+    > div {
+        @extend .style-input;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    > div > div:first-child {
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    svg > path {
+        stroke-dasharray: 30;
+        stroke-dashoffset: 30;
+        stroke: currentColor;
+        transition: stroke-dashoffset 0.4s 0.1s;
+    }
+
+    input:checked + div {
+        > div:first-child {
+            svg > path {
+                stroke-dashoffset: 0;
+            }
+        }
+    }
+}
+
 .radio,
 .checkbox {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -28,7 +72,7 @@
             flex-shrink: 0;
             flex-basis: 20px;
             border-radius: $border-radius;
-            border: $border-width solid $color-gray-light;
+            border: $border-width solid $color-border;
             background: transparent;
             box-sizing: border-box;
             transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
@@ -98,7 +142,7 @@
         cursor: not-allowed;
 
         > div:first-child {
-            border: $border-width solid $color-gray-light;
+            border: $border-width solid $color-border;
             background: $color-white-shade;
 
             &:active {
@@ -113,8 +157,8 @@
 
     > input:disabled:checked + div  {
         > div:first-child {
-            border: $border-width solid $color-gray-light;
-            background: $color-gray-light;
+            border: $border-width solid $color-border;
+            background: $color-border;
 
             svg > path {
                 stroke: $color-gray;

@@ -1,8 +1,18 @@
 // Colors
 $input-height: 44px;
-$font-weight-default: normal;
-$font-weight-medium: 500;
-$font-weight-bold: 600;
+
+$font-weight-default: var(--font-weight-default, 500);
+
+// On desktop, medium is same as default
+$font-weight-medium: var(--font-weight-medium, 500);
+$font-weight-semibold: var(--font-weight-semibold, 600);
+$font-weight-bold: var(--font-weight-bold, 600);
+
+@media (max-width: 400px) {
+    :root {
+        --navigation-bar-margin: 0px;
+    }
+}
 
 $color-primary-original: #0053ff;
 $color-primary: var(--color-primary, $color-primary-original);
@@ -10,7 +20,7 @@ $color-primary: var(--color-primary, $color-primary-original);
 $color-primary-gray-light-original: #9DB7EC;
 $color-primary-gray-light: var(--color-primary-gray-light, $color-primary-gray-light-original);
 
-$color-dark-original: #000716;
+$color-dark-original: #1D2129;// #000716;
 $color-dark: var(--color-dark, $color-dark-original);
 
 $color-primary-destination: var(--color-primary, #2700ff);
@@ -93,7 +103,7 @@ $color-warning-dark: var(--color-warning-dark, $color-warning-dark-original);
 // Other
 $border-width: 2px;
 $border-width-thin: 2px;
-$border-radius: 6px;
+$border-radius: 5px;
 $border-radius-modals: 10px;
 
 // Aliasses
