@@ -64,14 +64,20 @@ export default class Tooltip extends Vue {
     z-index: 10000;
     left: 0;
     top: 0;
-    background: $color-dark;
-    padding: 10px 15px;
-    border-radius: $border-radius;
     @extend .style-description-small;
     @extend .style-overlay-shadow;
-    color: $color-white;
     box-sizing: border-box;
     max-width: 350px;
+
+    background: $color-background-shade-darker;
+    
+    --color-current-background: #{$color-background-shade-darker};
+    --color-current-background-shade: #{$color-border};
+
+    border: 2px solid $color-border-shade;
+    padding: 8px 15px;
+    border-radius: $border-radius-modals;
+    color: $color-dark;
 
     @media (max-width: 350px + 30px) {
         max-width: 100vw;
