@@ -1,7 +1,7 @@
 <template>
     <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
         <ContextMenuItem v-for="column of columns" :key="column.id" element-name="label">
-            <Checkbox slot="left" v-model="column.enabled" :only-line="true" />
+            <Checkbox slot="left" :checked="column.enabled" :only-line="true" @change="setColumnEnabled(column, $event)" />
             {{ column.name }}
         </ContextMenuItem>
     </ContextMenu>
@@ -37,6 +37,11 @@ export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     columns: Column<any>[];
+
+    setColumnEnabled(column: Column<any>, enabled: boolean) {
+        column.width = null
+        column.enabled = enabled
+    }
 
 }
 </script>

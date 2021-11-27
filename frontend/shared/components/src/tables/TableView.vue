@@ -44,8 +44,8 @@
                     </div>
 
                     <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                        <div v-for="(column, index) of columns" :key="column.id">
-                            <button @click="toggleSort(column)">
+                        <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
+                            <button @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
                                 <span>{{ column.name }}</span>
 
                                 <span v-if="sortBy === column"
@@ -68,7 +68,7 @@
                             <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                         </div>
                         <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                            <div v-for="column of columns" :key="column.id">
+                            <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
                                 {{ row.value ? column.getValue(row.value) : "" }}
                             </div>
                         </div>
@@ -219,6 +219,11 @@ export default class TableView extends Mixins(NavigationMixin) {
         return this.allColumns.filter(c => c.enabled)
     }
 
+    get hiddenColumns() {
+        return this.allColumns.filter(c => !c.enabled)
+    }
+
+
     //@Prop({ default: true})
     wrapColumns = window.innerWidth < 600
     showSelection = !this.wrapColumns
@@ -248,6 +253,9 @@ export default class TableView extends Mixins(NavigationMixin) {
     isDraggingColumn: Column<any> | null = null
     draggingStartX = 0
     draggingInitialWidth = 0
+    draggingInitialColumns: Column<any>[] = []
+    isColumnDragActive = false
+    dragType: "width" | "order" = "width"
 
     getEventX(event: any) {
         let x = 0;
@@ -262,16 +270,30 @@ export default class TableView extends Mixins(NavigationMixin) {
         return x;
     }
 
+    columnDragStart(event, column: Column<any>) {
+        this.draggingStartX = this.getEventX(event);
+        this.isDraggingColumn = column
+        this.dragType = "order"
+        this.draggingInitialColumns = this.columns.slice()
+        this.isColumnDragActive = false
+        this.attachDragHandlers()
+    }
+
     handleDragStart(event, column: Column<any>) {
         this.draggingStartX = this.getEventX(event);
         this.isDraggingColumn = column
+        this.dragType = "width"
         this.draggingInitialWidth = column.width ?? 0
+        this.isColumnDragActive = true
         this.attachDragHandlers()
     }
 
     attachDragHandlers() {
         this.updateRecommendedWidths();
-        (this.$refs["table"] as HTMLElement).style.cursor = "col-resize"
+
+        if (this.isColumnDragActive) {
+            (this.$refs["table"] as HTMLElement).style.cursor = this.dragType === "width" ? "col-resize" : "grabbing"
+        }
         document.addEventListener("mousemove", this.mouseMove, {
             passive: false,
         });
@@ -301,13 +323,55 @@ export default class TableView extends Mixins(NavigationMixin) {
         const currentX = this.getEventX(event)
         const difference = currentX - this.draggingStartX
 
-        const currentWidth = this.totalWidth
+        if (!this.isColumnDragActive) {
+            if (Math.abs(difference) > 5) {
+                this.isColumnDragActive = true;
+                (this.$refs["table"] as HTMLElement).style.cursor = this.dragType === "width" ? "col-resize" : "grabbing"
+            } else {
+                return
+            }
+        }
 
-        const newWidth = this.draggingInitialWidth + difference
-        this.isDraggingColumn.width =  Math.max(newWidth, this.isDraggingColumn.minimumWidth)
-        this.isDraggingColumn.renderWidth = Math.floor(this.isDraggingColumn.width)
+        if (this.dragType === "width") {
+            const currentWidth = this.totalWidth
 
-        this.updateColumnWidth(this.isDraggingColumn, "move", currentWidth)
+            const newWidth = this.draggingInitialWidth + difference
+            this.isDraggingColumn.width =  Math.max(newWidth, this.isDraggingColumn.minimumWidth)
+            this.isDraggingColumn.renderWidth = Math.floor(this.isDraggingColumn.width)
+
+            this.updateColumnWidth(this.isDraggingColumn, "move", currentWidth)
+        } else {
+            // We swap columns if the startX of the column moves over the middle of a different column            
+            // Calculate how many columns we have moved in the X direction 
+            let startIndex = this.draggingInitialColumns.findIndex(c => c === this.isDraggingColumn)
+            let columnMoveIndex = 0
+            let remainingDifference = difference
+            while (Math.sign(remainingDifference) === Math.sign(difference)) {
+                let shouldMove = (remainingDifference < 0) ? -1 : 1
+                const column = this.draggingInitialColumns[startIndex + shouldMove + columnMoveIndex]
+                if (!column || column.width === null) {
+                    break
+                }
+                // Move the column if they overlap at least 40px
+                const neededMove = 40
+                if (Math.abs(remainingDifference) > neededMove) {
+                    remainingDifference -= column.width*shouldMove
+                    columnMoveIndex += shouldMove
+                } else {
+                    break
+                }
+            }
+
+            const columns = this.draggingInitialColumns.slice()
+            columns.splice(startIndex, 1);
+            columns.splice(startIndex + columnMoveIndex, 0, this.isDraggingColumn);
+
+            this.allColumns = [...columns, ...this.hiddenColumns];
+
+            // Translate moving column with mouse
+            (this.$refs["table"] as HTMLElement).style.setProperty("--drag-x", `${remainingDifference}px`);
+
+        }
 
         // Prevent scrolling (on mobile) and other stuff
         event.preventDefault();
@@ -494,14 +558,19 @@ export default class TableView extends Mixins(NavigationMixin) {
 
         const affectedColumns = afterColumn ? this.columns.slice(this.columns.findIndex(c => c === afterColumn ) + 1) : this.columns
 
+
         if (strategy === "grow") {
             // Step 1: use recommendedWidth as minimum width in first round
             let growTotal = affectedColumns.reduce((acc, col) => acc + ((distributeWidth < 0 && col.width !== null && col.width <= col.recommendedWidth) ? 0 : col.grow), 0);
             
-            while (distributeWidth != 0 && growTotal > 0) {
+            // Force the first pass, even if distributeWidth is zero, because some columns might not meet their miniumum recommended width or minimum width
+            let forceFirstPass = !!affectedColumns.find(c => c.width === 0 || c.width === null)
+
+            while ((forceFirstPass || distributeWidth != 0) && growTotal > 0) {
                 const widthPerGrow = distributeWidth / growTotal;
                 distributeWidth = 0
                 growTotal = 0
+                forceFirstPass = false
 
                 for (let col of affectedColumns) {
                     if (widthPerGrow < 0 && col.width !== null && col.width <= col.recommendedWidth) {
@@ -514,7 +583,7 @@ export default class TableView extends Mixins(NavigationMixin) {
                     const change = col.grow * widthPerGrow
                     col.width += change;
 
-                    if (change < 0 && col.width <= col.recommendedWidth) {
+                    if (col.width <= col.recommendedWidth) {
                         // we hit the minimum width, so we need to distribute the width that we couldn't absorb
                         const couldNotAbsorb = col.recommendedWidth - col.width
                         distributeWidth -= couldNotAbsorb;
@@ -670,6 +739,10 @@ export default class TableView extends Mixins(NavigationMixin) {
     }
 
     toggleSort(column: Column<any>) {
+        if (this.isColumnDragActive) {
+            console.log("Ignored sort toggle due to drag")
+            return
+        }
         if (this.sortBy === column) {
             if (this.sortDirection === SortDirection.Ascending) {
                 this.sortDirection = SortDirection.Descending;
@@ -977,6 +1050,31 @@ export default class TableView extends Mixins(NavigationMixin) {
                 display: grid;
                 grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(0, 1fr)));
                 align-items: center;
+
+                > div {
+                    transition: transform 0.2s;
+
+                    &.isDragging {
+                        transform: translateX(var(--drag-x, 0px));
+                        transition: none;
+                    }
+                }
+            }
+        }
+
+        .table-row {
+            .columns {
+                > div {
+                    padding-right: 20px;
+                    
+                    &:last-child {
+                        padding-right: 0;
+                    }
+
+                    &.isDragging {
+                        opacity: 0.5;
+                    }
+                }
             }
         }
     }
