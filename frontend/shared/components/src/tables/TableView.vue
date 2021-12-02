@@ -600,7 +600,7 @@ export default class TableView extends Mixins(NavigationMixin) {
                     distributeWidth -= col.recommendedWidth
                     col.renderWidth = Math.floor(col.width);
 
-                    console.log("Colmun", col.name, "didn't have a width, so we set it to", col.width)
+                    //console.log("Colmun", col.name, "didn't have a width, so we set it to", col.width)
                 }
 
                 if (col.width < col.minimumWidth) {
@@ -608,7 +608,7 @@ export default class TableView extends Mixins(NavigationMixin) {
                     col.width = col.minimumWidth
                     col.renderWidth = Math.floor(col.width);
 
-                    console.log("Colmun", col.name, "was smaller than the minimum width and decreased the distributeWidth")
+                    //console.log("Colmun", col.name, "was smaller than the minimum width and decreased the distributeWidth")
                 }
             }
 
@@ -623,7 +623,7 @@ export default class TableView extends Mixins(NavigationMixin) {
             let columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null && c.width < getColumnMinimum(c))
 
             if (columns.length == 0 && !didSwitch) {
-                console.log("Done with recommendedWidth, now trying with minimumWidth")
+                //console.log("Done with recommendedWidth, now trying with minimumWidth")
                 getColumnMinimum = (col: Column<any>) => col.minimumWidth
                 columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
                 didSwitch = true
@@ -638,7 +638,7 @@ export default class TableView extends Mixins(NavigationMixin) {
                     change = Math.sign(distributeWidth)
                 }
 
-                console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
+                //console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
                 
                 // We'll make sure we never grow or shrink more than the distribute width
 
@@ -651,7 +651,7 @@ export default class TableView extends Mixins(NavigationMixin) {
 
                     if ((shrinking && change < distributeWidth) || (!shrinking && change > distributeWidth)) {
                         // Prevent growing more than the distributeWidth
-                        console.log("Limited change to distributeWidth", change, distributeWidth)
+                        //console.log("Limited change to distributeWidth", change, distributeWidth)
                         change = distributeWidth
                     }
 
@@ -667,11 +667,11 @@ export default class TableView extends Mixins(NavigationMixin) {
                         const absorbed = -(start - col.width)
                         distributeWidth -= absorbed;
 
-                        console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
+                        //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
 
                     } else {
                         distributeWidth -= change;
-                        console.log("Column", col.name, "absorbed", change, "of", change, "and is now at", col.width)
+                        //console.log("Column", col.name, "absorbed", change, "of", change, "and is now at", col.width)
                     }
                     col.renderWidth = Math.floor(col.width);
                 }
@@ -680,7 +680,7 @@ export default class TableView extends Mixins(NavigationMixin) {
                 columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null && c.width < getColumnMinimum(c))
 
                 if (columns.length == 0 && !didSwitch) {
-                    console.log("Done with recommendedWidth, now trying with minimumWidth")
+                    //console.log("Done with recommendedWidth, now trying with minimumWidth")
                     getColumnMinimum = (col: Column<any>) => col.minimumWidth
                     columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
                     didSwitch = true
@@ -688,7 +688,7 @@ export default class TableView extends Mixins(NavigationMixin) {
 
             }
 
-            console.log("Done distributing with distributeWidth left: ", distributeWidth)
+            //console.log("Done distributing with distributeWidth left: ", distributeWidth)
         } else {
             // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
