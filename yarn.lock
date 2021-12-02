@@ -2268,10 +2268,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.10.0.tgz#f6669e4012a6aec4b1ea8d67a802b880b0cf023c"
   integrity sha512-YVyV/XnSBprBEmGmitUxQmnTVzYSfI1IymxlAh0YjbMoy6i55uX/2RjU6TILbI0gerdolXCNljPHC4xzWYNehQ==
 
-"@simonbackx/vue-app-navigation@1.22.1":
-  version "1.22.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.22.1.tgz#f219f8bf0c786a8c45be17fa4b42b66176fc736a"
-  integrity sha512-Lt551+uvY2/hE8MEcAx0JPoblJUGk60hNA8BZiQ1LpSxTTf+msGCxt1ClKPGl68Rbf5xN5DyGIw4iY13DbyDDA==
+"@simonbackx/vue-app-navigation@1.22.2":
+  version "1.22.2"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.22.2.tgz#65cebc3d3f5ce4ca9c39f1bb693db1bc49c15bd5"
+  integrity sha512-JweDVuzC08uhDpliT25VmPxMjA0XuYDsM0jWUP0KE6/EgZdkRIosiRS7fTZSzr0HKafhMN/d9TQN2usL90Vs8w==
 
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"

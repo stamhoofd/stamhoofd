@@ -66,10 +66,12 @@
                     <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: !!clickHandler }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }">
                         <div v-if="showSelection" class="selection-column">
                             <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
+                            <Checkbox v-else :checked="false" />
                         </div>
                         <div class="columns" :class="{ 'show-checkbox': showSelection }">
                             <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
                                 {{ row.value ? column.getValue(row.value) : "" }}
+                                <span v-if="!row.value" class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(column.width, column.recommendedWidth)-30))+'px'}" />
                             </div>
                         </div>
                     </div>
@@ -100,14 +102,20 @@ interface TableListable {
 class VisibleRow<T> {
     id = uuidv4()
     y = 0
+
+    /**
+     * currentIndex = null -> available for reause
+     */
     currentIndex: null | number = null
 
     /**
-     * If row is not set, this means that it can be reused again + that it shouldn't get rendered
+     * value = null -> show loading indicator
      */
     value: T | null = null
 
     cachedSelectionValue = false
+
+    skeletonPercentage = Math.random() * 0.5 + 0.5
 }
 
 enum SortDirection {
@@ -157,6 +165,9 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     // This contains the data we want to show
     @Prop({ required: true})
     allValues!: Value[]
+
+    @Prop({ required: false, default: null })
+    estimatedRows!: number | null
 
     @Prop({ required: true})
     filterDefinitions!: FilterDefinition<Value, any, any>[]/* = [
@@ -367,6 +378,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         /*for (let index = 0; index < 10000; index++) {
             this.allValues.push(new Value(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
         }*/
+
+        console.log("estimatedRows", this.estimatedRows)
         
         this.loadColumnConfiguration().catch(console.error)
         
@@ -459,9 +472,16 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         
     }
 
+    @Watch("wrapColumns")
+    onWrapChanged() {
+        this.updateRowHeight()
+        this.updateVisibleRows()
+    }
+
     @Watch("columns")
     onColumnsChanged() {
         this.updateRowHeight()
+        this.updateVisibleRows()
         this.updateColumnWidth()
         this.saveColumnConfiguration()
     }
@@ -509,6 +529,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             if (width > maximum) {
                 maximum = width
             }
+            let found = false
 
             for (const visibleRow of this.visibleRows) {
                 const value = visibleRow.value
@@ -516,6 +537,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 if (!value) {
                     continue
                 }
+                found = true
 
                 const text = column.getValue(value)
 
@@ -527,7 +549,9 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             }
 
             // Also add some padding
-            column.recommendedWidth = maximum + 20
+            if (found) (
+                column.recommendedWidth = maximum + 20
+            )
         }
 
         document.body.removeChild(measureDiv)
@@ -845,7 +869,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         for (const visibleRow of this.visibleRows) {
             // has this row changed and should it now display a different value? -> clear it and mark it for reuse
-            if (visibleRow.value && visibleRow.currentIndex !== null && (visibleRow.currentIndex >= this.sortedValues.length || visibleRow.value !== this.sortedValues[visibleRow.currentIndex])) {
+            if (visibleRow.currentIndex !== null && (visibleRow.currentIndex >= this.sortedValues.length || visibleRow.value !== this.sortedValues[visibleRow.currentIndex])) {
                 // Mark this row to be reused
                 visibleRow.value = null
                 visibleRow.currentIndex = null
@@ -854,6 +878,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         // Update all rows
         this.updateVisibleRows()
+        this.updateRecommendedWidths()
     }
 
     simulateColumnWidthChange() {
@@ -868,10 +893,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     cachedTableYPosition: number | null = 0
 
     updateVisibleRows() {
-        if (this.sortedValues.length == 0) {
-            return
-        }
-
         let topOffset = 0
 
         if (this.shouldScroll) {
@@ -899,19 +920,22 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             topOffset = (scrollElement.scrollTop - this.cachedTableYPosition)
         }        
 
+        const totalItems = this.totalItemsCount
         const extraItems = 5
 
-        const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, this.sortedValues.length - 1))
+        const firstVisibleItemIndex = Math.max(0, Math.min(Math.floor(topOffset / this.rowHeight) - extraItems, totalItems - 1))
 
         const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 
-        const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, this.sortedValues.length - 1))
+        const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, totalItems - 1))
 
         //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
 
+        console.log(`First visible item index: ${firstVisibleItemIndex} Last visible item index: ${lastVisibleItemIndex}`)
+
         // Make all visible rows available if not visible any longer
         for (const visibleRow of this.visibleRows) {
-            if (visibleRow.value && (visibleRow.currentIndex === null || visibleRow.currentIndex < firstVisibleItemIndex || visibleRow.currentIndex > lastVisibleItemIndex)) {
+            if (visibleRow.currentIndex === null || visibleRow.currentIndex < firstVisibleItemIndex || visibleRow.currentIndex > lastVisibleItemIndex) {
                 //console.log("Freed visibleRow at index "+visibleRow.currentIndex)
                 visibleRow.value = null
                 visibleRow.currentIndex = null
@@ -923,6 +947,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             let visibleRow = this.visibleRows.find(r => r.currentIndex === index)
             if (visibleRow) {
                 // Nothing to do, it's already visible
+                visibleRow.y = index * this.rowHeight
                 continue
             }
 
@@ -935,8 +960,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 this.visibleRows.push(visibleRow)
             }
 
-            // todo: simulate loading here
-            const value = this.sortedValues[index]
+            const value = this.sortedValues[index] ?? null
 
             visibleRow.value = value
             visibleRow.y = index * this.rowHeight
@@ -964,8 +988,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         (this.$refs["table"] as HTMLElement).style.setProperty("--table-row-height", `${this.rowHeight}px`);
     }
 
+    get totalItemsCount() {
+        return Math.max(this.estimatedRows ?? 0, this.sortedValues.length)
+    }
+
     get totalHeight() {
-        return this.rowHeight * this.filteredValues.length
+        return this.rowHeight * this.totalItemsCount
     }
 }
 </script>
@@ -1101,6 +1129,9 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         .table-row {
             .columns {
                 padding: 15px 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
 
                 > div {
                     font-size: 14px;
@@ -1109,7 +1140,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     color: $color-gray;
                     box-sizing: content-box;
 
-                    padding-bottom: 6px;
+                    padding-top: 6px;
 
                     &:first-child {
                         font-size: 16px;
@@ -1119,9 +1150,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                         color: $color-dark;
                     }
 
-                    &:last-child {
-                        
-                        padding-bottom: 0;
+                    &:first-child {
+                        padding-top: 0;
+                    }
+
+                    &:empty {
+                        display: none;
                     }
                 }
 
@@ -1244,13 +1278,22 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     transition: opacity 0.2s;
                     border-radius: 2px;
 
-                    &.reached-minimum {
-                        cursor: e-resize;
-                    }
-
                     &:hover {
                         opacity: 1;
                         transition: opacity 0.2s 0.6s;
+                    }
+
+                    @media (pointer: coarse) {
+                        left: 0px;
+                        right: -20px;
+
+                        &:hover {
+                            opacity: 0;
+                        }
+                    }
+
+                    &.reached-minimum {
+                        cursor: e-resize;
                     }
 
                     &:active {
@@ -1290,7 +1333,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         .placeholder-skeleton {
             display: block;
             height: 1em;
-            width: 150px;
+            width: 10px;
             border-radius: 5px;
             background: $color-background-shade-darker;
         }

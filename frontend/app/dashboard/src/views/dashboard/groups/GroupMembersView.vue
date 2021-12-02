@@ -1,14 +1,16 @@
 <template>
-    <TableView :title="title" column-configuration-id="members" :all-values="allValues" :all-columns="allColumns" :filter-definitions="filterDefinitions" />
+    <TableView :title="title" column-configuration-id="members" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" />
 </template>
 
 <script lang="ts">
+import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Column, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableView, TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, PaymentStatus, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
+import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 
@@ -39,6 +41,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     allValues: MemberWithRegistrations[] = []
 
+    get estimatedRows() {
+        return this.loading ? 30 : 0
+    }
+
     allColumns: Column<MemberWithRegistrations>[] = [
         new Column({
             name: "Naam", 
@@ -46,12 +52,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             compare: (a, b) => Sorter.byStringValue(a.name, b.name),
             grow: 1,
             minimumWidth: 100,
-            recommendedWidth: 150
+            recommendedWidth: 300
         }),
         new Column({
             name: "Leeftijd", 
-            getValue: (v) => v.details.age ? v.details.age+" jaar" : "", 
-            compare: (a, b) => Sorter.byNumberValue(a.details.age ?? 99, b.details.age ?? 99),
+            getValue: (v) => v.details.age ? v.details.age+" jaar" : "Geen leeftijd", 
+            compare: (a, b) => Sorter.byNumberValue(b.details.age ?? 99, a.details.age ?? 99),
             grow: 1,
             minimumWidth: 100,
             recommendedWidth: 150
@@ -61,16 +67,19 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             getValue: (v) => {
                 const toPay = v.outstandingAmount
                 if (toPay == 0) {
-                    return "";
+                    return "Betaald";
                 }
                 return Formatter.price(toPay)
             }, 
-            compare: (a, b) => Sorter.byNumberValue(a.outstandingAmount, b.outstandingAmount),
+            compare: (a, b) => Sorter.byNumberValue(b.outstandingAmount, a.outstandingAmount),
             grow: 1,
             minimumWidth: 100,
             recommendedWidth: 150
         })
     ]
+
+    loading = false
+    cycleOffset = 0
 
     get title() {
         return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
@@ -171,6 +180,96 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
 
         return base
+    }
+
+    created() {
+        this.reload();
+    }
+
+    activated() {
+        MemberManager.addListener(this, this.onUpdateMember)
+        GlobalEventBus.addListener(this, "encryption", async () => {
+            this.reload()
+            return Promise.resolve()
+        })
+    }
+
+    onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
+        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment") {
+            this.reload()
+        }
+    }
+
+    deactivated() {
+        MemberManager.removeListener(this)
+        GlobalEventBus.removeListener(this)
+    }
+
+    beforeDestroy() {
+        Request.cancelAll(this)
+    }
+
+    checkingInaccurate = false
+
+    async checkInaccurateMetaData() {
+        if (this.checkingInaccurate) {
+            return
+        }
+        this.checkingInaccurate = true
+        let toast: Toast | null = null
+        try {
+            const inaccurate: MemberWithRegistrations[] = []
+            for (const member of this.allValues) {
+                const meta = member.getDetailsMeta()
+
+                // Check if meta is wrong
+                if (!member.details.isRecovered && (!meta || !meta.isAccurateFor(member.details))) {
+                    console.warn("Found inaccurate meta data!")
+                    inaccurate.push(member)
+                }
+            }
+            if (inaccurate.length > 0) {
+                toast = new Toast("Gegevens van leden updaten naar laatste versie...", "spinner").setHide(null).show()
+
+                // Patch member with new details
+                await MemberManager.patchMembersDetails(inaccurate, false)
+            }
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+        }
+        toast?.hide()
+        this.checkingInaccurate = false
+    }
+
+    get groupIds() {
+        if (this.group) {
+            return [this.group.id]
+        }
+        if (this.category) {
+            return this.category.groups.map(g => g.id) // needed because of permission check + existing check!
+        }
+        return []
+    }
+
+    reload() {
+        Request.cancelAll(this)
+        this.loading = true;
+        
+        MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset, this).then((members) => {
+            this.allValues = members
+            this.checkInaccurateMetaData().catch(e => {
+                console.error(e)
+            })
+        }).catch((e) => {
+            console.error(e)
+
+            if (!Request.isNetworkError(e)) {
+                Toast.fromError(e).show()
+            }
+        }).finally(() => {
+            this.loading = false
+        })
     }
 }
 </script>
