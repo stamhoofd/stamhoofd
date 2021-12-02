@@ -20,7 +20,7 @@
 
                 <div class="status-bar">
                     <p v-if="isLoading">
-                        <Spinner /> Bijwerken...
+                        <Spinner class="inline" /> Bijwerken...
                     </p>
                     <p v-else-if="hadNetworkError">
                         Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.<br>
@@ -704,6 +704,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             line-height: 1.4;
 
             padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 15px);
+
+            .spinner-container {
+                margin-right: 15px;
+            }
         }
     }
 

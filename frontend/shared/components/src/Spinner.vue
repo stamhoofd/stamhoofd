@@ -11,12 +11,13 @@
 <style lang="scss">
 @use '~@stamhoofd/scss/base/variables' as *;
 
-.spinner-container  > div.spinner {
+.spinner-container > div.spinner {
     display: block;
     animation: spinner-spin 2s linear infinite;
     width: 24px;
     height: 24px;
     overflow: hidden;
+
 
     > svg {
         width: 24px;
@@ -36,6 +37,11 @@
 .spinner-container {
     width: 24px;
     height: 24px;
+
+    &.inline {
+        display: inline-block;
+        vertical-align: middle;
+    }
 
     &.center {
         display: flex;
