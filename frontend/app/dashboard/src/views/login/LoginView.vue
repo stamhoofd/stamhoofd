@@ -18,7 +18,7 @@
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
-                <input v-model="password" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                <input v-model="password" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
         </main>
 
@@ -42,7 +42,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
 import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
-import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
+import { Component, Mixins, Prop, Ref, Watch } from "vue-property-decorator";
 
 @Component({
     components: {
