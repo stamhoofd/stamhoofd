@@ -10,6 +10,11 @@ import Capacitor
 import AVFoundation
 import UIKit
 
+struct QRTarget {
+    var value: String
+    var since: Date
+}
+
 @objc(QRScannerPlugin)
 public class QRScannerPlugin: CAPPlugin {
     var captureSession: AVCaptureSession?
@@ -17,6 +22,8 @@ public class QRScannerPlugin: CAPPlugin {
     
     var detectionView: UIView?
     var listenerView: UIView?
+    var lastViewed: Date?
+    var target: QRTarget?
     
     private func updatePreviewLayerOrientation() {
         if let connection =  self.previewLayer?.connection  {
@@ -267,56 +274,75 @@ extension QRScannerPlugin: AVCaptureMetadataOutputObjectsDelegate {
     }
     
     public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        // captureSession?.stopRunning()
+        // Choose the QR-code that is most to the center
+        var closed: AVMetadataObject?
+        var current: CGFloat?
         
-        
-        if metadataObjects.count > 0 {
-            // Choose the QR-code that is most to the center
-            var closed: AVMetadataObject?
-            var current: CGFloat?
+        for m in metadataObjects {
+            let distance = calculateDistanceToCenter(metadataObject: m)
             
-            for m in metadataObjects {
-                let distance = calculateDistanceToCenter(metadataObject: m)
-                
-                guard let currentDistance = current else {
-                    closed = m
-                    current = distance
-                    continue
-                }
-                
-                if distance < currentDistance {
-                    closed = m
-                    current = distance
-                }
+            guard let currentDistance = current else {
+                closed = m
+                current = distance
+                continue
             }
             
-            if let metadataObject = closed {
-                // We need to use height, since that represents the width in portrait mode
-                
-                if let previewLayer = self.previewLayer, let detectionView = self.detectionView {
-                    if detectionView.isHidden {
-                        detectionView.isHidden = false
+            if distance < currentDistance {
+                closed = m
+                current = distance
+            }
+        }
+        
+        if let metadataObject = closed {
+            // We need to use height, since that represents the width in portrait mode
+            guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
+            guard let stringValue = readableObject.stringValue else { return }
+            
+            if let previewLayer = self.previewLayer, let detectionView = self.detectionView {
+                if detectionView.isHidden || lastViewed == nil || lastViewed!.timeIntervalSinceNow < -0.2 {
+                    print("time \(lastViewed?.timeIntervalSinceNow)")
+                    detectionView.isHidden = false
+                    detectionView.alpha = 1
+                    detectionView.frame = previewLayer.layerRectConverted(fromMetadataOutputRect: metadataObject.bounds)
+                } else {
+                    UIView.animate(withDuration: 0.2) {
                         detectionView.frame = previewLayer.layerRectConverted(fromMetadataOutputRect: metadataObject.bounds)
-                    } else {
-                        UIView.animate(withDuration: 0.2) {
-                            detectionView.frame = previewLayer.layerRectConverted(fromMetadataOutputRect: metadataObject.bounds)
-                        }
+                        detectionView.alpha = 1
                     }
                 }
-                
-                if (metadataObject.bounds.height < 0.2) {
-                    self.detectionView?.layer.borderColor = UIColor.red.cgColor
-                    return
-                }
-                self.detectionView?.layer.borderColor = UIColor.init(named: "primary")!.cgColor
-                guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
-                guard let stringValue = readableObject.stringValue else { return }
-                self.notifyListeners("scannedQRCode", data: [ "value": stringValue ])
+            }
+            
+            
+            lastViewed = Date(timeIntervalSinceNow: 0)
+
+            if (metadataObject.bounds.height < 0.05) {
+                // Clear target if too small
+                target = nil
+                self.detectionView?.layer.borderColor = UIColor.red.cgColor
+                return
+            }
+            
+            if target != nil && target!.value == stringValue {
+                // Still same value
             } else {
-                self.detectionView?.isHidden = true
+                target = QRTarget(value: stringValue, since: Date(timeIntervalSinceNow: 0))
+            }
+            
+            self.detectionView?.layer.borderColor = UIColor.init(named: "primary")!.cgColor
+            
+            // If multiple targets: give some time to adjust
+            let timeNeeded = metadataObjects.count <= 1 ? -0.2 : -1
+            
+            if target!.since.timeIntervalSinceNow < timeNeeded {
+                self.notifyListeners("scannedQRCode", data: [ "value": stringValue ])
             }
         } else {
-            self.detectionView?.isHidden = true
+            // Don't clear the target, because in some situations, the qr recognition will stutter and we'll never reach 200ms
+            if let detectionView = self.detectionView {
+                UIView.animate(withDuration: 0.2) {
+                    detectionView.alpha = 0
+                }
+            }
         }
     }
 
