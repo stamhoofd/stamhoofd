@@ -15,6 +15,7 @@
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
 		F43E93AB267E34F900A6D8B0 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43E93AA267E34F900A6D8B0 /* HomeViewController.swift */; };
+		F46DD2942758E7DF004B81D9 /* ListenerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46DD2932758E7DF004B81D9 /* ListenerView.swift */; };
 		F4B25C5726F213A10003D14D /* QRScannerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B25C5626F213A10003D14D /* QRScannerPlugin.swift */; };
 		F4B25C5A26F214AD0003D14D /* QRScannerPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = F4B25C5926F214AD0003D14D /* QRScannerPlugin.m */; };
 		F4DA27452694B5F60068C9F8 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4DA27442694B5F60068C9F8 /* Launch Screen.storyboard */; };
@@ -32,6 +33,7 @@
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		F43E93AA267E34F900A6D8B0 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		F46DD2932758E7DF004B81D9 /* ListenerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerView.swift; sourceTree = "<group>"; };
 		F4B25C5626F213A10003D14D /* QRScannerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerPlugin.swift; sourceTree = "<group>"; };
 		F4B25C5926F214AD0003D14D /* QRScannerPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QRScannerPlugin.m; sourceTree = "<group>"; };
 		F4DA27442694B5F60068C9F8 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 			children = (
 				F4B25C5626F213A10003D14D /* QRScannerPlugin.swift */,
 				F4B25C5926F214AD0003D14D /* QRScannerPlugin.m */,
+				F46DD2932758E7DF004B81D9 /* ListenerView.swift */,
 			);
 			path = QRScannner;
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F46DD2942758E7DF004B81D9 /* ListenerView.swift in Sources */,
 				F4B25C5A26F214AD0003D14D /* QRScannerPlugin.m in Sources */,
 				F4B25C5726F213A10003D14D /* QRScannerPlugin.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,

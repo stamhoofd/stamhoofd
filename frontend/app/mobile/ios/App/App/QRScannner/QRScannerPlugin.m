@@ -11,4 +11,6 @@
 CAP_PLUGIN(QRScannerPlugin, "QRScanner",
     CAP_PLUGIN_METHOD(startScanning, CAPPluginReturnPromise);
     CAP_PLUGIN_METHOD(stopScanning, CAPPluginReturnPromise);
+    CAP_PLUGIN_METHOD(getTorch, CAPPluginReturnPromise);
+    CAP_PLUGIN_METHOD(toggleTorch, CAPPluginReturnPromise);
 )

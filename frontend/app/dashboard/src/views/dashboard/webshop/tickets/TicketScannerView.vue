@@ -5,8 +5,8 @@
         </STNavigationBar>
 
         <div class="video-container" :class="{ native: disableWebVideo }">
-            <video ref="video" />
-            <div class="scan-overlay" />
+            <video v-if="!disableWebVideo" ref="video" />
+            <div v-if="!disableWebVideo" class="scan-overlay" />
 
             <div class="video-footer">
                 <div class="button-bar">
@@ -30,7 +30,11 @@
                         </button>
                     </p>
                     <p v-else>
-                        Plaats de QR-code in het kader om te scannen.<br>
+                        <template v-if="disableWebVideo">
+                            Plaats de QR-code in het midden van het scherm.
+                        </template><template v-else>
+                            Plaats de QR-code in het kader om te scannen.
+                        </template><br>
                         <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span>
                     </p>
                 </div>
@@ -189,6 +193,14 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     toggleFlash() {
+        if (AppManager.shared.QRScanner) {
+            AppManager.shared.QRScanner.toggleTorch().then(torch => {
+                console.log(torch)
+                this.isFlashOn = torch.status
+            }).catch(console.error)
+            return
+        }
+
         if (this.isFlashOn) {
             //this.scanner?.turnFlashOff()
             this.isFlashOn = false
@@ -486,7 +498,15 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                     this.validateQR(result.value)
                 })
             }
-            
+
+            try {
+                const torch = await AppManager.shared.QRScanner.getTorch()
+                console.log(torch)
+                this.isFlashOn = torch.status
+                this.hasFlash = true
+            } catch (e) {
+                console.error(e)
+            }
 
             return
         }
@@ -640,11 +660,11 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
 
         .scan-overlay {
-            width: 60%;
+            width: 70%;
             position: absolute;
             left: 50%;
             top: 50%;
-            padding-bottom: 60%;
+            padding-bottom: 70%;
             border: 4px solid white;
             border-radius: 5px;
             transform: translate(-50%, -50%);
