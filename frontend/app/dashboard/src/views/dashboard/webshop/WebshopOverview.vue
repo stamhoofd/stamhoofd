@@ -143,7 +143,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editInputFields(true)">
+                    <STListItem :selectable="true" class="left-center" @click="editInputFields(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
                             Vrije invoervelden
