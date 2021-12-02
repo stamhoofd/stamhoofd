@@ -147,6 +147,10 @@ public class QRScannerPlugin: CAPPlugin {
         self.captureSession = nil
         
         DispatchQueue.main.async {
+            // Reset background color again
+            self.webView?.isOpaque = true
+            self.webView?.backgroundColor = UIColor.systemBackground
+            
             self.previewLayer?.removeFromSuperlayer()
             self.previewLayer = nil
         }
