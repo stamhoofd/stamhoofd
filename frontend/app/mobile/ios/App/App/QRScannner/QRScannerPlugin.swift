@@ -300,7 +300,6 @@ extension QRScannerPlugin: AVCaptureMetadataOutputObjectsDelegate {
             
             if let previewLayer = self.previewLayer, let detectionView = self.detectionView {
                 if detectionView.isHidden || lastViewed == nil || lastViewed!.timeIntervalSinceNow < -0.2 {
-                    print("time \(lastViewed?.timeIntervalSinceNow)")
                     detectionView.isHidden = false
                     detectionView.alpha = 1
                     detectionView.frame = previewLayer.layerRectConverted(fromMetadataOutputRect: metadataObject.bounds)
