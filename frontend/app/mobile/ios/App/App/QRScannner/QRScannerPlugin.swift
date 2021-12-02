@@ -129,7 +129,6 @@ public class QRScannerPlugin: CAPPlugin {
             captureSession.startRunning()
             
             listenerView.onFrameChanged = { [weak self] (bounds: CGRect) -> () in
-                print("Change bounds")
                 self?.updatePreviewLayerOrientation()
                 self?.previewLayer?.frame = bounds
             }
@@ -221,7 +220,6 @@ public class QRScannerPlugin: CAPPlugin {
     }
     
     @objc func stopScanning(_ call: CAPPluginCall) {
-        print("Stopscanning")
         self.captureSession?.stopRunning()
         self.captureSession = nil
         
