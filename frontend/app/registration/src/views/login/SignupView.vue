@@ -18,11 +18,11 @@
                 <div class="split-inputs">
                     <div>
                         <STInputBox title="Kies een wachtwoord">
-                            <input v-model="password" name="new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                            <input v-model="password" name="new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
                         </STInputBox>
 
                         <STInputBox title="Herhaal wachtwoord">
-                            <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                            <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
                         </STInputBox>
                     </div>
                     <div>
