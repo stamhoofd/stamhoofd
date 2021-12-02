@@ -1,11 +1,13 @@
 export class Column<T> {
     name: string
     enabled = true
+    index = 0
     getValue: (val: T) => string
     compare: (a: T, b: T) => number
 
     constructor(settings: {
         name: string, 
+        index?: number,
         enabled?: boolean,
         getValue: (val: T) => string, 
         compare: (a: T, b: T) => number,
@@ -14,6 +16,7 @@ export class Column<T> {
         recommendedWidth?: number,
     }) {
         this.enabled = settings.enabled ?? true
+        this.index = settings.index ?? 0
         this.name = settings.name
         this.getValue = settings.getValue
         this.compare = settings.compare

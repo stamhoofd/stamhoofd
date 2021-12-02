@@ -81,7 +81,7 @@
 
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, FilterEditor, STNavigationBar, TooltipDirective } from "@stamhoofd/components"
 import { Storage } from "@stamhoofd/networking";
@@ -141,7 +141,6 @@ class EnabledColumnConfiguration extends AutoEncoder {
 
     @field({ decoder: NumberDecoder })
     width: number
-
 }
 
 /**
@@ -150,6 +149,9 @@ class EnabledColumnConfiguration extends AutoEncoder {
 class ColumnConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EnabledColumnConfiguration) })
     columns: EnabledColumnConfiguration[] = []
+
+    @field({ decoder: BooleanDecoder, optional: true })
+    canCollapse = false
 
     @field({ decoder: StringDecoder, optional: true })
     sortColumnId?: string
@@ -288,6 +290,22 @@ export default class TableView extends Mixins(NavigationMixin) {
         this.attachDragHandlers()
     }
 
+    horizontalPadding = 40
+
+    updatePaddingIfNeeded() {
+        if (this.horizontalPadding === 0) {
+            this.updatePadding()
+        }
+    }
+    
+    updatePadding() {
+        const padding = getComputedStyle((this.$refs["table"] as HTMLElement))
+            .getPropertyValue('--st-horizontal-padding');
+
+        this.horizontalPadding = parseInt(padding)
+        console.log("Updated horizontal padding to " + this.horizontalPadding)
+    }
+
     attachDragHandlers() {
         this.updateRecommendedWidths();
 
@@ -419,16 +437,21 @@ export default class TableView extends Mixins(NavigationMixin) {
             }, { passive: true })
         }
 
-        window.addEventListener("resize", () => {
-            if (this.canCollapse) {
+        if (!this.wrapColumns) {
+            window.addEventListener("resize", () => {
+            // Force padding update
+                this.updatePadding()
+
+                if (this.canCollapse) {
                 // Keep existing width
-                this.updateCanCollapse()
-            } else {
+                    this.updateCanCollapse()
+                } else {
                 // shrink or grow width
-                this.updateColumnWidth()
-            }
-            this.updateVisibleRows()
-        }, { passive: true })
+                    this.updateColumnWidth()
+                }
+                this.updateVisibleRows()
+            }, { passive: true })
+        }
     }
 
     async loadColumnConfiguration() {
@@ -439,14 +462,15 @@ export default class TableView extends Mixins(NavigationMixin) {
                 const decoded = (new VersionBoxDecoder(ColumnConfiguration as Decoder<ColumnConfiguration>).decode(parsed)).data
 
                 for (const col of this.allColumns) {
-                    const config = decoded.columns.find(c => c.id === col.id)
-                    if (!config) {
+                    const i = decoded.columns.findIndex(c => c.id === col.id)
+                    if (i === -1) {
                         col.enabled = false
                     } else {
+                        const config = decoded.columns[i]
                         col.enabled = true
                         col.width = config.width
                         col.renderWidth = Math.floor(col.width)
-                        // Don't set renderWidth here, we'll call updateColumnWidth after this
+                        col.index = i
                     }
                 }
 
@@ -459,14 +483,21 @@ export default class TableView extends Mixins(NavigationMixin) {
                 }
 
                 console.info("Loaded existing column configuration")
+
+                this.updateRowHeight()
+                this.updateVisibleRows();
+                this.updateRecommendedWidths();
+
+                if (decoded.canCollapse) {
+                    this.updateCanCollapse()
+                } else {
+                    this.updateColumnWidth()
+                }
             }
         } catch (error) {
             console.error(error)
         }
-        this.updateRowHeight()
-        this.updateVisibleRows();
-        this.updateRecommendedWidths();
-        this.updateColumnWidth()
+        
     }
 
     @Watch("columns")
@@ -479,6 +510,7 @@ export default class TableView extends Mixins(NavigationMixin) {
     saveColumnConfiguration() {
         const configuration = ColumnConfiguration.create({
             columns: this.columns.map(c => EnabledColumnConfiguration.create({ id: c.id, width: c.width ?? 0 })),
+            canCollapse: this.canCollapse,
             sortColumnId: this.sortBy.id,
             sortDirection: this.sortDirection,
         })
@@ -492,7 +524,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         // Show a context menu to select the available columns
         const displayedComponent = new ComponentWithProperties(ColumnSelectorContextMenu, {
             x: event.clientX,
-            y: event.clientY + 10,
+            y: event.clientY,
             columns: this.allColumns,
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
@@ -536,7 +568,7 @@ export default class TableView extends Mixins(NavigationMixin) {
             }
 
             // Also add some padding
-            column.recommendedWidth = maximum + 50
+            column.recommendedWidth = maximum + 20
         }
 
         document.body.removeChild(measureDiv)
@@ -548,8 +580,9 @@ export default class TableView extends Mixins(NavigationMixin) {
      * Update the width of the columns by distributing the available width across the columns, except the ignored column (optional)
      */
     updateColumnWidth(afterColumn: Column<any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
-        const leftPadding = 40
-        const rightPadding = 40
+        this.updatePaddingIfNeeded()
+        const leftPadding = this.horizontalPadding
+        const rightPadding = this.horizontalPadding
 
         const availableWidth = (forceWidth ?? (this.$refs["table"] as HTMLElement).clientWidth) - this.selectionColumnWidth - leftPadding - rightPadding;
         const currentWidth = this.columns.reduce((acc, col) => acc + (col.width ?? 0), 0);
@@ -559,82 +592,103 @@ export default class TableView extends Mixins(NavigationMixin) {
 
 
         if (strategy === "grow") {
-            // Step 1: use recommendedWidth as minimum width in first round
-            let growTotal = affectedColumns.reduce((acc, col) => acc + ((distributeWidth < 0 && col.width !== null && col.width <= col.recommendedWidth) ? 0 : col.grow), 0);
-            
-            // Force the first pass, even if distributeWidth is zero, because some columns might not meet their miniumum recommended width or minimum width
-            let forceFirstPass = !!affectedColumns.find(c => c.width === 0 || c.width === null)
+            // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
+            // Also update columns that are smaller than the minimumWidth
+            for (const col of affectedColumns) {
+                if (col.width === null || col.width === 0) {
+                    col.width = col.recommendedWidth
+                    distributeWidth -= col.recommendedWidth
+                    col.renderWidth = Math.floor(col.width);
 
-            while ((forceFirstPass || distributeWidth != 0) && growTotal > 0) {
-                const widthPerGrow = distributeWidth / growTotal;
-                distributeWidth = 0
-                growTotal = 0
-                forceFirstPass = false
+                    console.log("Colmun", col.name, "didn't have a width, so we set it to", col.width)
+                }
 
-                for (let col of affectedColumns) {
-                    if (widthPerGrow < 0 && col.width !== null && col.width <= col.recommendedWidth) {
-                        continue;
-                    }
+                if (col.width < col.minimumWidth) {
+                    distributeWidth -= col.minimumWidth - col.width
+                    col.width = col.minimumWidth
+                    col.renderWidth = Math.floor(col.width);
 
+                    console.log("Colmun", col.name, "was smaller than the minimum width and decreased the distributeWidth")
+                }
+            }
+
+            // Get columns with the highest priority for shrinking or growing
+            // growing: the ones with a width lower than the recommendedWidth
+            // shrinking: the ones with a width higher than the recommendedWidth
+            let getColumnMinimum = (col: Column<any>) => col.recommendedWidth
+
+            let didSwitch = false
+
+            const shrinking = distributeWidth < 0
+            let columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null && c.width < getColumnMinimum(c))
+
+            if (columns.length == 0 && !didSwitch) {
+                console.log("Done with recommendedWidth, now trying with minimumWidth")
+                getColumnMinimum = (col: Column<any>) => col.minimumWidth
+                columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
+                didSwitch = true
+            }
+
+            while (distributeWidth !== 0 && columns.length > 0) {
+                // Always try to grow with rounded numbers, because else we'll get rounding errors
+                let change = Math.round(distributeWidth / columns.length);
+
+                if (Math.abs(change) < 1) {
+                    // Make sure change is never zero, or we'll have an infinite loop
+                    change = Math.sign(distributeWidth)
+                }
+
+                console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
+                
+                // We'll make sure we never grow or shrink more than the distribute width
+
+                for (let col of columns) {
                     if (col.width == null) {
-                        col.width = 0
+                        throw new Error("Impossible. Typescript type checking error")
                     } 
-                    const change = col.grow * widthPerGrow
+
+                    const start = col.width
+
+                    if ((shrinking && change < distributeWidth) || (!shrinking && change > distributeWidth)) {
+                        // Prevent growing more than the distributeWidth
+                        console.log("Limited change to distributeWidth", change, distributeWidth)
+                        change = distributeWidth
+                    }
+
                     col.width += change;
-
-                    if (col.width <= col.recommendedWidth) {
-                        // we hit the minimum width, so we need to distribute the width that we couldn't absorb
-                        const couldNotAbsorb = col.recommendedWidth - col.width
-                        distributeWidth -= couldNotAbsorb;
-                        col.width = col.recommendedWidth;
-                    }
                     
-                    // Can we absorb the next shrink? (if shrinking)
-                    if (!(widthPerGrow < 0 && col.width !== null && col.width <= col.recommendedWidth)) {
-                        growTotal += col.grow;
-                    }
+                    // A column can never shrink more than its recommended width, or it's start width, if that was already smaller (only in case of minimum)
+                    const min = Math.min(start, getColumnMinimum(col))
 
+                    if (col.width <= min) {
+                        // we hit the minimum width, so we need to distribute the width that we couldn't absorb
+                        col.width = min;
+
+                        const absorbed = -(start - col.width)
+                        distributeWidth -= absorbed;
+
+                        console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
+
+                    } else {
+                        distributeWidth -= change;
+                        console.log("Column", col.name, "absorbed", change, "of", change, "and is now at", col.width)
+                    }
                     col.renderWidth = Math.floor(col.width);
                 }
-            }
 
-            if (distributeWidth != 0) {
-                // Step 2: use real minimum width (if still needed)
-                growTotal = affectedColumns.reduce((acc, col) => acc + ((distributeWidth < 0 && col.width !== null && col.width <= col.minimumWidth) ? 0 : col.grow), 0);
-            
-                while (distributeWidth != 0 && growTotal > 0) {
-                    const widthPerGrow = distributeWidth / growTotal;
+                // Update columns
+                columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null && c.width < getColumnMinimum(c))
 
-                    distributeWidth = 0
-                    growTotal = 0
-
-                    for (let col of affectedColumns) {
-                        if (widthPerGrow < 0 && col.width !== null && col.width <= col.minimumWidth) {
-                            continue;
-                        }
-
-                        if (col.width == null) {
-                            col.width = 0
-                        } 
-                        const change = col.grow * widthPerGrow
-                        col.width += change;
-
-                        if (change < 0 && col.width <= col.minimumWidth) {
-                            // we hit the minimum width, so we need to distribute the width that we couldn't absorb
-                            const couldNotAbsorb = col.minimumWidth - col.width
-                            distributeWidth -= couldNotAbsorb;
-                            col.width = col.minimumWidth;
-                        }
-                        
-                        // Can we absorb the next shrink? (if shrinking)
-                        if (!(widthPerGrow < 0 && col.width !== null && col.width <= col.minimumWidth)) {
-                            growTotal += col.grow;
-                        }
-
-                        col.renderWidth = Math.floor(col.width);
-                    }
+                if (columns.length == 0 && !didSwitch) {
+                    console.log("Done with recommendedWidth, now trying with minimumWidth")
+                    getColumnMinimum = (col: Column<any>) => col.minimumWidth
+                    columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
+                    didSwitch = true
                 }
+
             }
+
+            console.log("Done distributing with distributeWidth left: ", distributeWidth)
         } else {
             // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
@@ -666,11 +720,18 @@ export default class TableView extends Mixins(NavigationMixin) {
     }
 
     updateCanCollapse() {
+        this.updatePaddingIfNeeded()
+        const n = this.canCollapse
         this.canCollapse = Math.floor(this.totalWidth) > Math.floor((this.$refs["table"] as HTMLElement).clientWidth);
+
+        if (n !== this.canCollapse) {
+            this.saveColumnConfiguration()
+        }
     }
 
     collapse() {
         this.updateColumnWidth(null, "grow")
+        this.saveColumnConfiguration()
     }
 
     get selectionColumnWidth() {
@@ -678,14 +739,14 @@ export default class TableView extends Mixins(NavigationMixin) {
     }
 
     get totalWidth() {
-        const leftPadding = 40
-        const rightPadding = 40
+        const leftPadding = this.horizontalPadding
+        const rightPadding = this.horizontalPadding
         return this.selectionColumnWidth + this.columns.reduce((acc, col) => acc + (col.width ?? 0), 0) + leftPadding + rightPadding
     }
 
     get totalRenderWidth() {
-        const leftPadding = 40
-        const rightPadding = 40
+        const leftPadding = this.horizontalPadding
+        const rightPadding = this.horizontalPadding
         return this.selectionColumnWidth + this.columns.reduce((acc, col) => acc + (col.renderWidth ?? 0), 0) + leftPadding + rightPadding
     }
 
