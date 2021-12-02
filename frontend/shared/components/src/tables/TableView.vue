@@ -270,7 +270,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             .getPropertyValue('--st-horizontal-padding');
 
         this.horizontalPadding = parseInt(padding)
-        console.log("Updated horizontal padding to " + this.horizontalPadding)
     }
 
     attachDragHandlers() {
@@ -378,8 +377,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         /*for (let index = 0; index < 10000; index++) {
             this.allValues.push(new Value(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
         }*/
-
-        console.log("estimatedRows", this.estimatedRows)
         
         this.loadColumnConfiguration().catch(console.error)
         
@@ -913,8 +910,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 } else {
                     this.cachedTableYPosition = scrollElement.scrollTop + top
                 }
-
-                console.log("Cached table y position at "+this.cachedTableYPosition)
             }
 
             topOffset = (scrollElement.scrollTop - this.cachedTableYPosition)
@@ -930,8 +925,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, totalItems - 1))
 
         //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
-
-        console.log(`First visible item index: ${firstVisibleItemIndex} Last visible item index: ${lastVisibleItemIndex}`)
 
         // Make all visible rows available if not visible any longer
         for (const visibleRow of this.visibleRows) {
