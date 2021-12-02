@@ -50,9 +50,24 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             name: "Naam", 
             getValue: (v) => v.name, 
             compare: (a, b) => Sorter.byStringValue(a, b),
-            grow: 1,
             minimumWidth: 100,
             recommendedWidth: 300
+        }),
+        new Column<MemberWithRegistrations, string>({
+            name: "Voornaam", 
+            getValue: (v) => v.firstName, 
+            compare: (a, b) => Sorter.byStringValue(a, b),
+            enabled: false,
+            minimumWidth: 100,
+            recommendedWidth: 150
+        }),
+        new Column<MemberWithRegistrations, string>({
+            name: "Achternaam", 
+            getValue: (v) => v.details.lastName, 
+            compare: (a, b) => Sorter.byStringValue(a, b),
+            enabled: false,
+            minimumWidth: 100,
+            recommendedWidth: 150
         }),
         new Column<MemberWithRegistrations, number | null>({
             name: "Leeftijd", 
@@ -60,22 +75,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             format: (v) => v !== null ? v+" jaar" : "Geen leeftijd", 
             getStyle: (v) => v === null ? "gray" : "",
             compare: (a, b) => Sorter.byNumberValue(b ?? 99, a ?? 99),
-            grow: 1,
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-        new Column<MemberWithRegistrations, number>({
-            name: "Te betalen", 
-            getValue: (v) => v.outstandingAmount,
-            format: (outstandingAmount) => {
-                if (outstandingAmount == 0) {
-                    return "Betaald";
-                }
-                return Formatter.price(outstandingAmount)
-            }, 
-            getStyle: (v) => v == 0 ? "gray" : "",
-            compare: (a, b) => Sorter.byNumberValue(b, a),
-            grow: 1,
             minimumWidth: 100,
             recommendedWidth: 150
         }),
@@ -113,10 +112,23 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             format: (v) => v ? Formatter.date(v, true) : "Onbekend",
             getStyle: (v) => v === null ? "gray" : "",
             compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900, 0, 1), a ?? new Date(1900, 0, 1)),
-            grow: 1,
             minimumWidth: 100,
             recommendedWidth: 150
-        })
+        }),
+        new Column<MemberWithRegistrations, number>({
+            name: "Te betalen", 
+            getValue: (v) => v.outstandingAmount,
+            format: (outstandingAmount) => {
+                if (outstandingAmount == 0) {
+                    return "Betaald";
+                }
+                return Formatter.price(outstandingAmount)
+            }, 
+            getStyle: (v) => v == 0 ? "gray" : "",
+            compare: (a, b) => Sorter.byNumberValue(b, a),
+            minimumWidth: 100,
+            recommendedWidth: 150
+        }),
     ]
 
     loading = false
