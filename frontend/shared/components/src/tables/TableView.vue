@@ -69,8 +69,8 @@
                             <Checkbox v-else :checked="false" />
                         </div>
                         <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                            <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="(row.value && column.getStyle) ? column.getStyle(row.value) : ''">
-                                {{ row.value ? column.getValue(row.value) : "" }}
+                            <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)">
+                                {{ row.value ? column.getFormattedValue(row.value) : "" }}
                                 <span v-if="!row.value" class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 500, column.recommendedWidth)-30))+'px'}" />
                             </div>
                         </div>
@@ -186,7 +186,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     columnConfigurationId!: string
 
     @Prop({ required: true})
-    allColumns!: Column<Value>[]
+    allColumns!: Column<Value, any>[]
 
     get columns() {
         return this.allColumns.filter(c => c.enabled).sort((a, b) => a.index - b.index)
@@ -203,7 +203,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     @Prop({ default: null })
     clickHandler: ((value: Value) => void) | null 
 
-    sortBy: Column<Value> = this.columns[0]
+    sortBy: Column<Value, any> = this.columns[0]
     sortDirection: SortDirection = SortDirection.Ascending
 
     visibleRows: VisibleRow<Value>[] = []
@@ -219,10 +219,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     markedRowsAreSelected = true
 
     // Column drag helpers:
-    isDraggingColumn: Column<any> | null = null
+    isDraggingColumn: Column<any, any> | null = null
     draggingStartX = 0
     draggingInitialWidth = 0
-    draggingInitialColumns: Column<any>[] = []
+    draggingInitialColumns: Column<any, any>[] = []
     isColumnDragActive = false
     dragType: "width" | "order" = "width"
 
@@ -239,7 +239,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         return x;
     }
 
-    columnDragStart(event, column: Column<any>) {
+    columnDragStart(event, column: Column<any, any>) {
         this.draggingStartX = this.getEventX(event);
         this.isDraggingColumn = column
         this.dragType = "order"
@@ -248,7 +248,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.attachDragHandlers()
     }
 
-    handleDragStart(event, column: Column<any>) {
+    handleDragStart(event, column: Column<any, any>) {
         this.draggingStartX = this.getEventX(event);
         this.isDraggingColumn = column
         this.dragType = "width"
@@ -539,7 +539,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 }
                 found = true
 
-                const text = column.getValue(value)
+                const text = column.getFormattedValue(value)
 
                 measureDiv.innerText = text
                 const width = measureDiv.clientWidth
@@ -562,7 +562,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     /**
      * Update the width of the columns by distributing the available width across the columns, except the ignored column (optional)
      */
-    updateColumnWidth(afterColumn: Column<any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
+    updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
         this.updatePaddingIfNeeded()
         const leftPadding = this.horizontalPadding
         const rightPadding = this.horizontalPadding
@@ -598,7 +598,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             // Get columns with the highest priority for shrinking or growing
             // growing: the ones with a width lower than the recommendedWidth
             // shrinking: the ones with a width higher than the recommendedWidth
-            let getColumnMinimum = (col: Column<any>) => col.recommendedWidth
+            let getColumnMinimum = (col: Column<any, any>) => col.recommendedWidth
 
             let didSwitch = false
 
@@ -607,7 +607,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             if (columns.length == 0 && !didSwitch) {
                 //console.log("Done with recommendedWidth, now trying with minimumWidth")
-                getColumnMinimum = (col: Column<any>) => col.minimumWidth
+                getColumnMinimum = (col: Column<any, any>) => col.minimumWidth
                 columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
                 didSwitch = true
             }
@@ -664,7 +664,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
                 if (columns.length == 0 && !didSwitch) {
                     //console.log("Done with recommendedWidth, now trying with minimumWidth")
-                    getColumnMinimum = (col: Column<any>) => col.minimumWidth
+                    getColumnMinimum = (col: Column<any, any>) => col.minimumWidth
                     columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
                     didSwitch = true
                 }
@@ -778,10 +778,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get sortedValues() {
         const m = (this.sortDirection === SortDirection.Ascending ? 1 : -1)
-        return this.filteredValues.sort((a, b) => this.sortBy.compare(a, b) * m)
+        return this.filteredValues.sort((a, b) => this.sortBy.doCompare(a, b) * m)
     }
 
-    toggleSort(column: Column<any>) {
+    toggleSort(column: Column<any, any>) {
         if (this.isColumnDragActive) {
             console.log("Ignored sort toggle due to drag")
             return

@@ -36,9 +36,9 @@ export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
     yPlacement?: string;
 
     @Prop({ required: true })
-    columns: Column<any>[];
+    columns: Column<any, any>[];
 
-    setColumnEnabled(column: Column<any>, enabled: boolean) {
+    setColumnEnabled(column: Column<any, any>, enabled: boolean) {
         column.width = null
         column.enabled = enabled
     }

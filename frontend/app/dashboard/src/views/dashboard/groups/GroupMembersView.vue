@@ -6,7 +6,7 @@
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -45,35 +45,74 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return this.loading ? 30 : 0
     }
 
-    allColumns: Column<MemberWithRegistrations>[] = [
-        new Column({
+    allColumns = [
+        new Column<MemberWithRegistrations, string>({
             name: "Naam", 
             getValue: (v) => v.name, 
-            compare: (a, b) => Sorter.byStringValue(a.name, b.name),
+            compare: (a, b) => Sorter.byStringValue(a, b),
             grow: 1,
             minimumWidth: 100,
             recommendedWidth: 300
         }),
-        new Column({
+        new Column<MemberWithRegistrations, number | null>({
             name: "Leeftijd", 
-            getValue: (v) => v.details.age !== null ? v.details.age+" jaar" : "Geen leeftijd", 
-            getStyle: (v) => v.details.age === null ? "gray" : "",
-            compare: (a, b) => Sorter.byNumberValue(b.details.age ?? 99, a.details.age ?? 99),
+            getValue: (v) => v.details.age, 
+            format: (v) => v !== null ? v+" jaar" : "Geen leeftijd", 
+            getStyle: (v) => v === null ? "gray" : "",
+            compare: (a, b) => Sorter.byNumberValue(b ?? 99, a ?? 99),
             grow: 1,
             minimumWidth: 100,
             recommendedWidth: 150
         }),
-        new Column({
+        new Column<MemberWithRegistrations, number>({
             name: "Te betalen", 
-            getValue: (v) => {
-                const toPay = v.outstandingAmount
-                if (toPay == 0) {
+            getValue: (v) => v.outstandingAmount,
+            format: (outstandingAmount) => {
+                if (outstandingAmount == 0) {
                     return "Betaald";
                 }
-                return Formatter.price(toPay)
+                return Formatter.price(outstandingAmount)
             }, 
-            getStyle: (v) => v.outstandingAmount == 0 ? "gray" : "",
-            compare: (a, b) => Sorter.byNumberValue(b.outstandingAmount, a.outstandingAmount),
+            getStyle: (v) => v == 0 ? "gray" : "",
+            compare: (a, b) => Sorter.byNumberValue(b, a),
+            grow: 1,
+            minimumWidth: 100,
+            recommendedWidth: 150
+        }),
+        new Column<MemberWithRegistrations, Date | null>({
+            name: "Inschrijvingsdatum", 
+            getValue: (v) => {
+                let registrations: Registration[] = []
+                if (this.group) {
+                    const group = this.group
+                    registrations = v.registrations.filter(r => r.groupId == group.id && r.cycle == group.cycle - this.cycleOffset)
+                } else  {
+                    // Search registrations in this category
+                    if (this.category) {
+                        const groups = this.category.getAllGroups()
+                        registrations = v.registrations.filter(r => {
+                            const group = groups.find(g => g.id == r.groupId)
+                            if (!group) {
+                                return false
+                            }
+                            return r.cycle == group.cycle - this.cycleOffset
+                        })
+                    } else {
+                        registrations = v.activeRegistrations;
+                    }
+                }
+                if (registrations.length == 0) {
+                    return null
+                }
+                const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime())
+                if (filtered.length == 0) {
+                    return null
+                }
+                return new Date(Math.min(...filtered))
+            }, 
+            format: (v) => v ? Formatter.date(v, true) : "Onbekend",
+            getStyle: (v) => v === null ? "gray" : "",
+            compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900, 0, 1), a ?? new Date(1900, 0, 1)),
             grow: 1,
             minimumWidth: 100,
             recommendedWidth: 150
