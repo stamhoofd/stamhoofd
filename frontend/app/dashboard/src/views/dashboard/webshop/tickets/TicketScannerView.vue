@@ -302,7 +302,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             this.pollInterval = null
         }
         const video = this.$refs.video as HTMLVideoElement
-         // iOS fix
+        // iOS fix
         video.setAttribute('autoplay', '');
         video.setAttribute('muted', '');
         video.setAttribute('playsinline', '');
@@ -475,7 +475,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             this.disableWebVideo = true
 
             // Make background transparent to see the video underlay
-            document.body.style.background = "transparent"
+            document.body.style.background = "transparent";
+            (this.$el as HTMLElement).style.background = "transparent"
 
             // Disable scrolling (bouncing)
             document.body.style.overflow = "hidden"
@@ -504,10 +505,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                     video: { deviceId: this.cameras[this.cameraIndex].deviceId },
                     audio: false,
                 } :
-                { 
-                video: { facingMode: "environment" },
-                audio: false,
-            })
+                    { 
+                        video: { facingMode: "environment" },
+                        audio: false,
+                    })
         }
         
         /*this.scanner = new QrScanner(this.$refs.video as HTMLVideoElement, (result) => {
@@ -534,7 +535,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
             // Reset body
             document.body.style.background = ""
-            document.body.style.overflow = ""
+            document.body.style.overflow = "";
+            (this.$el as HTMLElement).style.background = ""
 
             AppManager.shared.QRScanner.stopScanning().catch(console.error)
             return
