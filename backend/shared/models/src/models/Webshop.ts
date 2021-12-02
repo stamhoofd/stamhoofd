@@ -142,7 +142,7 @@ export class Webshop extends Model {
     static async getByDomain(host: string, uri: string | null): Promise<Webshop | undefined> {
         if (uri === null || uri.length == 0) {
             const [rows] = await Database.select(
-                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND \`domainUri\` is null LIMIT 1`,
+                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND (\`domainUri\` is null OR \`domainUri\` = "") LIMIT 1`,
                 [host]
             );
 
