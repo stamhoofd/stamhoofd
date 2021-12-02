@@ -226,7 +226,7 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
 
      .webshop-banner {
         height: 300px;
-        background: $color-gray;
+        background: $color-gray-1;
         border-radius: $border-radius;
         margin-top: 20px;
 

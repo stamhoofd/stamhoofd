@@ -36,7 +36,7 @@ export default class StepperInput extends Vue {
     // Limit value to bounds
     constrain(value: number): number {
         if (this.min !== null && value < this.min) {
-             value = this.min;
+            value = this.min;
         } else if (this.max !== null && value > this.max) {
             value = this.max;
         }
@@ -70,7 +70,7 @@ export default class StepperInput extends Vue {
         width: $border-width;
         flex-basis: $border-width;
         height: 19px;
-        background: $color-gray-light;
+        background: $color-gray-2;
         border-radius: $border-width/2;
         border: 0;
         outline: 0;
@@ -93,7 +93,7 @@ export default class StepperInput extends Vue {
         transition: background-color 0.2s;
 
         &:active {
-            background: $color-gray-lighter;
+            background: $color-gray-3;
             transition: none;
         }
 

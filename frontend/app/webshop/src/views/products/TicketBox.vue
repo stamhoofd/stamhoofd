@@ -287,7 +287,7 @@ export default class TicketBox extends Mixins(NavigationMixin){
 
         > span {
             display: block;
-            color: $color-gray;
+            color: $color-gray-1;
             font-size: 10px;
             font-weight: bold;
         }

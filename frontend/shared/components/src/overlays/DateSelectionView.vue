@@ -268,7 +268,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                     color: white;
 
                     &::after {
-                        background: $color-gray;
+                        background: $color-gray-1;
                         transform: scale(0.9, 0.9);
                     }
                 }

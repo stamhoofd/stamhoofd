@@ -157,7 +157,7 @@ export default class ChooseWebshopView extends Mixins(NavigationMixin){
                         }
 
                         &, &:hover, &:link, &:active, &:visited {
-                            color: $color-gray;
+                            color: $color-gray-1;
                             font-weight: 600;
                             text-decoration: none;
                         }

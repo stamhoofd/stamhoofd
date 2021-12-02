@@ -333,7 +333,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
 
         &:active {
             transition: none;
-            background-color: $color-gray-lighter;
+            background-color: $color-gray-3;
         }
 
         > .icon:first-child {

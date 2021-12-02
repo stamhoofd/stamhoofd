@@ -641,7 +641,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.addSettingsPatch({ startDate })
     }
 
-     get endDate() {
+    get endDate() {
         return this.patchedGroup.settings.endDate
     }
 
@@ -885,7 +885,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         }))
     }
 
-     get hs() {
+    get hs() {
         return [
             ResolutionRequest.create({
                 width: 1600
@@ -925,7 +925,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         return this.coverPhotoResolution?.height
     }
 
-     // Cover picture
+    // Cover picture
     get squarePhoto() {
         return this.patchedGroup.settings.squarePhoto
     }
@@ -936,7 +936,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         }))
     }
 
-     get hsSquare() {
+    get hsSquare() {
         return [
             ResolutionRequest.create({
                 height: 250,
@@ -965,7 +965,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         height: 0;
         position: relative;
         padding-bottom: 750/1800*100%;
-        background: $color-gray;
+        background: $color-gray-1;
         border-radius: $border-radius;
         margin-top: 20px;
 

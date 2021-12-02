@@ -66,7 +66,7 @@ export default class SegmentedControl extends Vue {
 }
 
 .segmented-control {
-    background: $color-gray-lighter;
+    background: $color-gray-3;
     padding: $border-width;
     border-radius: 6px;
     width: 100%;
@@ -98,7 +98,7 @@ export default class SegmentedControl extends Vue {
             left: -$border-width/2;
             width: $border-width;
             border-radius: $border-width/2;
-            background: $color-gray-light;
+            background: $color-gray-2;
             opacity: 1;
             transition: opacity 0.25s;
         }

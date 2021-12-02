@@ -262,7 +262,7 @@ $slider-height: 6px;
         text-align: right;
         width: 50px;
         display: block;
-        border-bottom: 2px dashed $color-gray-light;
+        border-bottom: 2px dashed $color-gray-2;
         padding: 5px 0;
 
         // Firefox fix
@@ -287,7 +287,7 @@ $slider-height: 6px;
         right: $slider-height/2;
         bottom: 0;
         position: absolute;
-        background: $color-gray-light;
+        background: $color-gray-2;
         clip-path: polygon(
             0 $slider-height/2 - $border-width/2,
             100% 0,
@@ -317,7 +317,7 @@ $slider-height: 6px;
         transform: translate(-50%, -50%);
         height: 25px;
         width: 25px;
-        background: $color-gray-lighter;
+        background: $color-gray-3;
         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.1);
         border-radius: (25px)/2;
         cursor: pointer;
@@ -354,7 +354,7 @@ $slider-height: 6px;
 
     &::after {
         content: "";
-        background: $color-gray-light;
+        background: $color-gray-2;
         right: 0;
         top: 0;
 

@@ -415,7 +415,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         width: 100%;
         margin: 0 auto;
         padding-bottom: 300 / 720 * 100%;
-        background: $color-gray;
+        background: $color-gray-1;
         border-radius: $border-radius;
         margin-bottom: 30px;
         margin-top: 0px;
@@ -508,7 +508,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                             }
 
                             &, &:hover, &:link, &:active, &:visited {
-                                color: $color-gray;
+                                color: $color-gray-1;
                                 font-weight: 600;
                                 text-decoration: none;
                             }

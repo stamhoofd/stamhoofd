@@ -44,19 +44,24 @@ $color-success-dark: var(--color-success-dark, $color-success-dark-original);
 $color-success-border: var(--color-success-border, $color-success-border-original);
 $color-success-border-focus: $color-success;
 
-$color-gray-dark-original: #5e5e5e;
-$color-gray-dark: var(--color-gray-dark, $color-gray-dark-original);
-
-$color-gray-text: $color-gray-dark;
 
 $color-gray-original: #868686;
-$color-gray: var(--color-gray, $color-gray-original);
+$color-gray-1: var(--color-gray-1, $color-gray-original);
 
-$color-gray-light-original: #dcdcdc;
-$color-gray-light: var(--color-gray-light, $color-gray-light-original);
+$color-gray-2-original: #dcdcdc;
+$color-gray-2: var(--color-gray-2, $color-gray-2-original);
 
-$color-gray-lighter-original: #e7e7e7;
-$color-gray-lighter: var(--color-gray-lighter, $color-gray-lighter-original);
+$color-gray-3-original: #e7e7e7;
+$color-gray-3: var(--color-gray-3, $color-gray-3-original);
+
+// Usage: descriptive text
+$color-gray-4-original: #5e5e5e;
+$color-gray-4: var(--color-gray-4, $color-gray-4-original);
+$color-gray-text: $color-gray-4;
+
+// Usage: text that is not important
+$color-gray-5-original: #a7a7a7;
+$color-gray-5: var(--color-gray-5, $color-gray-5-original);
 
 $color-primary-lighter-original: #F7FAFF;
 $color-primary-lighter: var(--color-primary-lighter, $color-primary-lighter-original);
@@ -108,8 +113,8 @@ $border-radius-modals: 10px;
 
 // Aliasses
 
-$color-border-lighter: $color-gray-lighter; 
-$color-border: $color-gray-light; 
+$color-border-lighter: $color-gray-3; 
+$color-border: $color-gray-2; 
 $color-border-shade: #D1D1D1;
 
 $color-background-shade: $color-white-shade;

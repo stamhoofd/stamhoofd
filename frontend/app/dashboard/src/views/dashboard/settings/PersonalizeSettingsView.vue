@@ -332,8 +332,8 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     .logo-placeholder {
         @extend .style-input;
         @extend .style-input-shadow;
-        border: $border-width solid $color-gray-light;
-        color: $color-gray;
+        border: $border-width solid $color-gray-2;
+        color: $color-gray-5;
         background: var(--color-white, white);
         border-radius: $border-radius;
         padding: 5px 15px;

@@ -4,6 +4,7 @@ export class Column<T> {
     index = 0
     getValue: (val: T) => string
     compare: (a: T, b: T) => number
+    getStyle: ((val: T) => string) | null = null
 
     constructor(settings: {
         name: string, 
@@ -11,6 +12,7 @@ export class Column<T> {
         enabled?: boolean,
         getValue: (val: T) => string, 
         compare: (a: T, b: T) => number,
+        getStyle?: (val: T) => string,
         grow?: number,
         minimumWidth?: number,
         recommendedWidth?: number,
@@ -20,6 +22,7 @@ export class Column<T> {
         this.name = settings.name
         this.getValue = settings.getValue
         this.compare = settings.compare
+        this.getStyle = settings.getStyle ?? null
         this.grow = settings?.grow ?? 1
         this.minimumWidth = settings?.minimumWidth ?? 100
         this.recommendedWidth = settings?.recommendedWidth ?? 100

@@ -69,9 +69,9 @@
                             <Checkbox v-else :checked="false" />
                         </div>
                         <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                            <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
+                            <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="(row.value && column.getStyle) ? column.getStyle(row.value) : ''">
                                 {{ row.value ? column.getValue(row.value) : "" }}
-                                <span v-if="!row.value" class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(column.width, column.recommendedWidth)-30))+'px'}" />
+                                <span v-if="!row.value" class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 500, column.recommendedWidth)-30))+'px'}" />
                             </div>
                         </div>
                     </div>
@@ -1105,6 +1105,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                         opacity: 0.5;
                     }
 
+                    &[data-style="gray"] {
+                        color: $color-gray-5;
+                    }
+
                     transition: transform 0.2s, opacity 0.2s;
 
                     &.isDragging {
@@ -1137,7 +1141,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     font-size: 14px;
                     height: 14px;
                     line-height: 14px;
-                    color: $color-gray;
+                    color: $color-gray-1;
                     box-sizing: content-box;
 
                     padding-top: 6px;

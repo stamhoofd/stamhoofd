@@ -304,7 +304,7 @@ export default class GroupView extends Mixins(NavigationMixin){
         height: 0;
         position: relative;
         padding-bottom: 750/1800*100%;
-        background: $color-gray;
+        background: $color-gray-1;
         border-radius: $border-radius;
         margin-bottom: 20px;
 

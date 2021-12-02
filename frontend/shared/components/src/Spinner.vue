@@ -52,7 +52,7 @@
     }
     &.gray {
         div.spinner > svg > circle {
-            stroke: $color-gray;
+            stroke: $color-gray-1;
         }
     }
 }

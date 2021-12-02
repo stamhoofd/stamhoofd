@@ -162,7 +162,7 @@ export default class MailEditor extends Vue {
         > div.disabled {
             user-select: none;
             cursor: not-allowed;
-            color: $color-gray-dark;
+            color: $color-gray-4;
 
             .button {
                 pointer-events: none
@@ -228,7 +228,7 @@ export default class MailEditor extends Vue {
 
             &:hover {
                 &::after {
-                    background: $color-gray-dark;
+                    background: $color-gray-4;
                     transform: scale(1, 1);
                 }
             }
@@ -331,10 +331,10 @@ export default class MailEditor extends Vue {
         }
 
         .replace-placeholder {
-            background: $color-gray-lighter;
+            background: $color-gray-3;
             padding: 3px 5px;
             font-weight: 600;
-            color: $color-gray;
+            color: $color-gray-5;
             border-radius: $border-radius;
             white-space: nowrap;
 

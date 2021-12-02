@@ -57,15 +57,15 @@
     }
 
     &:disabled {
-        color: $color-gray;
+        color: $color-gray-1;
         cursor: not-allowed;
 
         // Safari fix color opacity
-        -webkit-text-fill-color: $color-gray;
+        -webkit-text-fill-color: $color-gray-1;
         opacity: 1; /* required on iOS */
 
         &:hover {
-            border-color: $color-gray-light;
+            border-color: $color-gray-2;
         }
     }
 
@@ -75,7 +75,7 @@
     }
 
     &::placeholder {
-        color: $color-gray;
+        color: $color-gray-5;
     }
 
     &.error {

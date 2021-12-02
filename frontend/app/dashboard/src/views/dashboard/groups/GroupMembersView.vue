@@ -56,7 +56,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }),
         new Column({
             name: "Leeftijd", 
-            getValue: (v) => v.details.age ? v.details.age+" jaar" : "Geen leeftijd", 
+            getValue: (v) => v.details.age !== null ? v.details.age+" jaar" : "Geen leeftijd", 
+            getStyle: (v) => v.details.age === null ? "gray" : "",
             compare: (a, b) => Sorter.byNumberValue(b.details.age ?? 99, a.details.age ?? 99),
             grow: 1,
             minimumWidth: 100,
@@ -71,6 +72,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 }
                 return Formatter.price(toPay)
             }, 
+            getStyle: (v) => v.outstandingAmount == 0 ? "gray" : "",
             compare: (a, b) => Sorter.byNumberValue(b.outstandingAmount, a.outstandingAmount),
             grow: 1,
             minimumWidth: 100,

@@ -734,7 +734,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         transition: background-color 0.2s;
 
         &:active {
-            background: $color-gray;
+            background: $color-gray-1;
             transition: background-color 0s;
         }
 

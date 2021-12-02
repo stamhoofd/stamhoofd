@@ -398,7 +398,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     > .search-result {
         @extend .style-input-shadow;
         background: $color-white;
-        border: $border-width solid $color-gray-light;
+        border: $border-width solid $color-gray-2;
         padding: 20px 20px;
         border-radius: $border-radius;
         margin: 10px 0;
@@ -421,7 +421,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             right: 10px;
             top: 50%;
             transform: translate(0, -50%);
-            color: $color-gray;
+            color: $color-gray-1;
             transition: color 0.2s;
         }
 
