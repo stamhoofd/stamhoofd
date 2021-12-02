@@ -1,5 +1,5 @@
 <template>
-    <TableView column-configuration-id="members" :all-values="allValues" :all-columns="allColumns" :filter-definitions="filterDefinitions" />
+    <TableView :title="title" column-configuration-id="members" :all-values="allValues" :all-columns="allColumns" :filter-definitions="filterDefinitions" />
 </template>
 
 <script lang="ts">
@@ -71,6 +71,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             recommendedWidth: 150
         })
     ]
+
+    get title() {
+        return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
+    }
 
     get recordCategories(): RecordCategory[] {
         // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)

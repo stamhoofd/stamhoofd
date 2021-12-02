@@ -18,7 +18,7 @@
         </STNavigationBar>
     
         <main>
-            <h1>Table</h1>
+            <h1>{{ title }}</h1>
 
             <div class="input-with-buttons">
                 <div>
@@ -151,6 +151,8 @@ class ColumnConfiguration extends AutoEncoder {
     }
 })
 export default class TableView<Value extends TableListable> extends Mixins(NavigationMixin) {
+    @Prop({ required: true})
+    title!: string
 
     // This contains the data we want to show
     @Prop({ required: true})
@@ -176,7 +178,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     allColumns!: Column<Value>[]
 
     get columns() {
-        return this.allColumns.filter(c => c.enabled)
+        return this.allColumns.filter(c => c.enabled).sort((a, b) => a.index - b.index)
     }
 
     get hiddenColumns() {
@@ -338,7 +340,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             columns.splice(startIndex, 1);
             columns.splice(startIndex + columnMoveIndex, 0, this.isDraggingColumn);
 
-            this.allColumns = [...columns, ...this.hiddenColumns];
+            // Update indexes
+            for (let i = 0; i < columns.length; i++) {
+                columns[i].index = i
+            }
 
             // Translate moving column with mouse
             (this.$refs["table"] as HTMLElement).style.setProperty("--drag-x", `${remainingDifference}px`);
