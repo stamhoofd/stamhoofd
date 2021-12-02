@@ -110,9 +110,13 @@ export class MemberWithRegistrations extends Member {
         this.acceptedWaitingGroups = Array.from(acceptedWaitlistGroups.values())
         this.allGroups = groups.slice()
     }
+
+    get outstandingAmount() {
+        return this.registrations.reduce((o, r) => (r.payment && r.payment.status != PaymentStatus.Succeeded ? r.payment.price : 0) + o, 0)
+    }
     
     get paid(): boolean {
-        return !this.activeRegistrations.find(r => r.payment && r.payment.status != PaymentStatus.Succeeded)
+        return !this.registrations.find(r => r.payment && r.payment.status != PaymentStatus.Succeeded)
     }
 
     get info(): string {

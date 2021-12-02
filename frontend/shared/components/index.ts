@@ -117,4 +117,5 @@ export { default as RegistrationsFilterView } from "./src/filters/RegistrationsF
 export { default as StringFilterView } from "./src/filters/StringFilterView.vue"
 
 // tables
+export * from "./src/tables/Column"
 export { default as TableView } from "./src/tables/TableView.vue"

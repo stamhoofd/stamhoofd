@@ -83,38 +83,18 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, FilterEditor, STNavigationBar, TooltipDirective } from "@stamhoofd/components"
+import { BackButton, Checkbox, FilterEditor, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
-import { StringFilterDefinition } from "@stamhoofd/structures/esm/dist";
-import { StringCompare } from "@stamhoofd/utility";
-import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
-import { Component, Mixins, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { Column } from "./Column";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 
-interface Searchable {
+interface TableListable {
+    id: string;
     matchQuery(query: string): boolean;
-}
-
-class TestValue implements Searchable {
-    id: string
-    name: string
-    age: number
-    status: string
-
-    constructor(id: string, name: string, age: number, status: string) {
-        this.id = id
-        this.name = name
-        this.age = age
-        this.status = status
-    }
-
-    matchQuery(query: string): boolean {
-        return StringCompare.contains(this.name, query)
-    }
 }
 
 class VisibleRow<T> {
@@ -170,52 +150,30 @@ class ColumnConfiguration extends AutoEncoder {
         tooltip: TooltipDirective
     }
 })
-export default class TableView extends Mixins(NavigationMixin) {
+export default class TableView<Value extends TableListable> extends Mixins(NavigationMixin) {
 
     // This contains the data we want to show
-    allValues: TestValue[] = []
+    @Prop({ required: true})
+    allValues!: Value[]
 
-    //@Prop({ required: true})
-    filterDefinitions: FilterDefinition<TestValue, any, any>[] = [
+    @Prop({ required: true})
+    filterDefinitions!: FilterDefinition<Value, any, any>[]/* = [
         new StringFilterDefinition({
             id: "name",
             name: "Name",
-            getValue: (value: TestValue) => value.name,
+            getValue: (value: Value) => value.name,
         }),
-    ]
+    ]*/
 
-    selectedFilter: Filter<TestValue> | null = null
+    selectedFilter: Filter<Value> | null = null
     searchQuery = ""
 
     // Where to store the latest column configuration, so we can reload it instead of switching to the defaults each time
-    //@Prop({ required: true})
-    columnConfigurationId = "test"
+    @Prop({ required: true})
+    columnConfigurationId!: string
 
-    //@Prop({ required: true})
-    allColumns: Column<TestValue>[] = [
-        new Column({
-            name: "Naam", 
-            getValue: (v) => v.name, 
-            compare: (a, b) => Sorter.byStringValue(a.name, b.name),
-            grow: 1,
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-        new Column({
-            name: "Leeftijd", 
-            getValue: (v) => v.age+" jaar", 
-            compare: (a, b) => -1 * Sorter.byNumberValue(a.age, b.age),
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-        new Column({
-            name: "Status", 
-            getValue: (v) => v.status, 
-            compare: (a, b) => Sorter.byStringValue(a.status, b.status),
-            minimumWidth: 150,
-            recommendedWidth: 200
-        })
-    ]
+    @Prop({ required: true})
+    allColumns!: Column<Value>[]
 
     get columns() {
         return this.allColumns.filter(c => c.enabled)
@@ -225,25 +183,21 @@ export default class TableView extends Mixins(NavigationMixin) {
         return this.allColumns.filter(c => !c.enabled)
     }
 
-
-    //@Prop({ default: true})
     wrapColumns = window.innerWidth < 600
     showSelection = !this.wrapColumns
     shouldScroll = window.innerWidth >= 600
 
-    //@Prop({ default: null })
-    clickHandler: ((value: TestValue) => void) | null = (val: TestValue) => {
-        // todo: show details
-    }
+    @Prop({ default: null })
+    clickHandler: ((value: Value) => void) | null 
 
-    sortBy: Column<TestValue> = this.columns[0]
+    sortBy: Column<Value> = this.columns[0]
     sortDirection: SortDirection = SortDirection.Ascending
 
-    visibleRows: VisibleRow<TestValue>[] = []
+    visibleRows: VisibleRow<Value>[] = []
 
     // If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows, 
     // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
-    markedRows = new Map<string, TestValue>()
+    markedRows = new Map<string, Value>()
 
     /**
      * When true: only the marked rows are selected.
@@ -405,9 +359,9 @@ export default class TableView extends Mixins(NavigationMixin) {
 
     mounted() {
         // Initialise visible Rows
-        for (let index = 0; index < 10000; index++) {
-            this.allValues.push(new TestValue(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
-        }
+        /*for (let index = 0; index < 10000; index++) {
+            this.allValues.push(new Value(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
+        }*/
         
         this.loadColumnConfiguration().catch(console.error)
         
@@ -766,7 +720,7 @@ export default class TableView extends Mixins(NavigationMixin) {
     }
 
     get filteredValues() {
-        const filtered = this.selectedFilter === null ? this.allValues.slice() : this.allValues.filter((val: TestValue) => {
+        const filtered = this.selectedFilter === null ? this.allValues.slice() : this.allValues.filter((val: Value) => {
             if (this.selectedFilter?.doesMatch(val)) {
                 return true;
             }
@@ -776,7 +730,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         if (this.searchQuery == "") {
             return filtered;
         }
-        return filtered.filter((val: TestValue) => val.matchQuery(this.searchQuery));
+        return filtered.filter((val: Value) => val.matchQuery(this.searchQuery));
     }
 
     editFilter() {
@@ -815,11 +769,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         this.saveColumnConfiguration()
     }
 
-    setValues(allValues: TestValue[]) {
-        this.allValues = allValues
-    }
-
-    getSelectionValue(row: VisibleRow<TestValue>) {
+    getSelectionValue(row: VisibleRow<Value>) {
         const value = row.value
         if (!value) {
             return false
@@ -834,7 +784,7 @@ export default class TableView extends Mixins(NavigationMixin) {
         }
     }
 
-    setSelectionValue(row: VisibleRow<TestValue>, selected: boolean) {
+    setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
         const value = row.value
         if (!value) {
             return
@@ -899,10 +849,6 @@ export default class TableView extends Mixins(NavigationMixin) {
 
         // Update all rows
         this.updateVisibleRows()
-    }
-
-    simulateDataChange() {
-        this.sortedValues[0].name = this.sortedValues[0].name.split("").reverse().join("")
     }
 
     simulateColumnWidthChange() {
@@ -980,7 +926,7 @@ export default class TableView extends Mixins(NavigationMixin) {
 
             if (!visibleRow) {
                 //console.log("Created new cached row for index "+index)
-                visibleRow = new VisibleRow<TestValue>()
+                visibleRow = new VisibleRow<Value>()
                 this.visibleRows.push(visibleRow)
             }
 
