@@ -17,7 +17,7 @@
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
-                <input v-model="password" name="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                <input v-model="password" name="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
         </main>
 

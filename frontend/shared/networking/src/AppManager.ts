@@ -1,7 +1,7 @@
 // todo: remove duplicate type definitions, but need to check if capacitor won't get loaded on the web...
 type PermissionState = 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied';
 export interface PermissionStatus {
-  receive: PermissionState;
+    receive: PermissionState;
 }
 
 interface PluginListenerHandle {
@@ -10,6 +10,8 @@ interface PluginListenerHandle {
 
 type QRScannerPlugin = {
     startScanning(): Promise<void>;
+    getTorch(): Promise<{ status: boolean }>;
+    toggleTorch(): Promise<{ status: boolean }>;
     stopScanning(): Promise<void>;
     checkPermissions(): Promise<PermissionStatus>;
     requestPermissions(): Promise<PermissionStatus>;
