@@ -72,7 +72,7 @@ $segmented-control-inner-height: $segmented-control-height - $segmented-control-
 .segmented-control {
     background: $color-gray-3;
     padding: $segmented-control-border-width;
-    border-radius: 6px;
+    border-radius: $border-radius;
     width: 100%;
     box-sizing: border-box;
     display: flex;
@@ -195,7 +195,7 @@ $segmented-control-inner-height: $segmented-control-height - $segmented-control-
             top: 0;
             height: $segmented-control-inner-height;
             background: $color-white-highlight;
-            border-radius: 4px;
+            border-radius: $border-radius - $segmented-control-border-width;
             box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
         }
     }

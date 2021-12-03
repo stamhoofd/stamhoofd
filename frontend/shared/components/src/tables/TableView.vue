@@ -1279,7 +1279,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     .table-head {
         height: 70px;
-        border-bottom: 2px solid $color-border-lighter;
+        border-bottom: $border-width-thin solid $color-border;
         position: sticky;
         top: 0px;
         z-index: 100;
@@ -1357,7 +1357,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             }
 
             .drag-handle-container {
-                width: 2px;
+                width: $border-width-thin;
                 height: 20px;
                 display: inline-block;
                 position: relative;
@@ -1369,10 +1369,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     position: absolute;
                     top: 0;
                     left: 20px;
-                    width: 2px;
+                    width: $border-width-thin;
                     height: 20px;
                     background: $color-border;
-                    border-radius: 2px;
+                    border-radius: $border-width-thin;
                 }
 
                 // The drag area

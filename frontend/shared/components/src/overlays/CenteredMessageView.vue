@@ -155,24 +155,11 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     padding: 30px;
     box-sizing: border-box;
     max-height: 100vh;
-    //overflow: auto;
-    //overflow-x: hidden;
+    overflow: auto;
+    overflow-x: hidden;
 
     @media (max-width: 500px) {
         padding: 20px;
-    }
-
-    &:before {
-        content: "";
-        position: absolute;
-        left: -1px;
-        right: -1px;
-        top: -1px;
-        bottom: -1px;
-        border: 1px solid rgba(0, 0, 0, 0.15);
-        z-index: 1;
-        pointer-events: none;
-        border-radius: $border-radius-modals + 1px;
     }
 
     > *:first-child {
@@ -200,7 +187,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     > button, .loading-button {
-        margin-top: 15px;
+        margin-top: 10px;
     }
 }
 

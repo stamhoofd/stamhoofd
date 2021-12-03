@@ -194,8 +194,8 @@ export default class ContextMenu extends Vue {
     --color-current-background: #{$color-background-shade-darker};
     --color-current-background-shade: #{$color-border};
 
-    border: 2px solid $color-border-shade;
-    padding: 6px 20px;
+    border: $border-width-thin solid $color-border-shade;
+    padding: 6px 15px;
 
     @extend .style-overlay-shadow;
     border-radius: $border-radius-modals;
@@ -220,8 +220,8 @@ export default class ContextMenu extends Vue {
         align-items: center;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         min-height: 32px;
-        margin: 0 -14px;
-        padding: 0 14px;
+        margin: 0 -9px;
+        padding: 0 9px;
         border-radius: $border-radius;
 
         @media (max-width: 400px) {
@@ -233,7 +233,7 @@ export default class ContextMenu extends Vue {
                 display: none;
             }
             flex-shrink: 0;
-            padding-right: 15px;
+            padding-right: 10px;
         }
 
         > .middle {
