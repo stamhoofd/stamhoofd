@@ -188,10 +188,18 @@ export default class STNavigationBar extends Vue {
 
                 &:first-child {
                     margin-left: 0;
+
+                    &.button.icon {
+                        margin-left: -10px;
+                    }
                 }
 
                 &:last-child {
                     margin-right: 0;
+
+                    &.button.icon {
+                        margin-right: -10px;
+                    }
                 }
             }
         }
@@ -204,10 +212,18 @@ export default class STNavigationBar extends Vue {
 
                 &:last-child {
                     margin-right: 0;
+
+                    &.button.icon {
+                        margin-right: -10px;
+                    }
                 }
 
                 &:first-child {
                     margin-left: 0;
+
+                    &.button.icon {
+                        margin-left: -10px;
+                    }
                 }
             }
         }
@@ -246,7 +262,10 @@ export default class STNavigationBar extends Vue {
 
 
     &.scrolled {
-        box-shadow: 0px 2px 3px $color-shadow;
+
+        //box-shadow: 0px 2px 3px $color-shadow;
+
+        border-bottom: 1px solid rgba(black, 0.1);
         > h1 {
             opacity: 1;
         }

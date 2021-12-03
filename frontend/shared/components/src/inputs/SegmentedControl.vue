@@ -61,13 +61,17 @@ export default class SegmentedControl extends Vue {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
+$segmented-control-border-width: 2px;
+$segmented-control-height: 38px;
+$segmented-control-inner-height: $segmented-control-height - $segmented-control-border-width * 2;
+
 .st-view > main > h1 + .segmented-control {
     margin-bottom: 25px;
 }
 
 .segmented-control {
     background: $color-gray-3;
-    padding: $border-width;
+    padding: $segmented-control-border-width;
     border-radius: 6px;
     width: 100%;
     box-sizing: border-box;
@@ -76,11 +80,11 @@ export default class SegmentedControl extends Vue {
     z-index: 0;
     overflow: hidden;
     @extend .style-button-smaller;
-    height: 36px;
+    height: $segmented-control-height;
 
     & > .item {
         flex-grow: 1;
-        height: 32px;
+        height: $segmented-control-inner-height;
         padding: 0 10px;
 
         cursor: pointer;
@@ -95,9 +99,9 @@ export default class SegmentedControl extends Vue {
             z-index: -10;
             top: 5px;
             bottom: 5px;
-            left: -$border-width/2;
+            left: -$border-width / 2;
             width: $border-width;
-            border-radius: $border-width/2;
+            border-radius: $border-width / 2;
             background: $color-gray-2;
             opacity: 1;
             transition: opacity 0.25s;
@@ -120,8 +124,8 @@ export default class SegmentedControl extends Vue {
                 left: 10px;
                 right: 10px;
                 top: 0;
-                height: 32px;
-                line-height: 32px;
+                height: $segmented-control-inner-height;;
+                line-height: $segmented-control-inner-height;;
                 text-align: center;
                 text-overflow: ellipsis;
                 opacity: 1;
@@ -137,8 +141,8 @@ export default class SegmentedControl extends Vue {
                 left: 10px;
                 right: 10px;
                 top: 0;
-                height: 32px;
-                line-height: 32px;
+                height: $segmented-control-inner-height;;
+                line-height: $segmented-control-inner-height;;
                 text-align: center;
                 text-overflow: ellipsis;
                 font-weight: 600;
@@ -175,10 +179,10 @@ export default class SegmentedControl extends Vue {
     & > .pointer {
         // Width needs to be correct, because transformX will use percentages!
         position: absolute;
-        top: $border-width;
-        height: 32px;
-        left: $border-width;
-        right: $border-width;
+        top: $segmented-control-border-width;
+        height: $segmented-control-inner-height;;
+        left: $segmented-control-border-width;
+        right: $segmented-control-border-width;
         z-index: -1;
         pointer-events: none;
 
@@ -189,7 +193,7 @@ export default class SegmentedControl extends Vue {
             position: absolute;
             left: 0;
             top: 0;
-            height: 32px;
+            height: $segmented-control-inner-height;
             background: $color-white-highlight;
             border-radius: 4px;
             box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);

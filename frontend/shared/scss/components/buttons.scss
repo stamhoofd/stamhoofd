@@ -59,17 +59,14 @@
         align-items: center;
 
         border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
-        box-shadow: 0 6px 10px 0 rgba($color-primary, 0.2);
-        touch-action: manipulation;
+        transition: 0.2s transform, 0.2s opacity; //, 0.2s box-shadow;
+        //box-shadow: 0 6px 10px 0 rgba($color-primary, 0.2);
         display: inline-flex;
         justify-content: center;
 
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-
         &:active {
             transform: scale(0.95, 0.95);
-            box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
+            //box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
         }
 
         .dropdown-text {
@@ -135,18 +132,15 @@
         text-overflow: ellipsis;
         height: 42px;
         border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
-        box-shadow: 0 6px 10px 0 rgba($color-error, 0.2);
-        touch-action: manipulation;
+        transition: 0.2s transform, 0.2s opacity;
+        //box-shadow: 0 6px 10px 0 rgba($color-error, 0.2);
         display: inline-flex;
         justify-content: center;
         align-items: center;
 
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-
         &:active {
             transform: scale(0.95, 0.95);
-            box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
+            //box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
         }
     }
 
@@ -161,9 +155,6 @@
         text-overflow: ellipsis;
         border-radius: $border-radius;
         transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
-        cursor: pointer;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         height: 42px;
         display: inline-flex;
         justify-content: center;
@@ -260,6 +251,10 @@
             color: $color-primary;
         }
 
+        &.unbold {
+            font-weight: $font-weight-medium;
+        }
+        
         &.inherit-color {
             color: inherit;
         }

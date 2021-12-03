@@ -107,9 +107,9 @@ $color-warning-dark: var(--color-warning-dark, $color-warning-dark-original);
 
 // Other
 $border-width: 2px;
-$border-width-thin: 2px;
+$border-width-thin: 1px;
 $border-radius: 5px;
-$border-radius-modals: 10px;
+$border-radius-modals: 15px;
 
 // Aliasses
 
@@ -127,7 +127,7 @@ $color-shadow: var(--color-shadow, $color-shadow-original);
 $color-side-view-shadow-original: rgba(0, 0, 0, 0.1);
 $color-side-view-shadow: var(--color-side-view-shadow, $color-side-view-shadow-original);
 
-$color-overlay-shadow-original: rgba(0, 0, 0, 0.2);
+$color-overlay-shadow-original: rgba(0, 0, 0, 0.1);
 $color-overlay-shadow: var(--color-overlay-shadow, $color-overlay-shadow-original);
 
 $color-box-shadow-original: rgba(0, 0, 0, 0.05);

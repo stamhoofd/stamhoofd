@@ -1,9 +1,9 @@
 <template>
-    <div class="st-view group-members-view background">
+    <div class="st-view table-view background">
         <STNavigationBar :sticky="true">
             <template #left>
-                <button v-if="isMobile && showSelection && !isIOS" class="button icon close" @click="showSelection = false" />
-                <button v-else-if="showSelection && isIOS" class="button text" @click="setSelectAll(!cachedAllSelected)">
+                <button v-if="isMobile && showSelection && !isIOS" class="button icon gray close" @click="showSelection = false" />
+                <button v-else-if="showSelection && isIOS" class="button text selected unbold" @click="setSelectAll(!cachedAllSelected)">
                     <template v-if="cachedAllSelected">
                         Deselecteer alles
                     </template>
@@ -26,13 +26,13 @@
             </template>
             <template #right>
                 <div v-if="!isIOS" class="wrap-bar">
-                    <button class="button icon email" @click="showSelection = !showSelection" />
-                    <button class="button icon feedback-line" @click="showSelection = !showSelection" />
-                    <button class="button icon download" @click="showSelection = !showSelection" />
+                    <button class="button icon gray email" @click="showSelection = !showSelection" />
+                    <button class="button icon gray feedback-line" @click="showSelection = !showSelection" />
+                    <button class="button icon gray download" @click="showSelection = !showSelection" />
                 </div>
                 <button class="button icon more" @click="showSelection = !showSelection" />
 
-                <button v-if="showSelection && isIOS" class="button text" @click="showSelection = false">
+                <button v-if="showSelection && isIOS" class="button text selected highlight" @click="showSelection = false">
                     Gereed
                 </button>
             </template>
@@ -811,7 +811,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     get selectionColumnWidth() {
-        return this.showSelection ? 50 : 0
+        return this.showSelection ? (this.wrapColumns ? 40 : 50) : 0
     }
 
     get totalWidth() {
@@ -1091,6 +1091,22 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 @use '~@stamhoofd/scss/base/variables' as *;
 @use '~@stamhoofd/scss/base/text-styles' as *;
 
+.table-view .wrap-bar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 44px;
+    padding: 0;
+    margin: 0px !important;
+    overflow: hidden;
+    align-items: center;
+    justify-content: flex-end;
+
+    > * {
+        margin: 0;
+    }
+}
+
 .table-column-content-style {
     font-size: 16px;
 }
@@ -1151,12 +1167,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             box-sizing: border-box;
             height: 100%;
             top: 0;
-            width: 50px;
             display: flex;
             flex-wrap: nowrap;
             justify-content: flex-start;
             align-items: center;
             padding-bottom: 2px;
+            width: var(--selection-column-width, 50px);
         }
 
         .columns {
@@ -1167,14 +1183,15 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             transition: transform 0.2s;
 
             &.show-checkbox {
-                width: calc(100% - 50px);
-                transform: translateX(50px);
+                width: calc(100% - var(--selection-column-width, 50px));
+                transform: translateX(var(--selection-column-width, 50px));
             }
         }
     }
 
     &:not(.wrap) {
         .table-head, .table-row {
+            --selection-column-width: 50px;
             .columns {
                 display: grid;
                 grid-template-columns: var(--table-columns, repeat(auto-fit, minmax(0, 1fr)));
@@ -1214,13 +1231,15 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     &.wrap {
-        padding-top: 20px;
+        padding-top: 10px;
 
         .table-head {
             display: none;
         }
 
         .table-row {
+            --selection-column-width: 40px;
+
             .columns {
                 padding: 15px 0;
                 display: flex;
@@ -1413,7 +1432,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         height: var(--table-row-height, 60px);
 
         .columns {
-            border-bottom: 2px solid $color-border-lighter;
+            border-bottom: $border-width-thin solid $color-border-lighter;
 
             > div {
                 white-space: nowrap;

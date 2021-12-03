@@ -14,7 +14,7 @@
     box-shadow: 0px 2px 3px $color-box-shadow;
 }
 .style-overlay-shadow {
-    box-shadow: 0px 5px 30px 3px $color-overlay-shadow;
+    box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
 }
 
 .style-nowrap {
@@ -24,17 +24,13 @@
 }
 
 .style-hr {
-    height: $border-width;
+    height: $border-width-thin;
     background: $color-border-lighter;
-    border-radius: $border-width/2;
+    border-radius: $border-width-thin/2;
     padding: 0;
     margin: 20px 0;
     outline: none;
     border: 0;
-
-    @media (max-width: 400px) {
-        height: 1px;
-    }
 }
 
 .style-huge-title-1 {
@@ -242,7 +238,7 @@
 }
 
 .style-button-small {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: $font-weight-semibold;
 }
 

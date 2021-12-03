@@ -72,6 +72,7 @@
     &:focus,
     &:focus-within {
         border-color: $color-primary;
+        border-width: 2px;
     }
 
     &::placeholder {
