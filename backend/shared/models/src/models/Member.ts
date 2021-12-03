@@ -298,13 +298,21 @@ export class Member extends Model {
 
     }
 
-    getStructureWithRegistrations(this: MemberWithRegistrations) {
-        return EncryptedMemberWithRegistrations.create(
-            Object.assign(Object.assign({}, this), {
-                registrations: this.registrations.map(r => r.getStructure()),
-                users: this.users.map(u => UserStruct.create(u)),
-            })
-        )
+    getStructureWithRegistrations(this: MemberWithRegistrations, forOrganization: null | boolean = null) {
+        return EncryptedMemberWithRegistrations.create({
+            ...this,
+            encryptedDetails: forOrganization === null ? this.encryptedDetails : this.encryptedDetails.map(d => {
+                if (d.forOrganization === forOrganization) {
+                    return d
+                }
+
+                // Clear unused data, but keep essential data, such as the public key, which is needed to determine
+                // the other keys a user need to encrypt the data for
+                return EncryptedMemberDetails.create({ ...d, ciphertext: ""})
+            }),
+            registrations: this.registrations.map(r => r.getStructure()),
+            users: this.users.map(u => UserStruct.create(u)),
+        })
     }
 
     static getRegistrationWithMemberStructure(registration: RegistrationWithMember) {

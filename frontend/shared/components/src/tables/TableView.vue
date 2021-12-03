@@ -2,9 +2,18 @@
     <div class="st-view group-members-view background">
         <STNavigationBar :sticky="true">
             <template #left>
-                <BackButton v-if="canPop" slot="left" @click="pop" />
+                <button v-if="isMobile && showSelection && !isIOS" class="button icon close" @click="showSelection = false" />
+                <button v-else-if="showSelection && isIOS" class="button text" @click="setSelectAll(!cachedAllSelected)">
+                    <template v-if="cachedAllSelected">
+                        Deselecteer alles
+                    </template>
+                    <template v-else>
+                        Selecteer alles
+                    </template>
+                </button>
+                <BackButton v-else-if="canPop" slot="left" @click="pop" />
             </template>
-            <template #right>
+            <template v-if="false">
                 <button class="button text" @click="showSelection = !showSelection">
                     Select...
                 </button>
@@ -15,6 +24,18 @@
                     Change
                 </button>
             </template>
+            <template #right>
+                <div v-if="!isIOS" class="wrap-bar">
+                    <button class="button icon email" @click="showSelection = !showSelection" />
+                    <button class="button icon feedback-line" @click="showSelection = !showSelection" />
+                    <button class="button icon download" @click="showSelection = !showSelection" />
+                </div>
+                <button class="button icon more" @click="showSelection = !showSelection" />
+
+                <button v-if="showSelection && isIOS" class="button text" @click="showSelection = false">
+                    Gereed
+                </button>
+            </template>
         </STNavigationBar>
     
         <main>
@@ -22,9 +43,9 @@
 
             <div class="input-with-buttons">
                 <div>
-                    <div class="input-icon-container icon search gray">
-                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
-                    </div>
+                    <form class="input-icon-container icon search gray" @submit.prevent="">
+                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" @input="searchQuery = $event.target.value">
+                    </form>
                 </div>
                 <div>
                     <button class="button text" @click="editFilter">
@@ -63,11 +84,11 @@
                 </div>
 
                 <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: !!clickHandler }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }">
-                        <div v-if="showSelection" class="selection-column">
+                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener && row.value }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)">
+                        <label v-if="showSelection" class="selection-column" @click.stop>
                             <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                             <Checkbox v-else :checked="false" />
-                        </div>
+                        </label>
                         <div class="columns" :class="{ 'show-checkbox': showSelection }">
                             <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)">
                                 {{ row.value ? column.getFormattedValue(row.value) : "" }}
@@ -86,7 +107,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, FilterEditor, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
-import { Storage } from "@stamhoofd/networking";
+import { AppManager, Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
@@ -196,12 +217,56 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         return this.allColumns.filter(c => !c.enabled)
     }
 
-    wrapColumns = window.innerWidth < 600
-    showSelection = !this.wrapColumns
-    shouldScroll = window.innerWidth >= 600
+    isMobile = window.innerWidth < 600
+    
+    getOS(): string {
+        var userAgent = navigator.userAgent || navigator.vendor;
 
-    @Prop({ default: null })
-    clickHandler: ((value: Value) => void) | null 
+        if (/android/i.test(userAgent)) {
+            return "android";
+        }
+
+        if (/Mac OS X 10_14|Mac OS X 10_13|Mac OS X 10_12|Mac OS X 10_11|Mac OS X 10_10|Mac OS X 10_9/.test(userAgent)) {
+            // Different sms protocol
+            return "macOS-old";
+        }
+
+        // iOS detection from: http://stackoverflow.com/a/9039885/177710
+        if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+            return "iOS";
+        }
+
+        // iPad on iOS 13 detection
+        if (navigator.userAgent.includes("Mac") && "ontouchend" in document) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('MAC')>=0 ) {
+            return "macOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('WIN')>=0 ) {
+            return "windows";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('IPHONE')>=0 ) {
+            return "iOS";
+        }
+
+        if (navigator.platform.toUpperCase().indexOf('ANDROID')>=0 ) {
+            return "android";
+        }
+
+        return "unknown"
+    }
+
+    get isIOS() {
+        return AppManager.shared.platform === "ios" || (AppManager.shared.platform === "web" && this.getOS() == "iOS")
+    }
+
+    wrapColumns = this.isMobile
+    showSelection = !this.isMobile
+    shouldScroll = !this.isMobile
 
     sortBy: Column<Value, any> = this.columns[0]
     sortDirection: SortDirection = SortDirection.Ascending
@@ -239,7 +304,30 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         return x;
     }
 
+    get hasClickListener() {
+        return this.$listeners && this.$listeners.click
+    }
+
+    onClickRow(row: VisibleRow<Value>) {
+        if (this.wrapColumns && this.showSelection) {
+            // On mobile, tapping a column means selecting it when we are in editing modus
+            this.setSelectionValue(row, !this.getSelectionValue(row))
+            return
+        }
+        if (this.hasClickListener && row.value) {
+            this.$emit("click", row.value)
+        }
+    }
+
     columnDragStart(event, column: Column<any, any>) {
+        // Don't allow drag with right mouse or other buttons
+        if (event.button !== undefined && event.button !== 0) {
+            return
+        }
+        if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
+            // Don't allow drag with ctrl+click
+            return
+        }
         this.draggingStartX = this.getEventX(event);
         this.isDraggingColumn = column
         this.dragType = "order"
@@ -249,6 +337,14 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     handleDragStart(event, column: Column<any, any>) {
+        // Don't allow drag with right mouse or other buttons
+        if (event.button !== undefined && event.button !== 0) {
+            return
+        }
+        if (event.button === 0 && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) {
+            // Don't allow drag with ctrl+click
+            return
+        }
         this.draggingStartX = this.getEventX(event);
         this.isDraggingColumn = column
         this.dragType = "width"
@@ -1055,9 +1151,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             box-sizing: border-box;
             height: 100%;
             top: 0;
+            width: 50px;
             display: flex;
             flex-wrap: nowrap;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             padding-bottom: 2px;
         }

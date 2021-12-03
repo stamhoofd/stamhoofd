@@ -80,10 +80,6 @@
             align-items: center;
             justify-content: center;
 
-            &:active {
-                transform: scale(0.8, 0.8);
-            }
-
             svg > path {
                 stroke-dasharray: 30;
                 stroke-dashoffset: 30;
@@ -180,5 +176,15 @@ label.style-label {
     + .checkbox,
     + .radio {
         margin-top: 20px;
+    }
+}
+
+
+
+label:active .checkbox, label:active .radio, .checkbox:active, .radio:active {
+    > div {
+        > div:first-child {
+            transform: scale(0.8, 0.8);
+        }
     }
 }

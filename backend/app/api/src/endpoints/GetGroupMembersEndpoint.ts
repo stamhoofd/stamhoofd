@@ -1,11 +1,10 @@
 import { AutoEncoder, BooleanDecoder,Decoder,field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, PermissionLevel } from "@stamhoofd/structures";
-
 import { Group } from "@stamhoofd/models";
 import { KeychainItem } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct, PermissionLevel } from "@stamhoofd/structures";
 
 type Params = { id: string };
 class Query extends AutoEncoder {
@@ -69,7 +68,7 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         if (request.request.getVersion() <= 35) {
             // Old
-            return new Response(members.map(m => m.getStructureWithRegistrations()));
+            return new Response(members.map(m => m.getStructureWithRegistrations(true)));
         }
 
         // New
@@ -93,9 +92,9 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
             }) 
 
-            return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations()), keychainItems: keychainItems.map(m => KeychainItemStruct.create(m)) }));
+            return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations(true)), keychainItems: keychainItems.map(m => KeychainItemStruct.create(m)) }));
         }
         
-        return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations()), keychainItems: [] }));
+        return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations(true)), keychainItems: [] }));
     }
 }

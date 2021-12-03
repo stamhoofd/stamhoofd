@@ -38,8 +38,9 @@ export class MemberManagerBase {
         for (const encryptedDetails of oldToNew.slice().reverse()) {
             if (!encryptedDetails.meta.isRecovered) {
                 // Do we have a key?
-                if (Keychain.hasItem(encryptedDetails.publicKey)) {
+                if (Keychain.hasItem(encryptedDetails.publicKey) && encryptedDetails.ciphertext.length > 0) {
                     try {
+                        console.log("Found latest, not recovered encrypted details", encryptedDetails, encryptedDetails.meta.date)
                         latest = await this.decryptMemberDetails(encryptedDetails, organization)
                         latestEncryptedDetails = encryptedDetails
                         break
@@ -56,7 +57,7 @@ export class MemberManagerBase {
             // Use the oldest available recovered blob and keep applying all the updates
             for (const encryptedDetails of oldToNew) {
                 // Do we have a key?
-                if (Keychain.hasItem(encryptedDetails.publicKey)) {
+                if (Keychain.hasItem(encryptedDetails.publicKey) && encryptedDetails.ciphertext.length > 0) {
                     try {
                         latest = await this.decryptMemberDetails(encryptedDetails, organization)
                         latestEncryptedDetails = encryptedDetails
@@ -99,7 +100,7 @@ export class MemberManagerBase {
         // From old to new
         for (const encryptedDetails of oldToNew) {
             if (encryptedDetails.id !== latestEncryptedDetails.id && encryptedDetails.meta.isRecovered && latestEncryptedDetails.meta.date < encryptedDetails.meta.date) {
-                if (Keychain.hasItem(encryptedDetails.publicKey)) {
+                if (Keychain.hasItem(encryptedDetails.publicKey) && encryptedDetails.ciphertext.length > 0) {
                     try {
                         const updates = await this.decryptMemberDetails(encryptedDetails, organization)
                         details.merge(updates)

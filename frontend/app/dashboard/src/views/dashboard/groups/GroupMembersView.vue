@@ -1,10 +1,10 @@
 <template>
-    <TableView :title="title" column-configuration-id="members" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" />
+    <TableView :title="title" column-configuration-id="members" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember" />
 </template>
 
 <script lang="ts">
 import { Request } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
@@ -12,6 +12,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
+import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 
 @Component({
@@ -136,6 +137,24 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get title() {
         return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
+    }
+
+    openMember(member: MemberWithRegistrations) {
+        const component = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberView, {
+                member: member,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                //getNextMember: this.getNextMember,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                //getPreviousMember: this.getPreviousMember,
+
+                group: this.group,
+                cycleOffset: this.cycleOffset,
+                waitingList: this.waitingList
+            }),
+        });
+        component.modalDisplayStyle = "popup";
+        this.present(component);
     }
 
     get recordCategories(): RecordCategory[] {
