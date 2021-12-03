@@ -26,16 +26,8 @@ export default class ContextMenuItem extends Vue {
         if (this.clicked) {
             return;
         }
-        // blink
-        this.clicked = true;
-        setTimeout(() => {
-            this.clicked = false;
-
-            setTimeout(() => {
-                this.$emit("click", event);
-                (this.$parent as any).pop();
-            }, 80);
-        }, 80);
+        this.$emit("click", event);
+        (this.$parent as any).pop();
     }
 }
 </script>

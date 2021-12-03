@@ -172,7 +172,7 @@ export default class TabBarController extends Mixins(NavigationMixin) {
         left: 0;
         right: 0;
         height: 60px;
-        border-top: 2px solid $color-border;
+        border-top: $border-width-thin solid $color-border;
         padding-bottom: var(--st-safe-area-bottom, 0px);
         background: rgba($color-background, 0.7);
         backdrop-filter: blur(10px);

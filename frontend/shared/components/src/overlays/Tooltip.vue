@@ -74,8 +74,8 @@ export default class Tooltip extends Vue {
     --color-current-background: #{$color-background-shade-darker};
     --color-current-background-shade: #{$color-border};
 
-    border: 2px solid $color-border-shade;
-    padding: 10px 15px;
+    border: $border-width-thin solid $color-border-shade;
+    padding: 12px 15px;
     border-radius: $border-radius-modals;
     color: $color-dark-original;
 

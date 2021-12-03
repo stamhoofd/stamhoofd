@@ -1,11 +1,11 @@
 <template>
-    <TableView :title="title" column-configuration-id="members" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember" />
+    <TableView :title="title" column-configuration-id="members" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember" />
 </template>
 
 <script lang="ts">
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -45,6 +45,83 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     get estimatedRows() {
         return this.loading ? 30 : 0
     }
+    
+    actions: TableAction<MemberWithRegistrations>[] = [
+        new TableAction({
+            name: "Nieuw lid",
+            icon: "add",
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            handler: () => {
+                // todo
+            }
+        }),
+
+        new TableAction({
+            name: "Wachtlijst",
+            icon: "clock-small",
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            handler: () => {
+                // todo
+            }
+        }),
+        
+        new TableAction({
+            name: "Instellingen",
+            icon: "settings",
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: false,
+            handler: () => {
+                // todo
+            }
+        }),
+
+        //
+        new TableAction({
+            name: "E-mailen",
+            icon: "email",
+            priority: 10,
+            groupIndex: 2,
+            handler: (member: MemberWithRegistrations[]) => {
+                // todo
+            }
+        }),
+        new TableAction({
+            name: "SMS'en",
+            icon: "feedback-line",
+            priority: 9,
+            groupIndex: 2,
+
+            handler: (member: MemberWithRegistrations[]) => {
+                // todo
+            }
+        }),
+        new TableAction({
+            name: "Exporteren",
+            icon: "download",
+            priority: 8,
+            groupIndex: 2,
+            handler: (member: MemberWithRegistrations[]) => {
+                // todo
+            }
+        }),
+
+        new TableAction({
+            name: "Verwijderen",
+            icon: "trash",
+            priority: 0,
+            groupIndex: 3,
+            needsSelection: true,
+            handler: () => {
+                // todo
+            }
+        }),
+
+    ]
 
     allColumns = [
         new Column<MemberWithRegistrations, string>({
@@ -132,7 +209,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }),
     ]
 
-    loading = false
+    loading = true
     cycleOffset = 0
 
     get title() {

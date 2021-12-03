@@ -13,24 +13,11 @@
                 </button>
                 <BackButton v-else-if="canPop" slot="left" @click="pop" />
             </template>
-            <template v-if="false">
-                <button class="button text" @click="showSelection = !showSelection">
-                    Select...
-                </button>
-                <button class="button text" @click="wrapColumns = !wrapColumns">
-                    Wrap...
-                </button>
-                <button class="button text" @click="simulateColumnWidthChange">
-                    Change
-                </button>
-            </template>
             <template #right>
                 <div v-if="!isIOS" class="wrap-bar">
-                    <button class="button icon gray email" @click="showSelection = !showSelection" />
-                    <button class="button icon gray feedback-line" @click="showSelection = !showSelection" />
-                    <button class="button icon gray download" @click="showSelection = !showSelection" />
+                    <button v-for="(action, index) of actions" :key="index" v-tooltip="action.tooltip" :class="'button icon gray '+action.icon" @click="handleAction(action)" />
                 </div>
-                <button class="button icon more" @click="showSelection = !showSelection" />
+                <button class="button icon more" @click="showActions" />
 
                 <button v-if="showSelection && isIOS" class="button text selected highlight" @click="showSelection = false">
                     Gereed
@@ -99,6 +86,24 @@
                 </div>
             </div>
         </div>
+
+        <div v-if="isIOS" class="tool-bar">
+            <button class="button text small column selected">
+                <span class="icon download" />
+            </button>
+
+            <button class="button text small column selected">
+                <span class="icon email" />
+            </button>
+
+            <button class="button text small column selected">
+                <span class="icon feedback-line" />
+            </button>
+
+            <button class="button text small column selected">
+                <span class="icon more" />
+            </button>
+        </div>
     </div>
 </template>
 
@@ -106,7 +111,7 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, FilterEditor, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, FilterEditor, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
@@ -114,6 +119,8 @@ import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { Column } from "./Column";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
+import { TableAction } from "./TableAction";
+import TableActionsContextMenu from "./TableActionsContextMenu.vue";
 
 interface TableListable {
     id: string;
@@ -186,6 +193,9 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     // This contains the data we want to show
     @Prop({ required: true})
     allValues!: Value[]
+
+    @Prop({ required: false, default: () => [] })
+    actions!: TableAction<Value>[]
 
     @Prop({ required: false, default: null })
     estimatedRows!: number | null
@@ -956,6 +966,32 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.cachedAllSelected = selected
     }
 
+    getSelection(): Value[] {
+        if (this.markedRowsAreSelected) {
+            return Array.from(this.markedRows.values())
+        } else {
+            return Array.from(this.filteredValues).filter(val => !this.markedRows.has(val.id))
+        }
+    }
+
+    handleAction(action: TableAction<Value>) {
+        action.handler(this.getSelection())?.catch((e) => {
+            console.error(e)
+            Toast.fromError(e).show
+        })
+    }
+
+    showActions(event) {
+        const el = event.currentTarget;
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: el.getBoundingClientRect().left,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            actions: this.isIOS ? (this.showSelection ? [] : this.actions.filter(a => !a.needsSelection)) : (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions),
+            table: this,
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
     @Watch("sortedValues", { deep: false })
     onUpdateValues() {
         console.info("Sorted values has changed")
@@ -1104,6 +1140,31 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     > * {
         margin: 0;
+    }
+}
+
+.table-view {
+    >.tool-bar {
+        @media (min-width: 701px) {
+            display: none;
+        }
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        border-top: $border-width-thin solid $color-border;
+        padding-bottom: var(--st-safe-area-bottom, 0px);
+        background: rgba($color-background, 0.9);
+        backdrop-filter: blur(20px);
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        
+        > button {
+            flex-grow: 1;
+        }
     }
 }
 
@@ -1452,11 +1513,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         }
 
         &.selectable {
-           // will-change: transform, background-color;
+            will-change: transform, background-color;
             transition: background-color 0.15s;
             cursor: pointer;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            -webkit-tap-highlight-color: transparent;
             user-select: none;
 
             @media (hover: hover) {

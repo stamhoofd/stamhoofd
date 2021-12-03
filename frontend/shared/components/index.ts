@@ -118,4 +118,5 @@ export { default as StringFilterView } from "./src/filters/StringFilterView.vue"
 
 // tables
 export * from "./src/tables/Column"
+export * from "./src/tables/TableAction"
 export { default as TableView } from "./src/tables/TableView.vue"

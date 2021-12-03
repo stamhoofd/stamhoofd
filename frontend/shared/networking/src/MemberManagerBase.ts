@@ -40,7 +40,6 @@ export class MemberManagerBase {
                 // Do we have a key?
                 if (Keychain.hasItem(encryptedDetails.publicKey) && encryptedDetails.ciphertext.length > 0) {
                     try {
-                        console.log("Found latest, not recovered encrypted details", encryptedDetails, encryptedDetails.meta.date)
                         latest = await this.decryptMemberDetails(encryptedDetails, organization)
                         latestEncryptedDetails = encryptedDetails
                         break

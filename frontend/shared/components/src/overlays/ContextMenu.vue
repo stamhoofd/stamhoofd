@@ -202,7 +202,7 @@ export default class ContextMenu extends Vue {
     box-sizing: border-box;
     min-width: 200px;
 
-    @media (max-width: 400px) {
+    @media (max-width: 450px) {
         min-width: 70vw;
     }
 
@@ -224,7 +224,7 @@ export default class ContextMenu extends Vue {
         padding: 0 9px;
         border-radius: $border-radius;
 
-        @media (max-width: 400px) {
+        @media (max-width: 450px) {
             min-height: 40px;
         }
 

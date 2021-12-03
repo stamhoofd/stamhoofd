@@ -35,7 +35,7 @@ export default {
                             displayedComponent = new ComponentWithProperties(Tooltip, {
                                 text: binding.value,
                                 x: rect.left,
-                                y: rect.top + el.offsetHeight + 5,
+                                y: rect.top + el.offsetHeight,
                             });
                             parentComponent.present(displayedComponent.setDisplayStyle("overlay"));
                             el.tooltipComponent = displayedComponent
