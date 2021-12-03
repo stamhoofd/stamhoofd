@@ -238,8 +238,12 @@
 }
 
 .style-button-small {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: $font-weight-semibold;
+
+    @media (max-width: 450px) {
+        font-size: 16px;
+    }
 }
 
 .style-button-smaller {
