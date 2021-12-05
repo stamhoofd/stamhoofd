@@ -49,6 +49,4 @@ html {
     word-break: break-word;
 
     will-change: scroll-position;
-
-    // don't combine with hyphens, as that will choose random words as break points, which is not what we want
 }

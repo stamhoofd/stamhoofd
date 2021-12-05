@@ -303,6 +303,16 @@
                 }
             }
         }
+
+        &:disabled {
+            color: $color-gray-2;
+            box-shadow: none;
+            cursor: not-allowed;
+
+            &:active {
+                transform: none;
+            }
+        }
     }
 
     &.icon {

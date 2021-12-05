@@ -118,12 +118,19 @@ export default class STNavigationBar extends Vue {
 @use '~@stamhoofd/scss/layout/split-inputs.scss';
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
+.st-view > .st-navigation-bar.sticky {
+    // Old sticky behaviour
+    position: sticky;
+    top: 0;
+}
+
 .st-navigation-bar {
-    // Todo: replace padding with variable padding
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     margin-top: calc(-1 * var(--st-vertical-padding, 20px) + var(--navigation-bar-margin, 10px) - var(--st-safe-area-top, 0px));
     padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
     height: 60px;
+    
+    
     word-break: normal;
 
     &.large {
@@ -137,11 +144,6 @@ export default class STNavigationBar extends Vue {
         }
     }
     -webkit-app-region: drag;
-
-    &.sticky {
-        position: sticky;
-        top: 0;
-    }
 
     &.fixed {
         position: fixed;

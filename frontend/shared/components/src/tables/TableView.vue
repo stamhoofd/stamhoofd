@@ -17,14 +17,14 @@
                 <div v-if="!isIOS" class="wrap-bar">
                     <button v-for="(action, index) of actions" :key="index" v-tooltip="action.tooltip" :class="'button icon gray '+action.icon" @click="handleAction(action)" />
                 </div>
-                <button class="button icon more" @click="showActions" />
 
-                <button v-if="showSelection && isIOS" class="button text selected highlight" @click="showSelection = false">
+                <button v-if="showSelection && isIOS" key="iOSDone" class="button text selected highlight" @click="showSelection = false">
                     Gereed
                 </button>
+                <button v-else key="actions" class="button icon more" @click="showActions" />
             </template>
         </STNavigationBar>
-    
+
         <main>
             <h1>{{ title }}</h1>
 
@@ -42,65 +42,65 @@
                     </button>
                 </div>
             </div>
-        </main>
 
-        <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns, scroll: shouldScroll }">
-            <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+70)+'px', width: totalRenderWidth+'px'} : {}">
-                <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
-                    <div v-if="showSelection" class="selection-column">
-                        <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
-                    </div>
+            <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns, scroll: shouldScroll }">
+                <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+70)+'px', width: totalRenderWidth+'px'} : {}">
+                    <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
+                        <div v-if="showSelection" class="selection-column">
+                            <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
+                        </div>
 
-                    <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                        <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
-                            <button @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
-                                <span>{{ column.name }}</span>
+                        <div class="columns" :class="{ 'show-checkbox': showSelection }">
+                            <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
+                                <button @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
+                                    <span>{{ column.name }}</span>
 
-                                <span v-if="sortBy === column"
-                                      class="sort-arrow icon"
-                                      :class="{
-                                          'arrow-up-small': sortDirection == 'ASC',
-                                          'arrow-down-small': sortDirection == 'DESC',
-                                      }"
-                                />
-                            </button>
-                            <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="handleDragStart($event, column)" @touchstart="handleDragStart($event, column)" /></span>
-                            <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" class="button light-gray icon collapse-left" @click="collapse" />
+                                    <span v-if="sortBy === column"
+                                          class="sort-arrow icon"
+                                          :class="{
+                                              'arrow-up-small': sortDirection == 'ASC',
+                                              'arrow-down-small': sortDirection == 'DESC',
+                                          }"
+                                    />
+                                </button>
+                                <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="handleDragStart($event, column)" @touchstart="handleDragStart($event, column)" /></span>
+                                <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" class="button light-gray icon collapse-left" @click="collapse" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                    <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener && row.value }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)">
-                        <label v-if="showSelection" class="selection-column" @click.stop>
-                            <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
-                            <Checkbox v-else :checked="false" />
-                        </label>
-                        <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                            <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)">
-                                {{ row.value ? column.getFormattedValue(row.value) : "" }}
-                                <span v-if="!row.value" class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 500, column.recommendedWidth)-30))+'px'}" />
+                    <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
+                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener && row.value }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)">
+                            <label v-if="showSelection" class="selection-column" @click.stop>
+                                <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
+                                <Checkbox v-else :checked="false" />
+                            </label>
+                            <div class="columns" :class="{ 'show-checkbox': showSelection }">
+                                <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)">
+                                    {{ row.value ? column.getFormattedValue(row.value) : "" }}
+                                    <span v-if="!row.value" class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 500, column.recommendedWidth)-30))+'px'}" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <div v-if="isIOS" class="tool-bar">
-            <button class="button text small column selected">
+        <div v-if="true || isIOS" class="tool-bar">
+            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
                 <span class="icon download" />
             </button>
 
-            <button class="button text small column selected">
+            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
                 <span class="icon email" />
             </button>
 
-            <button class="button text small column selected">
+            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
                 <span class="icon feedback-line" />
             </button>
 
-            <button class="button text small column selected">
+            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
                 <span class="icon more" />
             </button>
         </div>
@@ -276,7 +276,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     wrapColumns = this.isMobile
     showSelection = !this.isMobile
-    shouldScroll = !this.isMobile
+    shouldScroll = false // !this.isMobile
 
     sortBy: Column<Value, any> = this.columns[0]
     sortDirection: SortDirection = SortDirection.Ascending
@@ -667,6 +667,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
      */
     updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
         this.updatePaddingIfNeeded()
+        
+        if (this.wrapColumns) {
+            return
+        }
+        
         const leftPadding = this.horizontalPadding
         const rightPadding = this.horizontalPadding
 
@@ -685,16 +690,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     col.width = col.recommendedWidth
                     distributeWidth -= col.recommendedWidth
                     col.renderWidth = Math.floor(col.width);
-
-                    //console.log("Colmun", col.name, "didn't have a width, so we set it to", col.width)
                 }
 
                 if (col.width < col.minimumWidth) {
                     distributeWidth -= col.minimumWidth - col.width
                     col.width = col.minimumWidth
                     col.renderWidth = Math.floor(col.width);
-
-                    //console.log("Colmun", col.name, "was smaller than the minimum width and decreased the distributeWidth")
                 }
             }
 
@@ -807,6 +808,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     updateCanCollapse() {
         this.updatePaddingIfNeeded()
+
+        if (this.wrapColumns) {
+            return
+        }
         const n = this.canCollapse
         this.canCollapse = Math.floor(this.totalWidth) > Math.floor((this.$refs["table"] as HTMLElement).clientWidth);
 
@@ -940,9 +945,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         // Update cached all selection
         this.cachedAllSelected = this.getSelectAll()
+        this.cachedSelectionCount = this.markedRowsAreSelected ? this.markedRows.size : (this.filteredValues.length - this.markedRows.size)
     }
 
     cachedAllSelected = false
+    cachedSelectionCount = 0
 
     /**
      * This is not reactive, due to the use of maps, which are not reactive in vue.
@@ -964,6 +971,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             visibleRow.cachedSelectionValue = selected
         }
         this.cachedAllSelected = selected
+        this.cachedSelectionCount = selected ? this.filteredValues.length : 0
     }
 
     getSelection(): Value[] {
@@ -1044,7 +1052,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 }
             }
 
-            topOffset = (scrollElement.scrollTop - this.cachedTableYPosition)
+            // During animations, the scrollTop often jumps temporarily to a negative value
+            topOffset = Math.max(0, (scrollElement.scrollTop - this.cachedTableYPosition))
         }        
 
         const totalItems = this.totalItemsCount
@@ -1056,6 +1065,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, totalItems - 1))
 
+        console.log("First visible item index: " + firstVisibleItemIndex + " Last visible item index: " + lastVisibleItemIndex)
+        console.log("vh: " + vh + " topOffset: " + topOffset + " rowHeight: " + this.rowHeight+" total: "+totalItems)
         //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
 
         // Make all visible rows available if not visible any longer
@@ -1145,22 +1156,24 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
 .table-view {
     >.tool-bar {
-        @media (min-width: 701px) {
-            display: none;
-        }
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        flex-shrink: 0;
         height: 60px;
+        box-sizing: content-box;
         border-top: $border-width-thin solid $color-border;
         padding-bottom: var(--st-safe-area-bottom, 0px);
+
+        margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
+        margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
+
         background: rgba($color-background, 0.9);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(30px);
 
         display: flex;
         flex-direction: row;
         align-items: center;
+
+        position: sticky;
+        bottom: 0;
         
         > button {
             flex-grow: 1;

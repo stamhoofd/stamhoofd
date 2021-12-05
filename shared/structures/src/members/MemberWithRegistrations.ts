@@ -439,4 +439,8 @@ export class MemberWithRegistrations extends Member {
             })
         ]
     }
+
+    matchQuery(q: string) {
+        return this.details.matchQuery(q)
+    }
 }
