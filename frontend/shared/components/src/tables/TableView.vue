@@ -15,13 +15,16 @@
             </template>
             <template #right>
                 <div v-if="!isIOS" class="wrap-bar">
-                    <button v-for="(action, index) of actions" :key="index" v-tooltip="action.tooltip" :class="'button icon gray '+action.icon" @click="handleAction(action)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon gray '+action.icon" @click="handleAction(action)" />
                 </div>
 
                 <button v-if="showSelection && isIOS" key="iOSDone" class="button text selected highlight" @click="showSelection = false">
                     Gereed
                 </button>
-                <button v-else key="actions" class="button icon more" @click="showActions" />
+                <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button text selected" @click="showSelection = true">
+                    Selecteer
+                </button>
+                <button v-else key="actions" class="button icon more" @click="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 
@@ -72,7 +75,7 @@
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)">
+                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
@@ -89,21 +92,13 @@
             </div>
         </main>
 
-        <div v-if="true || isIOS" class="tool-bar">
+        <div v-if="isIOS" class="tool-bar">
             <div>
-                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
-                    <span class="icon download" />
+                <button v-for="(action, index) of filteredActions" :key="index" class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0" @click="showSelection && cachedSelectionCount == 0 ? undefined : handleAction(action)">
+                    <span :class="'icon '+action.icon" />
                 </button>
 
-                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
-                    <span class="icon email" />
-                </button>
-
-                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
-                    <span class="icon feedback-line" />
-                </button>
-
-                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
+                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0" @click="showActions(false, $event)">
                     <span class="icon more" />
                 </button>
             </div>
@@ -334,6 +329,26 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         if (this.hasClickListener && row.value) {
             this.$emit("click", row.value)
         }
+    }
+
+    onRightClickRow(row: VisibleRow<Value>, event) {
+        if (this.isMobile && !this.showSelection && !this.isIOS) {
+            // On Android, the default long press action is switching to editing mode
+            this.setSelectionValue(row, true)
+            this.showSelection = true
+            return
+        }
+        // Show a context menu to select the available columns
+
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: event.clientX,
+            y: event.clientY,
+            focused: [row.value!],
+            actions: this.actions.filter(a => a.needsSelection),
+            table: this,
+        });
+
+        this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
     columnDragStart(event, column: Column<any, any>) {
@@ -864,6 +879,21 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         return filtered.filter((val: Value) => val.matchQuery(this.searchQuery));
     }
 
+    get sortedActions() {
+        return this.actions.slice().sort((a,b) => b.priority - a.priority)
+    }
+
+    get filteredActions() {
+        if (!this.isMobile || !this.showSelection) {
+            // Don't filter. But only show the first 3
+            return this.sortedActions.slice(0, 3)
+        }
+
+        return this.sortedActions.filter(action => {
+            return action.needsSelection
+        }).slice(0, 3)
+    }
+
     editFilter() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(FilterEditor, {
@@ -900,12 +930,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.saveColumnConfiguration()
     }
 
-    getSelectionValue(row: VisibleRow<Value>) {
-        const value = row.value
-        if (!value) {
-            return false
-        }
-
+    isValueSelected(value: Value) {
         const found = this.markedRows.has(value.id)
 
         if (this.markedRowsAreSelected) {
@@ -913,6 +938,43 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         } else {
             return !found
         }
+    }
+
+    getSelectionValue(row: VisibleRow<Value>) {
+        const value = row.value
+        if (!value) {
+            return false
+        }
+
+        return this.isValueSelected(value)
+    }
+
+    setSelectionValues(values: Value[], selected: boolean) {
+        for (const value of values) {
+            if (selected) {
+                if (this.markedRowsAreSelected) {
+                    this.markedRows.set(value.id, value)
+                } else {
+                    this.markedRows.delete(value.id)
+                }
+            } else {
+                if (!this.markedRowsAreSelected) {
+                    this.markedRows.set(value.id, value)
+                } else {
+                    this.markedRows.delete(value.id)
+                }
+            }
+
+            // Update cached value of visible row
+            const row = this.visibleRows.find(r => r.value?.id === value.id)
+            if (row) {
+                row.cachedSelectionValue = selected
+            }
+        }
+
+        // Update cached all selection
+        this.cachedAllSelected = this.getSelectAll()
+        this.cachedSelectionCount = this.markedRowsAreSelected ? this.markedRows.size : (this.filteredValues.length - this.markedRows.size)
     }
 
     setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
@@ -969,6 +1031,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     getSelection(): Value[] {
+        if (!this.showSelection || this.cachedSelectionCount == 0) {
+            return this.sortedValues
+        }
+
+        // todo: fix sorting
+
         if (this.markedRowsAreSelected) {
             return Array.from(this.markedRows.values())
         } else {
@@ -983,13 +1051,17 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         })
     }
 
-    showActions(event) {
+    showActions(isOnTop: boolean, event) {
         const el = event.currentTarget;
+        const bounds = el.getBoundingClientRect()
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: el.getBoundingClientRect().left,
-            y: el.getBoundingClientRect().top + el.offsetHeight,
-            actions: this.isIOS ? (this.showSelection ? [] : this.actions.filter(a => !a.needsSelection)) : (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions),
+            x: bounds.left + (!isOnTop ? el.offsetWidth : 0),
+            y: bounds.top + (isOnTop ? el.offsetHeight : 0),
+            xPlacement: isOnTop ? "right" : "left",
+            yPlacement: isOnTop ? "bottom" : "top",
+            actions: (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions),
             table: this,
+            focused: this.showSelection ? this.getSelection() : []
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -1163,6 +1235,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 }
 
 .table-view {
+    --st-vertical-padding: 10px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+
     > main {
         overflow-y: auto;
     }
@@ -1390,6 +1467,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     .table-head {
         height: 50px;
         border-bottom: $border-width-thin solid $color-border;
+        margin-bottom: - $border-width-thin;
         position: sticky;
         top: 0px;
         z-index: 100;
@@ -1536,7 +1614,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         height: var(--table-row-height, 60px);
 
         .columns {
-            border-bottom: $border-width-thin solid $color-border-lighter;
+            border-top: $border-width-thin solid $color-border-lighter;
 
             > div {
                 white-space: nowrap;

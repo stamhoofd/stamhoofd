@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="context-menu-item" :class="{ clicked: clicked }" @click="onClick">
+    <component :is="elementName" class="context-menu-item" :class="{ clicked: clicked }" @click.passive="onClick">
         <div class="left">
             <slot name="left" />
         </div>
@@ -27,7 +27,11 @@ export default class ContextMenuItem extends Vue {
             return;
         }
         this.$emit("click", event);
-        (this.$parent as any).pop();
+
+        // Allow some time to let the browser handle some events (e.g. label > update checkbox)
+        setTimeout(() => {
+            (this.$parent as any).pop();
+        }, 80)
     }
 }
 </script>

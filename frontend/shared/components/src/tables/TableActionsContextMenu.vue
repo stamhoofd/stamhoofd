@@ -1,7 +1,7 @@
 <template>
     <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
-        <ContextMenuItem v-if="!showSelection" @click="toggleSelect">
-            Selecteer
+        <ContextMenuItem v-if="!showSelection || focused.length >= 1" @click="toggleSelect">
+            {{ isFocusSelected ? 'Deselecteer' : 'Selecteer' }}
         </ContextMenuItem>
         <ContextMenuItem v-if="showSelection && !isAllSelected" @click="setSelectAll(true)">
             Selecteer alles
@@ -9,14 +9,14 @@
         <ContextMenuItem v-if="showSelection && isAllSelected" @click="setSelectAll(false)">
             Deselecteer alles
         </ContextMenuItem>
-        <ContextMenuItem>
+        <ContextMenuItem v-if="focused.length == 0">
             Kolommen
             <span slot="right" class="icon arrow-right-small" />
         </ContextMenuItem>
 
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index">
+            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" @click="handleAction(action)">
                 {{ action.name }}
                 <span v-if="action.icon" slot="right" :class="'icon '+action.icon" />
             </ContextMenuItem>
@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,Column,ContextMenu, ContextMenuItem, ContextMenuLine } from "@stamhoofd/components";
+import { Checkbox,Column,ContextMenu, ContextMenuItem, ContextMenuLine, Toast } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { TableAction } from "./TableAction";
@@ -53,6 +53,12 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
     @Prop()
     yPlacement?: string;
 
+    /**
+     * Act only on selection given here
+     */
+    @Prop({ default: () => [] })
+    focused!: any[];
+
     @Prop({ required: true })
     table!: TableView<any>;
 
@@ -71,8 +77,30 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
         return this.table.allColumns
     }
 
+    get isFocusSelected() {
+        return this.focused.length > 0 && this.focused.every(item => this.table.isValueSelected(item));
+    }
+
     toggleSelect() {
-        this.table.showSelection = !this.table.showSelection
+        this.table.showSelection = true
+
+        // Select focussed items
+        if (this.isFocusSelected) {
+            this.table.setSelectionValues(this.focused, false);
+        } else {
+            this.table.setSelectionValues(this.focused, true);
+        }
+    }
+
+    handleAction(action: TableAction<any>) {
+        if (this.focused.length > 0) {
+            action.handler(this.focused)?.catch((e) => {
+                console.error(e)
+                Toast.fromError(e).show
+            })
+        } else {
+            this.table.handleAction(action)
+        }
     }
 
     setSelectAll(all: boolean) {

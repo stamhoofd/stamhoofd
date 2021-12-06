@@ -12,6 +12,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
+import MailView from "../mail/MailView.vue";
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 
@@ -86,8 +87,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             icon: "email",
             priority: 10,
             groupIndex: 2,
-            handler: (member: MemberWithRegistrations[]) => {
-                // todo
+            handler: (members: MemberWithRegistrations[]) => {
+                this.openMail(members)
             }
         }),
         new TableAction({
@@ -419,6 +420,17 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }).finally(() => {
             this.loading = false
         })
+    }
+
+    openMail(members: MemberWithRegistrations[], subject = "") {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MailView, {
+                members,
+                group: this.group,
+                defaultSubject: subject
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 }
 </script>
