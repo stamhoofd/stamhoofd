@@ -9,7 +9,7 @@
 <style lang="scss">
 
 .st-floating-footer {
-    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    margin: 0;
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
     margin-top: auto;
     padding-top: 15px;

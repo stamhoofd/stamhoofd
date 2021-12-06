@@ -33,7 +33,7 @@ const app = new Vue({
 (window as any).app = app;
 
 if (!isPrerender) {
-    ViewportHelper.setup()
+    ViewportHelper.setup(true)
 
     // Load plausible if not production
     if (STAMHOOFD.environment == "production") {

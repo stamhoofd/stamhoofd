@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view table-view background">
+    <div class="modern st-view table-view background">
         <STNavigationBar :sticky="true">
             <template #left>
                 <button v-if="isMobile && showSelection && !isIOS" class="button icon gray close" @click="showSelection = false" />
@@ -1165,8 +1165,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
         margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
 
-        background: rgba($color-background, 0.9);
-        backdrop-filter: blur(30px);
+        background: $color-background;
+        //backdrop-filter: blur(30px);
 
         display: flex;
         flex-direction: row;
