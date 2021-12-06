@@ -27,6 +27,9 @@ export default class STNavigationBar extends Vue {
     @Prop({ default: true, type: Boolean })
     sticky!: boolean;
 
+    @Prop({ default: true, type: Boolean })
+    addShadow!: boolean;
+
     /**
      * Also show the title when not scrolled
      */
@@ -43,6 +46,11 @@ export default class STNavigationBar extends Vue {
     scrollElement!: HTMLElement | null;
 
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
+        // If we are in modern mode, always choose the main element, which is the next sibling
+        if (document.body.className.indexOf("modern") > -1) {
+            return this.$el.nextElementSibling as HTMLElement;
+        }
+
         if (!element) {
             element = this.$el as HTMLElement;
         }
@@ -66,6 +74,9 @@ export default class STNavigationBar extends Vue {
     addListener() {
         if (this.scrollElement) {
             return;
+        }
+        if (!this.addShadow) {
+            return
         }
         this.scrollElement = this.getScrollElement();
         if (this.scrollElement === document.documentElement) {

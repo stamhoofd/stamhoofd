@@ -1,6 +1,6 @@
 <template>
     <div class="modern st-view table-view background">
-        <STNavigationBar :sticky="true">
+        <STNavigationBar :sticky="true" :add-shadow="wrapColumns">
             <template #left>
                 <button v-if="isMobile && showSelection && !isIOS" class="button icon gray close" @click="showSelection = false" />
                 <button v-else-if="showSelection && isIOS" class="button text selected unbold" @click="setSelectAll(!cachedAllSelected)">
@@ -26,25 +26,27 @@
         </STNavigationBar>
 
         <main>
-            <h1>{{ title }}</h1>
+            <div class="container">
+                <h1>{{ title }}</h1>
 
-            <div class="input-with-buttons">
-                <div>
-                    <form class="input-icon-container icon search gray" @submit.prevent="">
-                        <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" @input="searchQuery = $event.target.value">
-                    </form>
-                </div>
-                <div>
-                    <button class="button text" @click="editFilter">
-                        <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
-                        <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
-                    </button>
+                <div class="input-with-buttons">
+                    <div>
+                        <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
+                            <input v-model="searchQuery" class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" @input="searchQuery = $event.target.value">
+                        </form>
+                    </div>
+                    <div>
+                        <button class="button text" @click="editFilter">
+                            <span class="icon filter" />
+                            <span class="hide-small">Filter</span>
+                            <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns, scroll: shouldScroll }">
-                <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+70)+'px', width: totalRenderWidth+'px'} : {}">
+            <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns }">
+                <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
                     <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
                             <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
@@ -70,7 +72,7 @@
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener && row.value }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)">
+                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
@@ -88,21 +90,23 @@
         </main>
 
         <div v-if="true || isIOS" class="tool-bar">
-            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
-                <span class="icon download" />
-            </button>
+            <div>
+                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
+                    <span class="icon download" />
+                </button>
 
-            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
-                <span class="icon email" />
-            </button>
+                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
+                    <span class="icon email" />
+                </button>
 
-            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
-                <span class="icon feedback-line" />
-            </button>
+                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
+                    <span class="icon feedback-line" />
+                </button>
 
-            <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
-                <span class="icon more" />
-            </button>
+                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0">
+                    <span class="icon more" />
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -276,7 +280,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     wrapColumns = this.isMobile
     showSelection = !this.isMobile
-    shouldScroll = false // !this.isMobile
 
     sortBy: Column<Value, any> = this.columns[0]
     sortDirection: SortDirection = SortDirection.Ascending
@@ -316,6 +319,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get hasClickListener() {
         return this.$listeners && this.$listeners.click
+    }
+
+    blurFocus() {
+        (document.activeElement as HTMLElement)?.blur()
     }
 
     onClickRow(row: VisibleRow<Value>) {
@@ -487,30 +494,17 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.loadColumnConfiguration().catch(console.error)
         
         let ticking = false
-        if (this.shouldScroll) {
-            (this.$refs["table"] as HTMLElement).addEventListener("scroll", () => {
-                
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        this.updateVisibleRows()
-                        ticking = false;
-                    });
 
-                    ticking = true;
-                }
-            }, { passive: true })
-        } else {
-            document.addEventListener("scroll", () => {
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        this.updateVisibleRows()
-                        ticking = false;
-                    });
+        this.getScrollElement(this.$refs["table"] as HTMLElement).addEventListener("scroll", () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    this.updateVisibleRows()
+                    ticking = false;
+                });
 
-                    ticking = true;
-                }
-            }, { passive: true })
-        }
+                ticking = true;
+            }
+        }, { passive: true })
 
         if (!this.wrapColumns) {
             window.addEventListener("resize", () => {
@@ -1028,33 +1022,47 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
      * Cached offset between scroll and top of the table
      */
     cachedTableYPosition: number | null = 0
+    cachedScrollElement: HTMLElement | null = null
+
+    getScrollElement(element: HTMLElement | null = null): HTMLElement {
+        if (!element) {
+            element = this.$el as HTMLElement;
+        }
+
+        const style = window.getComputedStyle(element);
+        if (
+            style.overflowY == "scroll" ||
+            style.overflow == "scroll" ||
+            style.overflow == "auto" ||
+            style.overflowY == "auto"
+        ) {
+            return element;
+        } else {
+            if (!element.parentElement) {
+                return document.documentElement;
+            }
+            return this.getScrollElement(element.parentElement);
+        }
+    }
 
     updateVisibleRows() {
         let topOffset = 0
 
-        if (this.shouldScroll) {
-            // Easy case: we can use the table scroll position
-            topOffset = (this.$refs["table"] as HTMLElement).scrollTop
-        } else {
-            const scrollElement = document.documentElement; //this.getScrollElement()
-        
-            // innerHeight is a fix for animations, causing wrong initial bouding client rect
-            if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
-                const tableBody = this.$refs["tableBody"] as HTMLElement
-                const rect = tableBody.getBoundingClientRect();
+        const scrollElement = this.cachedScrollElement ?? this.getScrollElement(this.$refs["table"] as HTMLElement)
+        this.cachedScrollElement = scrollElement
 
-                const top = rect.top
+        // innerHeight is a fix for animations, causing wrong initial bouding client rect
+        if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
+            console.log("Expensive calculation")
+            const tableBody = this.$refs["tableBody"] as HTMLElement
+            const rect = tableBody.getBoundingClientRect();
 
-                if (top >= 0) {
-                    this.cachedTableYPosition = top + scrollElement.scrollTop
-                } else {
-                    this.cachedTableYPosition = scrollElement.scrollTop + top
-                }
-            }
+            const top = rect.top
+            this.cachedTableYPosition = top + scrollElement.scrollTop
+        }
 
-            // During animations, the scrollTop often jumps temporarily to a negative value
-            topOffset = Math.max(0, (scrollElement.scrollTop - this.cachedTableYPosition))
-        }        
+        // During animations, the scrollTop often jumps temporarily to a negative value
+        topOffset = Math.max(0, (scrollElement.scrollTop - this.cachedTableYPosition))
 
         const totalItems = this.totalItemsCount
         const extraItems = 5
@@ -1065,14 +1073,14 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         const lastVisibleItemIndex = Math.max(0, Math.min(Math.floor((topOffset + vh) / this.rowHeight) + extraItems, totalItems - 1))
 
-        console.log("First visible item index: " + firstVisibleItemIndex + " Last visible item index: " + lastVisibleItemIndex)
-        console.log("vh: " + vh + " topOffset: " + topOffset + " rowHeight: " + this.rowHeight+" total: "+totalItems)
+        //console.log("First visible item index: " + firstVisibleItemIndex + " Last visible item index: " + lastVisibleItemIndex)
+        //console.log("vh: " + vh + " topOffset: " + topOffset + " rowHeight: " + this.rowHeight+" total: "+totalItems)
         //const neededCount = lastVisibleItemIndex - firstVisibleItemIndex + 1
 
         // Make all visible rows available if not visible any longer
         for (const visibleRow of this.visibleRows) {
             if (visibleRow.currentIndex === null || visibleRow.currentIndex < firstVisibleItemIndex || visibleRow.currentIndex > lastVisibleItemIndex) {
-                //console.log("Freed visibleRow at index "+visibleRow.currentIndex)
+                // console.log("Freed visibleRow at index "+visibleRow.currentIndex)
                 visibleRow.value = null
                 visibleRow.currentIndex = null
             }
@@ -1155,29 +1163,48 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 }
 
 .table-view {
-    >.tool-bar {
-        flex-shrink: 0;
-        height: 60px;
-        box-sizing: content-box;
-        border-top: $border-width-thin solid $color-border;
-        padding-bottom: var(--st-safe-area-bottom, 0px);
+    > main {
+        overflow-y: auto;
+    }
 
+    // When scrolling horizontally, make sure the container doesn't scroll
+    > main > .container {
+        position: sticky;
+        left: 0;
+    }
+
+    >.tool-bar {
+        margin: 0;
         margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
         margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
-
-        background: $color-background;
-        //backdrop-filter: blur(30px);
-
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        position: sticky;
-        bottom: 0;
+        padding-top: var(--st-vertical-padding, 20px);
         
-        > button {
-            flex-grow: 1;
+        > div {
+            flex-shrink: 0;
+            height: 60px;
+            box-sizing: content-box;
+            border-top: $border-width-thin solid $color-border;
+            padding-bottom: var(--st-safe-area-bottom, 0px);
+
+            margin: 0;
+
+            background: $color-background;
+            //backdrop-filter: blur(30px);
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            position: sticky;
+            bottom: 0;
+            
+            > button {
+                flex-grow: 1;
+            }
+
         }
+
+        
     }
 }
 
@@ -1189,7 +1216,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
     padding-bottom: var(--st-vertical-padding, 40px);
-    overflow: hidden;
 
     .inner-size {
         // This container determines the horizontal width and height.
@@ -1200,6 +1226,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         // position: absolute;
         // width: 150%;
         // height: 100%;
+
+        @supports not (contain: layout) {
+            transform: translate3d(0, 0, 0);
+        }
 
         // If the total width of all the columns is smaller than the total width, still force the table
         // to be 100% width
@@ -1226,6 +1256,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         position: relative;
         overflow: hidden;
         width: 100%;
+
+        @supports not (contain: layout) {
+            transform: translate3d(0, 0, 0);
+        }
     }
 
     .table-row, .table-head {
@@ -1264,6 +1298,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     &:not(.wrap) {
+        padding-top: 20px;
+
         .table-head, .table-row {
             --selection-column-width: 50px;
             .columns {
@@ -1352,18 +1388,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     .table-head {
-        height: 70px;
+        height: 50px;
         border-bottom: $border-width-thin solid $color-border;
         position: sticky;
         top: 0px;
         z-index: 100;
         background: var(--color-current-background, #{$color-background} );
-        padding-top: 20px;
-
-        .selection-column {
-            // Fix height
-            padding-top: 20px;
-        }
+        padding-top: 0px;
 
         .columns > div {
             @extend .style-table-head;
@@ -1501,8 +1532,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         contain: layout;
         position: absolute;
         
-        // will-change performance slower on safari
-        //will-change: transform;
+        will-change: transform;
         height: var(--table-row-height, 60px);
 
         .columns {
