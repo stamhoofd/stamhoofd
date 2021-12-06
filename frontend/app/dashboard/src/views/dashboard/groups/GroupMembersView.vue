@@ -3,18 +3,22 @@
 </template>
 
 <script lang="ts">
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, Organization, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
+import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
+import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
+import EditGroupView from "./EditGroupView.vue";
 
 @Component({
     components: {
@@ -55,7 +59,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             groupIndex: 1,
             needsSelection: false,
             handler: () => {
-                // todo
+                this.addMember()
             }
         }),
 
@@ -66,7 +70,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             groupIndex: 1,
             needsSelection: false,
             handler: () => {
-                // todo
+                this.openWaitingList()
             }
         }),
         
@@ -77,7 +81,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             groupIndex: 1,
             needsSelection: false,
             handler: () => {
-                // todo
+                this.editSettings()
             }
         }),
 
@@ -431,6 +435,54 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    addMember() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditMemberView, {
+
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    openWaitingList() {
+        this.show(new ComponentWithProperties(GroupMembersView, {
+            group: this.group,
+            waitingList: true
+        }))
+    }
+
+    editSettings() {
+        if (!this.group) {
+            if (this.category) {
+                this.present(new ComponentWithProperties(NavigationController, { 
+                    root: new ComponentWithProperties(EditCategoryGroupsView, { 
+                        category: this.category, 
+                        organization: OrganizationManager.organization, 
+                        saveHandler: async (patch) => {
+                            patch.id = OrganizationManager.organization.id
+                            await OrganizationManager.patch(patch)
+                        }
+                    })
+                }).setDisplayStyle("popup"))
+            }
+
+            return;
+        }
+        this.present(new ComponentWithProperties(EditGroupView, { 
+            group: this.group, 
+            organization: OrganizationManager.organization, 
+            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
+                patch.id = OrganizationManager.organization.id
+                await OrganizationManager.patch(patch)
+                const g = OrganizationManager.organization.groups.find(g => g.id === this.group!.id)
+                if (!g) {
+                    this.pop({ force: true })
+                } else {
+                    this.group!.set(g)
+                }
+            }
+        }).setDisplayStyle("popup"))
     }
 }
 </script>

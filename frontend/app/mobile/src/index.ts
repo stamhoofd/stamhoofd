@@ -6,6 +6,7 @@ import { Capacitor } from '@capacitor/core';
 import { Haptics, NotificationType } from '@capacitor/haptics';
 import { Keyboard } from '@capacitor/keyboard';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
+import { VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 //import smoothscroll from 'smoothscroll-polyfill';
 import Vue from "vue";
@@ -105,6 +106,9 @@ window.addEventListener("touchstart", () => { }, { passive: true });
 AppManager.shared.overrideXMLHttpRequest = WrapperHTTPRequest
 const i18n = I18nController.getI18n()
 I18nController.addUrlPrefix = false
+
+VueGlobalHelper.setup()
+Vue.prototype.$isMobile = true
 
 const app = new Vue({
     i18n,

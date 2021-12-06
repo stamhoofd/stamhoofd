@@ -1,9 +1,6 @@
 <template>
-    <form class="st-view edit-member-view" @submit.prevent="save">
-        <STNavigationBar :title="member ? member.details.name : 'Nieuw lid'">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
-        </STNavigationBar>
+    <form class="st-view edit-member-view" @submit.prevent>
+        <SaveBar :title="member ? member.details.name : 'Nieuw lid'" :disabled="!isChanged" :loading="loading" @save="save" />
         
         <main>
             <h1 v-if="member">
@@ -66,7 +63,7 @@
             </div>
         </main>
 
-        <STToolbar>
+        <STToolbar v-if="!$isMobile">
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click="save">
@@ -81,8 +78,7 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox,FillRecordCategoryView,RecordAnswerInput,STErrorsDefault,STList, STListItem,STNavigationTitle, Validator } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,ErrorBox,FillRecordCategoryView,RecordAnswerInput,SaveBar, STErrorsDefault,STList, STListItem,Validator } from "@stamhoofd/components";
 import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
 import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, Version } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
@@ -96,8 +92,7 @@ import EditMemberGroupView from './EditMemberGroupView.vue';
 
 @Component({
     components: {
-        STNavigationBar,
-        STNavigationTitle,
+        SaveBar,
         SegmentedControl,
         BackButton,
         STToolbar,
@@ -286,9 +281,16 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         this.present(displayedComponent);
     }
 
-    async shouldNavigateAway() {
+    get isChanged() {
         const compareTo = this.member ? this.member.details : MemberDetails.create({})
         if (JSON.stringify(this.memberDetails.encode({ version: Version })) == JSON.stringify(compareTo.encode({ version: Version }))) {
+            return false
+        }
+        return true
+    }
+
+    async shouldNavigateAway() {
+        if (!this.isChanged) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

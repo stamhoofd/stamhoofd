@@ -6,7 +6,7 @@ require('@stamhoofd/assets/images/icons/icons.font');
 
 // Continue
 import * as Sentry from '@sentry/vue';
-import { ViewportHelper } from '@stamhoofd/components';
+import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
@@ -23,6 +23,7 @@ if (!isPrerender && STAMHOOFD.environment == "production") {
 }
 
 import App from "./App.vue";
+VueGlobalHelper.setup()
 
 const i18n = I18nController.getI18n()
 const app = new Vue({
