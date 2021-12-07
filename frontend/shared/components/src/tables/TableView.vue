@@ -1223,12 +1223,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             flex-shrink: 0;
             height: 60px;
             box-sizing: content-box;
-            border-top: $border-width-thin solid $color-border;
+            border-top: $border-width-thin solid $color-border-shade;
             padding-bottom: var(--st-safe-area-bottom, 0px);
 
             margin: 0;
 
-            background: $color-background;
+            background: $color-background-shade;
             //backdrop-filter: blur(30px);
 
             display: flex;

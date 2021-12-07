@@ -168,7 +168,8 @@ export default class STNavigationBar extends Vue {
     gap: 10px;
     background: var(--color-white, white);
     background: var(--color-current-background, white);
-    z-index: 11;
+    transition: background-color 0.3s, border-color 0.3s;
+    z-index: 200;
 
     &.no-title {
         grid-template-columns: auto 1fr;
@@ -271,12 +272,17 @@ export default class STNavigationBar extends Vue {
         }
     }
 
+    border-bottom: $border-width-thin solid transparent;
+    
+    // Fix for rendering rounding
+    padding-bottom: $border-width-thin;
 
     &.scrolled {
+        background: $color-background-shade;
 
         //box-shadow: 0px 2px 3px $color-shadow;
-
-        border-bottom: 1px solid rgba(black, 0.1);
+        border-color: $color-border-shade;
+  
         > h1 {
             opacity: 1;
         }

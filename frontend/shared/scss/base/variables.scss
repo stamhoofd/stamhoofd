@@ -109,15 +109,22 @@ $color-warning-dark: var(--color-warning-dark, $color-warning-dark-original);
 
 // Other
 $border-width: 2px;
-$border-width-thin: 1px;
+$border-width-thin: var(--border-width-thin, 1px);
+
+
 $border-radius: 7px;
 $border-radius-modals: 15px;
 
 // Aliasses
 
-$color-border-lighter: $color-gray-3; 
-$color-border: $color-gray-2; 
-$color-border-shade: #D1D1D1;
+$color-border-lighter-original: $color-gray-3; 
+$color-border-lighter: var(--color-border-lighter, $color-border-lighter-original);
+
+$color-border-original: $color-gray-2; 
+$color-border: var(--color-border, $color-border-original);
+
+$color-border-shade-original: #D1D1D1;
+$color-border-shade: var(--color-border-shade, $color-border-shade-original);
 
 $color-background-shade: $color-white-shade;
 $color-background-shade-darker: #EBEBEB;
@@ -134,3 +141,13 @@ $color-overlay-shadow: var(--color-overlay-shadow, $color-overlay-shadow-origina
 
 $color-box-shadow-original: rgba(0, 0, 0, 0.05);
 $color-box-shadow: var(--color-box-shadow, $color-box-shadow-original);
+
+@media 
+(-webkit-min-device-pixel-ratio: 2), 
+(min-resolution: 192dpi) { 
+    :root {
+        --border-width-thin: 0.5px;
+        --color-border-shade: #{$color-gray-5};
+        --color-border-lighter: #{$color-gray-5};
+    }
+}

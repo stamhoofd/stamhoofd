@@ -324,8 +324,8 @@ export default class ContextMenu extends Vue {
         background: $color-border-shade;
         border: 0;
         outline: 0;
-        border-radius: $border-width/2;
-        height: $border-width;
+        border-radius: $border-width-thin;
+        height: $border-width-thin;
         margin: 6px 0;
     }
 }
