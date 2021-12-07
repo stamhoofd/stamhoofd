@@ -1602,6 +1602,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             cursor: pointer;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
             user-select: none;
 
             @media (hover: hover) {

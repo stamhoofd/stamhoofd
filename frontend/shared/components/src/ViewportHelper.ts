@@ -117,14 +117,17 @@ export class ViewportHelper {
                 }
             }, { passive: true })
 
-            document.body.addEventListener("touchend", () => {
+            document.body.addEventListener("touchend", (event) => {
                 if (!clickedElement) {
                     return
                 }
-                // Show bottom scroll if we are idle at the bottom
 
                 clickedElement.style.paddingTop = ""
                 clickedElement.style.paddingBottom = ""
+
+                if (clickedElement.scrollTop == 1) {
+                    clickedElement.scrollTop = 0
+                }
 
                 // Force scroll back to top
                 window.scrollTo(0,0);

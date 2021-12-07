@@ -14,6 +14,8 @@ import WebKit
     We enable the default swipe to go back behaviour in the WKWebView
  */
 class HomeViewController: CAPBridgeViewController {
+    var longPressGesture: UILongPressGestureRecognizer!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.webView!.allowsBackForwardNavigationGestures = true
@@ -50,5 +52,35 @@ class HomeViewController: CAPBridgeViewController {
         }
         self.webView!.configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         self.webView!.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        
+        // Add our own gesture recognizer to fix the iOS15 bug that always adds the magnifying glass when long pressing something, event when it is not selectable
+        /*let gestureRecognizer = UILongPressGestureRecognizer(target: self,
+                                                             action:#selector(self.handleLongPress))
+        
+        gestureRecognizer.minimumPressDuration = 0.5
+        gestureRecognizer.delaysTouchesBegan = false
+        gestureRecognizer.delegate = self
+        self.longPressGesture = gestureRecognizer
+        self.webView?.addGestureRecognizer(gestureRecognizer)*/
+    }
+    
+    @objc func handleLongPress() {
+        print("Handled long press")
+    }
+    
+    
+    
+}
+
+extension HomeViewController: UIGestureRecognizerDelegate {
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+             shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+       // Do not begin the pan until the swipe fails.
+       if otherGestureRecognizer == self.longPressGesture {
+          return false
+       }
+        print(gestureRecognizer)
+       return true
     }
 }
