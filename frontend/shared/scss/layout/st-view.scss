@@ -7,23 +7,19 @@
     }
 }
 
-html {
-    overflow: hidden;
-    height: 100vh;
-}
-
 body.modern {
+    // on iOS, we don't set overflow: hidden as that prevents scrolling the body. On Android, it doesn't matter, so better to hide overflow
+    @supports not (-webkit-touch-callout: none) {
+        //overflow: hidden;
+    }
+
     overflow: hidden;
     height: 100vh;
 
     // Fix for iOS safari hide scroll bars + weird bugs in iOS15 when pulling to refresh (negative scroll top gets stuck)
     #app {
-        height: 100vh;
+        height: 200vh;
     }
-}
-
-body.modern .popup .navigation-controller {
-    position: static;
 }
 
 body.modern .navigation-controller {
@@ -125,11 +121,7 @@ body.modern .sheet > div {
     }
 
     body.modern .popup & {
-        height: 100%;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
+        height: calc(var(--vh, 1vh) * 100);
         min-height: 0;
         max-height: 100vh;
     }

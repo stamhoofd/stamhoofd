@@ -30,13 +30,20 @@ function focusNextElement () {
             const nextElement = focussable[index + 1]
             if (!nextElement) {
                 // On mobile, we'll just blur the last element and not submit, while on desktop we'll focus the submit button (which will be last)
-                if (document.documentElement.clientWidth <= 500) {
-                    activeElement.blur()
-                    return true
-                }
-                return false
+                activeElement.blur()
+                return true
             }
             nextElement.focus();
+
+            if (nextElement.tagName === "BUTTON") {
+                // If the next element is a button, we'll add the class .focus-visible to it, as Safari doesn't support the :focus-visible pseudo-class on buttons
+                nextElement.classList.add("focus-visible");
+
+                // And we'll remove it again on blur, once
+                nextElement.addEventListener("blur", function () {
+                    nextElement.classList.remove("focus-visible");
+                }, { once: true });
+            }
         }                    
     }
     return true
@@ -44,7 +51,7 @@ function focusNextElement () {
 
 export class VueGlobalHelper {
     static setup() {
-        Vue.prototype.$isMobile = document.documentElement.clientWidth <= 500;
+        Vue.prototype.$isMobile = document.documentElement.clientWidth <= 550;
         Vue.prototype.$focusNext = () => {
             focusNextElement()
         }
@@ -98,6 +105,9 @@ export class VueGlobalHelper {
             return "unknown"
     
         })()
+
+        Vue.prototype.$isAndroid = Vue.prototype.$OS === "android"
+        Vue.prototype.$isIOS = Vue.prototype.$OS === "iOS"
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

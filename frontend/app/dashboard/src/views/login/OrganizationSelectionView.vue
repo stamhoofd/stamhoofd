@@ -21,16 +21,16 @@
                     <span>Stamhoofd website</span>
                 </a>
                 <h1>Kies jouw vereniging</h1>
-                <div class="input-icon-container icon search gray">
-                    <input v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" autocorrect="off" @input="query = $event.target.value">
-                </div>
+                <form class="input-icon-container icon search gray" @submit.prevent>
+                    <input ref="input" v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
+                </form>
                 <p v-if="!loading && filteredResults.length == 0 && !query">
                     Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
                 </p>
 
                 <Spinner v-if="loading" class="gray center" />
                 <template v-else>
-                    <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization.id)">
+                    <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
                         <h1>{{ organization.name }}</h1>
                         <p>{{ organization.address }}</p>
                         <Spinner v-if="loadingSession === organization.id" class="floating" />
@@ -278,6 +278,16 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         })
     }
 
+    selectResult(index: number) {
+        if (index === -1) {
+            (this.$refs.input as HTMLInputElement).focus();
+            return
+        }
+        if (this.$refs.results && this.$refs.results[index]) {
+            this.$refs.results[index].focus()
+        }
+    }
+
     async loginOrganization(organizationId: string) {
         if (this.loadingSession) {
             return
@@ -429,15 +439,25 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             @extend .style-description-small;
         }
 
-        &:hover {
-            border-color: $color-primary-gray-light;
-            background-color: $color-primary-background;
+        @media (hover: hover) {
+            &:hover {
+                border-color: $color-primary-gray-light;
+                background-color: $color-primary-background;
+
+                > .icon.floating {
+                    color: $color-primary;
+                }
+            }
+        }
+
+        &:focus {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            border-color: $color-primary;
 
             > .icon.floating {
                 color: $color-primary;
             }
         }
-
 
         &:active {
             transform: scale(0.95, 0.95);

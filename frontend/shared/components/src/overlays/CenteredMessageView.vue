@@ -1,29 +1,33 @@
 <template>
     <transition appear name="show">
-        <div class="centered-message-container">
+        <form class="centered-message-container" @submit.prevent>
             <div class="centered-message">
                 <Spinner v-if="centeredMessage.type == 'loading'" class="center" />
                 <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg">
                 <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
                 <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg">
                 <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
-                <h1>{{ centeredMessage.title }}</h1>
+                <h1>
+                    {{ centeredMessage.title }}
+                </h1>
                 <p>{{ centeredMessage.description }}</p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <a v-if="button.href" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
+                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </a>
-                    <button v-else class="button full" :class="button.type" @click="onClickButton(button)">
+                    <button v-else ref="buttons" class="button full" :class="button.type" :tabindex="0" type="button" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </button>
                 </LoadingButton>
+
+                <div class="force-focus-cycle" tabindex="0" @focus="focusFirst" />
             </div>
-        </div>
+        </form>
     </transition>
 </template>
 
@@ -52,11 +56,50 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     mounted() {
+        
+        this.centeredMessage.doHide = () => {
+            this.close()
+        }
+
         if (document.activeElement && (document.activeElement as any).blur) {
             (document.activeElement as any).blur();
         }
-        this.centeredMessage.doHide = () => {
-            this.close()
+
+        setTimeout(() => {
+            const defaultButton = this.centeredMessage.buttons.findIndex(b => b.action !== null && b.type != "destructive")
+            if (defaultButton > -1 && this.$refs.buttons) {
+                const button = this.$refs.buttons[defaultButton] as HTMLButtonElement | undefined
+                if (button) {
+                    console.log("Focus on default button", button)
+                    button.focus()
+
+                    button.classList.add("focus-visible");
+
+                    // And we'll remove it again on blur, once
+                    button.addEventListener("blur", function () {
+                        button.classList.remove("focus-visible");
+                    }, { once: true });
+                }
+            }
+        }, 200)
+
+        
+    }
+
+    focusFirst() {
+        if (this.$refs.buttons) {
+            const button = this.$refs.buttons[0] as HTMLButtonElement | undefined
+            if (button) {
+                console.log("Focus on first button", button)
+                button.focus()
+
+                button.classList.add("focus-visible");
+
+                // And we'll remove it again on blur, once
+                button.addEventListener("blur", function () {
+                    button.classList.remove("focus-visible");
+                }, { once: true });
+            }
         }
     }
 
@@ -111,25 +154,11 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
                 return;
             }
 
-            this.onClickButton(closeButton)
+            this.onClickButton(closeButton).catch(console.error)
             event.preventDefault();
             return;
         }
-
-        const confirmButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
-
-        if (!confirmButton && !closeButton) {
-            return
-        }
-
-        if (key === "Enter") {
-            if (confirmButton) {
-                this.onClickButton(confirmButton)
-            } else {
-                this.close();
-            }
-            event.preventDefault();
-        }
+        
     }
 
    

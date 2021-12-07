@@ -69,7 +69,13 @@
             //box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
         }
 
-        &:focus {
+        &.focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary-dark;
+        }
+
+        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+        &:focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
             box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary-dark;
         }
@@ -147,6 +153,17 @@
             transform: scale(0.95, 0.95);
             //box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
         }
+
+        &.focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+        }
+
+        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+        &:focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+        }
     }
 
     &.secundary {
@@ -159,11 +176,22 @@
         overflow: hidden;
         text-overflow: ellipsis;
         border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
+        transition: 0.2s transform, 0.2s opacity;
         height: 42px;
         display: inline-flex;
         justify-content: center;
         align-items: center;
+
+        &.focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
+        }
+
+        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+        &:focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
+        }
 
         &:active {
             transform: scale(0.95, 0.95);
@@ -182,7 +210,6 @@
         &:disabled {
             color: $color-gray-2;
             background: $color-white-shade;
-            box-shadow: none;
             cursor: not-allowed;
 
             &:active {
