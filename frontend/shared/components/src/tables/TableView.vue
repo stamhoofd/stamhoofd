@@ -98,7 +98,7 @@
                     <span :class="'icon '+action.icon" />
                 </button>
 
-                <button class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0" @click="showActions(false, $event)">
+                <button v-long-press="(e) => showActions(false, e)" class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0" @click="showActions(false, $event)">
                     <span class="icon more" />
                 </button>
             </div>

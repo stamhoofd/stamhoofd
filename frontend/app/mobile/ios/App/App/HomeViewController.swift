@@ -62,6 +62,8 @@ class HomeViewController: CAPBridgeViewController {
         gestureRecognizer.delegate = self
         self.longPressGesture = gestureRecognizer
         self.webView?.addGestureRecognizer(gestureRecognizer)*/
+        
+        self.webView!.scrollView.textInteractionMode = .nonEditable
     }
     
     @objc func handleLongPress() {

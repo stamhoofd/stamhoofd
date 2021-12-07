@@ -32,6 +32,7 @@ export default {
             }
         }
 
+        let scrollElement: HTMLElement | undefined
 
         // Add a hover listener
         el.addEventListener(
@@ -41,21 +42,25 @@ export default {
                     clearTimeout(el.$longPressTimer)
                 }
 
-                // Listen for scroll event of container, and cancel
-                const scrollElement = getScrollElement(el)
+                // Listen for scroll event of container, and cancel if scrolled
+                scrollElement = getScrollElement(el)
                 scrollElement.addEventListener("scroll", scrollListener, { passive: true })
 
                 el.$longPressTimer = setTimeout(() => {
-                    scrollElement.removeEventListener("scroll", scrollListener)
+                    scrollElement?.removeEventListener("scroll", scrollListener)
 
                     el.$longPressTimer = null
 
-                    // TODO: Check if not moved too much
-
                     // Call listener
-                    
                     const callback = binding.value
-                    callback(event)
+
+                    const customEvent = {
+                        currentTarget: el,
+                        target: el,
+                        changedTouches: event.changedTouches,
+                        touches: event.touches,
+                    }
+                    callback(customEvent)
 
                     // Cancel all move events
                     el.$didTriggerLongPress = true
@@ -86,6 +91,7 @@ export default {
                 }
                 el.$longPressTimer = null
                 el.$didTriggerLongPress = false
+                scrollElement?.removeEventListener("scroll", scrollListener)
                 
             },
             { passive: true }
@@ -101,6 +107,7 @@ export default {
                 }
                 el.$longPressTimer = null
                 el.$didTriggerLongPress = false
+                scrollElement?.removeEventListener("scroll", scrollListener)
                 
             },
             { passive: true }
