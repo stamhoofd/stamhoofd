@@ -73,6 +73,7 @@ body.modern .sheet > div {
             // Prevent scrolling outer scroll area's
             overscroll-behavior: contain;
             position: relative;
+            z-index: 0;
 
             touch-action: auto;
 
@@ -92,6 +93,8 @@ body.modern .sheet > div {
             &~ * {
                 padding-top: 0;
                 margin-bottom: -300px;
+                z-index: 100;
+                position: relative;
 
                 // Add some fake bottom padding, so when we animate it, the background stays white
                 > div {
