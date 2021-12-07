@@ -64,6 +64,30 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }),
 
         new TableAction({
+            name: "Openen",
+            icon: "eye",
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: true,
+            singleSelection: true,
+            handler: (members: MemberWithRegistrations[]) => {
+                this.openMember(members[0])
+            }
+        }),
+
+        new TableAction({
+            name: "Bewerk",
+            icon: "edit",
+            priority: 0,
+            groupIndex: 1,
+            needsSelection: true,
+            singleSelection: true,
+            handler: (members: MemberWithRegistrations[]) => {
+                this.editMember(members[0])
+            }
+        }),
+
+        new TableAction({
             name: "Wachtlijst",
             icon: "clock-small",
             priority: 0,
@@ -432,6 +456,15 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 members,
                 group: this.group,
                 defaultSubject: subject
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    editMember(member: MemberWithRegistrations) {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EditMemberView, {
+                member,
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));

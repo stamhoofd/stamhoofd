@@ -45,6 +45,12 @@ export class AppManager {
         }
     }
 
+    hapticTap = () => {
+        if (window.navigator.vibrate) {
+            window.navigator.vibrate(50);
+        }
+    }
+
     hapticSuccess = () => {
         if (window.navigator.vibrate) {
             window.navigator.vibrate(100);

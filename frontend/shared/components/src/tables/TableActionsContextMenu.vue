@@ -111,6 +111,15 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
         // Group all actions based on their groupIndex property, sorted by groupIndex
         return Object.values(
             this.actions
+                .filter(action => {
+                    if (action.singleSelection && this.focused.length != 1) {
+                        return false;
+                    }
+                    if (!action.needsSelection && this.focused.length > 0) {
+                        return false;
+                    }
+                    return true
+                })
                 .sort((a, b) => a.groupIndex - b.groupIndex)
                 .reduce((acc, action) => {
                     const group = acc[action.groupIndex];

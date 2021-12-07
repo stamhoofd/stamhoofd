@@ -139,3 +139,7 @@ AppManager.shared.hapticWarning = () => {
 AppManager.shared.hapticSuccess = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 }
+
+AppManager.shared.hapticTap = () => {
+    Haptics.notification({ type: NotificationType.Success }).catch(console.error);
+}

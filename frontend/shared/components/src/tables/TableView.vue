@@ -75,7 +75,7 @@
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" class="table-row" :class="{ selectable: hasClickListener }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
+                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :class="{ selectable: hasClickListener }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
@@ -110,7 +110,7 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, FilterEditor, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, FilterEditor, LongPressDirective, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
@@ -182,7 +182,8 @@ class ColumnConfiguration extends AutoEncoder {
         Checkbox
     },
     directives: {
-        tooltip: TooltipDirective
+        tooltip: TooltipDirective,
+        longPress: LongPressDirective
     }
 })
 export default class TableView<Value extends TableListable> extends Mixins(NavigationMixin) {
@@ -291,6 +292,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     onRightClickRow(row: VisibleRow<Value>, event) {
+        if (this.isMobile) {
+            AppManager.shared.hapticTap()
+        }
+        
         if (this.isMobile && !this.showSelection && !this.isIOS) {
             // On Android, the default long press action is switching to editing mode
             this.setSelectionValue(row, true)
@@ -300,8 +305,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         // Show a context menu to select the available columns
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: event.changedTouches ? event.changedTouches[0].pageX : event.clientX,
+            y: event.changedTouches ? event.changedTouches[0].pageY : event.clientY,
             focused: [row.value!],
             actions: this.actions.filter(a => a.needsSelection),
             table: this,
@@ -844,12 +849,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get filteredActions() {
         if (!this.isMobile || !this.showSelection) {
-            // Don't filter. But only show the first 3
-            return this.sortedActions.slice(0, 3)
+            return this.sortedActions.filter(action => !action.singleSelection).slice(0, 3)
         }
 
         return this.sortedActions.filter(action => {
-            return action.needsSelection
+            return action.needsSelection && !action.singleSelection
         }).slice(0, 3)
     }
 
@@ -1020,7 +1024,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             yPlacement: isOnTop ? "bottom" : "top",
             actions: (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions),
             table: this,
-            focused: this.showSelection ? this.getSelection() : []
+            focused: this.showSelection  && this.isMobile ? this.getSelection() : []
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

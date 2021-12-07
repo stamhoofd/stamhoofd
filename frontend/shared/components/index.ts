@@ -31,6 +31,7 @@ export { default as Tooltip } from "./src/overlays/Tooltip.vue"
 
 // Directives
 export { default as CopyableDirective } from "./src/directives/Copyable"
+export { default as LongPressDirective } from "./src/directives/LongPress"
 export { default as TooltipDirective } from "./src/directives/Tooltip"
 
 // Cotnainers

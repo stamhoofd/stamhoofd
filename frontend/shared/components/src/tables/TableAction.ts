@@ -18,6 +18,8 @@ export class TableAction<T> {
      */
     needsSelection = true
 
+    singleSelection = false
+
     constructor(settings: Partial<TableAction<T>>) {
         this.name = settings.name ?? "";
         this.icon = settings.icon ?? "";
@@ -25,6 +27,7 @@ export class TableAction<T> {
         this.handler = settings.handler ?? (() => { throw new Error("No handler defined") });
         this.groupIndex = settings.groupIndex ?? 0;
         this.needsSelection = settings.needsSelection ?? true;
+        this.singleSelection = settings.singleSelection ?? false;
         this.tooltip = settings.tooltip ?? this.name;
     }
 }

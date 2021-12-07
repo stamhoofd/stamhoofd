@@ -97,10 +97,51 @@ export default class ContextMenu extends Vue {
         this.transformOrigin = xTransform + "% "+yTransform+"%"
         
         this.$el.addEventListener("contextmenu", this.pop, { passive: true });
+        window.addEventListener("touchmove", this.onTouchMove, { passive: false });
+        window.addEventListener("touchend", this.onTouchUp, { passive: false });
+    }
+
+    getSelectedElement(event): HTMLElement | null {
+        // Check which one is hovered, and manually add a hover state to it
+        let selectedElement = document.elementFromPoint(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+
+        // Get parent until class is context-menu-item or stop when parent is document, or context-menu-container class
+        while (selectedElement && !selectedElement.classList.contains("context-menu-item") && !selectedElement.classList.contains("context-menu-container")) {
+            selectedElement = selectedElement.parentElement;
+        }
+        if (selectedElement && selectedElement.classList.contains("context-menu-item")) {
+            return selectedElement as HTMLElement
+        }
+        return null
+    }
+
+    onTouchMove(event) {
+        // Check which one is hovered, and manually add a hover state to it
+        const selectedElement = this.getSelectedElement(event);
+
+        this.$el.querySelectorAll(".context-menu-item").forEach(item => {
+            item.classList.remove("hover")
+            item.classList.add("disable-active")
+        })
+
+        if (selectedElement) {
+            selectedElement.classList.add("hover")
+        }
+
+        event.preventDefault()
+    }
+
+    onTouchUp(event) {
+        const selectedElement = this.getSelectedElement(event);
+        if (selectedElement) {
+            selectedElement.click()
+        }
     }
 
     beforeDestroy() {
         this.$el.removeEventListener("contextmenu", this.pop);
+        window.removeEventListener("touchmove", this.onTouchMove);
+        window.removeEventListener("touchend", this.onTouchUp);
     }
 
     pop() {
@@ -141,6 +182,12 @@ export default class ContextMenu extends Vue {
     top: 0;
     bottom: 0;
     right: 0;
+
+    // Allow dragging over the whole screen on touch devices
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 
     .context-menu {
         transform-origin: 0% 0%;
@@ -255,13 +302,23 @@ export default class ContextMenu extends Vue {
             padding-left: 20px;
         }
 
-
-        &:hover {
-            background: $color-primary;
-            color: $color-white;
-
+        @media (hover: hover) {
+            &:hover {
+                background: $color-primary;
+                color: $color-white;
+            }
         }
 
+        &.hover {
+            background: $color-primary;
+            color: $color-white;
+        }
+
+        &:active:not(.disable-active) {
+            background: $color-primary;
+            color: $color-white;
+        }
+        
         &.clicked {
             background: transparent;
             color: $color-dark;
