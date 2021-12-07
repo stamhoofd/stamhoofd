@@ -24,7 +24,7 @@
                 <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button text selected" @click="showSelection = true">
                     Selecteer
                 </button>
-                <button v-else key="actions" class="button icon more" @click="showActions(true, $event)" @contextmenu="showActions(true, $event)" />
+                <button v-else key="actions" class="button icon more" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 

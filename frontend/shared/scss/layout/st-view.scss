@@ -34,7 +34,7 @@ body.modern .sheet > div {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    //min-height: calc(var(--vh, 1vh) * 100);
+    min-height: calc(var(--vh, 1vh) * 100);
     box-sizing: border-box;
     padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px) 0;
 
@@ -50,6 +50,7 @@ body.modern .sheet > div {
         padding-bottom: 0; //var(--st-safe-area-bottom, 0px);
         padding-top: 0; //var(--st-safe-area-top, 0px);
         transition: none;
+        contain: strict;
 
         > * {
             flex-shrink: 0;
@@ -130,6 +131,7 @@ body.modern .sheet > div {
         height: auto;
         min-height: 0;
         max-height: 100vh;
+        contain: content;
     }
 
 

@@ -318,11 +318,6 @@ export default class ContextMenu extends Vue {
             background: $color-primary;
             color: $color-white;
         }
-        
-        &.clicked {
-            background: transparent;
-            color: $color-dark;
-        }
     }
 
     .context-menu-line {

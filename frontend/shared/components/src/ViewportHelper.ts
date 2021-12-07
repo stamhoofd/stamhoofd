@@ -1,5 +1,8 @@
+import { AppManager } from "@stamhoofd/networking";
+
 export class ViewportHelper {
     static currentVh: number | null = null
+    static modern = false
 
     static getScrollElement(element: HTMLElement): HTMLElement {
         const style = window.getComputedStyle(element);
@@ -14,6 +17,7 @@ export class ViewportHelper {
     }
 
     static setup(modern = false) {
+        this.modern = modern
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
         if (isPrerender) {
@@ -77,63 +81,64 @@ export class ViewportHelper {
                 });
             }, { passive: true });
 
-            // Todo: only execute the following codeon touch devices where scroll contain is not supported
+            if (AppManager.shared.getOS() === "iOS") {
+                let clickedElement: HTMLElement | null = null;
+                
+                document.body.addEventListener("touchstart", (event) => {
+                    if (!event.target) {
+                        clickedElement = null
+                        return;
+                    }
+                    const scrollElement = this.getScrollElement(event.target as HTMLElement)
 
-            let clickedElement: HTMLElement | null = null;
+                    if (scrollElement === document.documentElement || scrollElement.tagName !== "MAIN") {
+                        clickedElement = null
+                        return
+                    }
+
+                    clickedElement = scrollElement;
+                    // Show bottom scroll if we are idle at the bottom
+
+                    if (scrollElement.scrollTop == 0) {
+                        let paddingTop = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'))
+                        paddingTop = isNaN(paddingTop) ? 0 : paddingTop
+
+                        scrollElement.style.paddingTop = `${paddingTop + 1}px`
+                        scrollElement.scrollTop = 1
+                    } else if (scrollElement.scrollTop == scrollElement.scrollHeight - scrollElement.clientHeight) {
+                        let paddingBottom = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'))
+                        paddingBottom = isNaN(paddingBottom) ? 0 : paddingBottom
+
+                        const scrollPosition = scrollElement.scrollTop
+                        scrollElement.style.paddingBottom = `${paddingBottom + 1}px`
+
+                        // Prevent the browser from keepign the scroll position at the bottom.
+                        // We need 1 pixel outside the scroll view, so the browser thinks it can scroll in this view,
+                        // so we can prevent that the browser will scroll a different view than this one
+                        scrollElement.scrollTop = scrollPosition
+                    }
+                }, { passive: true })
+
+                document.body.addEventListener("touchend", (event) => {
+                    if (!clickedElement) {
+                        return
+                    }
+
+                    clickedElement.style.paddingTop = ""
+                    clickedElement.style.paddingBottom = ""
+
+                    if (clickedElement.scrollTop == 1) {
+                        clickedElement.scrollTop = 0
+                    }
+
+                    // Force scroll back to top
+                    window.scrollTo(0,0);
+
+                    clickedElement = null
+                }, { passive: true })
+            }
+
             
-            document.body.addEventListener("touchstart", (event) => {
-                if (!event.target) {
-                    clickedElement = null
-                    return;
-                }
-                const scrollElement = this.getScrollElement(event.target as HTMLElement)
-
-                if (scrollElement === document.documentElement || scrollElement.tagName !== "MAIN") {
-                    console.log("Siipped", scrollElement)
-                    clickedElement = null
-                    return
-                }
-
-                clickedElement = scrollElement;
-                // Show bottom scroll if we are idle at the bottom
-
-                if (scrollElement.scrollTop == 0) {
-                    let paddingTop = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'))
-                    paddingTop = isNaN(paddingTop) ? 0 : paddingTop
-
-                    scrollElement.style.paddingTop = `${paddingTop + 1}px`
-                    scrollElement.scrollTop = 1
-                } else if (scrollElement.scrollTop == scrollElement.scrollHeight - scrollElement.clientHeight) {
-                    let paddingBottom = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'))
-                    paddingBottom = isNaN(paddingBottom) ? 0 : paddingBottom
-
-                    const scrollPosition = scrollElement.scrollTop
-                    scrollElement.style.paddingBottom = `${paddingBottom + 1}px`
-
-                    // Prevent the browser from keepign the scroll position at the bottom.
-                    // We need 1 pixel outside the scroll view, so the browser thinks it can scroll in this view,
-                    // so we can prevent that the browser will scroll a different view than this one
-                    scrollElement.scrollTop = scrollPosition
-                }
-            }, { passive: true })
-
-            document.body.addEventListener("touchend", (event) => {
-                if (!clickedElement) {
-                    return
-                }
-
-                clickedElement.style.paddingTop = ""
-                clickedElement.style.paddingBottom = ""
-
-                if (clickedElement.scrollTop == 1) {
-                    clickedElement.scrollTop = 0
-                }
-
-                // Force scroll back to top
-                window.scrollTo(0,0);
-
-                clickedElement = null
-            }, { passive: true })
         } else {
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             document.body.addEventListener("touchstart", () => { }, { passive: true });
@@ -149,7 +154,7 @@ export class ViewportHelper {
             // Calculate bottom padding
             // In modern mode, the body is set to 100vh, and we need to calculate the difference between 100vh and the viewport height
             // This can be used to calculate the keyboard height
-            if (window.visualViewport) {
+            if (window.visualViewport && this.modern) {
                 const bodyHeight = document.body.clientHeight;
                 const bottomPadding = bodyHeight - window.visualViewport.height
 

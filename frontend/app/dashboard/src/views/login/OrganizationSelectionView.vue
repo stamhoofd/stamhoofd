@@ -294,6 +294,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         }
         this.loadingSession = organizationId
 
+        if (document.activeElement) {
+            // Blur currently focused element, to prevent from opening the login view multiple times
+            (document.activeElement as HTMLElement).blur()
+        }
+
         try {
             let session = await SessionManager.getSessionForOrganization(organizationId)
             if (!session) {
