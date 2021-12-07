@@ -77,6 +77,8 @@ export class ViewportHelper {
                 });
             }, { passive: true });
 
+            // Todo: only execute the following codeon touch devices where scroll contain is not supported
+
             let clickedElement: HTMLElement | null = null;
             
             document.body.addEventListener("touchstart", (event) => {

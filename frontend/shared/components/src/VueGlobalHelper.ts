@@ -17,18 +17,23 @@ function focusNextElement () {
     }
 
     //add all elements we want to include in our selection
-    const focussableElements = 'input:not([disabled]), textarea:not([disabled]), select:not([disabled])';
+    const focussableElements = 'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button[type="submit"], button:not([type="button"])';
     if (activeElement && activeElement.form) {
         const focussable = Array.prototype.filter.call(activeElement.form.querySelectorAll(focussableElements),
             function (element) {
             //check for visibility while always include the current activeElement 
                 return element.offsetWidth > 0 || element.offsetHeight > 0 || element === activeElement
             });
+        console.log(focussable)
         const index = focussable.indexOf(activeElement);
         if(index > -1) {
             const nextElement = focussable[index + 1]
             if (!nextElement) {
-                activeElement.blur()
+                // On mobile, we'll just blur the last element and not submit, while on desktop we'll focus the submit button (which will be last)
+                if (document.documentElement.clientWidth <= 500) {
+                    activeElement.blur()
+                    return true
+                }
                 return false
             }
             nextElement.focus();
@@ -41,7 +46,6 @@ export class VueGlobalHelper {
     static setup() {
         Vue.prototype.$isMobile = document.documentElement.clientWidth <= 500;
         Vue.prototype.$focusNext = () => {
-            console.log("Focus next called")
             focusNextElement()
         }
 
@@ -99,7 +103,9 @@ export class VueGlobalHelper {
             const element = event.target as HTMLInputElement;
             if (element && (element.tagName === 'INPUT' || element.tagName === 'SELECT') && element.form) {
                 if (event.which === 13) {
+                    console.log("Enter pressed")
                     if (focusNextElement() === true) {
+                        console.log("Prevent default")
                         event.preventDefault();
                     }
                 }

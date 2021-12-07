@@ -48,7 +48,13 @@
         padding-right: 0; // More visible text for long texts that overflow
     }
 
-    &:hover {
+    @media (hover: hover) {
+        &:hover {
+            border-color: $color-primary-gray-light;
+        }
+    }
+
+    &:active {
         border-color: $color-primary-gray-light;
     }
 

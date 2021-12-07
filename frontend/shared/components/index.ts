@@ -12,7 +12,7 @@ export * from "./src/ViewportHelper"
 // Navigation
 export { default as BackButton } from "./src/navigation/BackButton.vue"
 export { default as LoadingButton } from "./src/navigation/LoadingButton.vue"
-export { default as SaveBar } from "./src/navigation/SaveBar.vue"
+export { default as SaveView } from "./src/navigation/SaveView.vue"
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"
 export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue"
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"

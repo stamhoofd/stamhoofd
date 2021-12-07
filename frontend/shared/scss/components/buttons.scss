@@ -69,6 +69,11 @@
             //box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
         }
 
+        &:focus {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary-dark;
+        }
+
         .dropdown-text {
             flex-grow: 1;
             margin-right: -40px;

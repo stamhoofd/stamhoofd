@@ -38,9 +38,10 @@ const helper = {
             displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
         }, 1000);
 
-        if (el.tooltipComponent) {
+        if (el.$tooltipDisplayedComponent) {
             try {
-                el.tooltipComponent.vnode.componentInstance?.$parent.$emit("pop");
+                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+                el.$tooltipDisplayedComponent = null;
             } catch (e) {
                 // ignore
             }
