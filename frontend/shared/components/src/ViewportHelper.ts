@@ -94,8 +94,6 @@ export class ViewportHelper {
                     return
                 }
 
-                console.log("Clicked", scrollElement)
-
                 clickedElement = scrollElement;
                 // Show bottom scroll if we are idle at the bottom
 
@@ -148,17 +146,20 @@ export class ViewportHelper {
             // Calculate bottom padding
             // In modern mode, the body is set to 100vh, and we need to calculate the difference between 100vh and the viewport height
             // This can be used to calculate the keyboard height
-            const bodyHeight = document.body.clientHeight;
-            const bottomPadding = bodyHeight - window.visualViewport.height
+            if (window.visualViewport) {
+                const bodyHeight = document.body.clientHeight;
+                const bottomPadding = bodyHeight - window.visualViewport.height
 
-            if (bottomPadding > 250) {
-                // We are showing the keyboard
-                document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
-                document.documentElement.style.setProperty("--bottom-padding", `0px`);
-            } else {
-                document.documentElement.style.setProperty("--bottom-padding", `${bottomPadding.toFixed(2)}px`);
-                document.documentElement.style.setProperty("--keyboard-height", `0px`);
+                if (bottomPadding > 250) {
+                    // We are showing the keyboard
+                    document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
+                    document.documentElement.style.setProperty("--bottom-padding", `0px`);
+                } else {
+                    document.documentElement.style.setProperty("--bottom-padding", `${bottomPadding.toFixed(2)}px`);
+                    document.documentElement.style.setProperty("--keyboard-height", `0px`);
+                }
             }
+            
         }
     }
 }
