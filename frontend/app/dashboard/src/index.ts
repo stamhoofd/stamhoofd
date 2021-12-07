@@ -8,6 +8,7 @@ require('@stamhoofd/assets/images/icons/icons.font');
 import * as Sentry from '@sentry/vue';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
+import { AppManager } from '@stamhoofd/networking';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
@@ -20,6 +21,10 @@ if (!isPrerender && STAMHOOFD.environment == "production") {
         dsn: "https://00c3e526a886491e853cf060f3b00b05@o431770.ingest.sentry.io/6002539",
         logErrors: true
     });
+}
+
+if (AppManager.shared.getOS() === "iOS") {
+    document.body.classList.add("iosFix");
 }
 
 import App from "./App.vue";

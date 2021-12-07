@@ -8,7 +8,7 @@ import { Keyboard } from '@capacitor/keyboard';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-//import smoothscroll from 'smoothscroll-polyfill';
+// import smoothscroll from 'smoothscroll-polyfill';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
@@ -62,7 +62,7 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
 
     // note: for this to work on android, android:windowSoftInputMode="adjustPan" is needed in the activity (manifest)
     // kick off the polyfill!
-    //smoothscroll.polyfill();
+    //
 
     if (Capacitor.getPlatform() === 'ios') {
         //StatusBar.setStyle({ style: Style.Light }).catch(e => console.error(e));
@@ -143,3 +143,60 @@ AppManager.shared.hapticSuccess = () => {
 AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 }
+
+window.addEventListener('statusTap',  () => {
+    console.log("Status tapped")
+    const element = document.querySelector(".st-view > main") as HTMLElement
+    if (element) {
+        // Smooth scroll has just landed in Safari TP, we'll wait a bit before we implement it here
+
+        // Scroll to top
+        // Stop current scroll acceleration before initiating a new one
+        
+        const duration = 300 // ms
+        let start: number
+        let previousTimeStamp: number
+        const startPosition = element.scrollTop
+        const endPosition = 0
+        let previousPosition = element.scrollTop
+
+        element.style.willChange = "scroll-position";
+        (element.style as any).webkitOverflowScrolling = "auto"
+        element.style.overflow = "hidden"
+
+        // animate scrollTop of element to zero
+        const step = function (timestamp) {
+            if (start === undefined) {
+                start = timestamp;
+
+            }
+            const elapsed = timestamp - start;
+
+            if (element.scrollTop !== previousPosition && start !== timestamp){
+                // The user has scrolled the page: stop animation
+                element.style.overflow = ""
+                element.style.willChange = "";
+                (element.style as any).webkitOverflowScrolling = ""
+                return
+            }
+
+            if (previousTimeStamp !== timestamp) {
+                // Math.min() is used here to make sure the element stops at exactly 200px
+                element.scrollTop = Math.round((startPosition - endPosition) * (duration - elapsed) / duration + endPosition)
+                element.style.overflow = ""
+            }
+
+            if (elapsed < duration) { // Stop the animation after 2 seconds
+                previousTimeStamp = timestamp
+                previousPosition = element.scrollTop
+                window.requestAnimationFrame(step);
+            } else {
+                element.style.overflow = ""
+                element.style.willChange = "";
+                (element.style as any).webkitOverflowScrolling = ""
+            }
+        }
+
+        window.requestAnimationFrame(step);
+    }
+});

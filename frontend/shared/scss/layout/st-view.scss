@@ -16,6 +16,12 @@ body.modern {
     overflow: hidden;
     height: 100vh;
 
+    #app {
+        height: 100vh;
+    }
+}
+
+body.modern.iosFix {
     // Fix for iOS safari hide scroll bars + weird bugs in iOS15 when pulling to refresh (negative scroll top gets stuck)
     #app {
         height: 200vh;
