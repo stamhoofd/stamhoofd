@@ -65,11 +65,7 @@ public class FileOpenerPlugin extends Plugin {
 
         intent.putExtra(Intent.EXTRA_TITLE, url.substring(url.lastIndexOf("/")+1));
         intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, Environment.DIRECTORY_DOCUMENTS);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //intent.putExtra(Intent.EXTRA_STREAM, fileUrl);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        Log.v("open", "opening file "+url+" - "+fileUrl);
 
         try {
             Intent chooser = Intent.createChooser(intent, "Bestand openen");
@@ -80,27 +76,6 @@ public class FileOpenerPlugin extends Plugin {
         } catch (Exception ex) {
             call.reject("Failed to open");
         }
-
-        /*
-
-
-        JSObject ret = new JSObject();
-        final PackageManager manager = getContext().getPackageManager();
-        Intent launchIntent = new Intent(Intent.ACTION_VIEW);
-        launchIntent.setData(Uri.parse(url));
-
-        try {
-            getActivity().startActivity(launchIntent);
-            ret.put("completed", true);
-        } catch (Exception ex) {
-            launchIntent = manager.getLaunchIntentForPackage(url);
-            try {
-                getActivity().startActivity(launchIntent);
-                ret.put("completed", true);
-            } catch (Exception expgk) {
-                ret.put("completed", false);
-            }
-        }*/
     }
 
 

@@ -239,13 +239,14 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
     });
 
     try {
-        // On android: open the file
-        await FileOpener.open({url: result.uri})//.catch(console.error);
-
-        /*await Share.share({
-            dialogTitle: filename,
-            url: result.uri,
-        });*/
+        if (Capacitor.getPlatform() === 'ios') {
+            await Share.share({
+                dialogTitle: filename,
+                url: result.uri,
+            });
+        } else {
+            await FileOpener.open({url: result.uri})
+        }
     } catch (e) {
         if (e.message === "Share canceled") {
             return
