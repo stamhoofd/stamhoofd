@@ -148,13 +148,3 @@ $color-overlay-shadow: var(--color-overlay-shadow, $color-overlay-shadow-origina
 
 $color-box-shadow-original: rgba(0, 0, 0, 0.05);
 $color-box-shadow: var(--color-box-shadow, $color-box-shadow-original);
-
-@media 
-(-webkit-min-device-pixel-ratio: 2), 
-(min-resolution: 192dpi) { 
-    :root {
-        --border-width-thin: 0.5px;
-        --color-border-shade: #{$color-gray-5};
-        --color-border-lighter: #{$color-gray-5};
-    }
-}

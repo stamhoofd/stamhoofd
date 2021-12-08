@@ -62,7 +62,19 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     allValues: MemberWithRegistrations[] = []
 
     get estimatedRows() {
-        return this.loading ? 30 : 0
+        if (!this.loading) {
+            return 0
+        }
+
+        if (this.group) {
+            return this.group.settings.registeredMembers ?? 30
+        }
+
+        if (this.category) {
+            return this.category.groups.reduce((sum, group) => sum + (group.settings.registeredMembers ?? 30), 0)
+        }
+
+        return 30
     }
     
     actions: TableAction<MemberWithRegistrations>[] = [

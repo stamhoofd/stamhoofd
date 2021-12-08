@@ -58,6 +58,7 @@
                             @click="openGroup(group)"
                         >
                             <span>{{ group.settings.name }}</span>
+                            <span v-if="group.settings.registeredMembers" class="count">{{ group.settings.registeredMembers }}</span>
                         </button>
 
                         <button
@@ -134,11 +135,6 @@
                 <button class="menu-button button heading" @click="gotoFeedback(false)">
                     <span class="icon feedback" />
                     <span>Feedback</span>
-                </button>
-
-                <button class="menu-button button heading" @click="openTest(true)">
-                    <span class="icon new" />
-                    <span>Test</span>
                 </button>
 
                 <button class="menu-button button heading" @click="logout">
@@ -440,14 +436,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
                 })
             ]
         });
-    }
-
-    openTest(animated = true) {
-        this.showDetail(
-            new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(TableView, {})
-            }).setAnimated(animated)
-        );
     }
 
     manageWhatsNew() {

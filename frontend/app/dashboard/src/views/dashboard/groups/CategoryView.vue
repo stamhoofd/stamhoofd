@@ -48,6 +48,7 @@
                         {{ group.settings.name }}
 
                         <template slot="right">
+                            <span v-if="group.settings.registeredMembers" class="style-description-small">{{ group.settings.registeredMembers }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>

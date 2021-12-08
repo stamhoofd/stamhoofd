@@ -99,7 +99,7 @@ export class ViewportHelper {
                     clickedElement = scrollElement;
                     // Show bottom scroll if we are idle at the bottom
 
-                    if (scrollElement.scrollTop == 0) {
+                    if (scrollElement.scrollTop == 0 && scrollElement.scrollHeight > scrollElement.clientHeight) {
                         let paddingTop = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'))
                         paddingTop = isNaN(paddingTop) ? 0 : paddingTop
 

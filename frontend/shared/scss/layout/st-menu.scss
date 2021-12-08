@@ -2,7 +2,9 @@
 @use '../base/text-styles' as *;
 
 .st-menu {
-    --st-horizontal-padding: 30px;
+    @media (min-width: 801px) {
+        --st-horizontal-padding: 30px;
+    }
 
     #organization-switcher {
         margin-bottom: 15px;
@@ -88,6 +90,15 @@
             white-space: nowrap;
         }
 
+        .count {
+            margin-left: auto;
+            flex-shrink: 0;
+            opacity: 0.7;
+            font-size: 13px;
+            font-weight: $font-weight-semibold;
+            padding-left: 5px;
+        }
+
         .bubble {
             @extend .style-bubble;
             
@@ -110,7 +121,7 @@
             color: $color-primary;
         }
 
-        &.selected {
+        .split-view-controller[data-has-detail="true"] &.selected  {
             background-color: $color-primary-light;
             color: $color-primary;
         }
