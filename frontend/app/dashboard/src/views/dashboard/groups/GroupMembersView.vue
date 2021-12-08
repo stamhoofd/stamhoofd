@@ -1,5 +1,19 @@
 <template>
-    <TableView :title="title" column-configuration-id="members" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember" />
+    <TableView :title="title" column-configuration-id="members" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
+        <template #empty>
+            <template v-if="cycleOffset != 0">
+                Er zijn nog geen leden ingeschreven in deze inschrijvingsperiode.
+            </template>
+
+            <template v-else-if="group">
+                Er zijn nog geen leden ingeschreven in deze inschrijvingsgroep.
+            </template>
+
+            <template v-else>
+                Er zijn nog geen leden ingeschreven in deze categorie.
+            </template>
+        </template>
+    </TableView>
 </template>
 
 <script lang="ts">
