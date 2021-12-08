@@ -1218,6 +1218,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     > * {
         margin: 0;
     }
+
+    + .button {
+        margin-left: 0px;
+    }
 }
 
 .table-view {
