@@ -24,7 +24,7 @@
                 <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button text selected" @click="showSelection = true">
                     Selecteer
                 </button>
-                <button v-else key="actions" class="button icon more" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
+                <button v-else key="actions" class="button icon more gray" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 
@@ -1041,9 +1041,9 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         const el = event.currentTarget;
         const bounds = el.getBoundingClientRect()
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: bounds.left + (!isOnTop ? el.offsetWidth : 0),
+            x: bounds.left + el.offsetWidth,
             y: bounds.top + (isOnTop ? el.offsetHeight : 0),
-            xPlacement: isOnTop ? "right" : "left",
+            xPlacement: "left",
             yPlacement: isOnTop ? "bottom" : "top",
             actions: (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions),
             table: this,
@@ -1208,7 +1208,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    height: 44px;
+    height: 48px;
     padding: 0;
     margin: 0px !important;
     overflow: hidden;

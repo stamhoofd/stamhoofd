@@ -4,6 +4,8 @@
             <template #right>
                 <button v-if="hasPreviousMember" class="button icon arrow-up" @click="goBack" />
                 <button v-if="hasNextMember" class="button icon arrow-down" @click="goNext" />
+
+                <button class="button icon gray edit" @click="editMember" />
                 <button class="button icon gray more" @click="showContextMenu" />
             </template>
         </STNavigationBar>
@@ -31,6 +33,7 @@ import { Gender,Group,MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
+import EditMemberView from "./edit/EditMemberView.vue";
 import MemberContextMenu from "./MemberContextMenu.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
@@ -175,15 +178,30 @@ export default class MemberView extends Mixins(NavigationMixin) {
     }
 
     showContextMenu(event) {
+        const el = event.currentTarget;
+        const bounds = el.getBoundingClientRect()
+
         const displayedComponent = new ComponentWithProperties(MemberContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: bounds.left + el.offsetWidth,
+            y: bounds.top + el.offsetHeight,
+
+            xPlacement: "left",
+            yPlacement: "bottom",
+
             member: this.member,
             group: this.group,
             cycleOffset: this.cycleOffset,
             waitingList: this.waitingList
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    editMember() {
+        const displayedComponent = new ComponentWithProperties(EditMemberView, {
+            member: this.member,
+            initialFamily: this.familyManager
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 }
 </script>

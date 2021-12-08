@@ -220,23 +220,28 @@ export default class STNavigationBar extends Vue {
                 }
             }
             
-            > * {
-                margin: 0 10px;
+            display: flex;
+            flex-direction: row;
 
-                &:first-child {
-                    margin-left: 0;
+            align-items: center;
+            justify-content: flex-start;
 
-                    &.button.icon {
-                        margin-left: -10px;
-                    }
+            > .button {
+                margin: 0;
+            }
+
+            // Visually correct back button
+            > .button.text:first-child > .icon.arrow-left:first-child {
+                margin-left: -4px;
+            }
+
+            > .button.icon {
+                &:last-child {
+                    margin-right: -12px;
                 }
 
-                &:last-child {
-                    margin-right: 0;
-
-                    &.button.icon {
-                        margin-right: -10px;
-                    }
+                &:first-child {
+                    margin-left: -12px;
                 }
             }
         }
@@ -244,23 +249,23 @@ export default class STNavigationBar extends Vue {
         &:last-child {
             justify-content: flex-end;
 
-            > * {
-                margin: 0 10px;
+            display: flex;
+            flex-direction: row;
 
+            align-items: center;
+            justify-content: flex-end;
+
+            > .button {
+                margin: 0;
+            }
+
+            > .button.icon {
                 &:last-child {
-                    margin-right: 0;
-
-                    &.button.icon {
-                        margin-right: -10px;
-                    }
+                    margin-right: -12px;
                 }
 
                 &:first-child {
-                    margin-left: 0;
-
-                    &.button.icon {
-                        margin-left: -10px;
-                    }
+                    margin-left: -12px;
                 }
             }
         }
