@@ -11,7 +11,7 @@
 
 .input {
     @extend .style-input;
-    @extend .style-input-shadow;
+    //@extend .style-input-shadow;
     color: $color-dark;
     border: $border-width solid $color-border;
     background: var(--color-white, white);
@@ -19,7 +19,7 @@
     padding: 5px 15px;
     text-align: left;
     height: $input-height;
-    line-height: $input-height - 10px - 2 * $border-width;
+    line-height: calc($input-height - 10px - 2 * $border-width);
     margin: 0;
     width: 100%;
     box-sizing: border-box;
@@ -28,6 +28,8 @@
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     word-break: normal;
+
+    box-shadow: 0px 1px 0.5px 0px rgba(0, 0, 0, 0.1);
 
     // On iOS, the time is centered on inputs, this is not what we want
     &::-webkit-date-and-time-value {
@@ -45,7 +47,6 @@
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-        padding-right: 0; // More visible text for long texts that overflow
     }
 
     @media (hover: hover) {
@@ -78,7 +79,7 @@
     &:focus,
     &:focus-within {
         border-color: $color-primary;
-        border-width: 2px;
+        box-shadow: 0 0 0 1px $color-primary;
     }
 
     &::placeholder {
@@ -87,10 +88,12 @@
 
     &.error {
         border-color: $color-error-border;
+        box-shadow: 0 0 0 1px $color-error-border;
 
         &:focus,
         &:focus-within {
             border-color: $color-error-border-focus;
+            box-shadow: 0 0 0 1px $color-error-border-focus;
         }
     }
 }
@@ -98,10 +101,12 @@
 .input-errors {
     .input {
         border-color: $color-error-border;
+        box-shadow: 0 0 0 1px $color-error-border;
 
         &:focus,
         &:focus-within {
             border-color: $color-error-border-focus;
+            box-shadow: 0 0 0 1px $color-error-border-focus;
         }
     }
 }
@@ -121,17 +126,17 @@ textarea.input {
     max-width: none;
     padding: 12px 15px;
     // 3 lines height
-    line-height: $input-height - 18px - 2 * $border-width;
-    height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 4;
+    line-height: calc($input-height - 18px - 2 * $border-width);
+    height: calc($input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 4);
 
     resize: none;
 
     &.large {
-        height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 8;
+        height: calc($input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 8);
     }
 
     &.small {
-        height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 3;
+        height: calc($input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 3);
     }
 }
 

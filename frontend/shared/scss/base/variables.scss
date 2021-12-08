@@ -1,5 +1,12 @@
 // Colors
-$input-height: 44px;
+$input-height-original: 39px;
+$input-height: var(--input-height, $input-height-original);
+
+@media (max-width: 550px) {
+    :root {
+        --input-height: 42px;
+    }
+}
 
 $font-weight-default: var(--font-weight-default, 500);
 
@@ -108,7 +115,7 @@ $color-warning-dark-original: #634e00;
 $color-warning-dark: var(--color-warning-dark, $color-warning-dark-original);
 
 // Other
-$border-width: 2px;
+$border-width: 1px;
 $border-width-thin: var(--border-width-thin, 1px);
 
 
