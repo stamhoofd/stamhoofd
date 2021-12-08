@@ -60,14 +60,6 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
-    body.web-android &, body.native-android & {
-        &.more {
-            &:before {
-                transform: rotate(90deg);
-            }
-        }
-    }
-
     /*&.add:after {
         font-icon: url('@stamhoofd/assets/images/icons/gray/add.svg');
     }
