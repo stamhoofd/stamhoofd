@@ -23,9 +23,7 @@ if (!isPrerender && STAMHOOFD.environment == "production") {
     });
 }
 
-if (AppManager.shared.getOS() === "iOS") {
-    document.body.classList.add("iosFix");
-}
+document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 
 import App from "./App.vue";
 VueGlobalHelper.setup()

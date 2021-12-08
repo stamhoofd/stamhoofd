@@ -1,19 +1,9 @@
 <template>
     <div class="st-view member-view">
-        <STNavigationBar :title="member.details.name">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-                <button v-if="hasPreviousMember" class="button text" @click="goBack">
-                    <span class="icon arrow-left" />
-                    <span>Vorige</span>
-                </button>
-            </template>
+        <STNavigationBar :title="member.details.name" :pop="canPop" :dismiss="canDismiss">
             <template #right>
-                <button v-if="hasNextMember" class="button text" @click="goNext">
-                    <span>Volgende</span>
-                    <span class="icon arrow-right" />
-                </button>
-                <button class="button icon close gray" @click="pop" />
+                <button v-if="hasPreviousMember" class="button icon arrow-up" @click="goBack" />
+                <button v-if="hasNextMember" class="button icon arrow-down" @click="goNext" />
             </template>
         </STNavigationBar>
 

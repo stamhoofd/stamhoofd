@@ -111,7 +111,9 @@ AppManager.shared.overrideXMLHttpRequest = WrapperHTTPRequest
 const i18n = I18nController.getI18n()
 I18nController.addUrlPrefix = false
 
+document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 VueGlobalHelper.setup()
+
 Vue.prototype.$isMobile = true
 
 const app = new Vue({
@@ -254,8 +256,11 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
         throw e
     }
 
-    await Filesystem.deleteFile({
-        path: result.uri
-    })
-    
+    try {
+        await Filesystem.deleteFile({
+            path: result.uri
+        })
+    } catch (e) {
+        console.error(e)
+    }
 }

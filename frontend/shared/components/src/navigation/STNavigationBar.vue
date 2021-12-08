@@ -1,6 +1,7 @@
 <template>
     <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle, 'no-title': title.length == 0 }">
         <div>
+            <BackButton v-if="pop || (dismiss && $isAndroid)" @click="$parent.pop" />
             <slot name="left" />
         </div>
 
@@ -12,6 +13,10 @@
 
         <div>
             <slot name="right" />
+            <button v-if="dismiss && $isIOS" class="button text" @click="$parent.dismiss">
+                Sluiten
+            </button>
+            <button v-else-if="dismiss && !$isAndroid" class="button icon close gray" @click="$parent.dismiss" />
         </div>
     </div>
 </template>
@@ -19,7 +24,13 @@
 <script lang="ts">
 import { Component, Prop,Vue } from "vue-property-decorator";
 
-@Component
+import BackButton from ".//BackButton.vue";
+
+@Component({
+    components: {
+        BackButton
+    }
+})
 export default class STNavigationBar extends Vue {
     @Prop({ default: "", type: String })
     title!: string;
@@ -41,6 +52,14 @@ export default class STNavigationBar extends Vue {
 
     @Prop({ default: false, type: Boolean })
     large!: boolean;
+
+    /// Add dismiss button (location depending on the OS)
+    @Prop({ default: false, type: Boolean })
+    dismiss!: boolean;
+
+    /// Add pop button (location depending on the OS)
+    @Prop({ default: false, type: Boolean })
+    pop!: boolean;
 
     scrolled = false;
     scrollElement!: HTMLElement | null;
@@ -171,6 +190,11 @@ export default class STNavigationBar extends Vue {
     transition: background-color 0.3s, border-color 0.3s;
     z-index: 200;
 
+    body.web-android &, body.native-android & {
+        // align left on android
+        grid-template-columns: auto 1fr auto;
+    }
+
     &.no-title {
         grid-template-columns: auto 1fr;
 
@@ -189,11 +213,12 @@ export default class STNavigationBar extends Vue {
         align-items: center;
 
         &:first-child {
-            /*min-width: 30px;
-
             &:empty {
                 min-width: 0;
-            }*/
+                + h1 {
+                    margin-left: -10px;
+                }
+            }
             
             > * {
                 margin: 0 10px;
@@ -265,6 +290,14 @@ export default class STNavigationBar extends Vue {
         transition: opacity 0.2s;
         @extend .style-title-small;
     }
+
+    body.web-android &, body.native-android & {
+        // Increase title size a bit
+        > h1 {
+            font-size: 16px;
+        }
+    }
+
 
     &.show-title {
         > h1 {

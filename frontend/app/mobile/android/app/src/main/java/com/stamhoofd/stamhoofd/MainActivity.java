@@ -63,9 +63,8 @@ public class MainActivity extends BridgeActivity {
         webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
-        MainActivity me = this;
 
-        //webView.getWebViewClient()
+        MainActivity me = this;
 
         // Because trusted root CA don't work in WebViews in Android...
         if (BuildConfig.BUILD_TYPE.equals("debug")) {
@@ -100,9 +99,9 @@ public class MainActivity extends BridgeActivity {
                             String[] permissions = { Manifest.permission.CAMERA };
 
                             ActivityCompat.requestPermissions(
-                                me,
-                                permissions,
-                                PERMISSION_REQUEST_CODE);
+                                    me,
+                                    permissions,
+                                    PERMISSION_REQUEST_CODE);
                             return;
                         }
 
@@ -137,7 +136,6 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         registerPlugin(FileOpenerPlugin.class);
-
     }
 
     @Override
