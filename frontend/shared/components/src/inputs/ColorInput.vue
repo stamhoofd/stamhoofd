@@ -128,9 +128,9 @@ export default class ColorInput extends Vue {
 
     .text-input {
         width: 100%;
-        height: 44px - 2 * $border-width;
         padding: 5px 0;
-        line-height: 44px - 10px - 2 * $border-width;
+        height:  calc(#{$input-height} - 2 * #{$border-width});
+        line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
         box-sizing: border-box;
     }
 

@@ -1,6 +1,6 @@
 <template>
     <div class="modern st-view table-view background">
-        <STNavigationBar :sticky="true" :add-shadow="wrapColumns">
+        <STNavigationBar :sticky="true" :add-shadow="wrapColumns" :title="title">
             <template #left>
                 <button v-if="isMobile && showSelection && !isIOS" class="button icon gray close" @click="showSelection = false" />
                 <button v-else-if="showSelection && isIOS" class="button text selected unbold" @click="setSelectAll(!cachedAllSelected)">
@@ -30,7 +30,10 @@
 
         <main>
             <div class="container">
-                <h1>{{ title }}</h1>
+                <h1>
+                    <span>{{ title }}</span>
+                    <span class="icon arrow-down-small gray" />
+                </h1>
 
                 <div class="input-with-buttons">
                     <div>

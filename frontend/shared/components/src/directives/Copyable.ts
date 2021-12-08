@@ -50,7 +50,7 @@ const helper = {
 
     copyElement(event, bindingValue: any, vnode: any) {
         if (navigator.clipboard) {
-            const myText = bindingValue ?? event.target.textContent;
+            const myText = bindingValue ?? event.target.textContent.trim();
             navigator.clipboard.writeText(myText).then(() => {
                 this.copiedPopup(event, vnode);
             }).catch(() => {

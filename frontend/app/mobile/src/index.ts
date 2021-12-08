@@ -97,6 +97,10 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 window.addEventListener("touchstart", () => { }, { passive: true });
 
+document.body.style.userSelect = "none";
+(document.body.style as any).webkitTouchCallout = "none";
+(document.body.style as any).webkitUserSelect = "none";
+
 // Plausible placeholder
 (window as any).plausible = function() {
     //console.log("Debug plausible with args ", arguments)

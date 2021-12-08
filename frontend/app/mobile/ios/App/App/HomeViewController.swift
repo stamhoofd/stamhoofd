@@ -19,13 +19,12 @@ class HomeViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.webView!.allowsBackForwardNavigationGestures = true
-        self.webView!.scrollView.bounces = true
-        self.webView!.allowsLinkPreview = false
+        self.webView!.scrollView.bounces = false
         self.webView!.scrollView.keyboardDismissMode = .interactive
         self.webView!.configuration.suppressesIncrementalRendering = true
         
         // Disable 3D Touch
-        self.webView!.allowsLinkPreview = false
+        //self.webView!.allowsLinkPreview = false
         
         // Better defaults
         self.webView!.configuration.allowsInlineMediaPlayback = true
@@ -54,14 +53,14 @@ class HomeViewController: CAPBridgeViewController {
         self.webView!.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         
         // Add our own gesture recognizer to fix the iOS15 bug that always adds the magnifying glass when long pressing something, event when it is not selectable
-        /*let gestureRecognizer = UILongPressGestureRecognizer(target: self,
+        let gestureRecognizer = UILongPressGestureRecognizer(target: self,
                                                              action:#selector(self.handleLongPress))
         
-        gestureRecognizer.minimumPressDuration = 0.5
-        gestureRecognizer.delaysTouchesBegan = false
-        gestureRecognizer.delegate = self
+        gestureRecognizer.minimumPressDuration = 0.45
+        gestureRecognizer.allowableMovement = 100
+        //gestureRecognizer.delegate = self
         self.longPressGesture = gestureRecognizer
-        self.webView?.addGestureRecognizer(gestureRecognizer)*/
+        self.webView?.addGestureRecognizer(gestureRecognizer)
 
     }
     

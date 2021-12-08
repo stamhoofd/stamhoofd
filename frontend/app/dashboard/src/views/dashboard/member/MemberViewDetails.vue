@@ -20,22 +20,28 @@
                 <dl class="details-grid">
                     <template v-if="member.details.memberNumber">
                         <dt>Lidnummer</dt>
-                        <dd>{{ member.details.memberNumber }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.memberNumber }}
+                        </dd>
                     </template>
 
                     <template v-if="member.details.birthDay">
                         <dt>Verjaardag</dt>
-                        <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
+                        <dd v-copyable>
+                            {{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)
+                        </dd>
                     </template>
 
                     <template v-if="member.details.phone">
                         <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
-                        <dd>{{ member.details.phone }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.phone }}
+                        </dd>
                     </template>
 
                     <template v-if="member.details.email">
                         <dt>E-mailadres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ member.details.email }}
                             <span v-if="getInvalidEmailDescription(member.details.email)" v-tooltip="getInvalidEmailDescription(member.details.email)" class="icon warning yellow" />
                         </dd>
@@ -43,7 +49,7 @@
 
                     <template v-if="member.details.address">
                         <dt>Adres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ member.details.address.street }} {{ member.details.address.number }}<br>{{ member.details.address.postalCode }}
                             {{ member.details.address.city }}
                             <template v-if="member.details.address.country !== currentCountry">
@@ -306,7 +312,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { CenteredMessage, CopyableDirective, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
 import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { CountryHelper } from "@stamhoofd/structures/esm/dist";
@@ -328,7 +334,7 @@ import MemberView from './MemberView.vue';
         STList,
         RecordCategoryAnswersBox
     },
-    directives: { Tooltip },
+    directives: { Tooltip, Copyable: CopyableDirective },
     filters: {
         dateTime: Formatter.dateTime.bind(Formatter)
     },
@@ -373,12 +379,12 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get missingAnswers(): RecordAnswer[] {
         const missing: RecordAnswer[] = []
-         for (const answer of this.member.details.recordAnswers) {
+        for (const answer of this.member.details.recordAnswers) {
             // Search
             if (!this.recordCategories.find(cat => !!cat.records.find(record => record.id === answer.settings.id))) {
                 missing.push(answer)
             }
-         }
+        }
         return missing
     }
 
@@ -592,11 +598,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
             missing.addDelete(user.id)
             encryptedMembers.addPatch(
-                    EncryptedMemberWithRegistrations.patch({
-                        id: this.member.id,
-                        users: missing
-                    })
-                )
+                EncryptedMemberWithRegistrations.patch({
+                    id: this.member.id,
+                    users: missing
+                })
+            )
 
             const updated = await MemberManager.patchMembers(encryptedMembers, false)
 
