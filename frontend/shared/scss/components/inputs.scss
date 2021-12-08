@@ -114,10 +114,12 @@
 .input-success {
     .input {
         border-color: $color-success-border;
+        box-shadow: 0 0 0 1px $color-success-border;
 
         &:focus,
         &:focus-within {
             border-color: $color-success-border-focus;
+            box-shadow: 0 0 0 1px $color-success-border-focus;
         }
     }
 }

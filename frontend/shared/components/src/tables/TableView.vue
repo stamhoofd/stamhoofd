@@ -90,6 +90,17 @@
                     </div>
                 </div>
             </div>
+
+            <p v-if="totalItemsCount == 0 && allValues.length == 0 " class="info-box">
+                <slot name="empty" />
+            </p>
+            <p v-else-if="totalItemsCount == 0" class="info-box with-button">
+                Geen resultaten gevonden
+
+                <button class="button text" @click="resetFilter">
+                    Reset
+                </button>
+            </p>
         </main>
 
         <div v-if="isIOS" class="tool-bar">
@@ -465,41 +476,45 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     mounted() {
-        // Initialise visible Rows
-        /*for (let index = 0; index < 10000; index++) {
-            this.allValues.push(new Value(uuidv4(), "Lid "+index, Math.floor(Math.random() * 99), uuidv4()));
-        }*/
-        
         this.loadColumnConfiguration().catch(console.error)
-        
-        let ticking = false
-
-        this.getScrollElement(this.$refs["table"] as HTMLElement).addEventListener("scroll", () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    this.updateVisibleRows()
-                    ticking = false;
-                });
-
-                ticking = true;
-            }
-        }, { passive: true })
+        this.getScrollElement(this.$refs["table"] as HTMLElement).addEventListener("scroll", this.onScroll, { passive: true })
 
         if (!this.wrapColumns) {
-            window.addEventListener("resize", () => {
-            // Force padding update
-                this.updatePadding()
-
-                if (this.canCollapse) {
-                // Keep existing width
-                    this.updateCanCollapse()
-                } else {
-                // shrink or grow width
-                    this.updateColumnWidth()
-                }
-                this.updateVisibleRows()
-            }, { passive: true })
+            window.addEventListener("resize", this.onResize, { passive: true })
         }
+    }
+
+    ticking = false
+
+    onScroll() {
+        if (!this.ticking) {
+            window.requestAnimationFrame(() => {
+                this.updateVisibleRows()
+                this.ticking = false;
+            });
+
+            this.ticking = true;
+        }
+    }
+
+    onResize() {
+        // Force padding update
+        this.updatePadding()
+
+        if (this.canCollapse) {
+        // Keep existing width
+            this.updateCanCollapse()
+        } else {
+        // shrink or grow width
+            this.updateColumnWidth()
+        }
+        this.updateVisibleRows()
+    }
+
+    beforeDestroy() {
+        // Remove event listeners
+        this.getScrollElement(this.$refs["table"] as HTMLElement).removeEventListener("scroll", this.onScroll)
+        window.removeEventListener("resize", this.onResize)
     }
 
     async loadColumnConfiguration() {
@@ -823,6 +838,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         if (!this.wrapColumns) {
             (this.$refs["table"] as HTMLElement).style.setProperty("--table-columns", val);
         }
+    }
+
+    resetFilter() {
+        this.searchQuery = ""
+        this.selectedFilter = null
     }
 
     get filteredCount() {
