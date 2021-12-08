@@ -151,7 +151,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             priority: 9,
             groupIndex: 2,
 
-            handler: (member: MemberWithRegistrations[]) => {
+            handler: (members: MemberWithRegistrations[]) => {
                 // todo
             }
         }),
@@ -160,8 +160,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             icon: "download",
             priority: 8,
             groupIndex: 2,
-            handler: (member: MemberWithRegistrations[]) => {
-                // todo
+            handler: (members: MemberWithRegistrations[]) => {
+                // todo: vervangen door een context menu
+                this.exportToExcel(members).catch(console.error)
             }
         }),
 
@@ -542,6 +543,17 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 }
             }
         }).setDisplayStyle("popup"))
+    }
+
+    async exportToExcel(members: MemberWithRegistrations[]) {
+        try {
+            const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
+            const MemberExcelExport = d.MemberExcelExport
+            MemberExcelExport.export(members);
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+        }
     }
 }
 </script>

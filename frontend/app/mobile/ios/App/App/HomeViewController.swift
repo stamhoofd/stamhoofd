@@ -24,18 +24,15 @@ class HomeViewController: CAPBridgeViewController {
         self.webView!.configuration.suppressesIncrementalRendering = true
         
         // Disable 3D Touch
-        //self.webView!.allowsLinkPreview = false
+        // Enabling this breaks the magnification loupes again
+        // self.webView!.allowsLinkPreview = false
         
         // Better defaults
         self.webView!.configuration.allowsInlineMediaPlayback = true
         self.webView!.configuration.mediaTypesRequiringUserActionForPlayback = []
         
         self.webView!.configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
-        /*if #available(iOS 14.5, *) {
-            self.webView!.configuration.preferences.textInteractionEnabled = false
-        } else {
-            // Fallback on earlier versions
-        }*/
+
         if #available(iOS 14.0, *) {
             self.webView!.configuration.limitsNavigationsToAppBoundDomains = true
         } else {
@@ -58,29 +55,11 @@ class HomeViewController: CAPBridgeViewController {
         
         gestureRecognizer.minimumPressDuration = 0.45
         gestureRecognizer.allowableMovement = 100
-        //gestureRecognizer.delegate = self
         self.longPressGesture = gestureRecognizer
-        self.webView?.addGestureRecognizer(gestureRecognizer)
-
+        self.view.addGestureRecognizer(gestureRecognizer)
     }
     
     @objc func handleLongPress() {
-        print("Handled long press")
-    }
-    
-    
-    
-}
-
-extension HomeViewController: UIGestureRecognizerDelegate {
-
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-             shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-       // Do not begin the pan until the swipe fails.
-       if otherGestureRecognizer == self.longPressGesture {
-          return false
-       }
-        print(gestureRecognizer)
-       return true
+        // Ignore
     }
 }

@@ -215,3 +215,40 @@ window.addEventListener('statusTap',  () => {
         
     }
 });
+
+import { Directory, Encoding,Filesystem } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+
+
+// Download File
+AppManager.shared.downloadFile = async (data: any, filename: string) => {
+    const {publicStorage} = await Filesystem.checkPermissions();
+    if (!publicStorage) {
+        throw new Error("Geen toegang tot bestanden. Wijzig de toestemmingen van de app om bestanden te kunnen opslaan.")
+    }
+
+    // todo: automatically encode data to base64 in case of buffer
+
+    const result = await Filesystem.writeFile({
+        path: filename,
+        data,
+        directory: Directory.Cache,
+        // encoding: Encoding.UTF8, // if not present: data should be base64 encoded
+    });
+
+    try {
+        await Share.share({
+            dialogTitle: filename,
+            url: result.uri,
+        });
+    } catch (e) {
+        if (e.message === "Share canceled") {
+            return
+        }
+        throw e
+    }
+
+    await Filesystem.deleteFile({
+        path: filename
+    })
+}

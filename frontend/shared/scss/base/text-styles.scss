@@ -347,6 +347,13 @@
 
     dd {
         @extend .style-definition-description;
+        
+        -webkit-touch-callout: default;
+        
+        // user-select contain is not supported in safari
+        -webkit-user-select: text;
+        user-select: text;
+        user-select: contain;
     }
 
     .center {

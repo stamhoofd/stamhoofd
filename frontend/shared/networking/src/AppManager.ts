@@ -57,6 +57,8 @@ export class AppManager {
         }
     }
 
+    downloadFile: ((data: any, filename: string) => Promise<void>) | null = null
+
     // Optional: if the current platform ahs a native scanner (see QRScannerPlugin in mobile frontend), this pluging will get instered here
     QRScanner?: QRScannerPlugin
 

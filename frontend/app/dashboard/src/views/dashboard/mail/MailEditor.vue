@@ -155,6 +155,12 @@ export default class MailEditor extends Vue {
     line-height: normal;
     outline: none;
 
+    user-select: auto;
+    user-select: contain;
+    -webkit-user-select: text;
+    -webkit-user-select: auto;
+    -webkit-touch-callout: default;
+
     > footer {
         padding: 0 15px 15px 15px;
         --st-horizontal-padding: 15px;

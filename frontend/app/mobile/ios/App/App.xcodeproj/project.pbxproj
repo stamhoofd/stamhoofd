@@ -34,6 +34,8 @@
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		F43E93AA267E34F900A6D8B0 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		F46DD2932758E7DF004B81D9 /* ListenerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerView.swift; sourceTree = "<group>"; };
+		F46DD2B02761228D004B81D9 /* nl-BE */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "nl-BE"; path = "nl-BE.lproj/Main.strings"; sourceTree = "<group>"; };
+		F46DD2B1276122ED004B81D9 /* nl-NL */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "nl-NL"; path = "nl-NL.lproj/Main.strings"; sourceTree = "<group>"; };
 		F4B25C5626F213A10003D14D /* QRScannerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerPlugin.swift; sourceTree = "<group>"; };
 		F4B25C5926F214AD0003D14D /* QRScannerPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QRScannerPlugin.m; sourceTree = "<group>"; };
 		F4DA27442694B5F60068C9F8 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
@@ -161,6 +163,8 @@
 			knownRegions = (
 				nl,
 				Base,
+				"nl-BE",
+				"nl-NL",
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
@@ -244,6 +248,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				504EC30C1FED79650016851F /* Base */,
+				F46DD2B02761228D004B81D9 /* nl-BE */,
+				F46DD2B1276122ED004B81D9 /* nl-NL */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -255,6 +261,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -312,6 +319,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
