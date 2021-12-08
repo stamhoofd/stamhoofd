@@ -219,6 +219,8 @@ window.addEventListener('statusTap',  () => {
 import { Directory, Encoding,Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 
+import FileOpener from './FileOpenerPlugin';
+
 
 // Download File
 AppManager.shared.downloadFile = async (data: any, filename: string) => {
@@ -237,10 +239,13 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
     });
 
     try {
-        await Share.share({
+        // On android: open the file
+        await FileOpener.open({url: result.uri})//.catch(console.error);
+
+        /*await Share.share({
             dialogTitle: filename,
             url: result.uri,
-        });
+        });*/
     } catch (e) {
         if (e.message === "Share canceled") {
             return
@@ -249,6 +254,7 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
     }
 
     await Filesystem.deleteFile({
-        path: filename
+        path: result.uri
     })
+    
 }
