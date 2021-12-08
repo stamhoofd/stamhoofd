@@ -62,12 +62,36 @@
     font-weight: $font-weight-default;
     padding: 15px 15px 15px 50px;
 
+    min-height: 49px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
     box-sizing: border-box;
     margin: 15px 0;
     position: relative;
 
     .custom-bottom-box + & {
         margin-top: 5px;
+    }
+
+    +.error-box, +.success-box, +.info-box, +.warning-box, +.loading-box  {
+        margin-top: -10px;
+    }
+
+    > .button {
+        flex-shrink: 0;
+        margin: -15px 0;
+        padding: 0;
+        justify-self: stretch;
+        padding-left: 15px;
+        margin-left: auto;
+        @extend .only-icon-smartphone;
+
+        &.text.button {
+            color: inherit;
+        }
     }
 }
 
@@ -83,15 +107,11 @@
     }
 
     &.icon {
-        display: block;
+        display: flex;
         width: auto;
         height: auto;
         overflow: visible;
         white-space: inherit;
-    }
-
-    +.error-box, +.success-box, +.info-box, +.warning-box  {
-        margin-top: -10px;
     }
 
     &.selectable {
@@ -102,23 +122,6 @@
 
         &:active {
             opacity: 0.5;
-        }
-    }
-
-    &.with-button {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        > .button {
-            flex-shrink: 0;
-            padding-left: 15px;
-            margin-left: auto;
-            @extend .only-icon-smartphone;
-
-            &.text.button {
-                color: inherit;
-            }
         }
     }
 }
