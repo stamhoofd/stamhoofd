@@ -286,8 +286,13 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 waitingList: this.waitingList
             }),
         });
-        component.modalDisplayStyle = "popup";
-        this.present(component);
+
+        if ((this as any).$isMobile) {
+            this.show(component)
+        } else {
+            component.modalDisplayStyle = "popup";
+            this.present(component);
+        }
     }
 
     get recordCategories(): RecordCategory[] {
