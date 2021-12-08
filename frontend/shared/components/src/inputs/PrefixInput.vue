@@ -89,7 +89,7 @@ export default class PrefixInput extends Vue {
         box-sizing: border-box;
         
         
-        line-height: calc($input-height - 10px - 2 * $border-width);
+        line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
         display: block;
 
         @media (max-width: 350px) {
@@ -113,7 +113,7 @@ export default class PrefixInput extends Vue {
         padding-left: 200px;
         margin-left: -200px;
 
-        line-height: calc($input-height - 10px - 2 * $border-width);
+        line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
 
         text-overflow: ellipsis;
         overflow: hidden;

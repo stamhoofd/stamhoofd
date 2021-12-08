@@ -19,7 +19,7 @@
     padding: 5px 15px;
     text-align: left;
     height: $input-height;
-    line-height: calc($input-height - 10px - 2 * $border-width);
+    line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
     margin: 0;
     width: 100%;
     box-sizing: border-box;
@@ -126,17 +126,17 @@ textarea.input {
     max-width: none;
     padding: 12px 15px;
     // 3 lines height
-    line-height: calc($input-height - 18px - 2 * $border-width);
-    height: calc($input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 4);
+    line-height: calc(#{$input-height} - 18px - 2 * #{$border-width});
+    height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 4);
 
     resize: none;
 
     &.large {
-        height: calc($input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 8);
+        height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 8);
     }
 
     &.small {
-        height: calc($input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 3);
+        height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 3);
     }
 }
 
