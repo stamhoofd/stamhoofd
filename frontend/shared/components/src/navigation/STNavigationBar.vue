@@ -314,7 +314,7 @@ export default class STNavigationBar extends Vue {
     body.web-android &, body.native-android & {
         // Increase title size a bit
         > h1 {
-            font-size: 17px;
+            font-size: 19px;
         }
     }
 

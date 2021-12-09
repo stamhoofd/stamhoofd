@@ -65,6 +65,9 @@ $segmented-control-border-width: 2px;
 $segmented-control-height: 38px;
 $segmented-control-inner-height: $segmented-control-height - $segmented-control-border-width * 2;
 
+
+$border-radius: 9px;
+
 .st-view > main > h1 + .segmented-control {
     margin-bottom: 25px;
 }
@@ -196,7 +199,7 @@ $segmented-control-inner-height: $segmented-control-height - $segmented-control-
             height: $segmented-control-inner-height;
             background: $color-white-highlight;
             border-radius: $border-radius - $segmented-control-border-width;
-            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.25);
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
         }
     }
 }

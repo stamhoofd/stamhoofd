@@ -11,13 +11,21 @@
 
             <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box container">
                 <hr v-if="member.activeRegistrations.length == 0">
-                <h2 class="style-with-button">
-                    <div>Algemeen</div>
-                    <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editMember()" />
-                    </div>
-                </h2>
                 <dl class="details-grid">
+                    <template v-if="member.details.firstName">
+                        <dt>Voornaam</dt>
+                        <dd v-copyable>
+                            {{ member.details.firstName }}
+                        </dd>
+                    </template>
+
+                    <template v-if="member.details.lastName">
+                        <dt>Achternaam</dt>
+                        <dd v-copyable>
+                            {{ member.details.lastName }}
+                        </dd>
+                    </template>
+
                     <template v-if="member.details.memberNumber">
                         <dt>Lidnummer</dt>
                         <dd v-copyable>
@@ -63,7 +71,7 @@
 
             <div v-if="member.activeRegistrations.length > 0" class="container">
                 <h2 class="style-with-button with-list">
-                    <div>Ingeschreven voor</div>
+                    <div>Inschrijvingen</div>
                     <div>
                         <button class="button text limit-space" @click="editGroup()">
                             <span class="icon sync" />
@@ -222,8 +230,6 @@
 
         <div v-if="hasWarnings || member.users.length > 0 || familyMembers.length > 0">
             <div v-if="hasWarnings" class="hover-box container">
-                <h2>Waarschuwingen</h2>
-
                 <ul class="member-records">
                     <li
                         v-for="warning in sortedWarnings"
@@ -258,6 +264,10 @@
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
                     <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" @click="unlinkUser(user)" />
                 </p>
+
+                <template v-if="placeholderAccounts.length > 0">
+                    <hr>
+                </template>
             </div>
 
             <div v-if="placeholderAccounts.length > 0" class="hover-box container">
