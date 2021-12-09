@@ -133,7 +133,7 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     get viewTitle() {
         if (this.isNew) {
-            return "Nieuwe webshop of ticketverkoop starten"
+            return "Nieuwe verkoop starten"
         }
         return "Algemene instellingen"
     }
