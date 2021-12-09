@@ -23,13 +23,14 @@ content: "\\{{this}}";
 {{/each}}
 
 {{#each android_icons}}
-body.web-android .icon.{{@key}}:before, body.native-android .icon.{{@key}}:before, body.web-android .icon-base.{{@key}}:before, body.native-android .icon-base.{{@key}}:before {
+body.web-android .icon.{{@key}}:before, body.native-android .icon.{{@key}}:before, 
+body.web-android .icon-base.{{@key}}:before, body.native-android .icon-base.{{@key}}:before {
 content: "\\{{this}}";
 }
 {{/each}}
 
 {{#each ios_icons}}
-body.web-iOS .icon.{{@key}}:before, body.native-iOS .icon.{{@key}}:before
+body.web-iOS .icon.{{@key}}:before, body.native-iOS .icon.{{@key}}:before,
 body.web-iOS .icon-base.{{@key}}:before, body.native-iOS .icon-base.{{@key}}:before {
 content: "\\{{this}}";
 }

@@ -261,8 +261,28 @@
         @extend .style-button-small;
         color: $color-gray-4;
         text-overflow: ellipsis;
-        display: inline-block;
-        vertical-align: middle;
+        
+        
+        
+        //display: inline-block;
+        //vertical-align: middle;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        > span {
+            min-width: 0;
+        }
+
+        > .icon {
+            flex-shrink: 0;
+
+            &:first-child {
+                margin-right: 7px;
+            }
+        }
+
+
         overflow: hidden;
         height: 34px;
         line-height: 34px;

@@ -115,7 +115,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
         new TableAction({
             name: "Wachtlijst",
-            icon: "clock-small",
+            icon: "clock",
             priority: 0,
             groupIndex: 1,
             needsSelection: false,
