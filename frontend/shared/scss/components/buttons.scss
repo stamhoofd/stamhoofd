@@ -263,8 +263,6 @@
         color: $color-gray-4;
         text-overflow: ellipsis;
         
-        
-        
         //display: inline-block;
         //vertical-align: middle;
         display: flex;
@@ -284,13 +282,34 @@
         }
 
 
-        overflow: hidden;
+        // note: if you need overflow ellipsis, please use a <span> inside of the button.
+        // we need to overflow for the breakout region
+        overflow: visible; 
+
         height: 34px;
         line-height: 34px;
         white-space: nowrap;
-        transition: 0.2s opacity ease-out 0.1s, 0.2s color;
+        transition: opacity 0.2s 0.1s ease-out, color 0.2s;
         position: relative;
         max-width: 100%;
+
+        &:after {
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -10px;
+            right: -10px;
+            bottom: -5px;
+        }
+
+        &.navigation:last-child:after {
+            right: -20px;
+        }
+
+        &.navigation:first-child:after {
+            left: -20px;
+        }
 
         &.full {
             display: block;
@@ -343,8 +362,8 @@
         }
 
         &:active {
-            opacity: 0.4;
-            transition: 0s opacity, 0.2s color;
+            opacity: 0.15;
+            transition: opacity 0s, color 0.2s;
         }
 
         @media (max-width: 500px) {
@@ -369,13 +388,78 @@
     }
 
     &.icon {
-        padding: 12px;
-        margin: -12px;
-        transition: 0.2s opacity ease-out, 0.2s color;
+        transition: opacity 0.2s ease-out, color 0.2s ;
+        overflow: visible; // fix for breakout region
 
-        &:active {
-            opacity: 0.4;
-            transition: 0s opacity, 0.2s color;
+        &:after {
+            // Breakout region
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+        }
+
+        &.navigation:last-child:after {
+            right: -20px;
+        }
+
+        &.navigation:first-child:after {
+            left: -20px;
+        }
+
+        &:active, &.active {
+            opacity: 0.15;
+            transition: opacity 0s, color 0.2s;
+        }
+
+        position: relative;
+
+        body.web-android &, body.native-android & {
+            transition: none;
+            &:active {
+                opacity: 1;
+                transition: none;
+            }
+
+            &:after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                padding-bottom: 100%;
+                background: $color-gray-3;
+                border-radius: 200px;
+                pointer-events: none;
+
+                transform: translate(0, -50%) scale(0.1, 0.1) ;
+                z-index: 0;
+
+                will-change: opacity, transform;
+                opacity: 0;
+
+                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);;
+
+
+            }
+
+            &:before {
+                z-index: 1;
+            }
+
+            &.active {
+                opacity: 1;
+                &:after {
+
+                    opacity: 1;
+                    transform: translate(0, -50%) scale(1, 1);
+
+                    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                }
+            }
         }
     }
 }

@@ -2,8 +2,8 @@
     <div class="modern st-view table-view background">
         <STNavigationBar :sticky="true" :add-shadow="wrapColumns" :title="title">
             <template #left>
-                <button v-if="isMobile && showSelection && !isIOS" class="button icon gray close" @click="showSelection = false" />
-                <button v-else-if="showSelection && isIOS" class="button text selected unbold" @click="setSelectAll(!cachedAllSelected)">
+                <button v-if="isMobile && showSelection && !isIOS" class="button icon navigation close" @click="showSelection = false" />
+                <button v-else-if="showSelection && isIOS" class="button navigation" @click="setSelectAll(!cachedAllSelected)">
                     <template v-if="cachedAllSelected">
                         Deselecteer alles
                     </template>
@@ -15,16 +15,16 @@
             </template>
             <template #right>
                 <div v-if="!isIOS" class="wrap-bar">
-                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon gray '+action.icon" @click="handleAction(action)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" @click="handleAction(action)" />
                 </div>
 
-                <button v-if="showSelection && isIOS" key="iOSDone" class="button text selected highlight" @click="showSelection = false">
+                <button v-if="showSelection && isIOS" key="iOSDone" class="button navigation highlight" @click="showSelection = false">
                     Gereed
                 </button>
-                <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button text selected" @click="showSelection = true">
+                <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button navigation" @click="showSelection = true">
                     Selecteer
                 </button>
-                <button v-else key="actions" class="button icon more gray" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
+                <button v-else key="actions" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 
@@ -1216,7 +1216,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     justify-content: flex-end;
 
     > * {
-        margin: 0;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     + .button {

@@ -351,9 +351,22 @@
 
     &> *:last-child {
         flex-shrink: 0;
+        margin-top: -13px;
 
-        > .button.text {
-            margin: -5px 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        > .button {
+            margin: 0 10px;
+
+            &.text {
+                margin: -5px 10px;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
         }
     }
 }

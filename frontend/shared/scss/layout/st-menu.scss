@@ -129,7 +129,7 @@
         &.button {
             cursor: pointer;
 
-            &:active {
+            &:active, &.active {
                 background-color: $color-gray-3;
             }
         }

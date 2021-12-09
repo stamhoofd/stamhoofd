@@ -243,19 +243,27 @@ export default class STNavigationBar extends Vue {
             justify-content: flex-start;
 
             > .button {
-                margin-left: 0;
-                margin-right: 0;
+                margin-left: 10px;
+                margin-right: 10px;
+
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
             }
 
             
 
             > .button.icon {
                 &:last-child {
-                    margin-right: -12px;
+                    margin-right: 0;
                 }
 
                 &:first-child {
-                    margin-left: -12px;
+                    margin-left: -8px;
                 }
             }
         }
@@ -270,17 +278,25 @@ export default class STNavigationBar extends Vue {
             justify-content: flex-end;
 
             > .button {
-                margin-left: 0;
-                margin-right: 0;
+                margin-left: 10px;
+                margin-right: 10px;
+
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
             }
 
             > .button.icon {
                 &:last-child {
-                    margin-right: -12px;
+                    margin-right: -8px;
                 }
 
                 &:first-child {
-                    margin-left: -12px;
+                    margin-left: 0;
                 }
             }
         }
