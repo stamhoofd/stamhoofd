@@ -35,5 +35,14 @@ module.exports = {
         ctx.ios_icons[icon.substr(0, icon.length-("-ios".length))] = ctx.codepoints[icon]
       }
     }
+
+    // Custom Apple icons
+    ctx.apple_icons = {}
+    for (const icon in ctx.codepoints) {
+      if (icon.endsWith("-apple")) {
+        // Remove android suffix
+        ctx.apple_icons[icon.substr(0, icon.length-("-apple".length))] = ctx.codepoints[icon]
+      }
+    }
   }
 };
