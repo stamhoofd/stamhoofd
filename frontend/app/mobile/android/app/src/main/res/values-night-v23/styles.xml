@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- This theme is not used... -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -20,10 +12,7 @@
         <item name="android:statusBarColor">@color/statusBar</item>
         <item name="android:navigationBarColor">@color/navigationBarColor</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
 
-
-    <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
-        <item name="android:background">@drawable/launch_splash</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

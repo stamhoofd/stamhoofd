@@ -220,6 +220,7 @@ window.addEventListener('statusTap',  () => {
 
 import { Directory, Encoding,Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { StatusBar } from '@capacitor/status-bar';
 
 import FileOpener from './FileOpenerPlugin';
 
