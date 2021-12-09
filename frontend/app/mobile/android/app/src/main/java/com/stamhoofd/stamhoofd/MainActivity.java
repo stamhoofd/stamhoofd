@@ -24,6 +24,7 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.compose.ui.graphics.Color;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.webkit.WebSettingsCompat;
@@ -40,6 +41,9 @@ public class MainActivity extends BridgeActivity {
         int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         WebView webView = this.bridge.getWebView();
         WebSettings webSettings = webView.getSettings();
+
+        // Fix background color in dark mode: always use a color that switches depending on the theme
+        webView.setBackgroundColor(this.getResources().getColor(R.color.navigationBarColor));
 
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

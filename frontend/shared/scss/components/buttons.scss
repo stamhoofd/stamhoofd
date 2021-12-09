@@ -1,5 +1,6 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
+@use '../components/icons' as *;
 
 .inline-link {
     &, &:hover, &:link, &:active, &:visited {
@@ -257,7 +258,7 @@
         cursor: help;
     }
 
-    &.text {
+    &.text, &.navigation {
         @extend .style-button-small;
         color: $color-gray-4;
         text-overflow: ellipsis;
@@ -375,6 +376,47 @@
         &:active {
             opacity: 0.4;
             transition: 0s opacity, 0.2s color;
+        }
+    }
+}
+
+.button.navigation {
+    font-size: 17px;
+    font-weight: $font-weight-medium;
+    color: $color-gray-4;
+
+    overflow: visible;
+
+    // Visually correct back button
+    &:first-child > .icon.arrow-back:first-child {
+        margin-left: -4px;
+    }
+
+    body.native-iOS &, body.web-iOS & {
+        color: $color-primary;
+
+        // Visually correct back button
+        &:first-child > .icon.arrow-back:first-child {
+            margin-left: -14px;
+            margin-right: 0px;
+        }
+    }
+
+    body.native-android &, body.web-android & {
+        color: $color-dark;
+    }
+
+    &.highlight {
+        font-weight: $font-weight-semibold;
+    }
+
+    &:disabled {
+        color: $color-gray-2 !important;
+        box-shadow: none;
+        cursor: not-allowed;
+
+        &:active {
+            transform: none;
         }
     }
 }

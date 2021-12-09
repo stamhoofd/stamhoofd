@@ -2,16 +2,16 @@
     <div class="st-view member-view">
         <STNavigationBar :title="member.details.name" :pop="canPop" :dismiss="canDismiss">
             <template #right>
-                <button v-if="hasPreviousMember" class="button icon arrow-up" @click="goBack" />
-                <button v-if="hasNextMember" class="button icon arrow-down" @click="goNext" />
+                <button v-if="hasPreviousMember" class="button navigation icon arrow-up" @click="goBack" />
+                <button v-if="hasNextMember" class="button navigation icon arrow-down" @click="goNext" />
 
-                <button class="button icon gray edit" @click="editMember" />
-                <button class="button icon gray more" @click="showContextMenu" />
+                <button class="button icon navigation edit" @click="editMember" />
+                <button class="button icon navigation more" @click="showContextMenu" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>
+            <h1 class="style-navigation-title with-icons">
                 <span v-copyable class="icon-spacer">{{ member.details.name }}</span>
                 <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
                 <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />

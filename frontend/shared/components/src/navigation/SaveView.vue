@@ -1,20 +1,20 @@
 <template>
     <form class="st-view" @submit.prevent="$emit('save')">
         <STNavigationBar v-if="$isMobile" :title="title">
-            <button v-if="$isAndroid" slot="left" class="button icon gray close" type="button" @click="$parent.pop" />
+            <button v-if="$isAndroid" slot="left" class="button navigation icon close" type="button" @click="$parent.pop" />
             <button v-else slot="left" class="button text selected unbold" type="button" @click="$parent.pop">
                 {{ cancelText }}
             </button>
             
             <LoadingButton slot="right" :loading="loading">
-                <button class="button text selected hightlight" :disabled="disabled" @click="$emit('save')">
+                <button class="button navigation highlight" :disabled="disabled" @click="$emit('save')">
                     {{ saveText }}
                 </button>
             </LoadingButton>
         </STNavigationBar>
         <STNavigationBar v-else :title="title">
             <BackButton v-if="$parent.canPop" slot="left" @click="$parent.pop" />
-            <button v-else slot="right" class="button icon gray close" type="button" @click="$parent.pop" />
+            <button v-else slot="right" class="button navigation icon close" type="button" @click="$parent.pop" />
         </STNavigationBar>
         <main>
             <slot />

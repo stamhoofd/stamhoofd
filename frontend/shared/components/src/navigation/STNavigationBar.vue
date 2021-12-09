@@ -13,10 +13,10 @@
 
         <div>
             <slot name="right" />
-            <button v-if="dismiss && $isIOS" class="button text" @click="$parent.dismiss">
+            <button v-if="dismiss && $isIOS" class="button navigation" @click="$parent.dismiss">
                 Sluiten
             </button>
-            <button v-else-if="dismiss && !$isAndroid" class="button icon close gray" @click="$parent.dismiss" />
+            <button v-else-if="dismiss && !$isAndroid" class="button navigation icon close" @click="$parent.dismiss" />
         </div>
     </div>
 </template>
@@ -158,8 +158,22 @@ export default class STNavigationBar extends Vue {
     margin: 0;
     margin-top: calc(-1 * var(--st-vertical-padding, 20px) + var(--navigation-bar-margin, 10px) - var(--st-safe-area-top, 0px));
     padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
-    height: 60px;
+    height: 56px;
     word-break: normal;
+
+    @media (min-width: 550px) {
+        padding-top: max(var(--st-safe-area-top, 0px), 5px);
+        height: 55px;
+    }
+
+    body.native-iOS & {
+        height: 42px; // 44px - 2 x border width thin
+
+        @media (min-width: 550px) {
+            // Landscape mode
+            height: 30px;
+        }
+    }
 
     &.large {
         height: 80px;
@@ -173,6 +187,8 @@ export default class STNavigationBar extends Vue {
     }
     -webkit-app-region: drag;
 
+    
+
     &.fixed {
         position: fixed;
         top: 0;
@@ -184,7 +200,7 @@ export default class STNavigationBar extends Vue {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
     background: var(--color-white, white);
     background: var(--color-current-background, white);
     transition: background-color 0.3s, border-color 0.3s;
@@ -227,13 +243,11 @@ export default class STNavigationBar extends Vue {
             justify-content: flex-start;
 
             > .button {
-                margin: 0;
+                margin-left: 0;
+                margin-right: 0;
             }
 
-            // Visually correct back button
-            > .button.text:first-child > .icon.arrow-left:first-child {
-                margin-left: -4px;
-            }
+            
 
             > .button.icon {
                 &:last-child {
@@ -256,7 +270,8 @@ export default class STNavigationBar extends Vue {
             justify-content: flex-end;
 
             > .button {
-                margin: 0;
+                margin-left: 0;
+                margin-right: 0;
             }
 
             > .button.icon {
@@ -299,7 +314,14 @@ export default class STNavigationBar extends Vue {
     body.web-android &, body.native-android & {
         // Increase title size a bit
         > h1 {
-            font-size: 16px;
+            font-size: 17px;
+        }
+    }
+
+    body.web-iOS &, body.native-iOS & {
+        // Increase title size a bit
+        > h1 {
+            font-size: 17px;
         }
     }
 
@@ -311,15 +333,21 @@ export default class STNavigationBar extends Vue {
     }
 
     border-bottom: $border-width-thin solid transparent;
-    
-    // Fix for rendering rounding
-    padding-bottom: $border-width-thin;
+
+    // also one at the top to fix centering
+    border-top: $border-width-thin solid transparent;
 
     &.scrolled {
         background: $color-background-shade;
 
         //box-shadow: 0px 2px 3px $color-shadow;
-        border-color: $color-border-shade;
+        border-bottom-color: $color-border-shade;
+
+        body.native-android &, body.web-android & {
+            box-shadow: 0px 2px 3px $color-shadow;
+            background: $color-background;
+            border-bottom-color: transparent;
+        }
   
         > h1 {
             opacity: 1;

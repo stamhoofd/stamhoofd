@@ -30,7 +30,7 @@
 
         <main>
             <div class="container">
-                <h1>
+                <h1 class="style-navigation-title">
                     <span>{{ title }}</span>
                     <span class="icon arrow-down-small gray" />
                 </h1>

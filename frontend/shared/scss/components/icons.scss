@@ -55,6 +55,12 @@
     }
 
     &:before {
+        line-height: 1;
+        font-size: 24px;
+        font-family: icons !important;
+        font-style: normal;
+        font-weight: normal !important;
+
         vertical-align: middle !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;

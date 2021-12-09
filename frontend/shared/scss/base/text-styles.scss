@@ -52,13 +52,44 @@
     font-weight: $font-weight-semibold;
     line-height: 1.4;
 
-    // Correct line height margin
-    margin-top: -5px;
-
     @media (max-width: 350px) {
         font-size: 24px;
     }
 }
+
+// Use this style only for shorter titles
+.style-navigation-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 32px;
+    font-weight: $font-weight-semibold;
+    line-height: 1.4;
+
+    @media (max-width: 350px) {
+        font-size: 28px;
+    }
+
+    padding-bottom: 10px;
+
+    &.with-icons {
+        display: flex;
+        align-items: center;
+
+        > *:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        > *:not(:first-child) {
+            flex-shrink: 0;
+        }
+    }
+}
+
 
 .style-title-2 {
     font-size: 18px;
@@ -373,8 +404,8 @@
 
 .main-text-container {
     &, .container {
-        > h1:first-child {
-            padding-bottom: 20px;
+        > h1:not([class]):first-child {
+            padding-bottom: 10px;
             @extend .style-title-1;
 
             + p:not([class]), + p.style-description {
@@ -384,18 +415,18 @@
         
         > h2 {
             @extend .style-title-2;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
         }
 
         > h2.style-with-button {
             > *:first-child {
-                padding-bottom: 20px;
+                padding-bottom: 15px;
             }
             padding-bottom: 0;
         }
 
         .segmented-control + h2 {
-            padding-top: 20px;
+            padding-top: 15px;
         }
 
         > h2 + p {
@@ -414,6 +445,10 @@
             @extend .style-hr;
             margin: 30px 0;
             margin: 30px calc(-1 * var(--st-horizontal-padding, 40px));
+
+            @media (max-width: 550px) {
+                margin: 20px 0;
+            }
         }
     }
 }
