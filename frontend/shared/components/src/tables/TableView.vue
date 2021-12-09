@@ -14,9 +14,9 @@
                 <BackButton v-else-if="canPop" slot="left" @click="pop" />
             </template>
             <template #right>
-                <div v-if="!isIOS" class="wrap-bar">
+                <template v-if="!isIOS">
                     <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" @click="handleAction(action)" />
-                </div>
+                </template>
 
                 <button v-if="showSelection && isIOS" key="iOSDone" class="button navigation highlight" @click="showSelection = false">
                     Gereed
@@ -1203,27 +1203,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 <style lang="scss">
 @use '~@stamhoofd/scss/base/variables' as *;
 @use '~@stamhoofd/scss/base/text-styles' as *;
-
-.table-view .wrap-bar {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    height: 48px;
-    padding: 0;
-    margin: 0px !important;
-    overflow: hidden;
-    align-items: center;
-    justify-content: flex-end;
-
-    > * {
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    + .button {
-        margin-left: 0px;
-    }
-}
 
 .table-view {
     --st-vertical-padding: 10px;

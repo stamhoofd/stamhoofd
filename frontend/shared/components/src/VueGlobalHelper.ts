@@ -74,15 +74,17 @@ export class VueGlobalHelper {
             }
         })
 
-        document.addEventListener('touchstart', (event) => {
-            const target = event.target as HTMLElement
-            if (target && target.tagName === 'BUTTON') {
-                target.classList.add("active");
+        if (Vue.prototype.$OS === "android") {
+            document.addEventListener('touchstart', (event) => {
+                const target = event.target as HTMLElement
+                if (target && target.tagName === 'BUTTON') {
+                    target.classList.add("active");
 
-                window.setTimeout(() => {
-                    target.classList.remove("active");
-                }, 250)
-            }
-        }, { passive: true })
+                    window.setTimeout(() => {
+                        target.classList.remove("active");
+                    }, 250)
+                }
+            }, { passive: true })
+        }
     }
 }

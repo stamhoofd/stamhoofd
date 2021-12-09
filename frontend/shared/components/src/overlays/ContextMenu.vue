@@ -291,6 +291,10 @@ export default class ContextMenu extends Vue {
             width: 20px;
             height: 20px;
             font-size: 20px;
+
+            &:before {
+                font-size: 20px; 
+            }
         }
 
         > .right {

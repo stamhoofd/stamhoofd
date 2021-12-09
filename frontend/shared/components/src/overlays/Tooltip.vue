@@ -1,6 +1,6 @@
 <template>
     <transition appear name="show">
-        <div class="tooltip" :style="{ top: top + 'px', left: left + 'px' }" :class="icon">
+        <div class="tooltip" :style="{ top: top + 'px', left: left + 'px' }" :class="icon" @click="$parent.$emit('pop')">
             <span v-if="icon" :class="'icon '+icon" />
             <span>{{ text }}</span>
         </div>
@@ -51,6 +51,17 @@ export default class Tooltip extends Vue {
 
         this.left = this.x - Math.max(0, width - (clientWidth - viewPadding - this.x));
         this.top = this.y - Math.max(0, height - (clientHeight - viewPadding - this.y));
+
+        // Hide on scroll or any touch
+        document.addEventListener("touchstart", this.hide, { passive: true })
+    }
+
+    beforeDestroy() {
+        document.removeEventListener("touchstart", this.hide)
+    }
+
+    hide() {
+        this.$parent.$emit("pop")
     }
 }
 </script>

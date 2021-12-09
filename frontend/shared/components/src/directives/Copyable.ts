@@ -46,6 +46,7 @@ const helper = {
                 // ignore
             }
         }
+        el.$tooltipDisplayedComponent = displayedComponent;
     },
 
     copyElement(event, bindingValue: any, vnode: any) {

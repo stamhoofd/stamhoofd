@@ -254,18 +254,6 @@ export default class STNavigationBar extends Vue {
                     margin-right: 0;
                 }
             }
-
-            
-
-            > .button.icon {
-                &:last-child {
-                    margin-right: 0;
-                }
-
-                &:first-child {
-                    margin-left: -8px;
-                }
-            }
         }
 
         &:last-child {
@@ -287,16 +275,6 @@ export default class STNavigationBar extends Vue {
 
                 &:last-child {
                     margin-right: 0;
-                }
-            }
-
-            > .button.icon {
-                &:last-child {
-                    margin-right: -8px;
-                }
-
-                &:first-child {
-                    margin-left: 0;
                 }
             }
         }
