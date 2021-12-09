@@ -12,7 +12,7 @@
 
         <main>
             <h1>
-                <span class="icon-spacer">{{ member.details.name }}</span>
+                <span v-copyable class="icon-spacer">{{ member.details.name }}</span>
                 <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
                 <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
             </h1>
@@ -24,9 +24,9 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, Popup, Sheet } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle } from "@stamhoofd/components";
+import { CopyableDirective, STNavigationTitle } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
 import { Gender,Group,MemberWithRegistrations } from '@stamhoofd/structures';
@@ -46,6 +46,9 @@ import MemberViewPayments from "./MemberViewPayments.vue";
         MaleIcon,
         FemaleIcon,
         BackButton
+    },
+    directives: {
+        Copyable: CopyableDirective,
     },
 })
 export default class MemberView extends Mixins(NavigationMixin) {

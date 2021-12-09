@@ -27,34 +27,40 @@
             <template v-if="isNew">
                 <hr>
                 <h2>Type verkoop</h2>
-                <p>Stamhoofd kan automatisch scanbare tickets aanmaken. Je kan dan via de scanner van Stamhoofd tickets scannen. Die worden dan automatisch gemarkeerd als 'gescand' waardoor je ze niet onopgemerkt dubbel kan scannen. De scanner blijft werken als het internet wegvalt, maar bij de start van het evenement is even een internetverbinding nodig.</p>
 
                 <STList>
-                    <STListItem :selectable="true" element-name="label">
+                    <STListItem :selectable="true" element-name="label" class="left-center">
                         <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.None" />
                         <h3 class="style-title-list">
                             Webshop zonder scanners
                         </h3>
                     </STListItem>
-                    <STListItem :selectable="true" element-name="label">
+                    <STListItem :selectable="true" element-name="label" class="left-center">
                         <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
                         <h3 class="style-title-list">
-                            Ticketverkoop voor groepen (bv. eetfestijn)
+                            Ticketverkoop voor groepen
                         </h3>
                         <p class="style-description">
-                            Per bestelling wordt er maar één ticket met QR-code aangemaakt die gemakkelijk kan worden gescand bij het afhalen. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
+                            Ideaal voor een eetfestijn
                         </p>
                     </STListItem>
-                    <STListItem :selectable="true" element-name="label">
+                    <STListItem :selectable="true" element-name="label" class="left-center">
                         <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.Tickets" />
                         <h3 class="style-title-list">
-                            Ticketverkoop voor personen (bv. fuif)
+                            Ticketverkoop voor personen
                         </h3>
                         <p class="style-description">
-                            Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+                            Ideaal voor een fuif
                         </p>
                     </STListItem>
                 </STList>
+
+                <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
+                    Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
+                </p>
+                <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
+                    Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+                </p>
             </template>
 
             <hr>
