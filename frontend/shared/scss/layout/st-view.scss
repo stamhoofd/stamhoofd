@@ -28,14 +28,6 @@ body.modern.web-iOS {
     }
 }
 
-body.modern .navigation-controller {
-    //height: 100%;
-}
-
-body.modern .sheet > div {
-    //overflow: hidden;
-}
-
 .st-view {
     display: flex;
     flex-direction: column;
@@ -104,7 +96,7 @@ body.modern .sheet > div {
 
                 // Add some fake bottom padding, so when we animate it, the background stays white
                 > div {
-                    padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 310px);
+                    padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 300px + var(--default-footer-padding, 0px));
                 }
 
                 transition: transform 0.2s;

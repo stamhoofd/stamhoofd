@@ -24,8 +24,6 @@
                         <span>{{ button.text }}</span>
                     </button>
                 </LoadingButton>
-
-                <div class="force-focus-cycle" tabindex="0" @focus="focusFirst" />
             </div>
         </form>
     </transition>
@@ -56,50 +54,12 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     mounted() {
-        
         this.centeredMessage.doHide = () => {
             this.close()
         }
 
         if (document.activeElement && (document.activeElement as any).blur) {
             (document.activeElement as any).blur();
-        }
-
-        setTimeout(() => {
-            const defaultButton = this.centeredMessage.buttons.findIndex(b => b.action !== null && b.type != "destructive")
-            if (defaultButton > -1 && this.$refs.buttons) {
-                const button = this.$refs.buttons[defaultButton] as HTMLButtonElement | undefined
-                if (button) {
-                    console.log("Focus on default button", button)
-                    button.focus()
-
-                    button.classList.add("focus-visible");
-
-                    // And we'll remove it again on blur, once
-                    button.addEventListener("blur", function () {
-                        button.classList.remove("focus-visible");
-                    }, { once: true });
-                }
-            }
-        }, 200)
-
-        
-    }
-
-    focusFirst() {
-        if (this.$refs.buttons) {
-            const button = this.$refs.buttons[0] as HTMLButtonElement | undefined
-            if (button) {
-                console.log("Focus on first button", button)
-                button.focus()
-
-                button.classList.add("focus-visible");
-
-                // And we'll remove it again on blur, once
-                button.addEventListener("blur", function () {
-                    button.classList.remove("focus-visible");
-                }, { once: true });
-            }
         }
     }
 
@@ -158,11 +118,17 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
             event.preventDefault();
             return;
         }
-        
+
+        if (key === "Enter" || key === 13) {
+            // Do we have a default action?
+            const defaultButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
+            if (defaultButton) {
+                this.onClickButton(defaultButton).catch(console.error)
+                event.preventDefault();
+                return;
+            }
+        }
     }
-
-   
-
 }
 </script>
 

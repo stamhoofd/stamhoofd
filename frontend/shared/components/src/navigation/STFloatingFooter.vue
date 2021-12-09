@@ -23,6 +23,8 @@
     >div {
         padding: 0 var(--st-horizontal-padding, 40px);
         padding-bottom: var(--st-vertical-padding, 40px);
+        --default-footer-padding: var(--st-vertical-padding, 40px);
+
         display: flex;
         flex-direction: column;
         align-items: stretch;
@@ -33,7 +35,7 @@
         margin-top: 10px;
 
         &:first-child {
-            margin-top: 0;;
+            margin-top: 0;
         }
     }
 }
