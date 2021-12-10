@@ -19,6 +19,11 @@ export class TableAction<T> {
      */
     needsSelection = true
 
+    /**
+     * If this action needs a selection, we will not automatically select all items if none is selected, or when selection mode is disabled
+     */
+    allowAutoSelectAll = true
+
     singleSelection = false
 
     constructor(settings: Partial<TableAction<T>>) {
@@ -31,5 +36,6 @@ export class TableAction<T> {
         this.singleSelection = settings.singleSelection ?? false;
         this.tooltip = settings.tooltip ?? this.name;
         this.enabled = settings.enabled ?? true;
+        this.allowAutoSelectAll = settings.allowAutoSelectAll ?? true;
     }
 }

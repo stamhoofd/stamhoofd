@@ -13,8 +13,8 @@
         <main>
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ member.details.firstName }}</span>
-                <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
-                <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
+                <MaleIcon v-if="member.details.gender == Gender.Male" v-tooltip="member.details.age >= 18 ? 'Man' : 'Jongen'" class="icon-spacer" />
+                <FemaleIcon v-if="member.details.gender == Gender.Female" v-tooltip="member.details.age >= 18 ? 'Vrouw' : 'Meisje'" class="icon-spacer" />
             </h1>
 
             <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
@@ -26,7 +26,7 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle } from "@stamhoofd/components";
+import { STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
 import { Gender,Group,MemberWithRegistrations } from '@stamhoofd/structures';
@@ -47,6 +47,9 @@ import MemberViewPayments from "./MemberViewPayments.vue";
         FemaleIcon,
         BackButton
     },
+    directives: {
+        Tooltip: TooltipDirective
+    }
 })
 export default class MemberView extends Mixins(NavigationMixin) {
     @Prop()

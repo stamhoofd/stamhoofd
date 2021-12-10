@@ -82,7 +82,7 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
     }
 
     toggleSelect() {
-        this.table.showSelection = true
+        this.table.setShowSelection(true)
 
         // Select focussed items
         if (this.isFocusSelected) {

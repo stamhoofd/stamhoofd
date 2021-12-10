@@ -2,7 +2,7 @@
     <div class="modern st-view table-view background">
         <STNavigationBar :sticky="true" :add-shadow="wrapColumns" :title="title">
             <template #left>
-                <button v-if="isMobile && showSelection && !isIOS" class="button icon navigation close" @click="showSelection = false" />
+                <button v-if="isMobile && showSelection && !isIOS" class="button icon navigation close" @click="setShowSelection(false)" />
                 <button v-else-if="showSelection && isIOS" class="button navigation" @click="setSelectAll(!cachedAllSelected)">
                     <template v-if="cachedAllSelected">
                         Deselecteer alles
@@ -18,10 +18,10 @@
                     <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" @click="handleAction(action)" />
                 </template>
 
-                <button v-if="showSelection && isIOS" key="iOSDone" class="button navigation highlight" @click="showSelection = false">
+                <button v-if="showSelection && isIOS" key="iOSDone" class="button navigation highlight" @click="setShowSelection(false)">
                     Gereed
                 </button>
-                <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button navigation" @click="showSelection = true">
+                <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button navigation" @click="setShowSelection(true)">
                     Selecteer
                 </button>
                 <button v-else key="actions" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
@@ -108,11 +108,11 @@
 
         <div v-if="isIOS" class="tool-bar">
             <div>
-                <button v-for="(action, index) of filteredActions" :key="index" class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0" @click="showSelection && cachedSelectionCount == 0 ? undefined : handleAction(action)">
+                <button v-for="(action, index) of filteredActions" :key="index" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0 ? undefined : handleAction(action)">
                     <span :class="'icon '+action.icon" />
                 </button>
 
-                <button v-long-press="(e) => showActions(false, e)" class="button text small column selected" :disabled="showSelection && cachedSelectionCount == 0" @click="showActions(false, $event)">
+                <button v-long-press="(e) => showActions(false, e)" class="button text small column selected" @click="showActions(false, $event)">
                     <span class="icon more" />
                 </button>
             </div>
@@ -316,7 +316,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         if (this.isMobile && !this.showSelection && !this.isIOS) {
             // On Android, the default long press action is switching to editing mode
             this.setSelectionValue(row, true)
-            this.showSelection = true
+            this.setShowSelection(true)
             return
         }
         // Show a context menu to select the available columns
@@ -330,6 +330,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         });
 
         this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    setShowSelection(showSelection: boolean) {
+        this.showSelection = showSelection
+        if (!showSelection) {
+            this.setSelectAll(false)
+        }
     }
 
     columnDragStart(event, column: Column<any, any>) {
@@ -875,11 +882,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get filteredActions() {
         if (!this.isMobile || !this.showSelection) {
-            return this.sortedActions.filter(action => !action.singleSelection).slice(0, 3)
+            return this.sortedActions.filter(action => action.enabled && !action.singleSelection).slice(0, 3)
         }
 
         return this.sortedActions.filter(action => {
-            return action.needsSelection && !action.singleSelection
+            return action.enabled && action.needsSelection && !action.singleSelection
         }).slice(0, 3)
     }
 

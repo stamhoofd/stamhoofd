@@ -27,7 +27,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, CenteredMessageButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -92,7 +92,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 priority: 0,
                 groupIndex: 1,
                 needsSelection: false,
-                enabled: this.hasWrite,
+                enabled: this.hasWrite && !this.waitingList,
                 handler: () => {
                     this.addMember()
                 }
@@ -160,19 +160,33 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 }
             }),
         
+            //
             new TableAction({
-                name: "Instellingen",
-                icon: "settings",
-                priority: 0,
-                groupIndex: 2,
-                needsSelection: false,
-                enabled: this.hasFull,
-                handler: () => {
-                    this.editSettings()
+                name: "Toelaten om in te schrijven",
+                icon: "success",
+                priority: 15,
+                groupIndex: 3,
+                enabled: this.hasWrite && this.waitingList,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (members: MemberWithRegistrations[]) => {
+                    await this.return(members, true)
                 }
             }),
 
-            //
+            new TableAction({
+                name: "Toelating intrekken",
+                icon: "canceled",
+                priority: 14,
+                groupIndex: 3,
+                enabled: this.hasWrite && this.waitingList,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (members: MemberWithRegistrations[]) => {
+                    await this.return(members, false)
+                }
+            }),
+
             new TableAction({
                 name: "E-mailen",
                 icon: "email",
@@ -203,14 +217,25 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 }
             }),
 
+            new TableAction({
+                name: "Instellingen",
+                icon: "settings",
+                priority: 0,
+                groupIndex: 4,
+                needsSelection: false,
+                enabled: this.hasFull,
+                handler: () => {
+                    this.editSettings()
+                }
+            }),
 
             // Waiting list actions
             new TableAction({
                 name: "Verplaatst naar wachtlijst",
-                icon: "clock",
                 priority: 0,
-                groupIndex: 4,
+                groupIndex: 5,
                 needsSelection: true,
+                allowAutoSelectAll: false,
                 enabled: !this.waitingList && this.hasWrite,
                 handler: (members) => {
                     this.moveToWaitingList(members)
@@ -221,8 +246,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "Schrijf in",
                 icon: "edit",
                 priority: 0,
-                groupIndex: 4,
+                groupIndex: 5,
                 needsSelection: true,
+                allowAutoSelectAll: false,
                 enabled: this.waitingList && this.hasWrite,
                 handler: (members) => {
                     this.acceptWaitingList(members)
@@ -233,8 +259,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "Uitschrijven",
                 icon: "unregister",
                 priority: 0,
-                groupIndex: 4,
+                groupIndex: 5,
                 needsSelection: true,
+                allowAutoSelectAll: false,
                 enabled: this.hasWrite,
                 handler: (members) => {
                     this.deleteRegistration(members)
@@ -243,11 +270,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
 
             new TableAction({
-                name: "Gegevens gedeeltelijk wissen",
-                icon: "trash",
+                name: "Gegevens gedeeltelijk wissen...",
                 priority: 0,
-                groupIndex: 4,
+                groupIndex: 5,
                 needsSelection: true,
+                allowAutoSelectAll: false,
                 enabled: this.hasWrite,
                 handler: (members) => {
                     this.deleteRecords(members)
@@ -258,8 +285,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "Verwijderen",
                 icon: "trash",
                 priority: 0,
-                groupIndex: 4,
+                groupIndex: 5,
                 needsSelection: true,
+                allowAutoSelectAll: false,
                 enabled: this.hasWrite,
                 handler: (members) => {
                     this.deleteData(members)
@@ -269,91 +297,119 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         ]
     }
 
-    allColumns = [
-        new Column<MemberWithRegistrations, string>({
-            name: "Naam", 
-            getValue: (v) => v.name, 
-            compare: (a, b) => Sorter.byStringValue(a, b),
-            minimumWidth: 100,
-            recommendedWidth: 300
-        }),
-        new Column<MemberWithRegistrations, string>({
-            name: "Voornaam", 
-            getValue: (v) => v.firstName, 
-            compare: (a, b) => Sorter.byStringValue(a, b),
-            enabled: false,
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-        new Column<MemberWithRegistrations, string>({
-            name: "Achternaam", 
-            getValue: (v) => v.details.lastName, 
-            compare: (a, b) => Sorter.byStringValue(a, b),
-            enabled: false,
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-        new Column<MemberWithRegistrations, number | null>({
-            name: "Leeftijd", 
-            getValue: (v) => v.details.age, 
-            format: (v) => v !== null ? v+" jaar" : "Geen leeftijd", 
-            getStyle: (v) => v === null ? "gray" : "",
-            compare: (a, b) => Sorter.byNumberValue(b ?? 99, a ?? 99),
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-        new Column<MemberWithRegistrations, Date | null>({
-            name: "Inschrijvingsdatum", 
-            getValue: (v) => {
-                let registrations: Registration[] = []
-                if (this.group) {
-                    const group = this.group
-                    registrations = v.registrations.filter(r => r.groupId == group.id && r.cycle == group.cycle - this.cycleOffset)
-                } else  {
+    allColumns = ((): Column<MemberWithRegistrations, any>[] => {
+        const cols: Column<MemberWithRegistrations, any>[] = [
+            new Column<MemberWithRegistrations, string>({
+                name: "Naam", 
+                getValue: (v) => v.name, 
+                compare: (a, b) => Sorter.byStringValue(a, b),
+                minimumWidth: 100,
+                recommendedWidth: 300
+            }),
+            new Column<MemberWithRegistrations, string>({
+                name: "Voornaam", 
+                getValue: (v) => v.firstName, 
+                compare: (a, b) => Sorter.byStringValue(a, b),
+                enabled: false,
+                minimumWidth: 100,
+                recommendedWidth: 150
+            }),
+            new Column<MemberWithRegistrations, string>({
+                name: "Achternaam", 
+                getValue: (v) => v.details.lastName, 
+                compare: (a, b) => Sorter.byStringValue(a, b),
+                enabled: false,
+                minimumWidth: 100,
+                recommendedWidth: 150
+            }),
+            new Column<MemberWithRegistrations, number | null>({
+                name: "Leeftijd", 
+                getValue: (v) => v.details.age, 
+                format: (v) => v !== null ? v+" jaar" : "Geen leeftijd", 
+                getStyle: (v) => v === null ? "gray" : "",
+                compare: (a, b) => Sorter.byNumberValue(b ?? 99, a ?? 99),
+                minimumWidth: 100,
+                recommendedWidth: 150
+            }),
+            new Column<MemberWithRegistrations, Date | null>({
+                name: "Inschrijvingsdatum", 
+                getValue: (v) => {
+                    let registrations: Registration[] = []
+                    if (this.group) {
+                        const group = this.group
+                        registrations = v.registrations.filter(r => r.groupId == group.id && r.cycle == group.cycle - this.cycleOffset)
+                    } else  {
                     // Search registrations in this category
-                    if (this.category) {
-                        const groups = this.category.getAllGroups()
-                        registrations = v.registrations.filter(r => {
-                            const group = groups.find(g => g.id == r.groupId)
-                            if (!group) {
-                                return false
-                            }
-                            return r.cycle == group.cycle - this.cycleOffset
-                        })
-                    } else {
-                        registrations = v.activeRegistrations;
+                        if (this.category) {
+                            const groups = this.category.getAllGroups()
+                            registrations = v.registrations.filter(r => {
+                                const group = groups.find(g => g.id == r.groupId)
+                                if (!group) {
+                                    return false
+                                }
+                                return r.cycle == group.cycle - this.cycleOffset
+                            })
+                        } else {
+                            registrations = v.activeRegistrations;
+                        }
                     }
-                }
-                if (registrations.length == 0) {
-                    return null
-                }
-                const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime())
-                if (filtered.length == 0) {
-                    return null
-                }
-                return new Date(Math.min(...filtered))
-            }, 
-            format: (v) => v ? Formatter.date(v, true) : "Onbekend",
-            getStyle: (v) => v === null ? "gray" : "",
-            compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900, 0, 1), a ?? new Date(1900, 0, 1)),
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-        new Column<MemberWithRegistrations, number>({
-            name: "Te betalen", 
-            getValue: (v) => v.outstandingAmount,
-            format: (outstandingAmount) => {
-                if (outstandingAmount == 0) {
-                    return "Betaald";
-                }
-                return Formatter.price(outstandingAmount)
-            }, 
-            getStyle: (v) => v == 0 ? "gray" : "",
-            compare: (a, b) => Sorter.byNumberValue(b, a),
-            minimumWidth: 100,
-            recommendedWidth: 150
-        }),
-    ]
+                    if (registrations.length == 0) {
+                        return null
+                    }
+                    const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime())
+                    if (filtered.length == 0) {
+                        return null
+                    }
+                    return new Date(Math.min(...filtered))
+                }, 
+                format: (v) => v ? Formatter.date(v, true) : "Onbekend",
+                getStyle: (v) => v === null ? "gray" : "",
+                compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900, 0, 1), a ?? new Date(1900, 0, 1)),
+                minimumWidth: 100,
+                recommendedWidth: 150
+            })
+        ]
+
+        if (!this.waitingList) {
+            cols.push(
+                new Column<MemberWithRegistrations, number>({
+                    name: "Te betalen", 
+                    getValue: (v) => v.outstandingAmount,
+                    format: (outstandingAmount) => {
+                        if (outstandingAmount == 0) {
+                            return "Betaald";
+                        }
+                        return Formatter.price(outstandingAmount)
+                    }, 
+                    getStyle: (v) => v == 0 ? "gray" : "",
+                    compare: (a, b) => Sorter.byNumberValue(b, a),
+                    minimumWidth: 100,
+                    recommendedWidth: 150
+                })
+            )
+        }
+
+        if (this.waitingList && this.group) {
+            cols.push(
+                new Column<MemberWithRegistrations, boolean>({
+                    name: "Status", 
+                    getValue: (member) => !!member.registrations.find(r => r.groupId == this.group!.id && r.waitingList && r.canRegister && r.cycle == this.group!.cycle),
+                    format: (canRegister) => {
+                        if (canRegister) {
+                            return "Uitgenodigd om in te schrijven";
+                        }
+                        return "Nog niet uitgenodigd"
+                    }, 
+                    getStyle: (canRegister) => !canRegister ? "gray" : "",
+                    compare: (a, b) => Sorter.byBooleanValue(b, a),
+                    minimumWidth: 100,
+                    recommendedWidth: 150
+                })
+            )
+        }
+
+        return cols
+    })()
 
     loading = true
     cycleOffset = 0
@@ -727,6 +783,43 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()
+        }
+    }
+
+    async return(members: MemberWithRegistrations[], allow = true) {
+        members = members.filter(m => !this.group || (allow && m.waitingGroups.find(r => r.id === this.group!.id)) || (!allow && m.acceptedWaitingGroups.find(r => r.id === this.group!.id)))
+        if (members.length == 0) {
+            return;
+        }
+
+        try {
+            const patches = MemberManager.getPatchArray()
+            for (const member of members) {
+                const registrationsPatch = MemberManager.getRegistrationsPatchArray()
+
+                const registration = member.registrations.find(r => r.groupId == this.group!.id && r.waitingList == true && r.cycle == this.group!.cycle)
+                if (!registration) {
+                    throw new Error("Not found")
+                }
+                registrationsPatch.addPatch(Registration.patchType().create({
+                    id: registration.id,
+                    canRegister: allow
+                }))
+
+                patches.addPatch(EncryptedMemberWithRegistrationsPatch.create({
+                    id: member.id,
+                    registrations: registrationsPatch
+                }))
+            }
+            await MemberManager.patchMembers(patches)
+        } catch (e) {
+            console.error(e)
+            // todo
+        }
+        this.reload()
+
+        if (allow) {
+            this.openMail(members, "Je kan nu inschrijven!")
         }
     }
 

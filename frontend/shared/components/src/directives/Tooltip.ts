@@ -32,11 +32,10 @@ export default {
                             const rect = el.getBoundingClientRect();
 
                             // Present
-
                             el.$tooltipDisplayedComponent = new ComponentWithProperties(Tooltip, {
                                 text: binding.value,
                                 x: rect.left,
-                                y: rect.top + el.offsetHeight,
+                                y: rect.bottom,
                             });
                             parentComponent.present(el.$tooltipDisplayedComponent.setDisplayStyle("overlay"));
                         }
