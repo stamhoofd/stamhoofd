@@ -112,6 +112,9 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
         return Object.values(
             this.actions
                 .filter(action => {
+                    if (!action.enabled) {
+                        return false
+                    }
                     if (action.singleSelection && this.focused.length != 1) {
                         return false;
                     }

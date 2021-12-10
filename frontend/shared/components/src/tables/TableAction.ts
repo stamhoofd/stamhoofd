@@ -2,6 +2,7 @@ export class TableAction<T> {
     name: string;
     icon: string;
     tooltip = ""
+    enabled = true
 
     /// Determines order
     priority: number;
@@ -29,5 +30,6 @@ export class TableAction<T> {
         this.needsSelection = settings.needsSelection ?? true;
         this.singleSelection = settings.singleSelection ?? false;
         this.tooltip = settings.tooltip ?? this.name;
+        this.enabled = settings.enabled ?? true;
     }
 }

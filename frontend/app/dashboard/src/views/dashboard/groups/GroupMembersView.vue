@@ -1,5 +1,11 @@
 <template>
-    <TableView :title="title" column-configuration-id="members" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
+    <TableView :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
+        <button v-if="titleDescription" class="info-box selectable" type="button" @click="resetCycle">
+            {{ titleDescription }}
+
+            <span class="button text">Reset</span>
+        </button>
+
         <template #empty>
             <template v-if="cycleOffset != 0">
                 Er zijn nog geen leden ingeschreven in deze inschrijvingsperiode.
@@ -77,107 +83,134 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         return 30
     }
     
-    actions: TableAction<MemberWithRegistrations>[] = [
-        new TableAction({
-            name: "Nieuw lid",
-            icon: "add",
-            priority: 0,
-            groupIndex: 1,
-            needsSelection: false,
-            handler: () => {
-                this.addMember()
-            }
-        }),
+    get actions(): TableAction<MemberWithRegistrations>[] {
+        return [
+            new TableAction({
+                name: "Nieuw lid",
+                icon: "add",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                handler: () => {
+                    this.addMember()
+                }
+            }),
 
-        new TableAction({
-            name: "Openen",
-            icon: "eye",
-            priority: 0,
-            groupIndex: 1,
-            needsSelection: true,
-            singleSelection: true,
-            handler: (members: MemberWithRegistrations[]) => {
-                this.openMember(members[0])
-            }
-        }),
+            new TableAction({
+                name: "Openen",
+                icon: "eye",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: true,
+                singleSelection: true,
+                handler: (members: MemberWithRegistrations[]) => {
+                    this.openMember(members[0])
+                }
+            }),
 
-        new TableAction({
-            name: "Bewerk",
-            icon: "edit",
-            priority: 0,
-            groupIndex: 1,
-            needsSelection: true,
-            singleSelection: true,
-            handler: (members: MemberWithRegistrations[]) => {
-                this.editMember(members[0])
-            }
-        }),
+            new TableAction({
+                name: "Bewerk",
+                icon: "edit",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: true,
+                singleSelection: true,
+                handler: (members: MemberWithRegistrations[]) => {
+                    this.editMember(members[0])
+                }
+            }),
 
-        new TableAction({
-            name: "Wachtlijst",
-            icon: "clock",
-            priority: 0,
-            groupIndex: 1,
-            needsSelection: false,
-            handler: () => {
-                this.openWaitingList()
-            }
-        }),
+            new TableAction({
+                name: "Wachtlijst",
+                icon: "clock",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                enabled: !this.waitingList,
+                handler: () => {
+                    this.openWaitingList()
+                }
+            }),
+
+            new TableAction({
+                name: "Vorige inschrijvingsperiode",
+                icon: "arrow-up",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                enabled: this.canGoBack,
+                handler: () => {
+                    this.goBack()
+                }
+            }),
+
+            new TableAction({
+                name: "Volgende inschrijvingsperiode",
+                icon: "arrow-down",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                enabled: this.canGoNext,
+                handler: () => {
+                    this.goNext()
+                }
+            }),
         
-        new TableAction({
-            name: "Instellingen",
-            icon: "settings",
-            priority: 0,
-            groupIndex: 1,
-            needsSelection: false,
-            handler: () => {
-                this.editSettings()
-            }
-        }),
+            new TableAction({
+                name: "Instellingen",
+                icon: "settings",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: false,
+                handler: () => {
+                    this.editSettings()
+                }
+            }),
 
-        //
-        new TableAction({
-            name: "E-mailen",
-            icon: "email",
-            priority: 10,
-            groupIndex: 2,
-            handler: (members: MemberWithRegistrations[]) => {
-                this.openMail(members)
-            }
-        }),
-        new TableAction({
-            name: "SMS'en",
-            icon: "feedback-line",
-            priority: 9,
-            groupIndex: 2,
+            //
+            new TableAction({
+                name: "E-mailen",
+                icon: "email",
+                priority: 10,
+                groupIndex: 2,
+                handler: (members: MemberWithRegistrations[]) => {
+                    this.openMail(members)
+                }
+            }),
+            new TableAction({
+                name: "SMS'en",
+                icon: "feedback-line",
+                priority: 9,
+                groupIndex: 2,
 
-            handler: (members: MemberWithRegistrations[]) => {
+                handler: (members: MemberWithRegistrations[]) => {
                 // todo
-            }
-        }),
-        new TableAction({
-            name: "Exporteren",
-            icon: "download",
-            priority: 8,
-            groupIndex: 2,
-            handler: (members: MemberWithRegistrations[]) => {
+                }
+            }),
+            new TableAction({
+                name: "Exporteren",
+                icon: "download",
+                priority: 8,
+                groupIndex: 2,
+                handler: (members: MemberWithRegistrations[]) => {
                 // todo: vervangen door een context menu
-                this.exportToExcel(members).catch(console.error)
-            }
-        }),
+                    this.exportToExcel(members).catch(console.error)
+                }
+            }),
 
-        new TableAction({
-            name: "Verwijderen",
-            icon: "trash",
-            priority: 0,
-            groupIndex: 3,
-            needsSelection: true,
-            handler: () => {
+            new TableAction({
+                name: "Verwijderen",
+                icon: "trash",
+                priority: 0,
+                groupIndex: 3,
+                needsSelection: true,
+                handler: () => {
                 // todo
-            }
-        }),
+                }
+            }),
 
-    ]
+        ]
+    }
 
     allColumns = [
         new Column<MemberWithRegistrations, string>({
@@ -270,6 +303,40 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     get title() {
         return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
+    }
+
+    get titleDescription() {
+        if (this.cycleOffset === 1) {
+            return "Dit is de vorige inschrijvingsperiode"
+        }
+        if (this.cycleOffset > 1) {
+            return "Dit is "+this.cycleOffset+" inschrijvingsperiodes geleden"
+        }
+        return ""
+    }
+
+
+    get canGoBack() {
+        return !this.loading // always allow to go to -1
+    }
+
+    get canGoNext() {
+        return this.cycleOffset > 0 && !this.loading
+    }
+
+    goNext() {
+        this.cycleOffset--
+        this.reload()
+    }
+
+    goBack() {
+        this.cycleOffset++
+        this.reload()
+    }
+
+    resetCycle() {
+        this.cycleOffset = 0
+        this.reload()
     }
 
     openMember(member: MemberWithRegistrations) {

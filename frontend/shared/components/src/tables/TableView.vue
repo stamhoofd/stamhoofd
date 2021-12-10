@@ -31,9 +31,9 @@
         <main>
             <div class="container">
                 <h1 class="style-navigation-title">
-                    <span>{{ title }}</span>
-                    <span class="icon arrow-down-small gray" />
+                    {{ title }}
                 </h1>
+                <slot />
 
                 <div class="input-with-buttons">
                     <div>
@@ -203,6 +203,9 @@ class ColumnConfiguration extends AutoEncoder {
 export default class TableView<Value extends TableListable> extends Mixins(NavigationMixin) {
     @Prop({ required: true})
     title!: string
+
+    @Prop({ default: "" })
+    description!: string
 
     // This contains the data we want to show
     @Prop({ required: true})
@@ -1218,6 +1221,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     > main > .container {
         position: sticky;
         left: 0;
+
+        > h1 + p {
+            padding-bottom: 15px;
+        }
     }
 
     >.tool-bar {
