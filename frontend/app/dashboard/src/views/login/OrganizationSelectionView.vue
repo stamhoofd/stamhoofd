@@ -20,12 +20,12 @@
                     <span class="icon arrow-left" />
                     <span>Stamhoofd website</span>
                 </a>
-                <h1>Kies jouw vereniging</h1>
+                <h1>Log in bij jouw vereniging</h1>
                 <form class="input-icon-container icon search gray" @submit.prevent>
                     <input ref="input" v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
                 </form>
                 <p v-if="!loading && filteredResults.length == 0 && !query">
-                    Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
+                    Zoek en selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
                 </p>
 
                 <Spinner v-if="loading" class="gray center" />

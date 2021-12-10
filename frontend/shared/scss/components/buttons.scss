@@ -72,13 +72,13 @@
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary-dark;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
         }
 
         // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
         &:focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary-dark;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
         }
 
         .dropdown-text {
@@ -269,6 +269,10 @@
         flex-direction: row;
         align-items: center;
 
+        &.inline {
+            display: inline-flex;
+        }
+
         > span {
             min-width: 0;
         }
@@ -278,6 +282,10 @@
 
             &:first-child {
                 margin-right: 7px;
+            }
+
+            &:last-child {
+                margin-left: 7px;
             }
         }
 

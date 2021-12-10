@@ -39,7 +39,7 @@ export default class STInputBox extends Vue {
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
 .st-input-box {
-    padding: 12px 0;
+    padding: 10px 0;
     display: block;
     max-width: 340px;
 

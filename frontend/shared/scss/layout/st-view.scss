@@ -75,10 +75,7 @@ body.modern.web-iOS {
 
             touch-action: auto;
 
-            padding-bottom: calc(
-                var(--st-vertical-padding, 20px)
-                + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px))
-            );
+            padding-bottom: calc(max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
 
             &:first-child {
                 padding-top: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px));

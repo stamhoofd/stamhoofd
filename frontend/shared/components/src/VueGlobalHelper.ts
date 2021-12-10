@@ -24,18 +24,32 @@ function focusNextElement () {
             //check for visibility while always include the current activeElement 
                 return element.offsetWidth > 0 || element.offsetHeight > 0 || element === activeElement
             });
-        console.log(focussable)
         const index = focussable.indexOf(activeElement);
         if(index > -1) {
             const nextElement = focussable[index + 1]
             if (!nextElement) {
+                if (activeElement.form.hasAttribute("data-submit-last-field")) {
+                    // don't blur, or the default handler won't work
+                    return false
+                }
+                
                 // On mobile, we'll just blur the last element and not submit, while on desktop we'll focus the submit button (which will be last)
                 activeElement.blur()
                 return true
             }
-            nextElement.focus();
 
             if (nextElement.tagName === "BUTTON") {
+                if (activeElement.form.hasAttribute("data-submit-last-field")) {
+                    // don't blur, or the default handler won't work
+                    return false
+                }
+
+                if ((('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0))) {
+                    // Don't focus buttons on mobile
+                    activeElement.blur()
+                    return true
+                }
+
                 // If the next element is a button, we'll add the class .focus-visible to it, as Safari doesn't support the :focus-visible pseudo-class on buttons
                 nextElement.classList.add("focus-visible");
 
@@ -44,6 +58,8 @@ function focusNextElement () {
                     nextElement.classList.remove("focus-visible");
                 }, { once: true });
             }
+
+            nextElement.focus();
         }                    
     }
     return true

@@ -26,7 +26,7 @@
   },
   "backend": {},
   "dashboard": {
-    "join": "Aansluiten",
+    "join": "Nieuwe vereniging",
     "settings": {
       "menu": {
         "paymentMethods": {

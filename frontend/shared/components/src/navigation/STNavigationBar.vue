@@ -13,10 +13,10 @@
 
         <div>
             <slot name="right" />
-            <button v-if="dismiss && $isIOS" class="button navigation" @click="$parent.dismiss">
+            <button v-if="dismiss && $isIOS" class="button navigation" type="button" @click="$parent.dismiss">
                 Sluiten
             </button>
-            <button v-else-if="dismiss && !$isAndroid" class="button navigation icon close" @click="$parent.dismiss" />
+            <button v-else-if="dismiss && !$isAndroid" class="button navigation icon close" type="button" @click="$parent.dismiss" />
         </div>
     </div>
 </template>
@@ -93,9 +93,6 @@ export default class STNavigationBar extends Vue {
     addListener() {
         if (this.scrollElement) {
             return;
-        }
-        if (!this.addShadow) {
-            return
         }
         this.scrollElement = this.getScrollElement();
         if (this.scrollElement === document.documentElement) {

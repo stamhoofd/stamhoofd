@@ -1,8 +1,6 @@
 <template>
-    <form class=" st-view login-view" autocomplete="off" @submit.prevent="submit">
-        <STNavigationBar title="Inloggen">
-            <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
-        </STNavigationBar>
+    <form class=" st-view login-view" autocomplete="off" data-submit-last-field @submit.prevent="submit">
+        <STNavigationBar title="Inloggen" :pop="canPop" :dismiss="canDismiss" />
         <main>
             <h1>Inloggen</h1>
 
@@ -20,19 +18,21 @@
                 </button>
                 <input v-model="password" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
+
+
+            <button class="button text" type="button" @click="help">
+                <span class="help icon" />
+                <span>Ik heb geen account</span>
+            </button>
         </main>
 
-        <STFloatingFooter class="no-sticky">
+        <STFloatingFooter class="sticky">
             <LoadingButton :loading="loading">
                 <button class="button primary full">
                     <span class="lock icon" />
                     <span>Inloggen</span>
                 </button>
             </LoadingButton>
-            <button class="button secundary full" type="button" @click="help">
-                <span class="help icon" />
-                <span>Geen account?</span>
-            </button>
         </STFloatingFooter>
     </form>
 </template>
