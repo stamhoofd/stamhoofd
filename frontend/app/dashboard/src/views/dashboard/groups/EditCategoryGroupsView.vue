@@ -124,7 +124,7 @@ import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType,GroupPrivateSettings,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
+import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupCategoryTree, GroupGenderType,GroupPrivateSettings,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditGroupView from './EditGroupView.vue';
@@ -399,7 +399,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     createCategory() {
         const category = GroupCategory.create({})
-        category.groupIds = this.category.groupIds
+        category.groupIds = this.category.categoryIds.length == 0 ? this.category.groupIds : []
         
         const meta = OrganizationMetaData.patch({})
         meta.categories.addPut(category)
@@ -459,12 +459,8 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     startNewRegistrationPeriod() {
-        const initialGroupIds = this.category.groupIds
-
-        for (const cat of this.categories) {
-            initialGroupIds.push(...cat.groupIds)
-        }
-
+        const tree = GroupCategoryTree.build(this.category, this.organization.meta.categories, this.organization.groups)
+        const initialGroupIds =  tree.getAllGroups().map(g => g.id)
         this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds }).setDisplayStyle("popup"))
     }
 }

@@ -145,7 +145,7 @@ export class GroupCategoryTree extends GroupCategory {
     }
 
     getAllGroups() {
-        return [...this.groups, ...this.categories.flatMap(c => c.groups)]
+        return [...this.groups, ...this.categories.flatMap(c => c.getAllGroups())]
     }
 
     /**
