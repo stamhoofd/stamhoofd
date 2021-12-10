@@ -26,8 +26,8 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, Organization, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
+import { BackButton, CenteredMessage, CenteredMessageButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -37,6 +37,7 @@ import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
+import SMSView from "../sms/SMSView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import EditGroupView from "./EditGroupView.vue";
 
@@ -91,6 +92,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 priority: 0,
                 groupIndex: 1,
                 needsSelection: false,
+                enabled: this.hasWrite,
                 handler: () => {
                     this.addMember()
                 }
@@ -115,28 +117,30 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
+                enabled: this.hasWrite,
                 handler: (members: MemberWithRegistrations[]) => {
                     this.editMember(members[0])
                 }
             }),
 
             new TableAction({
-                name: "Wachtlijst",
+                name: "Open wachtlijst",
                 icon: "clock",
                 priority: 0,
-                groupIndex: 1,
+                groupIndex: 2,
                 needsSelection: false,
-                enabled: !this.waitingList,
+                enabled: !this.waitingList && !!this.group,
                 handler: () => {
                     this.openWaitingList()
                 }
             }),
 
+
             new TableAction({
                 name: "Vorige inschrijvingsperiode",
                 icon: "arrow-up",
                 priority: 0,
-                groupIndex: 1,
+                groupIndex: 2,
                 needsSelection: false,
                 enabled: this.canGoBack,
                 handler: () => {
@@ -148,7 +152,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "Volgende inschrijvingsperiode",
                 icon: "arrow-down",
                 priority: 0,
-                groupIndex: 1,
+                groupIndex: 2,
                 needsSelection: false,
                 enabled: this.canGoNext,
                 handler: () => {
@@ -160,8 +164,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "Instellingen",
                 icon: "settings",
                 priority: 0,
-                groupIndex: 1,
+                groupIndex: 2,
                 needsSelection: false,
+                enabled: this.hasFull,
                 handler: () => {
                     this.editSettings()
                 }
@@ -172,7 +177,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "E-mailen",
                 icon: "email",
                 priority: 10,
-                groupIndex: 2,
+                groupIndex: 3,
                 handler: (members: MemberWithRegistrations[]) => {
                     this.openMail(members)
                 }
@@ -181,20 +186,71 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "SMS'en",
                 icon: "feedback-line",
                 priority: 9,
-                groupIndex: 2,
+                groupIndex: 3,
 
                 handler: (members: MemberWithRegistrations[]) => {
-                // todo
+                    this.openSMS(members)
                 }
             }),
             new TableAction({
                 name: "Exporteren",
                 icon: "download",
                 priority: 8,
-                groupIndex: 2,
+                groupIndex: 3,
                 handler: (members: MemberWithRegistrations[]) => {
                 // todo: vervangen door een context menu
                     this.exportToExcel(members).catch(console.error)
+                }
+            }),
+
+
+            // Waiting list actions
+            new TableAction({
+                name: "Verplaatst naar wachtlijst",
+                icon: "clock",
+                priority: 0,
+                groupIndex: 4,
+                needsSelection: true,
+                enabled: !this.waitingList && this.hasWrite,
+                handler: (members) => {
+                    this.moveToWaitingList(members)
+                }
+            }),
+
+            new TableAction({
+                name: "Schrijf in",
+                icon: "edit",
+                priority: 0,
+                groupIndex: 4,
+                needsSelection: true,
+                enabled: this.waitingList && this.hasWrite,
+                handler: (members) => {
+                    this.acceptWaitingList(members)
+                }
+            }),
+
+            new TableAction({
+                name: "Uitschrijven",
+                icon: "unregister",
+                priority: 0,
+                groupIndex: 4,
+                needsSelection: true,
+                enabled: this.hasWrite,
+                handler: (members) => {
+                    this.deleteRegistration(members)
+                }
+            }),
+
+
+            new TableAction({
+                name: "Gegevens gedeeltelijk wissen",
+                icon: "trash",
+                priority: 0,
+                groupIndex: 4,
+                needsSelection: true,
+                enabled: this.hasWrite,
+                handler: (members) => {
+                    this.deleteRecords(members)
                 }
             }),
 
@@ -202,10 +258,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 name: "Verwijderen",
                 icon: "trash",
                 priority: 0,
-                groupIndex: 3,
+                groupIndex: 4,
                 needsSelection: true,
-                handler: () => {
-                // todo
+                enabled: this.hasWrite,
+                handler: (members) => {
+                    this.deleteData(members)
                 }
             }),
 
@@ -337,6 +394,34 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     resetCycle() {
         this.cycleOffset = 0
         this.reload()
+    }
+
+    get hasWrite() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        for (const group of this.groups) {
+            if (!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+                return false
+            }
+        }
+        
+        return true
+    }
+
+    get hasFull() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        
+        for (const group of this.groups) {
+            if (!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Full)) {
+                return false
+            }
+        }
+        
+        return true
     }
 
     openMember(member: MemberWithRegistrations) {
@@ -519,6 +604,16 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         this.checkingInaccurate = false
     }
 
+    get groups() {
+        if (this.group) {
+            return [this.group]
+        }
+        if (this.category) {
+            return this.category.groups
+        }
+        return []
+    }
+
     get groupIds() {
         if (this.group) {
             return [this.group.id]
@@ -556,6 +651,13 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 group: this.group,
                 defaultSubject: subject
             })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    openSMS(members: MemberWithRegistrations[]) {
+        const displayedComponent = new ComponentWithProperties(SMSView, {
+            members,
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
@@ -626,6 +728,92 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             console.error(e)
             Toast.fromError(e).show()
         }
+    }
+
+    acceptWaitingList(members: MemberWithRegistrations[]) {
+        new CenteredMessage("Wil je "+members.length+" leden inschrijven?", "We raden sterk aan om leden toe te laten en daarna uit te nodigen om in te schrijven via een e-mail. Dan zijn ze verplicht om de rest van hun gegevens aan te vullen en de betaling in orde te brengen.")
+            .addButton(new CenteredMessageButton("Toch inschrijven", {
+                action: async () => {
+                    await MemberManager.acceptFromWaitingList(members, this.group, this.cycleOffset)
+                    new Toast(members.length+" leden zijn ingeschreven", "success green").show()
+                },
+                type: "destructive",
+                icon: "download"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    deleteRecords(members: MemberWithRegistrations[]) {
+        new CenteredMessage("Gegevens van "+members.length+" leden wissen", "Opgelet, je kan dit niet ongedaan maken! Deze functie houdt de leden wel in het systeem, maar verwijdert een deel van de gegevens (o.a. handig om in orde te zijn met GDPR).")
+            .addButton(new CenteredMessageButton("Behoud contactgegevens", {
+                action: async () => {
+                    if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam, e-mailadres en telefoonnummer (van leden zelf en ouders indien -18jaar) worden verwijderd.")) {
+                        await MemberManager.deleteDataExceptContacts(members)
+                        new Toast("De steekkaart van "+members.length+" leden is verwijderd.", "success green").show()
+                    }
+                },
+                type: "destructive",
+                icon: "trash"
+            }))
+            .addButton(new CenteredMessageButton("Behoud enkel naam", {
+                action: async () => {
+                    if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam worden verwijderd.")) {
+                        await MemberManager.deleteData(members)
+                        new Toast("De steekkaart van "+members.length+" leden is verwijderd.", "success green").show()
+                    }
+                },
+                type: "destructive",
+                icon: "trash"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    moveToWaitingList(members: MemberWithRegistrations[]) {
+        new CenteredMessage("Wil je "+members.length+" leden naar de wachtlijst verplaatsen?")
+            .addButton(new CenteredMessageButton("Naar wachtlijst", {
+                action: async () => {
+                    await MemberManager.moveToWaitingList(members, this.group, this.cycleOffset)
+                    new Toast(members.length+" leden zijn naar de wachtlijst verplaatst", "success green").show()
+                },
+                type: "destructive",
+                icon: "clock"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    deleteData(members: MemberWithRegistrations[]) {
+        new CenteredMessage("Wil je alle data van "+members.length+" leden verwijderen?", "Dit verwijdert alle data van de geselecteerde leden, inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.")
+            .addButton(new CenteredMessageButton("Verwijderen", {
+                action: async () => {
+                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, definitief verwijderen")) {
+                        await MemberManager.deleteMembers(members)
+                        new Toast(members.length+" leden zijn verwijderd", "success green").show()
+                    }
+                },
+                type: "destructive",
+                icon: "trash"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    deleteRegistration(members: MemberWithRegistrations[]) {
+        new CenteredMessage("Ben je zeker dat je "+members.length+" leden wilt uitschrijven?", "De gegevens van de leden blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
+            .addButton(new CenteredMessageButton("Uitschrijven", {
+                action: async () => {
+                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
+                        await MemberManager.unregisterMembers(members, this.group, this.cycleOffset, this.waitingList)
+                        new Toast(members.length+" leden zijn uitgeschreven", "success green").show()
+                    }
+                },
+                type: "destructive",
+                icon: "unregister"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
     }
 }
 </script>

@@ -371,6 +371,9 @@ export class MemberManagerStatic extends MemberManagerBase {
             member.details.records = []
             member.details.reviewTimes.removeReview("records")
 
+            member.details.recordAnswers = []
+            member.details.requiresFinancialSupport = undefined
+
             member.details.emergencyContacts = []
             member.details.doctor = null
             member.details.reviewTimes.removeReview("emergencyContacts")
@@ -397,6 +400,9 @@ export class MemberManagerStatic extends MemberManagerBase {
 
             member.details.records = []
             member.details.reviewTimes.removeReview("records")
+
+            member.details.recordAnswers = []
+            member.details.requiresFinancialSupport = undefined
 
             member.details.emergencyContacts = []
             member.details.doctor = null
