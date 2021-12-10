@@ -16,7 +16,7 @@
 
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" @click="handleAction(action)">
+            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && !action.allowAutoSelectAll" @click="handleAction(action)">
                 {{ action.name }}
                 <span v-if="action.icon" slot="right" :class="'icon '+action.icon" />
             </ContextMenuItem>
@@ -64,6 +64,10 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     actions: TableAction<any>[];
+
+    get hasSelection() {
+        return this.focused.length > 0 || this.table.cachedSelectionCount > 0;
+    }
 
     get showSelection() {
         return this.table.showSelection;

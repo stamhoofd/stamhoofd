@@ -248,7 +248,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
             new TableAction({
                 name: "Schrijf in",
-                icon: "edit",
                 priority: 0,
                 groupIndex: 5,
                 needsSelection: true,
@@ -261,7 +260,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
             new TableAction({
                 name: "Uitschrijven",
-                icon: "unregister",
                 priority: 0,
                 groupIndex: 5,
                 needsSelection: true,

@@ -17,32 +17,30 @@
             </h1>
             
             <p v-if="isRoot && enableActivities">
-                Voeg hier categorieën toe waarin je jouw inschrijvingsgroepen wilt onderverdelen. Leden kunnen dan inschrijven voor één of meerdere inschrijvingsgroepen in een categorie. Een categorie is puur voor de structuur: zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
+                Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen. Als je geen onderverdeling wilt, kan je gewoon één groep toevoegen. Leden kunnen dan inschrijven voor één of meerdere inschrijvingsgroepen. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
             </p>
           
             <STErrorsDefault :error-box="errorBox" />
 
-            <template v-if="!isRoot">
-                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                    <input
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        placeholder="Naam van deze categorie"
-                        autocomplete=""
-                    >
-                </STInputBox>
+            <STInputBox v-if="!isRoot" title="Naam" error-fields="name" :error-box="errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    placeholder="Naam van deze categorie"
+                    autocomplete=""
+                >
+            </STInputBox>
 
-                <template v-if="enableActivities">
-                    <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
-                        Een lid kan maar in één groep inschrijven
-                    </Checkbox>
+            <template v-if="enableActivities">
+                <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
+                    Een lid kan maar in één groep inschrijven
+                </Checkbox>
 
-                    <Checkbox v-model="isHidden">
-                        Toon deze categorie enkel voor beheerders
-                    </Checkbox>
-                </template>
+                <Checkbox v-if="!isRoot" v-model="isHidden">
+                    Toon deze categorie enkel voor beheerders
+                </Checkbox>
             </template>
 
             <template v-if="categories.length > 0 && enableActivities">
@@ -55,7 +53,7 @@
 
             <template v-else>
                 <hr>
-                <h2>Inschrijvingsgroepen</h2>
+                <h2>Groepen</h2>
                 <STList>
                     <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
                 </STList>
@@ -64,7 +62,7 @@
             <p v-if="categories.length == 0">
                 <button class="button text" @click="createGroup">
                     <span class="icon add" />
-                    <span>Nieuwe inschrijvingsgroep</span>
+                    <span>Nieuwe groep</span>
                 </button>
             </p>
             <p v-if="enableActivities">
@@ -77,8 +75,8 @@
 
             <div v-if="!isRoot && enableActivities" class="container">
                 <hr>
-                <h2>Wie kan inschrijvingsgroepen maken in deze categorie?</h2>
-                <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe activiteit, cursus of workshop toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersgroepen bewerken bij je instellingen.</p>
+                <h2>Wie kan groepen maken in deze categorie?</h2>
+                <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe groep (bv. activiteit, cursus of workshop) toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersgroepen bewerken bij je instellingen.</p>
     
                 <STList v-if="roles.length > 0">
                     <STListItem>
@@ -209,7 +207,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.isRoot ? 'Inschrijvingsgroepen bewerken' : (this.isNew ? "Nieuwe categorie" : this.name)
+        return this.isRoot ? 'Lidstructuur bewerken' : (this.isNew ? "Nieuwe categorie" : this.name)
     }
 
     get name() {

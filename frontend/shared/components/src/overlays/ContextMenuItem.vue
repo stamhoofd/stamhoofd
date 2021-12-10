@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="context-menu-item" @click.passive="onClick">
+    <component :is="elementName" class="context-menu-item" type="button" @click.passive="onClick">
         <div class="left">
             <slot name="left" />
         </div>
@@ -19,7 +19,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 export default class ContextMenuItem extends Vue {
     clicked = false;
 
-    @Prop({ default: 'article', type: String })
+    @Prop({ default: 'button', type: String })
     elementName!: string;
 
     onClick(event) {

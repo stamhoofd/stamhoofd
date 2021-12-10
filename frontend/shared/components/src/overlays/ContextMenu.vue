@@ -271,6 +271,11 @@ export default class ContextMenu extends Vue {
         padding: 0 9px;
         border-radius: $border-radius;
 
+        // Fix for button width
+        width: 100%;
+        text-align: left;
+        box-sizing: content-box;
+
         @media (max-width: 450px) {
             min-height: 40px;
         }
@@ -306,21 +311,28 @@ export default class ContextMenu extends Vue {
             padding-left: 20px;
         }
 
-        @media (hover: hover) {
-            &:hover {
+        &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        &:not(:disabled) {
+            @media (hover: hover) {
+                &:hover {
+                    background: $color-primary;
+                    color: $color-white;
+                }
+            }
+
+            &.hover {
                 background: $color-primary;
                 color: $color-white;
             }
-        }
 
-        &.hover {
-            background: $color-primary;
-            color: $color-white;
-        }
-
-        &:active:not(.disable-active) {
-            background: $color-primary;
-            color: $color-white;
+            &:active:not(.disable-active) {
+                background: $color-primary;
+                color: $color-white;
+            }
         }
     }
 

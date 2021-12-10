@@ -129,10 +129,10 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                         <h2 class="style-title-list">
-                            Inschrijvingsgroepen
+                            Lidstructuur bewerken
                         </h2>
                         <p v-if="enableActivities" class="style-description">
-                            Leeftijdsgroepen, cursussen, activiteiten, kampen... aanmaken en beheren
+                            Deel je leden op in groepen en activiteiten, wijzig de prijs en de inschrijvingsdatum
                         </p>
                         <p v-else class="style-description">
                             Leeftijdsgroepen aanmaken en beheren
