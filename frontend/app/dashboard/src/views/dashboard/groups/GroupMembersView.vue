@@ -336,7 +336,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 recommendedWidth: 150
             }),
             new Column<MemberWithRegistrations, Date | null>({
-                name: "Inschrijvingsdatum", 
+                name: this.waitingList ? "Op wachtlijst sinds" : "Inschrijvingsdatum", 
                 getValue: (v) => {
                     let registrations: Registration[] = []
                     if (this.group) {
