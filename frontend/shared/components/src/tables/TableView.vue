@@ -15,7 +15,7 @@
             </template>
             <template #right>
                 <template v-if="!isIOS">
-                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" @click="handleAction(action)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action)" />
                 </template>
 
                 <button v-if="showSelection && isIOS" key="iOSDone" class="button navigation highlight" @click="setShowSelection(false)">
@@ -1026,7 +1026,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.cachedSelectionCount = selected ? this.filteredValues.length : 0
     }
 
-    getSelection(): Value[] {
+    getSelection(allowAutoSelectAll = true): Value[] {
         if (!this.showSelection || this.cachedSelectionCount == 0) {
             return this.sortedValues
         }
@@ -1041,7 +1041,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     handleAction(action: TableAction<Value>) {
-        action.handler(this.getSelection())?.catch((e) => {
+        action.handler(this.getSelection(action.allowAutoSelectAll))?.catch((e) => {
             console.error(e)
             Toast.fromError(e).show
         })

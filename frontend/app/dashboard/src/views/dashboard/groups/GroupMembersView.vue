@@ -73,6 +73,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return 0
         }
 
+        if (this.allValues.length > 0) {
+            return this.allValues.length
+        }
+
         if (this.group) {
             return this.group.settings.registeredMembers ?? 30
         }
@@ -683,7 +687,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     reload() {
         Request.cancelAll(this)
         this.loading = true;
-        
+
         MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset, this).then((members) => {
             this.allValues = members
             this.checkInaccurateMetaData().catch(e => {
