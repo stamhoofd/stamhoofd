@@ -1,6 +1,6 @@
 <template>
     <form id="signup-general-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Aansluiten">
+        <STNavigationBar title="Nieuwe vereniging">
             <button slot="right" type="button" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         
@@ -8,14 +8,15 @@
             <h1>
                 Nieuwe vereniging aansluiten bij Stamhoofd
             </h1>
-            <p class="style-description-small">
-                Met een account kan je alle functies eerst gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen.
+            <p>
+                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen.
             </p>
-            <p class="style-description-small">
-                Gebruikt jouw vereniging Stamhoofd al? <button class="button text selected inline" type="button">
-                    Log dan hier in.
-                </button>
-            </p>
+            <button v-if="visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
+                Gebruikt jouw vereniging Stamhoofd al? 
+                <span class="button text" type="button">
+                    Log dan hier in
+                </span>
+            </button>
 
             <p v-if="registerCode" class="success-box icon gift">
                 Je ontvangt 25 euro tegoed van <strong>{{ registerCode.organization }}</strong> als je nu registreert
@@ -97,7 +98,7 @@
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click.prevent="goNext">
-                        Vereniging registreren
+                        Vereniging aanmaken
                     </button>
                 </LoadingButton>
             </template>
@@ -151,6 +152,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     address: Address | null = null
     acquisitionTypes: AcquisitionType[] = []
+
+    @Prop({ default: false})
+    visitViaUrl!: boolean
 
     @Prop({ default: null })
     initialRegisterCode!: { code: string; organization: string } | null;
@@ -409,6 +413,9 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
+        if (this.name == "" && this.address == null && this.type == null) {
+            return true
+        }
         if (await CenteredMessage.confirm("Ben je zeker dat je dit venster wilt sluiten?", "Sluiten")) {
             plausible('closeSignup');
             return true;

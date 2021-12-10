@@ -137,7 +137,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         if (this.isNative) {
             new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Een vereniging moet eerst aansluiten voor je kan inloggen.").addCloseButton("Sluiten").show()
         } else {
-            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.").addCloseButton("Sluiten").show()
+            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Nieuwe vereniging' bovenaan.").addCloseButton("Sluiten").show()
         }
     }
 
@@ -176,7 +176,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                                 initialRegisterCode: code && organization ? {
                                     code,
                                     organization
-                                } : null
+                                } : null,
+                                visitViaUrl: true
                             })
                         }).setDisplayStyle("popup").setAnimated(false)
                     ]
