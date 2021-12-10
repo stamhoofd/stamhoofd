@@ -73,6 +73,15 @@
                 </button>
             </p>
 
+            <div class="container">
+                <hr>
+                <h2>Start nieuwe inschrijvingsperiode</h2>
+                <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je leden automatisch verplaatsen naar een vorige inschrijvingsperiode, zodat ze opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
+                <button type="button" class="button text" @click="startNewRegistrationPeriod">
+                    <span class="icon undo" /><span>Start nieuwe inschrijvingsperiode...</span>
+                </button>
+            </div>
+
             <div v-if="!isRoot && enableActivities" class="container">
                 <hr>
                 <h2>Wie kan groepen maken in deze categorie?</h2>
@@ -119,6 +128,7 @@ import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, 
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditGroupView from './EditGroupView.vue';
+import EndRegistrationPeriodView from './EndRegistrationPeriodView.vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue"
 import GroupRow from "./GroupRow.vue"
 
@@ -449,6 +459,9 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
-    
+    startNewRegistrationPeriod() {
+        const initialGroupIds = this.category.groupIds
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds }).setDisplayStyle("popup"))
+    }
 }
 </script>
