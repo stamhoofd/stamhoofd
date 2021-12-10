@@ -452,7 +452,6 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        console.log("should navigate away")
         if (!this.isChanged()) {
             return true
         }
@@ -461,6 +460,11 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     startNewRegistrationPeriod() {
         const initialGroupIds = this.category.groupIds
+
+        for (const cat of this.categories) {
+            initialGroupIds.push(...cat.groupIds)
+        }
+
         this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds }).setDisplayStyle("popup"))
     }
 }
