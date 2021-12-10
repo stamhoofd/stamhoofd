@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
+    <ContextMenu v-bind="{...$attrs}">
         <ContextMenuItem v-for="column of columns" :key="column.id" element-name="label">
             <Checkbox slot="left" :checked="column.enabled" :only-line="true" @change="setColumnEnabled(column, $event)" />
             {{ column.name }}
@@ -23,18 +23,6 @@ import { Column } from "./Column";
     },
 })
 export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
-    @Prop({ default: 0 })
-    x!: number;
-
-    @Prop({ default: 0 })
-    y!: number;
-
-    @Prop()
-    xPlacement?: string;
-
-    @Prop()
-    yPlacement?: string;
-
     @Prop({ required: true })
     columns: Column<any, any>[];
 

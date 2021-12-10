@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
+    <ContextMenu v-bind="{...$attrs}">
         <ContextMenuItem v-if="!showSelection || focused.length >= 1" @click="toggleSelect">
             {{ isFocusSelected ? 'Deselecteer' : 'Selecteer' }}
         </ContextMenuItem>
@@ -9,26 +9,28 @@
         <ContextMenuItem v-if="showSelection && isAllSelected" @click="setSelectAll(false)">
             Deselecteer alles
         </ContextMenuItem>
-        <ContextMenuItem v-if="focused.length == 0">
+        <ContextMenuItem v-if="focused.length == 0" :child-context-menu="columnContextMenu">
             Kolommen
             <span slot="right" class="icon arrow-right-small" />
         </ContextMenuItem>
 
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && !action.allowAutoSelectAll" @click="handleAction(action)">
+            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && !action.allowAutoSelectAll" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action)">
                 {{ action.name }}
-                <span v-if="action.icon" slot="right" :class="'icon '+action.icon" />
+                <span v-if="action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
+                <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
             </ContextMenuItem>
         </template>
     </ContextMenu>
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,Column,ContextMenu, ContextMenuItem, ContextMenuLine, Toast } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox, ContextMenu, ContextMenuItem, ContextMenuLine, Toast } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableView from "./TableView.vue";
 
@@ -41,18 +43,6 @@ import TableView from "./TableView.vue";
     },
 })
 export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
-    @Prop({ default: 0 })
-    x!: number;
-
-    @Prop({ default: 0 })
-    y!: number;
-
-    @Prop()
-    xPlacement?: string;
-
-    @Prop()
-    yPlacement?: string;
-
     /**
      * Act only on selection given here
      */
@@ -83,6 +73,12 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
 
     get isFocusSelected() {
         return this.focused.length > 0 && this.focused.every(item => this.table.isValueSelected(item));
+    }
+
+    get columnContextMenu() {
+        return new ComponentWithProperties(ColumnSelectorContextMenu, {
+            columns: this.table.allColumns,
+        })
     }
 
     toggleSelect() {
@@ -139,6 +135,18 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
                 }, {} as { [groupIndex: number]: TableAction<any>[] })
         );
 
+    }
+
+    getChildContextMenu(action: TableAction<any>) {
+        if (!action.childActions || action.childActions.length == 0) {
+            return
+        }
+
+        return new ComponentWithProperties(TableActionsContextMenu, {
+            actions: action.childActions,
+            table: this.table,
+            focused: this.focused,
+        })
     }
 }
 </script>

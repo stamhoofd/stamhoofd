@@ -1,11 +1,10 @@
 <template>
     <transition appear name="show">
-        <div class="context-menu-container" @click="pop">
+        <div class="context-menu-container" :class="{ hasParent: !!parentMenu }" @click="pop" @contextmenu.prevent="pop">
             <div
                 ref="context"
-                oncontextmenu="return false;"
                 class="context-menu"
-                :class="xPlacement+' '+yPlacement"
+                :class="usedXPlacement+' '+usedYPlacement"
                 :style="{ transformOrigin, top: top ? top + 'px' : undefined, left: left ? (left + 'px') : undefined, right: right ? (right + 'px') : undefined, bottom: bottom ? (bottom + 'px') : undefined, width: preferredWidth ? (preferredWidth + 'px') : undefined }"
                 @click.stop=""
             >
@@ -16,6 +15,7 @@
 </template>
 
 <script lang="ts">
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({
@@ -46,12 +46,31 @@ export default class ContextMenu extends Vue {
     @Prop({
         default: "right",
     })
-    xPlacement: "right" | "left";
+    xPlacement!: "right" | "left";
+
+    usedXPlacement: "right" | "left" = this.xPlacement
 
     @Prop({
         default: "bottom",
     })
-    yPlacement: "bottom" | "top";
+    yPlacement!: "bottom" | "top";
+
+    usedYPlacement: "bottom" | "top" = this.yPlacement
+
+    @Prop({
+        default: null,
+    })
+    parentMenu!: ContextMenu | null;
+
+    /**
+     * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
+     */
+    @Prop({
+        default: null,
+    })
+    wrapWidth!: number | null
+
+    isPopped = false
 
     mounted() {
         // Calculate position
@@ -68,11 +87,30 @@ export default class ContextMenu extends Vue {
             clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
 
         if (this.xPlacement === "right") {
-            this.left = this.x - Math.max(0, width - (clientWidth - viewPadding - this.x));
+            this.left = this.x; 
+            
+            // If the remaining space is too small, we need to wrap
+            if (width > clientWidth - viewPadding - this.x) {
+                this.left = null
+                this.usedXPlacement = "left"
 
-            if (this.left < viewPadding) {
-                this.left = viewPadding
+                if (this.wrapWidth !== null) {
+                    // Wrap instead of sticking to right
+                    this.x = this.x - this.wrapWidth
+                    this.right = Math.min(clientWidth - this.x, clientWidth - viewPadding - width);
+
+                    if (this.right < viewPadding) {
+                        this.right = viewPadding
+                    }
+                } else {
+                    this.right = clientWidth - viewPadding
+                }
+            } else {
+                if (this.left < viewPadding) {
+                    this.left = viewPadding
+                }
             }
+            //- Math.max(0, width - (clientWidth - viewPadding - this.x));
 
         } else {
             this.right = Math.min(clientWidth - this.x, clientWidth - viewPadding - width)
@@ -96,9 +134,37 @@ export default class ContextMenu extends Vue {
 
         this.transformOrigin = xTransform + "% "+yTransform+"%"
         
-        this.$el.addEventListener("contextmenu", this.pop, { passive: true });
         window.addEventListener("touchmove", this.onTouchMove, { passive: false });
         window.addEventListener("touchend", this.onTouchUp, { passive: false });
+
+        if (this.isPopped || this.parentMenu?.isPopped || (this.parentMenu && (!this.parentMenu.$el || !this.parentMenu.$el.isConnected))) {
+            // Pop was dismissed before we could mount this context menu
+            console.error("Context menu lost its parent menu during mounting")
+            this.pop(false)
+        }
+    }
+
+    childMenu: ComponentWithProperties | null = null
+
+    popChildMenu() {
+        if (this.childMenu) {
+            const instance =  this.childMenu.componentInstance() as any
+
+            if (instance) {
+                instance.$children[0].pop(false)
+            } else {
+                console.warn("Could not pop child menu, because it is not yet mounted")
+            }
+        }
+        this.childMenu = null
+    }
+
+    setChildMenu(component: ComponentWithProperties | null) {
+        if (this.childMenu === component) {
+            return
+        }
+        this.popChildMenu()
+        this.childMenu = component;
     }
 
     getSelectedElement(event): HTMLElement | null {
@@ -139,13 +205,19 @@ export default class ContextMenu extends Vue {
     }
 
     beforeDestroy() {
-        this.$el.removeEventListener("contextmenu", this.pop);
+        this.popChildMenu()
         window.removeEventListener("touchmove", this.onTouchMove);
         window.removeEventListener("touchend", this.onTouchUp);
     }
 
-    pop() {
+    pop(popParents = false) {
+        this.isPopped = true
+        this.popChildMenu()
         this.$parent.$parent.$emit("pop");
+
+        if (popParents && this.parentMenu) {
+            this.parentMenu.pop(true)
+        }
     }
 
     activated() {
@@ -188,6 +260,14 @@ export default class ContextMenu extends Vue {
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+
+    &.hasParent {
+        pointer-events: none;
+
+        .context-menu {
+            pointer-events: auto;
+        }
+    }
 
     .context-menu {
         transform-origin: 0% 0%;
@@ -317,6 +397,10 @@ export default class ContextMenu extends Vue {
         }
 
         &:not(:disabled) {
+            &.isOpen {
+                background: $color-gray-2;
+            }
+
             @media (hover: hover) {
                 &:hover {
                     background: $color-primary;

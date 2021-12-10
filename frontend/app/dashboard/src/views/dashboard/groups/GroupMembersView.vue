@@ -215,6 +215,28 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 icon: "download",
                 priority: 8,
                 groupIndex: 3,
+                childActions: [
+                    new TableAction({
+                        name: "Excel",
+                        icon: "download",
+                        priority: 0,
+                        groupIndex: 0,
+                        handler: (members: MemberWithRegistrations[]) => {
+                        // todo: vervangen door een context menu
+                            this.exportToExcel(members).catch(console.error)
+                        }
+                    }),
+                    new TableAction({
+                        name: "Samenvatting",
+                        icon: "download",
+                        priority: 0,
+                        groupIndex: 0,
+                        handler: (members: MemberWithRegistrations[]) => {
+                        // todo: vervangen door een context menu
+                            this.exportToExcel(members).catch(console.error)
+                        }
+                    }),
+                ],
                 handler: (members: MemberWithRegistrations[]) => {
                 // todo: vervangen door een context menu
                     this.exportToExcel(members).catch(console.error)

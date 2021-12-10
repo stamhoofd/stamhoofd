@@ -26,6 +26,8 @@ export class TableAction<T> {
 
     singleSelection = false
 
+    childActions: TableAction<T>[] = []
+
     constructor(settings: Partial<TableAction<T>>) {
         this.name = settings.name ?? "";
         this.icon = settings.icon ?? "";
@@ -37,5 +39,6 @@ export class TableAction<T> {
         this.tooltip = settings.tooltip ?? this.name;
         this.enabled = settings.enabled ?? true;
         this.allowAutoSelectAll = settings.allowAutoSelectAll ?? true;
+        this.childActions = settings.childActions ?? [];
     }
 }
