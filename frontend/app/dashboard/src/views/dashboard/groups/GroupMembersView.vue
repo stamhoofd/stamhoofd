@@ -253,11 +253,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                             this.exportToPDF(members)
                         }
                     }),
-                ],
-                handler: (members: MemberWithRegistrations[]) => {
-                // todo: vervangen door een context menu
-                    this.exportToExcel(members).catch(console.error)
-                }
+                ]
             }),
 
             new TableAction({
