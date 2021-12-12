@@ -251,7 +251,7 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
             await FileOpener.open({url: result.uri})
         }
     } catch (e) {
-        if (e.message === "Share canceled") {
+        if (e.message === "Share canceled" || e.message === "Error sharing item") {
             return
         }
         throw e

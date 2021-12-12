@@ -8,7 +8,7 @@
 
         <main>
             <h1>
-                Samenvatting
+                Exporteren naar PDF
             </h1>
             <p>Exporteer de gegevens van de geselecteerde leden naar een PDF-bestand die je kan afdrukken of opslaan.</p>
 
@@ -71,6 +71,7 @@ import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metrop
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2';
 import logoUrl from '@stamhoofd/assets/images/logo/logo-horizontal.png';
 import { BackButton, Checkbox, ErrorBox, LoadingButton, SegmentedControl, STErrorsDefault, STList, STListItem, STNavigationBar, STNavigationTitle, STToolbar, TooltipDirective } from "@stamhoofd/components";
+import { AppManager } from "@stamhoofd/networking";
 import { Group, Member, MemberWithRegistrations, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 // Keep for types only
@@ -449,7 +450,7 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
     buildMemberGroups() {
         const groups: SamenvattingGroep[] = []
 
-         // Sort members
+        // Sort members
         const members = this.members.slice()
         members.sort(Member.sorterByName("ASC"));
 
@@ -479,7 +480,7 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
     buildGroupGroups() {
         const groups: SamenvattingGroep[] = []
 
-         // Sort members
+        // Sort members
         const members = this.members.slice()
         members.sort(Member.sorterByName("ASC"));
 
@@ -584,17 +585,18 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
             doc.end();
         });
 
-        var blob = new Blob([buffer], {type: "application/pdf"});
 
-        if (!(navigator as any).openFile) {
-            var link = document.createElement('a');
+        if (AppManager.shared.downloadFile) {
+            const data = buffer.toString('base64')
+            await AppManager.shared.downloadFile(data, Formatter.slug(title)+".pdf")
+        } else {
+            const blob = new Blob([buffer], {type: "application/pdf"});
+            const link = document.createElement('a');
             const href = window.URL.createObjectURL(blob);
             link.href = href        
-            var fileName = Formatter.slug(title)+".pdf";
+            const fileName = Formatter.slug(title)+".pdf";
             link.download = fileName;
             link.click();
-        } else {
-            (navigator as any).openFile(blob, Formatter.slug(title)+".pdf")
         }
     }
 
