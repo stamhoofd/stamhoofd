@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="context-menu-item" type="button" :class="{ isOpen: isOpen }" @click.passive="onClick" @mouseover.passive="onMouseOver">
+    <component :is="elementName" class="context-menu-item" type="button" :class="{ isOpen: isOpen, hover: isHovered }" @click.passive="onClick" @mouseover.passive="onMouseOver" @mouseleave.passive="onMouseLeave">
         <div class="left">
             <slot name="left" />
         </div>
@@ -19,6 +19,7 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 @Component
 export default class ContextMenuItem extends Mixins(NavigationMixin) {
     clicked = false;
+    isHovered = false
 
     @Prop({ default: 'button' })
     elementName!: string;
@@ -31,27 +32,11 @@ export default class ContextMenuItem extends Mixins(NavigationMixin) {
     }
 
     onMouseOver() {
-        if (this.childContextMenu) {
-            if (!this.childContextMenu.componentInstance()) {
-                // Present child context menu + send close event to parent
-                const el = this.$el as HTMLElement;
-                const bounds = el.getBoundingClientRect()
+        (this.$parent as any).onHoverItem(this)
+    }
 
-                // todo: calculate better position
-                this.childContextMenu.properties.x = bounds.right
-                this.childContextMenu.properties.y = bounds.top
-                this.childContextMenu.properties.xPlacement = "right"
-                this.childContextMenu.properties.yPlacement = "bottom"
-                this.childContextMenu.properties.parentMenu = this.$parent
-                this.childContextMenu.properties.wrapWidth = el.clientWidth;
-                
-                (this.$parent as any).setChildMenu(this.childContextMenu);
-                this.present(this.childContextMenu.setDisplayStyle("overlay"));
-
-            }
-        } else {
-            (this.$parent as any).setChildMenu(null);
-        }
+    onMouseLeave() {
+        (this.$parent as any).onMouseLeaveItem(this)
     }
 
     onClick(event) {
@@ -61,10 +46,9 @@ export default class ContextMenuItem extends Mixins(NavigationMixin) {
         this.clicked = true
         this.$emit("click", event);
 
-        // Allow some time to let the browser handle some events (e.g. label > update checkbox)
-        setTimeout(() => {
-            (this.$parent as any).pop(true);
-        }, 80)
+        // Wait to pop to let the browser handle events (e.g. label > checkbox)
+        (this.$parent as any).delayPop(true);
+        
     }
 }
 </script>

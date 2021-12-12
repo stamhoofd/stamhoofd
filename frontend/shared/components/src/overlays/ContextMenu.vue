@@ -10,6 +10,8 @@
             >
                 <slot />
             </div>
+
+            <div v-if="ignoreHoverTriangle && false" class="triangle" :style="{ 'clip-path': 'polygon('+ignoreHoverTriangle.p1.x+'px '+ignoreHoverTriangle.p1.y+'px, '+ignoreHoverTriangle.p2.x+'px '+ignoreHoverTriangle.p2.y+'px, '+ignoreHoverTriangle.p3.x+'px '+ignoreHoverTriangle.p3.y+'px)'}" />
         </div>
     </transition>
 </template>
@@ -17,6 +19,18 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Vue } from "vue-property-decorator";
+
+import ContextMenuItem from "./ContextMenuItem.vue";
+
+function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
+
+    let det = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
+
+    return  det * ((bx - ax) * (y - ay) - (by - ay) * (x - ax)) >= 0 &&
+            det * ((cx - bx) * (y - by) - (cy - by) * (x - bx)) >= 0 &&
+            det * ((ax - cx) * (y - cy) - (ay - cy) * (x - cx)) >= 0    
+
+}
 
 @Component({
 })
@@ -86,6 +100,8 @@ export default class ContextMenu extends Vue {
             clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth,
             clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
 
+        let usedX = this.x
+
         if (this.xPlacement === "right") {
             this.left = this.x; 
             
@@ -96,8 +112,8 @@ export default class ContextMenu extends Vue {
 
                 if (this.wrapWidth !== null) {
                     // Wrap instead of sticking to right
-                    this.x = this.x - this.wrapWidth
-                    this.right = Math.min(clientWidth - this.x, clientWidth - viewPadding - width);
+                    usedX = usedX - this.wrapWidth
+                    this.right = Math.min(clientWidth - usedX, clientWidth - viewPadding - width);
 
                     if (this.right < viewPadding) {
                         this.right = viewPadding
@@ -110,10 +126,10 @@ export default class ContextMenu extends Vue {
                     this.left = viewPadding
                 }
             }
-            //- Math.max(0, width - (clientWidth - viewPadding - this.x));
+            //- Math.max(0, width - (clientWidth - viewPadding - usedX);
 
         } else {
-            this.right = Math.min(clientWidth - this.x, clientWidth - viewPadding - width)
+            this.right = Math.min(clientWidth - usedX, clientWidth - viewPadding - width)
 
             if (this.right < viewPadding) {
                 this.right = viewPadding
@@ -127,7 +143,7 @@ export default class ContextMenu extends Vue {
         }
 
         const objLeft = this.left ? this.left : (clientWidth - this.right! - width)
-        const xTransform = ((this.x - objLeft) / width * 100).toFixed(2)
+        const xTransform = ((usedX - objLeft) / width * 100).toFixed(2)
 
         const objTop = this.top ? this.top : (clientHeight - this.right! - height)
         const yTransform = ((this.y - objTop) / height * 100).toFixed(2)
@@ -148,6 +164,8 @@ export default class ContextMenu extends Vue {
 
     popChildMenu() {
         if (this.childMenu) {
+            console.log("Pop child menu")
+
             const instance =  this.childMenu.componentInstance() as any
 
             if (instance) {
@@ -159,17 +177,254 @@ export default class ContextMenu extends Vue {
         this.childMenu = null
     }
 
+    currentlyHoveredItem: ContextMenuItem | null = null
+
+    // When we hover an item that has a child menu, we need to cancel other hovers if the mouse moves to the child menu
+    ignoreHover = false
+    ignoreHoverItem: ContextMenuItem | null = null
+    ignoreHoverTimeout: NodeJS.Timeout | null = null
+    ignoreHoverTriangle: { p1: { x: number, y: number }, p2: { x: number, y: number }, p3: { x: number, y: number } } | null = null
+
+    delayHover(ms: number) {
+        this.ignoreHover = true
+        if (this.ignoreHoverTimeout) {
+            clearTimeout(this.ignoreHoverTimeout)
+        }
+
+        if (ms <= 0) {
+            if (this.currentlyHoveredItem  && this.ignoreHoverItem === this.currentlyHoveredItem) {
+                // Ignore, and wait for next timer
+                return
+            }
+            this.endIgnoreHover()
+            return
+        }
+        this.ignoreHoverTimeout = setTimeout(() => {
+            if (this.currentlyHoveredItem && this.ignoreHoverItem === this.currentlyHoveredItem) {
+                // Ignore, and wait for next timer
+                return
+            }
+            this.endIgnoreHover()
+        }, ms)
+    }
+
+    endIgnoreHover() {
+        this.ignoreHover = false
+
+        console.info("Timer ended")
+        // Remove listener
+        window.removeEventListener("mousemove", this.onMouseMove);
+
+        this.ignoreHoverTriangle = null
+
+        const item = this.ignoreHoverItem
+        this.ignoreHoverItem = null
+
+        if (this.isPopped) {
+            return
+        }
+        
+        // Execute mouseover again: if we are above a different context menu item: close the popup and/or open a new one
+        if (this.currentlyHoveredItem && this.currentlyHoveredItem !== item) {
+            console.log('Dispatch mouse over to', this.currentlyHoveredItem)
+
+            this.onHoverItem(this.currentlyHoveredItem)
+        } else {
+            console.log("No other menu item to replace")
+        }
+    }
+
+    onHoverItem(item: ContextMenuItem) {
+        this.currentlyHoveredItem = item
+
+        if (this.shouldIgnoreHover()) {
+            return;
+        }
+
+        // Update hover style
+        item.isHovered = true
+
+        if (item.childContextMenu) {
+            if (!item.childContextMenu.componentInstance()) {
+                // TODO: Wait x ms hover delay, and check is the cursor is still hovered
+
+                if (this.isPopped) {
+                    console.warn("Trying to set child menu when parent is already popped")
+                    return
+                }
+                // Present child context menu + send close event to parent
+                const el = item.$el as HTMLElement;
+                const bounds = el.getBoundingClientRect()
+
+                // todo: calculate better position
+                item.childContextMenu.properties.x = bounds.right
+                item.childContextMenu.properties.y = bounds.top
+                item.childContextMenu.properties.xPlacement = "right"
+                item.childContextMenu.properties.yPlacement = "bottom"
+                item.childContextMenu.properties.parentMenu = this
+                item.childContextMenu.properties.wrapWidth = el.clientWidth;
+                
+                this.setChildMenu(item.childContextMenu);
+                item.present(item.childContextMenu.setDisplayStyle("overlay"));
+            }
+        } else {
+            this.setChildMenu(null);
+        }
+    }
+
+    onMouseLeaveItem(item: ContextMenuItem, event) {
+        if (this.currentlyHoveredItem === item) {
+            this.currentlyHoveredItem = null
+
+            if (item === this.ignoreHoverItem) {
+                this.delayHover(50)
+            }
+        }
+
+        // Update hover style if changed
+        item.isHovered = false
+    }
+
     setChildMenu(component: ComponentWithProperties | null) {
         if (this.childMenu === component) {
             return
         }
+
+        console.log("Set child menu", component)
+
         this.popChildMenu()
         this.childMenu = component;
+
+        // Capture initial mouse X + Y Position,
+        // calculate the triangle in which region we shouldn't hover
+        // keep adjusting the triangle as the mouse moves, but if the mouse stops too long, stop
+
+        if (component && this.currentlyHoveredItem && !this.ignoreHoverItem) {
+            // If the cursor now moves to the newly created context menu, we'll add a delay and prevent any other context menu hovering
+            this.ignoreHoverItem = this.currentlyHoveredItem
+
+            // We cant calculate the triangle yet, because the child menu is not yet mounted
+            this.ignoreHoverTriangle = null
+            this.delayHover(50)
+            window.addEventListener("mousemove", this.onMouseMove, { passive: true });
+        }
     }
 
-    getSelectedElement(event): HTMLElement | null {
+    calculateHoverTriangle(mouseX, mouseY) {
+        if (!this.childMenu) {
+            return
+        }
+        const instance = this.childMenu.componentInstance()
+        if (!instance) {
+            console.warn("Child menu doesn't have an instance yet")
+            return
+        }
+
+        // Get the child element, since the main element covers the whole window
+        const element = instance.$el.childNodes[0] as HTMLElement
+
+        if (!element) {
+            console.warn("Child menu doesn't have a child element!!!")
+            return
+        }
+
+
+        const bounds = element.getBoundingClientRect()
+
+        const contextX = bounds.left
+        const contextY = bounds.top
+        const contextY2 = bounds.bottom
+        const contextX2 = bounds.right
+
+        if (contextX < mouseX) {
+            // Menu is on the left side
+
+            return {
+                p1: { x: mouseX + 5, y: mouseY },
+                p2: { x: contextX2, y: contextY },
+                p3: { x: contextX2, y: contextY2 }
+            }
+
+        } else {
+            return {
+                p1: { x: mouseX - 5, y: mouseY },
+                p2: { x: contextX, y: contextY },
+                p3: { x: contextX, y: contextY2 }
+            }
+        }
+    }
+
+    updateHoverTriangle(mouseX, mouseY) {
+        const triangle = this.calculateHoverTriangle(mouseX, mouseY)
+        if (triangle) {
+            this.ignoreHoverTriangle = triangle
+        }
+    }
+
+    shouldIgnoreHover() {
+        return this.isPopped || (this.childMenu && this.ignoreHover)
+    }
+    
+
+    onMouseMove(event) {
+        if (!this.childMenu) {
+            // Wait for timer to end
+            return
+        }
+
+        const mouseX = event.clientX
+        const mouseY = event.clientY
+
+        const isStillHovered = this.currentlyHoveredItem && this.currentlyHoveredItem === this.ignoreHoverItem
+
+        if (this.ignoreHoverTriangle === null || isStillHovered) {
+            // We don't have triangle yet, probably because we didn't yet have the position
+            // of the mouse and the context menu
+            
+            // Just update the triangle for now, but don't expand the delay
+
+            this.updateHoverTriangle(mouseX, mouseY)
+
+            return
+        }
+
+        // Check if mouse position is inside the triangle
+
+        const p1 = this.ignoreHoverTriangle.p1
+        const p2 = this.ignoreHoverTriangle.p2
+        const p3 = this.ignoreHoverTriangle.p3
+
+        if (!triangleContains(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, mouseX, mouseY)) {
+            // Outside triangle:
+            // stop delay if we aren't hovering any longer
+            console.info("Outside triangle")
+
+            this.delayHover(0)
+            return
+        }
+
+
+        // Mouse is inside the triangle
+        // Expand
+
+        this.delayHover(50)
+
+        // Todo: adjust triangle
+
+        // if X position got closer, then we'll adjust the triangle again
+        const triangle = this.calculateHoverTriangle(mouseX, mouseY)
+        if (triangle && Math.abs(p1.x - p2.x) > Math.abs(triangle.p1.x - triangle.p2.x)) {
+            this.ignoreHoverTriangle = triangle
+        }
+
+        return
+
+
+    }
+
+    getSelectedElementAt(x, y): HTMLElement | null {
         // Check which one is hovered, and manually add a hover state to it
-        let selectedElement = document.elementFromPoint(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+        let selectedElement = document.elementFromPoint(x, y);
 
         // Get parent until class is context-menu-item or stop when parent is document, or context-menu-container class
         while (selectedElement && !selectedElement.classList.contains("context-menu-item") && !selectedElement.classList.contains("context-menu-container")) {
@@ -179,6 +434,12 @@ export default class ContextMenu extends Vue {
             return selectedElement as HTMLElement
         }
         return null
+    }
+
+
+    getSelectedElement(event): HTMLElement | null {
+        // Check which one is hovered, and manually add a hover state to it
+        return this.getSelectedElementAt(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
     }
 
     onTouchMove(event) {
@@ -210,13 +471,41 @@ export default class ContextMenu extends Vue {
         window.removeEventListener("touchend", this.onTouchUp);
     }
 
+    delayPop(popParents = false) {
+        if (this.isPopped) {
+            // Ignore
+            console.warn("Ignore popped, already popped")
+            return
+        }
+
+        this.isPopped = true
+
+        // Pop parents already, because otherwise they might want to
+       
+
+        // Allow some time to let the browser handle some events (e.g. label > update checkbox)
+        setTimeout(() => {
+            // set isPopped to false again, to force pop
+            this.isPopped = false;
+            this.pop(popParents);
+        }, 80)
+    }
+
     pop(popParents = false) {
+        if (this.isPopped) {
+            // Ignore
+            console.warn("Ignore popped, already popped")
+            return
+        }
+        console.log("Popping menu")
         this.isPopped = true
         this.popChildMenu()
         this.$parent.$parent.$emit("pop");
 
         if (popParents && this.parentMenu) {
             this.parentMenu.pop(true)
+        } else {
+            console.log("No parent menu")
         }
     }
 
@@ -310,6 +599,18 @@ export default class ContextMenu extends Vue {
             transform: scale(0.8, 0.8);
         }
     }
+
+    .triangle {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        background: red;
+        opacity: 0.5;
+        pointer-events: none;
+        z-index: 100000;
+    }
 }
 
 .context-menu {
@@ -399,13 +700,6 @@ export default class ContextMenu extends Vue {
         &:not(:disabled) {
             &.isOpen {
                 background: $color-gray-2;
-            }
-
-            @media (hover: hover) {
-                &:hover {
-                    background: $color-primary;
-                    color: $color-white;
-                }
             }
 
             &.hover {
