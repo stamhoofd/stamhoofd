@@ -164,14 +164,10 @@ export default class ContextMenu extends Vue {
 
     popChildMenu() {
         if (this.childMenu) {
-            console.log("Pop child menu")
-
             const instance =  this.childMenu.componentInstance() as any
 
             if (instance) {
                 instance.$children[0].pop(false)
-            } else {
-                console.warn("Could not pop child menu, because it is not yet mounted")
             }
         }
         this.childMenu = null
@@ -211,7 +207,6 @@ export default class ContextMenu extends Vue {
     endIgnoreHover() {
         this.ignoreHover = false
 
-        console.info("Timer ended")
         // Remove listener
         window.removeEventListener("mousemove", this.onMouseMove);
 
@@ -226,11 +221,7 @@ export default class ContextMenu extends Vue {
         
         // Execute mouseover again: if we are above a different context menu item: close the popup and/or open a new one
         if (this.currentlyHoveredItem && this.currentlyHoveredItem !== item) {
-            console.log('Dispatch mouse over to', this.currentlyHoveredItem)
-
             this.onHoverItem(this.currentlyHoveredItem)
-        } else {
-            console.log("No other menu item to replace")
         }
     }
 
@@ -249,7 +240,6 @@ export default class ContextMenu extends Vue {
                 // TODO: Wait x ms hover delay, and check is the cursor is still hovered
 
                 if (this.isPopped) {
-                    console.warn("Trying to set child menu when parent is already popped")
                     return
                 }
                 // Present child context menu + send close event to parent
@@ -290,8 +280,6 @@ export default class ContextMenu extends Vue {
             return
         }
 
-        console.log("Set child menu", component)
-
         this.popChildMenu()
         this.childMenu = component;
 
@@ -316,7 +304,6 @@ export default class ContextMenu extends Vue {
         }
         const instance = this.childMenu.componentInstance()
         if (!instance) {
-            console.warn("Child menu doesn't have an instance yet")
             return
         }
 
@@ -324,7 +311,6 @@ export default class ContextMenu extends Vue {
         const element = instance.$el.childNodes[0] as HTMLElement
 
         if (!element) {
-            console.warn("Child menu doesn't have a child element!!!")
             return
         }
 
@@ -397,8 +383,6 @@ export default class ContextMenu extends Vue {
         if (!triangleContains(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, mouseX, mouseY)) {
             // Outside triangle:
             // stop delay if we aren't hovering any longer
-            console.info("Outside triangle")
-
             this.delayHover(0)
             return
         }
@@ -474,14 +458,10 @@ export default class ContextMenu extends Vue {
     delayPop(popParents = false) {
         if (this.isPopped) {
             // Ignore
-            console.warn("Ignore popped, already popped")
             return
         }
 
-        this.isPopped = true
-
-        // Pop parents already, because otherwise they might want to
-       
+        this.isPopped = true       
 
         // Allow some time to let the browser handle some events (e.g. label > update checkbox)
         setTimeout(() => {
@@ -494,18 +474,14 @@ export default class ContextMenu extends Vue {
     pop(popParents = false) {
         if (this.isPopped) {
             // Ignore
-            console.warn("Ignore popped, already popped")
             return
         }
-        console.log("Popping menu")
         this.isPopped = true
         this.popChildMenu()
         this.$parent.$parent.$emit("pop");
 
         if (popParents && this.parentMenu) {
             this.parentMenu.pop(true)
-        } else {
-            console.log("No parent menu")
         }
     }
 
