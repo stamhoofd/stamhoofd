@@ -1082,7 +1082,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             const isOnTop = !this.isIOS
 
             const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-                x: bounds.left + el.offsetWidth,
+                x: bounds.left,
                 y: isOnTop ? bounds.bottom : bounds.top,
                 xPlacement: "right",
                 yPlacement: isOnTop ? "bottom" : "top",

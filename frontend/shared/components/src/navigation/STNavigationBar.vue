@@ -165,11 +165,6 @@ export default class STNavigationBar extends Vue {
 
     body.native-iOS & {
         height: 42px; // 44px - 2 x border width thin
-
-        @media (min-width: 550px) {
-            // Landscape mode
-            height: 30px;
-        }
     }
 
     &.large {

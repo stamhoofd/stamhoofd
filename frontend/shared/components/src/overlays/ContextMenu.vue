@@ -301,13 +301,18 @@ export default class ContextMenu extends Vue {
     }
 
     onClickItem(item: ContextMenuItem, event) {
+        if (item.clicked) {
+            return;
+        }
+        item.clicked = true
+
         if (item.childContextMenu) {
             // No click actions
             if (this.disableHoverChildMenus || (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0))) {
                 // Show child menu and replace self
-                this.pop(true)
 
                 if (!item.childContextMenu.componentInstance() && !this.shouldIgnoreHover()) {
+                    this.pop(true)
 
                     // Present child context menu + send close event to parent
                     const el = item.$el as HTMLElement;
@@ -324,10 +329,7 @@ export default class ContextMenu extends Vue {
             }
             return
         }
-        if (item.clicked) {
-            return;
-        }
-        item.clicked = true
+
         item.$emit("click", event);
 
         // Wait to pop to let the browser handle events (e.g. label > checkbox)
@@ -502,6 +504,10 @@ export default class ContextMenu extends Vue {
     }
 
     onTouchUp(event) {
+        if (this.isPopped) {
+            // We're already popped, so we don't need to do anything
+            return
+        }
         const selectedElement = this.getSelectedElement(event);
         if (selectedElement) {
             selectedElement.click()
