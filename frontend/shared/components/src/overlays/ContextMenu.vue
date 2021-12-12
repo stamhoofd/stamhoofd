@@ -307,17 +307,20 @@ export default class ContextMenu extends Vue {
                 // Show child menu and replace self
                 this.pop(true)
 
-                // Present child context menu + send close event to parent
-                const el = item.$el as HTMLElement;
-                const bounds = el.getBoundingClientRect()
+                if (!item.childContextMenu.componentInstance() && !this.shouldIgnoreHover()) {
 
-                // todo: calculate better position
-                item.childContextMenu.properties.x = bounds.left
-                item.childContextMenu.properties.y = bounds.top
-                item.childContextMenu.properties.xPlacement = "right"
-                item.childContextMenu.properties.yPlacement = "bottom"
-                item.childContextMenu.properties.parentMenu = null
-                item.present(item.childContextMenu.setDisplayStyle("overlay"));
+                    // Present child context menu + send close event to parent
+                    const el = item.$el as HTMLElement;
+                    const bounds = el.getBoundingClientRect()
+
+                    // todo: calculate better position
+                    item.childContextMenu.properties.x = bounds.left
+                    item.childContextMenu.properties.y = bounds.top
+                    item.childContextMenu.properties.xPlacement = "right"
+                    item.childContextMenu.properties.yPlacement = "bottom"
+                    item.childContextMenu.properties.parentMenu = null
+                    item.present(item.childContextMenu.setDisplayStyle("overlay"));
+                }
             }
             return
         }
