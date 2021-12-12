@@ -2,7 +2,7 @@
     <ContextMenu v-bind="{...$attrs}">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && !action.allowAutoSelectAll" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action)">
+            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && !action.allowAutoSelectAll" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, event)">
                 {{ action.name }}
                 <span v-if="action.childMenu || action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
@@ -78,14 +78,14 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
         }
     }
 
-    handleAction(action: TableAction<any>) {
+    handleAction(action: TableAction<any>, event) {
         if (this.focused.length > 0) {
             action.handler(this.focused)?.catch((e) => {
                 console.error(e)
                 Toast.fromError(e).show
             })
         } else {
-            this.table.handleAction(action)
+            this.table.handleAction(action, event)
         }
     }
 

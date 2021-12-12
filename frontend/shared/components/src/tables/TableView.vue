@@ -15,7 +15,7 @@
             </template>
             <template #right>
                 <template v-if="!isIOS">
-                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action, $event)" />
                 </template>
 
                 <button v-if="showSelection && isIOS" key="iOSDone" class="button navigation highlight" @click="setShowSelection(false)">
@@ -108,7 +108,7 @@
 
         <div v-if="isIOS" class="tool-bar">
             <div>
-                <button v-for="(action, index) of filteredActions" :key="index" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0 ? undefined : handleAction(action)">
+                <button v-for="(action, index) of filteredActions" :key="index" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0 ? undefined : handleAction(action, $event)">
                     <span :class="'icon '+action.icon" />
                 </button>
 
@@ -1070,7 +1070,24 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         }
     }
 
-    handleAction(action: TableAction<Value>) {
+    handleAction(action: TableAction<Value>, event) {
+        if (action.childActions.length > 0) {
+            const el = event.currentTarget;
+            const bounds = el.getBoundingClientRect()
+            const isOnTop = !this.isIOS
+
+            const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+                x: bounds.left + el.offsetWidth,
+                y: isOnTop ? bounds.bottom : bounds.top,
+                xPlacement: "left",
+                yPlacement: isOnTop ? "bottom" : "top",
+                actions: action.childActions,
+                table: this,
+                focused: this.showSelection  && this.isMobile ? this.getSelection() : []
+            });
+            this.present(displayedComponent.setDisplayStyle("overlay"));
+            return
+        }
         action.handler(this.getSelection(action.allowAutoSelectAll))?.catch((e) => {
             console.error(e)
             Toast.fromError(e).show
@@ -1330,7 +1347,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             display: flex;
             flex-direction: row;
-            align-items: center;
+            align-items: stretch;
 
             position: sticky;
             bottom: 0;

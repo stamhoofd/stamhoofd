@@ -40,18 +40,7 @@ export default class ContextMenuItem extends Mixins(NavigationMixin) {
     }
 
     onClick(event) {
-        if (this.childContextMenu) {
-            // No click actions
-            return
-        }
-        if (this.clicked) {
-            return;
-        }
-        this.clicked = true
-        this.$emit("click", event);
-
-        // Wait to pop to let the browser handle events (e.g. label > checkbox)
-        (this.$parent as any).delayPop(true);
+        (this.$parent as any).onClickItem(this, event)
         
     }
 }

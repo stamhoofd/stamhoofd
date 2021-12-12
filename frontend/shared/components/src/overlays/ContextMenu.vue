@@ -5,7 +5,7 @@
                 ref="context"
                 class="context-menu"
                 :class="usedXPlacement+' '+usedYPlacement"
-                :style="{ transformOrigin, top: top ? top + 'px' : undefined, left: left ? (left + 'px') : undefined, right: right ? (right + 'px') : undefined, bottom: bottom ? (bottom + 'px') : undefined, width: preferredWidth ? (preferredWidth + 'px') : undefined }"
+                :style="{ transformOrigin, top: top ? top + 'px' : undefined, left: left ? (left + 'px') : undefined, right: right ? (right + 'px') : undefined, bottom: bottom ? (bottom + 'px') : undefined, width: usedPreferredWidth ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight ? (usedPreferredHeight + 'px') : undefined }"
                 @click.stop=""
             >
                 <slot />
@@ -44,6 +44,9 @@ export default class ContextMenu extends Vue {
         default: null,
     })
     preferredWidth!: number | null;
+
+    usedPreferredHeight: number | null = null;
+    usedPreferredWidth: number | null = this.preferredWidth;
 
     @Prop({
         default: 0,
@@ -86,10 +89,12 @@ export default class ContextMenu extends Vue {
 
     isPopped = false
 
+    disableHoverChildMenus = false
+
     mounted() {
         // Calculate position
-        const width = (this.$refs.context as HTMLElement).offsetWidth;
-        const height = (this.$refs.context as HTMLElement).offsetHeight;
+        let width = (this.$refs.context as HTMLElement).offsetWidth;
+        let height = (this.$refs.context as HTMLElement).offsetHeight;
 
         const viewPadding = 15;
 
@@ -99,6 +104,21 @@ export default class ContextMenu extends Vue {
             body = doc.getElementsByTagName("body")[0],
             clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth,
             clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
+
+        if (width > clientWidth - viewPadding * 2) {
+            this.usedPreferredWidth = clientWidth - viewPadding * 2;
+            width = this.usedPreferredWidth
+        }
+
+        if (height > clientHeight - viewPadding * 2) {
+            this.usedPreferredHeight = clientHeight - viewPadding * 2;
+            height = this.usedPreferredHeight
+        }
+
+        if (width > clientWidth / 2) {
+            // Screen is too small to fit multiple context menus
+            this.disableHoverChildMenus = true
+        }
 
         let usedX = this.x
 
@@ -119,7 +139,7 @@ export default class ContextMenu extends Vue {
                         this.right = viewPadding
                     }
                 } else {
-                    this.right = clientWidth - viewPadding
+                    this.right = viewPadding
                 }
             } else {
                 if (this.left < viewPadding) {
@@ -235,6 +255,11 @@ export default class ContextMenu extends Vue {
         // Update hover style
         item.isHovered = true
 
+        if (this.disableHoverChildMenus) {
+            // Never automatically show a child menu
+            return
+        }
+
         if (item.childContextMenu) {
             if (!item.childContextMenu.componentInstance()) {
                 // TODO: Wait x ms hover delay, and check is the cursor is still hovered
@@ -262,7 +287,7 @@ export default class ContextMenu extends Vue {
         }
     }
 
-    onMouseLeaveItem(item: ContextMenuItem, event) {
+    onMouseLeaveItem(item: ContextMenuItem) {
         if (this.currentlyHoveredItem === item) {
             this.currentlyHoveredItem = null
 
@@ -273,6 +298,37 @@ export default class ContextMenu extends Vue {
 
         // Update hover style if changed
         item.isHovered = false
+    }
+
+    onClickItem(item: ContextMenuItem, event) {
+        if (item.childContextMenu) {
+            // No click actions
+            if (this.disableHoverChildMenus || (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0))) {
+                // Show child menu and replace self
+                this.pop(true)
+
+                // Present child context menu + send close event to parent
+                const el = item.$el as HTMLElement;
+                const bounds = el.getBoundingClientRect()
+
+                // todo: calculate better position
+                item.childContextMenu.properties.x = bounds.left
+                item.childContextMenu.properties.y = bounds.top
+                item.childContextMenu.properties.xPlacement = "right"
+                item.childContextMenu.properties.yPlacement = "bottom"
+                item.childContextMenu.properties.parentMenu = null
+                item.present(item.childContextMenu.setDisplayStyle("overlay"));
+            }
+            return
+        }
+        if (item.clicked) {
+            return;
+        }
+        item.clicked = true
+        item.$emit("click", event);
+
+        // Wait to pop to let the browser handle events (e.g. label > checkbox)
+        this.delayPop(true);
     }
 
     setChildMenu(component: ComponentWithProperties | null) {
@@ -538,6 +594,7 @@ export default class ContextMenu extends Vue {
         transform-origin: 0% 0%;
         transition: transform 0.2s;
 
+
         &.top {
             transform-origin: 0% 100%;
         }
@@ -613,6 +670,7 @@ export default class ContextMenu extends Vue {
     max-width: 100vw;
     max-width: calc(100vw - 30px);
     overflow: hidden;
+    overflow-y: auto;
 
     .context-menu-item {
         @extend .style-context-menu-item;
@@ -647,6 +705,10 @@ export default class ContextMenu extends Vue {
 
         > .middle {
             padding: 2px 0;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .icon {

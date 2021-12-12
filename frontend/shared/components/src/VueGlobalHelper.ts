@@ -44,7 +44,7 @@ function focusNextElement () {
                     return false
                 }
 
-                if ((('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0))) {
+                if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)) {
                     // Don't focus buttons on mobile
                     activeElement.blur()
                     return true
