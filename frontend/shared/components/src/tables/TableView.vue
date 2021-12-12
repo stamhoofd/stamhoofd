@@ -595,6 +595,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 } else {
                     this.updateColumnWidth()
                 }
+            } else {
+                this.updateRowHeight()
+                this.updateVisibleRows();
+                this.updateRecommendedWidths();
+                this.updateColumnWidth()
             }
         } catch (error) {
             console.error(error)
@@ -1079,7 +1084,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
                 x: bounds.left + el.offsetWidth,
                 y: isOnTop ? bounds.bottom : bounds.top,
-                xPlacement: "left",
+                xPlacement: "right",
                 yPlacement: isOnTop ? "bottom" : "top",
                 actions: action.childActions,
                 table: this,
@@ -1506,9 +1511,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             .columns {
                 padding: 15px 0;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
+                display: block;
 
                 > div {
                     font-size: 14px;
