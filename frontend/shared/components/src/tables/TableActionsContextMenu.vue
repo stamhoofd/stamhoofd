@@ -1,24 +1,10 @@
 <template>
     <ContextMenu v-bind="{...$attrs}">
-        <ContextMenuItem v-if="!showSelection || focused.length >= 1" @click="toggleSelect">
-            {{ isFocusSelected ? 'Deselecteer' : 'Selecteer' }}
-        </ContextMenuItem>
-        <ContextMenuItem v-if="showSelection && !isAllSelected" @click="setSelectAll(true)">
-            Selecteer alles
-        </ContextMenuItem>
-        <ContextMenuItem v-if="showSelection && isAllSelected" @click="setSelectAll(false)">
-            Deselecteer alles
-        </ContextMenuItem>
-        <ContextMenuItem v-if="focused.length == 0" :child-context-menu="columnContextMenu">
-            Kolommen
-            <span slot="right" class="icon arrow-right-small" />
-        </ContextMenuItem>
-
         <template v-for="(actions, groupIndex) of groupedActions">
-            <ContextMenuLine :key="groupIndex+'-line'" />
+            <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
             <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && !action.allowAutoSelectAll" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action)">
                 {{ action.name }}
-                <span v-if="action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
+                <span v-if="action.childMenu || action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
             </ContextMenuItem>
         </template>
@@ -109,35 +95,37 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
 
     get groupedActions() {
         // Group all actions based on their groupIndex property, sorted by groupIndex
-        return Object.values(
-            this.actions
-                .filter(action => {
-                    if (!action.enabled) {
-                        return false
-                    }
-                    if (action.singleSelection && this.focused.length != 1) {
-                        return false;
-                    }
-                    if (!action.needsSelection && this.focused.length > 0) {
-                        return false;
-                    }
-                    return true
-                })
-                .sort((a, b) => a.groupIndex - b.groupIndex)
-                .reduce((acc, action) => {
-                    const group = acc[action.groupIndex];
-                    if (!group) {
-                        acc[action.groupIndex] = [action]
-                    } else {
-                        group.push(action);
-                    }
-                    return acc;
-                }, {} as { [groupIndex: number]: TableAction<any>[] })
-        );
+        return this.actions
+            .filter(action => {
+                if (!action.enabled) {
+                    return false
+                }
+                if (action.singleSelection && this.focused.length != 1) {
+                    return false;
+                }
+                if (!action.needsSelection && this.focused.length > 0) {
+                    return false;
+                }
+                return true
+            })
+            .sort((a, b) => a.groupIndex - b.groupIndex)
+            .reduce((acc, action) => {
+                const group = acc[acc.length - 1];
+                if (group && group[0].groupIndex == action.groupIndex) {
+                    group.push(action);
+                } else {
+                    acc.push([action]);
+                }
+                return acc;
+            }, [] as TableAction<any>[][])
 
     }
 
     getChildContextMenu(action: TableAction<any>) {
+        if (action.childMenu) {
+            return action.childMenu
+        }
+
         if (!action.childActions || action.childActions.length == 0) {
             return
         }

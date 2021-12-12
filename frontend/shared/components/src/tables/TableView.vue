@@ -321,11 +321,37 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         }
         // Show a context menu to select the available columns
 
+        const actions = this.actions.filter(a => a.needsSelection);
+
+        // Also add select all actions
+        if (!this.showSelection || row.cachedSelectionValue == false) {
+            // Add select action
+            actions.push(new TableAction({
+                name: "Selecteer",
+                groupIndex: !this.showSelection ? -1 : 1,
+                priority: 10,
+                handler: () => {
+                    this.setSelectionValue(row, true)
+                    this.setShowSelection(true)
+                }
+            }))
+        } else {
+            // Add select action
+            actions.push(new TableAction({
+                name: "Deselecteer",
+                groupIndex: 1,
+                priority: 10,
+                handler: () => {
+                    this.setSelectionValue(row, false)
+                }
+            }))
+        }
+
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: event.changedTouches ? event.changedTouches[0].pageX : event.clientX,
             y: event.changedTouches ? event.changedTouches[0].pageY : event.clientY,
             focused: [row.value!],
-            actions: this.actions.filter(a => a.needsSelection),
+            actions,
             table: this,
         });
 
@@ -605,12 +631,16 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     onTableHeadRightClick(event) {
         // Show a context menu to select the available columns
-        const displayedComponent = new ComponentWithProperties(ColumnSelectorContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
-            columns: this.allColumns,
-        });
+        const displayedComponent = this.getColumnContextMenu();
+        displayedComponent.properties.x = event.clientX
+        displayedComponent.properties.y = event.clientY
         this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    getColumnContextMenu() {
+        return new ComponentWithProperties(ColumnSelectorContextMenu, {
+            columns: this.allColumns,
+        })
     }
 
     /**
@@ -1050,12 +1080,58 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     showActions(isOnTop: boolean, event) {
         const el = event.currentTarget;
         const bounds = el.getBoundingClientRect()
+
+        const actions = (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions.slice())
+
+        // Also add select all actions
+        if (!this.showSelection && !this.isIOS) {
+            // Add select action
+            actions.push(new TableAction({
+                name: "Selecteer",
+                groupIndex: -1,
+                priority: 10,
+                handler: () => {
+                    this.setShowSelection(true)
+                }
+            }))
+        }
+
+        // Add select all action
+        if (!this.cachedAllSelected) {
+            actions.push(new TableAction({
+                name: "Selecteer alles",
+                groupIndex: -1,
+                priority: 9,
+                handler: () => {
+                    this.setShowSelection(true)
+                    this.setSelectAll(true)
+                }
+            }))
+        } else {
+            actions.push(new TableAction({
+                name: "Deselecteer alles",
+                groupIndex: -1,
+                priority: 9,
+                handler: () => {
+                    this.setSelectAll(false)
+                }
+            }))
+        }
+        
+        // Add action to change visible columns
+        actions.push(new TableAction({
+            name: "Wijzig kolommen",
+            groupIndex: -1,
+            priority: 8,
+            childMenu: this.getColumnContextMenu()
+        }))
+
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: bounds.left + el.offsetWidth,
             y: bounds.top + (isOnTop ? el.offsetHeight : 0),
             xPlacement: "left",
             yPlacement: isOnTop ? "bottom" : "top",
-            actions: (this.isMobile && this.showSelection ? this.actions.filter(a => a.needsSelection) : this.actions),
+            actions,
             table: this,
             focused: this.showSelection  && this.isMobile ? this.getSelection() : []
         });

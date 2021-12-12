@@ -40,6 +40,10 @@ export default class ContextMenuItem extends Mixins(NavigationMixin) {
     }
 
     onClick(event) {
+        if (this.childContextMenu) {
+            // No click actions
+            return
+        }
         if (this.clicked) {
             return;
         }

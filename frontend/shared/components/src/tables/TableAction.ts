@@ -1,3 +1,5 @@
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+
 export class TableAction<T> {
     name: string;
     icon: string;
@@ -27,6 +29,7 @@ export class TableAction<T> {
     singleSelection = false
 
     childActions: TableAction<T>[] = []
+    childMenu: ComponentWithProperties | null = null
 
     constructor(settings: Partial<TableAction<T>>) {
         this.name = settings.name ?? "";
@@ -40,5 +43,6 @@ export class TableAction<T> {
         this.enabled = settings.enabled ?? true;
         this.allowAutoSelectAll = settings.allowAutoSelectAll ?? true;
         this.childActions = settings.childActions ?? [];
+        this.childMenu = settings.childMenu ?? null;
     }
 }

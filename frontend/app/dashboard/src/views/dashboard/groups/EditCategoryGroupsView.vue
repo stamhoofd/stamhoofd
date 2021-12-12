@@ -77,7 +77,7 @@
                 <hr>
                 <h2>Start nieuwe inschrijvingsperiode</h2>
                 <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je leden automatisch verplaatsen naar een vorige inschrijvingsperiode, zodat ze opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
-                <button type="button" class="button text" @click="startNewRegistrationPeriod">
+                <button type="button" class="button text" @click.left.exact="startNewRegistrationPeriod(false)" @click.alt.exact="startNewRegistrationPeriod(true)">
                     <span class="icon undo" /><span>Start nieuwe inschrijvingsperiode...</span>
                 </button>
             </div>
@@ -458,10 +458,10 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
-    startNewRegistrationPeriod() {
+    startNewRegistrationPeriod(undo = false) {
         const tree = GroupCategoryTree.build(this.category, this.organization.meta.categories, this.organization.groups)
         const initialGroupIds =  tree.getAllGroups().map(g => g.id)
-        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds }).setDisplayStyle("popup"))
+        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds, undo }).setDisplayStyle("popup"))
     }
 }
 </script>

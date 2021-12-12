@@ -27,6 +27,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, CenteredMessageButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -67,6 +68,23 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     waitingList!: boolean;
 
     allValues: MemberWithRegistrations[] = []
+
+    mounted() {
+        // Set url
+        if (this.group) {
+            UrlHelper.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
+            document.title = "Stamhoofd - "+this.group.settings.name
+        } else {
+            if (this.category) {
+                UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
+                document.title = "Stamhoofd - "+ this.category.settings.name +" - Alle leden"
+            } else {
+                UrlHelper.setUrl("/groups/all")    
+                document.title = "Stamhoofd - Alle leden"
+            }
+            
+        }
+    }
 
     get estimatedRows() {
         if (!this.loading) {
