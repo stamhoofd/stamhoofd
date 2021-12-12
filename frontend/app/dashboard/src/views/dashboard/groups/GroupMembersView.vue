@@ -36,6 +36,7 @@ import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
+import MemberSummaryBuilderView from "../member/MemberSummaryBuilderView.vue";
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 import SMSView from "../sms/SMSView.vue";
@@ -229,14 +230,13 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 }
             }),
             new TableAction({
-                name: "Exporteren",
+                name: "Exporteren naar",
                 icon: "download",
                 priority: 8,
                 groupIndex: 3,
                 childActions: [
                     new TableAction({
                         name: "Excel",
-                        icon: "download",
                         priority: 0,
                         groupIndex: 0,
                         handler: (members: MemberWithRegistrations[]) => {
@@ -245,13 +245,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                         }
                     }),
                     new TableAction({
-                        name: "Samenvatting",
-                        icon: "download",
+                        name: "PDF...",
                         priority: 0,
                         groupIndex: 0,
                         handler: (members: MemberWithRegistrations[]) => {
                         // todo: vervangen door een context menu
-                            this.exportToExcel(members).catch(console.error)
+                            this.exportToPDF(members)
                         }
                     }),
                 ],
@@ -826,6 +825,16 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             console.error(e)
             Toast.fromError(e).show()
         }
+    }
+
+    exportToPDF(members: MemberWithRegistrations[]) {
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberSummaryBuilderView, {
+                members,
+                group: this.group
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async return(members: MemberWithRegistrations[], allow = true) {
