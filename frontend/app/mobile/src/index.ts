@@ -237,7 +237,7 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
     const result = await Filesystem.writeFile({
         path: filename,
         data,
-        directory: Directory.Cache,
+        directory: Directory.External,
         // encoding: Encoding.UTF8, // if not present: data should be base64 encoded
     });
 
@@ -257,11 +257,11 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
         throw e
     }
 
-    try {
+    /*try {
         await Filesystem.deleteFile({
             path: result.uri
         })
     } catch (e) {
         console.error(e)
-    }
+    }*/
 }

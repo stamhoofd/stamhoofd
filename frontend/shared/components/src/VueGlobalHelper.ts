@@ -73,6 +73,7 @@ export class VueGlobalHelper {
         }
 
         Vue.prototype.$OS = AppManager.shared.getOS()
+        Vue.prototype.$isNative = AppManager.shared.isNative
 
         Vue.prototype.$isAndroid = Vue.prototype.$OS === "android"
         Vue.prototype.$isIOS = Vue.prototype.$OS === "iOS"

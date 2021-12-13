@@ -57,7 +57,8 @@
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click="createPDF">
                         <span class="icon download" />
-                        <span>Download</span>
+                        <span v-if="!$isNative">Download</span>
+                        <span v-else>Opslaan</span>
                     </button>
                 </LoadingButton>
             </template>
