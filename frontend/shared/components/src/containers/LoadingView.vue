@@ -37,10 +37,12 @@ export default class LoadingView extends Vue {
     > .spinner-container {
         opacity: 1;
         position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        left: 0;
+        top: 0;
         transition: opacity 0.2s 1s;
+        bottom: 0;
+        right: 0;
+        height: 100%;
 
     }
     
