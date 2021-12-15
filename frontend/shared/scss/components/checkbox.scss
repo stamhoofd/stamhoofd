@@ -75,7 +75,7 @@ $checkbox-border-radius: 5px;
             flex-basis: 20px;
             border-radius: $checkbox-border-radius;
             border: $border-width solid $color-border;
-            box-shadow: 0px 1px 0.5px 0px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
             background: $color-background;
             box-sizing: border-box;
             transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
