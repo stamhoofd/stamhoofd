@@ -1570,7 +1570,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     .table-head {
         height: 50px;
         border-bottom: $border-width-thin solid $color-border;
-        margin-bottom: - $border-width-thin;
+        margin-bottom: calc(-1 * #{$border-width-thin});
         position: sticky;
         top: 0px;
         z-index: 100;
