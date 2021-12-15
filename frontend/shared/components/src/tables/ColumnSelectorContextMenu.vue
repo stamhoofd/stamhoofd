@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{...$attrs}">
+    <ContextMenu v-bind="$attrs">
         <ContextMenuItem v-for="column of columns" :key="column.id" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
             <Checkbox slot="left" :checked="column.enabled" :only-line="true" />
             {{ column.name }}

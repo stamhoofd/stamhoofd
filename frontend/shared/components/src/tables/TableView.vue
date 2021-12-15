@@ -511,6 +511,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     mounted() {
+        console.info((TableView as any).options.props)
         this.loadColumnConfiguration().catch(console.error)
         this.getScrollElement(this.$refs["table"] as HTMLElement).addEventListener("scroll", this.onScroll, { passive: true })
 
