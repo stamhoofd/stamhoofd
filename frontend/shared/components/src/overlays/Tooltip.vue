@@ -54,10 +54,12 @@ export default class Tooltip extends Vue {
 
         // Hide on scroll or any touch
         document.addEventListener("touchstart", this.hide, { passive: true })
+        document.addEventListener("pointerdown", this.hide, { passive: true })
     }
 
     beforeDestroy() {
         document.removeEventListener("touchstart", this.hide)
+        document.removeEventListener("pointerdown", this.hide)
     }
 
     hide() {

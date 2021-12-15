@@ -26,7 +26,7 @@ const helper = {
     },
     
     copiedPopup(event, vnode) {
-        const el = event.target
+        const el = event.currentTarget
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
@@ -50,6 +50,13 @@ const helper = {
             }
         }
         el.$tooltipDisplayedComponent = displayedComponent;
+
+
+        // Add style
+        el.classList.add("copied");
+        setTimeout(() => {
+            el.classList.remove("copied");
+        }, 500);
     },
 
     copyElement(event, bindingValue: any, vnode: any) {

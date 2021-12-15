@@ -140,16 +140,20 @@
 
                 <dl class="details-grid hover">
                     <dt>Naam</dt>
-                    <dd>{{ parent.name }}</dd>
+                    <dd v-copyable>
+                        {{ parent.name }}
+                    </dd>
 
                     <template v-if="parent.phone">
                         <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
-                        <dd>{{ parent.phone }}</dd>
+                        <dd v-copyable>
+                            {{ parent.phone }}
+                        </dd>
                     </template>
 
                     <template v-if="parent.email">
                         <dt>E-mailadres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ parent.email }}
                             <span v-if="getInvalidEmailDescription(parent.email)" v-tooltip="getInvalidEmailDescription(parent.email)" class="icon warning yellow" />
                         </dd>
@@ -157,7 +161,7 @@
 
                     <template v-if="parent.address">
                         <dt>Adres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ parent.address.street }} {{ parent.address.number }}<br>{{ parent.address.postalCode }}
                             {{ parent.address.city }}
                             <template v-if="parent.address.country !== currentCountry">
@@ -179,10 +183,14 @@
 
                 <dl class="details-grid hover">
                     <dt>Naam</dt>
-                    <dd>{{ contact.name }}</dd>
+                    <dd v-copyable>
+                        {{ contact.name }}
+                    </dd>
 
                     <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
-                    <dd>{{ contact.phone }}</dd>
+                    <dd v-copyable>
+                        {{ contact.phone }}
+                    </dd>
                 </dl>
             </div>
 
@@ -198,12 +206,16 @@
                 <dl class="details-grid hover">
                     <template v-if="member.details.doctor.name">
                         <dt>Naam</dt>
-                        <dd>{{ member.details.doctor.name }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.doctor.name }}
+                        </dd>
                     </template>
 
                     <template v-if="member.details.doctor.phone">
                         <dt>Telefoonnummer</dt>
-                        <dd>{{ member.details.doctor.phone }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.doctor.phone }}
+                        </dd>
                     </template>
                 </dl>
             </div>

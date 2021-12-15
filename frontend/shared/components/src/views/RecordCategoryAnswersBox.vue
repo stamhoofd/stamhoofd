@@ -15,7 +15,7 @@
                 </dd>
                 <dd v-if="getAnswer(record).comments" :key="'dd-description-'+record.id" class="description pre-wrap" v-text="getAnswer(record).comments" />
             </template>
-            <dd v-else :key="'dd-'+record.id">
+            <dd v-else :key="'dd-'+record.id" v-copyable>
                 {{ getAnswer(record).stringValue }}
 
                 <button v-if="canDelete" class="button icon trash" type="button" @click="$emit('delete', record)" />
@@ -32,10 +32,10 @@ import { RecordAnswer, RecordCategory, RecordSettings, RecordType } from '@stamh
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { default as CopyableDirective } from "../directives/Copyable";
 
 @Component({
-    components: {
-    },
+    directives: { Copyable: CopyableDirective },
     filters: {
         price: Formatter.price
     }

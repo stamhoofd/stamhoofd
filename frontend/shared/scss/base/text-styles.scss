@@ -413,21 +413,45 @@
         user-select: contain;
         position: relative;
         z-index: 1;
+        cursor: default;
+
+        transition: color 0.2s;
     }
 
+    dd:before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -10px;
+        right: -10px;
+        bottom: -8px;
+        border-radius: $border-radius;
+        background: $color-primary-background;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+
     @media (hover: hover) {
+        dd:after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -10px;
+            right: -10px;
+            bottom: -8px;
+            border-radius: $border-radius;
+            background: $color-background-shade;
+            z-index: -2;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
         &.hover {
             dt:hover + dd, dd:hover{
-                &:not(.icons):before {
-                    content: '';
-                    position: absolute;
-                    top: -8px;
-                    left: -10px;
-                    right: -10px;
-                    bottom: -8px;
-                    border-radius: $border-radius;
-                    background: $color-background-shade;
-                    z-index: -1;
+                &:not(.icons):after {
+                    opacity: 1;
                 }
             }
 
@@ -437,7 +461,14 @@
                 }
             }
         }
+    }
 
+    dd.copied {
+        color: $color-primary;
+
+        &:before {
+            opacity: 1;
+        }
     }
     
     .center {
