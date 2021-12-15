@@ -26,7 +26,7 @@ const helper = {
     },
     
     copiedPopup(event, vnode) {
-        const el = event.currentTarget
+        const el = event.currentTarget || event.target
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
