@@ -11,6 +11,7 @@ const helper = {
 
         event.target.contentEditable = false;
 
+
         const w = window as any;
         if (w.getSelection) {
             if (w.getSelection().empty) {  // Chrome
@@ -19,7 +20,9 @@ const helper = {
                 w.getSelection().removeAllRanges();
             }
         }
-        this.copiedPopup(event, vnode)
+        this.copiedPopup(event, vnode);
+
+        (document.activeElement as HTMLElement)?.blur()
     },
     
     copiedPopup(event, vnode) {
@@ -50,15 +53,20 @@ const helper = {
     },
 
     copyElement(event, bindingValue: any, vnode: any) {
+        if (window.getSelection() !== null && window.getSelection()!.toString().length > 0) {
+            return
+        }
         if (navigator.clipboard) {
             // Select all
             const myText = bindingValue ?? event.currentTarget.textContent.trim();
             navigator.clipboard.writeText(myText).then(() => {
                 this.copiedPopup(event, vnode);
-            }).catch(() => {
+            }).catch((e) => {
+                console.error(e);
                 this.copyElementFallback(event, vnode);
             });
         } else {
+            console.warn("No navigator.clipboard support");
             this.copyElementFallback(event, vnode);
         }        
     },

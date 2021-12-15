@@ -332,13 +332,24 @@
 
 .style-definition-term {
     font-size: 14px;
-    font-weight: $font-weight-semibold;
+    font-weight: $font-weight-default;
     line-height: 1.5;
+    color: $color-gray-text;
+
+    @media (max-width: 550px) {
+        font-size: 13px;
+    }
 }
 
 .style-definition-description {
     @extend .style-description-small;
-    color: $color-gray-text;
+    color: $color-dark;
+
+    font-size: 16px;
+
+    @media (max-width: 550px) {
+        font-size: 15px;
+    }
 }
 
 .style-with-button {
@@ -378,8 +389,9 @@
 
 .details-grid {
     display: grid;
-    grid-template-columns: 40% 1fr;
-    gap: 8px 15px;
+    grid-template-columns: auto 1fr;
+    gap: 8px 25px;
+
 
     &.small {
         grid-template-columns: 150px 1fr;
@@ -387,6 +399,7 @@
 
     dt {
         @extend .style-definition-term;
+        cursor: default;
     }
 
     dd {
@@ -398,20 +411,48 @@
         -webkit-user-select: text;
         user-select: text;
         user-select: contain;
+        position: relative;
+        z-index: 1;
     }
 
+    @media (hover: hover) {
+        &.hover {
+            dt:hover + dd, dd:hover{
+                &:not(.icons):before {
+                    content: '';
+                    position: absolute;
+                    top: -8px;
+                    left: -10px;
+                    right: -10px;
+                    bottom: -8px;
+                    border-radius: $border-radius;
+                    background: $color-background-shade;
+                    z-index: -1;
+                }
+            }
+
+            dd.icons + dd {
+                &:before {
+                    display: none;
+                }
+            }
+        }
+
+    }
+    
     .center {
         align-self: center;
     }
 
     .icons {
         line-height: 1;
+        margin-left: auto;
     }
 
     dd.description {
         grid-column: 1 / span 2;
         margin-top: -5px;
-        @extend .style-description-small;
+        font-size: 15px;
     }
 }
 

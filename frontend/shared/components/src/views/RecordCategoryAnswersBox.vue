@@ -1,5 +1,5 @@
 <template>
-    <dl class="details-grid">
+    <dl class="details-grid hover">
         <template v-for="record of records">
             <dt :key="'dt-'+record.id" class="center">
                 {{ record.name }}

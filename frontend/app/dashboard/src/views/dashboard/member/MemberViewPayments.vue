@@ -9,7 +9,7 @@
                 <div v-for="(payment, index) in payments" :key="payment.id" class="container">
                     <hr v-if="index > 0">
                     <h2 class="style-with-button">
-                        <div>Afrekening</div>
+                        <div>Afrekening {{ payments.length - index }}</div>
                         <div class="hover-show">
                             <button v-if="hasWrite" class="button icon gray edit" @click="editPayment(payment)" />
                         </div>
@@ -42,25 +42,18 @@
 
                         <dt>Betaalmethode</dt>
                         <dd>{{ getMethodName(payment.method) }}</dd>
-
-                        <dt>Status</dt>
-                        <dd v-if="payment.status == 'Succeeded'">
-                            Betaald
-                        </dd>
-                        <dd v-else>
-                            Nog niet betaald
-                        </dd>
                     </dl>
 
-                    <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">
+                    <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box with-button">
                         Betaald op {{ payment.paidAt | date }}
+
+                        <button class="button text" @click="markNotPaid(payment)">
+                            Ongedaan maken
+                        </button>
                     </p>
 
-                    <LoadingButton :loading="loading">
-                        <button v-if="payment.status == 'Succeeded' && payment.paidAt" class="button secundary" @click="markNotPaid(payment)">
-                            Toch niet betaald
-                        </button>
-                        <button v-else class="button primary" @click="markPaid(payment)">
+                    <LoadingButton v-else :loading="loading">
+                        <button class="button primary" @click="markPaid(payment)">
                             Markeer als betaald
                         </button>
                     </LoadingButton>

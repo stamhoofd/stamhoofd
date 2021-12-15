@@ -2,11 +2,11 @@
     <div class="st-view member-view">
         <STNavigationBar :title="member.details.firstName" :pop="canPop" :dismiss="canDismiss">
             <template #right>
-                <button v-if="hasPreviousMember" class="button navigation icon arrow-up" @click="goBack" />
-                <button v-if="hasNextMember" class="button navigation icon arrow-down" @click="goNext" />
+                <button v-if="hasPreviousMember || hasNextMember" v-tooltip="'Ga naar vorige lid'" class="button navigation icon arrow-up" :disabled="!hasPreviousMember" @click="goBack" />
+                <button v-if="hasNextMember || hasPreviousMember" v-tooltip="'Ga naar volgende lid'" class="button navigation icon arrow-down" :disabled="!hasNextMember" @click="goNext" />
 
-                <button class="button icon navigation edit" @click="editMember" />
-                <button class="button icon navigation more" @click="showContextMenu" />
+                <button v-tooltip="'Lid bewerken'" class="button icon navigation edit" @click="editMember" />
+                <button class="button icon navigation more" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
 
@@ -29,12 +29,14 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
-import { Gender,Group,MemberWithRegistrations } from '@stamhoofd/structures';
+import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
+import { Gender,getPermissionLevelNumber,Group,MemberWithRegistrations, PermissionLevel } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
+import { OrganizationManager } from "../../../classes/OrganizationManager";
+import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberView from "./edit/EditMemberView.vue";
-import MemberContextMenu from "./MemberContextMenu.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 
@@ -124,7 +126,8 @@ export default class MemberView extends Mixins(NavigationMixin) {
         this.show({
             components: [component],
             replace: 1,
-            reverse: true
+            reverse: true,
+            animated: false
         })
     }
 
@@ -141,12 +144,13 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
             group: this.group,
             cycleOffset: this.cycleOffset,
-            waitingList: this.waitingList
+            waitingList: this.waitingList,
         });
 
         this.show({
             components: [component],
             replace: 1,
+            animated: false
         })
     }
 
@@ -180,21 +184,48 @@ export default class MemberView extends Mixins(NavigationMixin) {
         }
     }
 
+    get hasWrite(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if (OrganizationManager.user.permissions.hasFullAccess()) {
+            // Can edit members without groups
+            return true
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
+    }
+
+    get actions() {
+        const builder = new MemberActionBuilder({
+            component: this,
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            inWaitingList: this.waitingList,
+            hasWrite: this.hasWrite,
+        })
+
+        return builder.getActions()
+    }
+
     showContextMenu(event) {
         const el = event.currentTarget;
         const bounds = el.getBoundingClientRect()
 
-        const displayedComponent = new ComponentWithProperties(MemberContextMenu, {
-            x: bounds.left + el.offsetWidth,
-            y: bounds.top + el.offsetHeight,
-
-            xPlacement: "left",
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: bounds.left,
+            y: bounds.bottom,
+            xPlacement: "right",
             yPlacement: "bottom",
-
-            member: this.member,
-            group: this.group,
-            cycleOffset: this.cycleOffset,
-            waitingList: this.waitingList
+            actions: this.actions,
+            focused: [this.member]
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }

@@ -70,9 +70,15 @@ $border-radius: 9px;
 
 .st-view > main > h1 + .segmented-control {
     margin-bottom: 25px;
+
+    @media (max-width: 550px) {
+        margin-bottom: 20px;
+    }
 }
 
 .segmented-control {
+    user-select: none;
+    -webkit-touch-callout: none;
     background: $color-gray-3;
     padding: $segmented-control-border-width;
     border-radius: $border-radius;

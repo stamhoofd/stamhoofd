@@ -9,9 +9,27 @@
                 {{ member.firstName }} is niet ingeschreven
             </p>
 
-            <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box container">
+            <div v-if="$isMobile && hasWarnings" class="hover-box container">
                 <hr v-if="member.activeRegistrations.length == 0">
-                <dl class="details-grid">
+                <ul class="member-records">
+                    <li
+                        v-for="warning in sortedWarnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
+                    >
+                        <span :class="'icon '+getIcon(warning)" />
+                        <span class="text">{{ warning.text }}</span>
+                    </li>
+                </ul>
+
+                <p v-if="warnings.length == 0" class="info-box">
+                    Geen waarschuwingen
+                </p>
+            </div>
+
+            <div class="hover-box container">
+                <hr v-if="($isMobile && hasWarnings) || member.activeRegistrations.length == 0">
+                <dl class="details-grid hover">
                     <template v-if="member.details.firstName">
                         <dt>Voornaam</dt>
                         <dd v-copyable>
@@ -66,10 +84,10 @@
                         </dd>
                     </template>
                 </dl>
-                <hr v-if="member.activeRegistrations.length > 0">
             </div>
 
             <div v-if="member.activeRegistrations.length > 0" class="container">
+                <hr>
                 <h2 class="style-with-button with-list">
                     <div>Inschrijvingen</div>
                     <div>
@@ -120,7 +138,7 @@
                     </div>
                 </h2>
 
-                <dl class="details-grid">
+                <dl class="details-grid hover">
                     <dt>Naam</dt>
                     <dd>{{ parent.name }}</dd>
 
@@ -159,7 +177,7 @@
                     </div>
                 </h2>
 
-                <dl class="details-grid">
+                <dl class="details-grid hover">
                     <dt>Naam</dt>
                     <dd>{{ contact.name }}</dd>
 
@@ -177,7 +195,7 @@
                     </div>
                 </h2>
 
-                <dl class="details-grid">
+                <dl class="details-grid hover">
                     <template v-if="member.details.doctor.name">
                         <dt>Naam</dt>
                         <dd>{{ member.details.doctor.name }}</dd>

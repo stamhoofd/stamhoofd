@@ -309,10 +309,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     onRightClickRow(row: VisibleRow<Value>, event) {
-        if (this.isMobile) {
-            AppManager.shared.hapticTap()
-        }
-        
         if (this.isMobile && !this.showSelection && !this.isIOS) {
             // On Android, the default long press action is switching to editing mode
             this.setSelectionValue(row, true)
@@ -1149,7 +1145,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         }))
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: bounds.left + el.offsetWidth,
+            x: bounds.right,
             y: bounds.top + (isOnTop ? el.offsetHeight : 0),
             xPlacement: "left",
             yPlacement: isOnTop ? "bottom" : "top",
@@ -1304,6 +1300,32 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get totalHeight() {
         return this.rowHeight * this.totalItemsCount
+    }
+
+    getPrevious(value: Value): Value | null {
+        for (let index = 0; index < this.sortedValues.length; index++) {
+            const _value = this.sortedValues[index];
+            if (_value.id == value.id) {
+                if (index == 0) {
+                    return null;
+                }
+                return this.sortedValues[index - 1];
+            }
+        }
+        return null;
+    }
+
+    getNext(value: Value): Value | null {
+        for (let index = 0; index < this.sortedValues.length; index++) {
+            const _value = this.sortedValues[index];
+            if (_value.id == value.id) {
+                if (index == this.sortedValues.length - 1) {
+                    return null;
+                }
+                return this.sortedValues[index + 1];
+            }
+        }
+        return null;
     }
 }
 </script>

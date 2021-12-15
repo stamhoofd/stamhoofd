@@ -1,5 +1,5 @@
 <template>
-    <TableView :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
+    <TableView ref="table" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
         <button v-if="titleDescription" class="info-box selectable" type="button" @click="resetCycle">
             {{ titleDescription }}
 
@@ -34,14 +34,12 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
-import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
-import MemberSummaryBuilderView from "../member/MemberSummaryBuilderView.vue";
 import MemberView from "../member/MemberView.vue";
 import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
-import SMSView from "../sms/SMSView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import EditGroupView from "./EditGroupView.vue";
+import { MemberActionBuilder } from "./MemberActionBuilder";
 
 @Component({
     components: {
@@ -108,7 +106,17 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
     
     get actions(): TableAction<MemberWithRegistrations>[] {
+        const builder = new MemberActionBuilder({
+            component: this,
+            group: this.group,
+            cycleOffset: this.cycleOffset,
+            inWaitingList: this.waitingList,
+            hasWrite: this.hasWrite,
+        })
+
         return [
+            ...builder.getActions(),
+            ...builder.getWaitingListActions(),
             new TableAction({
                 name: "Nieuw lid",
                 icon: "add",
@@ -134,19 +142,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             }),
 
             new TableAction({
-                name: "Bewerk",
-                icon: "edit",
-                priority: 0,
-                groupIndex: 1,
-                needsSelection: true,
-                singleSelection: true,
-                enabled: this.hasWrite,
-                handler: (members: MemberWithRegistrations[]) => {
-                    this.editMember(members[0])
-                }
-            }),
-
-            new TableAction({
                 name: "Open wachtlijst",
                 icon: "clock",
                 priority: 0,
@@ -157,7 +152,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     this.openWaitingList()
                 }
             }),
-
 
             new TableAction({
                 name: "Vorige inschrijvingsperiode",
@@ -182,79 +176,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     this.goNext()
                 }
             }),
-        
-            //
-            new TableAction({
-                name: "Toelaten om in te schrijven",
-                icon: "success",
-                priority: 15,
-                groupIndex: 3,
-                enabled: this.hasWrite && this.waitingList,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                handler: async (members: MemberWithRegistrations[]) => {
-                    await this.return(members, true)
-                }
-            }),
-
-            new TableAction({
-                name: "Toelating intrekken",
-                icon: "canceled",
-                priority: 14,
-                groupIndex: 3,
-                enabled: this.hasWrite && this.waitingList,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                handler: async (members: MemberWithRegistrations[]) => {
-                    await this.return(members, false)
-                }
-            }),
-
-            new TableAction({
-                name: "E-mailen",
-                icon: "email",
-                priority: 10,
-                groupIndex: 3,
-                handler: (members: MemberWithRegistrations[]) => {
-                    this.openMail(members)
-                }
-            }),
-            new TableAction({
-                name: "SMS'en",
-                icon: "feedback-line",
-                priority: 9,
-                groupIndex: 3,
-
-                handler: (members: MemberWithRegistrations[]) => {
-                    this.openSMS(members)
-                }
-            }),
-            new TableAction({
-                name: "Exporteren naar",
-                icon: "download",
-                priority: 8,
-                groupIndex: 3,
-                childActions: [
-                    new TableAction({
-                        name: "Excel",
-                        priority: 0,
-                        groupIndex: 0,
-                        handler: (members: MemberWithRegistrations[]) => {
-                        // todo: vervangen door een context menu
-                            this.exportToExcel(members).catch(console.error)
-                        }
-                    }),
-                    new TableAction({
-                        name: "PDF...",
-                        priority: 0,
-                        groupIndex: 0,
-                        handler: (members: MemberWithRegistrations[]) => {
-                        // todo: vervangen door een context menu
-                            this.exportToPDF(members)
-                        }
-                    }),
-                ]
-            }),
 
             new TableAction({
                 name: "Instellingen",
@@ -265,69 +186,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 enabled: this.hasFull,
                 handler: () => {
                     this.editSettings()
-                }
-            }),
-
-            // Waiting list actions
-            new TableAction({
-                name: "Verplaatst naar wachtlijst",
-                priority: 0,
-                groupIndex: 5,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: !this.waitingList && this.hasWrite,
-                handler: (members) => {
-                    this.moveToWaitingList(members)
-                }
-            }),
-
-            new TableAction({
-                name: "Schrijf in",
-                priority: 0,
-                groupIndex: 5,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.waitingList && this.hasWrite,
-                handler: (members) => {
-                    this.acceptWaitingList(members)
-                }
-            }),
-
-            new TableAction({
-                name: "Uitschrijven",
-                priority: 0,
-                groupIndex: 5,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.hasWrite,
-                handler: (members) => {
-                    this.deleteRegistration(members)
-                }
-            }),
-
-
-            new TableAction({
-                name: "Gegevens gedeeltelijk wissen...",
-                priority: 0,
-                groupIndex: 5,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.hasWrite,
-                handler: (members) => {
-                    this.deleteRecords(members)
-                }
-            }),
-
-            new TableAction({
-                name: "Verwijderen",
-                icon: "trash",
-                priority: 0,
-                groupIndex: 5,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.hasWrite,
-                handler: (members) => {
-                    this.deleteData(members)
                 }
             }),
 
@@ -518,14 +376,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     openMember(member: MemberWithRegistrations) {
+        const table = this.$refs.table as TableView<MemberWithRegistrations> | undefined
         const component = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberView, {
                 member: member,
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                //getNextMember: this.getNextMember,
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                //getPreviousMember: this.getPreviousMember,
-
+                getNextMember: table?.getNext,
+                getPreviousMember: table?.getPrevious,
                 group: this.group,
                 cycleOffset: this.cycleOffset,
                 waitingList: this.waitingList
@@ -737,32 +593,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         })
     }
 
-    openMail(members: MemberWithRegistrations[], subject = "") {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MailView, {
-                members,
-                group: this.group,
-                defaultSubject: subject
-            })
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
-    }
 
-    openSMS(members: MemberWithRegistrations[]) {
-        const displayedComponent = new ComponentWithProperties(SMSView, {
-            members,
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
-    }
-
-    editMember(member: MemberWithRegistrations) {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditMemberView, {
-                member,
-            })
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
-    }
 
     addMember() {
         this.present(new ComponentWithProperties(NavigationController, {
@@ -812,149 +643,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    async exportToExcel(members: MemberWithRegistrations[]) {
-        try {
-            const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
-            const MemberExcelExport = d.MemberExcelExport
-            MemberExcelExport.export(members);
-        } catch (e) {
-            console.error(e)
-            Toast.fromError(e).show()
-        }
-    }
 
-    exportToPDF(members: MemberWithRegistrations[]) {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberSummaryBuilderView, {
-                members,
-                group: this.group
-            })
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
-    }
-
-    async return(members: MemberWithRegistrations[], allow = true) {
-        members = members.filter(m => !this.group || (allow && m.waitingGroups.find(r => r.id === this.group!.id)) || (!allow && m.acceptedWaitingGroups.find(r => r.id === this.group!.id)))
-        if (members.length == 0) {
-            return;
-        }
-
-        try {
-            const patches = MemberManager.getPatchArray()
-            for (const member of members) {
-                const registrationsPatch = MemberManager.getRegistrationsPatchArray()
-
-                const registration = member.registrations.find(r => r.groupId == this.group!.id && r.waitingList == true && r.cycle == this.group!.cycle)
-                if (!registration) {
-                    throw new Error("Not found")
-                }
-                registrationsPatch.addPatch(Registration.patchType().create({
-                    id: registration.id,
-                    canRegister: allow
-                }))
-
-                patches.addPatch(EncryptedMemberWithRegistrationsPatch.create({
-                    id: member.id,
-                    registrations: registrationsPatch
-                }))
-            }
-            await MemberManager.patchMembers(patches)
-        } catch (e) {
-            console.error(e)
-            // todo
-        }
-        this.reload()
-
-        if (allow) {
-            this.openMail(members, "Je kan nu inschrijven!")
-        }
-    }
-
-    acceptWaitingList(members: MemberWithRegistrations[]) {
-        new CenteredMessage("Wil je "+members.length+" leden inschrijven?", "We raden sterk aan om leden toe te laten en daarna uit te nodigen om in te schrijven via een e-mail. Dan zijn ze verplicht om de rest van hun gegevens aan te vullen en de betaling in orde te brengen.")
-            .addButton(new CenteredMessageButton("Toch inschrijven", {
-                action: async () => {
-                    await MemberManager.acceptFromWaitingList(members, this.group, this.cycleOffset)
-                    new Toast(members.length+" leden zijn ingeschreven", "success green").show()
-                },
-                type: "destructive",
-                icon: "download"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
-    }
-
-    deleteRecords(members: MemberWithRegistrations[]) {
-        new CenteredMessage("Gegevens van "+members.length+" leden wissen", "Opgelet, je kan dit niet ongedaan maken! Deze functie houdt de leden wel in het systeem, maar verwijdert een deel van de gegevens (o.a. handig om in orde te zijn met GDPR).")
-            .addButton(new CenteredMessageButton("Behoud contactgegevens", {
-                action: async () => {
-                    if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam, e-mailadres en telefoonnummer (van leden zelf en ouders indien -18jaar) worden verwijderd.")) {
-                        await MemberManager.deleteDataExceptContacts(members)
-                        new Toast("De steekkaart van "+members.length+" leden is verwijderd.", "success green").show()
-                    }
-                },
-                type: "destructive",
-                icon: "trash"
-            }))
-            .addButton(new CenteredMessageButton("Behoud enkel naam", {
-                action: async () => {
-                    if (await CenteredMessage.confirm("Ben je zeker?", "Verwijder", "Alle gegevens van deze leden, met uitzondering van hun voor- en achternaam worden verwijderd.")) {
-                        await MemberManager.deleteData(members)
-                        new Toast("De steekkaart van "+members.length+" leden is verwijderd.", "success green").show()
-                    }
-                },
-                type: "destructive",
-                icon: "trash"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
-    }
-
-    moveToWaitingList(members: MemberWithRegistrations[]) {
-        new CenteredMessage("Wil je "+members.length+" leden naar de wachtlijst verplaatsen?")
-            .addButton(new CenteredMessageButton("Naar wachtlijst", {
-                action: async () => {
-                    await MemberManager.moveToWaitingList(members, this.group, this.cycleOffset)
-                    new Toast(members.length+" leden zijn naar de wachtlijst verplaatst", "success green").show()
-                },
-                type: "destructive",
-                icon: "clock"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
-    }
-
-    deleteData(members: MemberWithRegistrations[]) {
-        new CenteredMessage("Wil je alle data van "+members.length+" leden verwijderen?", "Dit verwijdert alle data van de geselecteerde leden, inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.")
-            .addButton(new CenteredMessageButton("Verwijderen", {
-                action: async () => {
-                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, definitief verwijderen")) {
-                        await MemberManager.deleteMembers(members)
-                        new Toast(members.length+" leden zijn verwijderd", "success green").show()
-                    }
-                },
-                type: "destructive",
-                icon: "trash"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
-    }
-
-    deleteRegistration(members: MemberWithRegistrations[]) {
-        new CenteredMessage("Ben je zeker dat je "+members.length+" leden wilt uitschrijven?", "De gegevens van de leden blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
-            .addButton(new CenteredMessageButton("Uitschrijven", {
-                action: async () => {
-                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
-                        await MemberManager.unregisterMembers(members, this.group, this.cycleOffset, this.waitingList)
-                        new Toast(members.length+" leden zijn uitgeschreven", "success green").show()
-                    }
-                },
-                type: "destructive",
-                icon: "unregister"
-            }))
-            .addCloseButton("Annuleren")
-            .show()
-    }
+  
 }
 </script>
 

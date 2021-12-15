@@ -2,7 +2,7 @@
     <ContextMenu v-bind="{...$attrs}">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && !action.allowAutoSelectAll" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, event)">
+            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && (!table || !action.allowAutoSelectAll)" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, event)">
                 {{ action.name }}
                 <span v-if="action.childMenu || action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
@@ -16,7 +16,6 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Checkbox, ContextMenu, ContextMenuItem, ContextMenuLine, Toast } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableView from "./TableView.vue";
 
@@ -35,51 +34,18 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
     @Prop({ default: () => [] })
     focused!: any[];
 
-    @Prop({ required: true })
-    table!: TableView<any>;
+    @Prop({ required: false })
+    table?: TableView<any>;
 
     @Prop({ required: true })
     actions: TableAction<any>[];
 
     get hasSelection() {
-        return this.focused.length > 0 || this.table.cachedSelectionCount > 0;
-    }
-
-    get showSelection() {
-        return this.table.showSelection;
-    }
-
-    get isAllSelected() {
-        return this.table.cachedAllSelected
-    }
-
-    get columns() {
-        return this.table.allColumns
-    }
-
-    get isFocusSelected() {
-        return this.focused.length > 0 && this.focused.every(item => this.table.isValueSelected(item));
-    }
-
-    get columnContextMenu() {
-        return new ComponentWithProperties(ColumnSelectorContextMenu, {
-            columns: this.table.allColumns,
-        })
-    }
-
-    toggleSelect() {
-        this.table.setShowSelection(true)
-
-        // Select focussed items
-        if (this.isFocusSelected) {
-            this.table.setSelectionValues(this.focused, false);
-        } else {
-            this.table.setSelectionValues(this.focused, true);
-        }
+        return this.focused.length > 0 || (this.table && this.table.cachedSelectionCount > 0);
     }
 
     handleAction(action: TableAction<any>, event) {
-        if (this.focused.length > 0) {
+        if (this.focused.length > 0 || !this.table) {
             action.handler(this.focused)?.catch((e) => {
                 console.error(e)
                 Toast.fromError(e).show
@@ -87,10 +53,6 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
         } else {
             this.table.handleAction(action, event)
         }
-    }
-
-    setSelectAll(all: boolean) {
-        this.table.setSelectAll(all)
     }
 
     get groupedActions() {
