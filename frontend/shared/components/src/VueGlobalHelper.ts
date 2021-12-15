@@ -74,6 +74,7 @@ export class VueGlobalHelper {
 
         Vue.prototype.$OS = AppManager.shared.getOS()
         Vue.prototype.$isNative = AppManager.shared.isNative
+        Vue.prototype.$isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)
 
         Vue.prototype.$isAndroid = Vue.prototype.$OS === "android"
         Vue.prototype.$isIOS = Vue.prototype.$OS === "iOS"

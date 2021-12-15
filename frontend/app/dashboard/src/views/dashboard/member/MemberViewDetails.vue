@@ -258,8 +258,8 @@
             </div>
         </div>
 
-        <div v-if="hasWarnings || member.users.length > 0 || familyMembers.length > 0">
-            <div v-if="hasWarnings" class="hover-box container">
+        <div v-if="(hasWarnings && !$isMobile) || member.users.length > 0 || familyMembers.length > 0">
+            <div v-if="hasWarnings && !$isMobile" class="hover-box container">
                 <ul class="member-records">
                     <li
                         v-for="warning in sortedWarnings"
@@ -281,8 +281,10 @@
             </div>
 
             <div v-if="activeAccounts.length > 0" class="hover-box container">
+                <hr v-if="$isMobile">
                 <h2>
-                    <span class="icon-spacer">Accounts</span><span
+                    <span class="icon-spacer">Accounts</span><span 
+                        v-if="!$isTouch"
                         v-tooltip="
                             'Deze accounts bestaan, kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
                         "
@@ -303,6 +305,7 @@
             <div v-if="placeholderAccounts.length > 0" class="hover-box container">
                 <h2>
                     <span class="icon-spacer">Kunnen registereren</span><span
+                        v-if="!$isTouch"
                         v-tooltip="
                             'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op de inschrijvingspagina). Deze worden automatisch bepaald aan de hand van de gegevens van het lid.'
                         "
