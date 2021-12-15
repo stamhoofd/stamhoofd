@@ -6,7 +6,7 @@
                 <button v-if="hasNextMember || hasPreviousMember" v-tooltip="'Ga naar volgende lid'" class="button navigation icon arrow-down" :disabled="!hasNextMember" @click="goNext" />
 
                 <button v-tooltip="'Lid bewerken'" class="button icon navigation edit" @click="editMember" />
-                <button class="button icon navigation more" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
+                <button v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
 
@@ -26,7 +26,7 @@
 <script lang="ts">
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
+import { LongPressDirective, STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
 import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
@@ -50,7 +50,8 @@ import MemberViewPayments from "./MemberViewPayments.vue";
         BackButton
     },
     directives: {
-        Tooltip: TooltipDirective
+        Tooltip: TooltipDirective,
+        LongPress: LongPressDirective
     }
 })
 export default class MemberView extends Mixins(NavigationMixin) {
