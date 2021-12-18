@@ -6,7 +6,7 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <EmailInput ref="emailInput" v-model="email" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
+            <EmailInput ref="emailInput" v-model="email" enterkeyhint="next" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
@@ -16,7 +16,7 @@
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
-                <input v-model="password" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
+                <input v-model="password" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
 
 
@@ -24,16 +24,14 @@
                 <span class="help icon" />
                 <span>Ik heb geen account</span>
             </button>
-        </main>
 
-        <STFloatingFooter class="sticky">
-            <LoadingButton :loading="loading">
+            <LoadingButton :loading="loading" class="block bottom">
                 <button class="button primary full">
                     <span class="lock icon" />
                     <span>Inloggen</span>
                 </button>
             </LoadingButton>
-        </STFloatingFooter>
+        </main>
     </form>
 </template>
 
@@ -42,7 +40,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
 import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
-import { Component, Mixins, Prop, Ref, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -52,7 +50,7 @@ import { Component, Mixins, Prop, Ref, Watch } from "vue-property-decorator";
         STInputBox,
         LoadingButton,
         EmailInput
-    }
+    },
 })
 export default class LoginView extends Mixins(NavigationMixin){
     @Prop({ required: true})

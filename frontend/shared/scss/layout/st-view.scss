@@ -22,7 +22,6 @@ body.modern {
 }
 
 body.modern.web-iOS {
-    // Fix for iOS safari hide scroll bars + weird bugs in iOS15 when pulling to refresh (negative scroll top gets stuck)
     #app {
         height: 200vh;
     }
@@ -72,6 +71,8 @@ body.modern.web-iOS {
             overscroll-behavior: contain;
             position: relative;
             z-index: 0;
+            display: flex;
+            flex-direction: column;
 
             touch-action: auto;
 

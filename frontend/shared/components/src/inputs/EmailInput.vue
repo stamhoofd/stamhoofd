@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input ref="input" v-model="emailRaw" class="email-input-field input" :name="name" type="email" :class="{ error: !valid }" :placeholder="placeholder" :autocomplete="autocomplete" :disabled="disabled" @change="validate(false)">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)">
     </STInputBox>
 </template>
 
@@ -13,7 +13,10 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 @Component({
     components: {
         STInputBox
-    }
+    },
+
+    // All attributes that we don't recognize should be passed to the input, and not to the root (except style and class)
+    inheritAttrs: false
 })
 export default class EmailInput extends Vue {
     @Prop({ default: "" }) 
@@ -21,7 +24,6 @@ export default class EmailInput extends Vue {
 
     @Prop({ default: null }) 
     validator: Validator | null
-    
 
     emailRaw = "";
     valid = true;
@@ -34,15 +36,6 @@ export default class EmailInput extends Vue {
 
     @Prop({ default: false })
     disabled!: boolean
-
-    @Prop({ default: "" })
-    placeholder!: string
-
-    @Prop({ default: "email" })
-    autocomplete!: string
-
-    @Prop({ default: undefined })
-    name?: string
 
     errorBox: ErrorBox | null = null
 
