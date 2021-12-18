@@ -113,7 +113,7 @@ $border-radius: 9px;
             border-radius: $border-width / 2;
             background: $color-gray-2;
             opacity: 1;
-            transition: opacity 0.25s;
+            transition: opacity 0.2s;
         }
 
         &.selected,
@@ -140,7 +140,10 @@ $border-radius: 9px;
                 opacity: 1;
                 overflow: hidden;
                 white-space: nowrap;
-                transition: opacity 0.25s;
+                transition: opacity 0.2s 0.1s;
+
+                // Fixes bug on Safari (desktop) that causes the text to jump up and down during animation
+                will-change: opacity;
             }
 
             &::after {
@@ -158,7 +161,10 @@ $border-radius: 9px;
                 overflow: hidden;
                 white-space: nowrap;
                 opacity: 0;
-                transition: opacity 0.25s;
+                transition: opacity 0.2s 0.1s;
+
+                // Fixes bug on Safari (desktop) that causes the text to jump up and down during animation
+                will-change: opacity;
             }
         }
 
@@ -195,8 +201,9 @@ $border-radius: 9px;
         z-index: -1;
         pointer-events: none;
 
-        transition: transform 0.3s ease;
+        transition: transform 0.25s ease;
         transform: translate(0, 0);
+        will-change: transform;
 
         & > div {
             position: absolute;
