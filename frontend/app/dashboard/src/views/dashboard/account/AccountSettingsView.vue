@@ -140,6 +140,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         }
 
         this.saving = false
+
+        if (this.canPop) {
+            this.pop({ force: true })
+        }
     }
 
     async shouldNavigateAway() {
