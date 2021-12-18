@@ -71,8 +71,13 @@ body.modern.web-iOS {
             overscroll-behavior: contain;
             position: relative;
             z-index: 0;
+
             display: flex;
             flex-direction: column;
+            
+            > * {
+                flex-shrink: 0;
+            }
 
             touch-action: auto;
 
