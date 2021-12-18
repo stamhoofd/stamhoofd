@@ -1,32 +1,33 @@
 <template>
     <form class="st-view" @submit.prevent="$emit('save')">
-        <STNavigationBar v-if="$isMobile" :title="title">
-            <button v-if="$isAndroid" slot="left" class="button navigation icon close" type="button" @click="$parent.pop" />
-            <button v-else slot="left" class="button text selected unbold" type="button" @click="$parent.pop">
-                {{ cancelText }}
-            </button>
-            
-            <LoadingButton slot="right" :loading="loading">
+        <STNavigationBar :title="title">
+            <BackButton v-if="$parent.canPop" slot="left" @click="$parent.pop" />
+            <template v-else-if="$isMobile" slot="left">
+                <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
+                <button v-else class="button text selected unbold" type="button" @click="$parent.pop">
+                    {{ cancelText }}
+                </button>
+            </template>
+
+            <LoadingButton v-if="$isMobile" slot="right" :loading="loading">
                 <button class="button navigation highlight" :disabled="disabled" @click="$emit('save')">
                     {{ saveText }}
                 </button>
             </LoadingButton>
-        </STNavigationBar>
-        <STNavigationBar v-else :title="title">
-            <BackButton v-if="$parent.canPop" slot="left" @click="$parent.pop" />
-            <button v-else slot="right" class="button navigation icon close" type="button" @click="$parent.pop" />
+            <button v-else-if="$parent.canDismiss" slot="right" class="button navigation icon close" type="button" @click="$parent.pop" />
         </STNavigationBar>
         <main>
             <slot />
         </main>
         <STToolbar v-if="!$isMobile">
             <template #right>
-                <button class="button secundary" type="button" @click="$parent.pop">
+                <button v-if="$parent.canPop || $parent.canDismiss" class="button secundary" type="button" @click="$parent.pop">
                     {{ cancelText }}
                 </button>
                 <LoadingButton :loading="loading">
                     <button class="button primary" :disabled="disabled" @click="$emit('save')">
-                        {{ saveText }}
+                        <span v-if="saveIcon" class="icon " :class="saveIcon" />
+                        <span>{{ saveText }}</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -38,6 +39,7 @@
 <script lang="ts">
 import { Component,Prop,Vue } from "vue-property-decorator";
 
+import BackButton from "./BackButton.vue";
 import LoadingButton from "./LoadingButton.vue";
 import STNavigationBar from "./STNavigationBar.vue";
 import STToolbar from "./STToolbar.vue";
@@ -46,14 +48,15 @@ import STToolbar from "./STToolbar.vue";
     components: {
         STNavigationBar,
         STToolbar,
-        LoadingButton
+        LoadingButton,
+        BackButton
     }
 })
 export default class SaveView extends Vue {
     @Prop({ default: false })
     loading!: boolean;
 
-    @Prop({ default: true })
+    @Prop({ default: false })
     disabled!: boolean;
 
     @Prop({ default: "" })
@@ -61,6 +64,9 @@ export default class SaveView extends Vue {
 
     @Prop({ default: "Opslaan" })
     saveText!: string;
+
+    @Prop({ default: null })
+    saveIcon!: string | null;
 
     @Prop({ default: "Annuleren" })
     cancelText!: string;
