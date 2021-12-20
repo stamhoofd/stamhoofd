@@ -4,11 +4,11 @@
         <h2 class="style-with-button">
             <div>{{ optionMenu.name || 'Naamloos' }}</div>
             <div>
-                <button class="button text" @click="editOptionMenu">
+                <button class="button text only-icon-smartphone" type="button" @click="editOptionMenu">
                     <span class="icon edit" />
                     <span>Wijzig</span>
                 </button>
-                <button class="button text" @click="addOption">
+                <button class="button text only-icon-smartphone" type="button" @click="addOption">
                     <span class="icon add" />
                     <span>Keuze</span>
                 </button>

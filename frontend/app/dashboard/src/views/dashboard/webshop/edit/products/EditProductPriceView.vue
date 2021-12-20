@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? 'Prijskeuze toevoegen' : productPrice.name+' bewerken'" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? 'Prijskeuze toevoegen' : productPrice.name+' bewerken'" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             Prijskeuze toevoegen
         </h1>

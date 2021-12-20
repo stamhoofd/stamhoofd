@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? 'Categorie toevoegen' : name+' bewerken'" :disabled="!hasChanges" class="product-edit-view" @save="save">
+    <SaveView :title="isNew ? 'Categorie toevoegen' : name+' bewerken'" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
             Categorie toevoegen
         </h1>

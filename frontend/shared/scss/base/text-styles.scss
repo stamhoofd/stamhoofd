@@ -376,11 +376,11 @@
         flex-direction: row;
         align-items: center;
 
-        > .button {
-            margin: 0 15px;
+        > * {
+            margin: 0 10px;
 
-            &.text {
-                margin: -5px 15px;
+            &.button.text {
+                margin: -5px 10px;
             }
 
             &:last-child {
