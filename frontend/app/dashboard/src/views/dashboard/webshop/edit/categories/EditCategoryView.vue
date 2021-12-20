@@ -1,72 +1,61 @@
 <template>
-    <div class="st-view product-edit-view">
-        <STNavigationBar :title="isNew ? 'Categorie toevoegen' : name+' bewerken'">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1 v-if="isNew">
-                Categorie toevoegen
-            </h1>
-            <h1 v-else>
-                {{ name || 'Categorie' }} bewerken
-            </h1>
+    <SaveView :title="isNew ? 'Categorie toevoegen' : name+' bewerken'" :disabled="!hasChanges" class="product-edit-view" @save="save">
+        <h1 v-if="isNew">
+            Categorie toevoegen
+        </h1>
+        <h1 v-else>
+            {{ name || 'Categorie' }} bewerken
+        </h1>
           
-            <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van deze categorie"
-                    autocomplete=""
-                >
-            </STInputBox>
+        <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+            <input
+                ref="firstInput"
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="Naam van deze categorie"
+                autocomplete=""
+            >
+        </STInputBox>
 
+        <hr>
+        <h2 v-if="isTickets">
+            Tickets
+        </h2>
+        <h2 v-else>
+            Artikels
+        </h2>
+        <STList>
+            <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+        </STList>
+
+        <p>
+            <button class="button text" type="button" @click="addProduct">
+                <span class="icon add" />
+                <span v-if="isTickets">Ticket toevoegen</span>
+                <span v-else>Artikel toevoegen</span>
+            </button>
+        </p>
+
+        <div v-if="!isNew" class="container">
             <hr>
-            <h2 v-if="isTickets">
-                Tickets
+            <h2>
+                Verwijder deze categorie
             </h2>
-            <h2 v-else>
-                Artikels
-            </h2>
-            <STList>
-                <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
-            </STList>
 
-            <p>
-                <button class="button text" @click="addProduct">
-                    <span class="icon add" />
-                    <span v-if="isTickets">Ticket toevoegen</span>
-                    <span v-else>Artikel toevoegen</span>
-                </button>
-            </p>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage,ErrorBox, STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { CenteredMessage,ErrorBox, SaveView, STErrorsDefault,STInputBox, STList, Validator } from "@stamhoofd/components";
 import { Category, PrivateWebshop, Product, ProductType, Version, WebshopTicketType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -75,8 +64,7 @@ import ProductRow from "../products/ProductRow.vue"
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
         ProductRow,
@@ -230,17 +218,12 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         this.addCategoryPatch(p)
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchWebshop, this.webshop, { version: Version })
     }
 
     async shouldNavigateAway() {
-        console.log("should navigate away")
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

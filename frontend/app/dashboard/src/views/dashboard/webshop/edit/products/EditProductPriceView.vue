@@ -1,60 +1,44 @@
 <template>
-    <div class="st-view product-price-box">
-        <STNavigationBar :title="isNew ? 'Prijskeuze toevoegen' : productPrice.name+' bewerken'">
-            <template slot="right">
-                <button v-if="!isNew && !isSingle" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1 v-if="isNew">
-                Prijskeuze toevoegen
-            </h1>
-            <h1 v-else>
-                {{ productPrice.name || 'Prijs' }} bewerken
-            </h1>
+    <SaveView :title="isNew ? 'Prijskeuze toevoegen' : productPrice.name+' bewerken'" :disabled="!hasChanges" class="product-edit-view" @save="save">
+        <h1 v-if="isNew">
+            Prijskeuze toevoegen
+        </h1>
+        <h1 v-else>
+            {{ productPrice.name || 'Prijs' }} bewerken
+        </h1>
           
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
             
-            <ProductPriceBox :product-price="patchedProductPrice" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
-        </main>
+        <ProductPriceBox :product-price="patchedProductPrice" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
 
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+        <div v-if="!isNew" class="container">
+            <hr>
+            <h2>
+                Verwijder deze prijskeuze
+            </h2>
+
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, NumberInput,PriceInput,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Product, ProductPrice, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { Product, ProductPrice, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import ProductPriceBox from "./ProductPriceBox.vue"
+import ProductPriceBox from "./ProductPriceBox.vue";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        PriceInput,
-        STList,
-        Checkbox,
-        NumberInput,
         ProductPriceBox
     },
 })
@@ -100,10 +84,6 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    get isSingle() {
-        return this.patchedProduct.prices.length <= 1
-    }
-
     async deleteMe() {
         if (!await CenteredMessage.confirm("Ben je zeker dat je deze prijskeuze wilt verwijderen?", "Verwijderen")) {
             return
@@ -114,16 +94,12 @@ export default class EditProductPriceView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchProduct, this.product, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

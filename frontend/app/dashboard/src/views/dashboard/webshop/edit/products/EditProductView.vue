@@ -161,33 +161,26 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, Dropdown,ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, UploadButton, Validator } from "@stamhoofd/components";
+import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
+import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue";
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditProductPriceView from './EditProductPriceView.vue';
-import OptionMenuSection from "./OptionMenuSection.vue"
-import ProductPriceBox from "./ProductPriceBox.vue"
-import ProductPriceRow from "./ProductPriceRow.vue"
-import ProductSelectDateRangeInput from "./ProductSelectDateRangeInput.vue"
-import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
+import OptionMenuSection from "./OptionMenuSection.vue";
+import ProductPriceBox from "./ProductPriceBox.vue";
+import ProductPriceRow from "./ProductPriceRow.vue";
+import ProductSelectDateRangeInput from "./ProductSelectDateRangeInput.vue";
+import ProductSelectLocationInput from "./ProductSelectLocationInput.vue";
 
 @Component({
     components: {
         SaveView,
-        STToolbar,
         STInputBox,
         STErrorsDefault,
-        SegmentedControl,
-        DateSelection,
-        RadioGroup,
-        PriceInput,
-        Radio,
         Checkbox,
         NumberInput,
-        Spinner,
         UploadButton,
         ProductPriceRow,
         STList,
