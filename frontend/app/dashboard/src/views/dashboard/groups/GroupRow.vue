@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" @click="editProduct()">
+    <STListItem :selectable="true" class="right-stack" @click="editProduct()">
         <template slot="left">
             <img v-if="imageSrc" :src="imageSrc" class="group-row-image">
         </template>
@@ -9,8 +9,8 @@
         </h2>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <button class="button icon arrow-up gray" type="button" @click.stop="moveUp" />
+            <button class="button icon arrow-down gray" type="button" @click.stop="moveDown" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -38,7 +38,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
     organization: Organization
 
     get imageSrc() {
-        return this.group.settings.images[0]?.getPathForSize(80, 80)
+        return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(50, 50)
     }
 
     editProduct() {
@@ -67,8 +67,8 @@ export default class GroupRow extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .group-row-image {
-    width: 80px;
-    height: 80px;
+    width: 50px;
+    height: 50px;
     margin: -5px 0;
     border-radius: $border-radius;
 }

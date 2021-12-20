@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" class="right-description right-stack no-margin" @click="editOption()">
+    <STListItem :selectable="true" class="right-description right-stack" @click="editOption()">
         <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="isFirst" :value="true" :disabled="true" />
         <Checkbox v-else slot="left" :disabled="true" />
 

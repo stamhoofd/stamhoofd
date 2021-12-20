@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" @click="editCategory()">
+    <STListItem :selectable="true" class="right-stack" @click="editCategory()">
         {{ category.name || 'Naamloos' }}
 
         <template slot="right">

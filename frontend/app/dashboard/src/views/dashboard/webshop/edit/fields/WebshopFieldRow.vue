@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" class="right-stack no-margin" @click="editField()">
+    <STListItem :selectable="true" class="right-stack" @click="editField()">
         <h2 class="style-title-list">
             {{ field.name || 'Naamloos' }}
         </h2>

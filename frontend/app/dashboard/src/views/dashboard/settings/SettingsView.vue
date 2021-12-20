@@ -129,7 +129,9 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                         <h2 class="style-title-list">
-                            Lidstructuur bewerken
+                            Inschrijvingsgroepen<template v-if="enableActivities">
+                                en activiteiten
+                            </template>
                         </h2>
                         <p v-if="enableActivities" class="style-description">
                             Deel je leden op in groepen en activiteiten, wijzig de prijs en de inschrijvingsdatum

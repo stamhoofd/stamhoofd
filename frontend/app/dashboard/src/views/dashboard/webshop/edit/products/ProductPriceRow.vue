@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" class="right-description right-stack no-margin" @click="editPrice()">
+    <STListItem :selectable="true" class="right-description right-stack" @click="editPrice()">
         {{ productPrice.name || 'Naamloos' }}
         <template slot="right">
             <template v-if="productPrice.discountPrice">

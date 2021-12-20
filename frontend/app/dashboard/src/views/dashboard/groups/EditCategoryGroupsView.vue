@@ -1,128 +1,114 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar :title="title">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <template slot="right">
-                <button v-if="!isNew && !isRoot && enableActivities" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1>
-                {{ title }}
-            </h1>
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save">
+        <h1>
+            {{ title }}
+        </h1>
             
-            <p v-if="isRoot && enableActivities">
-                Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen. Als je geen onderverdeling wilt, kan je gewoon één groep toevoegen. Leden kunnen dan inschrijven voor één of meerdere inschrijvingsgroepen. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
-            </p>
+        <p v-if="isRoot && enableActivities">
+            Voeg hier alle groepen toe waarin je jouw leden wilt onderverdelen. Als je geen onderverdeling wilt, kan je gewoon één groep toevoegen. Leden kunnen dan inschrijven voor één of meerdere inschrijvingsgroepen. Je kan ook categorieën toevoegen: een categorie is puur voor de structuur, zo kan je bijvoorbeeld een categorie maken voor al je danslessen, leeftijdsgroepen, activiteiten, weekends, kampen, ...
+        </p>
           
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox v-if="!isRoot" title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van deze categorie"
-                    autocomplete=""
-                >
-            </STInputBox>
+        <STInputBox v-if="!isRoot" title="Naam" error-fields="name" :error-box="errorBox">
+            <input
+                ref="firstInput"
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="Naam van deze categorie"
+                autocomplete=""
+            >
+        </STInputBox>
 
-            <template v-if="enableActivities">
-                <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
-                    Een lid kan maar in één groep inschrijven
-                </Checkbox>
+        <template v-if="enableActivities">
+            <Checkbox v-if="categories.length == 0" v-model="limitRegistrations">
+                Een lid kan maar in één groep inschrijven
+            </Checkbox>
 
-                <Checkbox v-if="!isRoot" v-model="isHidden">
-                    Toon deze categorie enkel voor beheerders
-                </Checkbox>
-            </template>
+            <Checkbox v-if="!isRoot" v-model="isHidden">
+                Toon deze categorie enkel voor beheerders
+            </Checkbox>
+        </template>
 
-            <template v-if="categories.length > 0 && enableActivities">
-                <hr>
-                <h2>Categorieën</h2>
-                <STList>
-                    <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
-                </STList>
-            </template>
+        <template v-if="categories.length > 0 && enableActivities">
+            <hr>
+            <h2>Categorieën</h2>
+            <STList>
+                <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+            </STList>
+        </template>
 
-            <template v-else>
-                <hr>
-                <h2>Groepen</h2>
-                <STList>
-                    <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
-                </STList>
-            </template>
+        <template v-else>
+            <hr>
+            <h2>Groepen</h2>
+            <STList>
+                <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
+            </STList>
+        </template>
 
-            <p v-if="categories.length == 0">
-                <button class="button text" @click="createGroup">
-                    <span class="icon add" />
-                    <span>Nieuwe groep</span>
-                </button>
-            </p>
-            <p v-if="enableActivities">
-                <button class="button text" @click="createCategory">
-                    <span class="icon add" />
-                    <span v-if="groups.length == 0">Nieuwe categorie</span>
-                    <span v-else>Opdelen in categorieën</span>
-                </button>
-            </p>
+        <p v-if="categories.length == 0">
+            <button class="button text" type="button" @click="createGroup">
+                <span class="icon add" />
+                <span>Nieuwe groep</span>
+            </button>
+        </p>
+        <p v-if="enableActivities">
+            <button class="button text" type="button" @click="createCategory">
+                <span class="icon add" />
+                <span v-if="groups.length == 0">Nieuwe categorie</span>
+                <span v-else>Opdelen in categorieën</span>
+            </button>
+        </p>
 
-            <div class="container">
-                <hr>
-                <h2>Start nieuwe inschrijvingsperiode</h2>
-                <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je leden automatisch verplaatsen naar een vorige inschrijvingsperiode, zodat ze opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
-                <button type="button" class="button text" @click.left.exact="startNewRegistrationPeriod(false)" @click.alt.exact="startNewRegistrationPeriod(true)">
-                    <span class="icon undo" /><span>Start nieuwe inschrijvingsperiode...</span>
-                </button>
-            </div>
+        <div class="container">
+            <hr>
+            <h2>Start nieuwe inschrijvingsperiode</h2>
+            <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je leden automatisch verplaatsen naar een vorige inschrijvingsperiode, zodat ze opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
+            <button type="button" class="button text" @click.left.exact="startNewRegistrationPeriod(false)" @click.alt.exact="startNewRegistrationPeriod(true)">
+                <span class="icon undo" /><span>Start nieuwe inschrijvingsperiode...</span>
+            </button>
+        </div>
 
-            <div v-if="!isRoot && enableActivities" class="container">
-                <hr>
-                <h2>Wie kan groepen maken in deze categorie?</h2>
-                <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe groep (bv. activiteit, cursus of workshop) toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersgroepen bewerken bij je instellingen.</p>
+        <div v-if="!isRoot && enableActivities" class="container">
+            <hr>
+            <h2>Wie kan groepen maken in deze categorie?</h2>
+            <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe groep (bv. activiteit, cursus of workshop) toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan beheerdersgroepen bewerken bij je instellingen.</p>
     
-                <STList v-if="roles.length > 0">
-                    <STListItem>
-                        <Checkbox slot="left" :checked="true" :disabled="true" />
-                        Hoofdbeheerders
-                    </STListItem>
-                    <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description">
-                        <Checkbox slot="left" :checked="getCreateRole(role)" @change="setCreateRole(role, $event)" />
-                        {{ role.name }}
-                    </STListItem>
-                </STList>
+            <STList v-if="roles.length > 0">
+                <STListItem>
+                    <Checkbox slot="left" :checked="true" :disabled="true" />
+                    Hoofdbeheerders
+                </STListItem>
+                <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description">
+                    <Checkbox slot="left" :checked="getCreateRole(role)" @change="setCreateRole(role, $event)" />
+                    {{ role.name }}
+                </STListItem>
+            </STList>
 
-                <p v-else-if="fullAccess" class="info-box">
-                    Je hebt nog geen beheerdersgroepen aangemaakt. Maak beheerdersgroepen aan via instellingen > beheerders
-                </p>
-            </div>
-        </main>
+            <p v-else-if="fullAccess" class="info-box">
+                Je hebt nog geen beheerdersgroepen aangemaakt. Maak beheerdersgroepen aan via instellingen > beheerders
+            </p>
+        </div>
 
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <div v-if="!isNew && !isRoot && enableActivities" class="container">
+            <hr>
+            <h2>
+                Verwijder deze categorie
+            </h2>
+
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsDefault,STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupCategoryTree, GroupGenderType,GroupPrivateSettings,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -134,8 +120,7 @@ import GroupRow from "./GroupRow.vue"
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
         STList,
@@ -154,6 +139,9 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     category: GroupCategory
+
+    @Prop({ default: false })
+    isNew!: boolean
 
     @Prop({ required: true })
     organization: Organization
@@ -180,10 +168,6 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
             return c
         }
         return this.category
-    }
-
-    get isNew() {
-        return this.category.settings.name.length == 0
     }
 
     get isRoot() {
@@ -217,7 +201,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.isRoot ? 'Lidstructuur bewerken' : (this.isNew ? "Nieuwe categorie" : this.name)
+        return this.isRoot ? 'Inschrijvingsgroepen'+(this.enableActivities ? " en activiteiten" : "") : (this.isNew ? "Nieuwe categorie" : this.name)
     }
 
     get name() {
@@ -424,6 +408,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditCategoryGroupsView, { 
             category: category, 
             organization: this.patchedOrganization.patch(p), 
+            isNew: true,
             saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
                 this.addPatch(p.patch(patch))
             }
@@ -447,12 +432,12 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         this.pop()
     }
 
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

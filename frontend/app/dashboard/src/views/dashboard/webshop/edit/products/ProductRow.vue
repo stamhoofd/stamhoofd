@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" @click="editProduct()">
+    <STListItem :selectable="true" class="right-stack" @click="editProduct()">
         <template slot="left">
             <img v-if="imageSrc" :src="imageSrc" class="product-row-image">
         </template>
@@ -73,5 +73,10 @@ export default class ProductRow extends Mixins(NavigationMixin) {
     height: 80px;
     margin: -5px 0;
     border-radius: $border-radius;
+
+    @media (max-width: 550px) {
+        width: 50px;
+        height: 50px;
+    }
 }
 </style>
