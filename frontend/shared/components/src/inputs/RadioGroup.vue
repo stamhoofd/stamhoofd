@@ -25,5 +25,10 @@ export default class RadioGroup extends Vue {}
         flex-direction: column;
         flex-wrap: nowrap;
     }
+
+    @media (max-width: 550px) {
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
 }
 </style>

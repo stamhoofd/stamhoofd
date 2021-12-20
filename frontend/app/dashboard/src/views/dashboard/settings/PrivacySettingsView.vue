@@ -61,15 +61,20 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
+
+    // Make organization reactive
     temp_organization = OrganizationManager.organization
-    selectedPrivacyType = this.temp_organization.meta.privacyPolicyUrl ? "website" : (this.temp_organization.meta.privacyPolicyFile ? "file" : "none")
+
+    // Keep track of selected option
+    defaultSelectedType = OrganizationManager.organization.meta.privacyPolicyUrl ? "website" : (OrganizationManager.organization.meta.privacyPolicyFile ? "file" : "none")
+    selectedPrivacyType = this.defaultSelectedType
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
     }
-  
+
     get privacyPolicyUrl() {
         return this.organization.meta.privacyPolicyUrl
     }
@@ -141,7 +146,7 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+        return this.selectedPrivacyType !== this.defaultSelectedType || patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
     }
 
     async shouldNavigateAway() {
