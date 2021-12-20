@@ -46,29 +46,69 @@
         }
     }
 
-    &.primary {
+    &.primary, &.secundary, &.destructive {
         @extend .style-button;
-        color: white;
 
+        border-radius: $border-radius;
+        
+        transition: transform 0.2s, opacity 0.2s;
+
+        height: 42px;
         padding: 0 27px;
-        background: linear-gradient(to right, $color-primary, $color-primary-destination);
-        text-align: center;
+
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        height: 42px;
-        align-items: center;
 
-        border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity; //, 0.2s box-shadow;
-        //box-shadow: 0 6px 10px 0 rgba($color-primary, 0.2);
-        display: inline-flex;
+        text-align: center;
+        align-items: center;
         justify-content: center;
+        display: inline-flex;
+
+        // Ignore stretch when a button is directly inside the main of st-view (which has display flex)
+        align-self: flex-start;
 
         &:active {
             transform: scale(0.95, 0.95);
-            //box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
         }
+
+        &:disabled {
+            color: $color-gray-2;
+            background: $color-white-shade;
+            box-shadow: none;
+            cursor: not-allowed;
+
+            &:active {
+                transform: none;
+            }
+        }
+
+        > .icon, > .bubble {
+            align-self: center;
+            
+            &:first-child {
+                margin-right: 10px;
+                margin-left: -5px;
+            }
+
+            &:last-child {
+                margin-left: 10px;
+                margin-right: -5px;
+            }
+
+            
+        }
+
+        &.full {
+            width: 100%;
+        }
+    }
+
+    &.primary {
+        color: white;
+
+        background: linear-gradient(to right, $color-primary, $color-primary-destination);
+    
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
@@ -118,42 +158,11 @@
                 background-color: rgba($color-white, 0.2);
             }
         }
-
-        &:disabled {
-            color: $color-gray-2;
-            background: $color-white-shade;
-            box-shadow: none;
-            cursor: not-allowed;
-
-            &:active {
-                transform: none;
-            }
-        }
-
     }
 
     &.destructive {
-        @extend .style-button;
         color: white;
-
-        padding: 0 27px;
         background: $color-error;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        height: 42px;
-        border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity;
-        //box-shadow: 0 6px 10px 0 rgba($color-error, 0.2);
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-
-        &:active {
-            transform: scale(0.95, 0.95);
-            //box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
-        }
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
@@ -168,20 +177,9 @@
     }
 
     &.secundary {
-        @extend .style-button;
         color: $color-gray-4;
-        padding: 0 27px;
+        
         background: $color-gray-3;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity;
-        height: 42px;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
@@ -194,10 +192,6 @@
             box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
         }
 
-        &:active {
-            transform: scale(0.95, 0.95);
-        }
-
         &.green {
             color: $color-success-dark;
             background: $color-success-background;
@@ -206,38 +200,6 @@
         &.danger {
             color: $color-error-dark;
             background: $color-error-background;
-        }
-
-        &:disabled {
-            color: $color-gray-2;
-            background: $color-white-shade;
-            cursor: not-allowed;
-
-            &:active {
-                transform: none;
-            }
-        }
-    }
-
-    &.secundary, &.primary, &.destructive {
-        > .icon, > .bubble {
-            align-self: center;
-            
-            &:first-child {
-                margin-right: 10px;
-                margin-left: -5px;
-            }
-
-            &:last-child {
-                margin-left: 10px;
-                margin-right: -5px;
-            }
-
-            
-        }
-
-        &.full {
-            width: 100%;
         }
     }
 

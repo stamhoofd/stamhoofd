@@ -14,7 +14,7 @@
                     {{ saveText }}
                 </button>
             </LoadingButton>
-            <button v-else-if="$parent.canDismiss" slot="right" class="button navigation icon close" type="button" @click="$parent.pop" />
+            <button v-else-if="$parent.canDismiss" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
         </STNavigationBar>
         <main>
             <slot />

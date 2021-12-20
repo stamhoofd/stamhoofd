@@ -1,96 +1,81 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar title="E-mailadres">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!isNew" slot="right" class="button text" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
-        </STNavigationBar>
+    <SaveView :loading="saving" title="E-mailadres" :disabled="!hasChanges" @save="save">
+        <h1 v-if="isNew">
+            E-mailadres toevoegen
+        </h1>
+        <h1 v-else>
+            E-mailadres bewerken
+        </h1>
 
-        <main>
-            <h1 v-if="isNew">
-                E-mailadres toevoegen
-            </h1>
-            <h1 v-else>
-                E-mailadres bewerken
-            </h1>
+        <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Naam / aanspreking (optioneel)" error-fields="name" :error-box="errorBox">
+            <input
+                ref="firstInput"
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="Optioneel. bv. Webshopverantwoordelijke"
+                autocomplete=""
+            >
+        </STInputBox>
 
-            <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Naam / aanspreking (optioneel)" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel. bv. Webshopverantwoordelijke"
-                    autocomplete=""
-                >
-            </STInputBox>
+        <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres waarmee je wilt versturen" />
 
-            <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres waarmee je wilt versturen" />
+        <template v-if="enableMemberModule">
+            <hr>
+            <h2>Standaard e-mailadres voor...</h2>
+            <p class="st-list-description">
+                Selecteer de groepen die standaard met dit e-mailadres moeten versturen.
+            </p>
 
-            <template v-if="enableMemberModule">
-                <hr>
-                <h2>Standaard e-mailadres voor...</h2>
-                <p class="st-list-description">
-                    Selecteer de groepen die standaard met dit e-mailadres moeten versturen.
-                </p>
+            <STList>
+                <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
+                    <Checkbox slot="left" v-model="group.selected" />
+                    <h3 class="style-title-list">
+                        {{ group.group.settings.name }}<h3 />
+                    </h3>
+                </STListItem>
+                <STListItem element-name="label" :selectable="true">
+                    <Checkbox slot="left" v-model="isDefault" />
+                    <h3 class="style-title-list">
+                        Standaard e-mails
+                    </h3>
+                    <p class="style-description-small">
+                        Voor andere e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
+                    </p>
+                </STListItem>
+            </STList>
+        </template>
+        <Checkbox v-else v-model="isDefault">
+            <h3 class="style-title-list">
+                Standaard e-mails
+            </h3>
+            <p class="style-description-small">
+                Voor algemene e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
+            </p>
+        </Checkbox>
 
-                <STList>
-                    <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
-                        <Checkbox slot="left" v-model="group.selected" />
-                        <h3 class="style-title-list">
-                            {{ group.group.settings.name }}<h3 />
-                        </h3>
-                    </STListItem>
-                    <STListItem element-name="label" :selectable="true">
-                        <Checkbox slot="left" v-model="isDefault" />
-                        <h3 class="style-title-list">
-                            Standaard e-mails
-                        </h3>
-                        <p class="style-description-small">
-                            Voor andere e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
-                        </p>
-                    </STListItem>
-                </STList>
-            </template>
-            <Checkbox v-else v-model="isDefault">
-                <h3 class="style-title-list">
-                    Standaard e-mails
-                </h3>
-                <p class="style-description-small">
-                    Voor algemene e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
-                </p>
-            </Checkbox>
-        </main>
+        <hr v-if="!isNew">
+        <h2 v-if="!isNew">
+            Verwijderen
+        </h2>
 
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button v-if="isNew" class="button primary" @click="save">
-                        Toevoegen
-                    </button>
-                    <button v-else class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <button v-if="!isNew" class="button secundary danger" type="button" @click="deleteMe">
+            <span class="icon trash" />
+            <span>Verwijderen</span>
+        </button>
+    </SaveView>
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder,isPatchable,PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,PatchType } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Address, DNSRecord, Group, GroupGenderType, GroupPatch, GroupPrivateSettingsPatch,GroupSettings, GroupSettingsPatch, Organization, OrganizationDomains, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { AutoEncoderPatchType, isPatchable, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleErrors } from '@simonbackx/simple-errors';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
-import DNSRecordsView from './DNSRecordsView.vue';
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 class SelectableGroup {
     group: Group;
@@ -112,7 +97,8 @@ class SelectableGroup {
         LoadingButton,
         EmailInput,
         STList,
-        STListItem
+        STListItem,
+        SaveView
     },
 })
 export default class EditEmailView extends Mixins(NavigationMixin) {
@@ -247,7 +233,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (!confirm("Ben je zeker dat je dit e-mailadres wilt verwijderen?")) {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je dit e-mailadres wilt verwijderen?", "Verwijderen")) {
             return;
         }
 
@@ -285,6 +271,25 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
             this.errorBox = new ErrorBox(e)
             this.saving = false
         }
+    }
+
+    get hasChanges() {
+        for (const group of this.groups) {
+            // Check if changed
+            const prev = group.group.privateSettings !== null && group.group.privateSettings.defaultEmailId !== null && group.group.privateSettings.defaultEmailId === this.emailId
+            if (prev != group.selected) {
+                return true
+            }
+        }
+
+        return patchContainsChanges(this.organizationPatch, this.initialPatch ? OrganizationManager.organization.patch(this.initialPatch) : OrganizationManager.organization, { version: Version })
+    }
+
+    async shouldNavigateAway() {
+        if (!this.hasChanges) {
+            return true;
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
    
     async save() {
