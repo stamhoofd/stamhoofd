@@ -1,79 +1,59 @@
 <template>
-    <div class="st-view background">
-        <STNavigationBar title="Privacy">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+    <SaveView :loading="saving" title="Privacy" :disabled="!hasChanges" @save="save">
+        <h1>
+            Privacy
+        </h1>
+        <p>
+            Om in orde te zijn met de GDPR-wetgeving moet je jullie privacyvoorwaarden instellen.
+        </p>
 
-        <main>
-            <h1>
-                Privacy
-            </h1>
-            <p>
-                Om in orde te zijn met de GDPR-wetgeving moet je jullie privacyvoorwaarden instellen.
-            </p>
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Waar staan de privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
+            <RadioGroup>
+                <Radio v-model="selectedPrivacyType" value="none">
+                    Geen
+                </Radio>
+                <Radio v-model="selectedPrivacyType" value="website">
+                    Op onze website
+                </Radio>
+                <Radio v-model="selectedPrivacyType" value="file">
+                    Zelf PDF-bestand aanleveren
+                </Radio>
+            </RadioGroup>
+        </STInputBox>
 
-            <STInputBox title="Waar staan jullie privacyvoorwaarden?" error-fields="privacy" :error-box="errorBox" class="max">
-                <RadioGroup>
-                    <Radio v-model="selectedPrivacyType" value="none">
-                        Geen
-                    </Radio>
-                    <Radio v-model="selectedPrivacyType" value="website">
-                        Op onze website
-                    </Radio>
-                    <Radio v-model="selectedPrivacyType" value="file">
-                        Zelf PDF-bestand aanleveren
-                    </Radio>
-                </RadioGroup>
-            </STInputBox>
+        <STInputBox v-if="selectedPrivacyType == 'website'" key="website" title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox">
+            <input
+                v-model="privacyPolicyUrl"
+                class="input"
+                type="url"
+                :placeholder="$t('dashboard.inputs.privacyUrl.placeholder')"
+            >
+        </STInputBox>
 
-            <STInputBox v-if="selectedPrivacyType == 'website'" key="website" title="Volledige link naar privacyvoorwaarden" error-fields="privacyPolicyUrl" :error-box="errorBox">
-                <input
-                    v-model="privacyPolicyUrl"
-                    class="input"
-                    type="url"
-                    :placeholder="$t('dashboard.inputs.privacyUrl.placeholder')"
-                >
-            </STInputBox>
-
-            <FileInput v-if="selectedPrivacyType == 'file'" key="file" v-model="privacyPolicyFile" title="Kies een bestand" :validator="validator" :required="false" />
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <FileInput v-if="selectedPrivacyType == 'file'" key="file" v-model="privacyPolicyFile" title="Kies een bestand" :validator="validator" :required="false" />
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ErrorBox, FileInput,LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator} from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, FileInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures"
+import { File, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
         RadioGroup,
         Radio,
-        BackButton,
-        LoadingButton,
         FileInput
     },
 })
@@ -159,9 +139,13 @@ export default class PrivacySettingsView extends Mixins(NavigationMixin) {
 
         this.saving = false
     }
-  
+
+    get hasChanges() {
+        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+    }
+
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+        if (!this.hasChanges) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

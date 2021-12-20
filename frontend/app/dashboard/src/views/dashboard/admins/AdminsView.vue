@@ -1,14 +1,9 @@
 <template>
     <div class="st-view admins-list-view">
         <STNavigationBar title="Beheerders">
-            <button slot="right" class="button text" aria-label="Nieuwe beheerder" @click="createAdmin">
+            <button slot="right" class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" @click="createAdmin">
                 <span class="icon add" />
                 <span>Beheerder</span>
-            </button>
-
-            <button slot="right" class="button text hide-smartphone" aria-label="Nieuwe groep" @click="addRole">
-                <span class="icon add" />
-                <span>Groep</span>
             </button>
 
             <BackButton v-if="canPop" slot="left" @click="pop" />

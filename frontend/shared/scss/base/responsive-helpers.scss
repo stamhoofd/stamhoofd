@@ -30,6 +30,10 @@ Only show if tabbar is visible
         span:not(.icon) {
             display: none !important;
         }
+
+        span.icon {
+            margin: 0 !important;
+        }
     }
 }
 
