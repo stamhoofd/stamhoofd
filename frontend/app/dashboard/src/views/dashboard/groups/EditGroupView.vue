@@ -167,11 +167,11 @@
                 <h2 class="style-with-button">
                     <div>Verplicht ingeschreven bij...</div>
                     <div>
-                        <button v-if="patchedGroup.settings.requireGroupIds.length == 0" class="button text only-icon-smartphone" @click="editRequireGroups">
+                        <button v-if="patchedGroup.settings.requireGroupIds.length == 0" type="button" class="button text only-icon-smartphone" @click="editRequireGroups">
                             <span class="icon add" />
                             <span>Toevoegen</span>
                         </button>
-                        <button v-else class="button text only-icon-smartphone" @click="editRequireGroups">
+                        <button v-else class="button text only-icon-smartphone" type="button" @click="editRequireGroups">
                             <span class="icon edit" />
                             <span>Wijzigen</span>
                         </button>
@@ -183,7 +183,7 @@
                     <STListItem v-for="id of patchedGroup.settings.requireGroupIds" :key="id">
                         {{ getGroupName(id) }}
 
-                        <button slot="right" class="button text" @click="removeRequireGroupId(id)">
+                        <button slot="right" class="button text only-icon-smartphone" type="button" @click="removeRequireGroupId(id)">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
@@ -199,11 +199,11 @@
                 <h2 class="style-with-button">
                     <div>Verplicht vorige inschrijvingsperiode ingeschreven bij...</div>
                     <div>
-                        <button v-if="patchedGroup.settings.requirePreviousGroupIds.length == 0" class="button text only-icon-smartphone" @click="editRequirePreviousGroups">
+                        <button v-if="patchedGroup.settings.requirePreviousGroupIds.length == 0" type="button" class="button text only-icon-smartphone" @click="editRequirePreviousGroups">
                             <span class="icon add" />
                             <span>Toevoegen</span>
                         </button>
-                        <button v-else class="button text only-icon-smartphone" @click="editRequirePreviousGroups">
+                        <button v-else class="button text only-icon-smartphone" type="button" @click="editRequirePreviousGroups">
                             <span class="icon edit" />
                             <span>Wijzigen</span>
                         </button>
@@ -215,7 +215,7 @@
                     <STListItem v-for="id of patchedGroup.settings.requirePreviousGroupIds" :key="id">
                         {{ getGroupName(id) }}
 
-                        <button slot="right" class="button text" @click="removeRequirePreviousGroupId(id)">
+                        <button slot="right" class="button text only-icon-smartphone" type="button" @click="removeRequirePreviousGroupId(id)">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
@@ -231,11 +231,11 @@
                 <h2 class="style-with-button">
                     <div>Verhinder inschrijven als vorige keer ingeschreven bij...</div>
                     <div>
-                        <button v-if="patchedGroup.settings.preventPreviousGroupIds.length == 0" class="button text only-icon-smartphone" @click="editPreventPreviousGroups">
+                        <button v-if="patchedGroup.settings.preventPreviousGroupIds.length == 0" type="button" class="button text only-icon-smartphone" @click="editPreventPreviousGroups">
                             <span class="icon add" />
                             <span>Toevoegen</span>
                         </button>
-                        <button v-else class="button text only-icon-smartphone" @click="editPreventPreviousGroups">
+                        <button v-else class="button text only-icon-smartphone" type="button" @click="editPreventPreviousGroups">
                             <span class="icon edit" />
                             <span>Wijzigen</span>
                         </button>
@@ -247,7 +247,7 @@
                     <STListItem v-for="id of patchedGroup.settings.preventPreviousGroupIds" :key="id">
                         {{ getGroupName(id) }}
 
-                        <button slot="right" class="button text" @click="removePreventPreviousGroupId(id)">
+                        <button slot="right" class="button text only-icon-smartphone" type="button" @click="removePreventPreviousGroupId(id)">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
@@ -262,7 +262,7 @@
             <h2 class="style-with-button">
                 <div>Omslagfoto</div>
                 <div>
-                    <button v-if="coverPhoto" class="button text only-icon-smartphone" @click="coverPhoto = null">
+                    <button v-if="coverPhoto" class="button text only-icon-smartphone" type="button" @click="coverPhoto = null">
                         <span class="icon trash" />
                         <span>Verwijderen</span>
                     </button>
@@ -280,7 +280,7 @@
             <h2 class="style-with-button">
                 <div>Vierkante foto</div>
                 <div>
-                    <button v-if="squarePhoto" class="button text only-icon-smartphone" @click="squarePhoto = null">
+                    <button v-if="squarePhoto" class="button text only-icon-smartphone" type="button" @click="squarePhoto = null">
                         <span class="icon trash" />
                         <span>Verwijderen</span>
                     </button>

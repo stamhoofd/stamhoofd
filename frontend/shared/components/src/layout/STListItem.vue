@@ -153,7 +153,6 @@ a.st-list-item {
 
             > .middle {
                 padding-top: 15px;
-                padding-right: 15px;
                 padding-bottom: 15px;
                 flex-grow: 1;
                 min-width: 0; // flexbox disable becoming bigger than parent
@@ -166,6 +165,7 @@ a.st-list-item {
 
                 padding-top: 10px;
                 padding-bottom: 10px;
+                padding-left: 15px;
 
                 &:empty {
                     display: none;

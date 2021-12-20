@@ -10,7 +10,7 @@
                     Vanaf {{ formatDate(priceGroup.startDate) }}
                 </div>
                 <div>
-                    <button class="button text" @click="removeGroup(priceGroup)">
+                    <button class="button text" type="button" @click="removeGroup(priceGroup)">
                         <span class="icon trash" />
                         <span class="hide-smartphone">Verwijderen</span>
                     </button>
@@ -28,16 +28,16 @@
             <STList>
                 <STListItem v-for="(p, index) of priceGroup.prices" :key="index">
                     <div class="split-inputs">
-                        <STInputBox :title="priceGroup.prices.length <= 1 ? 'Prijs' : (ordinalNumber(priceGroup, index + 1, priceGroup.prices.length))" error-fields="price" :error-box="errorBox" class="no-padding">
+                        <STInputBox :title="priceGroup.prices.length <= 1 ? 'Prijs' : (ordinalNumber(priceGroup, index + 1, priceGroup.prices.length))" error-fields="price" :error-box="errorBox">
                             <PriceInput :value="p.price" placeholder="Gratis" @input="setPrice(priceGroup, index, $event)" />
 
-                            <button v-if="index > 0 && index == priceGroup.prices.length - 1" slot="right" class="button text" @click="removeFamilyPrice(priceGroup, index)">
+                            <button v-if="index > 0 && index == priceGroup.prices.length - 1" slot="right" type="button" class="button text" @click="removeFamilyPrice(priceGroup, index)">
                                 <span class="icon trash" />
                             </button>
                         </STInputBox>
 
                         <div>
-                            <STInputBox title="Verlaagd tarief*" error-fields="reducedPrice" :error-box="errorBox" class="no-padding">
+                            <STInputBox title="Verlaagd tarief*" error-fields="reducedPrice" :error-box="errorBox">
                                 <PriceInput :value="p.reducedPrice" :placeholder="formatPrice(p.price)" :required="false" @input="setReducedPrice(priceGroup, index, $event)" />
                             </STInputBox>
                         </div>
@@ -45,12 +45,12 @@
                 </STListItem>
             </STList>
 
-            <button v-if="!priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1" class="button text full" @click="addFamilyPrice(priceGroup)">
+            <button v-if="!priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1" type="button" class="button text full" @click="addFamilyPrice(priceGroup)">
                 <span class="icon add" />
                 <span>Korting voor extra gezinslid</span>
             </button>
 
-            <button v-if="(priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1) && canRegisterMultipleGroups" class="button text full" @click="addMultipleDiscount(priceGroup)">
+            <button v-if="(priceGroup.sameMemberOnlyDiscount || priceGroup.prices.length <= 1) && canRegisterMultipleGroups" type="button" class="button text full" @click="addMultipleDiscount(priceGroup)">
                 <span class="icon add" />
                 <span>
                     Korting voor meerdere inschrijvingen**
@@ -92,7 +92,7 @@
 
         <hr>
 
-        <button class="button text" @click="addGroup">
+        <button type="button" class="button text" @click="addGroup">
             <span class="icon add" />
             <span v-if="prices.length > 0">Andere prijs na bepaalde datum</span>
             <span v-else>Prijs toevoegen</span>
@@ -219,7 +219,7 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
 
         patch.addPut(GroupPrices.create({ 
             startDate: this.prices.length == 0 ? null : dd
-         }))
+        }))
         this.addPatch(patch)
     }
 
