@@ -2,7 +2,7 @@
     <div id="free-contribution-view" class="st-view boxed">
         <STNavigationBar title="Vrije bijdrage">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         <div class="box">
             <main>
@@ -20,7 +20,7 @@
                 </Radio>
               
                 <Radio v-model="amountOption" :value="otherValue" name="contributionRadio">
-                    Ander bedrag kiezen
+                    {{ amounts.length == 0 ? 'Bedrag kiezen' : 'Ander bedrag kiezen' }}
                 </Radio>
 
                 <div v-if="amountOption === otherValue" class="textarea-container">
@@ -47,7 +47,7 @@
             <STToolbar>
                 <span slot="left">Totaal: {{ cart.price | price }}</span>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary" type="button" @click="goNext">
                         <span>Doorgaan</span>
                         <span class="icon arrow-right" />
                     </button>
