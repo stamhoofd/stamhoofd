@@ -10,7 +10,7 @@
         <p v-if="isNew && !forceCreate" class="info-box">
             Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
         </p>
-        <button v-else-if="!user" class="warning-box with-button selectable" @click="resendInvite">
+        <button v-else-if="!user" class="warning-box with-button selectable" type="button" @click="resendInvite">
             Deze beheerder heeft de uitnodiging nog niet geaccepteerd
 
             <span v-if="!isNew && !user" class="button text">
@@ -58,7 +58,7 @@
             </p>
 
             <p>
-                <button class="button text" @click="addRole">
+                <button class="button text" type="button" @click="addRole">
                     <span class="icon add" />
                     <span>Nieuwe groep toevoegen</span>
                 </button>
