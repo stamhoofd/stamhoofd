@@ -47,6 +47,9 @@
                         </p>
 
                         <template slot="right">
+                            <span v-if="admin.id === me.id" class="style-tag">
+                                Ik
+                            </span>
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>
@@ -62,13 +65,20 @@
                             {{ permissionList(invite) }}
                         </p>
 
+                        <span v-if="isExpired(invite)" class="style-tag warn only-smartphone">
+                            Vervallen
+                        </span>
+                        <span v-else class="style-tag warn only-smartphone">
+                            Niet geaccepteerd
+                        </span>
+
                         <template slot="right">
-                            <p v-if="isExpired(invite)">
-                                Uitnodiging vervallen
-                            </p>
-                            <p v-else>
-                                Uitnodiging nog niet geaccepteerd
-                            </p>
+                            <span v-if="isExpired(invite)" class="style-tag warn hide-smartphone">
+                                Vervallen
+                            </span>
+                            <span v-else class="style-tag warn hide-smartphone">
+                                Niet geaccepteerd
+                            </span>
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>
@@ -104,6 +114,9 @@
                             </p>
 
                             <template slot="right">
+                                <span v-if="admin.id === me.id" class="style-tag">
+                                    Ik
+                                </span>
                                 <span><span class="icon gray edit" /></span>
                             </template>
                         </STListItem>
@@ -119,13 +132,20 @@
                                 {{ permissionList(invite) }}
                             </p>
 
+                            <span v-if="isExpired(invite)" class="style-tag warn only-smartphone">
+                                Vervallen
+                            </span>
+                            <span v-else class="style-tag warn only-smartphone">
+                                Niet geaccepteerd
+                            </span>
+
                             <template slot="right">
-                                <p v-if="isExpired(invite)">
-                                    Uitnodiging vervallen
-                                </p>
-                                <p v-else>
-                                    Uitnodiging nog niet geaccepteerd
-                                </p>
+                                <span v-if="isExpired(invite)" class="style-tag warn hide-smartphone">
+                                    Vervallen
+                                </span>
+                                <span v-else class="style-tag warn hide-smartphone">
+                                    Niet geaccepteerd
+                                </span>
                                 <span><span class="icon gray edit" /></span>
                             </template>
                         </STListItem>
@@ -266,6 +286,10 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     get enableMemberModule() {
         return this.organization.meta.modules.useMembers
+    }
+
+    get me() {
+        return this.SessionManager.currentSession!.user
     }
 
     permissionList(user: User | Invite) {

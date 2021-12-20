@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" title="Beheerder" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" title="Beheerder" :disabled="!isNew && !hasChanges" @save="save">
         <h1 v-if="isNew && !forceCreate">
             Beheerder toevoegen
         </h1>
