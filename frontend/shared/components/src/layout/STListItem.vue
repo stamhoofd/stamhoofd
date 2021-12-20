@@ -112,6 +112,10 @@ a.st-list-item {
                 &:last-child {
                     margin-right: 0;
                 }
+
+                &:first-child {
+                    margin-left: 0;
+                }
             }
 
             > .button {
@@ -119,6 +123,10 @@ a.st-list-item {
 
                 &:last-child {
                     margin-right: 0;
+                }
+
+                &:first-child {
+                    margin-left: 0;
                 }
             }
         }

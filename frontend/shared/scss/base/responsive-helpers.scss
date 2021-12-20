@@ -1,5 +1,5 @@
 .hide-smartphone {
-    @media (max-width: 450px) {
+    @media (max-width: 550px) {
         display: none !important;
     }
 }
@@ -11,7 +11,7 @@
 }
 
 .only-smartphone {
-    @media (min-width: 451px) {
+    @media (min-width: 551px) {
         display: none !important;
     }
 }
@@ -26,7 +26,7 @@ Only show if tabbar is visible
 }
 
 .only-icon-smartphone {
-    @media (max-width: 450px) {
+    @media (max-width: 550px) {
         span:not(.icon) {
             display: none !important;
         }
