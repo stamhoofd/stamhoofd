@@ -98,7 +98,7 @@
                     <p v-else class="style-description-small">
                         Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog
                     </p>
-                    <button v-if="!key.hasAccess && canShareKey(key.publicKey)" class="button text" @click="shareKey(key.publicKey)">
+                    <button v-if="!key.hasAccess && canShareKey(key.publicKey)" class="button text" type="button" @click="shareKey(key.publicKey)">
                         <span class="icon privacy" />
                         <span>Toegang geven</span>
                     </button>
