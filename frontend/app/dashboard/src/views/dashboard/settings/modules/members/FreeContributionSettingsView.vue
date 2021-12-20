@@ -9,7 +9,9 @@
         </p>
 
         <Checkbox v-model="freeContribution">
-            Vraag een vrije bijdrage bij het inschrijven (optioneel)
+            <h3 class="style-title-list">
+                Vraag een vrije bijdrage bij het inschrijven
+            </h3>
             <p v-if="enableFinancialSupport" class="style-description-small">
                 We slaan deze stap altijd over bij leden met financiële ondersteuning.
             </p>

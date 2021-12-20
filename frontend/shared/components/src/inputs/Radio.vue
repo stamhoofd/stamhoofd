@@ -1,6 +1,6 @@
 <template>
     <div>
-        <label class="radio">
+        <label class="radio" :class="{ 'with-text': hasDefaultSlot }">
             <input ref="radio" v-model="radioButtonValue" type="radio" :name="name" :value="value" :autocomplete="autocomplete" :disabled="disabled">
             <div>
                 <div />
@@ -34,6 +34,10 @@ export default class Radio extends Vue {
 
     @Prop({ default: false })
     disabled!: boolean;
+
+    get hasDefaultSlot () {
+        return !!this.$slots.default
+    }
 
     get radioButtonValue() {
         return this.modelValue;

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <label :class="{'checkbox': !onlyLine, 'checkbox-line': onlyLine, manual}">
+        <label :class="{'checkbox': !onlyLine, 'checkbox-line': onlyLine, manual, 'with-text': hasDefaultSlot }">
             <input ref="checkbox" v-model="checkboxValue" type="checkbox" :disabled="disabled">
             <div>
                 <div>
@@ -45,6 +45,10 @@ export default class Checkbox extends Vue {
     // Set to true to only allow external changes
     @Prop({ default: false })
     manual!: boolean;
+
+    get hasDefaultSlot () {
+        return !!this.$slots.default
+    }
 
     get checkboxValue() {
         return this.checked;

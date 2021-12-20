@@ -60,12 +60,18 @@ $checkbox-border-radius: 5px;
         display: none;
     }
 
+    &.with-text {
+        > div {
+            padding: 10px 0;
+        }
+    }
+
     > div {
         @extend .style-input;
 
         display: flex;
         flex-direction: row;
-        align-items: center;
+        align-items: flex-start;
         justify-content: flex-start;
         
         > div:first-child {
@@ -92,7 +98,8 @@ $checkbox-border-radius: 5px;
 
             ~ div {
                 margin-left: 15px;
-                padding: 11px 0;
+                
+                @extend .style-title-list;
 
                 &:empty {
                     margin: 0;
