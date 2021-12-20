@@ -843,12 +843,12 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         this.pop()
     }
 
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
