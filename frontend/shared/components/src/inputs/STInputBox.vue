@@ -70,16 +70,21 @@ export default class STInputBox extends Vue {
         display: flex;
         flex-direction: row;
         align-items: center;
-        height: 34px;
+        height: 24px;
 
         > label {
             flex-grow: 1; // fix safari newline glitch
-            flex-shrink: 2;
+            min-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            align-self: flex-start;
         }
 
         > .right {
             margin-left: auto;
-            flex-shrink: 1;
+            flex-shrink: 0;
+            align-self: flex-end;
         }
 
         ~ * {
