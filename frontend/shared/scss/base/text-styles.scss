@@ -145,6 +145,9 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 
+    max-width: 100%; // needed for inline-block to work with text-overflow
+    box-sizing: border-box;
+
     &.large {
         font-size: 13px;
         padding: 7px 9px;
