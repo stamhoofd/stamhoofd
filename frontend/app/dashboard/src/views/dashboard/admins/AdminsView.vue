@@ -35,7 +35,7 @@
 
                 <Spinner v-if="loading" />
                 <STList v-else>
-                    <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                    <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
                         <h2 class="style-title-list">
                             {{ admin.firstName }} {{ admin.lastName }}
                         </h2>
@@ -54,7 +54,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                    <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack" @click="editInvite(invite)">
                         <h2 class="style-title-list">
                             {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
                         </h2>
@@ -102,7 +102,7 @@
 
                     <Spinner v-if="loading" />
                     <STList v-else>
-                        <STListItem v-for="admin in getAdminsForRole(role)" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                        <STListItem v-for="admin in getAdminsForRole(role)" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
                             <h2 class="style-title-list">
                                 {{ admin.firstName }} {{ admin.lastName }}
                             </h2>
@@ -121,7 +121,7 @@
                             </template>
                         </STListItem>
 
-                        <STListItem v-for="invite in getInvitesForRole(role)" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                        <STListItem v-for="invite in getInvitesForRole(role)" :key="invite.id" :selectable="true" class="right-stack" @click="editInvite(invite)">
                             <h2 class="style-title-list">
                                 {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
                             </h2>
@@ -164,7 +164,7 @@
                     <p>Deze beheerders hebben nergens toegang toe, deel ze op in groepen op basis van hun functie in de vereniging.</p>
 
                     <STList v-if="!loading">
-                        <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack right-description" @click="editAdmin(admin)">
+                        <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
                             <h2 class="style-title-list">
                                 {{ admin.firstName }} {{ admin.lastName }}
                             </h2>
@@ -180,7 +180,7 @@
                             </template>
                         </STListItem>
 
-                        <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack right-description" @click="editInvite(invite)">
+                        <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack" @click="editInvite(invite)">
                             <h2 class="style-title-list">
                                 {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
                             </h2>
