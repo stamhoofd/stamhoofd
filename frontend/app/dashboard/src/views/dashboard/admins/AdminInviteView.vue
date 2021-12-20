@@ -22,10 +22,10 @@
         <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
             <div class="input-group">
                 <div>
-                    <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                 </div>
                 <div>
-                    <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
                 </div>
             </div>
         </STInputBox>
