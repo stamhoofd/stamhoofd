@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" @click="editCategory()">
+    <STListItem :selectable="true" class="right-stack" @click="editCategory()">
         <h3 class="style-title-list">
             {{ category.name }}
         </h3>
@@ -8,8 +8,8 @@
         </p>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <button class="button icon arrow-up gray" type="button" @click.stop="moveUp" />
+            <button class="button icon arrow-down gray" type="button" @click.stop="moveDown" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
