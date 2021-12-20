@@ -35,7 +35,7 @@ export default class Radio extends Vue {
     @Prop({ default: false })
     disabled!: boolean;
 
-    get hasDefaultSlot () {
+    get hasDefaultSlot() {
         return !!this.$slots.default
     }
 

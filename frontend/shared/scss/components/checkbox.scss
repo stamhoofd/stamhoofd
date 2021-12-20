@@ -53,8 +53,13 @@ $checkbox-border-radius: 5px;
     touch-action: manipulation;
     user-select: none;
 
-    display: inline-block; // needed to not cover whole width, since that might cause accidental clicks
+    display: block;
     cursor: pointer;
+
+    // Reduce clickable array (only on modern browsers)
+    // Can't use inline-block, because that causes whitespace issues
+    width: max-content;
+    max-width: 100%;
 
     > input {
         display: none;

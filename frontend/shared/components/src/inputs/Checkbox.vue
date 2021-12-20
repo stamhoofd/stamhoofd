@@ -46,7 +46,7 @@ export default class Checkbox extends Vue {
     @Prop({ default: false })
     manual!: boolean;
 
-    get hasDefaultSlot () {
+    get hasDefaultSlot() {
         return !!this.$slots.default
     }
 
