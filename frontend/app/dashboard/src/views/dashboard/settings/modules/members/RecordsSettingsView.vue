@@ -106,9 +106,11 @@
         <hr>
         <h2>Interne gegevens</h2>
 
-        <p class="info-box">
-            Nog even geduld. Het wordt binnenkort mogelijk om zelf kenmerken toe te voegen aan leden die niet zichtbaar zijn voor die leden zelf. Bv. om de status van iets bij te houden.
-        </p>
+        <a class="info-box selectable" href="https://stamhoofd.nolt.io/13" target="_blank">
+            Wil je ook interne gegevens bijhouden die niet zichtbaar zijn voor het lid zelf (Bv. om de status van iets bij te houden)? Dat kan momenteel nog niet, maar stem zeker op deze functie als je dit wilt gebruiken: dan kunnen we hier meer prioriteit aan geven.
+
+            <span class="button text">Stemmen</span>
+        </a>
     </SaveView>
 </template>
 

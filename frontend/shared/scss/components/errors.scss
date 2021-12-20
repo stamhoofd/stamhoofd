@@ -75,6 +75,10 @@
     margin: 15px 0;
     position: relative;
 
+    &:link, &:visited, &:active, &:hover, &:focus {
+        text-decoration: none;
+    }
+
     .custom-bottom-box + & {
         margin-top: 5px;
     }
