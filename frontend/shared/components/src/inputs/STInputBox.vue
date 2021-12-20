@@ -47,6 +47,10 @@ export default class STInputBox extends Vue {
         max-width: none;
     }
 
+    & + .style-description-small, & + .style-description {
+        padding-bottom: 10px;
+    }
+
     &.indent {
         padding-left: 35px;
 
