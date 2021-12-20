@@ -1,164 +1,147 @@
 <template>
-    <div class="st-view background">
-        <STNavigationBar title="Betaalmethodes">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+    <SaveView :loading="saving" title="Betaalmethodes" :disabled="!hasChanges" @save="save">
+        <h1>
+            Betaalmethodes
+        </h1>
 
-        <main>
-            <h1>
-                Betaalmethodes
-            </h1>
-
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
+        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
         
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <template v-if="enableMemberModule">
-                <hr>
-                <h2>Betaalmethodes voor inschrijvingen</h2>
+        <template v-if="enableMemberModule">
+            <hr>
+            <h2>Betaalmethodes voor inschrijvingen</h2>
 
-                <EditPaymentMethodsBox :methods="organization.meta.paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
-
-                <hr>
-            </template>
-
-            <h2>Overschrijvingen</h2>
-
-            <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="validator" :required="false" />
-
-            <template v-if="enableMemberModule">
-                <hr>
-                <h2>Overschrijvingen, specifiek voor inschrijvingen</h2>
-
-                <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
-                    <input
-                        v-model="creditor"
-                        class="input"
-                        type="text"
-                        :placeholder="organization.name"
-                        autocomplete=""
-                    >
-                </STInputBox>
-
-                <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
-                    <RadioGroup>
-                        <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
-                            {{ _type.name }}
-                        </Radio>
-                    </RadioGroup>
-                </STInputBox>
-                <p class="style-description-small">
-                    {{ transferTypeDescription }}
-                </p>
-
-                <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
-                    <input
-                        v-model="prefix"
-                        class="input"
-                        type="text"
-                        placeholder="bv. Inschrijving"
-                        autocomplete=""
-                    >
-                </STInputBox>
-                <p class="style-description-small">
-                    Voorbeeld: “{{ transferExample }}”
-                </p>
-            </template>
-
-            <template v-if="isBelgium || payconiqApiKey">
-                <hr>
-                <h2>Payconiq activeren</h2>
-                <p class="st-list-description">
-                    Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
-                </p>
-
-                <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
-                    <input
-                        v-model="payconiqApiKey"
-                        class="input"
-                        type="text"
-                        placeholder="API-key van Payconiq"
-                    >
-                </STInputBox>
-            </template>
+            <EditPaymentMethodsBox :methods="organization.meta.paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
 
             <hr>
-            <h2 v-if="isBelgium">
-                Bancontact, kredietkaart of iDEAL
-            </h2>
-            <h2 v-else>
-                iDEAL, kredietkaart of Bancontact
-            </h2>
+        </template>
 
-            <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p class="st-list-description">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
-                </p>
-                <p v-if="isBelgium" class="info-box">
-                    Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
-                </p>
+        <h2>Overschrijvingen</h2>
 
-                <p class="st-list-description">
-                    <button class="button text" @click="linkMollie">
-                        <span class="icon link" />
-                        <span>Mollie koppelen</span>
-                    </button>
-                </p>
-            </template>
-            <template v-else>
-                <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
-                </p>
-                <p v-else class="warning-box">
-                    Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
-                </p>
-                <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
-                    Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
-                </p>
+        <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="validator" :required="false" />
 
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
-                    Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
-                </p>
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
-                    Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
-                </p>
+        <template v-if="enableMemberModule">
+            <hr>
+            <h2>Overschrijvingen, specifiek voor inschrijvingen</h2>
 
-                <p class="st-list-description">
-                    <LoadingButton :loading="loadingMollie">
-                        <button class="button text" @click="mollieDashboard">
-                            <span class="icon external" />
-                            <span>Ga naar het Mollie dashboard</span>
-                        </button>
-                    </LoadingButton>
-                </p>
+            <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
+                <input
+                    v-model="creditor"
+                    class="input"
+                    type="text"
+                    :placeholder="organization.name"
+                    autocomplete=""
+                >
+            </STInputBox>
 
-                <p class="st-list-description">
-                    <button class="button text" @click="disconnectMollie">
-                        <span class="icon trash" />
-                        <span>Account loskoppelen van Stamhoofd</span>
-                    </button>
-                </p>
-            </template>
-        </main>
+            <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
+                        {{ _type.name }}
+                    </Radio>
+                </RadioGroup>
+            </STInputBox>
+            <p class="style-description-small">
+                {{ transferTypeDescription }}
+            </p>
 
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
+            <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
+                <input
+                    v-model="prefix"
+                    class="input"
+                    type="text"
+                    placeholder="bv. Inschrijving"
+                    autocomplete=""
+                >
+            </STInputBox>
+            <p class="style-description-small">
+                Voorbeeld: “{{ transferExample }}”
+            </p>
+        </template>
+
+        <template v-if="isBelgium || payconiqApiKey">
+            <hr>
+            <h2>Payconiq activeren</h2>
+            <p class="st-list-description">
+                Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
+            </p>
+
+            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
+                <input
+                    v-model="payconiqApiKey"
+                    class="input"
+                    type="text"
+                    placeholder="API-key van Payconiq"
+                >
+            </STInputBox>
+        </template>
+
+        <hr>
+        <h2 v-if="isBelgium">
+            Bancontact, kredietkaart of iDEAL
+        </h2>
+        <h2 v-else>
+            iDEAL, kredietkaart of Bancontact
+        </h2>
+
+        <template v-if="!organization.privateMeta.mollieOnboarding">
+            <p class="st-list-description">
+                {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
+            </p>
+            <p v-if="isBelgium" class="info-box">
+                Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
+            </p>
+
+            <p class="st-list-description">
+                <button class="button text" type="button" @click="linkMollie">
+                    <span class="icon link" />
+                    <span>Mollie koppelen</span>
+                </button>
+            </p>
+        </template>
+        <template v-else>
+            <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
+                {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
+            </p>
+            <p v-else class="warning-box">
+                Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
+            </p>
+            <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
+                Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
+            </p>
+
+            <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
+                Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
+            </p>
+            <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
+                Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
+            </p>
+
+            <p class="st-list-description">
+                <LoadingButton :loading="loadingMollie">
+                    <button class="button text" type="button" @click="mollieDashboard">
+                        <span class="icon external" />
+                        <span>Ga naar het Mollie dashboard</span>
                     </button>
                 </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+            </p>
+
+            <p class="st-list-description">
+                <button class="button text" type="button" @click="disconnectMollie">
+                    <span class="icon trash" />
+                    <span>Account loskoppelen van Stamhoofd</span>
+                </button>
+            </p>
+        </template>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -168,14 +151,11 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        Checkbox,
         RadioGroup,
         Radio,
-        BackButton,
         LoadingButton,
         IBANInput,
         STList,
@@ -314,7 +294,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
         const errors = new SimpleErrors()
        
-       let valid = false
+        let valid = false
 
         if (errors.errors.length > 0) {
             this.errorBox = new ErrorBox(errors)
@@ -342,12 +322,17 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
+    get hasChanges() {
+        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+    }
+
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+        if (!this.hasChanges) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
+
 
     async linkMollie() {
         // Start oauth flow
@@ -442,9 +427,9 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         UrlHelper.setUrl("/settings/payments")
     }
 
-     async updateMollie() {
+    async updateMollie() {
         if (!this.organization.privateMeta?.mollieOnboarding) {
-             return;
+            return;
         }
 
         try {
