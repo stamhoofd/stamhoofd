@@ -55,15 +55,17 @@
             </p>
         </Checkbox>
 
-        <hr v-if="!isNew">
-        <h2 v-if="!isNew">
-            Verwijderen
-        </h2>
+        <div v-if="!isNew" class="container">
+            <hr>
+            <h2>
+                Verwijderen
+            </h2>
 
-        <button v-if="!isNew" class="button secundary danger" type="button" @click="deleteMe">
-            <span class="icon trash" />
-            <span>Verwijderen</span>
-        </button>
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
     </SaveView>
 </template>
 
