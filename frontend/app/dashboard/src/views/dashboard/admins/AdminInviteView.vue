@@ -1,18 +1,22 @@
 <template>
     <SaveView :loading="saving" title="Beheerder" :disabled="!hasChanges" @save="save">
-        <h1 v-if="isNew">
+        <h1 v-if="isNew && !forceCreate">
             Beheerder toevoegen
         </h1>
         <h1 v-else>
             Beheerder bewerken
         </h1>
 
-        <p v-if="isNew" class="info-box">
+        <p v-if="isNew && !forceCreate" class="info-box">
             Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
         </p>
-        <p v-else-if="editUser === null" class="warning-box">
+        <button v-else-if="!user" class="warning-box with-button selectable" @click="resendInvite">
             Deze beheerder heeft de uitnodiging nog niet geaccepteerd
-        </p>
+
+            <span v-if="!isNew && !user" class="button text">
+                Opnieuw versturen
+            </span>
+        </button>
 
         <STErrorsDefault :error-box="errorBox" />
         <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
@@ -106,10 +110,6 @@
                 </STListItem>
             </STList>
         </template>
-
-        <button v-if="!isNew && !user" class="button secundary" @click="resendInvite">
-            Opnieuw versturen
-        </button>
     </SaveView>
 </template>
 
@@ -448,7 +448,17 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     this.onUpdateInvite(response.data);
                 }
 
-                this.show(new ComponentWithProperties(SendInviteView, { secret, invite: response.data }))
+                // Remove patches
+                this.editInvite?.set(response.data)
+                this.patchInvite = null
+
+                const component = new ComponentWithProperties(SendInviteView, { secret, invite: response.data })
+                if (this.forceCreate) {
+                    this.present({ components: [component], modalDisplayStyle: "popup" })
+                } else {
+                    this.show(component)
+                }
+
                 this.saving = false
             } catch (e) {
                 console.error(e)

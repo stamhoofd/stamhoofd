@@ -111,7 +111,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     }
 
     async generateQRCode() {
-         try {
+        try {
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
             this.QRCodeUrl = await QRCode.toDataURL(this.url, { margin: 0 })
         } catch (e) {
@@ -165,6 +165,8 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
 
     .qr-code {
         max-width: 100%;
+        height: auto;
+        align-self: flex-start;
         padding: 15px 0;
     }
 }
