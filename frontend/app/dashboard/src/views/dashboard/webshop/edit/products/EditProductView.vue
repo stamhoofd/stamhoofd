@@ -107,11 +107,11 @@
             <h2 class="style-with-button">
                 <div>Foto</div>
                 <div>
-                    <button v-if="image" class="button text" @click="image = null">
+                    <button v-if="image" class="button text only-icon-smartphone" @click="image = null">
                         <span class="icon trash" />
                         <span>Verwijderen</span>
                     </button>
-                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Foto uploaden'" :resolutions="resolutions" />
+                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
                 </div>
             </h2>
             <p>Foto’s worden altijd bijgeknipt tot een vierkant als ze in het overzicht getoond worden. Je hoeft foto's zelf niet bij te knippen. Een portretfoto wordt dus langs boven en onder afgeknipt, en een foto in landschapsoriëntatie wordt links en rechts afgeknipt. In de detailweergave is het soms mogelijk dat we links en rechts nog wat meer plaats hebben en de foto dus wat breder kunnen tonen.</p>

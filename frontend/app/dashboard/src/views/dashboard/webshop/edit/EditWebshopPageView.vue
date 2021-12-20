@@ -37,11 +37,11 @@
             <h2 class="style-with-button">
                 <div>Omslagfoto</div>
                 <div>
-                    <button v-if="coverPhoto" class="button text" @click="coverPhoto = null">
+                    <button v-if="coverPhoto" class="button text only-icon-smartphone" @click="coverPhoto = null">
                         <span class="icon trash" />
                         <span>Verwijderen</span>
                     </button>
-                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :resolutions="hs" />
+                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hs" />
                 </div>
             </h2>
 
@@ -58,7 +58,7 @@
             <h2 class="style-with-button">
                 <div>Externe links</div>
                 <div>
-                    <button class="button text" @click="addPolicy">
+                    <button class="button text only-icon-smartphone" @click="addPolicy">
                         <span class="icon add" />
                         <span>Toevoegen</span>
                     </button>
@@ -87,15 +87,13 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,LoadingButton,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Tooltip, TooltipDirective, UploadButton } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { DNSRecord, DNSRecordType,Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
+import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective, UploadButton } from "@stamhoofd/components";
+import { Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
-import EditPolicyBox from "./EditPolicyBox.vue"
+import EditPolicyBox from "./EditPolicyBox.vue";
 import EditWebshopMixin from "./EditWebshopMixin";
 
 @Component({
