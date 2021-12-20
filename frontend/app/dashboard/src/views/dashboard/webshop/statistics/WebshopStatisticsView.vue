@@ -12,7 +12,6 @@
                 Geannuleerde bestellingen zijn niet inbegrepen.
             </p>
 
-
             <div class="stats-grid">
                 <STInputBox title="Omzet">
                     <p class="style-price-big">
@@ -84,6 +83,26 @@
                     </STInputBox>
                 </div>
             </template>
+
+            <div v-if="!loading && Object.values(totalByProduct).length > 0" class="container">
+                <hr>
+                <h2>Per productcombinatie</h2>
+
+                <div class="stats-grid">
+                    <STInputBox v-for="(info, product) in totalByProduct" :key="product" :title="info.name">
+                        <p class="style-price-big">
+                            <span>
+                                {{ loading ? '-' : info.amount }}
+                            </span>
+                        </p>
+                        <p class="style-description-small">
+                            {{ loading ? '-' : formatPrice(info.price) }}
+                        </p>
+
+                        <p v-if="info.description" class="style-description-small pre-wrap" v-text="info.description" />
+                    </STInputBox>
+                </div>
+            </div>
         </main>
     </div>
 </template>
@@ -92,7 +111,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Spinner, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
+import { Category, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -127,6 +146,20 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
         return this.webshopManager.preview.meta.ticketType === WebshopTicketType.Tickets
     }
 
+    get categories() {
+        return this.webshop?.categories ?? []
+    }
+
+    getCategoryProducts(category: Category) {
+        return category.productIds.flatMap(id => {
+            const product = this.webshop?.products.find(product => product.id === id)
+            if (product) {
+                return [product]
+            }
+            return []
+        })
+    }
+
     loading = false
 
     formatPrice(price: number) {
@@ -142,6 +175,8 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     totalVouchers = 0
     totalScannedVouchers = 0
 
+    totalByProduct: { [name: string]: { amount: number, name: string, description: string, price: number } } = {}
+
     mounted() {
         this.reload().catch(console.error)
 
@@ -153,11 +188,41 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     async reload() {
         this.loading = true
         try {
+            this.totalByProduct = {}
+            this.totalRevenue = 0
+            this.totalOrders = 0
+            this.averagePrice = 0
+            this.totalTickets = 0
+            this.totalScannedTickets = 0
+            this.totalVouchers = 0
+            this.totalScannedVouchers = 0
+
+            // Keep a Set of all order Id's to prevent duplicate orders (in case an order gets updated, we'll receive it multiple times)
+            const orderIds = new Set<string>()
+
+            await this.webshopManager.loadWebshopIfNeeded(false)
             await this.webshopManager.streamOrders((order: Order) => {
-                if (order.status !== OrderStatus.Canceled) {
+                if (order.status !== OrderStatus.Canceled && !orderIds.has(order.id)) {
+                    orderIds.add(order.id)
                     this.totalRevenue += order.data.totalPrice
                     this.totalOrders += 1
                     this.averagePrice = Math.round(this.totalRevenue / this.totalOrders)
+
+                    for (const item of order.data.cart.items) {
+                        const name = item.codeWithoutFields
+                        const current = this.totalByProduct[name]
+                        if (current) {
+                            current.amount += item.amount
+                            current.price += item.getPrice(order.data.cart)
+                        } else {
+                            this.totalByProduct[name] = {
+                                amount: item.amount,
+                                name: item.product.name,
+                                description: item.descriptionWithoutFields,
+                                price: item.getPrice(order.data.cart),
+                            }
+                        }
+                    }
                 }
             })
 
@@ -208,8 +273,8 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 .webshop-statistics-view {
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr) );
-        gap: 30px 15px;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr) );
+        gap: 0px 15px;
     }
 }
 </style>

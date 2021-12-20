@@ -129,16 +129,13 @@ export class WebshopManager {
                 this.loadWebshop(false).catch(console.error)
             }
 
-            console.log("Return webshop")
             return this.webshop
         }
 
         if (this.webshopPromise) {
-            console.log("Return webshopPromise")
             return this.webshopPromise
         }
         
-        console.log("Init webshopPromise")
         this.webshopPromise = (async () => {
             // Try to get it from the database, also init a background fetch if it is too long ago
             try {
