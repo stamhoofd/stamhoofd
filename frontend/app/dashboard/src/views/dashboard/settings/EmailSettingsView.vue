@@ -10,23 +10,26 @@
                 E-mailadressen
             </h1>
 
-            <p>Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">deze pagina</a>.</p>
-
-        
-            <p v-if="organization.privateMeta && organization.privateMeta.mailDomainActive" class="st-list-description">
-                Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt die eindigen op @{{ organization.privateMeta.mailDomain }}, kan je e-mails versturen vanaf dat e-mailadres. Bij andere e-mailadressen (bv. {{ organization.uri }}@gmail.com) kunnen we enkel instellen dat leden antwoorden naar dat e-mailadres; de e-mail wordt nog steeds verstuurd vanaf @{{ organization.privateMeta.mailDomain }}. Voeg enkel e-mailadressen toe waar je ook e-mails op kan ontvangen.
-            </p>
-            <p v-else class="st-list-description">
-                {{ $t('dashboard.settings.email.description') }}
-            </p>
+            <p>Wijzig de e-mailadressen waarmee je e-mails kan versturen. Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">deze pagina</a>.</p>
 
             <STList>
                 <STListItem v-for="email in emails" :key="email.id" :selectable="true" @click="editEmail(email)">
-                    {{ email.name ? email.name+" <"+email.email+">" : email.email }}
+                    <h3 class="style-title-list">
+                        {{ email.name ? email.name : email.email }}
+                    </h3>
+                    <p v-if="email.name" class="style-description-small">
+                        {{ email.email }}
+                    </p>
+
+                    <span v-if="email.default" slot="right" class="style-tag">Standaard</span>
 
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>
+
+            <p v-if="emails.length == 0" class="info-box">
+                Je hebt nog geen e-mailadressen toegevoegd. 
+            </p>
         </main>
 
         <STToolbar>
@@ -80,8 +83,7 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
     }
 
     editEmail(email: OrganizationEmail) {
-        const patch = OrganizationManager.getPatch()
-        this.show(new ComponentWithProperties(EditEmailView, { organizationPatch: patch, emailId: email.id }))
+        this.show(new ComponentWithProperties(EditEmailView, { emailId: email.id }))
     }
     
     addEmail() {
@@ -89,7 +91,7 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
         const patch = OrganizationManager.getPatch()
         patch.privateMeta = OrganizationPrivateMetaData.patchType().create({})
         patch.privateMeta!.emails.addPut(email)
-        this.show(new ComponentWithProperties(EditEmailView, { organizationPatch: patch, emailId: email.id }))
+        this.show(new ComponentWithProperties(EditEmailView, { initialPatch: patch, emailId: email.id, isNew: true }))
     }
 }
 </script>

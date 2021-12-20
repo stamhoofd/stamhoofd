@@ -29,23 +29,40 @@
             </STInputBox>
 
             <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres waarmee je wilt versturen" />
-        
-            <hr>
-            <h2>Standaard e-mailadres voor...</h2>
-            <p class="st-list-description">
-                Selecteer de groepen die standaard met dit e-mailadres moeten versturen.
-            </p>
 
-            <STList>
-                <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
-                    <Checkbox slot="left" v-model="group.selected" />
-                    {{ group.group.settings.name }}
-                </STListItem>
-                <STListItem element-name="label" :selectable="true">
-                    <Checkbox slot="left" v-model="isDefault" />
-                    Algemene e-mails
-                </STListItem>
-            </STList>
+            <template v-if="enableMemberModule">
+                <hr>
+                <h2>Standaard e-mailadres voor...</h2>
+                <p class="st-list-description">
+                    Selecteer de groepen die standaard met dit e-mailadres moeten versturen.
+                </p>
+
+                <STList>
+                    <STListItem v-for="group in groups" :key="group.group.id" element-name="label" :selectable="true">
+                        <Checkbox slot="left" v-model="group.selected" />
+                        <h3 class="style-title-list">
+                            {{ group.group.settings.name }}<h3 />
+                        </h3>
+                    </STListItem>
+                    <STListItem element-name="label" :selectable="true">
+                        <Checkbox slot="left" v-model="isDefault" />
+                        <h3 class="style-title-list">
+                            Standaard e-mails
+                        </h3>
+                        <p class="style-description-small">
+                            Voor andere e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
+            <Checkbox v-else v-model="isDefault">
+                <h3 class="style-title-list">
+                    Standaard e-mails
+                </h3>
+                <p class="style-description-small">
+                    Voor algemene e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
+                </p>
+            </Checkbox>
         </main>
 
         <STToolbar>
@@ -64,10 +81,10 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchableArray,PatchType } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder,isPatchable,PartialWithoutMethods, PatchableArray,PatchableArrayAutoEncoder,PatchType } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STList, STListItem,STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, DNSRecord, Group, GroupGenderType, GroupPatch, GroupPrivateSettingsPatch,GroupSettings, GroupSettingsPatch, Organization, OrganizationDomains, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -106,27 +123,46 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
     @Prop()
     emailId!: string;
 
-    @Prop()
-    organizationPatch!: AutoEncoderPatchType<Organization> & AutoEncoder ;
+    @Prop({ default: false })
+    isNew!: boolean;
+
+    /**
+     * Pass some patches from outside, and also save these patches when saving the e-mail (e.g. creating an email)
+     */
+    @Prop({ default: null })
+    initialPatch!: AutoEncoderPatchType<Organization> | null;
+    
+    organizationPatch = this.initialPatch ? this.initialPatch : OrganizationManager.getPatch()
 
     groups: SelectableGroup[] = []
 
-    get privateMetaPatch() {
-        return this.organizationPatch.privateMeta as AutoEncoderPatchType<OrganizationPrivateMetaData> | undefined
-    }
-
-    get isNew() {
-        return this.privateMetaPatch && this.privateMetaPatch.emails.getPuts().length > 0
-    }
+    OrganizationManager = OrganizationManager
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get enableMemberModule() {
+        return this.organization.meta.modules.useMembers
     }
 
     mounted() {
         for (const group of this.organization.groups) {
             this.groups.push(new SelectableGroup(group, group.privateSettings !== null && group.privateSettings.defaultEmailId !== null && group.privateSettings.defaultEmailId === this.emailId))
         }
+    }
+
+    get unpatchedOrganizationEmail() {
+        const organization = OrganizationManager.organization
+        for (const email of organization.privateMeta?.emails ?? []) {
+            if (email.id === this.emailId) {
+                return email
+            }
+        }
+        if (this.saving) {
+            return OrganizationEmail.create({ email: "" })
+        }
+        throw new Error("Email not found")
     }
 
     get organizationEmail() {
@@ -142,15 +178,20 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
         throw new Error("Email not found")
     }
 
-    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationEmail>> ) {
+    addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationEmail>>, emailId?: string) {
         if (this.saving) {
             return
         }
-        if (!(this.organizationPatch as any).privateMeta) {
-            (this.organizationPatch as any).privateMeta = OrganizationPrivateMetaData.patchType().create({})
-        }
-        const p = OrganizationEmail.patchType().create(Object.assign(patch, { id: this.emailId }));
-        (this.organizationPatch as any).privateMeta.emails.addPatch(p)
+
+        const p = OrganizationEmail.patch({ id: emailId ?? this.emailId, ...patch });
+        const emails: PatchableArrayAutoEncoder<OrganizationEmail> = new PatchableArray()
+        emails.addPatch(p)
+
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                emails
+            })
+        })
     }
 
     get email() {
@@ -174,7 +215,31 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
     }
 
     set isDefault(d: boolean) {
+        if (!d) {
+            // Check the original value
+            const unpatched = this.unpatchedOrganizationEmail
+            if (unpatched && unpatched.default) {
+                new Toast("Om het standaard e-mailadres te wijzigen moet je het bij een ander e-mailadres aanvinken.", "info").show()
+                return
+            }
+        }
         this.addPatch({ default: d })
+
+        if (d) {
+            // Patch all other emails to false
+            for (const email of this.organization.privateMeta?.emails ?? []) {
+                if (email.id !== this.emailId) {
+                    this.addPatch({ default: false }, email.id)
+                }
+            }
+        } else {
+            // Clear other patches
+            const emails = this.organizationPatch.privateMeta?.emails
+            if (emails && isPatchable(emails)) {
+                // Keep only patches with email id
+                this.organizationPatch.privateMeta!.emails = emails.filter(this.emailId)
+            }
+        }
     }
 
     async deleteMe() {
