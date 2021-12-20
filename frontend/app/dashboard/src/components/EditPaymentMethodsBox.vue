@@ -13,27 +13,17 @@
 
 <script lang="ts">
 import { PatchableArray } from "@simonbackx/simple-encoding";
-import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg"
-import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
-import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
-import { BackButton, Checkbox, IBANInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg";
+import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg";
+import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg";
+import { Checkbox, STList, STListItem, Toast } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { Country, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
-        STErrorsDefault,
         Checkbox,
-        RadioGroup,
-        Radio,
-        BackButton,
-        LoadingButton,
-        IBANInput,
         STList,
         STListItem
     },

@@ -1,72 +1,44 @@
 <template>
-    <div class="st-view webshop-view-products">
-        <STNavigationBar :title="title">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-            <template #right>
-                <button v-if="canDismiss" class="button icon close gray" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
+        <h1 class="style-navigation-title">
+            {{ viewTitle }}
+        </h1>
+        <STErrorsDefault :error-box="errorBox" />
 
-        <main>
-            <h1>{{ title }}</h1>
-            <STErrorsDefault :error-box="errorBox" />
+        <template v-if="webshop.categories.length > 0">
+            <STList>
+                <CategoryRow v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+            </STList>
+        </template>
 
-            <template v-if="webshop.categories.length > 0">
-                <h2>Categorieën</h2>
-                <STList>
-                    <CategoryRow v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
-                </STList>
-            </template>
-
-            <template v-else-if="webshop.products.length > 0">
-                <template v-if="webshop.categories.length > 0">
-                    <h2 v-if="isTickets">
-                        Tickets
-                    </h2>
-                    <h2 v-else>
-                        Artikels
-                    </h2>
-                </template>
-                <STList>
-                    <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
-                </STList>
-            </template>
+        <template v-else-if="webshop.products.length > 0">
+            <STList>
+                <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+            </STList>
+        </template>
                 
-            <p v-if="webshop.categories.length == 0">
-                <button class="button text" @click="addProduct">
-                    <span class="icon add" />
-                    <span v-if="isTickets">Ticket toevoegen</span>
-                    <span v-else>Artikel toevoegen</span>
-                </button>
-            </p>
+        <p v-if="webshop.categories.length == 0">
+            <button class="button text" type="button" @click="addProduct">
+                <span class="icon add" />
+                <span v-if="isTickets">Ticket toevoegen</span>
+                <span v-else>Artikel toevoegen</span>
+            </button>
+        </p>
 
-            <p>
-                <button class="button text" @click="addCategory">
-                    <span class="icon add" />
-                    <span v-if="webshop.categories.length == 0 && webshop.products.length > 0">Opdelen in categorieën</span>
-                    <span v-else>Categorie toevoegen</span>
-                </button>
-            </p>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <p>
+            <button class="button text" type="button" @click="addCategory">
+                <span class="icon add" />
+                <span v-if="webshop.categories.length == 0 && webshop.products.length > 0">Opdelen in categorieën</span>
+                <span v-else>Categorie toevoegen</span>
+            </button>
+        </p>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { BackButton, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { Category, PrivateWebshop, Product, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -76,26 +48,26 @@ import EditWebshopMixin from "./EditWebshopMixin";
 import EditProductView from './products/EditProductView.vue';
 import ProductRow from './products/ProductRow.vue';
 
-
 @Component({
     components: {
         STListItem,
         STList,
-        STInputBox,
         STErrorsDefault,
         ProductRow,
         CategoryRow,
-        STNavigationBar,
-        LoadingButton,
-        STToolbar,
-        BackButton
-    },
-    directives: { Tooltip },
+        SaveView,
+    }
 })
 export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
-    get title() {
+    get viewTitle() {
         if (this.isTickets) {
+            if (this.webshop.categories.length > 0) {
+                return "Ticket categorieën"
+            }
             return "Aanbod tickets en vouchers"
+        }
+        if (this.webshop.categories.length > 0) {
+            return "Product categorieën"
         }
         return "Productaanbod"
     }

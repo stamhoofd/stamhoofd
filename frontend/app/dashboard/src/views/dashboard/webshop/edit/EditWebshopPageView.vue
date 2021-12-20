@@ -1,117 +1,88 @@
 <template>
-    <div class="st-view webshop-view-page">
-        <STNavigationBar :title="viewTitle">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-            <template #right>
-                <button v-if="canDismiss" class="button icon close gray" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" class="webshop-view-page" @save="save">
+        <h1>{{ viewTitle }}</h1>
+        <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Titel" error-fields="meta.title" :error-box="errorBox">
+            <input
+                v-model="title"
+                class="input"
+                type="text"
+                placeholder="bv. Bestel je wafels"
+                autocomplete=""
+            >
+        </STInputBox>
 
-        <main>
-            <h1>{{ viewTitle }}</h1>
-            <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Titel" error-fields="meta.title" :error-box="errorBox">
-                <input
-                    v-model="title"
-                    class="input"
-                    type="text"
-                    placeholder="bv. Bestel je wafels"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input large"
-                    type="text"
-                    placeholder="Beschrijving die op jouw webshop staat"
-                    autocomplete=""
-                />
-            </STInputBox>
+        <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input large"
+                type="text"
+                placeholder="Beschrijving die op jouw webshop staat"
+                autocomplete=""
+            />
+        </STInputBox>
 
 
-            <hr>
-            <h2 class="style-with-button">
-                <div>Omslagfoto</div>
-                <div>
-                    <button v-if="coverPhoto" class="button text only-icon-smartphone" @click="coverPhoto = null">
-                        <span class="icon trash" />
-                        <span>Verwijderen</span>
-                    </button>
-                    <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hs" />
-                </div>
-            </h2>
+        <hr>
+        <h2 class="style-with-button">
+            <div>Omslagfoto</div>
+            <div>
+                <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
+                    <span class="icon trash" />
+                    <span>Verwijderen</span>
+                </button>
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hs" />
+            </div>
+        </h2>
 
-            <p>De foto wordt getoond met een grootte van 900 x 375, maar we raden aan om een foto van minstens 1800 x 750 te uploaden.</p>
+        <p>De foto wordt getoond met een grootte van 900 x 375, maar we raden aan om een foto van minstens 1800 x 750 te uploaden.</p>
 
-            <figure v-if="coverPhotoSrc" class="webshop-banner">
-                <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
-            </figure>
+        <figure v-if="coverPhotoSrc" class="webshop-banner">
+            <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
+        </figure>
 
 
-            <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
+        <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
 
-            <hr>
-            <h2 class="style-with-button">
-                <div>Externe links</div>
-                <div>
-                    <button class="button text only-icon-smartphone" @click="addPolicy">
-                        <span class="icon add" />
-                        <span>Toevoegen</span>
-                    </button>
-                </div>
-            </h2>
-            <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
+        <hr>
+        <h2 class="style-with-button">
+            <div>Externe links</div>
+            <div>
+                <button type="button" class="button text only-icon-smartphone" @click="addPolicy">
+                    <span class="icon add" />
+                    <span>Toevoegen</span>
+                </button>
+            </div>
+        </h2>
+        <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
 
-            <p v-if="policies.length == 0" class="info-box">
-                Je hebt momenteel geen externe links toegevoegd.
-            </p>
-            <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
-                De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
-            </p>
-        </main>
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <p v-if="policies.length == 0" class="info-box">
+            Je hebt momenteel geen externe links toegevoegd.
+        </p>
+        <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
+            De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
+        </p>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective, UploadButton } from "@stamhoofd/components";
+import { SaveView, STErrorsDefault, STInputBox, UploadButton } from "@stamhoofd/components";
 import { Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
 import EditPolicyBox from "./EditPolicyBox.vue";
 import EditWebshopMixin from "./EditWebshopMixin";
 
 @Component({
     components: {
-        STListItem,
-        STList,
         STInputBox,
         STErrorsDefault,
         UploadButton,
-        Checkbox,
-        DNSRecordBox,
         EditPolicyBox,
-        STNavigationBar,
-        BackButton,
-        STToolbar,
-        LoadingButton
-    },
-    directives: { Tooltip: TooltipDirective },
+        SaveView
+    }
 })
 export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     get organization() {

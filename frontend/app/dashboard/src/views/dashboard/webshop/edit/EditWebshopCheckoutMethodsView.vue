@@ -1,71 +1,50 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar :title="viewTitle">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-            <template #right>
-                <button v-if="canDismiss" class="button icon close gray" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
+        <h1>{{ viewTitle }}</h1>
+        <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel, maar we raden het wel sterk aan, want zo is de juiste informatie zichtbaar in de bestelbevestiging.</p>
 
-        <main>
-            <h1>{{ viewTitle }}</h1>
-            <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel, maar we raden het wel sterk aan, want zo is de juiste informatie zichtbaar in de bestelbevestiging.</p>
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <STList>
+            <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" class="right-stack" @click="editCheckoutMethod(method)">
+                {{ method.type == 'OnSite' ? 'Ter plaatse consumeren' : (method.type == 'Takeout' ? 'Afhalen' : 'Leveren') }}: {{ method.name }}
 
-            <STList>
-                <STListItem v-for="method in webshop.meta.checkoutMethods" :key="method.id" :selectable="true" @click="editCheckoutMethod(method)">
-                    {{ method.type == 'OnSite' ? 'Ter plaatse consumeren' : (method.type == 'Takeout' ? 'Afhalen' : 'Leveren') }}: {{ method.name }}
-
-                    <template slot="right">
-                        <button class="button icon arrow-up gray" @click.stop="moveCheckoutUp(method)" />
-                        <button class="button icon arrow-down gray" @click.stop="moveCheckoutDown(method)" />
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                <template slot="right">
+                    <button class="button icon arrow-up gray" type="button" @click.stop="moveCheckoutUp(method)" />
+                    <button class="button icon arrow-down gray" type="button" @click.stop="moveCheckoutDown(method)" />
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </STList>
             
-            <p>
-                <button class="button text" @click="addOnSiteMethod">
-                    <span class="icon add" />
-                    <span>Ter plaatse consumeren toevoegen</span>
-                </button>
-            </p>
+        <p>
+            <button class="button text" type="button" @click="addOnSiteMethod">
+                <span class="icon add" />
+                <span>Ter plaatse consumeren toevoegen</span>
+            </button>
+        </p>
 
-            <p>
-                <button class="button text" @click="addTakeoutMethod">
-                    <span class="icon add" />
-                    <span>Afhaallocatie toevoegen</span>
-                </button>
-            </p>
+        <p>
+            <button class="button text" type="button" @click="addTakeoutMethod">
+                <span class="icon add" />
+                <span>Afhaallocatie toevoegen</span>
+            </button>
+        </p>
 
-            <p>
-                <button class="button text" @click="addDeliveryMethod">
-                    <span class="icon add" />
-                    <span>Leveringsoptie toevoegen</span>
-                </button>
-            </p>
-        </main>
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <p>
+            <button class="button text" type="button" @click="addDeliveryMethod">
+                <span class="icon add" />
+                <span>Leveringsoptie toevoegen</span>
+            </button>
+        </p>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { BackButton, LoadingButton,STErrorsDefault, STInputBox, STList, STListItem,STNavigationBar,STToolbar,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { WebshopOnSiteMethod } from '@stamhoofd/structures';
-import { AnyCheckoutMethod, CheckoutMethod, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { AnyCheckoutMethod, CheckoutMethod, PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
@@ -77,15 +56,9 @@ import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
     components: {
         STListItem,
         STList,
-        STInputBox,
         STErrorsDefault,
-        STNavigationBar,
-        STToolbar,
-        LoadingButton,
-        BackButton
-
+        SaveView
     },
-    directives: { Tooltip },
 })
 export default class EditWebshopCheckoutMethodsView extends Mixins(EditWebshopMixin) {
     get viewTitle() {

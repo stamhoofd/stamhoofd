@@ -34,11 +34,11 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" @click="skip">
+                <button class="button secundary" type="button" @click="skip">
                     Overslaan
                 </button>
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="validate">
+                    <button class="button primary" type="button" @click="validate">
                         Ik heb het ingesteld
                     </button>
                 </LoadingButton>

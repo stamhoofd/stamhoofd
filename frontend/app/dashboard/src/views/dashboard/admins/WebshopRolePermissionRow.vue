@@ -9,7 +9,7 @@
         </p>
 
         <div v-if="selected" slot="right">
-            <button class="button text" @click.stop.prevent="choosePermissions($event)">
+            <button class="button text" type="button" @click.stop.prevent="choosePermissions($event)">
                 <span>{{ getLevelText(permissions) }}</span>
                 <span class="icon arrow-down-small" />
             </button>

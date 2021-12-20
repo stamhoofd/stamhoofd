@@ -1,132 +1,112 @@
 <template>
-    <div class="st-view webshop-view-page">
-        <STNavigationBar :title="viewTitle">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-            <template #right>
-                <button v-if="canDismiss" class="button icon close gray" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
+        <h1>{{ viewTitle }}</h1>
 
-        <main>
-            <h1>{{ viewTitle }}</h1>
+        <p v-if="legacyUrl && webshop.domain === null" class="info-box">
+            We hebben het formaat gewijzigd van webshop links. Maar jouw webshop is (en blijft) ook bereikbaar via {{ legacyUrl }}. In toekomstige communicaties gebruik je best de nieuwe link, maar pas de nieuwe link eerst aan naar wens.
+        </p>
 
-            <p v-if="legacyUrl && webshop.domain === null" class="info-box">
-                We hebben het formaat gewijzigd van webshop links. Maar jouw webshop is (en blijft) ook bereikbaar via {{ legacyUrl }}. In toekomstige communicaties gebruik je best de nieuwe link, maar pas de nieuwe link eerst aan naar wens.
+        <STErrorsDefault :error-box="errorBox" />
+
+        <STInputBox title="Domeinnaam">
+            <Dropdown v-model="selectedDomain" @change="onChangeSelectedDomain">
+                <option :value="null">
+                    {{ defaultDomain }}
+                </option>
+                <option v-for="d of defaultDomains" :key="d" :value="d">
+                    {{ d }}
+                </option>
+                <option :value="''">
+                    Andere domeinnaam
+                </option>
+            </Dropdown>
+        </STInputBox>
+
+        <template v-if="useNewDomain">
+            <STInputBox title="Jouw webshop link" error-fields="customUrl" :error-box="errorBox" class="max">
+                <input
+                    v-model="customUrl"
+                    class="input"
+                    type="text"
+                    :placeholder="$t('dashboard.inputs.shopUrl.placeholder')"
+                    autocomplete=""
+                    @blur="resetCache"
+                >
+            </STInputBox>
+            <p class="st-list-description">
+                {{ $t('dashboard.webshop.customDomain.description') }}
             </p>
+            
+            <template v-if="didDNSRecordsChange">
+                <p class="info-box">
+                    Jouw webmaster zal enkele wijzigingen moeten doen om deze link mogelijk te maken. We geven je de instructies in de volgende stap.
+                </p>
+            </template>
+            <template v-else>
+                <p v-if="webshop.meta.domainActive && originalWebshop.domain == webshop.domain" class="success-box">
+                    Jouw domeinnaam is correct geconfigureerd.
+                </p>
+                <p v-else class="warning-box with-button selectable" @click="openDnsRecordSettings(false)">
+                    Jouw domeinnaam is momenteel nog niet actief. Breng de nodige DNS-wijzigingen in orde, dit kan tot 24 uur duren.
 
-            <STErrorsDefault :error-box="errorBox" />
+                    <button class="button text" type="button">
+                        Instellen
+                    </button>
+                </p>
+                <p v-if="webshop.meta.domainActive && originalWebshop.domain == webshop.domain">
+                    <button type="button" class="button text" @click="openDnsRecordSettings(false)">
+                        Bekijk DNS-records instructies
+                    </button>
+                </p>
+            </template>
 
-            <STInputBox title="Domeinnaam">
-                <Dropdown v-model="selectedDomain" @change="onChangeSelectedDomain">
-                    <option :value="null">
-                        {{ defaultDomain }}
-                    </option>
-                    <option v-for="d of defaultDomains" :key="d" :value="d">
-                        {{ d }}
-                    </option>
-                    <option :value="''">
-                        Andere domeinnaam
-                    </option>
-                </Dropdown>
+            <p v-if="!webshop.meta.domainActive" class="info-box">
+                Jouw webshop blijft ook bereikbaar via {{ defaultUrl }}. Die link kan je gebruiken om je webshop te bezoeken in tussentijd, tot de DNS-records zijn aangepast (kan tot 24 uur duren).
+            </p>
+        </template>
+
+        <template v-else-if="selectedDomain !== null">
+            <STInputBox title="Jouw webshop link" error-fields="domainUri" :error-box="errorBox" class="max">
+                <button slot="right" type="button" class="button text" @click="copyLink">
+                    <span class="icon copy" />
+                    <span>Kopiëren</span>
+                </button>
+                <PrefixInput v-model="domainUri" placeholder="bv. wafelbak" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" @blur="resetCache" />
+            </STInputBox>
+            <p class="style-description-small">
+                Vul eventueel iets in na het streepje (/), maar dat is niet verplicht.
+            </p>
+        </template>
+
+        <template v-else>
+            <STInputBox title="Jouw webshop link" error-fields="uri" :error-box="errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}">
+                <button slot="right" type="button" class="button text" @click="copyLink">
+                    <span class="icon copy" />
+                    <span>Kopiëren</span>
+                </button>
+                <PrefixInput v-model="uri" placeholder="bv. wafelbak" :prefix="defaultDomain+'/'" @blur="updateUri" />
             </STInputBox>
 
-            <template v-if="useNewDomain">
-                <STInputBox title="Jouw webshop link" error-fields="customUrl" :error-box="errorBox" class="max">
-                    <input
-                        v-model="customUrl"
-                        class="input"
-                        type="text"
-                        :placeholder="$t('dashboard.inputs.shopUrl.placeholder')"
-                        autocomplete=""
-                        @blur="resetCache"
-                    >
-                </STInputBox>
-                <p class="st-list-description">
-                    {{ $t('dashboard.webshop.customDomain.description') }}
+            <template v-if="errorBox === null && ((availabilityCheckerCount > 0 && isAvailable !== null) || checkingAvailability)">
+                <p v-if="checkingAvailability" class="loading-box">
+                    <Spinner />
+                    Nakijken of deze link nog beschikbaar is...
                 </p>
-            
-                <template v-if="didDNSRecordsChange">
-                    <p class="info-box">
-                        Jouw webmaster zal enkele wijzigingen moeten doen om deze link mogelijk te maken. We geven je de instructies in de volgende stap.
-                    </p>
-                </template>
-                <template v-else>
-                    <p v-if="webshop.meta.domainActive && originalWebshop.domain == webshop.domain" class="success-box">
-                        Jouw domeinnaam is correct geconfigureerd.
-                    </p>
-                    <p v-else class="warning-box with-button selectable" @click="openDnsRecordSettings(false)">
-                        Jouw domeinnaam is momenteel nog niet actief. Breng de nodige DNS-wijzigingen in orde, dit kan tot 24 uur duren.
 
-                        <button class="button text">
-                            Instellen
-                        </button>
-                    </p>
-                    <p v-if="webshop.meta.domainActive && originalWebshop.domain == webshop.domain">
-                        <button class="button text" @click="openDnsRecordSettings(false)">
-                            Bekijk DNS-records instructies
-                        </button>
-                    </p>
-                </template>
+                <p v-else-if="uri.length == 0" class="error-box">
+                    Je moet verplicht iets na de domeinnaam invullen.
+                </p>
 
-                <p v-if="!webshop.meta.domainActive" class="info-box">
-                    Jouw webshop blijft ook bereikbaar via {{ defaultUrl }}. Die link kan je gebruiken om je webshop te bezoeken in tussentijd, tot de DNS-records zijn aangepast (kan tot 24 uur duren).
+                <p v-else-if="!isAvailable" class="error-box">
+                    Deze link is al in gebruik. Kies een andere. Voeg iets uniek toe, bv. de naam van je vereniging.
+                </p>
+
+                <p v-else class="success-box">
+                    Deze link is nog beschikbaar!
                 </p>
             </template>
-
-            <template v-else-if="selectedDomain !== null">
-                <STInputBox title="Jouw webshop link" error-fields="domainUri" :error-box="errorBox" class="max">
-                    <button slot="right" class="button text" @click="copyLink">
-                        <span class="icon copy" />
-                        <span>Kopiëren</span>
-                    </button>
-                    <PrefixInput v-model="domainUri" placeholder="bv. wafelbak" :prefix="domainUri ? webshop.domain+'/' : webshop.domain" :focus-prefix="webshop.domain+'/'" :fade-prefix="!!domainUri" @blur="resetCache" />
-                </STInputBox>
-                <p class="style-description-small">
-                    Vul eventueel iets in na het streepje (/), maar dat is niet verplicht.
-                </p>
-            </template>
-
-            <template v-else>
-                <STInputBox title="Jouw webshop link" error-fields="uri" :error-box="errorBox" class="max custom-bottom-box" :class="{'input-success': isAvailable && !checkingAvailability && availabilityCheckerCount > 0, 'input-errors': !isAvailable && !checkingAvailability && availabilityCheckerCount > 0}">
-                    <button slot="right" class="button text" @click="copyLink">
-                        <span class="icon copy" />
-                        <span>Kopiëren</span>
-                    </button>
-                    <PrefixInput v-model="uri" placeholder="bv. wafelbak" :prefix="defaultDomain+'/'" @blur="updateUri" />
-                </STInputBox>
-
-                <template v-if="errorBox === null && ((availabilityCheckerCount > 0 && isAvailable !== null) || checkingAvailability)">
-                    <p v-if="checkingAvailability" class="loading-box">
-                        <Spinner />
-                        Nakijken of deze link nog beschikbaar is...
-                    </p>
-
-                    <p v-else-if="uri.length == 0" class="error-box">
-                        Je moet verplicht iets na de domeinnaam invullen.
-                    </p>
-
-                    <p v-else-if="!isAvailable" class="error-box">
-                        Deze link is al in gebruik. Kies een andere. Voeg iets uniek toe, bv. de naam van je vereniging.
-                    </p>
-
-                    <p v-else class="success-box">
-                        Deze link is nog beschikbaar!
-                    </p>
-                </template>
-            </template>
-        </main>
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        </template>
+    </SaveView>
 </template>
 
 <script lang="ts">
@@ -134,15 +114,13 @@ import { Decoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Dropdown, LoadingButton, PrefixInput, Spinner,STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective, UploadButton } from "@stamhoofd/components";
+import { Dropdown, PrefixInput, SaveView, Spinner, STErrorsDefault, STInputBox, Toast, Tooltip } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
-import EditPolicyBox from "./EditPolicyBox.vue";
 import EditWebshopMixin from "./EditWebshopMixin";
 import WebshopDNSRecordsView from "./WebshopDNSRecordsView.vue";
 
@@ -169,23 +147,13 @@ const throttle = (func, limit) => {
 
 @Component({
     components: {
-        STListItem,
-        STList,
         STInputBox,
         STErrorsDefault,
-        UploadButton,
-        Checkbox,
-        DNSRecordBox,
-        EditPolicyBox,
-        STNavigationBar,
-        BackButton,
-        STToolbar,
-        LoadingButton,
+        SaveView,
         PrefixInput,
         Spinner,
         Dropdown
-    },
-    directives: { Tooltip: TooltipDirective },
+    }
 })
 export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     cachedHasCustomDomain: boolean | null = null
@@ -303,7 +271,6 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     beforeDestroy() {
-        console.log("Cancel all")
         Request.cancelAll(this)
     }
 
@@ -427,7 +394,6 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     openDnsRecordSettings(replace = false) {
-        // todo
         const component = new ComponentWithProperties(WebshopDNSRecordsView, {
             webshopManager: this.webshopManager,
         })
@@ -443,8 +409,6 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
                 modalDisplayStyle: "popup"
             })
         }
-
-        
     }
 
     shouldDismiss(): Promise<boolean> | boolean {
@@ -491,31 +455,6 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
             text: "Link gekopieerd!",
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-
-        setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
-        }, 1000);
-    }
-
-    copyElement(event) {
-        event.target.contentEditable = true;
-
-        document.execCommand('selectAll', false);
-        document.execCommand('copy')
-
-        event.target.contentEditable = false;
-
-        const el = event.target;
-        const rect = event.target.getBoundingClientRect();
-
-        // Present
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "📋 Gekopieerd!",
             x: event.clientX,
             y: event.clientY + 10,
         });

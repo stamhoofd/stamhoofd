@@ -33,12 +33,12 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
         this.webshopPatch = this.webshopPatch.patch(patch)
     }
 
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.webshopPatch, this.originalWebshop, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

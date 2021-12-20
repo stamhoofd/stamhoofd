@@ -4,7 +4,7 @@
             <WebshopFieldRow v-for="field in fields" :key="field.id" :field="field" @patch="addPatch" @move-up="moveFieldUp(field)" @move-down="moveFieldDown(field)" />
         </STList>
         <p>
-            <button class="button text" @click="addField">
+            <button class="button text" type="button" @click="addField">
                 <span class="icon add" />
                 <span>Vraag toevoegen</span>
             </button>

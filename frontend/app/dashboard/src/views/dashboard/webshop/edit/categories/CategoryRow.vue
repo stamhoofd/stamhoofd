@@ -3,8 +3,8 @@
         {{ category.name || 'Naamloos' }}
 
         <template slot="right">
-            <button class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <button type="button" class="button icon arrow-up gray" @click.stop="moveUp" />
+            <button type="button" class="button icon arrow-down gray" @click.stop="moveDown" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>

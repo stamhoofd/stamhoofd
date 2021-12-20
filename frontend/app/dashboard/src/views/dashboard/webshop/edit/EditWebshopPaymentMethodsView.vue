@@ -1,118 +1,79 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar :title="viewTitle">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-            <template #right>
-                <button v-if="canDismiss" class="button icon close gray" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
+        <h1>{{ viewTitle }}</h1>
+        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
 
-        <main>
-            <h1>{{ viewTitle }}</h1>
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <EditPaymentMethodsBox :methods="paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
 
-            <EditPaymentMethodsBox :methods="paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
+        <p v-if="isAnyTicketType" class="warning-box">
+            Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddelijk.
+        </p>
 
-            <p v-if="isAnyTicketType" class="warning-box">
-                Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddelijk.
+        <template v-if="enableTransfers">
+            <hr>
+            <h2>Overschrijvingen</h2>
+
+            <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
+                <input
+                    v-model="creditor"
+                    class="input"
+                    type="text"
+                    :placeholder="organization.meta.transferSettings.creditor || organization.name"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <IBANInput v-model="iban" title="Bankrekeningnummer" :placeholder="organization.meta.transferSettings.iban || 'Op deze rekening schrijft men over'" :validator="validator" :required="false" />
+
+            <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
+                        {{ _type.name }}
+                    </Radio>
+                </RadioGroup>
+            </STInputBox>
+            <p class="style-description-small">
+                {{ transferTypeDescription }}
             </p>
 
-            <template v-if="enableTransfers">
-                <hr>
-                <h2>Overschrijvingen</h2>
-
-                <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
-                    <input
-                        v-model="creditor"
-                        class="input"
-                        type="text"
-                        :placeholder="organization.meta.transferSettings.creditor || organization.name"
-                        autocomplete=""
-                    >
-                </STInputBox>
-
-                <IBANInput v-model="iban" title="Bankrekeningnummer" :placeholder="organization.meta.transferSettings.iban || 'Op deze rekening schrijft men over'" :validator="validator" :required="false" />
-
-                <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
-                    <RadioGroup>
-                        <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
-                            {{ _type.name }}
-                        </Radio>
-                    </RadioGroup>
-                </STInputBox>
-                <p class="style-description-small">
-                    {{ transferTypeDescription }}
-                </p>
-
-                <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
-                    <input
-                        v-model="prefix"
-                        class="input"
-                        type="text"
-                        placeholder="bv. Bestelling"
-                        autocomplete=""
-                    >
-                </STInputBox>
-                <p class="style-description-small">
-                    Voorbeeld: “{{ transferExample }}”
-                </p>
-            </template>
-        </main>
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+            <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
+                <input
+                    v-model="prefix"
+                    class="input"
+                    type="text"
+                    placeholder="bv. Bestelling"
+                    autocomplete=""
+                >
+            </STInputBox>
+            <p class="style-description-small">
+                Voorbeeld: “{{ transferExample }}”
+            </p>
+        </template>
+    </SaveView>
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, DateSelection, IBANInput,LoadingButton,Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem,STNavigationBar,STToolbar,TimeInput,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { PatchableArray } from '@simonbackx/simple-encoding';
+import { IBANInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Country, WebshopField, WebshopOnSiteMethod, WebshopTicketType } from '@stamhoofd/structures';
-import { AnyCheckoutMethod, CheckoutMethod, PaymentMethod, PrivateWebshop, TransferDescriptionType,TransferSettings,WebshopDeliveryMethod, WebshopMetaData, WebshopTakeoutMethod } from '@stamhoofd/structures';
+import { Country, PaymentMethod, PrivateWebshop, TransferDescriptionType, TransferSettings, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
-import WebshopRolePermissionRow from '../../admins/WebshopRolePermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';
-import WebshopFieldsBox from './fields/WebshopFieldsBox.vue';
-import EditDeliveryMethodView from './locations/EditDeliveryMethodView.vue';
-import EditTakeoutMethodView from './locations/EditTakeoutMethodView.vue';
 
 @Component({
     components: {
-        STListItem,
-        STList,
         STInputBox,
         STErrorsDefault,
-        Checkbox,
         IBANInput,
-        DateSelection,
-        TimeInput,
         RadioGroup,
         Radio,
-        WebshopRolePermissionRow,
-        WebshopFieldsBox,
         EditPaymentMethodsBox,
-        STNavigationBar,
-        STToolbar,
-        LoadingButton,
-        BackButton
-
+        SaveView
     },
-    directives: { Tooltip },
 })
 export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMixin) {
     get viewTitle() {
