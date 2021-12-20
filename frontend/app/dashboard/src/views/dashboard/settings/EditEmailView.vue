@@ -71,7 +71,7 @@
 import { AutoEncoderPatchType, isPatchable, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -88,13 +88,9 @@ class SelectableGroup {
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        BackButton,
-        LoadingButton,
         EmailInput,
         STList,
         STListItem,
