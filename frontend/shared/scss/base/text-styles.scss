@@ -137,8 +137,13 @@
     font-weight: $font-weight-bold;
     color: $color-primary;
     background: $color-primary-background;
-    padding: 5px 7px;
+    padding: 7px 8px;
     border-radius: $border-radius;
+    line-height: 1;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 
     &.large {
         font-size: 13px;
