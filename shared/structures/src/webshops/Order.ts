@@ -105,12 +105,15 @@ export class Order extends AutoEncoder {
     get shouldIncludeStock() {
         return this.status !== OrderStatus.Canceled
     }
+
+    matchQuery(query: string): boolean {
+        return this.data.matchQuery(query)
+    }
 }
 
 export class PrivateOrder extends Order {
     @field({ decoder: PrivatePayment, nullable: true })
     payment: PrivatePayment | null
-    
 }
 
 export class OrderResponse extends AutoEncoder {

@@ -1,216 +1,29 @@
 <template>
-    <div class="st-view webshop-orders-view background">
-        <STNavigationBar :sticky="false">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
-    
-        <main>
-            <h1 class="data-table-prefix">
-                <span class="icon-spacer">{{ title }}</span>
-                <span v-if="!loading && !isLoadingOrders" class="style-tag">{{ orders.length }}</span>
-            </h1>
-
-            <div class="input-with-buttons data-table-prefix title-description">
-                <div>
-                    <div class="input-icon-container icon search gray">
-                        <input v-model="searchQuery" class="input" placeholder="Zoeken" @input="searchQuery = $event.target.value">
-                    </div>
-                </div>
-                <div>
-                    <button class="button text" @click="editFilter">
-                        <span class="icon filter" />
-                        <span class="hide-small">Filter</span>
-                        <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
-                    </button>
-                </div>
-            </div>
-
-            <Spinner v-if="isLoadingOrders && !isRefreshingOrders" class="center" />
-            <p v-if="!isLoadingOrders && orders.length == 0" class="info-box">
-                Je hebt nog geen bestellingen ontvangen
-            </p>
-
-            <table v-else-if="!isLoadingOrders" class="data-table">
-                <thead>
-                    <tr>
-                        <th>
-                            <Checkbox
-                                v-model="selectAll"
-                            />
-                        </th>
-                        <th class="hide-smartphone tiny" @click="toggleSort('number')">
-                            Nummer
-
-                            <span
-                                class="sort-arrow icon"
-                                :class="{
-                                    'arrow-up-small': sortBy == 'number' && sortDirection == 'ASC',
-                                    'arrow-down-small': sortBy == 'number' && sortDirection == 'DESC',
-                                }"
-                            />
-                        </th>
-                        <th @click="toggleSort('name')">
-                            Bestelling
-
-                            <span
-                                class="sort-arrow icon"
-                                :class="{
-                                    'arrow-up-small': sortBy == 'name' && sortDirection == 'ASC',
-                                    'arrow-down-small': sortBy == 'name' && sortDirection == 'DESC',
-                                }"
-                            />
-                        </th>
-                        <th class="hide-smartphone" @click="toggleSort('checkout')">
-                            Info
-
-                            <span
-                                class="sort-arrow icon"
-                                :class="{
-                                    'arrow-up-small': sortBy == 'checkout' && sortDirection == 'ASC',
-                                    'arrow-down-small': sortBy == 'checkout' && sortDirection == 'DESC',
-                                }"
-                            />
-                        </th>
-                        <th @click="toggleSort('status')">
-                            Status
-
-                            <span
-                                class="sort-arrow icon"
-                                :class="{
-                                    'arrow-up-small': sortBy == 'status' && sortDirection == 'ASC',
-                                    'arrow-down-small': sortBy == 'status' && sortDirection == 'DESC',
-                                }"
-                            />
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="order in sortedOrders" :key="order.id" class="selectable" @click="openOrder(order)" @contextmenu.prevent="showOrderContextMenu($event, order.order)">
-                        <td class="prefix" @click.stop="">
-                            <Checkbox v-model="order.selected" />
-                        </td>
-                        <td class="hide-smartphone tiny">
-                            #{{ order.order.number }}
-                        </td>
-                        <td>
-                            <h2 class="style-title-list">
-                                {{ order.order.data.customer.name }}
-                            </h2>
-                            <p class="only-smartphone style-description-small">
-                                #{{ order.order.number }}
-                            </p>
-                        </td>
-                        <td class="hide-smartphone member-description">
-                            <h2 v-if="order.order.data.checkoutMethod" class="style-title-list">
-                                {{ order.order.data.checkoutMethod.name }}
-                            </h2>
-                            <p v-if="order.order.data.timeSlot" class="style-description-small">
-                                {{ order.order.data.timeSlot.date | date }} om {{ order.order.data.timeSlot.startTime | minutes }} - {{ order.order.data.timeSlot.endTime | minutes }}
-                            </p>
-                        </td>
-                        <td>
-                            <span v-if="order.order.payment && order.order.payment.status !== 'Succeeded'" class="style-tag warn">Niet betaald</span>
-                            <span v-if="order.order.status == 'Prepared'" class="style-tag">Verwerkt</span>
-                            <span v-if="order.order.status == 'Collect'" class="style-tag">Ligt klaar</span>
-                            <span v-if="order.order.status == 'Completed'" v-tooltip="'Voltooid'" class="success icon green" />
-                            <span v-if="order.order.status == 'Canceled'" v-tooltip="'Geannuleerd'" class="error icon canceled" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <Spinner v-if="isRefreshingOrders" class="center" />
-
-            <p v-if="totalFilteredCount == 1" class="info-box icon filter with-button">
-                De filters verbergen één bestelling
-
-                <button class="button text" @click="resetFilter">
-                    Reset
-                </button>
-            </p>
-            <p v-else-if="totalFilteredCount > 1" class="info-box icon filter with-button">
-                De filters verbergen {{ totalFilteredCount }} bestellingen
-
-                <button class="button text" @click="resetFilter">
-                    Reset
-                </button>
-            </p>
-        </main>
-
-        <STToolbar :class="{'hide-smartphone': selectionCount == 0 }">
-            <template #left>
-                {{ selectionCount ? selectionCount : "Geen" }} {{ selectionCount == 1 ? "bestelling" : "bestellingen" }} geselecteerd
-                <template v-if="selectionCountHidden">
-                    (waarvan {{ selectionCountHidden }} verborgen)
-                </template>
-            </template>
-            <template #right>
-                <button v-if="hasWrite" class="button secundary" :disabled="selectionCount == 0 || isLoadingOrders" @click="markAs">
-                    Markeren als...
-                </button>
-                <LoadingButton :loading="actionLoading">
-                    <button class="button primary" :disabled="selectionCount == 0 || isLoadingOrders" @click="openMail()">
-                        <span class="dropdown-text">E-mailen</span>
-                        <div class="dropdown" @click.stop="openMailDropdown">
-                            <span class="icon arrow-down-small" />
-                        </div>
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+    <TableView ref="table" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openOrder">
+        <template #empty>
+            Er zijn nog geen bestellingen.
+        </template>
+    </TableView>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, FilterEditor, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
+import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import MailView from '../../mail/MailView.vue';
 import { WebshopManager } from '../WebshopManager';
-import OrderContextMenu from './OrderContextMenu.vue';
-import OrderStatusContextMenu from './OrderStatusContextMenu.vue';
 import OrderView from './OrderView.vue';
 import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus";
 
-class SelectableOrder {
-    order: PrivateOrder;
-    selected = false;
-
-    /**
-     * Whether this order came from the database or from the server
-     */
-    isRefreshed = false;
-
-    constructor(order: PrivateOrder, selected = false, isRefreshed = true) {
-        this.order = order;
-        this.selected = selected
-        this.isRefreshed = isRefreshed
-    }
-}
-
-
 @Component({
     components: {
-        Checkbox,
-        STNavigationBar,
-        STNavigationTitle,
-        STToolbar,
-        BackButton,
-        Spinner,
-        LoadingButton,
-        SegmentedControl
+        TableView,
     },
-    filters: {
-        price: Formatter.price.bind(Formatter),
-        date: Formatter.dateWithDay.bind(Formatter),
-        minutes: Formatter.minutes.bind(Formatter),
-    },
-    directives: { Tooltip },
 })
 export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     @Prop()
@@ -225,31 +38,156 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     loading = false;
-    actionLoading = false;
-
-    orders: SelectableOrder[] = []
+    orders: PrivateOrder[] = []
     nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
 
-    sortBy = "status";
-    sortDirection = "ASC";
-    selectionCountHidden = 0;
-    searchQuery = "";
 
-    selectedFilter: Filter<PrivateOrder> | null = null;
+    get estimatedRows() {
+        if (!this.loading) {
+            return 0
+        }
 
+        if (this.orders.length > 0) {
+            return this.orders.length
+        }
+       
+        // todo
+        return 30
+    }
+
+    get actions(): TableAction<PrivateOrder>[] {
+        return [
+            new TableAction({
+                name: "Openen",
+                icon: "eye",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: true,
+                singleSelection: true,
+                handler: (orders: PrivateOrder[]) => {
+                    this.openOrder(orders[0])
+                }
+            })
+        ]
+    }
+
+    allColumns = ((): Column<PrivateOrder, any>[] => {
+        const cols: Column<PrivateOrder, any>[] = [
+            new Column<PrivateOrder, number>({
+                name: "#", 
+                getValue: (order) => order.number ?? 0, 
+                compare: (a, b) => Sorter.byNumberValue(b, a),
+                minimumWidth: 50,
+                recommendedWidth: 50
+            }),
+
+            new Column<PrivateOrder, string>({
+                name: "Naam", 
+                getValue: (order) => order.data.customer.name, 
+                compare: (a, b) => Sorter.byStringValue(a, b),
+                minimumWidth: 100,
+                recommendedWidth: 400
+            }),
+
+            new Column<PrivateOrder, string | undefined>({
+                name: "Locatie", 
+                getValue: (order) => order.data.checkoutMethod?.name, 
+                compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
+                getStyle: (loc) => loc === undefined ? "gray" : "",
+                minimumWidth: 100,
+                recommendedWidth: 200
+            }),
+
+            new Column<PrivateOrder, string | undefined>({
+                name: "Adres", 
+                enabled: false,
+                getValue: (order) => order.data.address?.toString(), 
+                compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
+                getStyle: (loc) => loc === undefined ? "gray" : "",
+                minimumWidth: 100,
+                recommendedWidth: 250
+            }),
+
+            new Column<PrivateOrder, WebshopTimeSlot | undefined>({
+                name: "Datum", 
+                enabled: false,
+                getValue: (order) => order.data.timeSlot ? order.data.timeSlot : undefined,
+                compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
+                format: (timeSlot, width: number) => {
+                    if (!timeSlot) {
+                        return "Geen"
+                    }
+                    if (width < 120) {
+                        return Formatter.dateNumber(timeSlot.date, false)
+                    }
+
+                    if (width < 200) {
+                        return Formatter.capitalizeFirstLetter(timeSlot.dateStringShort())
+                    }
+                    return Formatter.capitalizeFirstLetter(timeSlot.dateString())
+                },
+                getStyle: (loc) => loc === undefined ? "gray" : "",
+                minimumWidth: 50,
+                recommendedWidth: 65
+            }),
+
+            new Column<PrivateOrder, WebshopTimeSlot | undefined>({
+                name: "Tijdstip", 
+                enabled: false,
+                getValue: (order) => order.data.timeSlot ? order.data.timeSlot : undefined,
+                compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
+                format: (timeSlot, width) => {
+                    if (!timeSlot) {
+                        return "Geen"
+                    }
+                    const time = timeSlot.timeRangeString()
+
+                    if (width < 120) {
+                        return time.replaceAll(" - ", "-").replaceAll(/:00/g, "u").replaceAll(/:(\n{2})/g, "u$1")
+                    }
+
+                    return time
+                },
+                getStyle: (loc) => loc === undefined ? "gray" : "",
+                minimumWidth: 80,
+                recommendedWidth: 105
+            }),
+
+            new Column<PrivateOrder, string>({
+                name: "Status", 
+                getValue: (order) => OrderStatusHelper.getName(order.status),
+                compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""), // todo: based on index
+                getStyleForObject: (order) => "", // todo: based on status
+                minimumWidth: 100,
+                recommendedWidth: 200
+            }),
+
+            new Column<PrivateOrder, number | undefined>({
+                name: "Te betalen", 
+                enabled: false,
+                getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.payment.price : undefined,
+                format: (price) => price ? Formatter.price(price) : "Betaald",
+                compare: (a, b) => Sorter.byNumberValue(a ?? 0, b ?? 0),
+                getStyle: (price) => price === undefined ? "gray" : "",
+                minimumWidth: 100,
+                recommendedWidth: 150
+            }),
+        ]
+        return cols
+    })()
 
     /**
      * Insert or update an order
      */
     putOrder(order: PrivateOrder) {
         for (const [index, _order] of this.orders.entries()) {
-            if (order.id === _order.order.id) {
+            if (order.id === _order.id) {
                 // replace
-                this.orders.splice(index, 1, new SelectableOrder(order, _order.selected, true))
+                this.orders.splice(index, 1, order)
                 return
             }
         }
-        this.orders.push(new SelectableOrder(order, false, true))
+        this.orders.push(order)
     }
 
     onNewOrders(orders: PrivateOrder[]) {
@@ -272,18 +210,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         document.title = this.preview.meta.name+" - Bestellingen"
     }
 
-    pollInterval: number | null = null
-
     activated() {
         WebshopOrdersEventBus.addListener(this, "deleted", this.onDeleteOrder)
-
-        /*if (this.hasTickets) {
-            this.pollInterval = window.setInterval(() => {
-                if (!this.isRefreshingOrders) {
-                    this.refresh(false).catch(console.error)
-                }
-            }, 1000*30)
-        }*/
     }
 
     get hasWrite() {
@@ -296,11 +224,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     deactivated() {
         WebshopOrdersEventBus.removeListener(this)
-
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval)
-            this.pollInterval = null
-        }
     }
 
     onDeleteOrder(): Promise<void> {
@@ -325,8 +248,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         
         // Disabled for now: first fix needed for payment status + deleted orders
         try {
-            const orders = await this.webshopManager.getOrdersFromDatabase()
-            this.orders = orders.map(o => new SelectableOrder(o, false, false))
+            this.orders = await this.webshopManager.getOrdersFromDatabase()
         } catch (e) {
             // Database error. We can ignore this and simply move on.
             console.error(e)
@@ -341,12 +263,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // don't wait
             this.isRefreshingOrders = true
             this.isLoadingOrders = this.orders.length == 0
-            await this.webshopManager.fetchNewOrders(false, reset)
 
             if (reset) {
-                // Delete all orders that are not refreshed (those are deleted)
-                this.orders = this.orders.filter(o => o.isRefreshed)
+                this.orders = []
             }
+            await this.webshopManager.fetchNewOrders(false, reset)
         } catch (e) {
             // Fetching failed
             Toast.fromError(e).show()
@@ -383,18 +304,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
     }
 
-    toggleSort(field: string) {
-        if (this.sortBy == field) {
-            if (this.sortDirection == "ASC") {
-                this.sortDirection = "DESC";
-            } else {
-                this.sortDirection = "ASC";
-            }
-            return;
-        }
-        this.sortBy = field;
-    }
-
     reload() {
         this.loading = true;
 
@@ -406,129 +315,18 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         })
     }
 
-    get selectionCount(): number {
-        let val = 0;
-        this.orders.forEach((order) => {
-            if (order.selected) {
-                val++;
-            }
-        });
-        return val;
-    }
-
-    get visibleSelectionCount(): number {
-        let val = 0;
-        this.filteredOrders.forEach((order) => {
-            if (order.selected) {
-                val++;
-            }
-        });
-        return val;
-    }
-
-    getSelectedOrders(): PrivateOrder[] {
-        return this.sortOrders(
-                this.orders.filter((order: SelectableOrder) => {
-                    return order.selected;
-                })
-            )
-            .map((order: SelectableOrder) => {
-                return order.order;
-            });
-    }
-
-    filteredCount = 0
-
-    get totalFilteredCount() {
-        return this.orders.length - this.filteredOrders.length
-    }
-
-    get filteredOrders() {
-        this.selectionCountHidden = 0
-        this.filteredCount = 0
-
-        const filtered = this.selectedFilter === null ? this.orders.slice() : this.orders.filter((order: SelectableOrder) => {
-            if (this.selectedFilter?.doesMatch(order.order)) {
-                return true;
-            }
-            this.selectionCountHidden += order.selected ? 1 : 0;
-            this.filteredCount += 1
-            return false;
-        });
-
-        if (this.searchQuery == "") {
-            return filtered;
-        }
-
-        return filtered.filter((order: SelectableOrder) => {
-            if (order.order.number+"" == this.searchQuery) {
-                return true;
-            }
-            if (order.order.data.matchQuery(this.searchQuery)) {
-                return true;
-            }
-            this.selectionCountHidden += order.selected ? 1 : 0;
-            return false;
-        });
-
-    }
-
-    sortOrders(orders: SelectableOrder[]) {
-        const clone = orders.slice()
-
-        if (this.sortBy == "number") {
-            return clone.sort((a, b) => Sorter.byNumberValue(a.order.number ?? 0, b.order.number ?? 0) * (this.sortDirection == "ASC" ? -1 : 1));
-        }
-
-        if (this.sortBy == "name") {
-            return clone.sort((a, b) => Sorter.byStringValue(a.order.data.customer.name, b.order.data.customer.name) * (this.sortDirection == "ASC" ? 1 : -1));
-        }
-
-        if (this.sortBy == "checkout") {
-            return clone.sort((a, b) => Sorter.stack(
-                    Sorter.byNumberValue(
-                        (a.order.data.timeSlot?.date?.getTime() ?? 0) + ((a.order.data.timeSlot?.startTime ?? 0) + (a.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60, 
-                        (b.order.data.timeSlot?.date?.getTime() ?? 0) + ((b.order.data.timeSlot?.startTime ?? 0) + (b.order.data.timeSlot?.endTime ?? 0))/2 * 1000 * 60
-                    ),
-                    Sorter.byStringValue(a.order.data.checkoutMethod?.id ?? "", b.order.data.checkoutMethod?.id ?? "")
-                )
-                * (this.sortDirection == "ASC" ? -1 : 1));
-        }
-        
-
-        if (this.sortBy == "status") {
-            const statusMap: Map<OrderStatus, number> = new Map()
-            for (const status of Object.values(OrderStatus)) {
-                statusMap.set(status, statusMap.size)
-            }
-
-            return clone.sort((a, b) => Sorter.stack(
-                Sorter.byNumberValue(statusMap.get(a.order.status) ?? 0, statusMap.get(b.order.status) ?? 0),
-                Sorter.byBooleanValue((a.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded, (b.order.payment?.status ?? PaymentStatus.Succeeded) == PaymentStatus.Succeeded), 
-                Sorter.byNumberValue(a.order.number ?? 0, b.order.number ?? 0)
-            ) * (this.sortDirection == "ASC" ? -1 : 1));
-        }
-
-        return clone
-    }
-
-    resetFilter() {
-        this.searchQuery = ""
-        this.selectedFilter = null
-    }
-
     get deliveryCities(): [string, string][] {
         const cities = new Map<string, string>()
         for (const order of this.orders) {
-            if (order.order.data.checkoutMethod &&  order.order.data.checkoutMethod.type == CheckoutMethodType.Delivery && order.order.data.address) {
-                cities.set(Formatter.slug(order.order.data.address.postalCode+" "+order.order.data.address.city), order.order.data.address.postalCode+" "+order.order.data.address.city)
+            if (order.data.checkoutMethod &&  order.data.checkoutMethod.type == CheckoutMethodType.Delivery && order.data.address) {
+                cities.set(Formatter.slug(order.data.address.postalCode+" "+order.data.address.city), order.data.address.postalCode+" "+order.data.address.city)
             }
         }
 
         return [...cities.entries()].sort((a, b) => Sorter.byStringValue(a[0], b[0]))
     }
 
-    get definitions(): FilterDefinition<PrivateOrder, Filter<PrivateOrder>, any>[] {
+    get filterDefinitions(): FilterDefinition<PrivateOrder, Filter<PrivateOrder>, any>[] {
         const checkoutMethod = new ChoicesFilterDefinition<PrivateOrder>({
             id: "order_checkoutMethod",
             name: "Afhaal/leveringsmethode",
@@ -693,109 +491,34 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return definitions
     }
 
-    editFilter() {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(FilterEditor, {
-                definitions: this.definitions,
-                selectedFilter: this.selectedFilter,
-                organization: OrganizationManager.organization,
-                setFilter: (filter: Filter<PrivateOrder>) => {
-                    this.selectedFilter = filter
-                }
-            })
-        }).setDisplayStyle("side-view"))
-    }
-
-
-    get sortedOrders() {
-        return this.sortOrders(this.filteredOrders)
-    }
-
     get title() {
         return this.preview.meta.name
     }
 
-    get selectAll() {
-        return this.visibleSelectionCount >= this.filteredOrders.length && this.filteredOrders.length > 0
-    }
-
-    set selectAll(selected: boolean) {
-        this.filteredOrders.forEach((order) => {
-            order.selected = selected;
-        });
-    }
-
-    openOrder(order: SelectableOrder) {
+    openOrder(order: PrivateOrder) {
+        const table = this.$refs.table as TableView<PrivateOrder> | undefined
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(OrderView, { 
-                initialOrder: order.order,
+                initialOrder: order,
                 webshopManager: this.webshopManager,
-                getNextOrder: this.getNextOrder,
-                getPreviousOrder: this.getPreviousOrder,
+                getNextOrder: table?.getNext,
+                getPreviousOrder: table?.getPrevious,
             })
         }).setDisplayStyle("popup"))
     }
 
-    getPreviousOrder(order: PrivateOrder): PrivateOrder | null {
-        for (let index = 0; index < this.sortedOrders.length; index++) {
-            const _order = this.sortedOrders[index];
-            if (_order.order.id == order.id) {
-                if (index == 0) {
-                    return null;
-                }
-                return this.sortedOrders[index - 1].order;
-            }
-        }
-        return null;
-    }
-
-    getNextOrder(order: PrivateOrder): PrivateOrder | null {
-        for (let index = 0; index < this.sortedOrders.length; index++) {
-            const _order = this.sortedOrders[index];
-            if (_order.order.id == order.id) {
-                if (index == this.sortedOrders.length - 1) {
-                    return null;
-                }
-                return this.sortedOrders[index + 1].order;
-            }
-        }
-        return null;
-    }
-
-    openMail(subject = "Bestelling {{nr}}") {
+    /*openMail(subject = "Bestelling {{nr}}") {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MailView, {
                 orders: this.getSelectedOrders(),
                 webshop: this.webshop,
-                /*otherRecipients: this.getSelectedOrders().flatMap((o) => {
-                    if ( o.data.customer.email.length > 0) {
-                        return [o.data.customer]
-                    }
-                    return []
-                }),*/
                 defaultSubject: subject
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
-    }
+    }*/
 
-    openMailDropdown(event) {
-        if (this.selectionCount == 0) {
-            return;
-        }
-        const el = event.currentTarget.parentElement;
-        const displayedComponent = new ComponentWithProperties(OrderContextMenu, {
-            x: el.getBoundingClientRect().left + el.offsetWidth,
-            y: el.getBoundingClientRect().top,
-            xPlacement: "left",
-            yPlacement: "top",
-            orders: this.getSelectedOrders(),
-            webshopManager: this.webshopManager
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-    }
-
-    markAs(event) {
+    /*markAs(event) {
         if (this.selectionCount == 0) {
             return;
         }
@@ -810,25 +533,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             webshopManager: this.webshopManager
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
-    }
-
-    showOrderContextMenu(event, order: PrivateOrder) {
-        const displayedComponent = new ComponentWithProperties(OrderContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
-            orders: [order],
-            webshopManager: this.webshopManager
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-    }
-
+    }*/
 }
 </script>
-
-<style lang="scss">
-.webshop-orders-view {
-    .title-description {
-        padding-bottom: 20px;
-    }
-}
-</style>

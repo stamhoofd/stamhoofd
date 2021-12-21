@@ -29,6 +29,7 @@ export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
     setColumnEnabled(column: Column<any, any>, enabled: boolean) {
         console.log("Set column enabled", column, enabled);
         column.width = null
+        column.renderWidth = null
         column.enabled = enabled
     }
 

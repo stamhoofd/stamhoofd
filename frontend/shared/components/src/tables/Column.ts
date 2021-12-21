@@ -4,7 +4,7 @@ export class Column<T, ValueType> {
     index = 0
 
     private getValue: (val: T) => ValueType
-    private format: (val: ValueType) => string
+    private format: (val: ValueType, width: number) => string
 
     /**
      * Implement if you need the full object to compare
@@ -25,7 +25,7 @@ export class Column<T, ValueType> {
         index?: number,
         enabled?: boolean,
         getValue: (val: T) => ValueType, 
-        format?: (val: ValueType) => string, 
+        format?: (val: ValueType, width: number) => string, 
         compareObjects?: (a: T, b: T) => number,
         compare?: (a: ValueType, b: ValueType) => number,
         getStyle?: (val: ValueType) => string,
@@ -54,7 +54,7 @@ export class Column<T, ValueType> {
     }
 
     getFormattedValue(val: T) {
-        return this.format(this.getValue(val))
+        return this.format(this.getValue(val), this.renderWidth ?? this.recommendedWidth)
     }
 
     doCompare(a: T, b: T): number {

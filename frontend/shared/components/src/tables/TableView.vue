@@ -2,8 +2,8 @@
     <div class="modern st-view table-view background">
         <STNavigationBar :sticky="true" :add-shadow="wrapColumns" :title="title">
             <template #left>
-                <button v-if="isMobile && showSelection && !isIOS" class="button icon navigation close" @click="setShowSelection(false)" />
-                <button v-else-if="showSelection && isIOS" class="button navigation" @click="setSelectAll(!cachedAllSelected)">
+                <button v-if="isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
+                <button v-else-if="showSelection && isIOS" type="button" class="button navigation" @click="setSelectAll(!cachedAllSelected)">
                     <template v-if="cachedAllSelected">
                         Deselecteer alles
                     </template>
@@ -15,16 +15,16 @@
             </template>
             <template #right>
                 <template v-if="!isIOS">
-                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action, $event)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action, $event)" />
                 </template>
 
-                <button v-if="showSelection && isIOS" key="iOSDone" class="button navigation highlight" @click="setShowSelection(false)">
+                <button v-if="showSelection && isIOS" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
                     Gereed
                 </button>
-                <button v-else-if="!showSelection && isIOS" key="iOSSelect" class="button navigation" @click="setShowSelection(true)">
+                <button v-else-if="!showSelection && isIOS" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
                     Selecteer
                 </button>
-                <button v-else key="actions" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
+                <button v-else key="actions" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 
@@ -42,7 +42,7 @@
                         </form>
                     </div>
                     <div>
-                        <button class="button text" @click="editFilter">
+                        <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter" />
                             <span class="hide-small">Filter</span>
                             <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
@@ -60,7 +60,7 @@
 
                         <div class="columns" :class="{ 'show-checkbox': showSelection }">
                             <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
-                                <button @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
+                                <button type="button" @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
                                     <span>{{ column.name }}</span>
 
                                     <span v-if="sortBy === column"
@@ -72,7 +72,7 @@
                                     />
                                 </button>
                                 <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="handleDragStart($event, column)" @touchstart="handleDragStart($event, column)" /></span>
-                                <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" class="button light-gray icon collapse-left" @click="collapse" />
+                                <button v-else-if="canCollapse" v-tooltip="'Pas kolommen op het scherm'" type="button" class="button light-gray icon collapse-left" @click="collapse" />
                             </div>
                         </div>
                     </div>
@@ -100,7 +100,7 @@
             <p v-else-if="totalItemsCount == 0" class="info-box with-button">
                 Geen resultaten gevonden
 
-                <button class="button text" @click="resetFilter">
+                <button class="button text" type="button" @click="resetFilter">
                     Reset
                 </button>
             </p>
@@ -108,11 +108,11 @@
 
         <div v-if="isIOS" class="tool-bar">
             <div>
-                <button v-for="(action, index) of filteredActions" :key="index" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0 ? undefined : handleAction(action, $event)">
+                <button v-for="(action, index) of filteredActions" :key="index" type="button" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0 ? undefined : handleAction(action, $event)">
                     <span :class="'icon '+action.icon" />
                 </button>
 
-                <button v-long-press="(e) => showActions(false, e)" class="button text small column selected" @click="showActions(false, $event)">
+                <button v-long-press="(e) => showActions(false, e)" type="button" class="button text small column selected" @click="showActions(false, $event)">
                     <span class="icon more" />
                 </button>
             </div>
@@ -125,7 +125,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, FilterEditor, LongPressDirective, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, Storage } from "@stamhoofd/networking";
+import { Storage } from "@stamhoofd/networking";
 import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
@@ -1494,7 +1494,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         .table-row {
             .columns {
                 > div {
-                    padding-right: 20px;
+                    padding-right: 10px;
                     
                     &:last-child {
                         padding-right: 0;
@@ -1585,7 +1585,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             display: flex;
             flex-direction: row;
             align-items: center;
-            padding-right: 20px;
+            padding-right: 10px;
 
             > button:first-child {
                 flex-grow: 1;
@@ -1640,6 +1640,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             .icon {
                 flex-shrink: 0;
+                margin-right: -8px;
             }
 
             .drag-handle-container {
@@ -1647,14 +1648,14 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 height: 20px;
                 display: inline-block;
                 position: relative;
-                padding-left: 20px;
+                padding-left: 10px;
                 flex-shrink: 0;
 
                 &:before {
                     content: '';
                     position: absolute;
                     top: 0;
-                    left: 20px;
+                    left: 10px;
                     width: $border-width-thin;
                     height: 20px;
                     background: $color-border;
@@ -1666,7 +1667,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     content: '';
                     position: absolute;
                     top: -10px;
-                    left: 19px;
+                    left: 9px;
                     bottom: -20px;
                     right: -1px;
                     cursor: col-resize;
