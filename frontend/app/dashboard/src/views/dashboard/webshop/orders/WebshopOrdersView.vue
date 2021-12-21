@@ -10,7 +10,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -81,6 +81,25 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 recommendedWidth: 50
             }),
 
+            new Column<PrivateOrder, OrderStatus>({
+                name: "Status", 
+                getValue: (order) => order.status,
+                format: (status) => OrderStatusHelper.getName(status),
+                compare: (a, b) => Object.values(OrderStatus).indexOf(a) - Object.values(OrderStatus).indexOf(b), 
+                getStyle: (status) => {
+                    switch (status) {
+                        case OrderStatus.Completed: return "success"
+                        case OrderStatus.Prepared: return "secundary"
+                        case OrderStatus.Collect: return "tertiary"
+                        case OrderStatus.Canceled: return "error"
+                        case OrderStatus.Created: return "info"
+                    }
+                    return "info"
+                }, // todo: based on status
+                minimumWidth: 70,
+                recommendedWidth: 120
+            }),
+
             new Column<PrivateOrder, string>({
                 name: "Naam", 
                 getValue: (order) => order.data.customer.name, 
@@ -89,100 +108,125 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 recommendedWidth: 400,
                 grow: true
             }),
+        ]
 
-            new Column<PrivateOrder, string | undefined>({
-                name: "Locatie", 
-                getValue: (order) => order.data.checkoutMethod?.name, 
-                compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
-                getStyle: (loc) => loc === undefined ? "gray" : "",
+        if (this.preview.meta.checkoutMethods.length > 1){
+            cols.push(new Column<PrivateOrder, CheckoutMethod | null>({
+                name: "Methode", 
+                getValue: (order) => order.data.checkoutMethod, 
+                format: (method: CheckoutMethod | null) => {
+                    if (method === null) {
+                        return "Geen"
+                    }
+                    return method.typeName
+                },
+                compare: (a, b) => Sorter.byStringValue(a?.id ?? "", b?.id ?? ""),
+                getStyle: (method) => method === null ? "gray" : "",
                 minimumWidth: 100,
                 recommendedWidth: 200
-            }),
+            }))
+        }
 
-            new Column<PrivateOrder, string | undefined>({
-                name: "Adres", 
-                enabled: false,
+        const hasDelivery = this.preview.meta.checkoutMethods.some(method => method.type === CheckoutMethodType.Delivery)
+        
+        // Count checkoutm ethods that are not delivery
+        const nonDeliveryCount = this.preview.meta.checkoutMethods.filter(method => method.type !== CheckoutMethodType.Delivery).length
+
+        if (hasDelivery || nonDeliveryCount > 1) {
+            cols.push(new Column<PrivateOrder, string | undefined>({
+                name: hasDelivery && nonDeliveryCount == 0 ? "Adres" : "Locatie", 
+                enabled: true,
                 getValue: (order) => order.data.address?.shortString(), 
                 compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
                 getStyle: (loc) => loc === undefined ? "gray" : "",
                 minimumWidth: 100,
                 recommendedWidth: 250
-            }),
+            }))
+        }
 
-            new Column<PrivateOrder, WebshopTimeSlot | undefined>({
-                name: "Datum", 
-                enabled: false,
-                getValue: (order) => order.data.timeSlot ? order.data.timeSlot : undefined,
-                compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
-                format: (timeSlot, width: number) => {
-                    if (!timeSlot) {
-                        return "Geen"
-                    }
-                    if (width < 120) {
-                        return Formatter.dateNumber(timeSlot.date, false)
-                    }
+        const timeCount = Formatter.uniqueArray(this.preview.meta.checkoutMethods.flatMap(method => method.timeSlots.timeSlots).map(t => t.timeRangeString())).length
+        const dateCount = Formatter.uniqueArray(this.preview.meta.checkoutMethods.flatMap(method => method.timeSlots.timeSlots).map(t => t.dateString())).length
 
-                    if (width < 200) {
-                        return Formatter.capitalizeFirstLetter(timeSlot.dateStringShort())
-                    }
-                    return Formatter.capitalizeFirstLetter(timeSlot.dateString())
-                },
-                getStyle: (loc) => loc === undefined ? "gray" : "",
-                minimumWidth: 60,
-                recommendedWidth: 65,
-            }),
+        if (dateCount > 1) {
+            cols.push(
+                new Column<PrivateOrder, WebshopTimeSlot | undefined>({
+                    name: "Datum", 
+                    getValue: (order) => order.data.timeSlot ? order.data.timeSlot : undefined,
+                    compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
+                    format: (timeSlot, width: number) => {
+                        if (!timeSlot) {
+                            return "Geen"
+                        }
+                        if (width < 120) {
+                            return Formatter.dateNumber(timeSlot.date, false)
+                        }
 
-            new Column<PrivateOrder, WebshopTimeSlot | undefined>({
-                name: "Tijdstip", 
-                enabled: false,
-                getValue: (order) => order.data.timeSlot ? order.data.timeSlot : undefined,
-                compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
-                format: (timeSlot, width) => {
-                    if (!timeSlot) {
-                        return "Geen"
-                    }
-                    const time = timeSlot.timeRangeString()
+                        if (width < 200) {
+                            return Formatter.capitalizeFirstLetter(timeSlot.dateStringShort())
+                        }
+                        return Formatter.capitalizeFirstLetter(timeSlot.dateString())
+                    },
+                    getStyle: (loc) => loc === undefined ? "gray" : "",
+                    minimumWidth: 60,
+                    recommendedWidth: 70,
+                }),
+            )
+        }
+        
+        if (timeCount > 1) {
+            cols.push(
+                new Column<PrivateOrder, WebshopTimeSlot | undefined>({
+                    name: "Tijdstip", 
+                    getValue: (order) => order.data.timeSlot ? order.data.timeSlot : undefined,
+                    compare: (a, b) => !a && !b ? 0 : (a && b ? a.startTime - b.startTime : (a ? 1 : -1)),
+                    format: (timeSlot, width) => {
+                        if (!timeSlot) {
+                            return "Geen"
+                        }
+                        const time = timeSlot.timeRangeString()
 
-                    if (width < 120) {
-                        return time.replaceAll(" - ", "-").replaceAll(/:00/g, "u").replaceAll(/:(\n{2})/g, "u$1")
-                    }
+                        if (width < 120) {
+                            return time.replaceAll(" - ", "-").replaceAll(/:00/g, "u").replaceAll(/:(\n{2})/g, "u$1")
+                        }
 
-                    return time
-                },
-                getStyle: (loc) => loc === undefined ? "gray" : "",
-                minimumWidth: 80,
-                recommendedWidth: 105
-            }),
+                        return time
+                    },
+                    getStyle: (loc) => loc === undefined ? "gray" : "",
+                    minimumWidth: 80,
+                    recommendedWidth: 105
+                })
+            )
+        }
 
-            new Column<PrivateOrder, OrderStatus>({
-                name: "Status", 
-                getValue: (order) => order.status,
-                format: (status) => OrderStatusHelper.getName(status),
-                compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""), // todo: based on index
-                getStyle: (status) => {
-                    switch (status) {
-                        case OrderStatus.Completed: return "success"
-                        case OrderStatus.Canceled: return "error"
-                        case OrderStatus.Created: return "info"
-                    }
-                    return "info"
-                }, // todo: based on status
-                minimumWidth: 70,
-                recommendedWidth: 200
-            }),
-
+        cols.push(
             new Column<PrivateOrder, number | undefined>({
-                name: "Te betalen", 
+                name: "Bedrag", 
                 enabled: false,
-                getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.payment.price : undefined,
-                format: (price) => price ? Formatter.price(price) : "Betaald",
+                getValue: (order) => order.payment?.price,
+                format: (price) => price ? Formatter.price(price) : "Onbekend",
                 compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
-                getStyle: (price) => price === undefined ? "gray" : "",
+                getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
                 minimumWidth: 70,
-                recommendedWidth: 150,
+                recommendedWidth: 80,
                 align: "right"
             }),
-        ]
+        )
+
+        if (this.preview.meta.paymentMethods.includes(PaymentMethod.Transfer)) {
+            cols.push(
+                new Column<PrivateOrder, number | undefined>({
+                    name: "Te betalen", 
+                    getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.payment.price : undefined,
+                    format: (price) => price ? Formatter.price(price) : "Betaald",
+                    compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
+                    getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
+                    minimumWidth: 70,
+                    recommendedWidth: 80,
+                    align: "right"
+                }),
+            )
+        }
+      
         return cols
     })()
 

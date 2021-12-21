@@ -81,6 +81,19 @@ export enum CheckoutMethodType {
     "Delivery" = "Delivery"
 }
 
+export class CheckoutMethodTypeHelper {
+    static getName(type: CheckoutMethodType): string {
+        switch (type) {
+            case CheckoutMethodType.OnSite:
+                return "Ter plaatse consumeren"
+            case CheckoutMethodType.Takeout:
+                return "Afhalen"
+            case CheckoutMethodType.Delivery:
+                return "Leveren"
+        }
+    }
+}
+
 export class CheckoutMethod extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -96,6 +109,10 @@ export class CheckoutMethod extends AutoEncoder {
 
     @field({ decoder: WebshopTimeSlots })
     timeSlots: WebshopTimeSlots = WebshopTimeSlots.create({})
+
+    get typeName() {
+        return CheckoutMethodTypeHelper.getName(this.type)
+    }
 }
 
 export class WebshopTakeoutMethod extends CheckoutMethod {

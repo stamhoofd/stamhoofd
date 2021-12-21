@@ -82,6 +82,21 @@ $color-primary-background: var(--color-primary-background, $color-primary-backgr
 $color-primary-dark-original: #002573;
 $color-primary-dark: var(--color-primary-dark, $color-primary-dark-original);
 
+
+
+$color-secundary: var(--color-secundary, #{adjust-hue($color-primary-original, 50deg)});
+$color-secundary-background: var(--color-secundary-background, #{adjust-hue($color-primary-background-original, 50deg)});
+$color-secundary-dark: var(--color-secundary-dark, #{adjust-hue($color-primary-dark-original, 50deg)});
+$color-secundary-border: var(--color-secundary-border, #{adjust-hue($color-primary-light-original, 50deg)});
+$color-secundary-border-focus: $color-secundary;
+
+
+$color-tertiary: var(--color-tertiary, #{adjust-hue($color-primary-original, 100deg)});
+$color-tertiary-background: var(--color-tertiary-background, #{adjust-hue($color-primary-background-original, 100deg)});
+$color-tertiary-dark: var(--color-tertiary-dark, #{adjust-hue($color-primary-dark-original, 100deg)});
+$color-tertiary-border: var(--color-tertiary-border, #{adjust-hue($color-primary-light-original, 100deg)});
+$color-tertiary-border-focus: $color-tertiary;
+
 $color-white-shade-original: #f5f5f5;
 $color-white-shade: var(--color-white-shade, $color-white-shade-original);
 

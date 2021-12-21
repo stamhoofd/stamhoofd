@@ -1544,8 +1544,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                         color: $color-gray-5;
                     }
 
-                    &[data-style="success"], &[data-style="error"], &[data-style="info"] {
-                        margin-left: -8px;
+                    &[data-style="success"], &[data-style="error"], &[data-style="info"], &[data-style="warn"], &[data-style="secundary"], &[data-style="tertiary"] {
 
                         > span {
                             display: inline-block;
@@ -1577,6 +1576,21 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     &[data-style="info"] > span {
                         background: $color-primary-background;
                         color: $color-primary;
+                    }
+
+                    &[data-style="warn"] > span {
+                        color: $color-warning-dark;
+                        background: $color-warning-background;
+                    }
+
+                    &[data-style="secundary"] > span {
+                        color: $color-secundary-dark;
+                        background: $color-secundary-background;
+                    }
+
+                    &[data-style="tertiary"] > span {
+                        color: $color-tertiary-dark;
+                        background: $color-tertiary-background;
                     }
 
                     &[data-align="right"] {
