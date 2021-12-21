@@ -84,12 +84,12 @@
                 </div>
             </template>
 
-            <div v-if="!loading && Object.values(totalByProduct).length > 0" class="container">
+            <div v-if="!loading && totalByProduct.length > 0" class="container">
                 <hr>
                 <h2>Per productcombinatie</h2>
 
                 <div class="stats-grid">
-                    <STInputBox v-for="(info, product) in totalByProduct" :key="product" :title="info.name">
+                    <STInputBox v-for="(info, index) in totalByProduct" :key="index" :title="info.name">
                         <p class="style-price-big">
                             <span>
                                 {{ loading ? '-' : info.amount }}
@@ -175,7 +175,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     totalVouchers = 0
     totalScannedVouchers = 0
 
-    totalByProduct: { [name: string]: { amount: number, name: string, description: string, price: number } } = {}
+    totalByProduct: { amount: number, name: string, description: string, price: number }[] = []
 
     mounted() {
         this.reload().catch(console.error)
@@ -188,7 +188,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     async reload() {
         this.loading = true
         try {
-            this.totalByProduct = {}
+            this.totalByProduct = []
             this.totalRevenue = 0
             this.totalOrders = 0
             this.averagePrice = 0
@@ -196,6 +196,8 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
             this.totalScannedTickets = 0
             this.totalVouchers = 0
             this.totalScannedVouchers = 0
+
+            const productMap: Map<string, { amount: number, name: string, description: string, price: number }> = new Map()
 
             // Keep a Set of all order Id's to prevent duplicate orders (in case an order gets updated, we'll receive it multiple times)
             const orderIds = new Set<string>()
@@ -209,22 +211,25 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                     this.averagePrice = Math.round(this.totalRevenue / this.totalOrders)
 
                     for (const item of order.data.cart.items) {
-                        const name = item.codeWithoutFields
-                        const current = this.totalByProduct[name]
+                        const code = item.codeWithoutFields
+                        const current = productMap.get(code)
                         if (current) {
                             current.amount += item.amount
                             current.price += item.getPrice(order.data.cart)
                         } else {
-                            this.totalByProduct[name] = {
+                            productMap.set(code, {
                                 amount: item.amount,
                                 name: item.product.name,
                                 description: item.descriptionWithoutFields,
                                 price: item.getPrice(order.data.cart),
-                            }
+                            })
                         }
                     }
                 }
             })
+
+            // Sort productmap values by amount and store in totalByProduct
+            this.totalByProduct = Array.from(productMap.values()).sort((a, b) => b.amount - a.amount)
 
             if (this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
                 await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
