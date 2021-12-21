@@ -208,7 +208,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                     orderIds.add(order.id)
                     this.totalRevenue += order.data.totalPrice
                     this.totalOrders += 1
-                    this.averagePrice = Math.round(this.totalRevenue / this.totalOrders)
+                    
 
                     for (const item of order.data.cart.items) {
                         const code = item.codeWithoutFields
@@ -230,6 +230,10 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
             // Sort productmap values by amount and store in totalByProduct
             this.totalByProduct = Array.from(productMap.values()).sort((a, b) => b.amount - a.amount)
+            
+            if (this.totalOrders > 0) {
+                this.averagePrice = Math.round(this.totalRevenue / this.totalOrders)
+            }
 
             if (this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
                 await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
