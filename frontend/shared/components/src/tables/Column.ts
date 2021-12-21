@@ -2,6 +2,29 @@ export class Column<T, ValueType> {
     name: string
     enabled = true
     index = 0
+    align?: "left" | "right" | "center"
+
+    /**
+     * null means: generate width + save it,  based on grow property
+     */
+    width: number | null = null
+
+    /**
+     * renderWidth is floored version of width, to use in CSS
+     */
+    renderWidth: number | null = null
+
+    /**
+     * Minimum width in pixels. Best minimum is 100, because this is needed for sort icon + drag handle + padding
+     */
+    minimumWidth = 100
+
+    recommendedWidth = 100
+
+    /**
+     * When growing, columns with grow = true will only grow (if all other columns have reached the recommended size)
+     */
+    grow = false
 
     private getValue: (val: T) => ValueType
     private format: (val: ValueType, width: number) => string
@@ -23,6 +46,7 @@ export class Column<T, ValueType> {
     constructor(settings: {
         name: string, 
         index?: number,
+        align?: "left" | "right" | "center",
         enabled?: boolean,
         getValue: (val: T) => ValueType, 
         format?: (val: ValueType, width: number) => string, 
@@ -30,7 +54,7 @@ export class Column<T, ValueType> {
         compare?: (a: ValueType, b: ValueType) => number,
         getStyle?: (val: ValueType) => string,
         getStyleForObject?: (val: T) => string,
-        grow?: number,
+        grow?: boolean,
         minimumWidth?: number,
         recommendedWidth?: number,
     }) {
@@ -46,9 +70,10 @@ export class Column<T, ValueType> {
         this.getStyle = settings.getStyle ?? null
         this.getStyleForObject = settings.getStyleForObject ?? null
 
-        this.grow = settings?.grow ?? 1
+        this.grow = settings?.grow ?? false
         this.minimumWidth = settings?.minimumWidth ?? 100
         this.recommendedWidth = settings?.recommendedWidth ?? 100
+        this.align = settings.align
 
         this.width = this.recommendedWidth
     }
@@ -82,26 +107,5 @@ export class Column<T, ValueType> {
         return this.width && this.width <= this.minimumWidth
     }
 
-    /**
-     * null means: generate width + save it,  based on grow property
-     */
-    width: number | null = null
-
-    /**
-     * renderWidth is floored version of width, to use in CSS
-     */
-    renderWidth: number | null = null
-
-    /**
-     * Minimum width in pixels. Best minimum is 100, because this is needed for sort icon + drag handle + padding
-     */
-    minimumWidth = 100
-
-    recommendedWidth = 100
-
-    /**
-     * Used for default width (behaves like flex-grow)
-     * and for resizing
-     */
-    grow = 1
+    
 }

@@ -86,7 +86,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 getValue: (order) => order.data.customer.name, 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 100,
-                recommendedWidth: 400
+                recommendedWidth: 400,
+                grow: true
             }),
 
             new Column<PrivateOrder, string | undefined>({
@@ -101,7 +102,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             new Column<PrivateOrder, string | undefined>({
                 name: "Adres", 
                 enabled: false,
-                getValue: (order) => order.data.address?.toString(), 
+                getValue: (order) => order.data.address?.shortString(), 
                 compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
                 getStyle: (loc) => loc === undefined ? "gray" : "",
                 minimumWidth: 100,
@@ -127,8 +128,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                     return Formatter.capitalizeFirstLetter(timeSlot.dateString())
                 },
                 getStyle: (loc) => loc === undefined ? "gray" : "",
-                minimumWidth: 50,
-                recommendedWidth: 65
+                minimumWidth: 60,
+                recommendedWidth: 65,
             }),
 
             new Column<PrivateOrder, WebshopTimeSlot | undefined>({
@@ -153,12 +154,20 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 recommendedWidth: 105
             }),
 
-            new Column<PrivateOrder, string>({
+            new Column<PrivateOrder, OrderStatus>({
                 name: "Status", 
-                getValue: (order) => OrderStatusHelper.getName(order.status),
+                getValue: (order) => order.status,
+                format: (status) => OrderStatusHelper.getName(status),
                 compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""), // todo: based on index
-                getStyleForObject: (order) => "", // todo: based on status
-                minimumWidth: 100,
+                getStyle: (status) => {
+                    switch (status) {
+                        case OrderStatus.Completed: return "success"
+                        case OrderStatus.Canceled: return "error"
+                        case OrderStatus.Created: return "info"
+                    }
+                    return "info"
+                }, // todo: based on status
+                minimumWidth: 70,
                 recommendedWidth: 200
             }),
 
@@ -167,10 +176,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 enabled: false,
                 getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.payment.price : undefined,
                 format: (price) => price ? Formatter.price(price) : "Betaald",
-                compare: (a, b) => Sorter.byNumberValue(a ?? 0, b ?? 0),
+                compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
                 getStyle: (price) => price === undefined ? "gray" : "",
-                minimumWidth: 100,
-                recommendedWidth: 150
+                minimumWidth: 70,
+                recommendedWidth: 150,
+                align: "right"
             }),
         ]
         return cols

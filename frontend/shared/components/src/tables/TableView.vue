@@ -59,7 +59,7 @@
                         </div>
 
                         <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                            <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}">
+                            <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}" :data-align="column.align">
                                 <button type="button" @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
                                     <span>{{ column.name }}</span>
 
@@ -84,9 +84,9 @@
                                 <Checkbox v-else :checked="false" />
                             </label>
                             <div class="columns" :class="{ 'show-checkbox': showSelection }">
-                                <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)">
-                                    {{ row.value ? column.getFormattedValue(row.value) : "" }}
-                                    <span v-if="!row.value" class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 500, column.recommendedWidth)-30))+'px'}" />
+                                <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)" :data-align="column.align">
+                                    <span v-if="row.value" v-text="column.getFormattedValue(row.value)" />
+                                    <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 500, column.recommendedWidth)-30))+'px'}" />
                                 </div>
                             </div>
                         </div>
@@ -686,7 +686,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             // Also add some padding
             if (found) (
-                column.recommendedWidth = maximum + 20
+                column.recommendedWidth = maximum + 15
             )
         }
 
@@ -719,6 +719,9 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
             // Also update columns that are smaller than the minimumWidth
             for (const col of affectedColumns) {
+                if (col.renderWidth === null && col.width !== null) {
+                    col.renderWidth = Math.floor(col.width);
+                }
                 if (col.width === null || col.width === 0) {
                     col.width = col.recommendedWidth
                     distributeWidth -= col.recommendedWidth
@@ -735,21 +738,60 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             // Get columns with the highest priority for shrinking or growing
             // growing: the ones with a width lower than the recommendedWidth
             // shrinking: the ones with a width higher than the recommendedWidth
-            let getColumnMinimum = (col: Column<any, any>) => col.recommendedWidth
-
-            let didSwitch = false
 
             const shrinking = distributeWidth < 0
-            let columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null && c.width < getColumnMinimum(c))
 
-            if (columns.length == 0 && !didSwitch) {
-                //console.log("Done with recommendedWidth, now trying with minimumWidth")
-                getColumnMinimum = (col: Column<any, any>) => col.minimumWidth
-                columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
-                didSwitch = true
+            const columnPriorities: ((col: Column<any, any>) => boolean)[] = shrinking ? [
+                // First, shrink all the columns that are larger than the recommendedWidth
+                (c) => c.width !== null && c.width > c.recommendedWidth,
+
+                // At last, only shrink columns larger than the minimum width
+                (c) => c.width !== null && c.width > c.minimumWidth
+            ] : [
+                // First grow all the columns that are smaller than the recommendedWidth
+                (c) => c.width !== null && c.width < c.minimumWidth,
+                (c) => c.width !== null && c.width < c.recommendedWidth,
+
+                // Grow only columns that have grow = true (unless none of the columns have grow = true, in which case this step is skipped automatically)
+                (c) => c.width !== null && c.grow === true,
+
+                // At last, grow any column, exept when they don't have width yet
+                (c) => c.width !== null
+            ]
+
+            const columnLimits: {minimum?: (col: Column<any, any>) => number, maximum?: (col: Column<any, any>) => number}[] = shrinking ? [
+                { minimum: c => c.recommendedWidth },
+                { minimum: c => c.minimumWidth },
+            ] : [
+                { maximum: c => c.minimumWidth }, // Grow to recommended size and continue to next step
+                { maximum: c => c.recommendedWidth }, // Grow to recommended size and continue to next step
+                { },
+                { },
+            ]
+            
+            let columnPriorityIndex = 0
+
+            let columns = affectedColumns // use same type, and don't allocate a new array because we'll override it shortly
+
+            console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
+
+            const updateColumns = () => {
+                columns = affectedColumns.filter(c => columnPriorities[columnPriorityIndex](c))
             }
+            updateColumns()
 
-            while (distributeWidth !== 0 && columns.length > 0) {
+            while (distributeWidth !== 0 && (columns.length > 0 || columnPriorityIndex < columnPriorities.length - 1)) {
+                if (columns.length == 0) {
+                    columnPriorityIndex++
+                    
+                    updateColumns()
+                    console.log("Moving to columnPriorityIndex", columnPriorityIndex)
+                    console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
+
+                    // Check loop conditions again, and if needed, jump to the next priority or start distributing
+                    continue
+                }
+
                 // Always try to grow with rounded numbers, because else we'll get rounding errors
                 let change = Math.round(distributeWidth / columns.length);
 
@@ -758,7 +800,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     change = Math.sign(distributeWidth)
                 }
 
-                //console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
+                console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
                 
                 // We'll make sure we never grow or shrink more than the distribute width
 
@@ -778,37 +820,32 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     col.width += change;
                     
                     // A column can never shrink more than its recommended width, or it's start width, if that was already smaller (only in case of minimum)
-                    const min = Math.min(start, getColumnMinimum(col))
+                    const limits = columnLimits[columnPriorityIndex]
+                    
+                    const min = limits.minimum ? Math.min(start, limits.minimum(col)) : undefined
+                    const max = limits.maximum ? Math.max(start, limits.maximum(col)) : undefined
 
-                    if (col.width <= min) {
+                    if (min !== undefined && col.width <= min) {
                         // we hit the minimum width, so we need to distribute the width that we couldn't absorb
                         col.width = min;
-
-                        const absorbed = -(start - col.width)
-                        distributeWidth -= absorbed;
-
                         //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at it's minimum", col.width)
-
-                    } else {
-                        distributeWidth -= change;
-                        //console.log("Column", col.name, "absorbed", change, "of", change, "and is now at", col.width)
+                    } else if (max !== undefined && col.width >= max) {
+                        // we hit the minimum width, so we need to distribute the width that we couldn't absorb
+                        col.width = max;
+                        //
                     }
+
+                    const absorbed = col.width - start;
+                    distributeWidth -= absorbed;
+                    console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at ", col.width)
                     col.renderWidth = Math.floor(col.width);
                 }
 
                 // Update columns
-                columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null && c.width < getColumnMinimum(c))
-
-                if (columns.length == 0 && !didSwitch) {
-                    //console.log("Done with recommendedWidth, now trying with minimumWidth")
-                    getColumnMinimum = (col: Column<any, any>) => col.minimumWidth
-                    columns = shrinking ? affectedColumns.filter(c => c.width !== null && c.width > getColumnMinimum(c)) : affectedColumns.filter(c => c.width !== null)
-                    didSwitch = true
-                }
-
+                updateColumns()
             }
 
-            //console.log("Done distributing with distributeWidth left: ", distributeWidth)
+            console.log("Done distributing with distributeWidth left: ", distributeWidth)
         } else {
             // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
@@ -1494,18 +1531,62 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         .table-row {
             .columns {
                 > div {
-                    padding-right: 10px;
-                    
-                    &:last-child {
-                        padding-right: 0;
-                    }
+                    padding-right: 15px;
 
+                    // Give numbers equal width
+                    font-variant-numeric: tabular-nums;
+                    
                     &.isDragging {
                         opacity: 0.5;
                     }
 
                     &[data-style="gray"] {
                         color: $color-gray-5;
+                    }
+
+                    &[data-style="success"], &[data-style="error"], &[data-style="info"] {
+                        margin-left: -8px;
+
+                        > span {
+                            display: inline-block;
+                            font-size: 11px;
+                            text-transform: uppercase;
+                            font-weight: $font-weight-bold;
+                            padding: 7px 8px;
+                            border-radius: $border-radius;
+
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            max-width: 100%;
+                            box-sizing: border-box;
+                        }
+                        
+                    }
+
+                    &[data-style="success"] > span {
+                        background: $color-success-background;
+                        color: $color-success-dark;
+                    }
+
+                    &[data-style="error"] > span {
+                        background: $color-error-background;
+                        color: $color-error-dark;
+                    }
+
+                    &[data-style="info"] > span {
+                        background: $color-primary-background;
+                        color: $color-primary;
+                    }
+
+                    &[data-align="right"] {
+                        text-align: right;
+                        margin-left: auto;
+                        padding-right: 20px;
+                    }
+
+                    &:last-child {
+                        padding-right: 0;
                     }
 
                     transition: transform 0.2s, opacity 0.2s;
@@ -1586,6 +1667,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             flex-direction: row;
             align-items: center;
             padding-right: 10px;
+
+            &[data-align="right"] {
+
+                > button:first-child {
+                    justify-content: flex-end;
+                }
+            }
 
             > button:first-child {
                 flex-grow: 1;

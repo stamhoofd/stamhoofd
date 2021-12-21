@@ -1,6 +1,6 @@
 <template>
     <ContextMenu v-bind="$attrs">
-        <ContextMenuItem v-for="column of columns" :key="column.id" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
+        <ContextMenuItem v-for="column of sortedColumns" :key="column.id" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
             <Checkbox slot="left" :checked="column.enabled" :only-line="true" />
             {{ column.name }}
         </ContextMenuItem>
@@ -27,10 +27,13 @@ export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
     columns: Column<any, any>[];
 
     setColumnEnabled(column: Column<any, any>, enabled: boolean) {
-        console.log("Set column enabled", column, enabled);
         column.width = null
         column.renderWidth = null
         column.enabled = enabled
+    }
+
+    get sortedColumns() {
+        return this.columns.sort((a, b) => a.index - b.index)
     }
 
 }
