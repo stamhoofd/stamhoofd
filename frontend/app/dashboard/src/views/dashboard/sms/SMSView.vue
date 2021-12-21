@@ -2,18 +2,20 @@
     <div class="st-view sms-view">
         <STNavigationBar title="SMS'en">
             <template #right>
-                <button class="button icon close gray" @click="dismiss" />
+                <button class="button icon close gray" type="button" @click="dismiss" />
             </template>
         </STNavigationBar>
-        <STNavigationTitle>
-            <span class="icon-spacer">SMS'en</span>
-        </STNavigationTitle>
+        
 
         <main>
+            <h1>
+                SMS'en
+            </h1>
+
             <div v-if="!isSupported" class="error-box">
-                SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone of Mac.
+                SMS functionaliteit is niet beschikbaar op dit toestel. Probeer het op een smartphone (Android of iOS) of Mac.
             </div>
-            <STInputBox v-if="customers.length == 0" title="Naar wie?">
+            <STInputBox v-if="customers.length == 0 && parentsEnabled" title="Naar wie?">
                 <Dropdown id="sms-who" v-model="smsFilter">
                     <option value="parents">
                         Enkel naar ouders
@@ -42,8 +44,8 @@
                 }}
             </template>
             <template #right>
-                <button class="button primary" :disabled="!isSupported || phones.length == 0" @click="send">
-                    Versturen
+                <button class="button primary" :disabled="!isSupported || phones.length == 0" type="button" @click="send">
+                    Versturen...
                 </button>
             </template>
         </STToolbar>
@@ -55,6 +57,8 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Dropdown, SegmentedControl, STInputBox, STNavigationBar, STNavigationTitle, STToolbar } from "@stamhoofd/components";
 import { Customer, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../../../registration/src/classes/OrganizationManager";
 
 @Component({
     components: {
@@ -73,9 +77,7 @@ export default class SMSView extends Mixins(NavigationMixin) {
     @Prop({ default: () => []})
     customers!: Customer[];
 
-    @Prop({ default: "parents" })
-    initialSmsFilter!: string;
-    smsFilter = this.initialSmsFilter
+    smsFilter = "all"
 
     message = "";
 
@@ -85,6 +87,22 @@ export default class SMSView extends Mixins(NavigationMixin) {
 
     get canUseBody() {
         return this.getOS() != "unknown" && this.getOS() != "windows" && this.getOS() != "macOS-old"
+    }
+
+    get parentsEnabled() {
+        const enabled = OrganizationManager.organization.meta.recordsConfiguration.parents !== null
+        return enabled && this.members.some(member => member.details.parents.length > 0)
+    }
+
+    mounted() {
+        if (this.parentsEnabled) {
+            const hasMinor = this.members.some(member => member.details.parents.length > 0 && (member.details.age ?? 99) < 18)
+            const hasGrownUp = this.members.some(member => (member.details.age ?? 99) >= 18)
+
+            if (hasMinor && !hasGrownUp) {
+                this.smsFilter = "parents"
+            }
+        }
     }
 
     getOS(): string {
