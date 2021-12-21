@@ -199,7 +199,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 getValue: (v) => v.name, 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 100,
-                recommendedWidth: 300
+                recommendedWidth: 300,
+                grow: true,
             }),
             new Column<MemberWithRegistrations, string>({
                 name: "Voornaam", 
@@ -207,7 +208,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 enabled: false,
                 minimumWidth: 100,
-                recommendedWidth: 150
+                recommendedWidth: 150,
+                grow: true,
             }),
             new Column<MemberWithRegistrations, string>({
                 name: "Achternaam", 
@@ -215,7 +217,8 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 enabled: false,
                 minimumWidth: 100,
-                recommendedWidth: 150
+                recommendedWidth: 150,
+                grow: true,
             }),
             new Column<MemberWithRegistrations, number | null>({
                 name: "Leeftijd", 
@@ -224,7 +227,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 getStyle: (v) => v === null ? "gray" : "",
                 compare: (a, b) => Sorter.byNumberValue(b ?? 99, a ?? 99),
                 minimumWidth: 100,
-                recommendedWidth: 150
+                recommendedWidth: 100
             }),
             new Column<MemberWithRegistrations, Date | null>({
                 name: this.waitingList ? "Op wachtlijst sinds" : "Inschrijvingsdatum", 
@@ -257,11 +260,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     }
                     return new Date(Math.min(...filtered))
                 }, 
-                format: (v) => v ? Formatter.date(v, true) : "Onbekend",
+                format: (v, width) => v ? (width < 160 ? (width < 120 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : Formatter.date(v, true)) : "Onbekend",
                 getStyle: (v) => v === null ? "gray" : "",
                 compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900, 0, 1), a ?? new Date(1900, 0, 1)),
-                minimumWidth: 100,
-                recommendedWidth: 150
+                minimumWidth: 80,
+                recommendedWidth: 160
             })
         ]
 
@@ -278,8 +281,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     }, 
                     getStyle: (v) => v == 0 ? "gray" : "",
                     compare: (a, b) => Sorter.byNumberValue(b, a),
-                    minimumWidth: 100,
-                    recommendedWidth: 150
+                    minimumWidth: 70,
+                    recommendedWidth: 80,
+                    align: "right"
                 })
             )
         }
