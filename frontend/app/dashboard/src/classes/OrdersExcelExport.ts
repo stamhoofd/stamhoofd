@@ -1,3 +1,5 @@
+import { Toast } from '@stamhoofd/components';
+import { AppManager } from '@stamhoofd/networking';
 import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PrivateOrder } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
@@ -423,9 +425,14 @@ export class OrdersExcelExport {
         if (shouldIncludeSettements) {
             XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Mollie uitbetalingen");
         }
-        
 
-        // todo: also add other sheets
-        XLSX.writeFile(wb, "bestellingen.xlsx");
+        if (AppManager.shared.downloadFile) {
+            const data = XLSX.write(wb, { type: 'base64' });
+            AppManager.shared.downloadFile(data, "bestellingen.xlsx").catch(e => {
+                Toast.fromError(e).show()
+            });
+        } else {
+            XLSX.writeFile(wb, "bestellingen.xlsx");
+        }
     }
 }
