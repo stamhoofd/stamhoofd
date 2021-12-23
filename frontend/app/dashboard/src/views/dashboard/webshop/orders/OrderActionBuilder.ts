@@ -223,7 +223,7 @@ export class OrderActionBuilder {
                 Toast.fromError(e).show()
             }
         } else {
-            new Toast(paid ? "Al gemarkeerd als betaald" : ("Deze "+ (orders.length == 1 ? "bestelling werd" : "bestellingen werden") +" nog niet betaald"), "error").setHide(1000).show()
+            new Toast(paid ? "Al gemarkeerd als betaald" : ("Deze "+ (orders.length == 1 ? "bestelling werd" : "bestellingen werden") +" nog niet betaald"), "error red").setHide(1000).show()
         }
     }
 
