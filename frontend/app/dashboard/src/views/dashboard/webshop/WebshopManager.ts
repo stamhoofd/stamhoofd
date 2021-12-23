@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, PaginatedResponse, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
@@ -39,6 +39,14 @@ export class WebshopManager {
 
     constructor(preview: WebshopPreview) {
         this.preview = preview
+    }
+
+    get hasWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
     }
 
     /**
@@ -816,6 +824,26 @@ export class WebshopManager {
                 }
             }
 
+        })
+    }
+
+    async deleteOrderFromDatabase(id: string): Promise<void> {
+        const db = await this.getDatabase()
+
+        return new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["orders"], "readwrite");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("orders");
+            const request = objectStore.delete(id)
+            request.onsuccess = () => {
+                resolve()
+            }
         })
     }
 

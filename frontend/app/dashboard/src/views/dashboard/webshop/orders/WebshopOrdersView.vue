@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
@@ -16,7 +16,10 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import MailView from "../../mail/MailView.vue";
+import SMSView from "../../sms/SMSView.vue";
 import { WebshopManager } from '../WebshopManager';
+import { OrderActionBuilder } from "./OrderActionBuilder";
 import OrderView from './OrderView.vue';
 import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus";
 
@@ -56,6 +59,10 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get actions(): TableAction<PrivateOrder>[] {
+        const builder = new OrderActionBuilder({
+            webshopManager: this.webshopManager,
+            component: this
+        })
         return [
             new TableAction({
                 name: "Openen",
@@ -69,96 +76,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 }
             }),
 
-            new TableAction({
-                name: "Wijzig status",
-                icon: "flag",
-                priority: 0,
-                groupIndex: 1,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                childActions: Object.values(OrderStatus).map(status => {
-                    return new TableAction({
-                        name: OrderStatusHelper.getName(status),
-                        needsSelection: true,
-                        allowAutoSelectAll: false,
-                        handler: (orders: PrivateOrder[]) => {
-                            // todo
-                        }
-                    })
-                })
-            }),
-
-            new TableAction({
-                name: "Wijzig betaalstatus",
-                icon: "flag",
-                priority: 0,
-                groupIndex: 1,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                childActions: [
-                    new TableAction({
-                        name: "Betaald",
-                        needsSelection: true,
-                        allowAutoSelectAll: false,
-                        handler: (orders: PrivateOrder[]) => {
-                            // todo
-                        }
-                    }),
-                    new TableAction({
-                        name: "Niet betaald",
-                        needsSelection: true,
-                        allowAutoSelectAll: false,
-                        handler: (orders: PrivateOrder[]) => {
-                            // todo
-                        }
-                    })
-                ]
-            }),
-
-            new TableAction({
-                name: "E-mailen",
-                icon: "email",
-                priority: 10,
-                groupIndex: 3,
-                handler: (orders: PrivateOrder[]) => {
-                    //this.openMail(members)
-                }
-            }),
-        
-            new TableAction({
-                name: "SMS'en",
-                icon: "feedback-line",
-                priority: 9,
-                groupIndex: 3,
-
-                handler: (orders: PrivateOrder[]) => {
-                    //this.openSMS(members)
-                }
-            }),
-
-            new TableAction({
-                name: "Exporteer naar Excel",
-                icon: "download",
-                priority: 8,
-                groupIndex: 3,
-                handler: (orders: PrivateOrder[]) => {
-                    //this.openSMS(members)
-                }
-            }),
-
-            new TableAction({
-                name: "Verwijderen",
-                icon: "trash",
-                priority: 0,
-                groupIndex: 5,
-                needsSelection: true,
-                allowAutoSelectAll: false,
-                enabled: this.hasWrite,
-                handler: (members) => {
-                    // todo
-                }
-            }),
-
+            ...builder.getActions()
         ]
     }
 
@@ -303,20 +221,19 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }),
         )
 
-        if (this.preview.meta.paymentMethods.includes(PaymentMethod.Transfer)) {
-            cols.push(
-                new Column<PrivateOrder, number | undefined>({
-                    name: "Te betalen", 
-                    getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.payment.price : undefined,
-                    format: (price) => price ? Formatter.price(price) : "Betaald",
-                    compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
-                    getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
-                    minimumWidth: 70,
-                    recommendedWidth: 80,
-                    align: "right"
-                }),
-            )
-        }
+        cols.push(
+            new Column<PrivateOrder, number | undefined>({
+                name: "Te betalen", 
+                enabled: this.preview.meta.paymentMethods.includes(PaymentMethod.Transfer), // keep it available because should be able to enable it when payment methods are changed
+                getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.payment.price : undefined,
+                format: (price) => price ? Formatter.price(price) : "Betaald",
+                compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
+                getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
+                minimumWidth: 70,
+                recommendedWidth: 80,
+                align: "right"
+            }),
+        )
       
         return cols
     })()
@@ -371,11 +288,15 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         WebshopOrdersEventBus.removeListener(this)
     }
 
-    onDeleteOrder(): Promise<void> {
-        // todo: needs an update
-        this.nextQuery = WebshopOrdersQuery.create({})
-        this.orders = []
-        this.loadOrders().catch(console.error)
+    onDeleteOrder(orders: PrivateOrder[]): Promise<void> {
+        // Delete these orders from the loaded orders instead of doing a full reload
+        for (const order of orders) {
+            const index = this.orders.findIndex(o => o.id === order.id)
+            if (index != -1) {
+                this.orders.splice(index, 1)
+            }
+        }
+
         return Promise.resolve()
     }
 
@@ -651,33 +572,5 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             })
         }).setDisplayStyle("popup"))
     }
-
-    /*openMail(subject = "Bestelling {{nr}}") {
-        const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MailView, {
-                orders: this.getSelectedOrders(),
-                webshop: this.webshop,
-                defaultSubject: subject
-            })
-        });
-        this.present(displayedComponent.setDisplayStyle("popup"));
-    }*/
-
-    /*markAs(event) {
-        if (this.selectionCount == 0) {
-            return;
-        }
-
-        const el = event.currentTarget;
-        const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {
-            x: el.getBoundingClientRect().left + el.offsetWidth,
-            y: el.getBoundingClientRect().top,
-            xPlacement: "left",
-            yPlacement: "top",
-            orders: this.getSelectedOrders(),
-            webshopManager: this.webshopManager
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-    }*/
 }
 </script>

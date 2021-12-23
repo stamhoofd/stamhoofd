@@ -514,41 +514,13 @@ export default class OrderView extends Mixins(NavigationMixin){
             return;
         }
 
-        const data: AutoEncoderPatchType<Payment>[] = []
-        if (payment.status != PaymentStatus.Succeeded || this.order.data.cart.price != payment.price) {
-            data.push(Payment.patch({
-                id: payment.id,
-                price: this.order.data.cart.price,
-                status: PaymentStatus.Succeeded
-            }))
+        try {
+            // Todo: use action builder
+            this.downloadNewTickets()
+        } catch (e) {
+            Toast.fromError(e).show()
         }
-
-        if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker?", "Markeer als betaald", "De besteller ontvangt een automatische e-mail. Tip: je kan dit ook via het menu 'Overschrijvingen' doen voor meerdere overschrijvingen in één keer, dat spaart je wat werk uit.")) {
-                return;
-            }
-            this.loadingPayment = true
-            const session = SessionManager.currentSession!
-
-            try {
-                const response = await session.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/organization/payments",
-                    body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>),
-                    shouldRetry: false
-                })
-                const p = response.data.find(pp => pp.id === payment.id)
-                if (p) {
-                    payment.set(p)
-                }
-                this.downloadNewTickets()
-            } catch (e) {
-                Toast.fromError(e).show()
-            }
-            this.loadingPayment = false
-            
-        }
+        this.loadingPayment = false
     }
 
     saving = false

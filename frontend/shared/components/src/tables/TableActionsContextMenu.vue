@@ -2,7 +2,7 @@
     <ContextMenu v-bind="$attrs">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && (!table || !action.allowAutoSelectAll)" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, event)">
+            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && (!table || !action.allowAutoSelectAll)" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
                 {{ action.name }}
                 <span v-if="action.childMenu || action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
