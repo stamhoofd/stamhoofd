@@ -1,19 +1,9 @@
 <template>
     <div class="st-view order-view">
-        <STNavigationBar :title="'Bestelling ' + patchedOrder.number">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-                <button v-if="hasPreviousOrder" class="button text" @click="goBack">
-                    <span class="icon arrow-left" />
-                    <span>Vorige</span>
-                </button>
-            </template>
+        <STNavigationBar :title="'Bestelling ' + patchedOrder.number" :pop="canPop" :dismiss="canDismiss">
             <template #right>
-                <button v-if="hasNextOrder" class="button text" @click="goNext">
-                    <span>Volgende</span>
-                    <span class="icon arrow-right" />
-                </button>
-                <button class="button icon close gray" @click="pop" />
+                <button v-if="hasPreviousOrder || hasNextOrder" v-tooltip="'Ga naar vorige bestelling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" @click="goBack" />
+                <button v-if="hasNextOrder || hasPreviousOrder" v-tooltip="'Ga naar volgende bestelling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" @click="goNext" />
             </template>
         </STNavigationBar>
         <main>
@@ -30,19 +20,33 @@
                     Naam
 
                     <template slot="right">
-                        <p>{{ patchedOrder.data.customer.name }}</p>
-                        <p>{{ patchedOrder.data.customer.phone }}</p>
-                        <p>{{ patchedOrder.data.customer.email }}</p>
+                        {{ patchedOrder.data.customer.name }}
                     </template>
                 </STListItem>
 
-                <STListItem class="right-description" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
+                <STListItem class="right-description">
+                    GSM-nummer
+
+                    <template slot="right">
+                        <p>{{ patchedOrder.data.customer.phone }}</p>
+                    </template>
+                </STListItem>
+
+                <STListItem class="right-description">
+                    E-mailadres
+
+                    <template slot="right">
+                        {{ patchedOrder.data.customer.email }}
+                    </template>
+                </STListItem>
+
+                <STListItem class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     Status
 
                     <template slot="right">
                         <span v-if="patchedOrder.status == 'Created'" class="style-tag">Nieuw</span>
-                        <span v-else-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
-                        <span v-else-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
+                        <span v-else-if="order.status == 'Prepared'" class="style-tag secundary">Verwerkt</span>
+                        <span v-else-if="order.status == 'Collect'" class="style-tag tertiary">Ligt klaar</span>
                         <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
                         <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
                         <span v-else>Onbekend</span>
@@ -440,7 +444,8 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.show({
             components: [component],
             replace: 1,
-            reverse: true
+            reverse: true,
+            animated: false
         })
     }
 
@@ -458,6 +463,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.show({
             components: [component],
             replace: 1,
+            animated: false
         })
     }
 

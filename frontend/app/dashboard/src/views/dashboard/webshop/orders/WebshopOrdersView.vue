@@ -67,7 +67,71 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 handler: (orders: PrivateOrder[]) => {
                     this.openOrder(orders[0])
                 }
-            })
+            }),
+
+            new TableAction({
+                name: "Wijzig status",
+                icon: "flag",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                childActions: Object.values(OrderStatus).map(status => {
+                    return new TableAction({
+                        name: OrderStatusHelper.getName(status),
+                        needsSelection: true,
+                        allowAutoSelectAll: false,
+                        handler: (orders: PrivateOrder[]) => {
+                            // todo
+                        }
+                    })
+                })
+            }),
+
+            new TableAction({
+                name: "E-mailen",
+                icon: "email",
+                priority: 10,
+                groupIndex: 3,
+                handler: (orders: PrivateOrder[]) => {
+                    //this.openMail(members)
+                }
+            }),
+        
+            new TableAction({
+                name: "SMS'en",
+                icon: "feedback-line",
+                priority: 9,
+                groupIndex: 3,
+
+                handler: (orders: PrivateOrder[]) => {
+                    //this.openSMS(members)
+                }
+            }),
+
+            new TableAction({
+                name: "Exporteer naar Excel",
+                icon: "download",
+                priority: 8,
+                groupIndex: 3,
+                handler: (orders: PrivateOrder[]) => {
+                    //this.openSMS(members)
+                }
+            }),
+
+            new TableAction({
+                name: "Verwijderen",
+                icon: "trash",
+                priority: 0,
+                groupIndex: 5,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                enabled: this.hasWrite,
+                handler: (members) => {
+                    // todo
+                }
+            }),
+
         ]
     }
 
@@ -150,7 +214,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         if (dateCount > 1) {
             cols.push(
                 new Column<PrivateOrder, WebshopTimeSlot | undefined>({
-                    name: "Datum", 
+                    name: (hasDelivery && nonDeliveryCount > 0) ? "Afhaal/leverdatum" : (hasDelivery ? "Leverdatum" : "Afhaaldatum"), 
                     getValue: (order) => order.data.timeSlot ? order.data.timeSlot : undefined,
                     compare: (a, b) => !a && !b ? 0 : (a && b ? WebshopTimeSlot.sort(a, b) : (a ? 1 : -1)),
                     format: (timeSlot, width: number) => {
