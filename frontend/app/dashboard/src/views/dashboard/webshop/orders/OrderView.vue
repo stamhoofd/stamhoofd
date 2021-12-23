@@ -4,6 +4,7 @@
             <template #right>
                 <button v-if="hasPreviousOrder || hasNextOrder" v-tooltip="'Ga naar vorige bestelling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" @click="goBack" />
                 <button v-if="hasNextOrder || hasPreviousOrder" v-tooltip="'Ga naar volgende bestelling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" @click="goNext" />
+                <button v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
         <main>
@@ -40,7 +41,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
+                <STListItem v-long-press="(e) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     Status
 
                     <template slot="right">
@@ -191,12 +192,12 @@
 
             <LoadingButton v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" :loading="loadingPayment">
                 <p>
-                    <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" class="button secundary" @click="markPaid(patchedOrder.payment)">
+                    <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" type="button" class="button secundary" @click="markPaid(true)">
                         <span class="icon success" />
                         <span>Markeer als betaald</span>
                     </button>
 
-                    <button v-if="patchedOrder.payment && patchedOrder.payment.status == 'Succeeded'" class="button secundary" @click="markNotPaid(patchedOrder.payment)">
+                    <button v-if="patchedOrder.payment && patchedOrder.payment.status == 'Succeeded'" type="button" class="button secundary" @click="markPaid(false)">
                         <span class="icon canceled" />
                         <span>Markeer als niet betaald</span>
                     </button>
@@ -237,7 +238,7 @@
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
                         </p>
                         <div @click.stop>
-                            <button class="button icon trash gray" @click="deleteItem(cartItem)" />
+                            <button type="button" class="button icon trash gray" @click="deleteItem(cartItem)" />
                         </div>
                     </footer>
 
@@ -248,7 +249,7 @@
             </STList>
 
             <p v-if="hasWrite">
-                <button class="button text" @click="addProduct">
+                <button class="button text" type="button" @click="addProduct">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
@@ -273,7 +274,7 @@
 
         <STToolbar v-if="hasWrite && isChanged()">
             <LoadingButton slot="right" :loading="saving">
-                <button class="button primary" @click="save()">
+                <button class="button primary" type="button" @click="save()">
                     Opslaan
                 </button>
             </LoadingButton>
@@ -282,18 +283,19 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, patchContainsChanges } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components"
+import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, OrderData, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderData, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { WebshopManager } from "../WebshopManager";
 import AddItemView from "./AddItemView.vue";
-import OrderStatusContextMenu from "./OrderStatusContextMenu.vue";
+import { OrderActionBuilder } from "./OrderActionBuilder";
 
 @Component({
     components: {
@@ -315,7 +317,8 @@ import OrderStatusContextMenu from "./OrderStatusContextMenu.vue";
         capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
     },
     directives: {
-        tooltip: TooltipDirective
+        tooltip: TooltipDirective,
+        LongPress: LongPressDirective
     }
 })
 export default class OrderView extends Mixins(NavigationMixin){
@@ -394,15 +397,37 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.tickets.reduce((c, ticket) => c + (ticket.scannedAt ? 1 : 0), 0)
     }
 
+    get actionBuilder() {
+        return new OrderActionBuilder({
+            webshopManager: this.webshopManager,
+            component: this,
+        })
+    }
+
+    showContextMenu(event) {
+        const el = event.currentTarget;
+        const bounds = el.getBoundingClientRect()
+
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: bounds.left,
+            y: bounds.bottom,
+            xPlacement: "right",
+            yPlacement: "bottom",
+            actions: this.actionBuilder.getActions(),
+            focused: [this.order]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
     markAs(event) {
         const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
-        const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: el.getBoundingClientRect().left + el.offsetWidth,
             y: el.getBoundingClientRect().top + el.offsetHeight,
             xPlacement: "left",
             yPlacement: "bottom",
-            orders: [this.order],
-            webshopManager: this.webshopManager
+            actions: this.actionBuilder.getStatusActions(),
+            focused: [this.order]
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -509,14 +534,21 @@ export default class OrderView extends Mixins(NavigationMixin){
         return cartItem.product.images[0]?.getPathForSize(100, 100)
     }
 
-    async markPaid(payment: Payment) {
+    async markPaid(paid = true) {
         if (this.loadingPayment) {
             return;
         }
 
         try {
             // Todo: use action builder
-            this.downloadNewTickets()
+            await new OrderActionBuilder({
+                component: this,
+                webshopManager: this.webshopManager,
+            }).markPaid([this.order], paid)
+
+            if (paid) {
+                this.downloadNewTickets()
+            }
         } catch (e) {
             Toast.fromError(e).show()
         }
@@ -649,46 +681,6 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
             cart: clone
         })})
-    }
-
-    async markNotPaid(payment: Payment) {
-        if (this.loadingPayment) {
-            return;
-        }
-
-        const data: AutoEncoderPatchType<Payment>[] = []
-        if (payment.status == PaymentStatus.Succeeded) {
-            data.push(Payment.patch({
-                id: payment.id,
-                status: PaymentStatus.Created
-            }))
-        }
-
-        if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker dat deze betaling niet uitgevoerd is?", "Niet betaald")) {
-                return;
-            }
-            this.loadingPayment = true
-            const session = SessionManager.currentSession!
-
-            try {
-                const response = await session.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/organization/payments",
-                    body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>),
-                    shouldRetry: false
-                })
-                const p = response.data.find(pp => pp.id === payment.id)
-                if (p) {
-                    payment.set(p)
-                }
-            } catch (e) {
-                Toast.fromError(e).show()
-            }
-            this.loadingPayment = false
-            
-        }
     }
 
     get orderUrl() {

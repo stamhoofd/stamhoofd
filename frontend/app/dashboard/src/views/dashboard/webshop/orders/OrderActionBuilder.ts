@@ -174,18 +174,19 @@ export class OrderActionBuilder {
             }
 
             if (paid) {
-                if (payment.status != PaymentStatus.Succeeded || order.data.cart.price != payment.price) {
+                if (payment.status != PaymentStatus.Succeeded || order.data.totalPrice != payment.price) {
                     data.push(Payment.patch({
                         id: payment.id,
-                        price: order.data.cart.price,
+                        price: order.data.totalPrice,
                         status: PaymentStatus.Succeeded
                     }))
                 }
             } else {
-                if (payment.status == PaymentStatus.Succeeded ) {
+                if (payment.status == PaymentStatus.Succeeded || order.data.totalPrice != payment.price) {
                     data.push(Payment.patch({
                         id: payment.id,
-                        status: PaymentStatus.Created
+                        status: PaymentStatus.Created,
+                        price: order.data.totalPrice
                     }))
                 }
             }
@@ -228,7 +229,7 @@ export class OrderActionBuilder {
     }
 
     async deleteOrders(orders: PrivateOrder[]) {
-        if (!await CenteredMessage.confirm(orders.length == 1 ? "Ben je zeker dat je bestelling "+orders[0].number+" ("+orders[0].data.customer.name+") wilt verwijderen? Je kan dit niet ongedaan maken." : "Ben je zeker dat je deze bestellingen wilt verwijderen? Je kan dit niet ongedaan maken.", "Verwijderen")) {
+        if (!await CenteredMessage.confirm(orders.length == 1 ? "Bestelling "+orders[0].number+" ("+orders[0].data.customer.name+") verwijderen?" : "Bestellingen verwijderen?", "Verwijderen", "Je kan dit niet ongedaan maken.")) {
             return
         }
 
