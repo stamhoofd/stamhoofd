@@ -448,7 +448,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         const orderStatus = new ChoicesFilterDefinition<PrivateOrder>({
             id: "order_status",
             name: "Bestelstatus",
-            choices: Object.values(OrderStatus).map(status => {
+            choices: Object.values(OrderStatus).filter(s => s !== OrderStatus.Deleted).map(status => {
                 return new ChoicesFilterChoice(status, OrderStatusHelper.getName(status))
             }),
             defaultMode: ChoicesFilterMode.Or,

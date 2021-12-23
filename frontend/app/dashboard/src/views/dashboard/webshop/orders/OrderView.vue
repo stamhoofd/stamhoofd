@@ -45,12 +45,7 @@
                     Status
 
                     <template slot="right">
-                        <span v-if="patchedOrder.status == 'Created'" class="style-tag">Nieuw</span>
-                        <span v-else-if="order.status == 'Prepared'" class="style-tag secundary">Verwerkt</span>
-                        <span v-else-if="order.status == 'Collect'" class="style-tag tertiary">Ligt klaar</span>
-                        <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
-                        <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
-                        <span v-else>Onbekend</span>
+                        <span :class="'style-tag '+statusColor">{{ statusName }}</span>
                         <span v-if="hasWrite" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
@@ -288,7 +283,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, getPermissionLevelNumber, OrderData, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderData, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -402,6 +397,14 @@ export default class OrderView extends Mixins(NavigationMixin){
             webshopManager: this.webshopManager,
             component: this,
         })
+    }
+
+    get statusName() {
+        return this.patchedOrder ? OrderStatusHelper.getName(this.order.status) : ""
+    }
+
+    get statusColor() {
+        return this.patchedOrder ? OrderStatusHelper.getColor(this.order.status) : ""
     }
 
     showContextMenu(event) {
