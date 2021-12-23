@@ -89,6 +89,33 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }),
 
             new TableAction({
+                name: "Wijzig betaalstatus",
+                icon: "flag",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                childActions: [
+                    new TableAction({
+                        name: "Betaald",
+                        needsSelection: true,
+                        allowAutoSelectAll: false,
+                        handler: (orders: PrivateOrder[]) => {
+                            // todo
+                        }
+                    }),
+                    new TableAction({
+                        name: "Niet betaald",
+                        needsSelection: true,
+                        allowAutoSelectAll: false,
+                        handler: (orders: PrivateOrder[]) => {
+                            // todo
+                        }
+                    })
+                ]
+            }),
+
+            new TableAction({
                 name: "E-mailen",
                 icon: "email",
                 priority: 10,

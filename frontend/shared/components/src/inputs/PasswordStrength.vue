@@ -166,7 +166,7 @@ export default class PasswordStrength extends Vue {
         }
 
         &.warning {
-            background: $color-warning-primary;
+            background: $color-warning;
         }
 
         &.success {
@@ -187,7 +187,7 @@ export default class PasswordStrength extends Vue {
     }
 
     &.warning {
-        color: $color-warning-primary;
+        color: $color-warning;
     }
 
     &.success {

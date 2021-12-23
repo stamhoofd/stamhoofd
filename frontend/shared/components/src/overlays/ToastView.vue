@@ -171,7 +171,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
         color: $color-warning-dark;;
 
         .progress {
-            background: $color-warning-primary;
+            background: $color-warning;
         }
 
         .button {

@@ -588,6 +588,27 @@
     font-weight: $font-weight-bold;
     line-height: 21px;
     vertical-align: text-bottom;
+
+    &.warn {
+        color: $color-warning;
+    }
+
+    &.error {
+        color: $color-error;
+    }
+
+    &.success {
+        color: $color-success;
+    }
+
+
+    &.secundary {
+        color: $color-secundary;
+    }
+
+    &.tertiary {
+        color: $color-tertiary;
+    }
 }
 
 .style-strong {

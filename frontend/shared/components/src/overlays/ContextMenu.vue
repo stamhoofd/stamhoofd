@@ -245,6 +245,8 @@ export default class ContextMenu extends Vue {
         }
     }
 
+    hoverTimeout: NodeJS.Timeout | null = null
+
     onHoverItem(item: ContextMenuItem) {
         this.currentlyHoveredItem = item
 
@@ -253,6 +255,7 @@ export default class ContextMenu extends Vue {
         }
 
         // Update hover style
+        const wasHovered = item.isHovered
         item.isHovered = true
 
         if (this.disableHoverChildMenus) {
@@ -260,28 +263,39 @@ export default class ContextMenu extends Vue {
             return
         }
 
+        if (!wasHovered && this.hoverTimeout) {
+            clearTimeout(this.hoverTimeout)
+            this.hoverTimeout = null
+        }
+
         if (item.childContextMenu) {
-            if (!item.childContextMenu.componentInstance()) {
-                // TODO: Wait x ms hover delay, and check is the cursor is still hovered
+            if (!wasHovered) {
+                this.setChildMenu(null);
+                this.hoverTimeout = setTimeout(() => {
+                    if (item.isHovered && this.currentlyHoveredItem === item && !this.shouldIgnoreHover() && item.childContextMenu && !item.childContextMenu.componentInstance()) {
+                        // TODO: Wait x ms hover delay, and check is the cursor is still hovered
 
-                if (this.isPopped) {
-                    return
-                }
-                // Present child context menu + send close event to parent
-                const el = item.$el as HTMLElement;
-                const bounds = el.getBoundingClientRect()
+                        if (this.isPopped) {
+                            return
+                        }
+                        // Present child context menu + send close event to parent
+                        const el = item.$el as HTMLElement;
+                        const bounds = el.getBoundingClientRect()
 
-                // todo: calculate better position
-                item.childContextMenu.properties.x = bounds.right
-                item.childContextMenu.properties.y = bounds.top
-                item.childContextMenu.properties.xPlacement = "right"
-                item.childContextMenu.properties.yPlacement = "bottom"
-                item.childContextMenu.properties.parentMenu = this
-                item.childContextMenu.properties.wrapWidth = el.clientWidth;
-                
-                this.setChildMenu(item.childContextMenu);
-                item.present(item.childContextMenu.setDisplayStyle("overlay"));
+                        // todo: calculate better position
+                        item.childContextMenu.properties.x = bounds.right
+                        item.childContextMenu.properties.y = bounds.top
+                        item.childContextMenu.properties.xPlacement = "right"
+                        item.childContextMenu.properties.yPlacement = "bottom"
+                        item.childContextMenu.properties.parentMenu = this
+                        item.childContextMenu.properties.wrapWidth = el.clientWidth;
+                        
+                        this.setChildMenu(item.childContextMenu);
+                        item.present(item.childContextMenu.setDisplayStyle("overlay"));
+                    }
+                }, 150)
             }
+            
         } else {
             this.setChildMenu(null);
         }
