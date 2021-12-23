@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
+    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
         <button v-if="titleDescription" class="info-box selectable" type="button" @click="resetCycle">
             {{ titleDescription }}
 
@@ -26,9 +26,9 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, CenteredMessageButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -67,6 +67,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     waitingList!: boolean;
 
     allValues: MemberWithRegistrations[] = []
+
+    get organization() {
+        return OrganizationManager.organization
+    }
 
     mounted() {
         // Set url

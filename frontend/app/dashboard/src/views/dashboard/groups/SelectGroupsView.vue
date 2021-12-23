@@ -28,7 +28,7 @@
 
         <STToolbar>
             <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" @click="save">
+                <button class="button primary" type="button" @click="save">
                     Opslaan
                 </button>
             </LoadingButton>

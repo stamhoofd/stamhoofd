@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openOrder">
+    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openOrder">
         <template #empty>
             Er zijn nog geen bestellingen.
         </template>
@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Column, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
@@ -16,8 +16,6 @@ import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import MailView from "../../mail/MailView.vue";
-import SMSView from "../../sms/SMSView.vue";
 import { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from "./OrderActionBuilder";
 import OrderView from './OrderView.vue';
@@ -38,6 +36,10 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     get webshop() {
         return this.webshopManager.webshop
+    }
+
+    get organization() {
+        return OrganizationManager.organization
     }
 
     loading = false;

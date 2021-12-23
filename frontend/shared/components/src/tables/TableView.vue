@@ -126,7 +126,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field,
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, FilterEditor, LongPressDirective, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { Storage } from "@stamhoofd/networking";
-import { Filter, FilterDefinition, Version } from "@stamhoofd/structures";
+import { Filter, FilterDefinition, Organization, Version } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -235,6 +235,9 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     @Prop({ required: true})
     allColumns!: Column<Value, any>[]
+
+    @Prop({ required: true })
+    organization: Organization
 
     get columns() {
         return this.allColumns.filter(c => c.enabled).sort((a, b) => a.index - b.index)
@@ -964,7 +967,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             root: new ComponentWithProperties(FilterEditor, {
                 definitions: this.filterDefinitions,
                 selectedFilter: this.selectedFilter,
-                //organization: OrganizationManager.organization,
+                organization: this.organization,
                 setFilter: (filter: Filter<any>) => {
                     this.selectedFilter = filter
                 }
