@@ -399,7 +399,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                         }
                     }
 
-                    if (order.status === OrderStatus.Canceled) {
+                    if (order.status === OrderStatus.Canceled && order.status === OrderStatus.Deleted) {
                         this.canceledTicket()
                     } else if (ticket.scannedAt !== null) {
                         this.alreadyScannedTicket(ticket, order)

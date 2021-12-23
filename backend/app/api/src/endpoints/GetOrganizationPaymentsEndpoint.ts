@@ -78,16 +78,16 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
         })
     }
     
-    static async getPaymentsWithOrder(organizationId: string, withCanceled = false): Promise<PaymentWithOrder[]> {
+    static async getPaymentsWithOrder(organizationId: string, withCanceledOrDeleted = false): Promise<PaymentWithOrder[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Order.getDefaultSelect()} from \`${Payment.table}\`\n`;
         query += `JOIN \`${Order.table}\` ON \`${Order.table}\`.\`${Order.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\`\n`
         query += `where \`${Order.table}\`.\`organizationId\` = ?`
 
-        const params = [organizationId]
+        const params: any = [organizationId]
 
-        if (!withCanceled) {
-            query += ` AND \`${Order.table}\`.\`status\` != ?`
-            params.push(OrderStatus.Canceled)
+        if (!withCanceledOrDeleted) {
+            query += ` AND \`${Order.table}\`.\`status\` NOT IN (?)`
+            params.push([OrderStatus.Canceled, OrderStatus.Deleted])
         }
 
         const [results] = await Database.select(query, params)

@@ -204,7 +204,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
             await this.webshopManager.loadWebshopIfNeeded(false)
             await this.webshopManager.streamOrders((order: Order) => {
-                if (order.status !== OrderStatus.Canceled && !orderIds.has(order.id)) {
+                if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                     orderIds.add(order.id)
                     this.totalRevenue += order.data.totalPrice
                     this.totalOrders += 1

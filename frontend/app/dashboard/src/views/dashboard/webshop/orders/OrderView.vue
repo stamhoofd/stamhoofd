@@ -86,7 +86,7 @@
                     Betaalmethode
 
                     <template slot="right">
-                        {{ getName(patchedOrder.payment.method) }}
+                        <span>{{ getName(patchedOrder.payment.method) }}</span>
 
                         <span v-if="patchedOrder.payment.status == 'Succeeded'" class="icon green success" />
                         <span v-else class="icon clock" />

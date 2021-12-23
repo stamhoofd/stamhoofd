@@ -96,12 +96,12 @@ export class Order extends Model {
     }
 
     shouldIncludeStock() {
-        return this.status !== OrderStatus.Canceled
+        return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
     }
 
     async onPaymentFailed(this: Order) {
         if (this.shouldIncludeStock()) {
-            this.status = OrderStatus.Canceled
+            this.status = OrderStatus.Deleted
             await this.save()
 
             await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {

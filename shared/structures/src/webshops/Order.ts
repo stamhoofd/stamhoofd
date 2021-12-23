@@ -11,12 +11,21 @@ export enum OrderStatusV103 {
     Canceled = "Canceled",
 }
 
+export enum OrderStatusV137 {
+    Created = "Created",
+    Prepared = "Prepared",
+    Collect = "Collect",
+    Completed = "Completed",
+    Canceled = "Canceled",
+}
+
 export enum OrderStatus {
     Created = "Created",
     Prepared = "Prepared",
     Collect = "Collect",
     Completed = "Completed",
     Canceled = "Canceled",
+    Deleted = "Deleted",
 }
 
 export class OrderStatusHelper {
@@ -27,7 +36,19 @@ export class OrderStatusHelper {
             case OrderStatus.Collect: return "Ligt klaar"
             case OrderStatus.Completed: return "Voltooid"
             case OrderStatus.Canceled: return "Geannuleerd"
+            case OrderStatus.Deleted: return "Verwijderd"
         }
+    }
+
+    static getColor(status: OrderStatus): string {
+        switch (status) {
+            case OrderStatus.Completed: return "success"
+            case OrderStatus.Prepared: return "secundary"
+            case OrderStatus.Collect: return "tertiary"
+            case OrderStatus.Canceled: return "error"
+            case OrderStatus.Created: return "info"
+        }
+        return "error"
     }
 }
 
@@ -87,23 +108,37 @@ export class Order extends AutoEncoder {
     @field({ decoder: new EnumDecoder(OrderStatusV103), version: 47 })
     // Migrate newer order status .collect in case of older client
     @field({ 
-        decoder: new EnumDecoder(OrderStatus), 
+        decoder: new EnumDecoder(OrderStatusV137), 
         version: 104, 
-        upgrade: (old: OrderStatusV103): OrderStatus => {
-            return old as any as OrderStatus
+        upgrade: (old: OrderStatusV103): OrderStatusV137 => {
+            return old as any as OrderStatusV137
         }, 
-        downgrade: (n: OrderStatus): OrderStatusV103 => {
-            if (n === OrderStatus.Collect) {
+        downgrade: (n: OrderStatusV137): OrderStatusV103 => {
+            if (n === OrderStatusV137.Collect) {
                 // Map to other status
                 return OrderStatusV103.Prepared
             }
             return n as any as OrderStatusV103
         } 
     })
+    @field({ 
+        decoder: new EnumDecoder(OrderStatus), 
+        version: 138, 
+        upgrade: (old: OrderStatusV137): OrderStatus => {
+            return old as any as OrderStatus
+        }, 
+        downgrade: (n: OrderStatus): OrderStatusV137 => {
+            if (n === OrderStatus.Deleted) {
+                // Map to other status
+                return OrderStatusV137.Canceled
+            }
+            return n as any as OrderStatusV137
+        } 
+    })
     status: OrderStatus
 
     get shouldIncludeStock() {
-        return this.status !== OrderStatus.Canceled
+        return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
     }
 
     matchQuery(query: string): boolean {

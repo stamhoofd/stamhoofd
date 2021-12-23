@@ -76,6 +76,11 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 model.status = patch.status ?? model.status
 
+                // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
+                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order) 
+                // -> the user doesn't need to download the ticket again
+                // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
+
                 if (patch.data) {
                     model.data.patchOrPut(patch.data)
                 }

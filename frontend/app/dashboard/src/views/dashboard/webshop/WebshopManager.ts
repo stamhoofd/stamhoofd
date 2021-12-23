@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { getPermissionLevelNumber, PaginatedResponse, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
@@ -341,7 +341,11 @@ export class WebshopManager {
             const objectStore = transaction.objectStore("orders");
 
             for (const order of orders) {
-                objectStore.put(order.encode({ version: Version }));
+                if (order.status === OrderStatus.Deleted) {
+                    objectStore.delete(order.id);
+                } else {
+                    objectStore.put(order.encode({ version: Version }));
+                }
             }
         })
     }
@@ -710,7 +714,13 @@ export class WebshopManager {
                     this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error)
 
                     // Already send these new orders to our listeners, who want to know new incoming orders
-                    this.ordersEventBus.sendEvent("fetched", response.results).catch(console.error)
+                    this.ordersEventBus.sendEvent("fetched", response.results.filter(o => o.status !== OrderStatus.Deleted)).catch(console.error)
+                    
+                    // Let listeners know that some orders are deleted
+                    const deleted = response.results.filter(o => o.status === OrderStatus.Deleted)
+                    if (deleted.length > 0) {
+                        this.ordersEventBus.sendEvent("deleted", deleted).catch(console.error)
+                    }
                 }
                 
                 query = response.next

@@ -3,7 +3,7 @@
     <div v-else class="st-view order-view">
         <STNavigationBar :large="true" :sticky="false">
             <OrganizationLogo slot="left" :organization="organization" />
-            <button slot="right" class="text button" @click="pop">
+            <button slot="right" class="text button" type="button" @click="pop">
                 Webshop
             </button>
         </STNavigationBar>
@@ -20,6 +20,10 @@
 
                     <p v-if="success">
                         Bedankt voor jouw bestelling, je ontvangt via e-mail ook een bevestiging.
+                    </p>
+
+                    <p v-if="isCanceled" class="error-box">
+                        Deze bestelling werd geannuleerd
                     </p>
 
                     <template v-if="hasTickets">
@@ -78,7 +82,7 @@
                             Betaalmethode
 
                             <template slot="right">
-                                {{ getName(order.payment.method) }}
+                                <span>{{ getName(order.payment.method) }}</span>
 
                                 <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
                                 <span v-else class="icon help" />
@@ -102,11 +106,7 @@
                             Status
 
                             <template slot="right">
-                                <span v-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
-                                <span v-else-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
-                                <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
-                                <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
-                                <span v-else>Geplaatst</span>
+                                <span :class="'style-tag '+statusColor">{{ statusName }}</span>
                             </template>
                         </STListItem>
                                                 
@@ -212,11 +212,11 @@
 
                     <STToolbar v-if="(canShare && !hasTickets) || !isPaid">
                         <template slot="right">
-                            <button v-if="canShare && !hasTickets" class="button secundary" @click="share">
+                            <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
                                 <span class="icon share" />
                                 <span>Delen</span>
                             </button>
-                            <button v-if="!isPaid" class="button primary" @click="openTransferView">
+                            <button v-if="!isPaid" class="button primary" type="button" @click="openTransferView">
                                 <span class="icon card" />
                                 <span>Betaalinstructies</span>
                             </button>
@@ -242,7 +242,7 @@
                         Je hoeft de tickets niet af te drukken, je kan ze ook tonen op jouw smartphone. Sla ze eventueel op zodat je ze niet kwijt geraakt.
                     </p>
 
-                    <button v-if="!loadingTickets" class="button primary" @click="downloadAllTickets">
+                    <button v-if="!loadingTickets" class="button primary" type="button" @click="downloadAllTickets">
                         <span class="icon download" />
                         <span v-if="singleTicket">Download ticket</span>
                         <span v-else>Download alle tickets</span>
@@ -263,7 +263,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { CartItem, Order, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -337,12 +337,24 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.order && (this.order.payment === null || this.order.payment.status === PaymentStatus.Succeeded)
     }
 
+    get isCanceled() {
+        return !this.order || this.order.status === OrderStatus.Canceled || this.order.status === OrderStatus.Deleted
+    }
+
     get hasTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product)
+        return (this.order && this.order.status != OrderStatus.Canceled && this.order.status != OrderStatus.Deleted) && (this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product))
     }
 
     get hasSingleTicket() {
         return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
+    }
+
+    get statusName() {
+        return this.order ? OrderStatusHelper.getName(this.order.status) : ""
+    }
+
+    get statusColor() {
+        return this.order ? OrderStatusHelper.getColor(this.order.status) : ""
     }
 
     get publicTickets() {

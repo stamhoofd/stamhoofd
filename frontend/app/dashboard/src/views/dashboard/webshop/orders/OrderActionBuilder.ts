@@ -1,11 +1,9 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding"
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
-import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentStatus, PrivateOrder, PrivateWebshop } from "@stamhoofd/structures"
+import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentStatus, PrivateOrder } from "@stamhoofd/structures"
 
 import { WebshopManager } from "../WebshopManager"
-import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus"
 
 export class OrderActionBuilder {
     component: any
@@ -243,7 +241,7 @@ export class OrderActionBuilder {
                 // Delete them from the database
                 await this.webshopManager.deleteOrderFromDatabase(order.id)
             }
-            await WebshopOrdersEventBus.sendEvent("deleted", orders)
+            await this.webshopManager.ordersEventBus.sendEvent("deleted", orders)
             new Toast(orders.length == 1 ? "De bestelling is verwijderd" : "De bestellingen zijn verwijderd", "success").show()            
         } catch (e) {
             Toast.fromError(e).show()

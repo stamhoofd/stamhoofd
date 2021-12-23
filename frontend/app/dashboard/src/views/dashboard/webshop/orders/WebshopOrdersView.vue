@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts">
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
@@ -19,7 +20,6 @@ import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import { WebshopManager } from '../WebshopManager';
 import { OrderActionBuilder } from "./OrderActionBuilder";
 import OrderView from './OrderView.vue';
-import { WebshopOrdersEventBus } from "./WebshopOrdersEventBus";
 
 @Component({
     components: {
@@ -98,14 +98,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 format: (status) => OrderStatusHelper.getName(status),
                 compare: (a, b) => Object.values(OrderStatus).indexOf(a) - Object.values(OrderStatus).indexOf(b), 
                 getStyle: (status) => {
-                    switch (status) {
-                        case OrderStatus.Completed: return "success"
-                        case OrderStatus.Prepared: return "secundary"
-                        case OrderStatus.Collect: return "tertiary"
-                        case OrderStatus.Canceled: return "error"
-                        case OrderStatus.Created: return "info"
-                    }
-                    return "info"
+                    return OrderStatusHelper.getColor(status)
                 }, // todo: based on status
                 minimumWidth: 70,
                 recommendedWidth: 120
@@ -264,6 +257,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     created() {
         this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
+        this.webshopManager.ordersEventBus.addListener(this, "deleted", this.onDeleteOrder)
         this.reload();
         this.loadOrders().catch(console.error)
     }
@@ -274,10 +268,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         document.title = this.preview.meta.name+" - Bestellingen"
     }
 
-    activated() {
-        WebshopOrdersEventBus.addListener(this, "deleted", this.onDeleteOrder)
-    }
-
     get hasWrite() {
         const p = SessionManager.currentSession?.user?.permissions
         if (!p) {
@@ -286,8 +276,9 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
     }
 
-    deactivated() {
-        WebshopOrdersEventBus.removeListener(this)
+    beforeDestroy() {
+        this.webshopManager.ordersEventBus.removeListener(this)
+        Request.cancelAll(this)
     }
 
     onDeleteOrder(orders: PrivateOrder[]): Promise<void> {
@@ -322,7 +313,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             console.error(e)
         }
 
-        await this.refresh(true) 
+        await this.refresh(false) 
     }
 
     async refresh(reset = false) {
@@ -565,14 +556,21 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     openOrder(order: PrivateOrder) {
         const table = this.$refs.table as TableView<PrivateOrder> | undefined
-        this.present(new ComponentWithProperties(NavigationController, { 
+        const component = new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(OrderView, { 
                 initialOrder: order,
                 webshopManager: this.webshopManager,
                 getNextOrder: table?.getNext,
                 getPreviousOrder: table?.getPrevious,
             })
-        }).setDisplayStyle("popup"))
+        })
+
+        if ((this as any).$isMobile) {
+            this.show(component)
+        } else {
+            component.modalDisplayStyle = "popup";
+            this.present(component);
+        }
     }
 }
 </script>
