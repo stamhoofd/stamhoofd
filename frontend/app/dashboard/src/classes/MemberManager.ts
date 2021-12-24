@@ -262,28 +262,33 @@ export class MemberManagerStatic extends MemberManagerBase {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
 
+        // Update counts
+        for (const member of members) {
+            for (const registration of member.activeRegistrations) {
+                const group = session.organization?.groups.find(g => g.id === registration.groupId)
+                if (group) {
+                    if (group.settings.waitingListSize !== null && registration.waitingList) {
+                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - 1)
+                    }
+
+                    if (group.settings.registeredMembers !== null && !registration.waitingList) {
+                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - 1)
+                    }
+                }
+            }
+        }
+
         this.callListeners("deleted", null)
     }
 
     async deleteMember(member: MemberWithRegistrations) {
-        const patchArray = new PatchableArray()
-        patchArray.addDelete(member.id)
- 
-        const session = SessionManager.currentSession!
-
-        // Send the request
-        await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
-
-        this.callListeners("deleted", member)
+        await this.deleteMembers([member])
     }
 
     async unregisterMembers(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0, waitingList = false) {
         const patchArray = new PatchableArray()
+
+        const countMap: Map<string, number> = new Map()
 
         for (const member of members) {
             const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
@@ -292,12 +297,14 @@ export class MemberManagerStatic extends MemberManagerBase {
                 for (const registration of member.activeRegistrations) {
                     if (registration.waitingList === waitingList) {
                         patchMember.registrations.addDelete(registration.id)
+                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
                     }
                 }
             } else {
                 for (const registration of member.registrations) {
                     if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === waitingList) {
                         patchMember.registrations.addDelete(registration.id)
+                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
                     }
                 }
             }
@@ -316,11 +323,33 @@ export class MemberManagerStatic extends MemberManagerBase {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
 
+        // Update group counts only when succesfully adjusted
+        if (cycleOffset === 0) {
+            for (const [groupId, count] of countMap) {
+                const group = session.organization?.groups.find(g => g.id === groupId)
+                if (group) {
+                    if (group.settings.waitingListSize !== null && waitingList) {
+                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - count)
+                    }
+
+                    if (group.settings.registeredMembers !== null && !waitingList) {
+                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - count)
+                    }
+                }
+            }
+        }
+
         this.callListeners("deleted", null)
+    }
+
+    async unregisterMember(member: MemberWithRegistrations, group: Group | null = null, cycleOffset = 0, waitingList = false) {
+        await this.unregisterMembers([member], group, cycleOffset, waitingList)
     }
 
     async acceptFromWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
         const patchArray = new PatchableArray()
+
+        const countMap: Map<string, number> = new Map()
 
         for (const member of members) {
             const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
@@ -332,6 +361,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                             id: registration.id,
                             waitingList: false
                         }))
+                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
                     }
                 }
             } else {
@@ -341,6 +371,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                             id: registration.id,
                             waitingList: false
                         }))
+                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
                     }
                 }
             }
@@ -358,6 +389,22 @@ export class MemberManagerStatic extends MemberManagerBase {
             body: patchArray,
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
+
+        // Update group counts only when succesfully adjusted
+        if (cycleOffset === 0) {
+            for (const [groupId, count] of countMap) {
+                const group = session.organization?.groups.find(g => g.id === groupId)
+                if (group) {
+                    if (group.settings.waitingListSize !== null) {
+                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - count)
+                    }
+
+                    if (group.settings.registeredMembers !== null) {
+                        group.settings.registeredMembers += count
+                    }
+                }
+            }
+        }
 
         this.callListeners("deleted", null)
     }
@@ -417,6 +464,8 @@ export class MemberManagerStatic extends MemberManagerBase {
     async moveToWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
         const patchArray = new PatchableArray()
 
+        const countMap: Map<string, number> = new Map()
+
         for (const member of members) {
             const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
 
@@ -427,6 +476,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                             id: registration.id,
                             waitingList: true
                         }))
+                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
                     }
                 }
             } else {
@@ -436,6 +486,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                             id: registration.id,
                             waitingList: true
                         }))
+                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
                     }
                 }
             }
@@ -454,40 +505,23 @@ export class MemberManagerStatic extends MemberManagerBase {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
         })
 
-        this.callListeners("deleted", null)
-    }
+        // Update group counts only when succesfully adjusted
+        if (cycleOffset === 0) {
+            for (const [groupId, count] of countMap) {
+                const group = session.organization?.groups.find(g => g.id === groupId)
+                if (group) {
+                    if (group.settings.waitingListSize !== null) {
+                        group.settings.waitingListSize += count
+                    }
 
-    async unregisterMember(member: MemberWithRegistrations, group: Group | null = null, cycleOffset = 0, waitingList = false) {
-        const patchArray = new PatchableArray()
-        const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
-
-        if (group === null) {
-            for (const registration of member.activeRegistrations) {
-                if (registration.waitingList === waitingList) {
-                    patchMember.registrations.addDelete(registration.id)
-                }
-            }
-        } else {
-            for (const registration of member.registrations) {
-                if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === waitingList) {
-                    patchMember.registrations.addDelete(registration.id)
+                    if (group.settings.registeredMembers !== null) {
+                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - count)
+                    }
                 }
             }
         }
-
-        patchArray.addPatch(patchMember)
- 
-        const session = SessionManager.currentSession!
-
-        // Send the request
-        await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
-
-        this.callListeners("deleted", member)
+        
+        this.callListeners("deleted", null)
     }
 }
 
