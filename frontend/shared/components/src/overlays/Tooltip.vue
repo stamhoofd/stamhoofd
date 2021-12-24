@@ -93,7 +93,7 @@ export default class Tooltip extends Vue {
     border: $border-width-thin solid $color-border-shade;
     padding: 10px 15px;
     border-radius: $border-radius-modals;
-    color: $color-dark-original;
+    color: $color-dark;
 
     @media (max-width: 350px + 30px) {
         max-width: 100vw;
