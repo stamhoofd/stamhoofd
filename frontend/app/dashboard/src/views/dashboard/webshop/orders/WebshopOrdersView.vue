@@ -48,11 +48,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
 
     get estimatedRows() {
-        if (!this.loading) {
-            return 0
-        }
-
-        if (this.orders.length > 0) {
+        if (this.orders.length > 0 || !this.isLoadingOrders) {
             return this.orders.length
         }
        
@@ -140,7 +136,17 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             cols.push(new Column<PrivateOrder, string | undefined>({
                 name: hasDelivery && nonDeliveryCount == 0 ? "Adres" : "Locatie", 
                 enabled: true,
-                getValue: (order) => order.data.address?.shortString(), 
+                getValue: (order) => {
+                    if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                        return order.data.checkoutMethod.name
+                    }
+
+                    if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
+                        return order.data.checkoutMethod.name
+                    }
+
+                    return order.data.address?.shortString() ?? "Onbekend"
+                }, 
                 compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
                 getStyle: (loc) => loc === undefined ? "gray" : "",
                 minimumWidth: 100,

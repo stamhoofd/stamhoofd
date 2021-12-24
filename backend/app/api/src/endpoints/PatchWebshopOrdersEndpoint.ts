@@ -6,7 +6,7 @@ import { Payment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { getPermissionLevelNumber, PaymentStatus, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, OrderStatus, PaymentStatus, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -83,6 +83,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 if (patch.data) {
                     model.data.patchOrPut(patch.data)
+                }
+
+                if (model.status === OrderStatus.Deleted) {
+                    model.data.removePersonalData()
                 }
             }
 

@@ -3,6 +3,7 @@ import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDec
 import { Payment, PrivatePayment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';
 import { Checkout } from './Checkout';
+import { Customer } from './Customer';
 
 export enum OrderStatusV103 {
     Created = "Created",
@@ -79,6 +80,23 @@ export class OrderData extends Checkout {
             }
         }
         return false;
+    }
+
+    /**
+     * Delete the personal data associated with an order when you delete an order.
+     * We still need the other data (e.g. to inform other clients about a deleted order)
+     * And also to match online payments and handle refunds if needed
+     */
+    removePersonalData() {
+        // Clear customer data
+        this.customer = Customer.create({})
+
+        // Clear free inputs
+        this.fieldAnswers = []
+
+        for (const item of this.cart.items) {
+            item.fieldAnswers = []
+        }
     }
 }
 
