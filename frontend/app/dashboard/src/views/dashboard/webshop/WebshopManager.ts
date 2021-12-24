@@ -714,7 +714,9 @@ export class WebshopManager {
                     this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error)
 
                     // Already send these new orders to our listeners, who want to know new incoming orders
-                    this.ordersEventBus.sendEvent("fetched", response.results.filter(o => o.status !== OrderStatus.Deleted)).catch(console.error)
+                    const fetched = response.results.filter(o => o.status !== OrderStatus.Deleted)
+                    console.log(fetched)
+                    this.ordersEventBus.sendEvent("fetched", fetched).catch(console.error)
                     
                     // Let listeners know that some orders are deleted
                     const deleted = response.results.filter(o => o.status === OrderStatus.Deleted)

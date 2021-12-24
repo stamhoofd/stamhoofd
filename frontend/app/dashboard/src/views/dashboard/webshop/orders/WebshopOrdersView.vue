@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openOrder">
+    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="isLoadingOrders ? [] : orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openOrder">
         <template #empty>
             Er zijn nog geen bestellingen.
         </template>
@@ -52,7 +52,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             return this.orders.length
         }
        
-        // todo
         return 30
     }
 
@@ -243,27 +242,28 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
      * Insert or update an order
      */
     putOrder(order: PrivateOrder) {
-        for (const [index, _order] of this.orders.entries()) {
+        for (const _order of this.orders) {
             if (order.id === _order.id) {
-                // replace
-                this.orders.splice(index, 1, order)
+                // replace data without affecting reference
+                _order.set(order)
                 return
             }
         }
         this.orders.push(order)
     }
 
-    onNewOrders(orders: PrivateOrder[]) {
+    async onNewOrders(orders: PrivateOrder[]) {
         console.log("Received new orders from network")
         // Search for the orders and replace / add them
         for (const order of orders) {
             this.putOrder(order)
         }
+        return Promise.resolve()
     }
 
     created() {
         this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
-        this.webshopManager.ordersEventBus.addListener(this, "deleted", this.onDeleteOrder)
+        this.webshopManager.ordersEventBus.addListener(this, "deleted", this.onDeleteOrders.bind(this))
         this.reload();
         this.loadOrders().catch(console.error)
     }
@@ -283,11 +283,12 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     beforeDestroy() {
+        console.log("Before destroy")
         this.webshopManager.ordersEventBus.removeListener(this)
         Request.cancelAll(this)
     }
 
-    onDeleteOrder(orders: PrivateOrder[]): Promise<void> {
+    onDeleteOrders(orders: PrivateOrder[]): Promise<void> {
         // Delete these orders from the loaded orders instead of doing a full reload
         for (const order of orders) {
             const index = this.orders.findIndex(o => o.id === order.id)

@@ -218,13 +218,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     estimatedRows!: number | null
 
     @Prop({ required: true})
-    filterDefinitions!: FilterDefinition<Value, any, any>[]/* = [
-        new StringFilterDefinition({
-            id: "name",
-            name: "Name",
-            getValue: (value: Value) => value.name,
-        }),
-    ]*/
+    filterDefinitions!: FilterDefinition<Value, any, any>[]
 
     selectedFilter: Filter<Value> | null = null
     searchQuery = ""
