@@ -270,9 +270,9 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, getPermissionLevelNumber, OrderData, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderData, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { WebshopManager } from "../WebshopManager";
@@ -305,7 +305,6 @@ import { OrderActionBuilder } from "./OrderActionBuilder";
 })
 export default class OrderView extends Mixins(NavigationMixin){
     loading = false
-    loadingPayment = false
     errorBox: ErrorBox | null = null
 
     @Prop({ required: true })
@@ -333,6 +332,13 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     @Prop({ default: null })
     getPreviousOrder!: (order: PrivateOrder) => PrivateOrder | null;
+
+    @Watch("order.payment.status")
+    onChangePaymentStatus(n: string, old: string) {
+        if (n === PaymentStatus.Succeeded && old !== PaymentStatus.Succeeded) {
+            this.downloadNewTickets()
+        }
+    }
 
     get patchedOrder() {
         return this.order.patch(this.patchOrder)
@@ -535,27 +541,6 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     imageSrc(cartItem: CartItem) {
         return cartItem.product.images[0]?.getPathForSize(100, 100)
-    }
-
-    async markPaid(paid = true) {
-        if (this.loadingPayment) {
-            return;
-        }
-
-        try {
-            // Todo: use action builder
-            await new OrderActionBuilder({
-                component: this,
-                webshopManager: this.webshopManager,
-            }).markPaid([this.order], paid)
-
-            if (paid) {
-                this.downloadNewTickets()
-            }
-        } catch (e) {
-            Toast.fromError(e).show()
-        }
-        this.loadingPayment = false
     }
 
     saving = false
