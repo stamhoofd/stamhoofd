@@ -115,7 +115,7 @@ $dark-theme-color-background-interactive: $color-dark;
 // -------- Primary contrast  --------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-primary-constrast-original: $color-background;
+$color-primary-constrast-original: $color-background-original;
 $color-primary-contrast: var(--color-primary-contrast, $color-primary-constrast-original);
 
 // -----------------------------------------------------------------------------

@@ -346,7 +346,7 @@ export default class MailEditor extends Vue {
 
             &.ProseMirror-selectednode {
                 background: $color-primary;
-                color: white;
+                color: $color-primary-contrast;
             }
         }
     }

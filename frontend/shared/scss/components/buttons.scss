@@ -107,10 +107,8 @@
     }
 
     &.primary {
-        color: white;
-
+        color: $color-primary-contrast;
         background: $color-primary;
-    
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border

@@ -765,12 +765,12 @@ export default class ContextMenu extends Vue {
 
             &.hover {
                 background: $color-primary;
-                color: $color-background;
+                color: $color-primary-contrast;
             }
 
             &:active:not(.disable-active) {
                 background: $color-primary;
-                color: $color-background;
+                color: $color-primary-contrast;
             }
         }
     }

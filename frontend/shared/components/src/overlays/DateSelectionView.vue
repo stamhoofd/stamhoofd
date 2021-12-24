@@ -274,7 +274,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                 }
 
                 &.selected {
-                    color: white;
+                    color: $color-primary-contrast;
                     font-weight: bold;
 
                     &::after {
@@ -283,6 +283,8 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                     }
 
                     &:hover {
+                        color: $color-background;
+
                         &::after {
                             background: $color-dark;
                         }
