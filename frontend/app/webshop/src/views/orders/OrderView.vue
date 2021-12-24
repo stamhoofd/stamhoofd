@@ -105,9 +105,7 @@
                         <STListItem class="right-description">
                             Status
 
-                            <template slot="right">
-                                <span :class="'style-tag '+statusColor">{{ statusName }}</span>
-                            </template>
+                            <span slot="right" :class="'style-tag '+statusColor">{{ statusName }}</span>
                         </STListItem>
                                                 
                         <template v-if="order.data.checkoutMethod">

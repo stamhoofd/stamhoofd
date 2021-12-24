@@ -18,7 +18,7 @@ export class OrderActionBuilder {
     }
 
     getStatusActions() {
-        return Object.values(OrderStatus).map(status => {
+        return Object.values(OrderStatus).filter(s => s !== OrderStatus.Deleted).map(status => {
             return new TableAction({
                 name: OrderStatusHelper.getName(status),
                 needsSelection: true,
@@ -152,11 +152,17 @@ export class OrderActionBuilder {
                     original.set(order)
                 }
             }
-            new Toast("Status gewijzigd", "success").setHide(1000).show()
 
-            if (status == OrderStatus.Canceled) {
-                new Toast("Je moet zelf communiceren dat de bestelling werd geannuleerd", "warning yellow").setHide(10*1000).show()
+            if (status === OrderStatus.Deleted) {
+                new Toast(orders.length == 1 ? "Bestelling verwijderd" : "Bestellingen verwijderd", "success").setHide(1500).show()
+            } else {
+                new Toast("Status gewijzigd", "success").setHide(1500).show()
+
+                if (status == OrderStatus.Canceled) {
+                    new Toast("Je moet zelf communiceren dat de bestelling werd geannuleerd", "warning yellow").setHide(10*1000).show()
+                }
             }
+            
         } catch (e) {
             Toast.fromError(e).show()
         }
@@ -232,17 +238,11 @@ export class OrderActionBuilder {
         }
 
         try {
+            await this.markAs(orders, OrderStatus.Deleted)
             for (const order of orders) {
-                await SessionManager.currentSession!.authenticatedServer.request({
-                    method: "DELETE",
-                    path: "/webshop/"+this.webshopManager.preview.id+"/orders/"+order.id,
-                })
-
-                // Delete them from the database
                 await this.webshopManager.deleteOrderFromDatabase(order.id)
             }
             await this.webshopManager.ordersEventBus.sendEvent("deleted", orders)
-            new Toast(orders.length == 1 ? "De bestelling is verwijderd" : "De bestellingen zijn verwijderd", "success").show()            
         } catch (e) {
             Toast.fromError(e).show()
             return;
