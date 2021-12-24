@@ -266,13 +266,13 @@ export default class TicketBox extends Mixins(NavigationMixin){
         padding: 30px;
         text-align: center;
 
-        border-left: 2px solid $color-border-lighter;
+        border-left: $border-width solid $color-border;
 
         @media (max-width: 700px) {
             align-self: stretch;
             border-left: 0;
             padding: 20px;
-            border-top: 2px solid $color-border-lighter;
+            border-top: $border-width solid $color-border;
         }
 
         > img, .placeholder {
@@ -287,7 +287,7 @@ export default class TicketBox extends Mixins(NavigationMixin){
 
         > span {
             display: block;
-            color: $color-gray-1;
+            color: $color-gray-text;
             font-size: 10px;
             font-weight: bold;
         }

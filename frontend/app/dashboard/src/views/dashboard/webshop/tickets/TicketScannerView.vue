@@ -729,7 +729,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         line-height: 48px;
         text-align: center;
         display: inline-block;
-        color: $color-white;
+        color: $color-background;
         border-radius: 24px;
         transition: background-color 0.2s;
 

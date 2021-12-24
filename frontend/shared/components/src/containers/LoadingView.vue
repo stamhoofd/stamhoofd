@@ -32,7 +32,7 @@ export default class LoadingView extends Vue {
     top: 0;
     z-index: 12;
     opacity: 1;
-    background: var(--color-current-background, #{$color-white});
+    background: var(--color-current-background, #{$color-background});
 
     > .spinner-container {
         opacity: 1;

@@ -22,10 +22,10 @@
             
 
         th {
-            background: $color-white;
+            background: $color-background;
             position: sticky;
             top: 0;
-            border-bottom: $border-width solid $color-border-lighter;
+            border-bottom: $border-width solid $color-border;
             @extend .style-table-head;
             margin-top: 0px;
             padding: 10px;
@@ -48,7 +48,7 @@
                 content: "";
                 position: sticky;
                 top: 0;
-                background: $color-white;
+                background: $color-background;
                 padding-top: calc(var(--current-view-safe-area-top, 0px) + 10px);
             }
 

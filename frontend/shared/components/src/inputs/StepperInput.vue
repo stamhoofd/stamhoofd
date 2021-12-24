@@ -60,7 +60,7 @@ export default class StepperInput extends Vue {
 .stepper-input {
     display: inline-flex;
     flex-direction: row;
-    background: $color-white-shade;
+    background: $color-background-shade;
     border-radius: $border-radius;
     align-items: stretch;
     height: $input-height;

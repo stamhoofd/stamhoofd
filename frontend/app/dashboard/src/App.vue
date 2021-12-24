@@ -69,8 +69,8 @@ export default class App extends Vue {
         }
 
         try {
-            ColorHelper.setColor("#0053ff")
-            ColorHelper.setupDarkTheme()
+            // ColorHelper.setColor("#0053ff")
+            //ColorHelper.setupDarkTheme()
         } catch (e) {
             console.error("Color setup failed")
             console.error(e)

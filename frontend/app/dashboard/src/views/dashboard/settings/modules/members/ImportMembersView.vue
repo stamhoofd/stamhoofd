@@ -317,7 +317,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         box-sizing: border-box;
         padding: 30px 20px;
         border-radius: $border-radius;
-        background: $color-white-shade;
+        background: $color-background-shade;
         display: flex;
         width: 100%;
         flex-direction: row;     
@@ -333,7 +333,7 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
 
         &:active {
             transition: none;
-            background-color: $color-gray-3;
+            background-color: $color-background-shade-darker;
         }
 
         > .icon:first-child {

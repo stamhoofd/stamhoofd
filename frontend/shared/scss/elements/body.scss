@@ -24,8 +24,8 @@
 }
 
 body {
-    --color-current-background: #{$color-white};
-    --color-current-background-shade: #{$color-white-shade};
+    --color-current-background: #{$color-background};
+    --color-current-background-shade: #{$color-background-shade};
 
     background: $color-background;
     color: $color-dark;

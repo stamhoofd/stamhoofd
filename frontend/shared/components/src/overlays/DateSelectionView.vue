@@ -250,7 +250,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                     bottom: 0;
                     z-index: -1;
                     border-radius: $border-radius;
-                    background: $color-white;
+                    background: $color-background;
                     background: var(--color-current-background, #{$color-background});
                     transition: background-color 0.2s, transform 0.2s;
                     transform: scale(0.9, 0.9);

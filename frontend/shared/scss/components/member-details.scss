@@ -51,7 +51,7 @@
         position: absolute;
         right: 0;
         bottom: 0;
-        background: var(--color-white, white);
+        background: $color-background;
         border-radius: 40px;
         line-height: 24px;
         transform: translate(40%, 30%);
@@ -84,7 +84,7 @@
     li {
         list-style: none;
         padding: 0 10px;
-        background: $color-white-shade;
+        background: $color-background-shade;
         border-radius: $border-radius;
         margin: 5px 0;
         font-size: 14px;

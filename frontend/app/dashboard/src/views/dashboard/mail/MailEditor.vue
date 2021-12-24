@@ -268,7 +268,7 @@ export default class MailEditor extends Vue {
         border-radius: $border-radius;
         @extend .style-description;
         @extend .style-overlay-shadow;
-        color: $color-white;
+        color: $color-background;
 
         &.is-active {
             pointer-events: initial;
@@ -292,7 +292,7 @@ export default class MailEditor extends Vue {
         border-radius: $border-radius;
         @extend .style-description;
         @extend .style-overlay-shadow;
-        color: $color-white;
+        color: $color-background;
         transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-end;
         opacity: 0;
 

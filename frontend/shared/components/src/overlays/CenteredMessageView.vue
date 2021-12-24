@@ -144,7 +144,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     transform: translate(-50%, -50%);
     @extend .style-overlay-shadow;
     border-radius: $border-radius-modals;
-    background: $color-white;
+    background: $color-background;
     max-width: calc(100vw - 30px);
     width: 350px;
     padding: 30px;
@@ -195,6 +195,10 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     right: 0;
     background: rgba(0, 0, 0, 0.3);
     opacity: 1;
+
+    @media (prefers-color-scheme: dark) {
+        background: rgba(8, 8, 8, 0.7);
+    }
 
     &.show-enter-active {
         transition: opacity 0.30s;

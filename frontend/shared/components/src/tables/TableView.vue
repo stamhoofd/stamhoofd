@@ -1573,6 +1573,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     &[data-style="info"] > span {
                         background: $color-primary-background;
                         color: $color-primary;
+                        
+                        @media (prefers-color-scheme: dark) {
+                            color: $color-primary-dark;
+                        }
                     }
 
                     &[data-style="warn"] > span {
@@ -1632,7 +1636,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     font-size: 14px;
                     height: 14px;
                     line-height: 14px;
-                    color: $color-gray-1;
+                    color: $color-gray-text;
                     box-sizing: content-box;
 
                     padding-top: 6px;
@@ -1817,7 +1821,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         height: var(--table-row-height, 60px);
 
         .columns {
-            border-top: $border-width-thin solid $color-border-lighter;
+            border-top: $border-width-thin solid $color-border;
 
             > div {
                 white-space: nowrap;

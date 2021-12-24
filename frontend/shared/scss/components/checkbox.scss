@@ -97,7 +97,7 @@ $checkbox-border-radius: 5px;
             svg > path {
                 stroke-dasharray: 30;
                 stroke-dashoffset: 30;
-                stroke: $color-white;
+                stroke: $color-background;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
 
@@ -122,7 +122,7 @@ $checkbox-border-radius: 5px;
                 content: "";
                 height: 20px - $border-width * 2;
                 width: 20px - $border-width * 2;
-                background: $color-white;
+                background: $color-background;
                 border-radius: (20px - $border-width * 2)/2;
                 transition: transform 0.2s;
                 transform: scale(1, 1);
@@ -154,14 +154,14 @@ $checkbox-border-radius: 5px;
 
         > div:first-child {
             border: $border-width solid $color-border;
-            background: $color-white-shade;
+            background: $color-background-shade-darker;
 
             &:active {
                 transform: none;
             }
 
             svg > path {
-                stroke: $color-white-shade;
+                stroke: $color-background-shade;
             }
         }
     }

@@ -93,7 +93,7 @@ export default class InvalidWebshopView extends Mixins(NavigationMixin){
                         }
 
                         &, &:hover, &:link, &:active, &:visited {
-                            color: $color-gray-1;
+                            color: $color-gray-text;
                             font-weight: 600;
                             text-decoration: none;
                         }

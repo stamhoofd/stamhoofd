@@ -14,7 +14,7 @@
     box-shadow: 0px 2px 3px $color-box-shadow;
 }
 .style-overlay-shadow {
-    box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+    box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
 }
 
 .style-nowrap {
@@ -25,7 +25,7 @@
 
 .style-hr {
     height: $border-width-thin;
-    background: $color-border-lighter;
+    background: $color-border;
     border-radius: $border-width-thin/2;
     padding: 0;
     margin: 20px 0;
@@ -136,6 +136,11 @@
     text-transform: uppercase;
     font-weight: $font-weight-bold;
     color: $color-primary;
+
+    @media (prefers-color-scheme: dark) {
+        color: $color-primary-dark;
+    }
+
     background: $color-primary-background;
     padding: 7px 8px;
     border-radius: $border-radius;
@@ -567,7 +572,7 @@
     background: $color-error;
     border-radius: 30px;
     font-size: 13px;
-    color: $color-white;
+    color: $color-background;
     display: inline-block;
     text-align: center;
     padding: 0 4px;

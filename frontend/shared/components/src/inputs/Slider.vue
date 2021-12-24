@@ -328,7 +328,7 @@ $slider-height: 6px;
             top: 1px;
             bottom: 1px;
             right: 1px;
-            background: $color-white-interaction;
+            background: $color-background-interactive;
             border-radius: (25px - 2px)/2;
             position: absolute;
             content: "";

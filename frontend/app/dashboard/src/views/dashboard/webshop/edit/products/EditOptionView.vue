@@ -133,7 +133,7 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    hasChanges() {
+    get hasChanges() {
         return patchContainsChanges(this.patchOptionMenu, this.optionMenu, { version: Version })
     }
 

@@ -289,7 +289,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             box-sizing: border-box;
             padding: 30px 20px;
             border-radius: $border-radius;
-            background: $color-white-shade;
+            background: $color-background-shade;
             display: flex;
             flex-direction: row;     
             align-items: center;    

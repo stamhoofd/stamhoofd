@@ -142,7 +142,7 @@ export default class PasswordStrength extends Vue {
     width: 100%;
     height: 4px;
     border-radius: 2px;
-    background: $color-border-lighter;
+    background: $color-border;
     position: relative;
     overflow: hidden;
     margin-top: 5px !important;
@@ -158,7 +158,7 @@ export default class PasswordStrength extends Vue {
         transition: width 0.2s, background-color 0.2s;
 
         &.none {
-            background: $color-gray-1;
+            background: $color-border;
         }
 
         &.error {
@@ -179,7 +179,7 @@ export default class PasswordStrength extends Vue {
     font-weight: bold;
 
     &.none {
-        color: $color-gray-1;
+        color: $color-gray-text;
     }
 
     &.error {

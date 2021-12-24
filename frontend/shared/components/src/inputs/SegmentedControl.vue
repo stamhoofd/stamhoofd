@@ -147,7 +147,6 @@ $border-radius: 9px;
             }
 
             &::after {
-                //background: var(--color-white, white);
                 content: attr(data-text);
                 position: absolute;
                 left: 10px;
@@ -210,7 +209,7 @@ $border-radius: 9px;
             left: 0;
             top: 0;
             height: $segmented-control-inner-height;
-            background: $color-white-highlight;
+            background: $color-background-highlight;
             border-radius: $border-radius - $segmented-control-border-width;
             box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
         }

@@ -76,10 +76,10 @@ export class ColorHelper {
 
         const preferredS = s / 6
         const preferredH = h
-        document.documentElement.style.setProperty("--dark-theme-color-white", "hsl(" + h + "," + s + "%," + l + "%)");
+        document.documentElement.style.setProperty("--dark-theme-color-background", "hsl(" + h + "," + s + "%," + l + "%)");
 
         l = 0;
-        document.documentElement.style.setProperty("--dark-theme-color-white-shade", "hsl(" + h + "," + s + "%," + l + "%)");
+        document.documentElement.style.setProperty("--dark-theme-color-background-shade", "hsl(" + h + "," + s + "%," + l + "%)");
 
         // Do color manipulation here
         document.documentElement.style.setProperty("--dark-theme-color-dark", "white");
@@ -118,7 +118,7 @@ export class ColorHelper {
 
         l += 12;
         s = 0;
-        document.documentElement.style.setProperty("--dark-theme-color-white-highlight", "hsl(" + h + "," + s + "%," + l + "%)");
+        document.documentElement.style.setProperty("--dark-theme-color-background-highlight", "hsl(" + h + "," + s + "%," + l + "%)");
 
 
         // Do color manipulation here

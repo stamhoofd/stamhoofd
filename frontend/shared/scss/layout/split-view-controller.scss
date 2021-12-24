@@ -15,7 +15,7 @@
     &[data-has-detail="true"] {
         > .master {
             border-right: $border-width-thin solid $color-border;
-            background: $color-white-shade;
+            background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
             --color-current-background-shade: #{$color-background-shade-darker};
         }
@@ -36,12 +36,23 @@
         //--navigation-bar-horizontal-padding: 10px;
     }
 
+    @media (prefers-color-scheme: dark) {
+        &:after {
+            background: rgba(8, 8, 8, 0.7);
+        }
+    }
+
     & > div {
         touch-action: auto;
+        background: $color-background;
         border-radius: $border-radius-modals;
         overscroll-behavior: contain;
         height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px));
         box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+
+        @media (prefers-color-scheme: dark) {
+            box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        }
 
        > .scrollable-container {
             --vh: calc(min(max(50vh, 1000px), var(--saved-vh, 1vh) * 100 - 40px) / 100);
@@ -75,12 +86,23 @@
         touch-action: none;
     }
 
+    @media (prefers-color-scheme: dark) {
+        &:after {
+            background: rgba(8, 8, 8, 0.7);
+        }
+    }
+
     > div {
         touch-action: auto;
+        background: $color-background;
         border-radius: $border-radius-modals;
         width: 400px;
         overscroll-behavior: contain;
         box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+
+        @media (prefers-color-scheme: dark) {
+            box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        }
 
         max-height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px));
 
