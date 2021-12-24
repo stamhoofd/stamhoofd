@@ -204,7 +204,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
             padding: 0px 0px;
             padding-bottom: 7px;
             margin-bottom: 5px;
-            border-bottom: 2px solid var(--color-current-border, #{$color-border});
+            border-bottom: $border-width solid $color-border;
 
             > div {
                 flex-grow: 1;

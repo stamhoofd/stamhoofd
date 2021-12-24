@@ -70,21 +70,14 @@
                     </span>
                 </STListItem>
 
-                <STListItem v-for="a in patchedOrder.data.fieldAnswers" :key="a.field.id" class="right-description">
-                    {{ a.field.name }}
-
-                    <template slot="right">
-                        {{ a.answer || "/" }}
-                    </template>
-                </STListItem>
-                <STListItem v-if="patchedOrder.payment" class="right-description right-stack">
+                <STListItem v-if="patchedOrder.payment" v-long-press="(e) => (hasPaymentsWrite && patchedOrder.payment.method == 'Transfer' ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && patchedOrder.payment.method == 'Transfer'" @click="hasPaymentsWrite && patchedOrder.payment.method == 'Transfer' ? changePaymentStatus($event) : null">
                     Betaalmethode
 
                     <template slot="right">
                         <span>{{ getName(patchedOrder.payment.method) }}</span>
-
                         <span v-if="patchedOrder.payment.status == 'Succeeded'" class="icon green success" />
                         <span v-else class="icon clock" />
+                        <span v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
                 <STListItem v-if="patchedOrder.payment && patchedOrder.payment.method == 'Transfer'" class="right-description right-stack">
@@ -92,6 +85,14 @@
 
                     <template slot="right">
                         {{ patchedOrder.payment.transferDescription }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-for="a in patchedOrder.data.fieldAnswers" :key="a.field.id" class="right-description">
+                    {{ a.field.name }}
+
+                    <template slot="right">
+                        {{ a.answer || "/" }}
                     </template>
                 </STListItem>
                 <STListItem v-if="patchedOrder.validAt" class="right-description">
@@ -184,20 +185,6 @@
                     </template>
                 </STListItem>
             </STList>
-
-            <LoadingButton v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" :loading="loadingPayment">
-                <p>
-                    <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" type="button" class="button secundary" @click="markPaid(true)">
-                        <span class="icon success" />
-                        <span>Markeer als betaald</span>
-                    </button>
-
-                    <button v-if="patchedOrder.payment && patchedOrder.payment.status == 'Succeeded'" type="button" class="button secundary" @click="markPaid(false)">
-                        <span class="icon canceled" />
-                        <span>Markeer als niet betaald</span>
-                    </button>
-                </p>
-            </LoadingButton>
 
             <div v-if="patchedOrder.data.checkoutMethod && patchedOrder.data.checkoutMethod.description" class="container">
                 <hr>
@@ -430,6 +417,19 @@ export default class OrderView extends Mixins(NavigationMixin){
             xPlacement: "left",
             yPlacement: "bottom",
             actions: this.actionBuilder.getStatusActions(),
+            focused: [this.order]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    changePaymentStatus(event) {
+        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
+            actions: this.actionBuilder.getPaymentActions(),
             focused: [this.order]
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));

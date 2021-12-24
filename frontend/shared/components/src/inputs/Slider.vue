@@ -262,7 +262,7 @@ $slider-height: 6px;
         text-align: right;
         width: 50px;
         display: block;
-        border-bottom: 2px dashed $color-gray-2;
+        border-bottom: 2px dashed $color-border;
         padding: 5px 0;
 
         // Firefox fix

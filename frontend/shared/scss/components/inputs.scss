@@ -71,8 +71,10 @@
         -webkit-text-fill-color: $color-gray-1;
         opacity: 1; /* required on iOS */
 
-        &:hover {
-            border-color: $color-gray-2;
+        @media (hover: hover) {
+            &:hover {
+                border-color: $color-border;
+            }
         }
     }
 

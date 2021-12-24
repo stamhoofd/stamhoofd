@@ -109,7 +109,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
         outline: 0;
         height: $border-width;
         width: 100%;
-        background: var(--color-current-border, #{$color-border});
+        background: $color-border;
         border-radius: $border-width/2;
         margin: 0;
         position: absolute;

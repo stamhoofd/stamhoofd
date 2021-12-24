@@ -30,6 +30,27 @@ export class OrderActionBuilder {
         })
     }
 
+    getPaymentActions() {
+        return [
+            new TableAction({
+                name: "Betaald",
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (orders: PrivateOrder[]) => {
+                    await this.markPaid(orders, true)
+                }
+            }),
+            new TableAction({
+                name: "Niet betaald",
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (orders: PrivateOrder[]) => {
+                    await this.markPaid(orders, false)
+                }
+            })
+        ]
+    }
+
     getActions() {
         return [
             new TableAction({
@@ -51,24 +72,7 @@ export class OrderActionBuilder {
                 groupIndex: 2,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                childActions: [
-                    new TableAction({
-                        name: "Betaald",
-                        needsSelection: true,
-                        allowAutoSelectAll: false,
-                        handler: async (orders: PrivateOrder[]) => {
-                            await this.markPaid(orders, true)
-                        }
-                    }),
-                    new TableAction({
-                        name: "Niet betaald",
-                        needsSelection: true,
-                        allowAutoSelectAll: false,
-                        handler: async (orders: PrivateOrder[]) => {
-                            await this.markPaid(orders, false)
-                        }
-                    })
-                ]
+                childActions: this.getPaymentActions()
             }),
 
             new TableAction({

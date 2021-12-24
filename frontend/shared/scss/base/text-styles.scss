@@ -322,17 +322,6 @@
     color: $color-gray-5;
 }
 
-.style-caption {
-    font-size: 14px;
-    font-weight: $font-weight-semibold;
-    color: $color-gray-1;
-    text-transform: uppercase;
-
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
 .style-description-small {
     font-size: 14px;
     font-weight: $font-weight-default;

@@ -179,9 +179,9 @@
     }
 
     &.secundary {
-        color: $color-gray-4;
+        color: $color-dark;
         
-        background: $color-gray-3;
+        background: $color-gray-2;
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border

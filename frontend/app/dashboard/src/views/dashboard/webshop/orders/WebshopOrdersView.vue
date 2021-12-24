@@ -48,11 +48,11 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
 
     get estimatedRows() {
-        if (this.orders.length > 0 || !this.isLoadingOrders) {
-            return this.orders.length
+        if (this.isLoadingOrders) {
+            return this.orders.length == 0 ? 30 : this.orders.length
         }
        
-        return 30
+        return 0
     }
 
     get actions(): TableAction<PrivateOrder>[] {

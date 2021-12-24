@@ -103,7 +103,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
 .file-input-box {
     @extend .style-input;
     @extend .style-input-shadow;
-    border: $border-width solid $color-gray-2;
+    border: $border-width solid $color-border;
     color: $color-gray-5;
     background: var(--color-white, white);
     border-radius: $border-radius;
