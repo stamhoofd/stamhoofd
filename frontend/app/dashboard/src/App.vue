@@ -16,7 +16,6 @@ import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelp
 import { Country, EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
-import { FacebookHelper } from './classes/FacebookHelper';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 // kick off the polyfill!
@@ -77,7 +76,6 @@ export default class App extends Vue {
             console.error(e)
         }
         HistoryManager.activate();
-        FacebookHelper.init()
     }
 
     checkGlobalRoutes() {

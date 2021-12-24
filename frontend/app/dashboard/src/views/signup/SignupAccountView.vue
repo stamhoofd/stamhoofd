@@ -70,7 +70,7 @@
             </template>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click.prevent="goNext">
+                    <button class="button primary" type="button" @click.prevent="goNext">
                         Account aanmaken
                     </button>
                 </LoadingButton>
@@ -86,8 +86,6 @@ import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, Error
 import { LoginHelper, Session } from "@stamhoofd/networking"
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import { FacebookHelper } from '../../classes/FacebookHelper';
 
 @Component({
     components: {
@@ -205,7 +203,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             plausible('signupKeys');
             try {
 
-                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code, FacebookHelper.id)
+                const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code)
                 plausible('signup');
 
                 this.loading = false;

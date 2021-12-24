@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/browser';
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, FBId, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, MyUser, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
-import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem, KeychainedResponseDecoder, KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { Keychain } from './Keychain';
 import { NetworkManager } from './NetworkManager';
@@ -521,7 +520,7 @@ export class LoginHelper {
         let authSignKeys: { privateKey: string }
 
         if (typeof password === "string") {
-             try {
+            try {
                 authSignKeys = await this.createSignKeys(password, challengeResponse.keyConstants)
             } catch (e) {
                 console.error(e)
@@ -623,7 +622,7 @@ export class LoginHelper {
         return {}
     }
 
-    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null, fb: FBId | null = null): Promise<string> {
+    static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null): Promise<string> {
         const keys = await this.createKeys(password)
 
         const userKeyPair = await Sodium.generateEncryptionKeyPair();
@@ -657,8 +656,7 @@ export class LoginHelper {
                 keychainItems: [
                     item
                 ],
-                registerCode,
-                fb
+                registerCode
             }),
             decoder: SignupResponse as Decoder<SignupResponse>
         })

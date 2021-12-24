@@ -3,14 +3,9 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
 import { Email, EmailInterfaceBase } from '@stamhoofd/email';
-import { EmailVerificationCode, FacebookPixel, STCredit, UsedRegisterCode } from '@stamhoofd/models';
-import { KeychainItem } from '@stamhoofd/models';
-import { Organization } from "@stamhoofd/models";
-import { RegisterCode } from '@stamhoofd/models';
-import { User } from "@stamhoofd/models";
-import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResponse } from "@stamhoofd/structures";
+import { EmailVerificationCode, KeychainItem, Organization, RegisterCode, STCredit, UsedRegisterCode, User } from '@stamhoofd/models';
+import { CreateOrganization, PermissionLevel, Permissions, SignupResponse } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -163,7 +158,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.meta = request.body.organization.meta
         organization.address = request.body.organization.address
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? []
-        organization.serverMeta.fb = request.body.fb ?? undefined
 
         // call CompleteRegistration
         // content_name, currency, status, value
@@ -222,8 +216,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         for (const email of delayEmails) {
             Email.sendInternal(email, organization.i18n)
         }
-
-        FacebookPixel.trackSignUp(organization, user, request.request)
 
         return new Response(SignupResponse.create({
             token: code.token,

@@ -19,10 +19,10 @@
                 </a>
             </p>
 
-            <p v-if="!areSalesDisabled" class="info-box icon gift selectable with-button" @click="openReferrals(true)">
+            <p v-if="false && !areSalesDisabled" class="info-box icon gift selectable with-button" @click="openReferrals(true)">
                 Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
-                <button class="button text">
+                <button class="button text" type="button">
                     Meedoen
                 </button>
             </p>

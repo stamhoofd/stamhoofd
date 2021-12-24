@@ -2,7 +2,7 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType 
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
-import { FacebookPixel, MolliePayment, STCredit } from "@stamhoofd/models";
+import { MolliePayment, STCredit } from "@stamhoofd/models";
 import { Payment } from "@stamhoofd/models";
 import { Registration } from "@stamhoofd/models";
 import { STInvoice } from "@stamhoofd/models";
@@ -10,7 +10,7 @@ import { STPackage } from "@stamhoofd/models";
 import { STPendingInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { FBId, Organization as OrganizationStruct, OrganizationPatch,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version  } from "@stamhoofd/structures";
+import { Organization as OrganizationStruct, OrganizationPatch,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version  } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
@@ -36,9 +36,6 @@ class Body extends AutoEncoder {
 
     @field({ decoder: UserStruct.patchType(), optional: true })
     userPatch?: AutoEncoderPatchType<UserStruct>
-
-    @field({ decoder: FBId, optional: true, nullable: true })
-    fb?: FBId
 }
 
 export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -83,14 +80,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         // Apply patches if needed
         if (user.firstName && user.lastName) {
             user.organization.privateMeta.billingContact = user.firstName + " " + user.lastName
-        }
-
-        if (request.body.fb) {
-            if (!user.organization.serverMeta.fb) {
-                user.organization.serverMeta.fb = request.body.fb
-            } else {
-                user.organization.serverMeta.fb.merge(request.body.fb)
-            }
         }
 
         if (request.body.organizationPatch) {
@@ -362,11 +351,8 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         message: "Er ging iets mis bij het aanmaken van de betaling. Probeer later opnieuw of contacteer ons als het probleem zich blijft voordoen ("+request.$t("shared.emails.general")+")"
                     })
                 }
-            } else {
-                // Track
-                FacebookPixel.trackProForma(user.organization, user, invoice).catch(console.error)
             }
-
+            
             // We don't save the invoice, just return it
             return new Response(STInvoiceResponse.create({
                 paymentUrl: undefined,

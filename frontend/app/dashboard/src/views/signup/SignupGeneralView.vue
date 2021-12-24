@@ -112,13 +112,11 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
-import { AcquisitionType, Address, Country, FBId, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
+import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
 import { Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { FacebookHelper } from '../../classes/FacebookHelper';
 import SignupAccountView from './SignupAccountView.vue';
-
 
 @Component({
     components: {
@@ -214,9 +212,6 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                 localStorage.removeItem("savedRegisterCodeDate")
             })
         }
-
-        this.sendId().catch(console.error)
-
     }
 
     get isBelgium() {
@@ -246,22 +241,6 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
                     }
                 }
                 throw e
-            }
-        }
-    }
-
-    async sendId() {
-        // Check register code
-        const id = FacebookHelper.id
-        if (id) {
-            try {
-                await NetworkManager.server.request({
-                    method: "POST",
-                    path: "/organizations/open",
-                    body: id
-                })
-            } catch (e) {
-                console.error(e)
             }
         }
     }
