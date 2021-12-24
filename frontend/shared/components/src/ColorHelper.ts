@@ -29,13 +29,17 @@ export class ColorHelper {
     static primaryColor: string | null;
 
     static setColor(color: string, element?: HTMLElement) {
+        const { h, s, l } = hexToHSL(color.substring(1));
         element = element ?? document.documentElement
+        element.style.setProperty("--color-primary-hue", h+"deg");
+        element.style.setProperty("--color-primary-saturation", s+"%");
+
 
         this.primaryColor = color;
         element.style.setProperty("--color-primary", color)
 
+        /*
         // Do color manipulation here
-        let { h, s, l } = hexToHSL(color.substring(1));
         // Modify s + l
         l = 97
         s = 100
@@ -62,6 +66,7 @@ export class ColorHelper {
         s = 100
         const primaryLighter = "hsl(" + h + "," + s + "%," + l + "%)";
         element.style.setProperty("--color-primary-lighter", primaryLighter)
+        */
     }
 
     static setupDarkTheme() {

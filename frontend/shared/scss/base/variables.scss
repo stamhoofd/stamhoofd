@@ -34,6 +34,13 @@ $border-radius-modals: 15px;
   @return hsl(color.hue($color), color.saturation($color), calc(100% - #{color.lightness($color) + $offset}));;
 }
 
+@function changeHue($color, $hue) {
+  @return hsl(#{$hue}, color.saturation($color), #{color.lightness($color)});
+}
+
+@function changeHueInvert($color, $hue, $offset: 0) {
+  @return hsl(#{$hue}, color.saturation($color), calc(100% - #{color.lightness($color) + $offset}));;
+}
 
 // -----------------------------------------------------------------------------
 // -------- Colors -------------------------------------------------------------
@@ -51,26 +58,26 @@ $color-primary-background-original: #E5EEFF;
 $color-primary-dark-original: #001F61;
 $color-primary-gray-light-original: #9DB7EC;
 
-$color-primary: var(--color-primary, $color-primary-original);
-$color-primary-lighter: var(--color-primary-lighter, $color-primary-lighter-original);
-$color-primary-light: var(--color-primary-light, $color-primary-light-original);
-$color-primary-background: var(--color-primary-background, $color-primary-background-original);
-$color-primary-dark: var(--color-primary-dark, $color-primary-dark-original);
-$color-primary-gray-light: var(--color-primary-gray-light, $color-primary-gray-light-original);
-
-$dark-theme-color-primary-lighter: invertColor($color-primary-lighter-original);
-$dark-theme-color-primary-light: invertColor($color-primary-light-original);
-// The primary background color in dark mode should be adjusted a bit for contrast 
-// -> hence we don't invert the same color
-$dark-theme-color-primary-background: invertColor($color-primary-background-original, -3);
-$dark-theme-color-primary-dark: invertColor($color-primary-dark-original);
-$dark-theme-color-primary-gray-light: invertColor($color-primary-gray-light-original);
-
 // These hints will get replaced by JavaScript if needed
 // And will be used to generate some colors
-$color-primary-hue: color.hue($color-primary-original);
-$color-primary-saturation: color.saturation($color-primary-original);
+$color-primary-hue: var(--color-primary-hue, color.hue($color-primary-original));
+$color-primary-saturation: var(--color-primary-saturation, color.saturation($color-primary-original));
 
+
+$color-primary: var(--color-primary, $color-primary-original);
+$color-primary-lighter: var(--color-primary-lighter, #{changeHue($color-primary-lighter-original, $color-primary-hue)});
+$color-primary-light: var(--color-primary-light, #{changeHue($color-primary-light-original, $color-primary-hue)});
+$color-primary-background: var(--color-primary-background, #{changeHue($color-primary-background-original, $color-primary-hue)});
+$color-primary-dark: var(--color-primary-dark, #{changeHue($color-primary-dark-original, $color-primary-hue)});
+$color-primary-gray-light: var(--color-primary-gray-light, #{changeHue($color-primary-gray-light-original, $color-primary-hue)});
+
+$dark-theme-color-primary-lighter: changeHueInvert($color-primary-lighter-original, $color-primary-hue);
+$dark-theme-color-primary-light: changeHueInvert($color-primary-light-original, $color-primary-hue);
+// The primary background color in dark mode should be adjusted a bit for contrast 
+// -> hence we don't invert the same color
+$dark-theme-color-primary-background: changeHueInvert($color-primary-background-original, $color-primary-hue, -3);
+$dark-theme-color-primary-dark: changeHueInvert($color-primary-dark-original, $color-primary-hue);
+$dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-original, $color-primary-hue);
 
 // -----------------------------------------------------------------------------
 // -------- Dark (black) -------------------------------------------------------
