@@ -114,8 +114,38 @@ export class GroupSettings extends AutoEncoder {
     })
     registeredMembers: number | null = null
 
+    /**
+     * Amount of members that is reserved (e.g in payment process, or a member on the waiting list that is invited)
+     */
+    @field({ 
+        decoder: IntegerDecoder, 
+        nullable: true, 
+        version: 139
+    })
+    reservedMembers: number | null = null
+
+    /**
+     * Amount of members on the waiting list
+     */
+    @field({ 
+        decoder: IntegerDecoder, 
+        nullable: true, 
+        version: 139
+    })
+    waitingListSize: number | null = null
+
     get isFull() {
-        return this.maxMembers !== null && this.registeredMembers !== null && this.registeredMembers >= this.maxMembers
+        return this.maxMembers !== null && this.registeredMembers !== null && (this.registeredMembers + (this.reservedMembers ?? 0)) >= this.maxMembers
+    }
+
+    get availableMembers() {
+        if (this.maxMembers === null) {
+            return null
+        }
+        if (this.registeredMembers === null) {
+            return null
+        }
+        return this.maxMembers - this.registeredMembers - (this.reservedMembers ?? 0)
     }
 
     /**

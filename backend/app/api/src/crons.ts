@@ -461,8 +461,6 @@ async function checkReservedUntil() {
 }
 
 
-
-
 // Wait for midnight before checking billing
 let lastBillingCheck: Date | null = new Date()
 let lastBillingId = ""

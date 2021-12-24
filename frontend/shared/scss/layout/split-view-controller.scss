@@ -137,8 +137,16 @@
 .side-view {
     transform: translate3d(0, 0, 0);
 
+    @media (prefers-color-scheme: dark) {
+        background: rgba(8, 8, 8, 0.7);
+    }
+
     > div {
         max-width: 400px;
         overscroll-behavior: contain;
+
+        @media (prefers-color-scheme: dark) {
+            box-shadow: 0 0 0 1px $color-border;
+        }
     }
 }

@@ -162,23 +162,23 @@ export class RegisterCartValidator {
 
         // Check if reached maximum with cart
         // Check maximum
-        if (group.settings.maxMembers !== null && group.settings.registeredMembers !== null) {
+        const available = group.settings.availableMembers
+        if (available !== null) {
             const count = cart.filter(item => item.groupId === group.id && item.memberId !== member.id && !item.waitingList).length
-            const reachedMaximum = group.settings.maxMembers <= group.settings.registeredMembers + count
+            const reachedMaximum = count >= available
             if (reachedMaximum) {
                 // Check if we have a reserved spot
                 const now = new Date()
                 const reserved = member.registrations.find(r => r.groupId === group.id && r.reservedUntil && r.reservedUntil > now && !r.waitingList && r.registeredAt === null && r.cycle === group.cycle)
 
                 if (!reserved) {
-                    const free = group.settings.maxMembers - group.settings.registeredMembers
                     if (!group.settings.waitingListIfFull) {
                         // Maximum reached without waiting list -> closed
                         return {
                             closed: true,
                             waitingList: false,
                             message: "Volzet",
-                            description: free > 0 ? ("Er zijn nog maar " + free + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.") : ("Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.")
+                            description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.") : ("Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.")
                         }
                     }
 
@@ -196,7 +196,7 @@ export class RegisterCartValidator {
                         closed: false,
                         waitingList: true,
                         message: "Wachtlijst (volzet)",
-                        description: free > 0 ? ("Er zijn nog maar " + free + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."
+                        description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."
                     }
                 } else {
                     return {

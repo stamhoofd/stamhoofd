@@ -99,6 +99,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         if (this.group) {
+            if (this.waitingList) {
+                return this.group.settings.waitingListSize ?? 30
+            }
             return this.group.settings.registeredMembers ?? 30
         }
 
@@ -146,12 +149,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             }),
 
             new TableAction({
-                name: "Open wachtlijst",
+                name: "Open wachtlijst"+(this.group?.settings.waitingListSize ? (" ("+this.group.settings.waitingListSize+")") : ""),
                 icon: "clock",
                 priority: 0,
                 groupIndex: 2,
                 needsSelection: false,
-                enabled: !this.waitingList && !!this.group,
+                enabled: !this.waitingList && !!this.group && (this.group.settings.waitingListSize === null || this.group.settings.waitingListSize > 0),
                 handler: () => {
                     this.openWaitingList()
                 }

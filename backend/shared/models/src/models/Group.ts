@@ -149,18 +149,33 @@ export class Group extends Model {
         return struct
     }
 
-    async updateOccupancy() {
-        const query = `select count(*) as c from \`${Registration.table}\` where groupId = ? and cycle = ? and (((registeredAt is not null or reservedUntil >= ?) and waitingList = 0) OR (waitingList = 1 AND canRegister = 1))`
+    private static async getCount(where: string, params: any[]) {
+        const query = `select count(*) as c from \`${Registration.table}\` where ${where}`
         
-        const [results] = await Database.select(query, [this.id, this.cycle, new Date()])
+        const [results] = await Database.select(query, params)
         const count = results[0]['']['c'];
-
         if (Number.isInteger(count)) {
-            this.settings.registeredMembers = count
-        } else {
-            console.error("Unexpected result for occupancy", results)
-            this.settings.registeredMembers = null;
+            return count
         }
+        return null
+    }
+
+    async updateOccupancy() {
+        this.settings.registeredMembers = await Group.getCount(
+            "groupId = ? and cycle = ? and waitingList = 0 and registeredAt is not null",
+            [this.id, this.cycle]
+        )
+        //const query = `select count(*) as c from \`${Registration.table}\` where groupId = ? and cycle = ? and (((registeredAt is not null or reservedUntil >= ?) and waitingList = 0) OR (waitingList = 1 AND canRegister = 1))`
+
+        this.settings.reservedMembers = await Group.getCount(
+            "groupId = ? and cycle = ? and ((waitingList = 0 and registeredAt is null AND reservedUntil >= ?) OR (waitingList = 1 and canRegister = 1))",
+            [this.id, this.cycle, new Date()]
+        )
+
+        this.settings.waitingListSize = await Group.getCount(
+            "groupId = ? and cycle = ? and waitingList = 1",
+            [this.id, this.cycle, new Date()]
+        )
     }
 
     static async deleteUnreachable(organizationId: string, organizationMetaData: OrganizationMetaData) {
