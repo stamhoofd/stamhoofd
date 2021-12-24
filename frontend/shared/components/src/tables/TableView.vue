@@ -132,6 +132,7 @@ import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { Column } from "./Column";
 import ColumnSelectorContextMenu from "./ColumnSelectorContextMenu.vue";
+import ColumnSortingContextMenu from "./ColumnSortingContextMenu.vue";
 import { TableAction } from "./TableAction";
 import TableActionsContextMenu from "./TableActionsContextMenu.vue";
 
@@ -639,6 +640,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     getColumnContextMenu() {
         return new ComponentWithProperties(ColumnSelectorContextMenu, {
             columns: this.allColumns,
+        })
+    }
+
+    getSortingContextMenu() {
+        return new ComponentWithProperties(ColumnSortingContextMenu, {
+            columns: this.allColumns,
+            table: this
         })
     }
 
@@ -1177,6 +1185,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             groupIndex: -1,
             priority: 8,
             childMenu: this.getColumnContextMenu()
+        }))
+
+        actions.push(new TableAction({
+            name: "Sorteren",
+            groupIndex: -1,
+            priority: 7,
+            childMenu: this.getSortingContextMenu()
         }))
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
