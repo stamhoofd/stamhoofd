@@ -44,6 +44,10 @@ export class Sorter {
         return 1
     }
 
+    static byEnumValue<T>( a: string, b: string, enumObject: T) {
+        return Object.values(enumObject).indexOf(a) - Object.values(enumObject).indexOf(b)
+    }
+
     /**
      * Sort from large to small - DESC
      */

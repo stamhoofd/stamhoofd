@@ -97,7 +97,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 name: "Status", 
                 getValue: (order) => order.status,
                 format: (status) => OrderStatusHelper.getName(status),
-                compare: (a, b) => Object.values(OrderStatus).indexOf(a) - Object.values(OrderStatus).indexOf(b), 
+                compare: (a, b) => Sorter.byEnumValue(a, b, OrderStatus), 
                 getStyle: (status) => {
                     return OrderStatusHelper.getColor(status)
                 }, // todo: based on status
@@ -296,7 +296,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     beforeDestroy() {
-        console.log("Before destroy")
         this.webshopManager.ordersEventBus.removeListener(this)
         Request.cancelAll(this)
     }

@@ -208,6 +208,23 @@ export class MemberManagerStatic extends MemberManagerBase {
         return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
     }
 
+    async checkInaccurateMetaData(members) {
+        const inaccurate: MemberWithRegistrations[] = []
+        for (const member of members) {
+            const meta = member.getDetailsMeta()
+
+            // Check if meta is wrong
+            if (!member.details.isRecovered && (!meta || !meta.isAccurateFor(member.details))) {
+                console.warn("Found inaccurate meta data!")
+                inaccurate.push(member)
+            }
+        }
+        if (inaccurate.length > 0) {
+            // Patch member with new details
+            await MemberManager.patchMembersDetails(inaccurate, false)
+        }
+    }
+
     private chunkArray<T>(array: T[], size = 10): T[][] {
         const chunked: T[][] = []
 

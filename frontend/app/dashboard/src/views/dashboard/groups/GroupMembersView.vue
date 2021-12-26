@@ -538,29 +538,13 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return
         }
         this.checkingInaccurate = true
-        let toast: Toast | null = null
         try {
-            const inaccurate: MemberWithRegistrations[] = []
-            for (const member of this.allValues) {
-                const meta = member.getDetailsMeta()
-
-                // Check if meta is wrong
-                if (!member.details.isRecovered && (!meta || !meta.isAccurateFor(member.details))) {
-                    console.warn("Found inaccurate meta data!")
-                    inaccurate.push(member)
-                }
-            }
-            if (inaccurate.length > 0) {
-                toast = new Toast("Gegevens van leden updaten naar laatste versie...", "spinner").setHide(null).show()
-
-                // Patch member with new details
-                await MemberManager.patchMembersDetails(inaccurate, false)
-            }
+            // Patch member with new details
+            await MemberManager.checkInaccurateMetaData(this.allValues)
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()
         }
-        toast?.hide()
         this.checkingInaccurate = false
     }
 

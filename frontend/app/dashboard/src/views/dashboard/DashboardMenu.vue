@@ -404,7 +404,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "PaymentsView", webpackPrefetch: true */ './payments/PaymentsView.vue'), {}, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "TransferPaymentsView", webpackPrefetch: true */ './payments/TransferPaymentsView.vue'), {}, { instant: !animated })
                 })
             ]
         });
