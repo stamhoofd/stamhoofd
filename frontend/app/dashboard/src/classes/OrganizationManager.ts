@@ -11,7 +11,7 @@ export class OrganizationManagerStatic {
     }
 
     set organization(organization: Organization) {
-        SessionManager.currentSession!.setOrganization(organization)
+        SessionManager.currentSession!.updateOrganization(organization)
     }
 
     get user() {
@@ -37,7 +37,7 @@ export class OrganizationManagerStatic {
         // Keep admins + invites loaded
         const admins = this.organization.admins
         const invites = this.organization.invites
-        this.organization.set(response.data)
+        this.organization = response.data
 
         if (admins && !this.organization.admins && patch.admins) {
             this.organization.admins = patch.admins.applyTo(admins)
@@ -47,7 +47,8 @@ export class OrganizationManagerStatic {
             this.organization.invites = patch.invites.applyTo(invites)
         }
 
-        // Call handlers
+        // Call handlers: also update the stored organization in localstorage
+        // + handle other listeners
         SessionManager.currentSession!.callListeners("organization")
 
         // Save organization in localstorage

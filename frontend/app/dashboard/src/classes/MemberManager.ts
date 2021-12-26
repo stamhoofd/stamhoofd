@@ -263,19 +263,27 @@ export class MemberManagerStatic extends MemberManagerBase {
         })
 
         // Update counts
+        let updateOrganization = false
         for (const member of members) {
             for (const registration of member.activeRegistrations) {
                 const group = session.organization?.groups.find(g => g.id === registration.groupId)
                 if (group) {
                     if (group.settings.waitingListSize !== null && registration.waitingList) {
                         group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - 1)
+                        updateOrganization = true
                     }
 
                     if (group.settings.registeredMembers !== null && !registration.waitingList) {
                         group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - 1)
+                        updateOrganization = true
                     }
                 }
             }
+        }
+
+        if (updateOrganization) {
+            // Save organization to disk
+            SessionManager.currentSession?.callListeners("organization")
         }
 
         this.callListeners("deleted", null)
@@ -325,17 +333,25 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         // Update group counts only when succesfully adjusted
         if (cycleOffset === 0) {
+            let updateOrganization = false
             for (const [groupId, count] of countMap) {
                 const group = session.organization?.groups.find(g => g.id === groupId)
                 if (group) {
                     if (group.settings.waitingListSize !== null && waitingList) {
                         group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - count)
+                        updateOrganization = true
                     }
 
                     if (group.settings.registeredMembers !== null && !waitingList) {
                         group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - count)
+                        updateOrganization = true
                     }
                 }
+            }
+
+            if (updateOrganization) {
+                // Save organization to disk
+                SessionManager.currentSession?.callListeners("organization")
             }
         }
 
@@ -392,17 +408,25 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         // Update group counts only when succesfully adjusted
         if (cycleOffset === 0) {
+            let updateOrganization = false
             for (const [groupId, count] of countMap) {
                 const group = session.organization?.groups.find(g => g.id === groupId)
                 if (group) {
                     if (group.settings.waitingListSize !== null) {
                         group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - count)
+                        updateOrganization = true
                     }
 
                     if (group.settings.registeredMembers !== null) {
                         group.settings.registeredMembers += count
+                        updateOrganization = true
                     }
                 }
+            }
+
+            if (updateOrganization) {
+                // Save organization to disk
+                SessionManager.currentSession?.callListeners("organization")
             }
         }
 
@@ -507,17 +531,25 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         // Update group counts only when succesfully adjusted
         if (cycleOffset === 0) {
+            let updateOrganization = false
             for (const [groupId, count] of countMap) {
                 const group = session.organization?.groups.find(g => g.id === groupId)
                 if (group) {
                     if (group.settings.waitingListSize !== null) {
                         group.settings.waitingListSize += count
+                        updateOrganization = true
                     }
 
                     if (group.settings.registeredMembers !== null) {
                         group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - count)
+                        updateOrganization = true
                     }
                 }
+            }
+
+            if (updateOrganization) {
+                // Save organization to disk
+                SessionManager.currentSession?.callListeners("organization")
             }
         }
         

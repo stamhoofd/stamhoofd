@@ -44,7 +44,7 @@
             <template v-if="enableMemberModule">
                 <div v-for="category in tree.categories" :key="category.id" class="container">
                     <div>
-                        <button class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                        <button type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                             <span class="icon group" />
                             <span>{{ category.settings.name }}</span>
                             <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
@@ -55,6 +55,7 @@
                             :key="group.id"
                             class="menu-button button"
                             :class="{ selected: currentlySelected == 'group-'+group.id }"
+                            type="button"
                             @click="openGroup(group)"
                         >
                             <span>{{ group.settings.name }}</span>
@@ -66,6 +67,7 @@
                             :key="c.id"
                             class="menu-button button"
                             :class="{ selected: currentlySelected == 'category-'+c.id }"
+                            type="button"
                             @click="openCategory(c)"
                         >
                             <span>{{ c.settings.name }}</span>
@@ -76,10 +78,10 @@
             </template>
 
             <div v-if="enableWebshopModule && webshops.length > 0">
-                <button class="menu-button heading">
+                <button type="button" class="menu-button heading">
                     <span class="icon basket" />
                     <span>Webshops</span>
-                    <button v-if="canCreateWebshops" class="button text" @click="addWebshop()">
+                    <button v-if="canCreateWebshops" type="button" class="button text" @click="addWebshop()">
                         <span class="icon add" />
                         <span>Nieuw</span>
                     </button>
@@ -88,6 +90,7 @@
                 <button
                     v-for="webshop in webshops"
                     :key="webshop.id"
+                    type="button"
                     class="menu-button button"
                     :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
                     @click="openWebshop(webshop)"
@@ -99,30 +102,30 @@
             </div>
             <hr v-if="enableWebshopModule && webshops.length > 0">
 
-            <button v-if="enableWebshopModule && hasWebshopArchive" class="menu-button button heading" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
+            <button v-if="enableWebshopModule && hasWebshopArchive" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
                 <span class="icon archive" />
                 <span>Webshop archief</span>
             </button>
 
-            <button v-if="canManagePayments" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
+            <button v-if="canManagePayments" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
                 <span class="icon card" />
                 <span>Overschrijvingen</span>
             </button>
 
             <div v-if="fullAccess">
-                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
+                <button type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
                     <span class="icon settings" />
                     <span>Instellingen</span>
                 </button>
 
-                <button v-if="isSGV" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
+                <button v-if="isSGV" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
                     <span class="icon sync" />
                     <span>Groepsadministratie</span>
                 </button>
             </div>
             <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             <div class="">
-                <button class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(true)">
+                <button type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-account'}" @click="manageAccount(true)">
                     <span class="icon user" />
                     <span>Mijn account</span>
                 </button>
@@ -132,12 +135,12 @@
                     <span>Documentatie</span>
                 </a>
 
-                <button class="menu-button button heading" @click="gotoFeedback(false)">
+                <button type="button" class="menu-button button heading" @click="gotoFeedback(false)">
                     <span class="icon feedback" />
                     <span>Feedback</span>
                 </button>
 
-                <button class="menu-button button heading" @click="logout">
+                <button type="button" class="menu-button button heading" @click="logout">
                     <span class="icon logout" />
                     <span>Uitloggen</span>
                 </button>
@@ -265,15 +268,11 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         
         if (!didSet && !this.splitViewController?.shouldCollapse()) {
             UrlHelper.shared.clear()
-            //if (this.groups.length > 0) {
-            //this.openGroup(this.groups[0], false)
-            //} else {
             if (this.fullAccess) {
                 this.manageSettings(false).catch(console.error)
             } else {
                 this.manageAccount(false).catch(console.error)
             }
-            //}
         }
 
         document.title = "Stamhoofd - "+OrganizationManager.organization.name
@@ -485,9 +484,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get canCreateWebshops() {
-        console.log(SessionManager.currentSession!.user!.permissions!, this.organization.privateMeta?.roles)
         const result = SessionManager.currentSession!.user!.permissions!.canCreateWebshops(this.organization.privateMeta?.roles ?? [])
-        console.log(result)
         return result
     }
 

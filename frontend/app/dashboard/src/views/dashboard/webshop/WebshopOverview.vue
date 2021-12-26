@@ -177,11 +177,11 @@
                         <p class="style-description">
                             Sluit de webshop, zodat geen nieuwe bestellingen meer mogelijk zijn.
                         </p>
-                        <button slot="right" class="button secundary danger hide-smartphone">
+                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
                             <span class="icon power" />
                             <span>Sluiten</span>
                         </button>
-                        <button slot="right" class="button icon power only-smartphone" />
+                        <button slot="right" type="button" class="button icon power only-smartphone" />
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="openWebshop()">
@@ -191,11 +191,11 @@
                         <p class="style-description">
                             Open de webshop opnieuw.
                         </p>
-                        <button slot="right" class="button secundary green hide-smartphone">
+                        <button slot="right" type="button" class="button secundary green hide-smartphone">
                             <span class="icon power" />
                             <span>Openen</span>
                         </button>
-                        <button slot="right" class="button icon power only-smartphone" />
+                        <button slot="right" type="button" class="button icon power only-smartphone" />
                     </STListItem>
 
                     <STListItem v-if="!isOpen && !isArchive" :selectable="true" @click="archiveWebshop()">
@@ -205,11 +205,11 @@
                         <p class="style-description">
                             Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.
                         </p>
-                        <button slot="right" class="button secundary hide-smartphone">
+                        <button slot="right" type="button" class="button secundary hide-smartphone">
                             <span class="icon archive" />
                             <span>Archiveren</span>
                         </button>
-                        <button slot="right" class="button icon archive only-smartphone" />
+                        <button slot="right" type="button" class="button icon archive only-smartphone" />
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="closeWebshop()">
@@ -219,11 +219,11 @@
                         <p class="style-description">
                             Verplaats de webshop terug naar het hoofdmenu.
                         </p>
-                        <button slot="right" class="button secundary hide-smartphone">
+                        <button slot="right" type="button" class="button secundary hide-smartphone">
                             <span class="icon undo" />
                             <span>Terugzetten</span>
                         </button>
-                        <button slot="right" class="button icon undo only-smartphone" />
+                        <button slot="right" type="button" class="button icon undo only-smartphone" />
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
@@ -233,11 +233,11 @@
                         <p class="style-description">
                             Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.
                         </p>
-                        <button slot="right" class="button secundary danger hide-smartphone">
+                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
-                        <button slot="right" class="button icon trash only-smartphone" />
+                        <button slot="right" type="button" class="button icon trash only-smartphone" />
                     </STListItem>
                 </STList>
             </template>
