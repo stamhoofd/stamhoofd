@@ -84,7 +84,13 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 getValue: (order) => order.number ?? 0, 
                 compare: (a, b) => Sorter.byNumberValue(b, a),
                 minimumWidth: 50,
-                recommendedWidth: 50
+                recommendedWidth: 50,
+                getStyleForObject: (order, isPrefix) => {
+                    if (!isPrefix) {
+                        return ""
+                    }
+                    return OrderStatusHelper.getColor(order.status)
+                },
             }),
 
             new Column<PrivateOrder, OrderStatus>({
@@ -96,7 +102,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                     return OrderStatusHelper.getColor(status)
                 }, // todo: based on status
                 minimumWidth: 70,
-                recommendedWidth: 120
+                recommendedWidth: 120,
+                index: (this as any).$isMobile ? 1 : 0
             }),
 
             new Column<PrivateOrder, string>({
@@ -105,7 +112,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 100,
                 recommendedWidth: 400,
-                grow: true
+                grow: true,
+                index: (this as any).$isMobile ? 0 : 1
             }),
         ]
 
@@ -239,16 +247,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     })()
 
     get prefixColumn() {
-        return new Column<PrivateOrder, number>({
-            name: "#", // should equal existing column!
-            getValue: (order) => order.number ?? 0, 
-            compare: (a, b) => Sorter.byNumberValue(b, a),
-            minimumWidth: 50,
-            recommendedWidth: 50,
-            getStyleForObject: (order) => {
-                return OrderStatusHelper.getColor(order.status)
-            },
-        })
+        // Needs to stay the same reference to enable disable/enable functionality
+        return this.allColumns[0]
     }
 
     /**

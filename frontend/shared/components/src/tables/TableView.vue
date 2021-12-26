@@ -83,9 +83,9 @@
                                 <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
                             </label>
-                            <div v-if="showPrefix" class="prefix-column" :class="{ 'show-checkbox': showSelection }" :data-style="prefixColumn.getStyleFor(row.value)" :data-align="prefixColumn.align">
+                            <div v-if="showPrefix" class="prefix-column" :class="{ 'show-checkbox': showSelection }" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
                                 <span v-if="row.value" v-text="prefixColumn.getFormattedValue(row.value)" />
-                                <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage) + '%'}" />
+                                <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*100) + '%'}" />
                             </div>
                             <div class="columns" :class="{ 'show-checkbox': showSelection, 'show-prefix': showPrefix }">
                                 <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)" :data-align="column.align">
@@ -632,7 +632,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     saveColumnConfiguration() {
         const configuration = ColumnConfiguration.create({
-            columns: this.columns.map(c => EnabledColumnConfiguration.create({ id: c.id, width: c.width ?? 0 })),
+            // We also need to saveh  te prefix column
+            columns: [...this.columns, ...(this.showPrefix ? [this.prefixColumn!] : [])].map(c => EnabledColumnConfiguration.create({ id: c.id, width: c.width ?? 0 })),
             canCollapse: this.canCollapse,
             sortColumnId: this.sortBy.id,
             sortDirection: this.sortDirection,

@@ -40,8 +40,8 @@ export class Column<T, ValueType> {
      */
     private compare: ((a: ValueType, b: ValueType) => number) | null
 
-    private getStyleForObject: ((val: T) => string) | null = null
-    private getStyle: ((val: ValueType) => string) | null = null
+    private getStyleForObject: ((val: T, isPrefix: boolean) => string) | null = null
+    private getStyle: ((val: ValueType, isPrefix: boolean) => string) | null = null
 
     constructor(settings: {
         name: string, 
@@ -52,8 +52,8 @@ export class Column<T, ValueType> {
         format?: (val: ValueType, width: number) => string, 
         compareObjects?: (a: T, b: T) => number,
         compare?: (a: ValueType, b: ValueType) => number,
-        getStyle?: (val: ValueType) => string,
-        getStyleForObject?: (val: T) => string,
+        getStyle?: (val: ValueType, isPrefix: boolean) => string,
+        getStyleForObject?: (val: T, isPrefix: boolean) => string,
         grow?: boolean,
         minimumWidth?: number,
         recommendedWidth?: number,
@@ -92,11 +92,11 @@ export class Column<T, ValueType> {
         }
     }
 
-    getStyleFor(val: T | null) {
+    getStyleFor(val: T | null, isPrefix = false) {
         if (val === null) {
             return ""
         }
-        return this.getStyleForObject ? this.getStyleForObject(val) : this.getStyle ? this.getStyle(this.getValue(val)) : ""
+        return this.getStyleForObject ? this.getStyleForObject(val, isPrefix) : this.getStyle ? this.getStyle(this.getValue(val), isPrefix) : ""
     }
 
     get id() {

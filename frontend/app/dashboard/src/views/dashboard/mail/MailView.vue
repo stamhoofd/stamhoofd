@@ -621,7 +621,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                             ],
                             userId: existing?.userId ?? null,
                             type
-                    }))
+                        }))
                 }
             }
         }
@@ -689,7 +689,16 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     async getHTML(withButton: boolean | null = null) {
-        let base = (this.$refs.editor as any).editor!.getHTML();
+        const editor = (this.$refs.editor as any)?.editor
+        if (!editor) {
+            // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
+            return {
+                text: "",
+                html: ""
+            }
+        }
+
+        let base = editor.getHTML();
 
         // Append footer HTML if needed
         if ((withButton ?? this.addButton) && this.$refs.footerButton) {
