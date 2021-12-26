@@ -2,7 +2,7 @@
     <ContextMenu v-bind="$attrs">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="!hasSelection && action.needsSelection && (!table || !action.allowAutoSelectAll)" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
+            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="isDisabled(action)" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
                 {{ action.name }}
                 <span v-if="action.childMenu || action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
@@ -40,6 +40,10 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     actions: TableAction<any>[];
 
+    isDisabled(action: TableAction<any>) {
+        return !this.hasSelection && action.needsSelection && (!this.table || !action.allowAutoSelectAll)
+    }
+
     get hasSelection() {
         return this.focused.length > 0 || (this.table && this.table.cachedSelectionCount > 0);
     }
@@ -67,6 +71,11 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
                 }
                 if (!action.needsSelection && this.focused.length > 0) {
                     return false;
+                }
+
+                if ((this as any).$isMobile && this.isDisabled(action)) {
+                    // On mobile, hide disabled actions, because we don't have enough room
+                    return false
                 }
                 return true
             })
