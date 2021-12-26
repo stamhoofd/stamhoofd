@@ -647,13 +647,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
                 })
             )
 
-            const updated = await MemberManager.patchMembers(encryptedMembers, false)
-
-            const updatedData = updated.find(m => m.id === this.member.id)
-            if (updatedData) {
-                this.member.copyFrom(updatedData)
-            }
-            
+            await MemberManager.patchMembersAndSync([this.member], encryptedMembers, false)
         } catch (e) {
             // Reset
             console.error(e)

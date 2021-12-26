@@ -63,11 +63,7 @@ export default {
     },
 
     unbind(el, binding, vnode) {
-        console.log("Unbind tooltip");
         if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
-            // Todo: hide component again
-            console.log("Force hide in unbind")
-
             try {
                 el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
             } catch (e) {

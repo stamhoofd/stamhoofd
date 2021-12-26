@@ -30,7 +30,6 @@ export default {
     bind(el, binding, vnode) {
         // If we are on Android or Desktop, we can ignore this listener
         if (!vnode.context.$isIOS) {
-            console.info("Ignore long press listener")
             return
         }
 

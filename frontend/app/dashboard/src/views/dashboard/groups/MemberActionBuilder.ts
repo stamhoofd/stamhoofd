@@ -329,12 +329,12 @@ export class MemberActionBuilder {
                     registrations: registrationsPatch
                 }))
             }
-            await MemberManager.patchMembers(patches)
+            await MemberManager.patchMembersAndSync(members, patches, false)
         } catch (e) {
             console.error(e)
-            // todo
+            Toast.fromError(e).show()
+            return
         }
-        //this.reload()
 
         if (allow) {
             new Toast("Verstuur zeker nog zelf een uitnodigingsmail", "success green").show()

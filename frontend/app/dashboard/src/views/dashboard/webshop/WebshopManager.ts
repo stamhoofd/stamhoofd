@@ -181,13 +181,9 @@ export class WebshopManager {
      * Force fetch a new webshop, but prevent fetching multiple times at the same time
      */
     async loadWebshop(shouldRetry = true): Promise<PrivateWebshop> {
-        
         if (this.webshopFetchPromise) {
-            console.log("Return webshopFetchPromise")
             return this.webshopFetchPromise
         }
-
-        console.log("Init webshopFetchPromise")
         
         this.webshopFetchPromise = (async () => {
             // Try to get it from the database, also init a background fetch if it is too long ago
@@ -706,16 +702,13 @@ export class WebshopManager {
                 if (response.results.length > 0) {
                     // Save these orders to the local database
                     // Non-critical:
-                    this.storeOrders(response.results).then(() => {
-                        console.log("Saved orders to the local database")
-                    }).catch(console.error)
+                    this.storeOrders(response.results).catch(console.error)
 
                     // Non-critical:
                     this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error)
 
                     // Already send these new orders to our listeners, who want to know new incoming orders
                     const fetched = response.results.filter(o => o.status !== OrderStatus.Deleted)
-                    console.log(fetched)
                     this.ordersEventBus.sendEvent("fetched", fetched).catch(console.error)
                     
                     // Let listeners know that some orders are deleted
@@ -829,7 +822,6 @@ export class WebshopManager {
 
                         const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
                         resolve(ticket.patch(patch))
-                        console.log("Found patched ticket in database", patch)
                     }
                 } else {
                     resolve(ticket)
@@ -948,9 +940,7 @@ export class WebshopManager {
                 if (response.results.length > 0) {
                     // Save these orders to the local database
                     // Non-critical:
-                    this.storeTickets(response.results).then(() => {
-                        console.log("Saved tickets to the local database")
-                    }).catch(console.error)
+                    this.storeTickets(response.results).catch(console.error)
 
                     // Non-critical:
                     this.setLastFetchedTicket(response.results[response.results.length - 1]).catch(console.error)

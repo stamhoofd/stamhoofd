@@ -122,14 +122,14 @@ export class UrlHelper {
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
             if (I18nController.fixedCountry) {
                 HistoryManager.setUrl("/"+I18nController.shared.language+prefix+url)
-                console.log("Setting url to", "/"+I18nController.shared.language+prefix+url)
+                //console.log("Setting url to", "/"+I18nController.shared.language+prefix+url)
             } else {
                 HistoryManager.setUrl("/"+I18nController.shared.locale+prefix+url)
-                console.log("Setting url to", "/"+I18nController.shared.locale+prefix+url)
+                //console.log("Setting url to", "/"+I18nController.shared.locale+prefix+url)
             }
         } else {
             HistoryManager.setUrl(prefix+url)
-            console.log("Setting url to", prefix+url)
+            //console.log("Setting url to", prefix+url)
         }
         I18nController.shared?.updateMetaData()
     }

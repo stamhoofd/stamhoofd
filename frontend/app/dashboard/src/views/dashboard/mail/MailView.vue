@@ -2,7 +2,7 @@
     <div class="st-view mail-view">
         <STNavigationBar title="E-mail versturen">
             <template #right>
-                <button class="button icon close gray" @click="dismiss" />
+                <button class="button icon close gray" type="button" @click="dismiss" />
             </template>
         </STNavigationBar>
 
@@ -31,7 +31,7 @@
                     <input id="mail-subject" v-model="subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
                 </STInputBox>
                 <STInputBox v-if="emails.length > 0" title="Versturen vanaf">
-                    <button v-if="fullAccess" slot="right" class="button text" @click="manageEmails">
+                    <button v-if="fullAccess" slot="right" class="button text" type="button" @click="manageEmails">
                         <span class="icon settings" />
                         <span>Wijzigen</span>
                     </button>
@@ -79,7 +79,7 @@
 
                             <template #right>
                                 <span>{{ file.size }}</span>
-                                <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
+                                <span><button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" /></span>
                             </template>
                         </STListItem>
                     </STList>

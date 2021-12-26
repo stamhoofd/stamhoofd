@@ -163,14 +163,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
 
         if (encryptedMembers.changes.length > 0) {
-            const updated = await this.patchMembers(encryptedMembers)
-
-            for (const member of members) {
-                const updatedData = updated.find(m => m.id === member.id)
-                if (updatedData) {
-                    member.copyFrom(updatedData)
-                }
-            }
+            const updated = await this.patchMembersAndSync(members, encryptedMembers)
         }
     }   
 
@@ -230,37 +223,48 @@ export class MemberManagerStatic extends MemberManagerBase {
         const chunked = this.chunkArray(members, 10)
 
         for (const group of chunked) {
-            await this.patchMembers(await this.getEncryptedMembersPatch(group), shouldRetry)
+            await this.patchMembersAndSync(group, await this.getEncryptedMembersPatch(group), shouldRetry)
         }
     }
 
-    async patchMembers(members: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {
+    async patchMembers(patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
             method: "PATCH",
             path: "/organization/members",
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
-            body: members,
+            body: patch,
             shouldRetry
         })
         return await this.decryptMembersWithRegistrations(response.data)
     }
 
+    /**
+     * Patch members and update the data of members instead of creating new instances
+     */
+    async patchMembersAndSync(members: MemberWithRegistrations[], patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {
+        const updated = await this.patchMembers(patch, shouldRetry)
+
+        for (const member of members) {
+            const i = updated.findIndex(m => m.id === member.id)
+            if (i !== -1) {
+                const updatedData = updated[i]
+                member.set(updatedData)
+                updated[i] = member
+            }
+        }
+        return updated
+    }
+
     async deleteMembers(members: MemberWithRegistrations[]) {
-        const patchArray = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
         for (const member of members) (
             patchArray.addDelete(member.id)
         )
  
         const session = SessionManager.currentSession!
 
-        // Send the request
-        await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
+        await this.patchMembersAndSync(members, patchArray, false)
 
         // Update counts
         let updateOrganization = false
@@ -294,7 +298,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async unregisterMembers(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0, waitingList = false) {
-        const patchArray = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
 
         const countMap: Map<string, number> = new Map()
 
@@ -322,14 +326,7 @@ export class MemberManagerStatic extends MemberManagerBase {
    
  
         const session = SessionManager.currentSession!
-
-        // Send the request
-        await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
+        await this.patchMembersAndSync(members, patchArray, false)
 
         // Update group counts only when succesfully adjusted
         if (cycleOffset === 0) {
@@ -363,7 +360,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async acceptFromWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
-        const patchArray = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
 
         const countMap: Map<string, number> = new Map()
 
@@ -398,13 +395,7 @@ export class MemberManagerStatic extends MemberManagerBase {
  
         const session = SessionManager.currentSession!
 
-        // Send the request
-        await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
+        await this.patchMembersAndSync(members, patchArray, false)
 
         // Update group counts only when succesfully adjusted
         if (cycleOffset === 0) {
@@ -486,7 +477,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async moveToWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
-        const patchArray = new PatchableArray()
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
 
         const countMap: Map<string, number> = new Map()
 
@@ -520,14 +511,7 @@ export class MemberManagerStatic extends MemberManagerBase {
    
  
         const session = SessionManager.currentSession!
-
-        // Send the request
-        await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patchArray,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
+        await this.patchMembersAndSync(members, patchArray, false)
 
         // Update group counts only when succesfully adjusted
         if (cycleOffset === 0) {

@@ -51,14 +51,14 @@
                 </div>
             </div>
 
-            <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns }">
+            <div ref="table" class="table-with-columns" :class="{ wrap: wrapColumns, 'show-checkbox': showSelection, 'show-prefix': showPrefix }">
                 <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
                     <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
                             <Checkbox :checked="cachedAllSelected" @change="setSelectAll($event)" />
                         </div>
 
-                        <div class="columns" :class="{ 'show-checkbox': showSelection }">
+                        <div class="columns">
                             <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}" :data-align="column.align">
                                 <button type="button" @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
                                     <span>{{ column.name }}</span>
@@ -83,11 +83,11 @@
                                 <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
                             </label>
-                            <div v-if="showPrefix" class="prefix-column" :class="{ 'show-checkbox': showSelection }" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
+                            <div v-if="showPrefix" class="prefix-column" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
                                 <span v-if="row.value" v-text="prefixColumn.getFormattedValue(row.value)" />
                                 <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*100) + '%'}" />
                             </div>
-                            <div class="columns" :class="{ 'show-checkbox': showSelection, 'show-prefix': showPrefix }">
+                            <div class="columns">
                                 <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)" :data-align="column.align">
                                     <span v-if="row.value" v-text="column.getFormattedValue(row.value)" />
                                     <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 200, column.recommendedWidth)-30))+'px'}" />
@@ -523,7 +523,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     mounted() {
-        console.info((TableView as any).options.props)
         this.loadColumnConfiguration().catch(console.error)
         this.getScrollElement(this.$refs["table"] as HTMLElement).addEventListener("scroll", this.onScroll, { passive: true })
 
@@ -592,8 +591,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                         this.sortDirection = decoded.sortDirection ?? SortDirection.Ascending
                     }
                 }
-
-                console.info("Loaded existing column configuration")
 
                 this.updateRowHeight()
                 this.updateVisibleRows();
@@ -793,7 +790,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             let columns = affectedColumns // use same type, and don't allocate a new array because we'll override it shortly
 
-            console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
+            //console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
 
             const updateColumns = () => {
                 columns = affectedColumns.filter(c => columnPriorities[columnPriorityIndex](c))
@@ -805,8 +802,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     columnPriorityIndex++
                     
                     updateColumns()
-                    console.log("Moving to columnPriorityIndex", columnPriorityIndex)
-                    console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
+                    //console.log("Moving to columnPriorityIndex", columnPriorityIndex)
+                    //console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
 
                     // Check loop conditions again, and if needed, jump to the next priority or start distributing
                     continue
@@ -820,7 +817,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     change = Math.sign(distributeWidth)
                 }
 
-                console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
+                //console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
                 
                 // We'll make sure we never grow or shrink more than the distribute width
 
@@ -857,7 +854,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
                     const absorbed = col.width - start;
                     distributeWidth -= absorbed;
-                    console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at ", col.width)
+                    //console.log("Column", col.name, "absorbed", absorbed, "of", change, "and is now at ", col.width)
                     col.renderWidth = Math.floor(col.width);
                 }
 
@@ -865,7 +862,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 updateColumns()
             }
 
-            console.log("Done distributing with distributeWidth left: ", distributeWidth)
+            //console.log("Done distributing with distributeWidth left: ", distributeWidth)
         } else {
             // shrink or grow all following columns, until the recommended width is reached (when shrinking) and jump to the next one
 
@@ -1000,7 +997,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     toggleSort(column: Column<any, any>) {
         if (this.isColumnDragActive) {
-            console.log("Ignored sort toggle due to drag")
+            //console.log("Ignored sort toggle due to drag")
             return
         }
         if (this.sortBy === column) {
@@ -1223,7 +1220,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     @Watch("sortedValues", { deep: false })
     onUpdateValues() {
-        console.info("Sorted values has changed")
+        // console.info("Sorted values has changed")
 
         for (const visibleRow of this.visibleRows) {
             // has this row changed and should it now display a different value? -> clear it and mark it for reuse
@@ -1280,7 +1277,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         // innerHeight is a fix for animations, causing wrong initial bouding client rect
         if (!this.cachedTableYPosition || this.cachedTableYPosition > window.innerHeight) {
-            console.log("Expensive calculation")
             const tableBody = this.$refs["tableBody"] as HTMLElement
             const rect = tableBody.getBoundingClientRect();
 
@@ -1609,9 +1605,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
             @extend .column-style;
 
-            &.show-checkbox {
-                transform: translateX(var(--selection-column-width, 50px));
-            }
+            
         }
 
         .columns {
@@ -1621,19 +1615,37 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             transform: translateX(0);
             transition: transform 0.2s;
 
-            &.show-prefix {
+           
+        }
+    }
+
+    &.show-prefix {
+        .table-row, .table-head {
+            .columns {
                 width: calc(100% - 50px);
                 transform: translateX(50px);
             }
+        }
+    }
 
-            &.show-checkbox {
+    &.show-checkbox {
+        .table-row, .table-head {
+            .prefix-column {
+                transform: translateX(var(--selection-column-width, 50px));
+            }
+
+            .columns {
                 width: calc(100% - var(--selection-column-width, 50px));
                 transform: translateX(var(--selection-column-width, 50px));
+            }
+        }
+    }
 
-                &.show-prefix {
-                    width: calc(100% - 50px - var(--selection-column-width, 50px));
-                    transform: translateX(calc(50px + var(--selection-column-width, 50px)));
-                }
+    &.show-checkbox.show-prefix {
+        .table-row, .table-head {
+            .columns {
+                width: calc(100% - 50px - var(--selection-column-width, 50px));
+                transform: translateX(calc(50px + var(--selection-column-width, 50px)));
             }
         }
     }
