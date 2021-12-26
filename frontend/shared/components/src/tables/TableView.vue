@@ -83,10 +83,14 @@
                                 <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
                             </label>
-                            <div class="columns" :class="{ 'show-checkbox': showSelection }">
+                            <div v-if="showPrefix" class="prefix-column" :class="{ 'show-checkbox': showSelection }" :data-style="prefixColumn.getStyleFor(row.value)" :data-align="prefixColumn.align">
+                                <span v-if="row.value" v-text="prefixColumn.getFormattedValue(row.value)" />
+                                <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage) + '%'}" />
+                            </div>
+                            <div class="columns" :class="{ 'show-checkbox': showSelection, 'show-prefix': showPrefix }">
                                 <div v-for="column of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order' }" :data-style="column.getStyleFor(row.value)" :data-align="column.align">
                                     <span v-if="row.value" v-text="column.getFormattedValue(row.value)" />
-                                    <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 500, column.recommendedWidth)-30))+'px'}" />
+                                    <span v-else class="placeholder-skeleton" :style="{ width: Math.floor(row.skeletonPercentage*(Math.min(!wrapColumns ? column.width : 200, column.recommendedWidth)-30))+'px'}" />
                                 </div>
                             </div>
                         </div>
@@ -234,8 +238,18 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     @Prop({ required: true })
     organization: Organization
 
+    /**
+     * Prefix column in wrapped state
+     */
+    @Prop({ required: false, default: null })
+    prefixColumn!: Column<Value, any> | null
+
+    get showPrefix() {
+        return this.prefixColumn !== null && this.wrapColumns && this.prefixColumn.enabled
+    }
+
     get columns() {
-        return this.allColumns.filter(c => c.enabled).sort((a, b) => a.index - b.index)
+        return this.allColumns.filter(c => c.enabled && (!this.showPrefix || c.id !== this.prefixColumn?.id)).sort((a, b) => a.index - b.index)
     }
 
     get hiddenColumns() {
@@ -1443,6 +1457,70 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     font-size: 16px;
 }
 
+.column-style {
+    &[data-style="gray"] {
+        color: $color-gray-5;
+    }
+
+    &[data-style="success"], &[data-style="error"], &[data-style="info"], &[data-style="warn"], &[data-style="secundary"], &[data-style="tertiary"] {
+        > span {
+            display: inline-block;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: $font-weight-bold;
+            padding: 7px 8px;
+            border-radius: $border-radius;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+    }
+
+    &[data-style="success"] > span {
+        background: $color-success-background;
+        color: $color-success-dark;
+    }
+
+    &[data-style="error"] > span {
+        background: $color-error-background;
+        color: $color-error-dark;
+    }
+
+    &[data-style="info"] > span {
+        background: $color-primary-background;
+        color: $color-primary;
+        
+        @media (prefers-color-scheme: dark) {
+            color: $color-primary-dark;
+        }
+    }
+
+    &[data-style="warn"] > span {
+        color: $color-warning-dark;
+        background: $color-warning-background;
+    }
+
+    &[data-style="secundary"] > span {
+        color: $color-secundary-dark;
+        background: $color-secundary-background;
+    }
+
+    &[data-style="tertiary"] > span {
+        color: $color-tertiary-dark;
+        background: $color-tertiary-background;
+    }
+
+    &[data-align="right"] {
+        text-align: right;
+        margin-left: auto;
+        padding-right: 20px;
+    }
+}
+
 .table-with-columns {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
@@ -1514,6 +1592,27 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             width: var(--selection-column-width, 50px);
         }
 
+        .prefix-column {
+            position: absolute;
+            box-sizing: border-box;
+            height: 100%;
+            top: 0;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding-top: 15px;
+            width: 50px;
+
+            transition: transform 0.2s;
+
+            @extend .column-style;
+
+            &.show-checkbox {
+                transform: translateX(var(--selection-column-width, 50px));
+            }
+        }
+
         .columns {
             box-sizing: border-box;
             width: 100%;
@@ -1521,9 +1620,19 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             transform: translateX(0);
             transition: transform 0.2s;
 
+            &.show-prefix {
+                width: calc(100% - 50px);
+                transform: translateX(50px);
+            }
+
             &.show-checkbox {
                 width: calc(100% - var(--selection-column-width, 50px));
                 transform: translateX(var(--selection-column-width, 50px));
+
+                &.show-prefix {
+                    width: calc(100% - 50px - var(--selection-column-width, 50px));
+                    transform: translateX(calc(50px + var(--selection-column-width, 50px)));
+                }
             }
         }
     }
@@ -1552,68 +1661,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                         opacity: 0.5;
                     }
 
-                    &[data-style="gray"] {
-                        color: $color-gray-5;
-                    }
-
-                    &[data-style="success"], &[data-style="error"], &[data-style="info"], &[data-style="warn"], &[data-style="secundary"], &[data-style="tertiary"] {
-
-                        > span {
-                            display: inline-block;
-                            font-size: 11px;
-                            text-transform: uppercase;
-                            font-weight: $font-weight-bold;
-                            padding: 7px 8px;
-                            border-radius: $border-radius;
-
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            max-width: 100%;
-                            box-sizing: border-box;
-                        }
-                        
-                    }
-
-                    &[data-style="success"] > span {
-                        background: $color-success-background;
-                        color: $color-success-dark;
-                    }
-
-                    &[data-style="error"] > span {
-                        background: $color-error-background;
-                        color: $color-error-dark;
-                    }
-
-                    &[data-style="info"] > span {
-                        background: $color-primary-background;
-                        color: $color-primary;
-                        
-                        @media (prefers-color-scheme: dark) {
-                            color: $color-primary-dark;
-                        }
-                    }
-
-                    &[data-style="warn"] > span {
-                        color: $color-warning-dark;
-                        background: $color-warning-background;
-                    }
-
-                    &[data-style="secundary"] > span {
-                        color: $color-secundary-dark;
-                        background: $color-secundary-background;
-                    }
-
-                    &[data-style="tertiary"] > span {
-                        color: $color-tertiary-dark;
-                        background: $color-tertiary-background;
-                    }
-
-                    &[data-align="right"] {
-                        text-align: right;
-                        margin-left: auto;
-                        padding-right: 20px;
-                    }
+                    @extend .column-style;
 
                     &:last-child {
                         padding-right: 0;

@@ -160,6 +160,12 @@ export class Order extends AutoEncoder {
     }
 
     matchQuery(query: string): boolean {
+        if (this.number+"" == query) {
+            return true
+        }
+        if (this.payment?.matchQuery(query)) {
+            return true
+        }
         return this.data.matchQuery(query)
     }
 }

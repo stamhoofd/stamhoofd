@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="isLoadingOrders ? [] : orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openOrder">
+    <TableView ref="table" :prefix-column="prefixColumn" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="isLoadingOrders ? [] : orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openOrder">
         <template #empty>
             Er zijn nog geen bestellingen.
         </template>
@@ -237,6 +237,19 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
       
         return cols
     })()
+
+    get prefixColumn() {
+        return new Column<PrivateOrder, number>({
+            name: "#", // should equal existing column!
+            getValue: (order) => order.number ?? 0, 
+            compare: (a, b) => Sorter.byNumberValue(b, a),
+            minimumWidth: 50,
+            recommendedWidth: 50,
+            getStyleForObject: (order) => {
+                return OrderStatusHelper.getColor(order.status)
+            },
+        })
+    }
 
     /**
      * Insert or update an order

@@ -22,9 +22,8 @@ export class PaymentDetailed extends Payment {
     }
 
     matchQuery(query: string): boolean {
-        const lowerQuery = query.toLowerCase();
         if (
-            this.transferDescription && this.transferDescription.toLowerCase().includes(lowerQuery) ||
+            super.matchQuery(query) ||
             this.registrations.find(r => r.member.details && r.member.details.matchQuery(query))
         ) {
             return true;
