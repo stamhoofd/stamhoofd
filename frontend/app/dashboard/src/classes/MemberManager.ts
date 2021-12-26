@@ -163,7 +163,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
 
         if (encryptedMembers.changes.length > 0) {
-            const updated = await this.patchMembersAndSync(members, encryptedMembers)
+            await this.patchMembersAndSync(members, encryptedMembers)
         }
     }   
 
@@ -240,20 +240,26 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     /**
+     * Replace as many references in newerData to references in old members, but update the data in
+     * those old members to match the new data
+     */
+    sync(members: MemberWithRegistrations[], newerData: MemberWithRegistrations[]) {
+        for (const member of members) {
+            const i = newerData.findIndex(m => m.id === member.id)
+            if (i !== -1) {
+                const updatedData = newerData[i]
+                member.set(updatedData)
+                newerData[i] = member
+            }
+        }
+    }
+
+    /**
      * Patch members and update the data of members instead of creating new instances
      */
     async patchMembersAndSync(members: MemberWithRegistrations[], patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>, shouldRetry = true) {
         const updated = await this.patchMembers(patch, shouldRetry)
-
-        for (const member of members) {
-            const i = updated.findIndex(m => m.id === member.id)
-            if (i !== -1) {
-                const updatedData = updated[i]
-                member.set(updatedData)
-                updated[i] = member
-            }
-        }
-        return updated
+        return this.sync(members, updated)
     }
 
     async deleteMembers(members: MemberWithRegistrations[]) {

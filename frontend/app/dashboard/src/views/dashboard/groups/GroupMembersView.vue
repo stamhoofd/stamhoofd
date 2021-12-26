@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
+    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openMember">
         <button v-if="titleDescription" class="info-box selectable" type="button" @click="resetCycle">
             {{ titleDescription }}
 
@@ -587,8 +587,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     reload() {
         Request.cancelAll(this)
         this.loading = true;
-
         MemberManager.loadMembers(this.groupIds, this.waitingList, this.cycleOffset, this).then((members) => {
+            // Make sure we keep as many references as possible
+            MemberManager.sync(this.allValues, members)
             this.allValues = members
             this.checkInaccurateMetaData().catch(e => {
                 console.error(e)
