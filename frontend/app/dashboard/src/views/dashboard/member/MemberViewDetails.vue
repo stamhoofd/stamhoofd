@@ -286,7 +286,7 @@
                     <span class="icon-spacer">Accounts</span><span 
                         v-if="!$isTouch"
                         v-tooltip="
-                            'Deze accounts bestaan, kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
+                            'Deze accounts kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
                         "
                         class="icon gray help"
                     />
@@ -294,7 +294,7 @@
                 <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
                     <span>{{ user.email }}</span>
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
-                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" @click="unlinkUser(user)" />
+                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" type="button" @click="unlinkUser(user)" />
                 </p>
 
                 <template v-if="placeholderAccounts.length > 0">
