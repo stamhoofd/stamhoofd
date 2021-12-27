@@ -105,6 +105,9 @@ export class Order extends AutoEncoder {
     @field({ decoder: StringDecoder })
     id: string
 
+    @field({ decoder: StringDecoder, version: 140 })
+    webshopId: string
+
     @field({ decoder: IntegerDecoder, nullable: true })
     number: number | null
 

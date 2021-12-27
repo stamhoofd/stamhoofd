@@ -1,5 +1,8 @@
 <template>
     <TableView ref="table" :organization="organization" :title="title" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions">
+        <p class="style-description">
+            Overzicht van alle openstaande overschrijvingen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 1 maand zichtbaar).
+        </p>
         <template #empty>
             Er zijn nog geen overschrijvingen.
         </template>
@@ -91,16 +94,16 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new Column<PaymentGeneral, Date>({
                 name: "Datum", 
                 getValue: (payment) => payment.createdAt,
-                compare: (a, b) => Sorter.byDateValue(a, b),
+                compare: (a, b) => Sorter.byDateValue(b, a),
                 format: (date, width: number) => {
                     if (width < 120) {
                         return Formatter.dateNumber(date, false)
                     }
 
-                    if (width < 200) {
+                    if (width < 170) {
                         return Formatter.capitalizeFirstLetter(Formatter.date(date))
                     }
-                    return Formatter.capitalizeFirstLetter(Formatter.dateWithDay(date))
+                    return Formatter.capitalizeFirstLetter(Formatter.date(date, true))
                 },
                 minimumWidth: 60,
                 recommendedWidth: 70,
@@ -138,6 +141,23 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 getStyle: (status) => status === PaymentStatus.Succeeded ? "success" : "error",
                 minimumWidth: 60,
                 recommendedWidth: 70,
+            }),
+
+            new Column<PaymentGeneral, string>({
+                name: "Beschrijving", 
+                getValue: (payment) => {
+                    if (!payment.order) {
+                        return payment.registrations.map(r => r.group.settings.name).join(", ")
+                    }
+                    const webshop = this.organization.webshops.find(w => w.id == payment.order!.webshopId)
+                    if (webshop) {
+                        return webshop.meta.name+" #"+payment.order.number
+                    }
+                    return "#"+payment.order.number
+                }, 
+                compare: (a, b) => Sorter.byStringValue(a, b),
+                minimumWidth: 50,
+                recommendedWidth: 100
             }),
 
         ]

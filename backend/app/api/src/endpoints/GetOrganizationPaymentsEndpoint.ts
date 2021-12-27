@@ -16,10 +16,6 @@ type RegistrationWithMember = Registration & { member: Member}
 type PaymentWithRegistrations = Payment & { registrations: RegistrationWithMember[] }
 type PaymentWithOrder = Payment & { order: Order }
 
-/**
- * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
- */
-
 export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
@@ -72,7 +68,7 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
             createdAt: p.createdAt,
             updatedAt: p.updatedAt,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r)) ?? [],
+            registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r, true)) ?? [],
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             order: (p as any).order ? OrderStruct.create(Object.assign({...(p as any).order}, { payment: null })) : null,
         })
@@ -133,11 +129,15 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
 
         query += `where \`${Member.table}\`.\`organizationId\` = ?`
 
-        const params = [organizationId]
+        const params: any[] = [organizationId]
 
         if (memberId) {
             query += ` AND \`MemberCheckTable\`.\`${Member.registrations.foreignKey}\` = ?`
             params.push(memberId)
+        } else {
+            // Only return non paid paymetns and payments of last 2 months
+            query += ` AND (\`${Payment.table}\`.\`paidAt\` is NULL OR \`${Payment.table}\`.\`paidAt\` > ?)`
+            params.push(new Date(Date.now() - (24 * 60 * 60 * 1000 * 30 * 2)))
         }
 
         const [results] = await Database.select(query, params)

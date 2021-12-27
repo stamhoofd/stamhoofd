@@ -315,7 +315,7 @@ export class Member extends Model {
         })
     }
 
-    static getRegistrationWithMemberStructure(registration: RegistrationWithMember) {
+    static getRegistrationWithMemberStructure(registration: RegistrationWithMember, forOrganization: null | boolean = null) {
         return RegistrationWithEncryptedMember.create({
             id: registration.id,
             groupId: registration.groupId,
@@ -324,7 +324,19 @@ export class Member extends Model {
             deactivatedAt: registration.deactivatedAt,
             createdAt: registration.createdAt,
             updatedAt: registration.updatedAt,
-            member: EncryptedMember.create(registration.member),
+            member: EncryptedMember.create({ 
+                ...registration.member,
+
+                encryptedDetails: forOrganization === null ? registration.member.encryptedDetails : registration.member.encryptedDetails.map(d => {
+                    if (d.forOrganization === forOrganization) {
+                        return d
+                    }
+
+                    // Clear unused data, but keep essential data, such as the public key, which is needed to determine
+                    // the other keys a user need to encrypt the data for
+                    return EncryptedMemberDetails.create({ ...d, ciphertext: ""})
+                }),
+            }),
             waitingList: registration.waitingList,
         })
     }

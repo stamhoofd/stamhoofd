@@ -78,7 +78,7 @@
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :class="{ selectable: hasClickListener }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
+                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e) => onRightClickRow(row, e)" class="table-row" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row)" @contextmenu.prevent="onRightClickRow(row, $event)">
                             <label v-if="showSelection" class="selection-column" @click.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :checked="row.cachedSelectionValue" @change="setSelectionValue(row, $event)" />
                                 <Checkbox v-else :checked="false" />
@@ -310,7 +310,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     onClickRow(row: VisibleRow<Value>) {
-        if (this.wrapColumns && this.showSelection) {
+        if (!this.hasClickListener || (this.wrapColumns && this.showSelection)) {
             // On mobile, tapping a column means selecting it when we are in editing modus
             this.setSelectionValue(row, !this.getSelectionValue(row))
             return
@@ -1916,7 +1916,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             background: $color-background-shade-darker;
         }
 
-        &.selectable {
+        //&.selectable {
             will-change: transform, background-color;
             transition: background-color 0.15s;
             cursor: pointer;
@@ -1935,7 +1935,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             &:active {
                 background-color: $color-primary-light;
             }
-        }
+        //}
     }
 }
 </style>
