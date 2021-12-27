@@ -2,8 +2,8 @@
     <div class="modern st-view table-view background">
         <STNavigationBar :sticky="true" :add-shadow="wrapColumns" :title="title">
             <template #left>
-                <button v-if="isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
-                <button v-else-if="showSelection && isIOS" type="button" class="button navigation" @click="setSelectAll(!cachedAllSelected)">
+                <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
+                <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="setSelectAll(!cachedAllSelected)">
                     <template v-if="cachedAllSelected">
                         Deselecteer alles
                     </template>
@@ -18,7 +18,7 @@
                     <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action, $event)" />
                 </template>
 
-                <button v-if="showSelection && isIOS" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
+                <button v-if="canLeaveSelectionMode && showSelection && isIOS" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
                     Gereed
                 </button>
                 <button v-else-if="!showSelection && isIOS" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
@@ -529,6 +529,14 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         if (!this.wrapColumns) {
             window.addEventListener("resize", this.onResize, { passive: true })
         }
+
+        if (!this.canLeaveSelectionMode) {
+            this.showSelection = true
+        }
+    }
+
+    get canLeaveSelectionMode() {
+        return !(this.wrapColumns && !this.hasClickListener)
     }
 
     ticking = false

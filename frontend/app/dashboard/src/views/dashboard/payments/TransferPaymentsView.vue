@@ -10,12 +10,12 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Column, TableAction, TableView } from "@stamhoofd/components";
+import { CenteredMessage, Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { EncryptedPaymentGeneral, Filter, FilterDefinition, PaymentGeneral, PaymentMethod } from '@stamhoofd/structures';
+import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, Filter, FilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentPatch } from '@stamhoofd/structures';
 import { PaymentStatus } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -70,8 +70,21 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 groupIndex: 1,
                 needsSelection: true,
                 allowAutoSelectAll: false,
-                handler: (orders: PaymentGeneral[]) => {
+                handler: async (payments: PaymentGeneral[]) => {
                     // Mark paid
+                    await this.markPaid(payments, true)
+                }
+            }),
+            new TableAction({
+                name: "Markeer als niet betaald",
+                icon: "canceled",
+                priority: 0,
+                groupIndex: 1,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (payments: PaymentGeneral[]) => {
+                    // Mark paid
+                    await this.markPaid(payments, false)
                 }
             })
         ]
@@ -181,7 +194,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         Request.cancelAll(this)
     }
 
-    async setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
+    async setPayments(encryptedPayments: EncryptedPaymentGeneral[], add = false) {
         encryptedPayments = encryptedPayments.filter(p => p.method == PaymentMethod.Transfer)
         const organization = OrganizationManager.organization
 
@@ -199,10 +212,77 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 registration.payment = payment
             }
 
-            payments.push(payment)
+            if (add) {
+                const pp = this.payments.find(p => p.id == payment.id)
+                if (pp) {
+                    // Keep reference
+                    pp.set(payment)
+                } else {
+                    // Append
+                    payments.push(payment)
+                }
+            } else {
+                payments.push(payment)
+            }
+
         }
 
-        this.payments = payments
+        if (add) {
+            this.payments.push(...payments)
+        } else {
+            this.payments = payments
+        }
+    }
+
+    async markPaid(payments: PaymentGeneral[], paid = true) {
+        const data: AutoEncoderPatchType<Payment>[] = []
+        let hasOrder = false
+
+        for (const payment of payments) {
+            if (payment.order) {
+                hasOrder = true
+            }
+            if (paid) {
+                if (payment.status != PaymentStatus.Succeeded) {
+                    data.push(Payment.patch({
+                        id: payment.id,
+                        status: PaymentStatus.Succeeded
+                    }))
+                }
+            } else {
+                if (payment.status == PaymentStatus.Succeeded) {
+                    data.push(Payment.patch({
+                        id: payment.id,
+                        status: PaymentStatus.Created,
+                    }))
+                }
+            }
+            
+        }
+        
+        if (data.length > 0) {
+            if (!await CenteredMessage.confirm("Ben je zeker?", paid ? "Markeer als betaald" : "Markeer als niet betaald", paid && hasOrder ? "De besteller(s) van bestellingen ontvangen een automatische e-mail." : undefined)) {
+                return;
+            }
+            const session = SessionManager.currentSession!
+
+            try {
+                const response = await session.authenticatedServer.request({
+                    method: "PATCH",
+                    path: "/organization/payments",
+                    body: data,
+                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>),
+                    shouldRetry: false
+                })
+
+                await this.setPayments(response.data, true)
+                new Toast("Betaalstatus gewijzigd", "success").setHide(1000).show()
+            } catch (e) {
+                Toast.fromError(e).show()
+            }
+        } else {
+            new Toast(paid ? "Al gemarkeerd als betaald" : ("Deze "+ (payments.length == 1 ? "betaling werd" : "betalingen werden") +" nog niet betaald"), "error red").setHide(1500).show()
+        }
     }
 }
 </script>
