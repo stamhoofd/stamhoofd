@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions">
+    <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions">
         <p class="style-description">
             Overzicht van alle openstaande overschrijvingen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 1 maand zichtbaar).
         </p>
@@ -104,6 +104,23 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 recommendedWidth: 100
             }),
 
+            new Column<PaymentGeneral, string>({
+                name: "Beschrijving", 
+                getValue: (payment) => {
+                    if (!payment.order) {
+                        return payment.registrations.map(r => r.group.settings.name).join(", ")
+                    }
+                    const webshop = this.organization.webshops.find(w => w.id == payment.order!.webshopId)
+                    if (webshop) {
+                        return webshop.meta.name+" #"+payment.order.number
+                    }
+                    return "#"+payment.order.number
+                }, 
+                compare: (a, b) => Sorter.byStringValue(a, b),
+                minimumWidth: 50,
+                recommendedWidth: 200
+            }),
+
             new Column<PaymentGeneral, Date>({
                 name: "Datum", 
                 getValue: (payment) => payment.createdAt,
@@ -122,6 +139,16 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 recommendedWidth: 70,
             }),
 
+            new Column<PaymentGeneral, string | null>({
+                name: "Mededeling", 
+                getValue: (payment) => payment.transferDescription, 
+                compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
+                format: (value) => value ?? "Geen",
+                getStyle: (value) => value === null ? "gray" : "",
+                minimumWidth: 50,
+                recommendedWidth: 180
+            }),
+
             new Column<PaymentGeneral, number>({
                 name: "Bedrag", 
                 getValue: (payment) => payment.price, 
@@ -131,20 +158,12 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 recommendedWidth: 50
             }),
 
-            new Column<PaymentGeneral, string | null>({
-                name: "Mededeling", 
-                getValue: (payment) => payment.transferDescription, 
-                compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
-                format: (value) => value ?? "Geen",
-                getStyle: (value) => value === null ? "gray" : "",
-                minimumWidth: 50,
-                recommendedWidth: 50
-            }),
-
             new Column<PaymentGeneral, PaymentStatus>({
                 name: "Status", 
                 getValue: (payment) => payment.status,
-                compare: (a, b) => Sorter.byEnumValue(a, b, PaymentStatus),
+                compareObjects: (a, b) => {
+                    return Sorter.stack(Sorter.byBooleanValue(a.status === PaymentStatus.Succeeded, b.status === PaymentStatus.Succeeded), Sorter.byDateValue(b.createdAt, a.createdAt))
+                },
                 format: (status) => {
                     if (status === PaymentStatus.Succeeded) {
                         return "Betaald"
@@ -155,28 +174,18 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 minimumWidth: 60,
                 recommendedWidth: 70,
             }),
-
-            new Column<PaymentGeneral, string>({
-                name: "Beschrijving", 
-                getValue: (payment) => {
-                    if (!payment.order) {
-                        return payment.registrations.map(r => r.group.settings.name).join(", ")
-                    }
-                    const webshop = this.organization.webshops.find(w => w.id == payment.order!.webshopId)
-                    if (webshop) {
-                        return webshop.meta.name+" #"+payment.order.number
-                    }
-                    return "#"+payment.order.number
-                }, 
-                compare: (a, b) => Sorter.byStringValue(a, b),
-                minimumWidth: 50,
-                recommendedWidth: 100
-            }),
-
         ]
 
         return cols
     })()
+
+    get defaultSortColumn() {
+        return this.allColumns[5]
+    }
+
+    get defaultSortDirection() {
+        return "DESC"
+    }
 
     async loadPayments() {
         const session = SessionManager.currentSession!

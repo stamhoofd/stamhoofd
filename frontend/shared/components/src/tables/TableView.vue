@@ -244,6 +244,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     @Prop({ required: false, default: null })
     prefixColumn!: Column<Value, any> | null
 
+    @Prop({ required: false, default: null })
+    defaultSortColumn!: Column<Value, any> | null
+
+    @Prop({ required: false, default: null })
+    defaultSortDirection!: SortDirection | null
+
     get showPrefix() {
         return this.prefixColumn !== null && this.wrapColumns && this.prefixColumn.enabled
     }
@@ -265,8 +271,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     wrapColumns = this.isMobile
     showSelection = !this.isMobile
 
-    sortBy: Column<Value, any> = this.columns[0]
-    sortDirection: SortDirection = SortDirection.Ascending
+    sortBy: Column<Value, any> = this.defaultSortColumn ?? this.columns[0]
+    sortDirection: SortDirection = this.defaultSortDirection ?? SortDirection.Ascending
 
     visibleRows: VisibleRow<Value>[] = []
 
@@ -674,6 +680,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
      * Loop all visible rows, and sets the recommended width of each column to the maximum width of the column.
      */
     updateRecommendedWidths() {
+        //console.log("Update recommended width")
         const measureDiv = document.createElement("div")
         measureDiv.style.position = "absolute"
         measureDiv.style.visibility = "hidden"
@@ -701,6 +708,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 found = true
 
                 const text = column.getFormattedValue(value)
+                
 
                 measureDiv.innerText = text
                 const width = measureDiv.clientWidth
@@ -710,12 +718,14 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             }
 
             // Also add some padding
-            if (found) (
-                column.recommendedWidth = maximum + 15
-            )
+            if (found) {
+                column.recommendedWidth = maximum + 15;
+                // console.log("Updated recommend width of column " + column.name + " to " + (maximum + 15), column.minimumWidth)
+            }
+
         }
 
-        document.body.removeChild(measureDiv)
+        //document.body.removeChild(measureDiv)
     }
 
     canCollapse = false
@@ -725,6 +735,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
      */
     updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy: "grow" | "move" = "grow", forceWidth: number | null = null) {
         this.updatePaddingIfNeeded()
+        // console.log("Update column width")
         
         if (this.wrapColumns) {
             return
@@ -810,8 +821,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     columnPriorityIndex++
                     
                     updateColumns()
-                    //console.log("Moving to columnPriorityIndex", columnPriorityIndex)
-                    //console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
+                    // console.log("Moving to columnPriorityIndex", columnPriorityIndex)
+                    // console.log("Current column configuration", columns.map(c => c.name+" ("+c.renderWidth+")"))
 
                     // Check loop conditions again, and if needed, jump to the next priority or start distributing
                     continue
@@ -1228,7 +1239,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     @Watch("sortedValues", { deep: false })
     onUpdateValues() {
-        // console.info("Sorted values has changed")
+        console.info("Sorted values has changed")
 
         for (const visibleRow of this.visibleRows) {
             // has this row changed and should it now display a different value? -> clear it and mark it for reuse

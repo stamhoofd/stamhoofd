@@ -91,6 +91,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                     }
                     return OrderStatusHelper.getColor(order.status)
                 },
+                index: 0
             }),
 
             new Column<PrivateOrder, OrderStatus>({
@@ -130,7 +131,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 compare: (a, b) => Sorter.byStringValue(a?.id ?? "", b?.id ?? ""),
                 getStyle: (method) => method === null ? "gray" : "",
                 minimumWidth: 100,
-                recommendedWidth: 200
+                recommendedWidth: 200,
+                index: 1
             }))
         }
 
@@ -157,7 +159,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 compare: (a, b) => Sorter.byStringValue(a ?? "", b ?? ""),
                 getStyle: (loc) => loc === undefined ? "gray" : "",
                 minimumWidth: 100,
-                recommendedWidth: 250
+                recommendedWidth: 250,
+                index: 1
             }))
         }
 
@@ -186,6 +189,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                     getStyle: (loc) => loc === undefined ? "gray" : "",
                     minimumWidth: 60,
                     recommendedWidth: 70,
+                    index: 1
                 }),
             )
         }
@@ -210,7 +214,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                     },
                     getStyle: (loc) => loc === undefined ? "gray" : "",
                     minimumWidth: 80,
-                    recommendedWidth: 105
+                    recommendedWidth: 105,
+                    index: 1
                 })
             )
         }
@@ -225,7 +230,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
                 minimumWidth: 70,
                 recommendedWidth: 80,
-                align: "right"
+                align: "right",
+                index: 1
             }),
         )
 
@@ -239,7 +245,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
                 minimumWidth: 70,
                 recommendedWidth: 80,
-                align: "right"
+                align: "right",
+                index: 1
             }),
         )
       
