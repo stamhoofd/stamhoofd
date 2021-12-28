@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar title="E-mailadressen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -13,7 +13,7 @@
             <p>Wijzig de e-mailadressen waarmee je e-mails kan versturen. Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">deze pagina</a>.</p>
 
             <STList>
-                <STListItem v-for="email in emails" :key="email.id" :selectable="true" @click="editEmail(email)">
+                <STListItem v-for="email in emails" :key="email.id" :selectable="true" class="right-stack" @click="editEmail(email)">
                     <h3 class="style-title-list">
                         {{ email.name ? email.name : email.email }}
                     </h3>
@@ -34,7 +34,7 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button primary" @click="addEmail">
+                <button class="button primary" type="button" @click="addEmail">
                     <span class="icon add" />
                     <span>E-mailadres toevoegen</span>
                 </button>
