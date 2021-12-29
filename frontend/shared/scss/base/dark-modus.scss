@@ -83,3 +83,9 @@ body {
         --color-overlay-shadow: rgba(0, 0, 0, 0.9);*/
     }
 }
+
+@media (prefers-color-scheme: dark) {
+    img[src*=".svg"] {
+        filter: contrast(0.7);
+    }
+}
