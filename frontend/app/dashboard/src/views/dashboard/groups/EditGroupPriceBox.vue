@@ -19,10 +19,10 @@
 
             <div v-if="priceGroup.startDate !== null" class="split-inputs">
                 <STInputBox title="Vanaf" error-fields="startDate" :error-box="errorBox">
-                    <DateSelection v-model="priceGroup.startDate" />
+                    <DateSelection :value="priceGroup.startDate" @input="setStartDate(priceGroup, $event)" />
                 </STInputBox>
 
-                <TimeInput v-model="priceGroup.startDate" title="Tijdstip" placeholder="Tijdstip" :validator="validator" />
+                <TimeInput :value="priceGroup.startDate" title="Tijdstip" placeholder="Tijdstip" :validator="validator" @input="setStartDate(priceGroup, $event)" />
             </div>
 
             <STList>
@@ -187,7 +187,7 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
 
     setPrice(group: GroupPrices, index: number, price: number) {
         const patch = this.getPricesPatch()
-        const prices = group.prices.slice()
+        const prices = group.prices.map(p => p.clone())
         prices[index].price = price
         patch.addPatch(GroupPrices.patch({ id: group.id, prices }))
         this.addPatch(patch)
@@ -195,9 +195,15 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
 
     setReducedPrice(group: GroupPrices, index: number, reducedPrice: number | null) {
         const patch = this.getPricesPatch()
-        const prices = group.prices.slice()
+        const prices = group.prices.map(p => p.clone())
         prices[index].reducedPrice = reducedPrice
         patch.addPatch(GroupPrices.patch({ id: group.id, prices }))
+        this.addPatch(patch)
+    }
+
+    setStartDate(group: GroupPrices, startDate: Date) {
+        const patch = this.getPricesPatch()
+        patch.addPatch(GroupPrices.patch({ id: group.id, startDate }))
         this.addPatch(patch)
     }
 
