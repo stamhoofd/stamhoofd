@@ -303,6 +303,10 @@
 
         > .bubble {
             @extend .style-bubble;
+
+            &:last-child {
+                margin-left: 8px;
+            }
         }
 
         &.column {
