@@ -31,6 +31,7 @@ export default class ColumnSortingContextMenu extends Mixins(NavigationMixin) {
     table: TableView<any>;
 
     setSortByColumn(column: Column<any, any>) {
+        console.log("Toggle sort by column", column)
         this.table.toggleSort(column)
     }
 

@@ -526,6 +526,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             this.detachDragHandlers();
             this.isDraggingColumn = null;
         }
+        this.isColumnDragActive = false
     }
 
     mounted() {
