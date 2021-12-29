@@ -179,7 +179,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
         outline: 0;
         height: $border-width;
         background: $color-border;
-        border-radius: $border-width/2;
+        border-radius: calc($border-width / 2);
         margin: 0;
         position: absolute;
         bottom: 0;

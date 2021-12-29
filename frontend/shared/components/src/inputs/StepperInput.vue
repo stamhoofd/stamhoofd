@@ -71,7 +71,7 @@ export default class StepperInput extends Vue {
         flex-basis: $border-width;
         height: 19px;
         background: $color-gray-2;
-        border-radius: $border-width/2;
+        border-radius: calc($border-width / 2);
         border: 0;
         outline: 0;
         transition: opacity 0.2s;

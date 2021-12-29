@@ -24,11 +24,17 @@ module.exports = merge(common, {
     },
     devServer: {
         port: prefix ? 8882 : 8082,
-        sockPort: 443, // needed because the dev server runs behind a reverse proxy (Caddy)
-        sockPath: prefix+'/sockjs-node',
         historyApiFallback: {
             index: prefix+'/index.html',
             disableDotRule: true, // default behaviour is to ignore all urls with a dot character. lol.
+        },
+        client: {
+            webSocketURL: {
+                // needed because the dev server runs behind a reverse proxy (Caddy)
+                hostname: "0.0.0.0",
+                pathname: prefix+'/ws',
+                port: 443,
+            },
         },
     },
     plugins: [

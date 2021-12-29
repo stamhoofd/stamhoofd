@@ -944,7 +944,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     .cover-photo {
         height: 0;
         position: relative;
-        padding-bottom: 750/1800*100%;
+        padding-bottom: calc(750 / 1800 * 100%);
         background: $color-gray-3;
         border-radius: $border-radius;
         margin-top: 20px;

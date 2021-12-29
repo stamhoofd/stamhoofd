@@ -3,7 +3,7 @@
 hr.hr {
     display: block;
     height: $border-width;
-    border-radius: $border-width/2;
+    border-radius: calc($border-width / 2);
     background: $color-gray-2;
     border: 0;
     outline: 0;
