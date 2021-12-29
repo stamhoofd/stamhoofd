@@ -637,7 +637,19 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     onColumnsChanged() {
         this.updateRowHeight()
         this.updateVisibleRows()
-        this.updateColumnWidth()
+
+        if (this.canCollapse) {
+            // Update width of new columns, without adjusting the width of any column
+            this.fixColumnWidths(this.columns)
+            this.updateCanCollapse()
+
+            if (!this.canCollapse) {
+                // Redistribute
+                this.updateColumnWidth()
+            }
+        } else {
+            this.updateColumnWidth()
+        }
         this.saveColumnConfiguration()
     }
 
@@ -730,6 +742,29 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     canCollapse = false
 
+    fixColumnWidths(columns: Column<any, any>[]) {
+        // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
+        // Also update columns that are smaller than the minimumWidth
+        let distributeWidth = 0
+        for (const col of columns) {
+            if (col.renderWidth === null && col.width !== null) {
+                col.renderWidth = Math.floor(col.width);
+            }
+            if (col.width === null || col.width === 0) {
+                col.width = col.recommendedWidth
+                distributeWidth -= col.recommendedWidth
+                col.renderWidth = Math.floor(col.width);
+            }
+
+            if (col.width < col.minimumWidth) {
+                distributeWidth -= col.minimumWidth - col.width
+                col.width = col.minimumWidth
+                col.renderWidth = Math.floor(col.width);
+            }
+        }
+        return distributeWidth
+    }
+
     /**
      * Update the width of the columns by distributing the available width across the columns, except the ignored column (optional)
      */
@@ -749,27 +784,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         let distributeWidth = availableWidth - currentWidth;
 
         const affectedColumns = afterColumn ? this.columns.slice(this.columns.findIndex(c => c === afterColumn ) + 1) : this.columns
-
+        
+        // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
+        // Also update columns that are smaller than the minimumWidth
+        distributeWidth += this.fixColumnWidths(affectedColumns)
 
         if (strategy === "grow") {
-            // First fix columns without width and update distributeWidth accordongly, because this can change the sign whether we need to grow or shrink the other columns
-            // Also update columns that are smaller than the minimumWidth
-            for (const col of affectedColumns) {
-                if (col.renderWidth === null && col.width !== null) {
-                    col.renderWidth = Math.floor(col.width);
-                }
-                if (col.width === null || col.width === 0) {
-                    col.width = col.recommendedWidth
-                    distributeWidth -= col.recommendedWidth
-                    col.renderWidth = Math.floor(col.width);
-                }
-
-                if (col.width < col.minimumWidth) {
-                    distributeWidth -= col.minimumWidth - col.width
-                    col.width = col.minimumWidth
-                    col.renderWidth = Math.floor(col.width);
-                }
-            }
 
             // Get columns with the highest priority for shrinking or growing
             // growing: the ones with a width lower than the recommendedWidth
@@ -1239,8 +1259,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     @Watch("sortedValues", { deep: false })
     onUpdateValues() {
-        console.info("Sorted values has changed")
-
         for (const visibleRow of this.visibleRows) {
             // has this row changed and should it now display a different value? -> clear it and mark it for reuse
             if (visibleRow.currentIndex !== null && (visibleRow.currentIndex >= this.sortedValues.length || visibleRow.value !== this.sortedValues[visibleRow.currentIndex])) {
@@ -1253,12 +1271,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         // Update all rows
         this.updateVisibleRows()
         this.updateRecommendedWidths()
-    }
-
-    simulateColumnWidthChange() {
-        this.columns[0].width = Math.random() * 400
-        this.columns[0].renderWidth = Math.floor(this.columns[0].width)
-        this.updateColumnWidth(this.columns[0])
     }
 
     /**
