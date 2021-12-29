@@ -52,7 +52,7 @@ export class GetMemberPaymentsEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        const payments = await GetOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId, member.id)
+        const payments = await GetOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId, member.id, false)
 
         return new Response(
             payments.map((p: any) => {
