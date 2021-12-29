@@ -18,9 +18,11 @@
                     <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action, $event)" />
                 </template>
 
-                <button v-if="canLeaveSelectionMode && showSelection && isIOS" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
-                    Gereed
-                </button>
+                <template v-if="showSelection && isIOS">
+                    <button v-if="canLeaveSelectionMode" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
+                        Gereed
+                    </button>
+                </template>
                 <button v-else-if="!showSelection && isIOS" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
                     Selecteer
                 </button>
