@@ -112,7 +112,21 @@ export class MemberWithRegistrations extends Member {
     }
 
     get outstandingAmount() {
-        return this.registrations.reduce((o, r) => (r.payment && r.payment.status != PaymentStatus.Succeeded ? r.payment.price : 0) + o, 0)
+        // Warning: some registrations might share the same payments!
+        // Don't count those twice!
+        const counted = new Set<string>()
+        return this.registrations.reduce((o, r) => {
+            if (!r.payment || r.payment.status === PaymentStatus.Succeeded) {
+                return o
+            }
+
+            if (!counted.has(r.payment.id)) {
+                counted.add(r.payment.id)
+                return r.payment.price + o
+            }
+            
+            return o
+        }, 0)
     }
     
     get paid(): boolean {
