@@ -15,7 +15,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { EncryptedPaymentDetailed, EncryptedPaymentGeneral, Filter, FilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentPatch } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, EncryptedPaymentDetailed, EncryptedPaymentGeneral, Filter, FilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentPatch } from '@stamhoofd/structures';
 import { PaymentStatus } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -91,7 +91,63 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     get filterDefinitions(): FilterDefinition<PaymentGeneral, Filter<PaymentGeneral>, any>[] {
-        return []
+        return [
+            new ChoicesFilterDefinition<PaymentGeneral>({
+                id: "webshops", 
+                name: "Webshops", 
+                choices: this.organization.webshops.map(webshop => new ChoicesFilterChoice(webshop.id, webshop.meta.name)),
+                getValue: (payment) => {
+                    if (!payment.order) {
+                        return []
+                    }
+                    return [payment.order.webshopId]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+
+            new ChoicesFilterDefinition<PaymentGeneral>({
+                id: "registrations", 
+                name: "Inschrijvingen", 
+                choices: this.organization.availableGroups.map(group => new ChoicesFilterChoice(group.id, group.settings.name)),
+                getValue: (payment) => {
+                    return payment.registrations.map(r => r.groupId)
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+
+            new ChoicesFilterDefinition<PaymentGeneral>({
+                id: "paid", 
+                name: "Betaald", 
+                choices: [
+                    new ChoicesFilterChoice("checked", "Betaald"),
+                    new ChoicesFilterChoice("not_checked", "Niet betaald")
+                ],
+                getValue: (payment) => {
+                    return [payment.status == PaymentStatus.Succeeded ? "checked" : "not_checked"]
+                },
+                defaultMode: ChoicesFilterMode.Or
+            }),
+
+            new DateFilterDefinition<PaymentGeneral>({
+                id: "created_at", 
+                name: "Aanmaakdatum", 
+                description: "Datum waarop overschrijving werd aangemaakt in het systeem.",
+                getValue: (payment) => {
+                    return payment.createdAt
+                },
+                time: false
+            }),
+
+            new DateFilterDefinition<PaymentGeneral>({
+                id: "paid_at", 
+                name: "Betaaldatum", 
+                description: "Datum waarop overschrijving als betaald werd gemarkeerd",
+                getValue: (payment) => {
+                    return payment.paidAt ?? new Date(1900, 0, 1)
+                },
+                time: false
+            }),
+        ]
     }
 
     allColumns = ((): Column<PaymentGeneral, any>[] => {

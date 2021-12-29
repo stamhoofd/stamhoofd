@@ -1,5 +1,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
+import { Toast } from "../..";
+
 export class TableAction<T> {
     name: string;
     icon: string;
@@ -44,5 +46,28 @@ export class TableAction<T> {
         this.allowAutoSelectAll = settings.allowAutoSelectAll ?? true;
         this.childActions = settings.childActions ?? [];
         this.childMenu = settings.childMenu ?? null;
+    }
+
+    async handle(item: T[]) {
+        const promise = this.handler(item)
+
+        if (!promise) {
+            return
+        }
+
+        let toast: Toast | null = null
+
+        const timer = setTimeout(() => {
+            toast = new Toast("Actie uitvoeren...", "spinner").setHide(null).show()
+        }, 2000)
+
+        return promise.then((v) => {
+            if (toast) {
+                toast.hide()
+                toast = null
+            }
+            clearTimeout(timer)
+            return v
+        })
     }
 }

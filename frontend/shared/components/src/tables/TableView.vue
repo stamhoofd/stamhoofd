@@ -1184,7 +1184,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             this.present(displayedComponent.setDisplayStyle("overlay"));
             return
         }
-        action.handler(this.getSelection(action.allowAutoSelectAll))?.catch((e) => {
+        action.handle(this.getSelection(action.allowAutoSelectAll))?.catch((e) => {
             console.error(e)
             Toast.fromError(e).show
         })

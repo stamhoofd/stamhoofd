@@ -1,11 +1,10 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation"
-import { CenteredMessage, CenteredMessageButton, TableAction, Toast } from "@stamhoofd/components"
+import { CenteredMessage, CenteredMessageButton, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { EncryptedMemberWithRegistrationsPatch, Group, MemberWithRegistrations, Registration } from "@stamhoofd/structures"
 
 import { MemberManager } from "../../../classes/MemberManager"
 import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
-import MemberSummaryBuilderView from "../member/MemberSummaryBuilderView.vue";
 import SMSView from "../sms/SMSView.vue";
 
 export class MemberActionBuilder {
@@ -75,18 +74,18 @@ export class MemberActionBuilder {
                         name: "Excel",
                         priority: 0,
                         groupIndex: 0,
-                        handler: (members: MemberWithRegistrations[]) => {
+                        handler: async (members: MemberWithRegistrations[]) => {
                         // todo: vervangen door een context menu
-                            this.exportToExcel(members).catch(console.error)
+                            await this.exportToExcel(members)
                         }
                     }),
                     new TableAction({
                         name: "PDF...",
                         priority: 0,
                         groupIndex: 0,
-                        handler: (members: MemberWithRegistrations[]) => {
+                        handler: async (members: MemberWithRegistrations[]) => {
                         // todo: vervangen door een context menu
-                            this.exportToPDF(members)
+                            await this.exportToPDF(members)
                         }
                     }),
                 ]
@@ -233,9 +232,9 @@ export class MemberActionBuilder {
         }
     }
 
-    exportToPDF(members: MemberWithRegistrations[]) {
+    async exportToPDF(members: MemberWithRegistrations[]) {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(MemberSummaryBuilderView, {
+            root: await LoadComponent(() => import(/* webpackChunkName: "MemberSummaryBuilderView"*/ '../member/MemberSummaryBuilderView.vue'), {
                 members,
                 group: this.group
             })
