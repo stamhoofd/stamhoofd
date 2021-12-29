@@ -221,6 +221,10 @@ export default class App extends Vue {
                 this.checkKey().catch(console.error)
             }
         })
+
+        // Update organization when opening an old tab again
+        SessionManager.listenForOrganizationUpdates()
+        
         CenteredMessage.addListener(this, async (centeredMessage) => {
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early

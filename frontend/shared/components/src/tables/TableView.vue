@@ -542,6 +542,35 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         if (!this.canLeaveSelectionMode) {
             this.showSelection = true
         }
+
+        this.refreshOnReturn()
+    }
+
+    beforeDestroy() {
+        // Remove event listeners
+        this.getScrollElement(this.$refs["table"] as HTMLElement).removeEventListener("scroll", this.onScroll)
+        window.removeEventListener("resize", this.onResize)
+        document.removeEventListener("visibilitychange", this.doRefresh)
+    }
+
+    lastRefresh = new Date()
+
+    refreshOnReturn() {
+        document.addEventListener("visibilitychange", this.doRefresh);
+    }
+
+    doRefresh() {
+        if (document.visibilityState === 'visible') {
+            // todo
+            console.info("Window became visible again")
+
+            if (this.lastRefresh.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
+                // Update when at least 5 minutes inactive
+                console.info("Updating table contents")
+                this.lastRefresh = new Date()
+                this.$emit("refresh")
+            }
+        }
     }
 
     get canLeaveSelectionMode() {
@@ -573,12 +602,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             this.updateColumnWidth()
         }
         this.updateVisibleRows()
-    }
-
-    beforeDestroy() {
-        // Remove event listeners
-        this.getScrollElement(this.$refs["table"] as HTMLElement).removeEventListener("scroll", this.onScroll)
-        window.removeEventListener("resize", this.onResize)
     }
 
     async loadColumnConfiguration() {
