@@ -7,6 +7,11 @@
     }
 }
 
+html.modern {
+    overflow: hidden;
+    height: 100vh;
+}
+
 body.modern {
     // on iOS, we don't set overflow: hidden as that prevents scrolling the body. On Android, it doesn't matter, so better to hide overflow
     @supports not (-webkit-touch-callout: none) {
@@ -72,6 +77,9 @@ body.modern.web-iOS {
             position: relative;
             z-index: 0;
 
+            // Windows scrollbars
+            scrollbar-gutter: stable;
+
             display: flex;
             flex-direction: column;
             
@@ -134,7 +142,7 @@ body.modern.web-iOS {
     body.modern .sheet & {
         height: auto;
         min-height: 0;
-        max-height: 100vh;
+        max-height: calc(var(--vh, 1vh) * 100);
         contain: content;
     }
 

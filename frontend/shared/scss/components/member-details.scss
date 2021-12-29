@@ -67,7 +67,7 @@
 .member-view-details.split {
     padding-bottom: 30px;
     display: grid;
-    grid-template-columns: 60% 40%;
+    grid-template-columns: calc(60% - 20px) 40%;
     gap: 20px;
 
     @media (max-width: 700px) {

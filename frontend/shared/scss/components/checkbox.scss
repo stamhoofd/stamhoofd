@@ -56,9 +56,6 @@ $checkbox-border-radius: 5px;
     display: block;
     cursor: pointer;
 
-    // Reduce clickable array (only on modern browsers)
-    // Can't use inline-block, because that causes whitespace issues
-    width: max-content;
     max-width: 100%;
 
     > input {

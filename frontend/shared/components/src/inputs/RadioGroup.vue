@@ -24,11 +24,19 @@ export default class RadioGroup extends Vue {}
     &.column {
         flex-direction: column;
         flex-wrap: nowrap;
+
+        .radio {
+            padding-right: 0px;
+        }
     }
 
     @media (max-width: 550px) {
         flex-direction: column;
         flex-wrap: nowrap;
+
+        .radio {
+            padding-right: 0px;
+        }
     }
 }
 </style>

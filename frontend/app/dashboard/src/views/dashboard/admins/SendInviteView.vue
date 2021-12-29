@@ -158,7 +158,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
 
 #send-invite-view {
     .link-box {
-        overflow-x: auto;
+        //overflow-x: auto; // doesn't work correctly on windows
         text-overflow: visible;
         white-space: nowrap;
     }
