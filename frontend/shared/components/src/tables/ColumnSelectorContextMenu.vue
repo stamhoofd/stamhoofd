@@ -33,7 +33,7 @@ export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
     }
 
     get sortedColumns() {
-        return this.columns.sort((a, b) => a.index - b.index)
+        return this.columns.slice().sort((a, b) => a.index - b.index)
     }
 
 }
