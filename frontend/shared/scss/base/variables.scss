@@ -253,7 +253,7 @@ $dark-theme-color-border-shade: invertColor($color-border-shade-original);
 
 $color-border-shade-darker: #C7C7C7;
 
-$color-shadow-original: rgba(0, 0, 0, 0.05);
+$color-shadow-original: rgba(0, 0, 0, 0.1);
 $color-shadow: var(--color-shadow, $color-shadow-original);
 
 $color-side-view-shadow-original: rgba(0, 0, 0, 0.1);

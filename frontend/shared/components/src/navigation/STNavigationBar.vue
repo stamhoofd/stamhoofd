@@ -329,8 +329,8 @@ export default class STNavigationBar extends Vue {
         //box-shadow: 0px 2px 3px $color-shadow;
         border-bottom-color: $color-border-shade;
 
-        body.native-android &, body.web-android & {
-            box-shadow: 0px 2px 3px $color-shadow;
+        &.large, body.native-android &, body.web-android & {
+            box-shadow: 0px 2px 5px $color-shadow;
             background: $color-background;
             border-bottom-color: transparent;
         }

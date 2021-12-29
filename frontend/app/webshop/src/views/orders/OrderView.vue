@@ -207,20 +207,19 @@
                             </STListItem>
                         </STList>
                     </template>
-
-                    <STToolbar v-if="(canShare && !hasTickets) || !isPaid">
-                        <template slot="right">
-                            <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
-                                <span class="icon share" />
-                                <span>Delen</span>
-                            </button>
-                            <button v-if="!isPaid" class="button primary" type="button" @click="openTransferView">
-                                <span class="icon card" />
-                                <span>Betaalinstructies</span>
-                            </button>
-                        </template>
-                    </STToolbar>
                 </main>
+                <STToolbar v-if="(canShare && !hasTickets) || !isPaid">
+                    <template slot="right">
+                        <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
+                            <span class="icon share" />
+                            <span>Delen</span>
+                        </button>
+                        <button v-if="!isPaid" class="button primary" type="button" @click="openTransferView">
+                            <span class="icon card" />
+                            <span>Betaalinstructies</span>
+                        </button>
+                    </template>
+                </STToolbar>
             </section>
             <section v-if="hasTickets && isPaid" class="gray-shadow view">
                 <main id="tickets">

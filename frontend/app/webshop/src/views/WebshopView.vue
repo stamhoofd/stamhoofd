@@ -10,7 +10,7 @@
                     <span class="icon external" />
                     <span>Terug naar website</span>
                 </a>
-                <button class="primary button" @click="openCart(true)">
+                <button class="primary button" type="button" @click="openCart(true)">
                     <span class="icon basket" />
                     <span>{{ cartCount }}</span>
                 </button>
@@ -479,6 +479,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 justify-content: space-between;
                 align-items: flex-start;
                 flex-wrap: wrap-reverse;
+                padding: 0 var(--st-horizontal-padding, 40px);
 
                 @media (max-width: 500px) {
                     .stamhoofd-logo-container {
