@@ -1,12 +1,12 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { PermissionLevel, Permissions } from '@stamhoofd/structures';
-
 import { GroupFactory } from '@stamhoofd/models';
 import { MemberFactory } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { RegistrationFactory } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { PermissionLevel, Permissions } from '@stamhoofd/structures';
+
 import { GetGroupMembersEndpoint } from './GetGroupMembersEndpoint';
 
 
@@ -41,7 +41,15 @@ describe("Endpoint.GetGroupMembers", () => {
         expect(response.body[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
         expect(response.body[0]).toMatchObject({
             id: members[0].id,
-            encryptedDetails: members[0].encryptedDetails
+            encryptedDetails: members[0].encryptedDetails.map(d => {
+                const c = d.clone()
+
+                if (!c.forOrganization){
+                    c.ciphertext = ""
+                }
+
+                return c
+            })
         })
     });
 
@@ -72,7 +80,15 @@ describe("Endpoint.GetGroupMembers", () => {
         expect(response.body[0].registrations).toIncludeSameMembers([registration.getStructure(), registration2.getStructure()])
         expect(response.body[0]).toMatchObject({
             id: members[0].id,
-            encryptedDetails: members[0].encryptedDetails
+            encryptedDetails: members[0].encryptedDetails.map(d => {
+                const c = d.clone()
+
+                if (!c.forOrganization){
+                    c.ciphertext = ""
+                }
+
+                return c
+            })
         })
     });
 });

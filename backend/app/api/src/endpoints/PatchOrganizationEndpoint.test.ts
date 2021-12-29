@@ -1,11 +1,11 @@
 import { AutoEncoderPatchType,PatchableArray, PatchType } from '@simonbackx/simple-encoding';
 import { Request } from "@simonbackx/simple-endpoints";
-import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupPrivateSettings,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,PermissionRole,PermissionRoleDetailed,Permissions } from '@stamhoofd/structures';
-
 import { GroupFactory } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { Group, GroupGenderType,GroupPatch,GroupPermissions,GroupPrivateSettings,GroupSettings, GroupSettingsPatch,Organization, PermissionLevel,PermissionRole,PermissionRoleDetailed,Permissions } from '@stamhoofd/structures';
+
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
 
 describe("Endpoint.PatchOrganization", () => {
@@ -226,9 +226,9 @@ describe("Endpoint.PatchOrganization", () => {
             })
             changes.addPut(put)
 
-            const r = Request.buildJson("PATCH", "/v34/organization", organization.getApiHost(), {
+            const r = Request.buildJson("PATCH", "/v140/organization", organization.getApiHost(), {
                 id: organization.id,
-                groups: changes.encode({ version: 34 }),
+                groups: changes.encode({ version: 140 }),
             });
             r.headers.authorization = "Bearer " + token.accessToken
 
@@ -240,7 +240,7 @@ describe("Endpoint.PatchOrganization", () => {
             }
 
             expect(response.body.id).toEqual(organization.id)
-            expect(response.body.groups).toContainEqual(put)
+            expect(response.body.groups.map(g => g.id)).toContainEqual(put.id)
         }
 
         for (const permission of invalidPermissions) {
