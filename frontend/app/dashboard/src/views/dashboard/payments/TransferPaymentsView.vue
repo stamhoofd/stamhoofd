@@ -15,7 +15,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, EncryptedPaymentDetailed, EncryptedPaymentGeneral, Filter, FilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentPatch } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, EncryptedPaymentDetailed, EncryptedPaymentGeneral, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentPatch } from '@stamhoofd/structures';
 import { PaymentStatus } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -147,6 +147,16 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 },
                 time: false
             }),
+
+            new NumberFilterDefinition<PaymentGeneral>({
+                id: "price",
+                name: "Bedrag",
+                currency: true,
+                floatingPoint: true,
+                getValue: (payment) => {
+                    return payment.price
+                }
+            })
         ]
     }
 
