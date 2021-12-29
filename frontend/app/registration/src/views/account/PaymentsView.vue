@@ -18,17 +18,14 @@
                     <p class="style-description-small">
                         {{ payment.getMemberNames() }}
                     </p>
-                    <p v-if="payment.status == 'Succeeded'" class="style-description-small">
+                    <p class="style-description-small">
                         {{ paymentMethodName(payment.method) }}
-                    </p>
-                    <p v-else class="style-description-small">
-                        Betaal via overschrijving
                     </p>
 
                     <template slot="right">
-                        {{ payment.price | price }}
+                        <span>{{ payment.price | price }}</span>
                         <span v-if="payment.status == 'Succeeded'" class="icon green success" />
-                        <span v-else class="icon arrow-right" />
+                        <span v-else-if="canOpenPayment(payment)" class="icon arrow-right" />
                     </template>
                 </STListItem>
             </STList>

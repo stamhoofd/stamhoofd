@@ -10,7 +10,7 @@
                     <span class="icon privacy" />
                     <span>Privacy</span>
                 </a>
-                <button v-if="organization.website" class="button text limit-space" @click="returnToSite">
+                <button v-if="organization.website" class="button text limit-space" type="button" @click="returnToSite">
                     <span class="icon external" />
                     <span>Terug naar website</span>
                 </button>
@@ -25,7 +25,7 @@
                             <p>Onderaan deze pagina vind je meer informatie over waar je zoal voor kan inschrijven.</p>
                             
                             <div class="button-box">
-                                <button class="button primary full" @click="login()">
+                                <button class="button primary full" type="button" @click="login()">
                                     <span class="icon lock" />
                                     <span>Inloggen</span>
                                 </button>
@@ -46,7 +46,7 @@
                         </aside>
                     </div>
                     <p class="stamhoofd-footer">
-                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'" target="_blank" class="button text">Ledenadministratie door <strong class="notranslate">Stamhoofd</strong></a>
+                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'" target="_blank" class="button text"><span>Ledenadministratie door</span> <strong class="notranslate">Stamhoofd</strong></a>
                     </p>
                 </main>
             </div>
@@ -101,7 +101,7 @@ import SignupView from './SignupView.vue';
                     content: "Inschrijven bij "+OrganizationManager.organization.name,
                 },
                 ...(this.firstImageResolution ? [
-                     {
+                    {
                         hid: 'og:image',
                         name: 'og:image',
                         content: this.firstImageResolution.file.getPublicPath()
@@ -251,6 +251,7 @@ export default class HomeView extends Mixins(NavigationMixin){
 
         strong {
             color: $color-primary-original;
+            margin-left: 5px;
         }
     }
 }

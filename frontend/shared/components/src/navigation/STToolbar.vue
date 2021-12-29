@@ -39,6 +39,7 @@ export default class STToolbar extends Vue {
 
     &.sticky {
         position: sticky;
+        z-index: 10;
     }
 
     > div {

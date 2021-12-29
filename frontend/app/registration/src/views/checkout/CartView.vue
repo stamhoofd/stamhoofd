@@ -50,7 +50,7 @@
                     </STList>
                 </main>
 
-                <STToolbar v-if="cart.items.length > 0">
+                <STToolbar v-if="cart.items.length > 0" class="dont-float">
                     <span slot="left">Totaal: {{ cart.price | price }}</span>
                     <LoadingButton slot="right" :loading="loading">
                         <button class="button primary" type="button" @click="goToCheckout">

@@ -156,16 +156,14 @@ body.modern.web-iOS {
 
         > .view {
             margin: calc(-1 * var(--st-vertical-padding, 20px)) calc(-1 * var(--st-horizontal-padding, 40px));
-            padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 15px);
+            padding: var(--st-vertical-padding, 20px) 0;
             flex-grow: 1;
 
             display: flex;
             flex-direction: column;
 
-            @media(min-width: 940px) {
-                > main {
-                    --st-horizontal-padding: 0px;
-                }
+            > main {
+                padding: 0 var(--st-horizontal-padding, 15px) 0 var(--st-horizontal-padding, 15px);
             }
         }
 
@@ -215,6 +213,12 @@ body.modern.web-iOS {
         display: flex;
         flex-direction: column;
 
+        --color-current-background: #{$color-background};
+
+        > main {
+            padding: 0 var(--st-horizontal-padding, 15px) 0 var(--st-horizontal-padding, 15px);
+        }
+
         // the main extend has moved to .box general because CSS stops working (don't know why)
 
         &:not(.popup .st-view > .box) {
@@ -243,10 +247,12 @@ body.modern.web-iOS {
                 width: 100%;
                 box-sizing: border-box;
 
-                padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+                padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px)0;
                 
                 // With extra top padding safe area default to 20px
-                padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+                padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) 0 var(--st-vertical-padding, 20px) 0;
+
+                
             }
         }
     }
@@ -254,7 +260,7 @@ body.modern.web-iOS {
     // Save padding if we make changes
     --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
 
-    .st-toolbar {
+    .st-toolbar:not(.dont-float) {
         margin-top: auto;
     }
 

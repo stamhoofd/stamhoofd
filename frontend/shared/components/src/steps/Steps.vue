@@ -98,7 +98,7 @@ export default class Steps extends Vue {
         width: 0;
         opacity: 1;
         transition: width 0.3s, opacity 0.3s;
-        z-index: 12;
+        z-index: 300;
 
         &.hide {
             transition: width 0.3s, opacity 0.2s 0.3s;

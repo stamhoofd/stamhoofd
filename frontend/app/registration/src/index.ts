@@ -5,8 +5,9 @@
 require('@stamhoofd/assets/images/icons/icons.font');
 
 import * as Sentry from "@sentry/vue";
-import { ViewportHelper } from "@stamhoofd/components";
+import { ViewportHelper, VueGlobalHelper } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
+import { AppManager } from "@stamhoofd/networking";
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
@@ -23,6 +24,10 @@ if (!isPrerender && STAMHOOFD.environment == "production") {
 }
 
 import App from "./App.vue";
+
+document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
+VueGlobalHelper.setup()
+
 const i18n = I18nController.getI18n()
 I18nController.fixedCountry = true
 
@@ -32,5 +37,5 @@ const app = new Vue({
 });
 
 (window as any).app = app;
-ViewportHelper.setup()
+ViewportHelper.setup(false)
 app.$mount("#app")
