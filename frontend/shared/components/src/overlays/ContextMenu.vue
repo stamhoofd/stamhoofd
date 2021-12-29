@@ -734,7 +734,7 @@ export default class ContextMenu extends Vue {
             white-space: nowrap;
         }
 
-        .icon {
+        .icon:not(.arrow-right-small):not(.arrow-down-small):not(.arrow-up-small) {
             width: 20px;
             height: 20px;
             font-size: 20px;

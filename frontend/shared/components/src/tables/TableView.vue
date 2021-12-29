@@ -1235,7 +1235,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         
         // Add action to change visible columns
         actions.push(new TableAction({
-            name: "Wijzig kolommen",
+            name: this.wrapColumns ? "Wijzig zichtbare gegevens" : "Wijzig kolommen",
             groupIndex: -1,
             priority: 8,
             childMenu: this.getColumnContextMenu()
