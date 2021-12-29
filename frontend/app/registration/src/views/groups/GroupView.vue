@@ -13,7 +13,7 @@
             <figure v-if="coverPhotoSrc" class="cover-photo">
                 <img :src="coverPhotoSrc">
             </figure>
-            <p v-if="group.settings.description" class="style-description" v-text="group.settings.description" />
+            <p v-if="group.settings.description" class="style-description pre-wrap" v-text="group.settings.description" />
 
             <p v-if="infoBox" class="info-box">
                 {{ infoBox }}
@@ -50,11 +50,20 @@
 
                     <div slot="right" v-text="who" />
                 </STListItem>
+
+                <STListItem v-for="(price, index) of priceList" :key="index">
+                    <h3>{{ price.text }}</h3>
+                    <p class="style-description-small">
+                        {{ price.description }}
+                    </p>
+
+                    <div slot="right" class="style-description" v-text="price.price" />
+                </STListItem>
             </STList>
         </main>
 
         <STToolbar v-if="isSignedIn && registerButton && !closed">
-            <button slot="right" class="primary button" @click="chooseMembers">
+            <button slot="right" class="primary button" type="button" @click="chooseMembers">
                 <span class="icon add" />
                 <span>Inschrijven</span>
             </button>
@@ -136,6 +145,36 @@ export default class GroupView extends Mixins(NavigationMixin){
 
     formatDate(date: Date) {
         return Formatter.date(date)
+    }
+
+    get priceList() {
+        const prices = this.group.settings.getGroupPrices(new Date())
+        if (!prices) {
+            return []
+        }
+
+        const list: { text: string, description: string, price: string }[] = []
+
+        for (const [index, price] of prices.prices.entries()) {
+            list.push({
+                text: "Prijs",
+                description: prices.prices.length > 1 ? (prices.sameMemberOnlyDiscount ? Formatter.capitalizeFirstLetter(Formatter.ordinalNumber(index + 1)+" inschrijving") : Formatter.capitalizeFirstLetter(Formatter.ordinalNumber(index + 1)+" gezinslid")): "",
+                price: Formatter.price(price.price),
+            })
+        }
+
+        for (const [index, price] of prices.prices.entries()) {
+            if (price.reducedPrice !== null && price.reducedPrice !== price.price) {
+                const text = prices.prices.length > 1 ? (prices.sameMemberOnlyDiscount ? Formatter.capitalizeFirstLetter("Verlaagd tarief voor "+Formatter.ordinalNumber(index + 1)+" inschrijving") : Formatter.capitalizeFirstLetter("Verlaagd tarief voor "+Formatter.ordinalNumber(index + 1)+" gezinslid")): "Verlaagd tarief"
+                list.push({
+                    text,
+                    description: "Enkel voor gezinnen die in aanmerking komen voor financiële ondersteuning",
+                    price: Formatter.price(price.reducedPrice),
+                })
+            }
+        }
+
+        return list
     }
 
     get infoBox() {
@@ -303,7 +342,7 @@ export default class GroupView extends Mixins(NavigationMixin){
     .cover-photo {
         height: 0;
         position: relative;
-        padding-bottom: 750/1800*100%;
+        padding-bottom: calc(750 / 1800 * 100%);
         background: $color-gray-3;
         border-radius: $border-radius;
         margin-bottom: 20px;
