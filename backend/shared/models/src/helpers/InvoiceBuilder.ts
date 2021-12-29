@@ -30,7 +30,7 @@ const NORMAL_START_Y = PAGE_MARGIN;
 
 export class InvoiceBuilder {
     invoice: STInvoice
-    payment: Payment | null = null
+    payment: Payment | null = null
     document: PDFKit.PDFDocument
 
     private remainingItems: STInvoiceItem[]

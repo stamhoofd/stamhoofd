@@ -1,3 +1,4 @@
+require('@stamhoofd/backend-env').load({path: __dirname+'/../../.env.test.json'})
 import { Column,Database } from "@simonbackx/simple-database";
 import { Request } from '@simonbackx/simple-endpoints';
 import { Version } from '@stamhoofd/structures';
