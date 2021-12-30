@@ -73,9 +73,8 @@ export default class IBANInput extends Vue {
 
         const ibantools = await import(/* webpackChunkName: "ibantools" */ 'ibantools');
         const iban = ibantools.electronicFormatIBAN(this.ibanRaw); // 'NL91ABNA0517164300'
-       
         
-        if (!ibantools.isValidIBAN(iban)) {
+        if (iban === null || !ibantools.isValidIBAN(iban)) {
             this.errorBox = new ErrorBox(new SimpleError({
                 "code": "invalid_field",
                 "message": "Ongeldig rekeningnummer: "+this.ibanRaw,
@@ -84,7 +83,7 @@ export default class IBANInput extends Vue {
             return false
 
         } else {
-            this.ibanRaw = ibantools.friendlyFormatIBAN(iban)
+            this.ibanRaw = ibantools.friendlyFormatIBAN(iban) ?? iban
             this.$emit("input", this.ibanRaw)
             this.errorBox = null
             return true
