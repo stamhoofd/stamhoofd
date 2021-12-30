@@ -4998,13 +4998,6 @@ domhandler@^2.3.0:
   dependencies:
     domelementtype "1"
 
-domhandler@^3.0.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-3.3.0.tgz#6db7ea46e4617eb15cf875df68b2b8524ce0037a"
-  integrity sha512-J1C5rIANUbuYK+FuFL98650rihynUOEzRLxW+90bKZRWB6A1X1Tf82GxR1qAWLyfNPRvjqfip3Q5tdYlmAa9lA==
-  dependencies:
-    domelementtype "^2.0.1"
-
 domhandler@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-4.0.0.tgz#01ea7821de996d85f69029e81fa873c21833098e"
@@ -5026,15 +5019,6 @@ domutils@^1.5.1, domutils@^1.7.0:
   dependencies:
     dom-serializer "0"
     domelementtype "1"
-
-domutils@^2.0.0:
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/domutils/-/domutils-2.4.4.tgz#282739c4b150d022d34699797369aad8d19bbbd3"
-  integrity sha512-jBC0vOsECI4OMdD0GC9mGn7NXPLb+Qt6KW1YDQzeQYRUFKmNG8lh7mO5HiELfr+lLQE7loDVI4QcAxV80HS+RA==
-  dependencies:
-    dom-serializer "^1.0.1"
-    domelementtype "^2.0.1"
-    domhandler "^4.0.0"
 
 domutils@^2.5.2, domutils@^2.6.0:
   version "2.8.0"
@@ -6509,17 +6493,6 @@ html-minifier-terser@^6.0.2:
     relateurl "^0.2.7"
     terser "^5.7.2"
 
-html-to-text@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/html-to-text/-/html-to-text-6.0.0.tgz#8b48adb1b781a8378f374c5bb481864a169f59f4"
-  integrity sha512-r0KNC5aqCAItsjlgtirW6RW25c92Ee3ybQj8z//4Sl4suE3HIPqM4deGpYCUJULLjtVPEP1+Ma+1ZeX1iMsCiA==
-  dependencies:
-    deepmerge "^4.2.2"
-    he "^1.2.0"
-    htmlparser2 "^4.1.0"
-    lodash "^4.17.20"
-    minimist "^1.2.5"
-
 html-to-text@8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/html-to-text/-/html-to-text-8.0.0.tgz#5848681a5a38d657a7bb58cf5006d1c29fe64ce3"
@@ -6587,16 +6560,6 @@ htmlparser2@^3.10.1:
     entities "^1.1.1"
     inherits "^2.0.1"
     readable-stream "^3.1.1"
-
-htmlparser2@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-4.1.0.tgz#9a4ef161f2e4625ebf7dfbe6c0a2f52d18a59e78"
-  integrity sha512-4zDq1a1zhE4gQso/c5LP1OtrhYTncXNSpvJYtWJBtXAETPlMfi3IFNjGuQbYLuVY4ZR0QMqRVvo4Pdy9KLyP8Q==
-  dependencies:
-    domelementtype "^2.0.1"
-    domhandler "^3.0.0"
-    domutils "^2.0.0"
-    entities "^2.0.0"
 
 htmlparser2@^6.1.0:
   version "6.1.0"
@@ -6733,13 +6696,6 @@ iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"
   integrity sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
-  dependencies:
-    safer-buffer ">= 2.1.2 < 3"
-
-iconv-lite@0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.5.0.tgz#59cdde0a2a297cc2aeb0c6445a195ee89f127550"
-  integrity sha512-NnEhI9hIEKHOzJ4f697DMz9IQEXr/MMJ5w64vN2/4Ai+wRnvV7SBrL0KLoRlwaKVghOc7LQ5YkPLuX146b6Ydw==
   dependencies:
     safer-buffer ">= 2.1.2 < 3"
 
@@ -7978,16 +7934,6 @@ libbase64@1.2.1:
   resolved "https://registry.yarnpkg.com/libbase64/-/libbase64-1.2.1.tgz#fb93bf4cb6d730f29b92155b6408d1bd2176a8c8"
   integrity sha512-l+nePcPbIG1fNlqMzrh68MLkX/gTxk/+vdvAb388Ssi7UuUN31MI44w4Yf33mM3Cm4xDfw48mdf3rkdHszLNew==
 
-libmime@4.2.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/libmime/-/libmime-4.2.1.tgz#d21aa5db88b131af18bf5a3caa1013da2c21a9dd"
-  integrity sha512-09y7zjSc5im1aNsq815zgo4/G3DnIzym3aDOHsGq4Ee5vrX4PdgQRybAsztz9Rv0NhO+J5C0llEUloa3sUmjmA==
-  dependencies:
-    encoding-japanese "1.0.30"
-    iconv-lite "0.5.0"
-    libbase64 "1.2.1"
-    libqp "1.1.0"
-
 libmime@5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/libmime/-/libmime-5.0.0.tgz#4759c76eb219985c5d4057b3a9359922194d9ff7"
@@ -8045,13 +7991,6 @@ lines-and-columns@^1.1.6:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.1.6.tgz#1c00c743b433cd0a4e80758f7b64a57440d9ff00"
   integrity sha1-HADHQ7QzzQpOgHWPe2SldEDZ/wA=
-
-linkify-it@3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-3.0.2.tgz#f55eeb8bc1d3ae754049e124ab3bb56d97797fb8"
-  integrity sha512-gDBO4aHNZS6coiZCKVhSNh43F9ioIL4JwRjLZPkoLIY4yZFwg264Y5lu2x6rb1Js42Gh6Yqm2f6L2AJcnkzinQ==
-  dependencies:
-    uc.micro "^1.0.1"
 
 linkify-it@3.0.3:
   version "3.0.3"
@@ -8229,21 +8168,6 @@ magic-string@0.25.1:
   dependencies:
     sourcemap-codec "^1.4.1"
 
-mailparser@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/mailparser/-/mailparser-3.0.1.tgz#c186f744907143fdb155f2e8aef25dc24e498458"
-  integrity sha512-bI6qE0rkyy+O2ZszMijmC6XJ67yvVeCWcZjvWj+6VOHR3FqMjYFMMsExPbFmDVxu0R0PnziYL3ZRv2l0ahCXiw==
-  dependencies:
-    encoding-japanese "1.0.30"
-    he "1.2.0"
-    html-to-text "6.0.0"
-    iconv-lite "0.6.2"
-    libmime "5.0.0"
-    linkify-it "3.0.2"
-    mailsplit "5.0.0"
-    nodemailer "6.4.16"
-    tlds "1.214.0"
-
 mailparser@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/mailparser/-/mailparser-3.4.0.tgz#249869bc5a41af9e0eabbf005197789442fbac9e"
@@ -8258,15 +8182,6 @@ mailparser@^3.4.0:
     mailsplit "5.3.1"
     nodemailer "6.7.0"
     tlds "1.224.0"
-
-mailsplit@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/mailsplit/-/mailsplit-5.0.0.tgz#0924c89142deadb75ef3825860181e436d7557a1"
-  integrity sha512-HeXA0eyCKBtZqbr7uoeb3Nn2L7VV8Vm27x6/YBb0ZiNzRzLoNS2PqRgGYADwh0cBzLYtqddq40bSSirqLO2LGw==
-  dependencies:
-    libbase64 "1.2.1"
-    libmime "4.2.1"
-    libqp "1.1.0"
 
 mailsplit@5.3.1:
   version "5.3.1"
@@ -8831,11 +8746,6 @@ node-ssh@^11.1.1:
     sb-scandir "^3.1.0"
     shell-escape "^0.2.0"
     ssh2 "^0.8.9"
-
-nodemailer@6.4.16:
-  version "6.4.16"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.4.16.tgz#5cb6391b1d79ab7eff32d6f9f48366b5a7117293"
-  integrity sha512-68K0LgZ6hmZ7PVmwL78gzNdjpj5viqBdFqKrTtr9bZbJYj6BRj5W6WGkxXrEnUl3Co3CBXi3CZBUlpV/foGnOQ==
 
 nodemailer@6.7.0:
   version "6.7.0"
@@ -11636,11 +11546,6 @@ tiptap@^1.30.0:
     prosemirror-view "1.15.7"
     tiptap-commands "^1.15.0"
     tiptap-utils "^1.11.0"
-
-tlds@1.214.0:
-  version "1.214.0"
-  resolved "https://registry.yarnpkg.com/tlds/-/tlds-1.214.0.tgz#a20191443eec26fd3339a3bd98e87a0b4f3f0d89"
-  integrity sha512-+i48KYsrCkkIZnsj31cTIj9cu5NtFxKo7xlNIB7jg8kXi//b4Ertl5qaHgqFF+y+g0nFwt/k+eph2uUNQJgfwg==
 
 tlds@1.224.0:
   version "1.224.0"
