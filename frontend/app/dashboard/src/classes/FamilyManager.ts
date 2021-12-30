@@ -145,7 +145,7 @@ export class FamilyManager {
             const m = this.members.find(_m => _m.id == member.id)
 
             if (m) {
-                m.copyFrom(member)
+                m.set(member)
                 s.push(m)
             } else {
                 s.push(member)
@@ -235,7 +235,7 @@ export class FamilyManager {
         return Array.from(addresses.values())
     }
 
-     /**
+    /**
      * List all unique parents of the already existing members
      */
     getParents(): Parent[] {

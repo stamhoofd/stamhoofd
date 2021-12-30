@@ -1,126 +1,109 @@
 <template>
-    <div id="personalize-settings-view" class="st-view background">
-        <STNavigationBar title="Personaliseren">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+    <SaveView id="personalize-settings-view" :loading="saving" title="Personaliseren" :disabled="!hasChanges" @save="save">
+        <h1>
+            Personaliseren
+        </h1>
+        <p>Als je een logo hebt kan je deze hier toevoegen. Je kan kiezen om een vierkant logo, een horizontaal logo of beide te uploaden. We kiezen dan automatisch het beste logo afhankelijk van de schermgrootte.</p>
 
-        <main>
-            <h1>
-                Personaliseren
-            </h1>
-            <p>Als je een logo hebt kan je deze hier toevoegen. Je kan kiezen om een vierkant logo, een horizontaal logo of beide te uploaden. We kiezen dan automatisch het beste logo afhankelijk van de schermgrootte.</p>
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <div class="split-inputs">
+            <div>
+                <ImageInput v-model="horizontalLogo" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
 
-            <div class="split-inputs">
-                <div>
-                    <ImageInput v-model="horizontalLogo" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
-
-                    <p class="st-list-description">
-                        Beter voor grotere schermen.
-                    </p>
-                </div>
-
-                <div>
-                    <ImageInput v-model="squareLogo" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
-                    <p class="st-list-description">
-                        Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
-                    </p>
-                </div>
+                <p class="st-list-description">
+                    Beter voor grotere schermen.
+                </p>
             </div>
 
-            <Checkbox v-model="expandLogo">
-                Logo groter weergeven
-            </Checkbox>
-            <p class="st-list-description">
-                Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten (want dan wordt het lomp). Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.
-            </p>
-
-            <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" />
-            <p class="st-list-description">
-                Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.
-            </p>
-
-            <hr>
-            <h2>Domeinnaam</h2>
-
-            <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen'" target="_blank">deze pagina</a>.</p>
-
-            <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
-                <p class="warning-box">
-                    Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.
-                </p>
-
-                <p v-if="enableMemberModule && organization.registerDomain" class="info-box">
-                    Jouw domeinnaam voor inschrijvingen is wel al beschikbaar ({{ organization.registerDomain }})
-                </p>
-
+            <div>
+                <ImageInput v-model="squareLogo" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
                 <p class="st-list-description">
-                    <button class="button secundary" @click="openRecords">
-                        DNS-records instellen en verifiëren
-                    </button>
-                    <button class="button text" @click="setupDomain">
-                        <span class="icon settings" />
-                        <span>Wijzigen</span>
-                    </button>
+                    Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
                 </p>
-            </template>
+            </div>
+        </div>
 
-            <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
-                <p v-if="enableMemberModule" class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
-                </p>
-                <p v-else class="st-list-description">
-                    Jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
-                </p>
+        <Checkbox v-model="expandLogo">
+            Logo groter weergeven
+        </Checkbox>
+        <p class="st-list-description">
+            Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten (want dan wordt het lomp). Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.
+        </p>
+
+        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" />
+        <p class="st-list-description">
+            Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.
+        </p>
+
+        <hr>
+        <h2>Domeinnaam</h2>
+
+        <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen'" target="_blank">deze pagina</a>.</p>
+
+        <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
+            <p class="warning-box">
+                Jouw nieuwe domeinnaam ({{ organization.privateMeta.pendingMailDomain }}) is nog niet geactiveerd. Voeg de DNS-records toe en verifieer je wijzigingen om deze te activeren.
+            </p>
+
+            <p v-if="enableMemberModule && organization.registerDomain" class="info-box">
+                Jouw domeinnaam voor inschrijvingen is wel al beschikbaar ({{ organization.registerDomain }})
+            </p>
+
+            <p class="st-list-description">
+                <button class="button secundary" type="button" @click="openRecords">
+                    DNS-records instellen en verifiëren
+                </button>
+                <button class="button text" type="button" @click="setupDomain">
+                    <span class="icon settings" />
+                    <span>Wijzigen</span>
+                </button>
+            </p>
+        </template>
+
+        <template v-else-if="organization.privateMeta && organization.privateMeta.mailDomain">
+            <p v-if="enableMemberModule" class="st-list-description">
+                Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a> en jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
+            </p>
+            <p v-else class="st-list-description">
+                Jouw e-mails kunnen worden verstuurd vanaf <strong>@{{ organization.privateMeta.mailDomain }}</strong>.
+            </p>
                 
-                <p v-if="!organization.privateMeta.mailDomainActive" class="warning-box">
-                    Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.
-                </p>
+            <p v-if="!organization.privateMeta.mailDomainActive" class="warning-box">
+                Jouw e-mail domeinnaam is nog niet actief, deze wordt binnenkort geactiveerd.
+            </p>
 
-                <p class="st-list-description">
-                    <button class="button text" @click="setupDomain">
-                        <span class="icon settings" />
-                        <span>Domeinnaam wijzigen</span>
-                    </button>
-                </p>
-            </template>
+            <p class="st-list-description">
+                <button class="button text" type="button" @click="setupDomain">
+                    <span class="icon settings" />
+                    <span>Domeinnaam wijzigen</span>
+                </button>
+            </p>
+        </template>
 
-            <template v-else>
-                <p v-if="enableMemberModule" class="st-list-description">
-                    Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
-                </p>
-                <p v-else class="st-list-description">
-                    {{ $t('dashboard.settings.personalize.domainDescription') }}
-                </p>
+        <template v-else>
+            <p v-if="enableMemberModule" class="st-list-description">
+                Jouw inschrijvingspagina is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
+            </p>
+            <p v-else class="st-list-description">
+                {{ $t('dashboard.settings.personalize.domainDescription') }}
+            </p>
 
-                <p class="st-list-description">
-                    <button class="button text" @click="setupDomain">
-                        <span class="icon settings" />
-                        <span>Domeinnaam instellen</span>
-                    </button>
-                </p>
-            </template>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+            <p class="st-list-description">
+                <button class="button text" type="button" @click="setupDomain">
+                    <span class="icon settings" />
+                    <span>Domeinnaam instellen</span>
+                </button>
+            </p>
+        </template>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, ColorInput, DateSelection, ErrorBox, FileInput, IBANInput, ImageInput, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ColorInput, ErrorBox, ImageInput, SaveView, STErrorsDefault, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Image, Organization, OrganizationMetaData, OrganizationPatch, ResolutionFit, ResolutionRequest, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -131,21 +114,11 @@ import DomainSettingsView from './DomainSettingsView.vue';
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
+        SaveView,
         STErrorsDefault,
         Checkbox,
-        DateSelection,
-        RadioGroup,
-        Radio,
-        BackButton,
-        AddressInput,
-        LoadingButton,
-        IBANInput,
         ImageInput,
         ColorInput,
-        FileInput
     },
 })
 export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
@@ -311,8 +284,12 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
+    get hasChanges() {
+        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+    }
+
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+        if (!this.hasChanges) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
@@ -332,9 +309,9 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
     .logo-placeholder {
         @extend .style-input;
         @extend .style-input-shadow;
-        border: $border-width solid $color-gray-light;
-        color: $color-gray;
-        background: var(--color-white, white);
+        border: $border-width solid $color-border;
+        color: $color-gray-5;
+        background: $color-background;
         border-radius: $border-radius;
         padding: 5px 15px;
         height: 60px;

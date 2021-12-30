@@ -1,17 +1,20 @@
 import { PermissionState, PluginListenerHandle, registerPlugin } from '@capacitor/core';
 
 export interface PermissionStatus {
-  /**
+    /**
    * Permission state of receiving notifications.
    *
    * @since 1.0.0
    */
-  receive: PermissionState;
+    receive: PermissionState;
 }
 
 export interface QRScannerPlugin {
     startScanning(): Promise<void>;
     stopScanning(): Promise<void>;
+
+    getTorch(): Promise<{ status: boolean }>;
+    toggleTorch(): Promise<{ status: boolean }>;
 
     /**
      * Check permission 

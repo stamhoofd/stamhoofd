@@ -311,7 +311,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 
     .ticket-secret {
         text-align: center;
-        color: $color-gray;
+        color: $color-gray-text;
         font-size: 10px;
         font-weight: bold;
         padding-bottom: 20px;

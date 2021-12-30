@@ -347,7 +347,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await group.save()
         }
 
-        return new Response(members.map(m => m.getStructureWithRegistrations()));
+        return new Response(members.map(m => m.getStructureWithRegistrations(true)));
     }
 
     async addRegistration(user: User, member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {

@@ -1,105 +1,88 @@
 <template>
-    <div id="general-settings-view" class="st-view background">
-        <STNavigationBar title="Instellingen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
-
-        <main>
-            <h1>
-                Algemene instellingen
-            </h1>
+    <SaveView :loading="saving" title="Algemeen" :disabled="!hasChanges" @save="save">
+        <h1>
+            Algemene instellingen
+        </h1>
         
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Naam van je vereniging (kort)" error-fields="name" :error-box="errorBox">
-                        <input
-                            id="organization-name"
-                            ref="firstInput"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            placeholder="De naam van je vereniging"
-                            autocomplete="organization"
-                        >
-                    </STInputBox>
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Naam van je vereniging (kort)" error-fields="name" :error-box="errorBox">
+                    <input
+                        id="organization-name"
+                        ref="firstInput"
+                        v-model="name"
+                        class="input"
+                        type="text"
+                        placeholder="De naam van je vereniging"
+                        autocomplete="organization"
+                    >
+                </STInputBox>
 
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
-                </div>
-
-                <div>
-                    <STInputBox title="Website (optioneel)" error-fields="website" :error-box="errorBox">
-                        <input
-                            v-model="website"
-                            class="input"
-                            type="url"
-                            :placeholder="$t('dashboard.inputs.website.placeholder')"
-                        >
-                    </STInputBox>
-                    <p class="style-description-small">
-                        De link naar de website van jouw vereniging.
-                    </p>
-                </div>
+                <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
             </div>
 
-            <hr>
-
-            <h2>Bedrijfsinformatie (optioneel)</h2>
-            <p>Om te voldoen aan sommige wettelijke verplichtingen, vul je deze informatie ook best in. Deze worden minder prominent weergegeven, maar zijn wel publiek beschikbaar.</p>
-
-            <Checkbox v-model="hasCompanyNumber">
-                Onze vereniging heeft een {{ country == 'NL' ? 'KVK-nummer' : 'ondernemingsnummer' }}
+            <div>
+                <STInputBox title="Website (optioneel)" error-fields="website" :error-box="errorBox">
+                    <input
+                        v-model="website"
+                        class="input"
+                        type="url"
+                        :placeholder="$t('dashboard.inputs.website.placeholder')"
+                    >
+                </STInputBox>
                 <p class="style-description-small">
-                    Vink dit aan als je bent geregistreerd als {{ country != 'BE' ? 'vereniging' : 'VZW' }} of stichting
+                    De link naar de website van jouw vereniging.
                 </p>
-            </Checkbox>
-            <Checkbox v-if="hasCompanyNumber" v-model="hasVATNumber">
-                Onze vereniging is BTW-plichtig
-            </Checkbox>
-
-            <div class="split-inputs">
-                <div>
-                    <STInputBox :title="hasCompanyNumber ? 'Bedrijfsnaam en rechtsvorm' : 'Officiële naam vereniging'" error-fields="companyName" :error-box="errorBox">
-                        <input
-                            id="business-name"
-                            v-model="companyName"
-                            class="input"
-                            type="text"
-                            :placeholder="country == 'BE' ? 'bv. Ruimtereis VZW' : 'bv. Ruimtereis vereniging'"
-                            autocomplete="organization"
-                        >
-                    </STInputBox>
-                    <p v-if="hasCompanyNumber && country == 'BE'" class="style-description-small">
-                        Vul ook de rechtsvorm in, bv. VZW.
-                    </p>
-                    <AddressInput v-if="hasCompanyNumber" v-model="companyAddress" :required="false" title="Maatschappelijke zetel" :validator="validator" />
-                </div>
-                <div>
-                    <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country != 'BE')" v-model="companyNumber" :country="country" placeholder="Jullie ondernemingsnummer" :validator="validator" :required="true" />
-                    <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" title="BTW-nummer" placeholder="Jullie BTW-nummer" :country="country" :validator="validator" :required="true" />
-                </div>
             </div>
-        </main>
+        </div>
 
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <hr>
+
+        <h2>Bedrijfsinformatie (optioneel)</h2>
+        <p>Om te voldoen aan sommige wettelijke verplichtingen, vul je deze informatie ook best in. Deze worden minder prominent weergegeven, maar zijn wel publiek beschikbaar.</p>
+
+        <Checkbox v-model="hasCompanyNumber">
+            Onze vereniging heeft een {{ country == 'NL' ? 'KVK-nummer' : 'ondernemingsnummer' }}
+            <p class="style-description-small">
+                Vink dit aan als je bent geregistreerd als {{ country != 'BE' ? 'vereniging' : 'VZW' }} of stichting
+            </p>
+        </Checkbox>
+        <Checkbox v-if="hasCompanyNumber" v-model="hasVATNumber">
+            Onze vereniging is BTW-plichtig
+        </Checkbox>
+
+        <div class="split-inputs">
+            <div>
+                <STInputBox :title="hasCompanyNumber ? 'Bedrijfsnaam en rechtsvorm' : 'Officiële naam vereniging'" error-fields="companyName" :error-box="errorBox">
+                    <input
+                        id="business-name"
+                        v-model="companyName"
+                        class="input"
+                        type="text"
+                        :placeholder="country == 'BE' ? 'bv. Ruimtereis VZW' : 'bv. Ruimtereis vereniging'"
+                        autocomplete="organization"
+                    >
+                </STInputBox>
+                <p v-if="hasCompanyNumber && country == 'BE'" class="style-description-small">
+                    Vul ook de rechtsvorm in, bv. VZW.
+                </p>
+                <AddressInput v-if="hasCompanyNumber" v-model="companyAddress" :required="false" title="Maatschappelijke zetel" :validator="validator" />
+            </div>
+            <div>
+                <CompanyNumberInput v-if="hasCompanyNumber && (!hasVATNumber || country != 'BE')" v-model="companyNumber" :country="country" placeholder="Jullie ondernemingsnummer" :validator="validator" :required="true" />
+                <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" title="BTW-nummer" placeholder="Jullie BTW-nummer" :country="country" :validator="validator" :required="true" />
+            </div>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator, VATNumberInput } from "@stamhoofd/components";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, DateSelection, ErrorBox, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator, VATNumberInput } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -108,6 +91,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 @Component({
     components: {
+        SaveView,
         STNavigationBar,
         STToolbar,
         STInputBox,
@@ -288,8 +272,12 @@ export default class GeneralSettingsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
+    get hasChanges() {
+        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+    }
+
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+        if (!this.hasChanges) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

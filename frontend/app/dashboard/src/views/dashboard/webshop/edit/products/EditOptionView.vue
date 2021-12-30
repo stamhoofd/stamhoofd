@@ -1,68 +1,55 @@
 <template>
-    <div class="st-view option-edit-view">
-        <STNavigationBar :title="isNew ? 'Keuze toevoegen' : name+' bewerken'">
-            <template slot="right">
-                <button v-if="!isNew && !isSingle" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1 v-if="isNew">
-                Keuze toevoegen
-            </h1>
-            <h1 v-else>
-                {{ name }} bewerken
-            </h1>
+    <SaveView :title="isNew ? 'Keuze toevoegen' : name+' bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+        <h1 v-if="isNew">
+            Keuze toevoegen
+        </h1>
+        <h1 v-else>
+            {{ name }} bewerken
+        </h1>
           
-            <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van deze keuze"
-                    autocomplete=""
-                >
-            </STInputBox>
+        <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+            <input
+                ref="firstInput"
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="Naam van deze keuze"
+                autocomplete=""
+            >
+        </STInputBox>
 
-            <STInputBox title="Meer of minkost" error-fields="price" :error-box="errorBox">
-                <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
-            </STInputBox>
-        </main>
+        <STInputBox title="Meer of minkost" error-fields="price" :error-box="errorBox">
+            <PriceInput v-model="price" placeholder="+ 0 euro" :min="null" />
+        </STInputBox>
 
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+        <div v-if="!isNew && !isSingle" class="container">
+            <hr>
+            <h2>
+                Verwijder deze keuze
+            </h2>
+
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, PriceInput,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, TimeInput, Validator } from "@stamhoofd/components";
-import { Category, Group, GroupGenderType, GroupPatch, GroupPrices, GroupSettings, GroupSettingsPatch, Option, OptionMenu, Organization, PrivateWebshop, Product, ProductPrice, Version, WaitingListType, Webshop } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { Option, OptionMenu, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
         PriceInput,
-        STList
     },
 })
 export default class EditOptionView extends Mixins(NavigationMixin) {
@@ -146,21 +133,15 @@ export default class EditOptionView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchOptionMenu, this.optionMenu, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
-
-    
 }
 </script>

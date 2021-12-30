@@ -276,6 +276,29 @@ export class SessionManagerStatic {
 
         return sessions
     }
+
+    lastOrganizationFetch = new Date()
+
+    listenForOrganizationUpdates() {
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === 'visible') {
+                // todo
+                console.info("Window became visible again")
+
+                if (!this.currentSession || !this.currentSession.isComplete()) {
+                    return
+                }
+
+                if (this.lastOrganizationFetch.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
+                    // Update when at least 5 minutes inactive
+                    console.info("Updating organization")
+                    this.lastOrganizationFetch = new Date()
+
+                    this.currentSession.updateData(true, false, false).catch(console.error)
+                }
+            }
+        });
+    }
 }
 
 export const SessionManager = new SessionManagerStatic();

@@ -5,10 +5,15 @@ type Listener<E, Value> = (value: Value, type: E) => Promise<void>
  * Controls the fetching and decrypting of members
  */
 export class EventBus<E, Value> {
-    protected listeners: Map<any, { type: E; listener: Listener<E, Value> }> = new Map()
+    protected listeners: Map<any, { type: E; listener: Listener<E, Value> }[]> = new Map()
 
     addListener<T extends E>(owner: any, type: T, listener: Listener<T, Value>) {
-        this.listeners.set(owner, { type, listener})
+        const existing = this.listeners.get(owner)
+        if (existing) {
+            existing.push({ type, listener })
+        } else {
+            this.listeners.set(owner, [{ type, listener}])
+        }
     }
 
     removeListener(owner: any) {
@@ -16,14 +21,16 @@ export class EventBus<E, Value> {
     }
 
     async sendEvent(type: E, value: Value) {
-        const values: any[] = []
-        for (const listener of this.listeners.values()) {
-            if (listener.type == type) {
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                values.push(await listener.listener(value, type))
+        const values: Promise<any>[] = []
+        for (const owner of this.listeners.values()) {
+            for (const listener of owner) {
+                if (listener.type == type) {
+                    values.push(listener.listener(value, type))
+                }
             }
+            
         }
-        return values
+        return await Promise.all(values)
     }
 }
 

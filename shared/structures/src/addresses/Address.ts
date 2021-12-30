@@ -24,6 +24,10 @@ export class Address extends AutoEncoder {
         return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + CountryHelper.getName(this.country)
     }
 
+    shortString(): string {
+        return this.street + " " + this.number + ", " + this.city
+    }
+
     static createDefault(country = Country.Belgium): Address {
         return Address.create({
             street: "",

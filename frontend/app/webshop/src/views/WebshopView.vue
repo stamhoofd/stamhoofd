@@ -10,7 +10,7 @@
                     <span class="icon external" />
                     <span>Terug naar website</span>
                 </a>
-                <button class="primary button" @click="openCart(true)">
+                <button class="primary button" type="button" @click="openCart(true)">
                     <span class="icon basket" />
                     <span>{{ cartCount }}</span>
                 </button>
@@ -145,7 +145,7 @@ import TicketView from "./orders/TicketView.vue";
                     content: WebshopManager.webshop.meta.title ?? WebshopManager.webshop.meta.name
                 },
                 ...(this.bannerImageSrc ? [
-                     {
+                    {
                         hid: 'og:image',
                         name: 'og:image',
                         content: this.bannerImageSrc
@@ -214,7 +214,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     openCart(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView) }).setAnimated(animated).setDisplayStyle("popup"))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            components: [
+                new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView) }).setDisplayStyle("popup")
+            ]
+        })
     }
 
     get bannerImage() {
@@ -239,17 +245,11 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get closed() {
         // 2 minutes in advance already
-        if (this.webshop.meta.availableUntil && this.webshop.meta.availableUntil.getTime() < new Date().getTime() + 2*60*1000) {
-            return true
-        }
-        return false
+        return this.webshop.isClosed(2*60*1000)
     }
 
     get almostClosed() {
-        if (this.webshop.meta.availableUntil && this.webshop.meta.availableUntil.getTime() < new Date().getTime() + 6*60*60*1000) {
-            return true
-        }
-        return false
+        return this.webshop.isClosed(6*60*60*1000) && !this.closed
     }
     
     onAddItem(cartItem: CartItem) {
@@ -278,21 +278,38 @@ export default class WebshopView extends Mixins(NavigationMixin){
             }
         })
 
-        const path = this.webshop.removeSuffix(UrlHelper.shared.getParts());
+        const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
+        const path = UrlHelper.shared.getParts();
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
-        UrlHelper.setUrl(this.webshop.getUrlSuffix())
+        UrlHelper.setUrl("/")
 
         if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];
-            this.show(new ComponentWithProperties(OrderView, { orderId }).setAnimated(false))
+            this.show({
+                animated: false,
+                adjustHistory: false,
+                components: [
+                    new ComponentWithProperties(OrderView, { orderId })
+                ]
+            })
         } else if (path.length == 2 && path[0] == 'tickets') {
             const secret = path[1];
-            this.show(new ComponentWithProperties(TicketView, { secret }).setAnimated(false))
+            this.show({
+                animated: false,
+                adjustHistory: false,
+                components: [
+                    new ComponentWithProperties(TicketView, { secret })
+                ]
+            })
         } else if (path.length == 1 && path[0] == 'payment' && params.get("id")) {
             const paymentId = params.get("id")
             const me = this
             this.show({
+                adjustHistory: false,
+                animated: false,
+                force: true,
+                url: currentPath,
                 components: [
                     new ComponentWithProperties(PaymentPendingView, { 
                         server: WebshopManager.server, 
@@ -318,8 +335,6 @@ export default class WebshopView extends Mixins(NavigationMixin){
                         } 
                     })
                 ],
-                animated: false,
-                force: true
             })
         } else if (path.length == 2 && path[0] == 'checkout') {
             const stepName = Formatter.capitalizeFirstLetter(path[1])
@@ -335,7 +350,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     async resumeStep(destination: CheckoutStepType, animated = true) {
-         // Quickly recreate all steps
+        // Quickly recreate all steps
         let step: CheckoutStepType | undefined = undefined
         const components: Promise<any>[] = []
 
@@ -364,6 +379,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         await this.navigationController!.push({
             components: replaceWith,
             animated,
+            adjustHistory: animated,
         })
     }
 
@@ -399,7 +415,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         width: 100%;
         margin: 0 auto;
         padding-bottom: 300 / 720 * 100%;
-        background: $color-gray;
+        background: $color-gray-3;
         border-radius: $border-radius;
         margin-bottom: 30px;
         margin-top: 0px;
@@ -463,6 +479,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 justify-content: space-between;
                 align-items: flex-start;
                 flex-wrap: wrap-reverse;
+                padding: 0 var(--st-horizontal-padding, 40px);
 
                 @media (max-width: 500px) {
                     .stamhoofd-logo-container {
@@ -492,7 +509,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                             }
 
                             &, &:hover, &:link, &:active, &:visited {
-                                color: $color-gray;
+                                color: $color-gray-text;
                                 font-weight: 600;
                                 text-decoration: none;
                             }

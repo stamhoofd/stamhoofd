@@ -12,7 +12,7 @@ const webpack = require("webpack")
 const fs = require("fs")
 const path = require("path")
 
-
+const useMiniCssExtractPlugin = true
 const use_env = {}
 
 // This is a debug config as a replacement for process.env.NODE_ENV which seems to break webpack 5
@@ -83,12 +83,19 @@ module.exports = {
         assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext][query]' : 'images/[name].[contenthash][ext][query]'
     },
     devServer: {
-        contentBase: './dist',
+        // contentBase: './dist',
         host: '0.0.0.0',
         port: 8080,
-        sockPort: 443, // needed because the dev server runs behind a reverse proxy (Caddy)
-        disableHostCheck: true,
-        historyApiFallback: true,
+        client: {
+            webSocketURL: {
+                // needed because the dev server runs behind a reverse proxy (Caddy)
+                port: 443,
+            },
+        },
+        allowedHosts: "all",
+        historyApiFallback: {
+            disableDotRule: true, // default behaviour is to ignore all urls with a dot character. lol.
+        },
     },
     /*optimization: (process.env.NODE_ENV === "production" ? {} : {
         runtimeChunk: true,
@@ -140,7 +147,7 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [
-                    process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader', 
+                    useMiniCssExtractPlugin ? MiniCssExtractPlugin.loader : 'style-loader', 
                     // If you enable this, HMR won't work. Replace it with a style loader
                     // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     'css-loader',
@@ -163,7 +170,7 @@ module.exports = {
                 test: /\.scss$/,
                 exclude: /\.url.scss$/,
                 use: [
-                    process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader',  // vue-style-loader is not supported/maintained any longer and doesn't work without other changes
+                    useMiniCssExtractPlugin ? MiniCssExtractPlugin.loader : 'style-loader',  // vue-style-loader is not supported/maintained any longer and doesn't work without other changes
                     // If you enable this, HMR won't work. Replace it with a style loader
                     // sets the style inline, instead of using MiniCssExtractPlugin.loader
                     {
@@ -241,7 +248,7 @@ module.exports = {
             {
                 test: /\.font\.js/,
                 use: [
-                    process.env.NODE_ENV === "production" ? MiniCssExtractPlugin.loader : 'style-loader',
+                    useMiniCssExtractPlugin ? MiniCssExtractPlugin.loader : 'style-loader',
                     {
                         loader: 'css-loader',
                         options: {
@@ -250,7 +257,7 @@ module.exports = {
                     },
                     {
                         loader: '@simonbackx/webfonts-loader',
-                        //options: { ... }
+                        options: {}
                     }
                 ]
             }
@@ -261,10 +268,10 @@ module.exports = {
         //new FriendlyErrorsWebpackPlugin(),
         new CleanWebpackPlugin(), // Clear the dist folder before building
         new VueLoaderPlugin(), // Allow .vue files
-        ...(process.env.NODE_ENV !== "production") ? [] : [new MiniCssExtractPlugin({
+        ...(!useMiniCssExtractPlugin) ? [] : [new MiniCssExtractPlugin({
             filename: '[name].[contenthash].css',
             //chunkFilename: '[id].[contenthash].css',
-            ignoreOrder: false, // Enable to remove warnings about conflicting order
+            ignoreOrder: true, // Enable to remove warnings about conflicting order
         })],
         new webpack.DefinePlugin(use_env),
         new webpack.ProvidePlugin({

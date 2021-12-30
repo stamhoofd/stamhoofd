@@ -19,10 +19,10 @@
                 </a>
             </p>
 
-            <p v-if="!areSalesDisabled" class="info-box icon gift selectable with-button" @click="openReferrals(true)">
+            <p v-if="false && !areSalesDisabled" class="info-box icon gift selectable with-button" @click="openReferrals(true)">
                 Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
 
-                <button class="button text">
+                <button class="button text" type="button">
                     Meedoen
                 </button>
             </p>
@@ -129,10 +129,12 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageGroups(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                         <h2 class="style-title-list">
-                            Inschrijvingsgroepen
+                            Inschrijvingsgroepen<template v-if="enableActivities">
+                                en activiteiten
+                            </template>
                         </h2>
                         <p v-if="enableActivities" class="style-description">
-                            Leeftijdsgroepen, cursussen, activiteiten, kampen... aanmaken en beheren
+                            Deel je leden op in groepen en activiteiten, wijzig de prijs en de inschrijvingsdatum
                         </p>
                         <p v-else class="style-description">
                             Leeftijdsgroepen aanmaken en beheren
@@ -337,95 +339,198 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 
     openReferrals(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(ReferralView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(ReferralView, {})
+                })
+            ]
+        })
     }
 
     openGeneral(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(GeneralSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(GeneralSettingsView, {})
+                })
+            ]
+        })
     }
 
     openPersonalize(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PersonalizeSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PersonalizeSettingsView, {})
+                })
+            ]
+        })
     }
 
     openPrivacy(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PrivacySettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PrivacySettingsView, {})
+                })
+            ]
+        })
     }
 
     openAdmins(animated = true) {
-        this.show(
-            new ComponentWithProperties(AdminsView, {}).setAnimated(animated)
-        )
+        this.show({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(AdminsView, {})
+            ]
+        })
     }
 
     setupEmail(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EmailSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(EmailSettingsView, {})
+                })
+            ]
+        })
     }
 
     openPayment(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PaymentSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PaymentSettingsView, {})
+                })
+            ]
+        })
     }
 
     openPackages(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(PackageSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PackageSettingsView, {})
+                })
+            ]
+        })
     }
 
     openBilling(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(BillingSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(BillingSettingsView, {})
+                })
+            ]
+        })
     }
 
     manageRegistrationPage(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(RegistrationPageSettingsView)
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(RegistrationPageSettingsView)
+                })
+            ]
+        })
     }
 
     manageGroups(animated = true) {
         const component = buildManageGroupsComponent(this.organization)
             
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: component
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: component
+                })
+            ]
+        })
     }
 
     manageRecords(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(RecordsSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(RecordsSettingsView, {})
+                })
+            ]
+        })
     }
 
     manageFinancialSupport(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(FinancialSupportSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(FinancialSupportSettingsView, {})
+                })
+            ]
+        })
     }
 
     manageDataPermission(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(DataPermissionSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(DataPermissionSettingsView, {})
+                })
+            ]
+        })
     }
 
     manageFreeContribution(animated = true) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(FreeContributionSettingsView, {})
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(FreeContributionSettingsView, {})
+                })
+            ]
+        })
     }
 
     importMembers(animated = true) {
@@ -434,9 +539,16 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             return
         }
 
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: AsyncComponent(() => import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue"))
-        }).setDisplayStyle("popup").setAnimated(animated))
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import(/* webpackChunkName: "ImportMembersView" */ "./modules/members/ImportMembersView.vue"))
+                })
+            ]
+        })
     }
 
     get hasPolicy() {
@@ -543,11 +655,17 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         }
 
         if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {
-            this.present(new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(InvoicePaymentStatusView, {
-                    paymentId: params.get("id")
-                })
-            }).setDisplayStyle("popup").setAnimated(false))
+            this.present({
+                animated: false,
+                adjustHistory: false,
+                modalDisplayStyle: "popup",
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(InvoicePaymentStatusView, {
+                            paymentId: params.get("id")
+                        })
+                    })
+                ]})
         }
 
         this.loadAdmins().catch(e => {

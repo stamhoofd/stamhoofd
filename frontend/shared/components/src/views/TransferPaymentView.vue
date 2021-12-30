@@ -153,20 +153,20 @@
                 </p>
                 <template v-else-if="payment.price > 0 && created">
                     <p v-if="isBelgium" class="hide-smartphone info-box">
-                        De QR-code is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
+                        De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
                     </p>     
                     <p v-else class="hide-smartphone info-box">
-                        De QR-code is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
+                        De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
                     </p>          
                 </template>
             </main>
 
             <STToolbar v-if="!isPopup">
-                <button v-if="payment.price > 0 && payment.status != 'Succeeded'" slot="right" class="button secundary hide-smartphone" @click="helpMe">
+                <button v-if="payment.price > 0 && payment.status != 'Succeeded'" slot="right" class="button secundary hide-smartphone" type="button" @click="helpMe">
                     <span class="icon help" />
                     <span>Het lukt niet</span>
                 </button>
-                <button slot="right" class="button primary" @click="goNext">
+                <button slot="right" class="button primary" type="button" @click="goNext">
                     <span>Doorgaan</span>
                     <span class="icon arrow-right" />
                 </button>
@@ -419,7 +419,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             position: absolute;
             top: 0;
             transform: translate(-50%, -50%);
-            background: var(--color-white, white);
+            background: $color-background;
             text-align: center;
             left: 50%;
             max-width: 90%;
@@ -437,7 +437,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
             position: absolute;
             bottom: 0;
             transform: translate(-50%, 50%);
-            background: var(--color-white, white);
+            background: $color-background;
             text-align: center;
             left: 50%;
             max-width: 90%;

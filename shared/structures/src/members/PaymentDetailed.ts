@@ -21,10 +21,9 @@ export class PaymentDetailed extends Payment {
         return this.registrations.map(r => (r.member.details?.name ?? "Onbekend")+" voor "+r.group.settings.name).join(", ")
     }
 
-    matchQuery(query: string): boolean {
-        const lowerQuery = query.toLowerCase();
+    override matchQuery(query: string): boolean {
         if (
-            this.transferDescription && this.transferDescription.toLowerCase().includes(lowerQuery) ||
+            super.matchQuery(query) ||
             this.registrations.find(r => r.member.details && r.member.details.matchQuery(query))
         ) {
             return true;

@@ -267,7 +267,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             return new Response(RegisterResponse.create({
                 payment: PaymentStruct.create(payment),
                 members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
+                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r, false)),
                 paymentUrl
             }));
         }
@@ -275,7 +275,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         return new Response(RegisterResponse.create({
             payment: null,
             members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
-            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
+            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r, false))
         }));
     }
 }

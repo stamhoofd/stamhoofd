@@ -5,8 +5,8 @@
         </STNavigationBar>
 
         <div class="video-container" :class="{ native: disableWebVideo }">
-            <video ref="video" />
-            <div class="scan-overlay" />
+            <video v-if="!disableWebVideo" ref="video" />
+            <div v-if="!disableWebVideo" class="scan-overlay" />
 
             <div class="video-footer">
                 <div class="button-bar">
@@ -20,7 +20,7 @@
 
                 <div class="status-bar">
                     <p v-if="isLoading">
-                        <Spinner /> Bijwerken...
+                        <Spinner class="inline" /> Bijwerken...
                     </p>
                     <p v-else-if="hadNetworkError">
                         Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.<br>
@@ -30,7 +30,11 @@
                         </button>
                     </p>
                     <p v-else>
-                        Plaats de QR-code in het kader om te scannen.<br>
+                        <template v-if="disableWebVideo">
+                            Plaats de QR-code in het midden van het scherm.
+                        </template><template v-else>
+                            Plaats de QR-code in het kader om te scannen.
+                        </template><br>
                         <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span>
                     </p>
                 </div>
@@ -189,6 +193,14 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     toggleFlash() {
+        if (AppManager.shared.QRScanner) {
+            AppManager.shared.QRScanner.toggleTorch().then(torch => {
+                console.log(torch)
+                this.isFlashOn = torch.status
+            }).catch(console.error)
+            return
+        }
+
         if (this.isFlashOn) {
             //this.scanner?.turnFlashOff()
             this.isFlashOn = false
@@ -302,7 +314,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             this.pollInterval = null
         }
         const video = this.$refs.video as HTMLVideoElement
-         // iOS fix
+        // iOS fix
         video.setAttribute('autoplay', '');
         video.setAttribute('muted', '');
         video.setAttribute('playsinline', '');
@@ -387,7 +399,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                         }
                     }
 
-                    if (order.status === OrderStatus.Canceled) {
+                    if (order.status === OrderStatus.Canceled || order.status === OrderStatus.Deleted) {
                         this.canceledTicket()
                     } else if (ticket.scannedAt !== null) {
                         this.alreadyScannedTicket(ticket, order)
@@ -475,7 +487,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             this.disableWebVideo = true
 
             // Make background transparent to see the video underlay
-            document.body.style.background = "transparent"
+            document.body.style.background = "transparent";
+            (this.$el as HTMLElement).style.background = "transparent"
 
             // Disable scrolling (bouncing)
             document.body.style.overflow = "hidden"
@@ -485,7 +498,15 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                     this.validateQR(result.value)
                 })
             }
-            
+
+            try {
+                const torch = await AppManager.shared.QRScanner.getTorch()
+                console.log(torch)
+                this.isFlashOn = torch.status
+                this.hasFlash = true
+            } catch (e) {
+                console.error(e)
+            }
 
             return
         }
@@ -504,10 +525,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
                     video: { deviceId: this.cameras[this.cameraIndex].deviceId },
                     audio: false,
                 } :
-                { 
-                video: { facingMode: "environment" },
-                audio: false,
-            })
+                    { 
+                        video: { facingMode: "environment" },
+                        audio: false,
+                    })
         }
         
         /*this.scanner = new QrScanner(this.$refs.video as HTMLVideoElement, (result) => {
@@ -534,7 +555,8 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
 
             // Reset body
             document.body.style.background = ""
-            document.body.style.overflow = ""
+            document.body.style.overflow = "";
+            (this.$el as HTMLElement).style.background = ""
 
             AppManager.shared.QRScanner.stopScanning().catch(console.error)
             return
@@ -638,11 +660,11 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }
 
         .scan-overlay {
-            width: 60%;
+            width: 70%;
             position: absolute;
             left: 50%;
             top: 50%;
-            padding-bottom: 60%;
+            padding-bottom: 70%;
             border: 4px solid white;
             border-radius: 5px;
             transform: translate(-50%, -50%);
@@ -682,6 +704,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             line-height: 1.4;
 
             padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 15px);
+
+            .spinner-container {
+                margin-right: 15px;
+            }
         }
     }
 
@@ -703,12 +729,12 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         line-height: 48px;
         text-align: center;
         display: inline-block;
-        color: $color-white;
+        color: $color-background;
         border-radius: 24px;
         transition: background-color 0.2s;
 
         &:active {
-            background: $color-gray;
+            background: $color-gray-1;
             transition: background-color 0s;
         }
 

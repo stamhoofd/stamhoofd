@@ -14,15 +14,17 @@ import WebKit
     We enable the default swipe to go back behaviour in the WKWebView
  */
 class HomeViewController: CAPBridgeViewController {
+    var longPressGesture: UILongPressGestureRecognizer!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.webView!.allowsBackForwardNavigationGestures = true
-        self.webView!.scrollView.bounces = true
-        self.webView!.allowsLinkPreview = false
+        self.webView!.scrollView.bounces = false
         self.webView!.scrollView.keyboardDismissMode = .interactive
         self.webView!.configuration.suppressesIncrementalRendering = true
         
         // Disable 3D Touch
+        // Enabling this breaks the magnification loupes again
         self.webView!.allowsLinkPreview = false
         
         // Better defaults
@@ -30,11 +32,7 @@ class HomeViewController: CAPBridgeViewController {
         self.webView!.configuration.mediaTypesRequiringUserActionForPlayback = []
         
         self.webView!.configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
-        /*if #available(iOS 14.5, *) {
-            self.webView!.configuration.preferences.textInteractionEnabled = false
-        } else {
-            // Fallback on earlier versions
-        }*/
+
         if #available(iOS 14.0, *) {
             self.webView!.configuration.limitsNavigationsToAppBoundDomains = true
         } else {

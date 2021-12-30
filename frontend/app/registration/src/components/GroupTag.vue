@@ -4,8 +4,8 @@
         <template v-else>
             <span v-if="group.notYetOpen" class="style-tag error">Nog niet geopend</span>
             <template v-if="group.settings.registeredMembers !== null && group.settings.maxMembers !== null">
-                <span v-if="group.settings.maxMembers - group.settings.registeredMembers > 0" class="style-tag warn">
-                    Nog {{ group.settings.maxMembers - group.settings.registeredMembers }} {{ group.settings.maxMembers - group.settings.registeredMembers != 1 ? 'plaatsen' : 'plaats' }}
+                <span v-if="group.settings.availableMembers > 0" class="style-tag warn">
+                    Nog {{ group.settings.availableMembers }} {{ group.settings.availableMembers != 1 ? 'plaatsen' : 'plaats' }}
                 </span>
                 <span v-else-if="waitingListIfFull" class="style-tag error">
                     Wachtlijst (volzet)
@@ -13,7 +13,7 @@
                 <span v-else class="style-tag error">
                     Volzet
                 </span>
-                <span v-if="preRegistrations && group.settings.maxMembers - group.settings.registeredMembers > 0" class="style-tag warn">Voorinschrijvingen</span>
+                <span v-if="preRegistrations && group.settings.availableMembers > 0" class="style-tag warn">Voorinschrijvingen</span>
             </template>
             <span v-else-if="preRegistrations" class="style-tag warn">Voorinschrijvingen</span>
             <span v-else-if="allWaitingList" class="style-tag error">Wachtlijst</span>
@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { Group, WaitingListType } from '@stamhoofd/structures';
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Prop,Vue } from "vue-property-decorator";
 
 @Component({
     components: {},

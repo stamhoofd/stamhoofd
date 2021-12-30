@@ -2,9 +2,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
-import { KeychainItem } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { ChangeOrganizationKeyRequest, CreateOrganization, Token as TokenStruct } from "@stamhoofd/structures";
+import { KeychainItem, Token } from '@stamhoofd/models';
+import { ChangeOrganizationKeyRequest } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;

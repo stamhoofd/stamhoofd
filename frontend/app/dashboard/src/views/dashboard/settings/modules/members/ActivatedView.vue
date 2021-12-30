@@ -11,13 +11,13 @@
             <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie inschrijvingspagina (zie hieronder) of je kan ze importeren via Excel. Je kan ook gewoon zelf eerst even proberen in te schrijven. Je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
 
             <hr>
-            <h2>Inschrijvingsgroepen</h2>
+            <h2>Lidstructuur</h2>
 
             <p v-if="isYouth">
                 Alle activiteiten, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
             </p>
             <p v-else>
-                Leden worden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
+                In Stamhoofd worden leden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
             </p>
 
             <button class="button secundary" @click="manageGroups">

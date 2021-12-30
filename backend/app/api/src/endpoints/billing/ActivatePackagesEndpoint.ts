@@ -149,6 +149,9 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             const invoice = STInvoice.createFor(user.organization)
             const date = invoice.meta.date!
 
+            invoice.meta.ipAddress = request.request.getIP()
+            invoice.meta.userAgent = request.headers["user-agent"] ?? null
+
             let membersCount: number | null = null
             
             // Save packages as models
@@ -349,7 +352,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     })
                 }
             }
-
+            
             // We don't save the invoice, just return it
             return new Response(STInvoiceResponse.create({
                 paymentUrl: undefined,

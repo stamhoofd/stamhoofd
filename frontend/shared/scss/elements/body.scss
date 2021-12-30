@@ -24,23 +24,30 @@
 }
 
 body {
-    --color-current-background: #{$color-white};
-    --color-current-border: #{$color-border};
-    --color-current-background-shade: #{$color-white-shade};
+    --color-current-background: #{$color-background};
+    --color-current-background-shade: #{$color-background-shade};
 
     background: $color-background;
     color: $color-dark;
+
+
 }
 
 body,
 html {
     margin: 0;
     padding: 0;
-    font-family: "Metropolis", Helvetica, Arial, sans-serif;
+    font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     
     -webkit-overflow-scrolling: auto;
     /* Disabel text resize as this doesn't work across animations */
     text-size-adjust: none;
+
+    // Allow word break if it doesn't fit only
+    word-break: break-word;
+
+    will-change: scroll-position;
 }

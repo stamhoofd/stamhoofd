@@ -14,16 +14,25 @@
 
     &[data-has-detail="true"] {
         > .master {
-            border-right: 2px solid $color-border;
-            background: $color-white-shade;
+            border-right: $border-width-thin solid $color-border;
+            background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
             --color-current-background-shade: #{$color-background-shade-darker};
+
+            body.modern & {
+                overflow: hidden;
+            }
         }
     }
 }
 
 .popup {
     transform: translate3d(0, 0, 0);
+    
+    // Prevent scrolling outer areas when touching the overlay
+    @supports not (overscroll-behavior: contain) {
+        touch-action: none;
+    }
 
     @media (max-height: 900px) {
         // Reduce navigation bar height if height is limited
@@ -31,18 +40,36 @@
         //--navigation-bar-horizontal-padding: 10px;
     }
 
+    @media (prefers-color-scheme: dark) {
+        &:after {
+            background: rgba(8, 8, 8, 0.7);
+        }
+    }
+
     & > div {
+        touch-action: auto;
+        background: $color-background;
+        border-radius: $border-radius-modals;
         overscroll-behavior: contain;
         height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px));
+        box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
 
-        > * {
+        @media (prefers-color-scheme: dark) {
+            box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        }
+
+       > .scrollable-container {
             --vh: calc(min(max(50vh, 1000px), var(--saved-vh, 1vh) * 100 - 40px) / 100);
+
+            body.modern & {
+                overflow: hidden;
+            }
         }
 
         @media (max-height: 900px) {
             height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 20px));
 
-            > * {
+            > .scrollable-container {
                 --vh: calc(min(max(50vh, 1000px), var(--saved-vh, 1vh) * 100 - 20px) / 100);
             }
         }
@@ -50,7 +77,7 @@
         @media (max-height: 600px) {
             height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 0px));
 
-            > * {
+            > .scrollable-container {
                 --vh: calc(min(max(50vh, 1000px), var(--saved-vh, 1vh) * 100) / 100);
             }
         }
@@ -62,9 +89,32 @@
 .sheet {
     transform: translate3d(0, 0, 0);
 
+    // Prevent scrolling outer areas when touching the overlay
+    @supports not (overscroll-behavior: contain) {
+        touch-action: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        &:after {
+            background: rgba(8, 8, 8, 0.7);
+        }
+    }
+
     > div {
+        touch-action: auto;
+        background: $color-background;
+        border-radius: $border-radius-modals;
         width: 400px;
         overscroll-behavior: contain;
+        box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+
+        @media (prefers-color-scheme: dark) {
+            box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        }
+
+        body.modern & {
+            overflow: hidden;
+        }
 
         max-height: calc(min(max(50vh, 1000px), var(--vh, 1vh) * 100 - 40px));
 
@@ -99,8 +149,16 @@
 .side-view {
     transform: translate3d(0, 0, 0);
 
+    @media (prefers-color-scheme: dark) {
+        background: rgba(8, 8, 8, 0.7);
+    }
+
     > div {
         max-width: 400px;
         overscroll-behavior: contain;
+
+        @media (prefers-color-scheme: dark) {
+            box-shadow: 0 0 0 1px $color-border;
+        }
     }
 }

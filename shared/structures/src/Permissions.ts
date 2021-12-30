@@ -163,7 +163,7 @@ export class Permissions extends AutoEncoder {
             return true
         }
         for (const r of this.roles) {
-            const f = roles.find(rr => r.id === r.id)
+            const f = roles.find(rr => r.id === rr.id)
             if (!f) {
                 // Deleted role
                 continue
@@ -184,7 +184,7 @@ export class Permissions extends AutoEncoder {
             return true
         }
         for (const r of this.roles) {
-            const f = roles.find(rr => r.id === r.id)
+            const f = roles.find(rr => r.id === rr.id)
             if (!f) {
                 // Deleted role
                 continue

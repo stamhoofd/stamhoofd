@@ -109,8 +109,8 @@ export default class GroupBox extends Mixins(NavigationMixin){
         outline: 0;
         height: $border-width;
         width: 100%;
-        background: var(--color-current-border, #{$color-border});
-        border-radius: $border-width/2;
+        background: $color-border;
+        border-radius: calc($border-width / 2);
         margin: 0;
         position: absolute;
         bottom: 0;
@@ -125,7 +125,7 @@ export default class GroupBox extends Mixins(NavigationMixin){
     }
 
     //@media (min-width: 801px) {
-        background: $color-white;
+        background: $color-background;
         border-radius: $border-radius;
         margin: 0;
         @include style-side-view-shadow();

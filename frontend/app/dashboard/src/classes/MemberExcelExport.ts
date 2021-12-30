@@ -1,3 +1,4 @@
+import { Toast } from '@stamhoofd/components';
 import { MemberWithRegistrations } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
@@ -77,7 +78,7 @@ export class MemberExcelExport {
                 break
             }
             if (empty) {
-               for (const row of wsData) {
+                for (const row of wsData) {
                     row.splice(index, 1)
                 } 
             }
@@ -105,6 +106,14 @@ export class MemberExcelExport {
 
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, ws, wsName);
-        XLSX.writeFile(wb, "leden.xlsx");
+
+        if (AppManager.shared.downloadFile) {
+            const data = XLSX.write(wb, { type: 'base64' });
+            AppManager.shared.downloadFile(data, "leden.xlsx").catch(e => {
+                Toast.fromError(e).show()
+            });
+        } else {
+            XLSX.writeFile(wb, "leden.xlsx");
+        }
     }
 }

@@ -8,12 +8,21 @@
             <main v-if="checkout.totalPrice > 0">
                 <h1>Kies je betaalmethode</h1>
 
+                <p v-if="isTrial" class="warning-box">
+                    Dit is een demo webshop. Bestellingen zijn fictief.
+                </p>
+
                 <STErrorsDefault :error-box="errorBox" />
 
                 <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
             </main>
             <main v-else>
                 <h1>Bevestig jouw bestelling</h1>
+
+                <p v-if="isTrial" class="warning-box">
+                    Dit is een demo webshop. Bestellingen zijn fictief.
+                </p>
+                
                 <p>Jouw bestelling zal worden geplaatst, je kan dit niet ongedaan maken.</p>
 
                 <STErrorsDefault :error-box="errorBox" />
@@ -94,8 +103,12 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         return WebshopManager.webshop
     }
 
+    get isTrial() {
+        return this.organization.meta.packages.isWebshopsTrial
+    }
+
     get organization() {
-       return WebshopManager.organization
+        return WebshopManager.organization
     }
 
     get paymentMethods() {
@@ -104,7 +117,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
     goToOrder(id: string) {
         console.log("Go to order ", id)
-         this.navigationController!.push({
+        this.navigationController!.push({
             components: [
                 new ComponentWithProperties(OrderView, { orderId: id, success: true })
             ],
@@ -191,7 +204,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Payment.toLowerCase())
+        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Payment.toLowerCase())
     }
 }
 </script>

@@ -20,17 +20,17 @@
                     <span class="icon arrow-left" />
                     <span>Stamhoofd website</span>
                 </a>
-                <h1>Kies jouw vereniging</h1>
-                <div class="input-icon-container icon search gray">
-                    <input v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" autocorrect="off" @input="query = $event.target.value">
-                </div>
+                <h1>Log in bij jouw vereniging</h1>
+                <form class="input-icon-container icon search gray" @submit.prevent>
+                    <input ref="input" v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
+                </form>
                 <p v-if="!loading && filteredResults.length == 0 && !query">
-                    Selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
+                    Zoek en selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
                 </p>
 
                 <Spinner v-if="loading" class="gray center" />
                 <template v-else>
-                    <button v-for="organization in filteredResults" :key="organization.id" class="search-result" @click="loginOrganization(organization.id)">
+                    <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
                         <h1>{{ organization.name }}</h1>
                         <p>{{ organization.address }}</p>
                         <Spinner v-if="loadingSession === organization.id" class="floating" />
@@ -137,7 +137,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         if (this.isNative) {
             new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Een vereniging moet eerst aansluiten voor je kan inloggen.").addCloseButton("Sluiten").show()
         } else {
-            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.").addCloseButton("Sluiten").show()
+            new CenteredMessage("Vereniging niet gevonden", "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Nieuwe vereniging' bovenaan.").addCloseButton("Sluiten").show()
         }
     }
 
@@ -154,8 +154,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         const parts =  UrlHelper.shared.getParts()
         const queryString =  UrlHelper.shared.getSearchParams()
 
-        UrlHelper.setUrl("/")
-
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
             UrlHelper.shared.clear()
             try {
@@ -169,14 +167,21 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                     code = null;
                     organization = null;
                 }
-                this.present(new ComponentWithProperties(NavigationController, {
-                    root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
-                        initialRegisterCode: code && organization ? {
-                            code,
-                            organization
-                        } : null
-                    })
-                }).setDisplayStyle("popup").setAnimated(false))
+                this.present({
+                    url: "/aansluiten",
+                    adjustHistory: false,
+                    components: [
+                        new ComponentWithProperties(NavigationController, {
+                            root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), { 
+                                initialRegisterCode: code && organization ? {
+                                    code,
+                                    organization
+                                } : null,
+                                visitViaUrl: true
+                            })
+                        }).setDisplayStyle("popup").setAnimated(false)
+                    ]
+                })
                 
             } catch (e) {
                 console.error(e)
@@ -192,7 +197,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     activated() {
-        UrlHelper.setUrl("/")
         this.updateDefault().catch(console.error)
     }
 
@@ -275,11 +279,26 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         })
     }
 
+    selectResult(index: number) {
+        if (index === -1) {
+            (this.$refs.input as HTMLInputElement).focus();
+            return
+        }
+        if (this.$refs.results && this.$refs.results[index]) {
+            this.$refs.results[index].focus()
+        }
+    }
+
     async loginOrganization(organizationId: string) {
         if (this.loadingSession) {
             return
         }
         this.loadingSession = organizationId
+
+        if (document.activeElement) {
+            // Blur currently focused element, to prevent from opening the login view multiple times
+            (document.activeElement as HTMLElement).blur()
+        }
 
         try {
             let session = await SessionManager.getSessionForOrganization(organizationId)
@@ -394,8 +413,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     > .search-result {
         @extend .style-input-shadow;
-        background: $color-white;
-        border: $border-width solid $color-gray-light;
+        background: $color-background;
+        border: $border-width solid $color-border;
         padding: 20px 20px;
         border-radius: $border-radius;
         margin: 10px 0;
@@ -418,7 +437,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             right: 10px;
             top: 50%;
             transform: translate(0, -50%);
-            color: $color-gray;
+            color: $color-gray-text;
             transition: color 0.2s;
         }
 
@@ -426,15 +445,25 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             @extend .style-description-small;
         }
 
-        &:hover {
-            border-color: $color-primary-gray-light;
-            background-color: $color-primary-background;
+        @media (hover: hover) {
+            &:hover {
+                border-color: $color-primary-gray-light;
+                background-color: $color-primary-background;
+
+                > .icon.floating {
+                    color: $color-primary;
+                }
+            }
+        }
+
+        &:focus {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            border-color: $color-primary;
 
             > .icon.floating {
                 color: $color-primary;
             }
         }
-
 
         &:active {
             transform: scale(0.95, 0.95);

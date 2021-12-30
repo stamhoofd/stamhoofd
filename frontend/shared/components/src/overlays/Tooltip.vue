@@ -1,6 +1,6 @@
 <template>
     <transition appear name="show">
-        <div class="tooltip" :style="{ top: top + 'px', left: left + 'px' }" :class="icon">
+        <div class="tooltip" :style="{ top: top + 'px', left: left + 'px' }" :class="icon" @click="$parent.$emit('pop')">
             <span v-if="icon" :class="'icon '+icon" />
             <span>{{ text }}</span>
         </div>
@@ -51,6 +51,21 @@ export default class Tooltip extends Vue {
 
         this.left = this.x - Math.max(0, width - (clientWidth - viewPadding - this.x));
         this.top = this.y - Math.max(0, height - (clientHeight - viewPadding - this.y));
+
+        // Hide on scroll or any touch
+        document.addEventListener("touchstart", this.hide, { passive: true })
+        document.addEventListener("pointerdown", this.hide, { passive: true })
+        document.addEventListener("wheel", this.hide, { passive: true })
+    }
+
+    beforeDestroy() {
+        document.removeEventListener("touchstart", this.hide)
+        document.removeEventListener("pointerdown", this.hide)
+        document.removeEventListener("wheel", this.hide)
+    }
+
+    hide() {
+        this.$parent.$emit("pop")
     }
 }
 </script>
@@ -64,14 +79,21 @@ export default class Tooltip extends Vue {
     z-index: 10000;
     left: 0;
     top: 0;
-    background: $color-dark;
-    padding: 10px 15px;
-    border-radius: $border-radius;
-    @extend .style-description-small;
+    @extend .style-context-menu-item;
+    line-height: 1.5;
     @extend .style-overlay-shadow;
-    color: $color-white;
     box-sizing: border-box;
     max-width: 350px;
+
+    background: $color-background-shade-darker;
+    
+    --color-current-background: #{$color-background-shade-darker};
+    --color-current-background-shade: #{$color-border};
+
+    border: $border-width-thin solid $color-border-shade;
+    padding: 10px 15px;
+    border-radius: $border-radius-modals;
+    color: $color-dark;
 
     @media (max-width: 350px + 30px) {
         max-width: 100vw;

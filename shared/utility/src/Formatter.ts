@@ -77,13 +77,12 @@ export class Formatter {
      /**
      * 01/01/2020
      */
-    static dateNumber(date: Date): string {
+    static dateNumber(date: Date, withYear = true): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return "?"
         }
-        const year = date.getFullYear()
-        return (date.getDate()+"").padStart(2, "0") + "/" + ((date.getMonth() + 1)+"").padStart(2, "0") + "/"+year
+        return (date.getDate()+"").padStart(2, "0") + "/" + ((date.getMonth() + 1)+"").padStart(2, "0") + (withYear ? "/"+date.getFullYear() : "")
     }
 
     /**

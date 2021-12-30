@@ -1,16 +1,17 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
+@use '../components/icons' as *;
 
 .inline-link {
     &, &:hover, &:link, &:active, &:visited {
         color: $color-primary;
-        font-weight: 600;
+        font-weight: $font-weight-bold;
         text-decoration: none;
     }
 
     &.secundary {
         &, &:hover, &:link, &:active, &:visited {
-            color: $color-gray-dark;
+            color: $color-gray-4;
         }
     }
 
@@ -45,31 +46,79 @@
         }
     }
 
-    &.primary {
+    &.primary, &.secundary, &.destructive {
         @extend .style-button;
-        color: white;
 
+        border-radius: $border-radius;
+        
+        transition: transform 0.2s, opacity 0.2s;
+
+        height: 42px;
         padding: 0 27px;
-        background: linear-gradient(to right, $color-primary, $color-primary-destination);
-        text-align: center;
+
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        height: 42px;
+
+        text-align: center;
         align-items: center;
-
-        border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
-        box-shadow: 0 6px 10px 0 rgba($color-primary, 0.2);
-        touch-action: manipulation;
-        display: inline-flex;
         justify-content: center;
+        display: inline-flex;
 
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        // Ignore stretch when a button is directly inside the main of st-view (which has display flex)
+        .st-view > main > & {
+            align-self: flex-start;
+        }
 
         &:active {
             transform: scale(0.95, 0.95);
-            box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
+        }
+
+        &:disabled {
+            color: $color-gray-2;
+            background: $color-background-shade;
+            box-shadow: none;
+            cursor: not-allowed;
+
+            &:active {
+                transform: none;
+            }
+        }
+
+        > .icon, > .bubble {
+            align-self: center;
+            
+            &:first-child {
+                margin-right: 10px;
+                margin-left: -5px;
+            }
+
+            &:last-child {
+                margin-left: 10px;
+                margin-right: -5px;
+            }
+
+            
+        }
+
+        &.full {
+            width: 100%;
+        }
+    }
+
+    &.primary {
+        color: $color-primary-contrast;
+        background: $color-primary;
+
+        &.focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
+        }
+
+        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+        &:focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
         }
 
         .dropdown-text {
@@ -106,102 +155,51 @@
             margin-left: 27px - $border-width;
 
             &:hover {
-                background-color: rgba($color-white, 0.2);
+                background-color: rgba($color-background, 0.2);
             }
         }
-
-        &:disabled {
-            color: $color-gray-light;
-            background: $color-white-shade;
-            box-shadow: none;
-            cursor: not-allowed;
-
-            &:active {
-                transform: none;
-            }
-        }
-
     }
 
     &.destructive {
-        @extend .style-button;
         color: white;
-
-        padding: 0 27px;
         background: $color-error;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        height: 42px;
-        border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
-        box-shadow: 0 6px 10px 0 rgba($color-error, 0.2);
-        touch-action: manipulation;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
 
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        &.focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+        }
 
-        &:active {
-            transform: scale(0.95, 0.95);
-            box-shadow: 0 0px 15px 0 rgba($color-primary, 0.2);
+        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+        &:focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
         }
     }
 
     &.secundary {
-        @extend .style-button;
-        color: $color-gray-dark;
-        padding: 0 27px;
-        background: $color-gray-lighter;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border-radius: $border-radius;
-        transition: 0.2s transform, 0.2s opacity, 0.2s box-shadow;
-        cursor: pointer;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        height: 42px;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
+        color: $color-dark;
+        
+        background: $color-gray-3;
 
-        &:active {
-            transform: scale(0.95, 0.95);
+        &.focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
         }
 
-        &:disabled {
-            color: $color-gray-light;
-            background: $color-white-shade;
-            box-shadow: none;
-            cursor: not-allowed;
-
-            &:active {
-                transform: none;
-            }
-        }
-    }
-
-    &.secundary, &.primary, &.destructive {
-        > .icon, > .bubble {
-            align-self: center;
-            
-            &:first-child {
-                margin-right: 10px;
-                margin-left: -5px;
-            }
-
-            &:last-child {
-                margin-left: 10px;
-                margin-right: -5px;
-            }
+        // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
+        &:focus-visible {
+            // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
         }
 
-        &.full {
-            width: 100%;
+        &.green {
+            color: $color-success-dark;
+            background: $color-success-background;
+        }
+
+        &.danger {
+            color: $color-error-dark;
+            background: $color-error-background;
         }
     }
 
@@ -222,22 +220,65 @@
         cursor: help;
     }
 
-    &.text {
+    &.text, &.navigation {
         @extend .style-button-small;
-        color: $color-gray-dark;
+        color: $color-gray-4;
         text-overflow: ellipsis;
-        display: inline-block;
-        vertical-align: middle;
-        overflow: hidden;
+        
+        //display: inline-block;
+        //vertical-align: middle;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        &.inline {
+            display: inline-flex;
+        }
+
+        > span {
+            min-width: 0;
+        }
+
+        > .icon {
+            flex-shrink: 0;
+
+            &:first-child {
+                margin-right: 7px;
+            }
+
+            &:last-child {
+                margin-left: 7px;
+            }
+        }
+
+
+        // note: if you need overflow ellipsis, please use a <span> inside of the button.
+        // we need to overflow for the breakout region
+        overflow: visible; 
+
         height: 34px;
         line-height: 34px;
         white-space: nowrap;
-        transition: 0.2s opacity ease-out 0.1s, 0.2s color;
+        transition: opacity 0.2s 0.1s ease-out, color 0.2s;
         position: relative;
         max-width: 100%;
 
-        &.full {
-            display: block;
+        &:after {
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -10px;
+            right: -10px;
+            bottom: -5px;
+        }
+
+        &.navigation:last-child:after {
+            right: -20px;
+        }
+
+        &.navigation:first-child:after {
+            left: -20px;
         }
 
         &.small {
@@ -248,6 +289,10 @@
             color: $color-primary;
         }
 
+        &.unbold {
+            font-weight: $font-weight-medium;
+        }
+        
         &.inherit-color {
             color: inherit;
         }
@@ -258,12 +303,17 @@
 
         > .bubble {
             @extend .style-bubble;
+
+            &:last-child {
+                margin-left: 8px;
+            }
         }
 
         &.column {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: auto;
             line-height: 1;
             position: relative;
@@ -283,8 +333,8 @@
         }
 
         &:active {
-            opacity: 0.4;
-            transition: 0s opacity, 0.2s color;
+            opacity: 0.15;
+            transition: opacity 0s, color 0.2s;
         }
 
         @media (max-width: 500px) {
@@ -296,16 +346,134 @@
                 }
             }
         }
+
+        &:disabled {
+            color: $color-gray-2;
+            box-shadow: none;
+            cursor: not-allowed;
+
+            &:active {
+                transform: none;
+            }
+        }
     }
 
     &.icon {
-        padding: 10px;
-        margin: -10px;
-        transition: 0.2s opacity ease-out, 0.2s color;
+        transition: opacity 0.2s ease-out, color 0.2s ;
+        overflow: visible; // fix for breakout region
+
+        &:after {
+            // Breakout region
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+        }
+
+        &.navigation:last-child:after {
+            right: -20px;
+        }
+
+        &.navigation:first-child:after {
+            left: -20px;
+        }
 
         &:active {
-            opacity: 0.4;
-            transition: 0s opacity, 0.2s color;
+            opacity: 0.15;
+            transition: opacity 0s, color 0.2s;
+        }
+
+        position: relative;
+
+        body.web-android &, body.native-android & {
+            transition: none;
+            &:active {
+                opacity: 1;
+                transition: none;
+            }
+
+            &:after {
+                content: "";
+                position: absolute;
+                left: 50% !important;
+                right: auto !important;
+                width: 50px;
+                height: 50px;
+                top: 50% !important;
+                bottom: auto !important;
+                background: $color-gray-3;
+                border-radius: 200px;
+                pointer-events: none;
+
+                transform: translate(-50%, -50%) scale(0.05, 0.05) ;
+                z-index: 0;
+
+                will-change: opacity, transform;
+                opacity: 0;
+
+                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);;
+
+
+            }
+
+            &:before {
+                z-index: 1;
+            }
+
+            &.active {
+                opacity: 1;
+                &:after {
+
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1, 1);
+
+                    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                }
+            }
+        }
+    }
+}
+
+.button.navigation {
+    font-size: 17px;
+    font-weight: $font-weight-medium;
+    color: $color-gray-4;
+
+    overflow: visible;
+
+    // Visually correct back button
+    &:first-child > .icon.arrow-back:first-child {
+        margin-left: -4px;
+    }
+
+    body.native-iOS &, body.web-iOS & {
+        color: $color-primary;
+
+        // Visually correct back button
+        &:first-child > .icon.arrow-back:first-child {
+            margin-left: -9px;
+            margin-right: 0px;
+        }
+    }
+
+    body.native-android &, body.web-android & {
+        color: $color-dark;
+    }
+
+    &.highlight {
+        font-weight: $font-weight-semibold;
+    }
+
+    &:disabled {
+        color: $color-gray-2 !important;
+        box-shadow: none;
+        cursor: not-allowed;
+
+        &:active {
+            transform: none;
         }
     }
 }

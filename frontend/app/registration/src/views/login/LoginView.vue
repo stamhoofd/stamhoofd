@@ -1,28 +1,29 @@
 <template>
-    <form class="login-view st-view auto" @submit.prevent="submit">
+    <form class="login-view st-view auto" autocomplete="off" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
         <main>
             <h1>Inloggen</h1>
-                    
+            <STErrorsDefault :error-box="errorBox" />
+
             <EmailInput ref="emailInput" v-model="email" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
             <p v-if="lock" class="style-description-small">
                 {{ lock }}
             </p>
 
             <STInputBox title="Wachtwoord" class="max">
-                <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
+                <button slot="right" class="button text" type="button" tabindex="-1" @click="gotoPasswordForgot">
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
-                <input v-model="password" name="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                <input v-model="password" name="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
         </main>
 
         <STFloatingFooter>
             <LoadingButton :loading="loading">
-                <button class="button primary full">
+                <button class="button primary full" type="submit">
                     <span class="icon lock" />
                     <span>Inloggen</span>
                 </button>
@@ -32,10 +33,10 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, ForgotPasswordView,LoadingButton, OrganizationLogo,STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, ForgotPasswordView,LoadingButton, OrganizationLogo,STErrorsDefault,STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components"
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
@@ -46,6 +47,7 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
     components: {
         STNavigationBar,
         STFloatingFooter,
+        STErrorsDefault,
         STInputBox,
         LoadingButton,
         OrganizationLogo,
@@ -121,15 +123,16 @@ export default class LoginView extends Mixins(NavigationMixin){
             const result = await LoginHelper.login(this.session, this.email, this.password)
 
             if (result.verificationToken) {
-                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken }))
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken, email: this.email }))
             }
         } catch (e) {
-            if (Request.isNetworkError(e)) {
-                new CenteredMessage("Geen internetverbinding", "Kijk jouw internetverbinding na en probeer het opnieuw.", "error").addCloseButton().show()           
-            } else if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
-                new CenteredMessage("Ongeldig wachtwoord of e-mailadres", "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven. Gebruik het e-mailadres waar je al e-mails van ons op ontvangt.", "error").addCloseButton().show()           
+            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    code: "invalid_signature",
+                    message: "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven. Gebruik het e-mailadres waar je al e-mails van ons op ontvangt."
+                }))
             } else {
-                new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
+                this.errorBox = new ErrorBox(e)
             }
         } finally {
             this.loading = false;

@@ -39,12 +39,16 @@ export default class STInputBox extends Vue {
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
 .st-input-box {
-    padding: 12px 0;
+    padding: 10px 0;
     display: block;
     max-width: 340px;
 
     @media (max-width: 450px) {
         max-width: none;
+    }
+
+    & + .style-description-small, & + .style-description {
+        padding-bottom: 10px;
     }
 
     &.indent {
@@ -55,6 +59,10 @@ export default class STInputBox extends Vue {
         }
     }
 
+    &.custom-bottom-box {
+        padding-bottom: 0;
+    }
+
     &.no-padding {
         // Keep 5px padding at bottom to compensate height of label
         padding: 0 0 5px 0;
@@ -62,20 +70,25 @@ export default class STInputBox extends Vue {
 
     > h4 {
         margin: 0;
-        @extend .style-title-small;
+        @extend .style-label;
         display: flex;
         flex-direction: row;
         align-items: center;
-        height: 34px;
+        height: 24px;
 
         > label {
             flex-grow: 1; // fix safari newline glitch
-            flex-shrink: 2;
+            min-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            align-self: flex-start;
         }
 
         > .right {
             margin-left: auto;
-            flex-shrink: 1;
+            flex-shrink: 0;
+            align-self: flex-end;
         }
 
         ~ * {

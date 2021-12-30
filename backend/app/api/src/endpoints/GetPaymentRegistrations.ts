@@ -68,7 +68,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
                 paidAt: payment.paidAt,
                 createdAt: payment.createdAt,
                 updatedAt: payment.updatedAt,
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
+                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r, false))
             })
         );
     }

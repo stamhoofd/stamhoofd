@@ -4,9 +4,11 @@
         <h2 class="style-title-list">
             {{ showRole ? role.name : group.settings.name }}
         </h2>
-        <p class="style-description-small" v-if="showRole && isMe">Jij zit in deze groep</p>
+        <p v-if="showRole && isMe" class="style-description-small">
+            Jij zit in deze groep
+        </p>
 
-        <div slot="right" v-if="selectGroup">
+        <div v-if="selectGroup" slot="right">
             <button class="button text" @click.stop.prevent="chooseGroupPermission(group, $event)">
                 <span>{{ getLevelText(getGroupPermission(group)) }}</span>
                 <span class="icon arrow-down-small" />
@@ -22,6 +24,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Checkbox, STListItem } from "@stamhoofd/components";
 import { Group, GroupPrivateSettings, Organization, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, PermissionsByRole } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 
@@ -182,9 +185,12 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
     }
 
     chooseGroupPermission(group, event) {
+        const el = event.currentTarget
         const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
             callback: (level: "none" | "write" | "read" | "full") => {
                 this.setGroupPermission(group, level)
             }

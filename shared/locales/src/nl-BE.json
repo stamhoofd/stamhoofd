@@ -5,6 +5,9 @@
       "mobile": {
         "label": "GSM-nummer"
       }
+    },
+    "domains": {
+      "email": ""
     }
   },
   "backend": {},
@@ -12,6 +15,13 @@
     "inputs": {
       "parentPhone": {
         "placeholder": "GSM-nummer van ouder"
+      }
+    },
+    "webshop": {
+      "deliveryMethod": {
+        "name": {
+          "placeholder": ""
+        }
       }
     }
   },

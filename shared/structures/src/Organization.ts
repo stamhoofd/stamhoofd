@@ -209,4 +209,21 @@ export class OrganizationWithWebshop extends AutoEncoder {
     webshop: Webshop
 }
 
+export class GetWebshopFromDomainResult extends AutoEncoder {
+    @field({ decoder: Organization })
+    organization: Organization
+
+    /**
+     * There is one specific webshop for the given domain.
+     */
+    @field({ decoder: Webshop, nullable: true })
+    webshop: Webshop | null = null
+
+    /**
+     * Multiple webshops possible. Show a selection page.
+     */
+    @field({ decoder: new ArrayDecoder(WebshopPreview), version: 137 })
+    webshops: WebshopPreview[] = []
+}
+
 export const OrganizationPatch = Organization.patchType()

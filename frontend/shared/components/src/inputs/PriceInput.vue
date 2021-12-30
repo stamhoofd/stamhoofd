@@ -156,7 +156,7 @@ export default class PriceInput extends Vue {
     // Limit value to bounds
     constrain(value: number): number {
         if (this.min !== null && value < this.min) {
-             value = this.min;
+            value = this.min;
         } else if (this.max !== null && value > this.max) {
             value = this.max;
         }
@@ -206,8 +206,8 @@ export default class PriceInput extends Vue {
         width: 100%;
         box-sizing: border-box;
         padding: 5px 15px;
-        height: 44px - 2 * $border-width;
-        line-height: 44px - 10px - 2 * $border-width;
+        height:  calc(#{$input-height} - 2 * #{$border-width});
+        line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
 
         &:focus {
             opacity: 1;

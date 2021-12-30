@@ -13,6 +13,8 @@
             <p class="st-list-description">
                 Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
             </p>
+
+            <STErrorsDefault :error-box="errorBox" />
             
             <div v-for="record in records" :key="record.id">
                 <DNSRecordBox :record="record" />

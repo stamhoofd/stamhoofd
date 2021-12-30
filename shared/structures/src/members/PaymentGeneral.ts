@@ -14,6 +14,16 @@ export class EncryptedPaymentGeneral extends EncryptedPaymentDetailed {
 export class PaymentGeneral extends PaymentDetailed {
     @field({ decoder: Order, nullable: true })
     order: Order | null = null
+
+    override matchQuery(query: string): boolean {
+        if (
+            super.matchQuery(query) ||
+            this.order?.matchQuery(query)
+        ) {
+            return true;
+        }
+        return false;
+    }
 }
 
 export class CreatePaymentGeneral extends AutoEncoder {

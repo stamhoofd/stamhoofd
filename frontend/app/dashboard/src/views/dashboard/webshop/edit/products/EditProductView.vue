@@ -1,200 +1,186 @@
 <template>
-    <div class="st-view product-edit-view">
-        <STNavigationBar :title="isNew ? typeName+' toevoegen' : name+' bewerken'">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
+    <SaveView :title="isNew ? typeName+' toevoegen' : name+' bewerken'" :disabled="!hasChanges" class="product-edit-view" @save="save">
+        <h1 v-if="isNew">
+            {{ typeName }} toevoegen
+        </h1>
+        <h1 v-else>
+            {{ name || typeName }} bewerken
+        </h1>
+        
+        <STErrorsDefault :error-box="errorBox" />
+
+        <div class="split-inputs">
+            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    :placeholder="'Naam '+typeName"
+                    autocomplete=""
+                    enterkeyhint="next"
+                >
+            </STInputBox>
+            <STInputBox v-if="isTicket" title="Type" error-fields="name" :error-box="errorBox">
+                <Dropdown
+                    v-model="type"
+                >
+                    <option value="Ticket">
+                        Ticket
+                    </option>
+                    <option value="Voucher">
+                        Voucher
+                    </option>
+                </Dropdown>
+            </STInputBox>
+        </div>
+
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Beschrijving van dit artikel"
+                autocomplete=""
+                enterkeyhint="next"
+            />
+        </STInputBox>
+
+        <template v-if="isTicket">
+            <hr>
+            <h2>Locatie</h2>
+            <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="validator" @modify="modifyLocation" />
+
+            <hr>
+            <h2>Datum en tijd</h2>            
+            <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="validator" @modify="modifyDateRange" />
+        </template>
+
+        <hr>
+        <h2 class="style-with-button">
+            <div>Prijzen</div>
+            <div>
+                <button class="button text only-icon-smartphone" type="button" @click="addProductPrice">
+                    <span class="icon add" />
+                    <span>Prijs</span>
+                </button>
+            </div>
+        </h2>
+        <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Als je maar één prijs hebt kan je die geen naam geven. Naast meerdere prijzen kan je ook keuzemogelijkheden toevoegen (zie onder).</p>
+
+        <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
+
+        <STList v-else>
+            <ProductPriceRow v-for="price in patchedProduct.prices" :key="price.id" :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
+        </STList>
+
+        <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addPatch" />
+
+        <hr>
+        <h2 class="style-with-button">
+            <div>Keuzemenu's</div>
+            <div>
+                <button class="button text only-icon-smartphone" type="button" @click="addOptionMenu">
+                    <span class="icon add" />
+                    <span>Keuzemenu toevoegen</span>
+                </button>
+            </div>
+        </h2>
+        <p>Je kan bij dit artikel nog een keuzemenu toevoegen waarbij men geen, één of meerdere antwoorden moet aanduiden. Elk menu heeft ook een titel, bv. "kies je extra's".</p>
+
+        <hr>
+        <h2>Open vragen</h2>
+        <p>Je kan ook nog open vragen stellen (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
+
+        <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
+
+        <hr>
+        <h2 class="style-with-button">
+            <div>Foto</div>
+            <div>
+                <button v-if="image" type="button" class="button text only-icon-smartphone" @click="image = null">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1 v-if="isNew">
-                {{ typeName }} toevoegen
-            </h1>
-            <h1 v-else>
-                {{ name || typeName }} bewerken
-            </h1>
-        
-            <STErrorsDefault :error-box="errorBox" />
-
-            <div class="split-inputs">
-                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                    <input
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        :placeholder="'Naam '+typeName"
-                        autocomplete=""
-                    >
-                </STInputBox>
-                <STInputBox v-if="isTicket" title="Type" error-fields="name" :error-box="errorBox">
-                    <Dropdown
-                        v-model="type"
-                    >
-                        <option value="Ticket">
-                            Ticket
-                        </option>
-                        <option value="Voucher">
-                            Voucher
-                        </option>
-                    </Dropdown>
-                </STInputBox>
+                <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
             </div>
+        </h2>
+        <p>Foto’s worden altijd bijgeknipt tot een vierkant als ze in het overzicht getoond worden. Je hoeft foto's niet zelf bij te knippen. Een portretfoto wordt dus langs boven en onder afgeknipt, en een foto in landschapsoriëntatie wordt links en rechts afgeknipt. In de detailweergave is het soms mogelijk dat we links en rechts nog wat meer plaats hebben en de foto dus wat breder kunnen tonen.</p>
 
-            <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    placeholder="Beschrijving van dit artikel"
-                    autocomplete=""
-                />
-            </STInputBox>
-
-            <template v-if="isTicket">
-                <hr>
-                <h2>Locatie</h2>
-                <ProductSelectLocationInput v-model="location" :locations="allLocations" :validator="validator" @modify="modifyLocation" />
-
-                <hr>
-                <h2>Datum en tijd</h2>            
-                <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="validator" @modify="modifyDateRange" />
-            </template>
-
-            <hr>
-            <h2 class="style-with-button">
-                <div>Prijzen</div>
-                <div>
-                    <button class="button text" @click="addProductPrice">
-                        <span class="icon add" />
-                        <span>Prijs</span>
-                    </button>
-                </div>
-            </h2>
-            <p>Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Als je maar één prijs hebt kan je die geen naam geven. Naast meerdere prijzen kan je ook keuzemogelijkheden toevoegen (zie onder).</p>
-
-            <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
-
-            <STList v-else>
-                <ProductPriceRow v-for="price in patchedProduct.prices" :key="price.id" :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
-            </STList>
-
-            <OptionMenuSection v-for="optionMenu in patchedProduct.optionMenus" :key="optionMenu.id" :option-menu="optionMenu" :product="patchedProduct" @patch="addPatch" />
-
-            <hr>
-            <h2 class="style-with-button">
-                <div>Keuzemenu's</div>
-                <div>
-                    <button class="button text" @click="addOptionMenu">
-                        <span class="icon add" />
-                        <span>Keuzemenu toevoegen</span>
-                    </button>
-                </div>
-            </h2>
-            <p>Je kan bij dit artikel nog een keuzemenu toevoegen waarbij men geen, één of meerdere antwoorden moet aanduiden. Elk menu heeft ook een titel, bv. "kies je extra's".</p>
-
-            <hr>
-            <h2>Open vragen</h2>
-            <p>Je kan ook nog open vragen stellen (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.</p>
-
-            <WebshopFieldsBox :fields="fields" @patch="addFieldsPatch" />
-
-            <hr>
-            <h2 class="style-with-button">
-                <div>Foto</div>
-                <div>
-                    <button v-if="image" class="button text" @click="image = null">
-                        <span class="icon trash" />
-                        <span>Verwijderen</span>
-                    </button>
-                    <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Foto uploaden'" :resolutions="resolutions" />
-                </div>
-            </h2>
-            <p>Foto’s worden altijd bijgeknipt tot een vierkant als ze in het overzicht getoond worden. Je hoeft foto's zelf niet bij te knippen. Een portretfoto wordt dus langs boven en onder afgeknipt, en een foto in landschapsoriëntatie wordt links en rechts afgeknipt. In de detailweergave is het soms mogelijk dat we links en rechts nog wat meer plaats hebben en de foto dus wat breder kunnen tonen.</p>
-
+        <div class="image-box">
             <img v-if="image" :src="imageSrc" class="image">
             <img v-if="image" :src="imageSrc2" class="image">
+        </div>  
         
+        <hr>
+        <h2>
+            Voorraad
+            {{ remainingStock !== null ? ('(nog '+ remainingStock +' beschikbaar)') : '' }}
+        </h2>
+
+        <Checkbox v-model="disabled">
+            Tijdelijk niet beschikbaar
+        </Checkbox>
+
+        <Checkbox v-model="useStock">
+            Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
+        </Checkbox>
+
+        <div v-if="useStock" class="split-inputs">
+            <STInputBox title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
+                <NumberInput v-model="stock" />
+            </STInputBox>
+        </div>
+
+        <Checkbox v-if="useStock" v-model="resetStock">
+            Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht van de {{ stock }})
+        </Checkbox>
+
+        <STInputBox v-if="useStock && resetStock" title="Verkocht aantal stuks" error-fields="usedStock" :error-box="errorBox">
+            <NumberInput v-model="usedStock" :max="stock" />
+        </STInputBox>
+
+        <p v-if="useStock" class="style-description">
+            Als je een bestelling annuleert of verwijdert zullen we de voorraad ook terug aanvullen (tenzij de bestelling geplaatst werd op een moment dat er geen voorraad maximum was). En als je een geannuleerde bestelling terugzet, zullen we ook terug de voorraad aanpassen.
+        </p>
+
+        <div v-if="!isNew" class="container">
             <hr>
             <h2>
-                Voorraad
-                {{ remainingStock !== null ? ('(nog '+ remainingStock +' beschikbaar)') : '' }}
+                Verwijder dit artikel
             </h2>
 
-            <Checkbox v-model="disabled">
-                Tijdelijk niet beschikbaar
-            </Checkbox>
-
-            <Checkbox v-model="useStock">
-                Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
-            </Checkbox>
-
-            <div v-if="useStock" class="split-inputs">
-                <STInputBox title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
-                    <NumberInput v-model="stock" />
-                </STInputBox>
-            </div>
-
-            <Checkbox v-if="useStock" v-model="resetStock">
-                Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht van de {{ stock }})
-            </Checkbox>
-
-            <STInputBox v-if="useStock && resetStock" title="Verkocht aantal stuks" error-fields="usedStock" :error-box="errorBox">
-                <NumberInput v-model="usedStock" :max="stock" />
-            </STInputBox>
-
-            <p v-if="useStock" class="style-description">
-                Als je een bestelling annuleert of verwijdert zullen we de voorraad ook terug aanvullen (tenzij de bestelling geplaatst werd op een moment dat er geen voorraad maximum was). En als je een geannuleerde bestelling terugzet, zullen we ook terug de voorraad aanpassen.
-            </p>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, Dropdown,ErrorBox, NumberInput, PriceInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, UploadButton, Validator } from "@stamhoofd/components";
+import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue"
+import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue";
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditProductPriceView from './EditProductPriceView.vue';
-import OptionMenuSection from "./OptionMenuSection.vue"
-import ProductPriceBox from "./ProductPriceBox.vue"
-import ProductPriceRow from "./ProductPriceRow.vue"
-import ProductSelectDateRangeInput from "./ProductSelectDateRangeInput.vue"
-import ProductSelectLocationInput from "./ProductSelectLocationInput.vue"
+import OptionMenuSection from "./OptionMenuSection.vue";
+import ProductPriceBox from "./ProductPriceBox.vue";
+import ProductPriceRow from "./ProductPriceRow.vue";
+import ProductSelectDateRangeInput from "./ProductSelectDateRangeInput.vue";
+import ProductSelectLocationInput from "./ProductSelectLocationInput.vue";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        SegmentedControl,
-        DateSelection,
-        RadioGroup,
-        PriceInput,
-        Radio,
         Checkbox,
         NumberInput,
-        Spinner,
         UploadButton,
         ProductPriceRow,
         STList,
@@ -471,7 +457,12 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         if (!image) {
             return null
         }
-        return image.getPathForSize(500, 500)
+        const resolution = image.getResolutionForSize(500, 500)
+        if (resolution.height >= resolution.width) {
+            // Never show photo in portrait mode (they will get cropped to a square)
+            return null
+        }
+        return resolution.file.getPublicPath()
     }
 
     addPatch(patch: AutoEncoderPatchType<Product>) {
@@ -554,16 +545,12 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchProduct, this.product, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
@@ -577,10 +564,20 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .product-edit-view {
-    img.image {
-        margin: 15px 0;
-        height: 140px;
-        border-radius: $border-radius;
+    .image-box {
+        margin: 0 -5px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        img.image {
+            margin: 5px;
+            max-height: 140px;
+            max-width: 100%;
+            border-radius: $border-radius;
+            align-self: flex-start;
+        }
     }
+    
 }
 </style>

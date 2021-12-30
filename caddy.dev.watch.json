@@ -256,7 +256,97 @@
                             "match": [
                                 {
                                     "host": [
-                                        "*.shop.stamhoofd.dev"
+                                        "dev.stamhoofd.be",
+                                        "dev.stamhoofd.nl"
+                                    ],
+                                    "path": [
+                                        "/shop/*"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "subroute",
+                                    "routes": [
+                                        {
+                                            "match": [
+                                                {
+                                                    "not": [
+                                                        {
+                                                            "path": [
+                                                                "*.js",
+                                                                "*.css",
+                                                                "*.png",
+                                                                "*.svg",
+                                                                "*.ttf",
+                                                                "*.woff",
+                                                                "*.woff2"
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "no-cache"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        },
+                                        {
+                                            "match": [
+                                                {
+                                                    "path": [
+                                                        "*.js",
+                                                        "*.css",
+                                                        "*.png",
+                                                        "*.svg",
+                                                        "*.ttf",
+                                                        "*.woff",
+                                                        "*.woff2"
+                                                    ]
+                                                }
+                                            ],
+                                            "handle": [
+                                                {
+                                                    "handler": "headers",
+                                                    "response": {
+                                                        "set": {
+                                                            "Cache-Control": [
+                                                                "max-age=2592000"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "terminal": false
+                                        }
+                                    ]
+                                },
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:8882"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
+                                        "*.shop.stamhoofd.dev",
+                                        "shop.dev.stamhoofd.be",
+                                        "shop.dev.stamhoofd.nl"
                                     ]
                                 }
                             ],
@@ -358,12 +448,33 @@
                             ]
                         },
                         {
+                            "match": [
+                                {
+                                    "vars_regexp": {
+                                        "{http.request.host}": {
+                                            "pattern": "^inschrijven\\."
+                                        }
+                                    }
+                                }
+                            ],
                             "handle": [
                                 {
                                     "handler": "reverse_proxy",
                                     "upstreams": [
                                         {
                                             "dial": "127.0.0.1:8081"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:8082"
                                         }
                                     ]
                                 }
@@ -407,7 +518,7 @@
                         "interval": "1d",
                         "burst": 50
                     },
-                    "ask": "http://127.0.0.1:9091/v15/check-domain-cert"
+                    "ask": "http://127.0.0.1:9091/v136/check-domain-cert"
                 }
             }
         }

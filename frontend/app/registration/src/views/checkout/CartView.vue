@@ -30,7 +30,7 @@
                                     {{ item.waitingList ? "Wachtlijst van " : "" }}{{ item.group.settings.name }}
                                 </p>
                                 <div @click.stop>
-                                    <button class="button icon trash gray" @click="deleteItem(item)" />
+                                    <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
                                 </div>
                             </footer>
 
@@ -50,10 +50,10 @@
                     </STList>
                 </main>
 
-                <STToolbar v-if="cart.items.length > 0">
+                <STToolbar v-if="cart.items.length > 0" class="dont-float">
                     <span slot="left">Totaal: {{ cart.price | price }}</span>
                     <LoadingButton slot="right" :loading="loading">
-                        <button class="button primary" @click="goToCheckout">
+                        <button class="button primary" type="button" @click="goToCheckout">
                             <span class="icon flag" />
                             <span>Afrekenen</span>
                         </button>
@@ -115,7 +115,7 @@ export default class CartView extends Mixins(NavigationMixin){
         this.loading = true
         this.errorBox = null
 
-         try {
+        try {
             // todo: go to checkout ;)
             if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport) {
                 // Go to financial view

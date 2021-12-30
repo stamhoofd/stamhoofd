@@ -1,6 +1,14 @@
 <template>
     <div class="boxed-view">
         <form class="confirm-email-view st-view small" @submit.prevent="submit">
+            <STNavigationBar>
+                <LoadingButton slot="right" :loading="retrying">
+                    <button class="button text" type="button" @click="retry">
+                        <span class="icon retry" />
+                        <span>Opnieuw</span>
+                    </button>
+                </LoadingButton>
+            </STNavigationBar>
             <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
 
             <main>
@@ -11,7 +19,7 @@
                     Verifieer jouw e-mailadres. Vul de code in uit de e-mail die we hebben gestuurd
                 </h1>
 
-                <p>Of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
+                <p>Er werd een e-mail verstuurd naar '{{ email }}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
 
                 <div><CodeInput v-model="code" @complete="submit" /></div>
 
@@ -61,6 +69,9 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     token!: string
 
+    @Prop({ required: true })
+    email!: string
+
     @Prop({ default: false })
     login!: boolean
 
@@ -68,6 +79,8 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
     session!: Session
 
     timer: any = null
+
+    startTime = new Date()
 
     mounted() {
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
@@ -84,6 +97,38 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
 
     destroyed() {
         this.stopPolling()
+    }
+
+    retrying = false
+
+    async retry() {
+        if (this.retrying) {
+            return
+        }
+
+        if (new Date().getTime() - this.startTime.getTime() < 5 * 60 * 1000) {
+            new Toast("Je moet minimaal 5 minuten wachten voor je een nieuwe e-mail kan versturen. Kijk jouw inbox goed na!", "error red").show()
+            return
+        }
+        // todo
+        if (!await CenteredMessage.confirm("Wil je een nieuwe bevestigingsmail sturen?", "Ja, versturen", "Kijk ook zeker in jouw spambox, wacht enkele minuten en kijk opnieuw. Kijk ook na of je geen typefouten hebt gemaakt in jouw e-mailadres (dan maak je best een nieuw account aan).")) {
+            return
+        }
+
+        this.retrying = true
+
+        try {
+            const stop = await LoginHelper.retryEmail(this.session, this.token)
+            this.startTime = new Date()
+            if (stop) {
+                this.dismiss({ force: true })
+                return
+            }
+            new Toast("Je hebt een nieuwe e-mail ontvangen. Kijk jouw inbox en spambox goed na!", "email").show()
+        } catch (error) {
+            this.errorBox = new ErrorBox(error)
+        }
+        this.retrying = false
     }
 
     async poll() {

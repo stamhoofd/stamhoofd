@@ -1,161 +1,144 @@
 <template>
-    <div id="settings-view" class="st-view">
-        <STNavigationBar title="Beheerder">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!isNew" slot="right" class="button text only-icon-smartphone" @click="deleteMe(false)">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
-            <button v-if="canDismiss && !canPop" slot="right" class="button icon close gray" @click="dismiss" />
-        </STNavigationBar>
+    <SaveView :loading="saving" title="Beheerder" :disabled="!isNew && !hasChanges" @save="save">
+        <h1 v-if="isNew && !forceCreate">
+            Beheerder toevoegen
+        </h1>
+        <h1 v-else>
+            Beheerder bewerken
+        </h1>
 
-        <main>
-            <h1 v-if="isNew">
-                Beheerder toevoegen
-            </h1>
-            <h1 v-else>
-                Beheerder bewerken
-            </h1>
+        <p v-if="isNew && !forceCreate" class="info-box">
+            Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
+        </p>
+        <button v-else-if="!user" class="warning-box with-button selectable" type="button" @click="resendInvite">
+            Deze beheerder heeft de uitnodiging nog niet geaccepteerd
 
-            <p v-if="isNew" class="info-box">
-                Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
-            </p>
-            <p v-else-if="editUser === null" class="warning-box">
-                Deze beheerder heeft de uitnodiging nog niet geaccepteerd
-            </p>
+            <span v-if="!isNew && !user" class="button text">
+                Opnieuw versturen
+            </span>
+        </button>
 
-            <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
-                <div class="input-group">
-                    <div>
-                        <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                    </div>
-                    <div>
-                        <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                    </div>
+        <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+            <div class="input-group">
+                <div>
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                 </div>
-            </STInputBox>
-
-            <EmailInput v-model="email" :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" placeholder="E-mailadres" :required="!!user" />
-
-            <div class="container">
-                <hr>
-                <h2>Beheerdersgroepen</h2>
-                <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot (tenzij voor hoofdbeheerders). Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
-
-                <STList>
-                    <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                        <Checkbox slot="left" v-model="fullAccess" />
-                        Hoofdbeheerders
-
-                        <template #right>
-                            Kan alles bekijken en bewerken
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
-                        <Checkbox slot="left" :checked="getRole(role)" @change="setRole(role, $event)" />
-                        {{ role.name }}
-                    </STListItem>
-                </STList>
-
-                <p v-if="roles.length == 0" class="info-box">
-                    Je hebt nog geen beheerdersgroepen aangemaakt. Maak een groep aan om beheerders op te delen.
-                </p>
-
-                <p>
-                    <button class="button text" @click="addRole">
-                        <span class="icon add" />
-                        <span>Nieuwe groep toevoegen</span>
-                    </button>
-                </p>
+                <div>
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                </div>
             </div>
+        </STInputBox>
 
+        <EmailInput v-model="email" :title="!!user ? 'E-mailadres' : 'E-mailadres (optioneel)'" :validator="validator" placeholder="E-mailadres" :required="!!user" />
 
-            <template v-if="editUser !== null">
-                <hr>
-                <h2>Encryptiesleutels</h2>
-                <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders (Stamhoofd forceert dit ook jaarlijks in de achtergrond). Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan een sleutel waar jij toegang tot hebt doorsturen. Dit heb je nodig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels nadat hij zijn wachtwoord heeft gereset. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
+        <div class="container">
+            <hr>
+            <h2>Beheerdersgroepen</h2>
+            <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot (tenzij voor hoofdbeheerders). Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
 
-                <p v-if="!hasKey" class="warning-box">
-                    {{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.
-                </p>
+            <STList>
+                <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
+                    <Checkbox slot="left" v-model="fullAccess" />
+                    Hoofdbeheerders
 
-                <Spinner v-if="loadingKeys" />
+                    <template #right>
+                        Kan alles bekijken en bewerken
+                    </template>
+                </STListItem>
 
-                <STList>
-                    <STListItem v-for="key in availableKeys" :key="key.publicKey">
-                        <span slot="left" class="icon key" />
-                        <h2 class="style-title-list">
-                            Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}
-                        </h2>
-                        <p v-if="!key.end" class="style-description-small">
-                            Huidige sleutel voor iedereen
-                        </p>
-                        <p v-else class="style-description-small">
-                            Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog
-                        </p>
-                        <button v-if="!key.hasAccess && canShareKey(key.publicKey)" class="button text" @click="shareKey(key.publicKey)">
-                            <span class="icon privacy" />
-                            <span>Toegang geven</span>
-                        </button>
+                <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description smartphone-wrap">
+                    <Checkbox slot="left" :checked="getRole(role)" @change="setRole(role, $event)" />
+                    {{ role.name }}
+                </STListItem>
+            </STList>
 
-                        <template #right>
-                            <span v-if="!key.hasAccess" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" class="icon error" />
-                            <span v-else v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" class="icon success green" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
-        </main>
+            <p v-if="roles.length == 0" class="info-box">
+                Je hebt nog geen beheerdersgroepen aangemaakt. Maak een groep aan om beheerders op te delen.
+            </p>
 
-        <STToolbar>
-            <template slot="right">
-                <button v-if="!isNew && !user" class="button secundary" @click="resendInvite">
-                    Opnieuw versturen
+            <p>
+                <button class="button text" type="button" @click="addRole">
+                    <span class="icon add" />
+                    <span>Nieuwe groep toevoegen</span>
                 </button>
-                <LoadingButton :loading="saving">
-                    <button v-if="isNew" class="button primary" @click="save">
-                        Toevoegen
+            </p>
+        </div>
+
+        <hr v-if="!isNew">
+        <h2 v-if="!isNew">
+            Verwijderen
+        </h2>
+
+        <button v-if="!isNew" class="button secundary danger" type="button" @click="deleteMe(false)">
+            <span class="icon trash" />
+            <span>Verwijderen</span>
+        </button>
+
+        <template v-if="editUser !== null">
+            <hr>
+            <h2>Encryptiesleutels</h2>
+            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders. Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan een sleutel waar jij toegang tot hebt doorsturen. Dit heb je nodig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels nadat hij zijn wachtwoord heeft gereset. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
+
+            <p v-if="!hasKey" class="warning-box">
+                {{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.
+            </p>
+
+            <Spinner v-if="loadingKeys" />
+
+            <STList>
+                <STListItem v-for="key in availableKeys" :key="key.publicKey">
+                    <span slot="left" class="icon key" />
+                    <h2 class="style-title-list">
+                        Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}
+                    </h2>
+                    <p v-if="!key.end" class="style-description-small">
+                        Huidige sleutel voor iedereen
+                    </p>
+                    <p v-else class="style-description-small">
+                        Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog
+                    </p>
+                    <button v-if="!key.hasAccess && canShareKey(key.publicKey)" class="button text" type="button" @click="shareKey(key.publicKey)">
+                        <span class="icon privacy" />
+                        <span>Toegang geven</span>
                     </button>
-                    <button v-else class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+
+                    <template #right>
+                        <span v-if="!key.hasAccess" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" class="icon error" />
+                        <span v-else v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" class="icon success green" />
+                    </template>
+                </STListItem>
+            </STList>
+        </template>
+    </SaveView>
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder,PartialWithoutMethods, PatchType, VersionBox } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PartialWithoutMethods, patchContainsChanges, PatchType, VersionBox } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,EmailInput, ErrorBox, LoadingButton, Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { Sodium } from '@stamhoofd/crypto';
-import { Keychain,LoginHelper,SessionManager } from '@stamhoofd/networking';
-import { Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder,NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures"
+import { Keychain, LoginHelper, SessionManager } from '@stamhoofd/networking';
+import { Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder, NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditRoleView from './EditRoleView.vue';
 import SendInviteView from './SendInviteView.vue';
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        BackButton,
-        LoadingButton,
         EmailInput,
         STList,
         STListItem,
-        Spinner
+        Spinner,
+        SaveView
     },
     directives: {
         tooltip: Tooltip
@@ -199,6 +182,32 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     loadingKeys = false
     availableKeys: OrganizationKeyUser[] = []
 
+    get hasChanges() {
+        if (this.editUser) {
+            if (!this.patchUser) {
+                return false
+            }
+            return patchContainsChanges(this.patchUser, this.editUser, { version: Version })
+        }
+
+        if (!this.editInvite) {
+            return false
+        }
+
+        if (!this.patchInvite) {
+            return false
+        }
+
+        return patchContainsChanges(this.patchInvite, this.editInvite, { version: Version })
+    }
+
+    async shouldNavigateAway() {
+        if (!this.hasChanges) {
+            return true;
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    }
+
     get isNew() {
         return this.forceCreate || (!this.editInvite && !this.editUser)
     }
@@ -234,7 +243,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             if (this.getRole(role)) {
                 return
             }
-             p.roles.addPut(role)
+            p.roles.addPut(role)
         } else {
             p.roles.addDelete(role.id)
         }
@@ -439,7 +448,17 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                     this.onUpdateInvite(response.data);
                 }
 
-                this.show(new ComponentWithProperties(SendInviteView, { secret, invite: response.data }))
+                // Remove patches
+                this.editInvite?.set(response.data)
+                this.patchInvite = null
+
+                const component = new ComponentWithProperties(SendInviteView, { secret, invite: response.data })
+                if (this.forceCreate) {
+                    this.present({ components: [component], modalDisplayStyle: "popup" })
+                } else {
+                    this.show(component)
+                }
+
                 this.saving = false
             } catch (e) {
                 console.error(e)
@@ -514,7 +533,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
             return false;
         }
 
-        if (!force && !confirm("Ben je zeker dat je deze beheerder wilt verwijderen?")) {
+        if (!force && !await CenteredMessage.confirm("Ben je zeker dat je deze beheerder wilt verwijderen?", "Verwijderen")) {
             return false;
         }
 
@@ -604,7 +623,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     /// --------------------------------------------------------
 
     get firstName() {
-        const user = this.user
         if (this.user) {
             return this.user.firstName ?? ""
         }
@@ -612,7 +630,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     set firstName(firstName: string) {
-        const user = this.user
         if (this.user) {
             this.addUserPatch({ firstName: firstName.length == 0 ? null : firstName })
             return
@@ -621,7 +638,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     get lastName() {
-        const user = this.user
         if (this.user) {
             return this.user.lastName ?? ""
         }
@@ -629,7 +645,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     set lastName(lastName: string) {
-        const user = this.user
         if (this.user) {
             this.addUserPatch({ lastName: lastName.length == 0 ? null : lastName })
             return
@@ -638,7 +653,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     get email() {
-        const user = this.user
         if (this.user) {
             return this.user.email ?? ""
         }
@@ -646,7 +660,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
     }
 
     set email(email: string | null) {
-        const user = this.user
         if (this.user) {
             this.addUserPatch({ email: email ?? this.user.email ?? ""})
             return

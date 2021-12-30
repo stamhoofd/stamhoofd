@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
@@ -39,6 +39,14 @@ export class WebshopManager {
 
     constructor(preview: WebshopPreview) {
         this.preview = preview
+    }
+
+    get hasWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
     }
 
     /**
@@ -77,19 +85,23 @@ export class WebshopManager {
             decoder: PrivateWebshop as Decoder<PrivateWebshop>
         })
 
+        this.updateWebshop(response.data)
+    }
+
+    updateWebshop(webshop: PrivateWebshop) {
         if (this.webshop) {
-            this.webshop.set(response.data)
+            this.webshop.set(webshop)
         } else {
-            this.webshop = response.data
+            this.webshop = webshop
         }
 
         // Clone data and keep references
-        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(response.data)
-        this.preview.set(response.data)
+        OrganizationManager.organization.webshops.find(w => w.id == this.preview.id)?.set(webshop)
+        this.preview.set(webshop)
         OrganizationManager.save().catch(console.error)
 
         // Save async (could fail in some unsupported browsers)
-        this.storeWebshop(response.data).catch(console.error)
+        this.storeWebshop(webshop).catch(console.error)
     }
 
     async loadWebshopFromDatabase(): Promise<PrivateWebshop | undefined> {
@@ -125,16 +137,13 @@ export class WebshopManager {
                 this.loadWebshop(false).catch(console.error)
             }
 
-            console.log("Return webshop")
             return this.webshop
         }
 
         if (this.webshopPromise) {
-            console.log("Return webshopPromise")
             return this.webshopPromise
         }
         
-        console.log("Init webshopPromise")
         this.webshopPromise = (async () => {
             // Try to get it from the database, also init a background fetch if it is too long ago
             try {
@@ -172,13 +181,9 @@ export class WebshopManager {
      * Force fetch a new webshop, but prevent fetching multiple times at the same time
      */
     async loadWebshop(shouldRetry = true): Promise<PrivateWebshop> {
-        
         if (this.webshopFetchPromise) {
-            console.log("Return webshopFetchPromise")
             return this.webshopFetchPromise
         }
-
-        console.log("Init webshopFetchPromise")
         
         this.webshopFetchPromise = (async () => {
             // Try to get it from the database, also init a background fetch if it is too long ago
@@ -332,7 +337,11 @@ export class WebshopManager {
             const objectStore = transaction.objectStore("orders");
 
             for (const order of orders) {
-                objectStore.put(order.encode({ version: Version }));
+                if (order.status === OrderStatus.Deleted) {
+                    objectStore.delete(order.id);
+                } else {
+                    objectStore.put(order.encode({ version: Version }));
+                }
             }
         })
     }
@@ -450,7 +459,7 @@ export class WebshopManager {
                 const cursor = event.target.result;
                 if (cursor) {
                     const rawOrder = cursor.value
-                     // Todo: need version fix here
+                    // Todo: need version fix here
                     const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
                     callback(order)
                     cursor.continue();
@@ -693,15 +702,20 @@ export class WebshopManager {
                 if (response.results.length > 0) {
                     // Save these orders to the local database
                     // Non-critical:
-                    this.storeOrders(response.results).then(() => {
-                        console.log("Saved orders to the local database")
-                    }).catch(console.error)
+                    this.storeOrders(response.results).catch(console.error)
 
                     // Non-critical:
                     this.setlastFetchedOrder(response.results[response.results.length - 1]).catch(console.error)
 
                     // Already send these new orders to our listeners, who want to know new incoming orders
-                    this.ordersEventBus.sendEvent("fetched", response.results).catch(console.error)
+                    const fetched = response.results.filter(o => o.status !== OrderStatus.Deleted)
+                    this.ordersEventBus.sendEvent("fetched", fetched).catch(console.error)
+                    
+                    // Let listeners know that some orders are deleted
+                    const deleted = response.results.filter(o => o.status === OrderStatus.Deleted)
+                    if (deleted.length > 0) {
+                        this.ordersEventBus.sendEvent("deleted", deleted).catch(console.error)
+                    }
                 }
                 
                 query = response.next
@@ -808,13 +822,32 @@ export class WebshopManager {
 
                         const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
                         resolve(ticket.patch(patch))
-                        console.log("Found patched ticket in database", patch)
                     }
                 } else {
                     resolve(ticket)
                 }
             }
 
+        })
+    }
+
+    async deleteOrderFromDatabase(id: string): Promise<void> {
+        const db = await this.getDatabase()
+
+        return new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["orders"], "readwrite");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("orders");
+            const request = objectStore.delete(id)
+            request.onsuccess = () => {
+                resolve()
+            }
         })
     }
 
@@ -907,9 +940,7 @@ export class WebshopManager {
                 if (response.results.length > 0) {
                     // Save these orders to the local database
                     // Non-critical:
-                    this.storeTickets(response.results).then(() => {
-                        console.log("Saved tickets to the local database")
-                    }).catch(console.error)
+                    this.storeTickets(response.results).catch(console.error)
 
                     // Non-critical:
                     this.setLastFetchedTicket(response.results[response.results.length - 1]).catch(console.error)

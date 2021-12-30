@@ -1,52 +1,50 @@
 <template>
-    <main class="webshop-view-products">
+    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
+        <h1 class="style-navigation-title">
+            {{ viewTitle }}
+        </h1>
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="webshop.categories.length > 0">
-            <h2>Categorieën</h2>
             <STList>
-                <CategoryRow v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+                <CategoryRow v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
             </STList>
         </template>
 
         <template v-else-if="webshop.products.length > 0">
-            <h2 v-if="isTickets">
-                Tickets
-            </h2>
-            <h2 v-else>
-                Artikels
-            </h2>
             <STList>
-                <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="$emit('patch', $event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+                <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
         </template>
-        
-        <p>
-            <button class="button text" @click="addCategory">
-                <span class="icon add" />
-                <span>Categorie toevoegen</span>
-            </button>
-        </p>
-
+                
         <p v-if="webshop.categories.length == 0">
-            <button class="button text" @click="addProduct">
+            <button class="button text" type="button" @click="addProduct">
                 <span class="icon add" />
                 <span v-if="isTickets">Ticket toevoegen</span>
                 <span v-else>Artikel toevoegen</span>
             </button>
         </p>
-    </main>
+
+        <p>
+            <button class="button text" type="button" @click="addCategory">
+                <span class="icon add" />
+                <span v-if="webshop.categories.length == 0 && webshop.products.length > 0">Opdelen in categorieën</span>
+                <span v-else>Categorie toevoegen</span>
+            </button>
+        </p>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STInputBox, STList, STListItem,TooltipDirective as Tooltip, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { Category, PrivateWebshop, Product, ProductType, WebshopTicketType } from '@stamhoofd/structures';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins } from "vue-property-decorator";
 
 import CategoryRow from './categories/CategoryRow.vue';
 import EditCategoryView from './categories/EditCategoryView.vue';
+import EditWebshopMixin from "./EditWebshopMixin";
 import EditProductView from './products/EditProductView.vue';
 import ProductRow from './products/ProductRow.vue';
 
@@ -54,19 +52,25 @@ import ProductRow from './products/ProductRow.vue';
     components: {
         STListItem,
         STList,
-        STInputBox,
         STErrorsDefault,
         ProductRow,
-        CategoryRow
-    },
-    directives: { Tooltip },
+        CategoryRow,
+        SaveView,
+    }
 })
-export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
-    @Prop()
-    webshop!: PrivateWebshop;
-
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
+export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
+    get viewTitle() {
+        if (this.isTickets) {
+            if (this.webshop.categories.length > 0) {
+                return "Ticket categorieën"
+            }
+            return "Aanbod tickets en vouchers"
+        }
+        if (this.webshop.categories.length > 0) {
+            return "Product categorieën"
+        }
+        return "Productaanbod"
+    }
 
     get isTickets() {
         return this.webshop.meta.ticketType === WebshopTicketType.Tickets
@@ -80,7 +84,7 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
         p.products.addPut(product)
         this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
-            this.$emit("patch", p.patch(patch))
+            this.addPatch(p.patch(patch))
 
             // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("popup"))
@@ -99,7 +103,7 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
 
         this.present(new ComponentWithProperties(EditCategoryView, { category, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
-            this.$emit("patch", p.patch(patch))
+            this.addPatch(p.patch(patch))
         }}).setDisplayStyle("popup"))
     }
 
@@ -112,7 +116,7 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
         const moveTo = index - 2
         const p = PrivateWebshop.patch({})
         p.categories.addMove(category.id, this.webshop.categories[moveTo]?.id ?? null)
-        this.$emit("patch", p)
+        this.addPatch(p)
     }
 
     moveCategoryDown(category: Category) {
@@ -124,7 +128,7 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
         const moveTo = index + 1
         const p = PrivateWebshop.patch({})
         p.categories.addMove(category.id, this.webshop.categories[moveTo].id)
-        this.$emit("patch", p)
+        this.addPatch(p)
     }
 
     moveProductUp(product: Product) {
@@ -136,7 +140,7 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
         const moveTo = index - 2
         const p = PrivateWebshop.patch({})
         p.products.addMove(product.id, this.webshop.products[moveTo]?.id ?? null)
-        this.$emit("patch", p)
+        this.addPatch(p)
     }
 
     moveProductDown(product: Product) {
@@ -148,15 +152,8 @@ export default class EditWebshopProductsView extends Mixins(NavigationMixin) {
         const moveTo = index + 1
         const p = PrivateWebshop.patch({})
         p.products.addMove(product.id, this.webshop.products[moveTo].id)
-        this.$emit("patch", p)
+        this.addPatch(p)
     }
   
 }
 </script>
-
-<style lang="scss">
-
-.webshop-view-products {
-    padding-top: 15px;
-}
-</style>

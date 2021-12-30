@@ -7,6 +7,7 @@ import { Address } from '../addresses/Address';
 import { City } from '../addresses/City';
 import { Country, CountryDecoder } from '../addresses/CountryDecoder';
 import { Province } from '../addresses/Province';
+import { DNSRecord, DNSRecordType } from '../DNSRecord';
 import { Image } from '../files/Image';
 import { PaymentMethod } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
@@ -49,7 +50,19 @@ export class WebshopTimeSlot extends AutoEncoder {
     }
 
     toString() {
-        return Formatter.dateWithDay(this.date)+", "+Formatter.minutes(this.startTime)+" - "+Formatter.minutes(this.endTime)
+        return this.dateString()+", "+this.timeRangeString()
+    }
+
+    dateString() {
+        return Formatter.dateWithDay(this.date)
+    }
+
+    dateStringShort() {
+        return Formatter.date(this.date)
+    }
+
+    timeRangeString() {
+        return Formatter.minutes(this.startTime)+" - "+Formatter.minutes(this.endTime)
     }
 }
 
@@ -68,6 +81,19 @@ export enum CheckoutMethodType {
     "Delivery" = "Delivery"
 }
 
+export class CheckoutMethodTypeHelper {
+    static getName(type: CheckoutMethodType): string {
+        switch (type) {
+            case CheckoutMethodType.OnSite:
+                return "Ter plaatse consumeren"
+            case CheckoutMethodType.Takeout:
+                return "Afhalen"
+            case CheckoutMethodType.Delivery:
+                return "Leveren"
+        }
+    }
+}
+
 export class CheckoutMethod extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
@@ -83,6 +109,10 @@ export class CheckoutMethod extends AutoEncoder {
 
     @field({ decoder: WebshopTimeSlots })
     timeSlots: WebshopTimeSlots = WebshopTimeSlots.create({})
+
+    get typeName() {
+        return CheckoutMethodTypeHelper.getName(this.type)
+    }
 }
 
 export class WebshopTakeoutMethod extends CheckoutMethod {
@@ -230,6 +260,12 @@ export enum WebshopTicketType {
     "Tickets" = "Tickets"
 }
 
+export enum WebshopStatus {
+    "Open" = "Open",
+    "Closed" = "Closed",
+    "Archived" = "Archived"
+}
+
 export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
@@ -278,6 +314,20 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true, version: 43 })
     availableUntil: Date | null = null
+
+    /**
+     * Manually close a webshop
+     */
+    @field({ decoder: new EnumDecoder(WebshopStatus), version: 136 })
+    status = WebshopStatus.Open
+
+    /**
+     * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.
+     * This is to prevent invalid url's from being used in emails.
+     * Lookups for a given domain still work if not active
+     */
+    @field({ decoder: BooleanDecoder, version: 135 })
+    domainActive = false
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {
@@ -289,6 +339,22 @@ export class WebshopPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: PermissionsByRole, version: 60, optional: true })
     permissions = PermissionsByRole.create({})
+
+    /**
+     * DNS records that need to be set in order to activate mail domain and registration domain
+     */
+    @field({ decoder: new ArrayDecoder(DNSRecord), version: 135 })
+    dnsRecords: DNSRecord[] = [];
+
+    static buildDNSRecords(domain: string): DNSRecord[] {
+        return [
+            DNSRecord.create({
+                type: DNSRecordType.CNAME,
+                name: domain+".",
+                value: "domains.stamhoofd.shop."
+            })
+        ]
+    }
 }
 
 export class WebshopServerMetaData extends AutoEncoder {

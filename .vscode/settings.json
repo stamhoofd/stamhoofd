@@ -3,6 +3,7 @@
     "javascript.format.enable": false,
     "search.exclude": {
         "**/dist": true,
+        "**/dist-prefix": true,
         "**/node_modules": true,
         "**/android/app/src/main/assets": true,
         "**/android/app/build": true,

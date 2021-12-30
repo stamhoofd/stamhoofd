@@ -9,9 +9,9 @@
                 <div v-for="(payment, index) in payments" :key="payment.id" class="container">
                     <hr v-if="index > 0">
                     <h2 class="style-with-button">
-                        <div>Afrekening</div>
+                        <div>Afrekening {{ payments.length - index }}</div>
                         <div class="hover-show">
-                            <button v-if="hasWrite" class="button icon gray edit" @click="editPayment(payment)" />
+                            <button v-if="hasWrite" class="button icon gray edit" type="button" @click="editPayment(payment)" />
                         </div>
                     </h2>
 
@@ -42,25 +42,18 @@
 
                         <dt>Betaalmethode</dt>
                         <dd>{{ getMethodName(payment.method) }}</dd>
-
-                        <dt>Status</dt>
-                        <dd v-if="payment.status == 'Succeeded'">
-                            Betaald
-                        </dd>
-                        <dd v-else>
-                            Nog niet betaald
-                        </dd>
                     </dl>
 
-                    <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box">
+                    <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box with-button">
                         Betaald op {{ payment.paidAt | date }}
+
+                        <button class="button text" @click="markNotPaid(payment)">
+                            Ongedaan maken
+                        </button>
                     </p>
 
-                    <LoadingButton :loading="loading">
-                        <button v-if="payment.status == 'Succeeded' && payment.paidAt" class="button secundary" @click="markNotPaid(payment)">
-                            Toch niet betaald
-                        </button>
-                        <button v-else class="button primary" @click="markPaid(payment)">
+                    <LoadingButton v-else :loading="loading">
+                        <button class="button primary" @click="markPaid(payment)">
                             Markeer als betaald
                         </button>
                     </LoadingButton>
@@ -78,15 +71,13 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder,Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, LoadingButton,Spinner,STToolbar, Toast } from "@stamhoofd/components";
+import { CenteredMessage, LoadingButton, Spinner, STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { FinancialSupportSettings, PaymentMethod, PaymentMethodHelper } from '@stamhoofd/structures';
-import { CreatePaymentGeneral, EncryptedPaymentDetailed, EncryptedPaymentGeneral, getPermissionLevelNumber, LegacyRecordType, MemberWithRegistrations, PaymentDetailed, PaymentGeneral, PaymentPatch, PaymentStatus, PermissionLevel, RegisterCart, RegisterItem } from '@stamhoofd/structures';
-import { RegisterCartPriceCalculator } from '@stamhoofd/structures/src/members/checkout/RegisterCartPriceCalculator';
+import { CreatePaymentGeneral, EncryptedPaymentGeneral, FinancialSupportSettings, getPermissionLevelNumber, MemberWithRegistrations, PaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentPatch, PaymentStatus, PermissionLevel, RegisterCart, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins, Prop,Vue } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from '../../../classes/MemberManager';
@@ -100,7 +91,7 @@ import EditPaymentView from '../payments/EditPaymentView.vue';
         Spinner
     },
     filters: {
-        price: Formatter.price,
+        price: Formatter.price.bind(Formatter),
         date: Formatter.dateTime.bind(Formatter)
     }
 })

@@ -92,7 +92,7 @@ export default class InvalidOrganizationView extends Mixins(NavigationMixin){
                         }
 
                         &, &:hover, &:link, &:active, &:visited {
-                            color: $color-gray;
+                            color: $color-gray-text;
                             font-weight: 600;
                             text-decoration: none;
                         }

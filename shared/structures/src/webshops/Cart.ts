@@ -82,7 +82,12 @@ export class CartItem extends AutoEncoder {
      * Unique identifier to check if two cart items are the same
      */
     get code(): string {
-        return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".")+"."+this.fieldAnswers.map(a => a.field.id+"-"+Formatter.slug(a.answer)).join(".");
+        return this.codeWithoutFields+"."+this.fieldAnswers.map(a => a.field.id+"-"+Formatter.slug(a.answer)).join(".");
+    }
+
+
+    get codeWithoutFields(): string {
+        return this.product.id+"."+this.productPrice.id+"."+this.options.map(o => o.option.id).join(".")
     }
 
     /**
@@ -133,6 +138,26 @@ export class CartItem extends AutoEncoder {
 
     getPrice(cart: Cart): number {
         return this.getUnitPrice(cart) * this.amount
+    }
+
+    /**
+     * Used for statistics
+     */
+    get descriptionWithoutFields(): string {
+        const descriptions: string[] = []
+
+        if (this.product.prices.length > 1) {
+            descriptions.push(this.productPrice.name)
+        }
+        for (const option of this.options) {
+            descriptions.push(option.option.name)
+        }
+
+        if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
+            descriptions.unshift(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()))
+        }
+
+        return descriptions.join("\n")
     }
 
     get descriptionWithoutDate(): string {

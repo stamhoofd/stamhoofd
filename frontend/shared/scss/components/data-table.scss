@@ -22,7 +22,7 @@
             
 
         th {
-            background: $color-white;
+            background: $color-background;
             position: sticky;
             top: 0;
             border-bottom: $border-width solid $color-border;
@@ -34,6 +34,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             cursor: pointer;
+            z-index: 100;
 
             &:first-child {
                 padding-left: 0;
@@ -47,7 +48,7 @@
                 content: "";
                 position: sticky;
                 top: 0;
-                background: $color-white;
+                background: $color-background;
                 padding-top: calc(var(--current-view-safe-area-top, 0px) + 10px);
             }
 

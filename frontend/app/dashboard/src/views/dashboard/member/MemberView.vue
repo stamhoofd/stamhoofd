@@ -1,28 +1,20 @@
 <template>
     <div class="st-view member-view">
-        <STNavigationBar :title="member.details.name">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-                <button v-if="hasPreviousMember" class="button text" @click="goBack">
-                    <span class="icon arrow-left" />
-                    <span>Vorige</span>
-                </button>
-            </template>
+        <STNavigationBar :title="member.details.firstName" :pop="canPop" :dismiss="canDismiss">
             <template #right>
-                <button v-if="hasNextMember" class="button text" @click="goNext">
-                    <span>Volgende</span>
-                    <span class="icon arrow-right" />
-                </button>
-                <button class="button icon close gray" @click="pop" />
+                <button v-if="hasPreviousMember || hasNextMember" v-tooltip="'Ga naar vorige lid'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousMember" @click="goBack" />
+                <button v-if="hasNextMember || hasPreviousMember" v-tooltip="'Ga naar volgende lid'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextMember" @click="goNext" />
+
+                <button v-tooltip="'Lid bewerken'" class="button icon navigation edit" type="button" @click="editMember" />
+                <button v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>
-                <span class="icon-spacer">{{ member.details.name }}</span>
-                <MaleIcon v-if="member.details.gender == Gender.Male" class="icon-spacer" />
-                <FemaleIcon v-if="member.details.gender == Gender.Female" class="icon-spacer" />
-                <button class="button icon gray more" @click="showContextMenu" />
+            <h1 class="style-navigation-title with-icons">
+                <span class="icon-spacer">{{ member.details.firstName }}</span>
+                <MaleIcon v-if="member.details.gender == Gender.Male" v-tooltip="member.details.age >= 18 ? 'Man' : 'Jongen'" class="icon-spacer" />
+                <FemaleIcon v-if="member.details.gender == Gender.Female" v-tooltip="member.details.age >= 18 ? 'Vrouw' : 'Meisje'" class="icon-spacer" />
             </h1>
 
             <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
@@ -32,16 +24,19 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, Popup, Sheet } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STNavigationTitle } from "@stamhoofd/components";
+import { LongPressDirective, STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
-import { Gender,Group,MemberWithRegistrations } from '@stamhoofd/structures';
+import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
+import { Gender,getPermissionLevelNumber,Group,MemberWithRegistrations, PermissionLevel } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
-import MemberContextMenu from "./MemberContextMenu.vue";
+import { OrganizationManager } from "../../../classes/OrganizationManager";
+import { MemberActionBuilder } from "../groups/MemberActionBuilder";
+import EditMemberView from "./edit/EditMemberView.vue";
 import MemberViewDetails from "./MemberViewDetails.vue";
 import MemberViewPayments from "./MemberViewPayments.vue";
 
@@ -54,6 +49,10 @@ import MemberViewPayments from "./MemberViewPayments.vue";
         FemaleIcon,
         BackButton
     },
+    directives: {
+        Tooltip: TooltipDirective,
+        LongPress: LongPressDirective
+    }
 })
 export default class MemberView extends Mixins(NavigationMixin) {
     @Prop()
@@ -128,7 +127,8 @@ export default class MemberView extends Mixins(NavigationMixin) {
         this.show({
             components: [component],
             replace: 1,
-            reverse: true
+            reverse: true,
+            animated: false
         })
     }
 
@@ -145,12 +145,13 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
             group: this.group,
             cycleOffset: this.cycleOffset,
-            waitingList: this.waitingList
+            waitingList: this.waitingList,
         });
 
         this.show({
             components: [component],
             replace: 1,
+            animated: false
         })
     }
 
@@ -184,27 +185,58 @@ export default class MemberView extends Mixins(NavigationMixin) {
         }
     }
 
-    showContextMenu(event) {
-        const displayedComponent = new ComponentWithProperties(MemberContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
-            member: this.member,
+    get hasWrite(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if (OrganizationManager.user.permissions.hasFullAccess()) {
+            // Can edit members without groups
+            return true
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
+    }
+
+    get actions() {
+        const builder = new MemberActionBuilder({
+            component: this,
             group: this.group,
             cycleOffset: this.cycleOffset,
-            waitingList: this.waitingList
+            inWaitingList: this.waitingList,
+            hasWrite: this.hasWrite,
+        })
+
+        return builder.getActions()
+    }
+
+    showContextMenu(event) {
+        const el = event.currentTarget;
+        const bounds = el.getBoundingClientRect()
+
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: bounds.left,
+            y: bounds.bottom,
+            xPlacement: "right",
+            yPlacement: "bottom",
+            actions: this.actions,
+            focused: [this.member]
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
-}
-</script>
 
-<style lang="scss">
-
-.member-view {
-    > main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
+    editMember() {
+        const displayedComponent = new ComponentWithProperties(EditMemberView, {
+            member: this.member,
+            initialFamily: this.familyManager
+        }).setDisplayStyle("popup");
+        this.present(displayedComponent);
     }
 }
-</style>
+</script>

@@ -5,7 +5,7 @@
                 <OrganizationLogo :organization="organization" />
             </template>
             <template slot="right">
-                <button v-for="item in items" :key="item.component.key" class="button text" :class="{ selected: activeItem === item }" @click="selectItem(item)">
+                <button v-for="item in items" :key="item.component.key" class="button text" :class="{ selected: activeItem === item }" type="button" @click="selectItem(item)">
                     <span :class="'icon '+item.icon" />
                     <span>{{ item.name }}</span>
                     <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
@@ -16,7 +16,7 @@
             <FramedComponent ref="component" :key="root.key" :root="root" />
         </div>
         <div class="tab-bar">
-            <button v-for="item in items" :key="item.component.key" class="button text small column" :class="{ selected: activeItem === item }" @click="selectItem(item)">
+            <button v-for="item in items" :key="item.component.key" class="button text small column" :class="{ selected: activeItem === item }" type="button" @click="selectItem(item)">
                 <span :class="'icon '+item.icon" />
                 <span>{{ item.name }}</span>
                 <span v-if="item.badge" class="bubble">{{ item.badge }}</span>
@@ -172,10 +172,11 @@ export default class TabBarController extends Mixins(NavigationMixin) {
         left: 0;
         right: 0;
         height: 60px;
-        border-top: 2px solid $color-border;
+        border-top: $border-width-thin solid $color-border;
         padding-bottom: var(--st-safe-area-bottom, 0px);
         background: rgba($color-background, 0.7);
         backdrop-filter: blur(10px);
+        z-index: 100;
 
         display: flex;
         flex-direction: row;

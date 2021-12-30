@@ -2,7 +2,6 @@ import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
-const { Resolver } = require('dns').promises;
 
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
@@ -13,6 +12,7 @@ import { OrganizationServerMetaData } from '../structures/OrganizationServerMeta
 import { Webshop } from './Webshop';
 import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { I18n } from "@stamhoofd/backend-i18n"
+import { validateDNSRecords } from "../helpers/DNSValidator";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -118,8 +118,21 @@ export class Organization extends Model {
 
     // Methods
     static async getByEmail(email: string): Promise<Organization | undefined> {
+        if (["hallo@stamhoofd.be", "hallo@stamhoofd.nl"].includes(email)) {
+            return
+        }
         if (email.endsWith("@stamhoofd.email")) {
             const uri = email.substring(0, email.length - "@stamhoofd.email".length)
+            return await Organization.getByURI(uri)
+        }
+
+        if (email.endsWith("@stamhoofd.be")) {
+            const uri = email.substring(0, email.length - "@stamhoofd.be".length)
+            return await Organization.getByURI(uri)
+        }
+
+        if (email.endsWith("@stamhoofd.nl")) {
+            const uri = email.substring(0, email.length - "@stamhoofd.nl".length)
             return await Organization.getByURI(uri)
         }
 
@@ -273,133 +286,7 @@ export class Organization extends Model {
             }
         }
         
-        // Revalidate all
-        const resolver = new Resolver();
-        resolver.setServers(['1.1.1.1', '8.8.8.8', '8.8.4.4']);
-
-        let allValid = true
-
-        // If all non-TXT records are valid, we can already setup the register domain
-        let hasAllNonTXT = true
-
-        for (const record of organization.privateMeta.dnsRecords) {
-            try {
-                switch (record.type) {
-                    case DNSRecordType.CNAME: {
-
-                        const addresses: string[] = await resolver.resolveCname(record.name.substr(0, record.name.length - 1))
-                        record.errors = null;
-
-                        if (addresses.length == 0) {
-                            record.status = DNSRecordStatus.Pending
-                            allValid = false
-                            hasAllNonTXT = false
-
-                            record.errors = new SimpleErrors(new SimpleError({
-                                code: "not_found",
-                                message: "",
-                                human: "We konden de CNAME-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
-                            }))
-                        } else if (addresses.length > 1) {
-                            record.status = DNSRecordStatus.Failed
-                            allValid = false
-                            hasAllNonTXT = false
-
-                            record.errors = new SimpleErrors(new SimpleError({
-                                code: "too_many_fields",
-                                message: "",
-                                human: "Er zijn meerdere CNAME records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerder hebt aangemaakt"
-                            }))
-                        } else {
-                            if (addresses[0] + "." === record.value) {
-                                record.status = DNSRecordStatus.Valid
-                            } else {
-                                record.status = DNSRecordStatus.Failed
-                                allValid = false
-                                hasAllNonTXT = false
-
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: "wrong_value",
-                                    message: "",
-                                    human: "Er is een andere waarde ingesteld voor de CNAME-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + addresses[0] + "."
-                                }))
-                            }
-                        }
-
-                        break;
-                    }
-
-                    case DNSRecordType.TXT: {
-                        const records: string[][] = await resolver.resolveTxt(record.name.substr(0, record.name.length - 1))
-
-                        record.errors = null;
-
-                        if (records.length == 0) {
-                            record.status = DNSRecordStatus.Pending
-                            allValid = false
-
-                            record.errors = new SimpleErrors(new SimpleError({
-                                code: "not_found",
-                                message: "",
-                                human: "We konden de TXT-record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
-                            }))
-                        } else if (records.length > 1) {
-                            record.status = DNSRecordStatus.Failed
-                            allValid = false
-                            record.errors = new SimpleErrors(new SimpleError({
-                                code: "too_many_fields",
-                                message: "",
-                                human: "Er zijn meerdere TXT-records ingesteld voor " + record.name + ", kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt"
-                            }))
-                        } else {
-                            const val = records[0].join("").trim()
-                            if (val === record.value.trim()) {
-                                if (records[0].length > 1 && val.length <= 255) {
-                                    // Split was not needed and is not supported by SES
-                                    record.status = DNSRecordStatus.Failed
-                                    allValid = false
-
-                                    record.errors = new SimpleErrors(new SimpleError({
-                                        code: "wrong_value",
-                                        message: "",
-                                        human: "De waarde komt overeen maar is op één of andere manier opgesplitst in meerdere stukken, terwijl dat niet nodig is. Dit wordt niet ondersteund door onze e-mailprovider. Contacteer ons als je de oorzaak niet kan achterhalen."
-                                    }))
-                                } else {
-                                    record.status = DNSRecordStatus.Valid
-                                }
-                            } else {
-                                record.status = DNSRecordStatus.Failed
-                                allValid = false
-
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: "wrong_value",
-                                    message: "",
-                                    human: "Er is een andere waarde ingesteld voor de TXT-record " + record.name + ", kijk na of je geen typfout hebt gemaakt. Gevonden: " + records[0].join("")
-                                }))
-                            }
-                        }
-                        break;
-                    }
-
-                }
-            } catch (e) {
-                console.error(e)
-                record.status = DNSRecordStatus.Pending
-
-                if (e.code && e.code == "ENOTFOUND") {
-                    record.errors = new SimpleErrors(new SimpleError({
-                        code: "not_found",
-                        message: "",
-                        human: "We konden de record " + record.name + " nog niet vinden. Hou er rekening mee dat het even (tot 24u) kan duren voor we deze kunnen zien."
-                    }))
-                }
-                allValid = false
-
-                if (record.type !== DNSRecordType.TXT) {
-                    hasAllNonTXT = false
-                }
-            }
-        }
+       const { allValid, hasAllNonTXT } = await validateDNSRecords(organization.privateMeta.dnsRecords)
 
         if (hasAllNonTXT) {
             // We can setup the register domain if needed
@@ -666,7 +553,7 @@ export class Organization extends Model {
         const filtered = await this.getAdmins()
 
         if (filtered.length > 0) {
-            return filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", ")
+            return filtered.map(f => f.getEmailTo() ).join(", ")
         }
 
         return undefined
@@ -682,7 +569,7 @@ export class Organization extends Model {
         const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
 
         if (filtered.length > 0) {
-            return filtered.map(f => f.firstName && f.lastName ? '"'+(f.firstName+" "+f.lastName).replace("\"", "\\\"")+"\" <"+f.email+">" : f.email ).join(", ")
+            return filtered.map(f => f.getEmailTo() ).join(", ")
         }
 
         return undefined
@@ -702,6 +589,13 @@ export class Organization extends Model {
         } else {
             console.error("Unexpected result for updateRequestKeysCount", results)
         }
+    }
+
+    /**
+     * Return default e-mail address for important e-mails that should have the highest deliverability
+     */
+    getStrongEmail(i18n: I18n) {
+        return '"'+this.name.replace("\"", "\\\"")+'" <'+ (this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
     }
 
     getDefaultEmail(): { from: string; replyTo: string | undefined } {

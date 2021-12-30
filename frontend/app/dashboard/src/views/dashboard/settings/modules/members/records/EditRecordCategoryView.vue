@@ -1,129 +1,116 @@
 <template>
-    <div class="st-view record-category-edit-view">
-        <STNavigationBar :title="title">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1>
-                {{ title }}
-            </h1>
+    <SaveView :loading="false" :title="title" :disabled="!hasChanges" @save="save">
+        <h1 class="style-navigation-title">
+            {{ title }}
+        </h1>
         
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <div class="split-inputs">
-                <STInputBox title="Titel" error-fields="name" :error-box="errorBox">
-                    <input
-                        ref="firstInput"
-                        v-model="name"
-                        class="input"
-                        type="text"
-                        placeholder="Titel"
-                        autocomplete=""
-                    >
-                </STInputBox>
-            </div>
-
-            <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
-                <textarea
-                    v-model="description"
+        <div class="split-inputs">
+            <STInputBox title="Titel" error-fields="name" :error-box="errorBox">
+                <input
+                    ref="firstInput"
+                    v-model="name"
                     class="input"
                     type="text"
-                    placeholder="Beschrijving"
+                    placeholder="Titel"
                     autocomplete=""
-                />
+                    enterkeyhint="next"
+                >
             </STInputBox>
-            <p class="style-description-small">
-                De beschrijving staat onder de titel van de categorie
-            </p>
+        </div>
 
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Beschrijving"
+                autocomplete=""
+            />
+        </STInputBox>
+        <p class="style-description-small">
+            De beschrijving staat onder de titel van de categorie
+        </p>
+
+        <hr>
+        <h2 v-if="categories.length == 0">
+            Kenmerken
+        </h2>
+        <h2 v-else>
+            Subcategorieën
+        </h2>
+        <p>
+            In elke categorie kan je kenmerken/vragen onderverdelen. Je kan er ook voor kiezen om een categorie nog eens onder te verdelen in categorieën, wat handig is als je heel wat informatie moet opvragen.
+        </p>
+
+        <STList v-if="categories.length > 0">
+            <RecordCategoryRow v-for="c in categories" :key="c.id" :category="c" :categories="categories" :parent-category="patchedCategory" :selectable="true" @patch="addCategoriesPatch" />
+        </STList>
+
+        <STList v-if="records.length > 0">
+            <RecordRow v-for="record in records" :key="record.id" :record="record" :records="records" :parent-category="patchedCategory" :selectable="true" @patch="addRecordsPatch" />
+        </STList>
+
+        <p v-if="categories.length == 0">
+            <button class="button text" type="button" @click="addRecord">
+                <span class="icon add" />
+                <span>Nieuw kenmerk/vraag</span>
+            </button>
+        </p>
+
+        <p v-if="!parentCategory">
+            <button class="button text" type="button" @click="addCategory">
+                <span class="icon add" />
+                <span>Nieuwe subcategorie</span>
+            </button>
+        </p>
+
+        <hr>
+        <h2>Wanneer ingeschakeld?</h2>
+        <p v-if="!parentCategory">
+            Je kan kiezen op welke leden deze categorie van toepassing is, en bij wie deze stap overgeslagen kan worden tijdens het inschrijven.
+        </p>
+        <p v-else>
+            Je kan kiezen op welke leden deze categorie van toepassing is.
+        </p>
+
+        <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" />
+
+        <div v-if="!isNew" class="container">
             <hr>
-            <h2 v-if="categories.length == 0">
-                Kenmerken
+            <h2>
+                Categorie verwijderen
             </h2>
-            <h2 v-else>
-                Subcategorieën
-            </h2>
-            <p>
-                In elke categorie kan je kenmerken/vragen onderverdelen. Je kan er ook voor kiezen om een categorie nog eens onder te verdelen in categorieën, wat handig is als je heel wat informatie moet opvragen.
-            </p>
 
-            <STList v-if="categories.length > 0">
-                <RecordCategoryRow v-for="c in categories" :key="c.id" :category="c" :categories="categories" :parent-category="patchedCategory" :selectable="true" @patch="addCategoriesPatch" />
-            </STList>
-
-            <STList v-if="records.length > 0">
-                <RecordRow v-for="record in records" :key="record.id" :record="record" :records="records" :parent-category="patchedCategory" :selectable="true" @patch="addRecordsPatch" />
-            </STList>
-
-            <p v-if="categories.length == 0">
-                <button class="button text" @click="addRecord">
-                    <span class="icon add" />
-                    <span>Nieuw kenmerk/vraag</span>
-                </button>
-            </p>
-
-            <p v-if="!parentCategory">
-                <button class="button text" @click="addCategory">
-                    <span class="icon add" />
-                    <span>Nieuwe subcategorie</span>
-                </button>
-            </p>
-
-            <hr>
-            <h2>Wanneer ingeschakeld?</h2>
-            <p v-if="!parentCategory">
-                Je kan kiezen op welke leden deze categorie van toepassing is, en bij wie deze stap overgeslagen kan worden tijdens het inschrijven.
-            </p>
-            <p v-else>
-                Je kan kiezen op welke leden deze categorie van toepassing is.
-            </p>
-
-            <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" />
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, PropertyFilterInput,Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { MemberDetails, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
+import { MemberDetails, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
-import EditRecordView from "./EditRecordView.vue"
-import RecordCategoryRow from "./RecordCategoryRow.vue"
-import RecordRow from "./RecordRow.vue"
+import EditRecordView from "./EditRecordView.vue";
+import RecordCategoryRow from "./RecordCategoryRow.vue";
+import RecordRow from "./RecordRow.vue";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        Spinner,
         STList,
         RecordCategoryRow,
         RecordRow,
-        Checkbox,
         PropertyFilterInput
     },
 })
@@ -292,12 +279,12 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
         this.pop()
     }
 
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchCategory, this.category, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

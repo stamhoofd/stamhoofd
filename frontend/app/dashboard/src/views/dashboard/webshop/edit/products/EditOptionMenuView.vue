@@ -1,96 +1,75 @@
 <template>
-    <div class="st-view optionmenu-edit-view">
-        <STNavigationBar :title="isNew ? 'Keuzemenu toevoegen' : name+' bewerken'">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1 v-if="isNew">
-                Keuzemenu toevoegen
-            </h1>
-            <h1 v-else>
-                {{ name }} bewerken
-            </h1>
+    <SaveView :title="isNew ? 'Keuzemenu toevoegen' : name+' bewerken'" :disabled="!hasChanges && !isNew" @save="save">
+        <h1 v-if="isNew">
+            Keuzemenu toevoegen
+        </h1>
+        <h1 v-else>
+            {{ name }} bewerken
+        </h1>
         
-            <STErrorsDefault :error-box="errorBox" />
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="bv. Kies je extra's"
-                    autocomplete=""
-                >
-            </STInputBox>
+        <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+            <input
+                ref="firstInput"
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="bv. Kies je extra's"
+                autocomplete=""
+            >
+        </STInputBox>
 
-            <Checkbox v-model="multipleChoice">
-                Meerkeuze
-            </Checkbox>
-            <p class="style-description">
-                Bij meerkeuze kan men geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).
-            </p>
+        <Checkbox v-model="multipleChoice">
+            Meerkeuze
+        </Checkbox>
+        <p class="style-description">
+            Bij meerkeuze kan men geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).
+        </p>
 
-            <hr>
-            <h2 class="style-with-button">
-                <div>Keuzes</div>
-                <div>
-                    <button class="button text" @click="addOption">
-                        <span class="icon add" />
-                        <span>Keuze</span>
-                    </button>
-                </div>
-            </h2>
+        <hr>
+        <h2 class="style-with-button">
+            <div>Keuzes</div>
+            <div>
+                <button class="button text only-icon-smartphone" type="button" @click="addOption">
+                    <span class="icon add" />
+                    <span>Keuze</span>
+                </button>
+            </div>
+        </h2>
             
-            <OptionMenuOptions :option-menu="patchedOptionMenu" @patch="addOptionMenuPatch" />
-        </main>
+        <OptionMenuOptions :option-menu="patchedOptionMenu" @patch="addOptionMenuPatch" />
 
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+        <div v-if="!isNew" class="container">
+            <hr>
+            <h2>
+                Verwijder dit keuzemenu
+            </h2>
+
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SegmentedControl, Slider, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Option, OptionMenu, Product, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { Option, OptionMenu, Product, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import EditOptionView from './EditOptionView.vue';
-import OptionMenuOptions from "./OptionMenuOptions.vue"
+import OptionMenuOptions from "./OptionMenuOptions.vue";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        SegmentedControl,
-        DateSelection,
-        RadioGroup,
-        PriceInput,
-        Radio,
         Checkbox,
-        Slider,
-        Spinner,
-        UploadButton,
         OptionMenuOptions,
-        STList
     },
 })
 export default class EditOptionMenuView extends Mixins(NavigationMixin) {
@@ -165,7 +144,6 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
         }}).setDisplayStyle("sheet"))
     }
 
-
     save() {
         this.saveHandler(this.patchProduct)
         this.pop({ force: true })
@@ -182,22 +160,16 @@ export default class EditOptionMenuView extends Mixins(NavigationMixin) {
         this.pop({ force: true })
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchProduct, this.product, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
-
-    
 }
 </script>
 

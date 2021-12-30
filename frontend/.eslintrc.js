@@ -65,6 +65,7 @@ module.exports = {
                 "@typescript-eslint/no-unsafe-call": "off", // This is impossible to use with dependencies that don't have types yet, such as tiptap
                 "@typescript-eslint/no-unsafe-member-access": "off", // This is impossible to use with dependencies that don't have types yet, such as tiptap
                 "@typescript-eslint/restrict-plus-operands": "off", // bullshit one
+                "vue/html-button-has-type": "error",
 
                 "vue/html-indent": ["warn", 4],
                 "vue/max-attributes-per-line": "off",
@@ -74,6 +75,10 @@ module.exports = {
                         order: ["template", "script", "style"],
                     },
                 ],
+
+                // Warning: the eslint indent rule is a bit broken (check github issue). Disabled for now. Enabled temporarily if needed
+                "indent": "off",
+                "@typescript-eslint/indent": ["warn", 4]
             },
         }
     ]

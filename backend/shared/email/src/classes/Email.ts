@@ -15,6 +15,7 @@ export type EmailInterfaceBase = {
     html?: string;
     attachments?: { filename: string; path?: string; href?: string; content?: string; contentType?: string }[];
     retryCount?: number;
+    type?: "transactional" | "broadcast"
 }
 
 export type EmailInterface = EmailInterfaceBase & {
@@ -26,6 +27,7 @@ export type EmailBuilder = () => EmailInterface | undefined
 
 class EmailStatic {
     transporter: Mail;
+    transactionalTransporter: Mail;
     rps = 14
 
     currentQueue: EmailBuilder[] = []
@@ -51,12 +53,32 @@ class EmailStatic {
             }
         });
 
+        // create reusable transporter object using the default SMTP transport
+        this.transactionalTransporter = nodemailer.createTransport({
+            pool: true,
+            host: STAMHOOFD.TRANSACTIONAL_SMTP_HOST,
+            port: STAMHOOFD.TRANSACTIONAL_SMTP_PORT,
+            auth: {
+                user: STAMHOOFD.TRANSACTIONAL_SMTP_USERNAME, // generated ethereal user
+                pass: STAMHOOFD.TRANSACTIONAL_SMTP_PASSWORD // generated ethereal password
+            }
+        });
+
         // verify connection configuration
         this.transporter.verify((error) => {
             if (error) {
                 console.error("SMTP server not working", error);
             } else {
-                console.log("Server is ready to take our messages");
+                console.log("SMTP server is ready to take our messages");
+            }
+        });
+
+        // verify connection configuration
+        this.transactionalTransporter.verify((error) => {
+            if (error) {
+                console.error("Transactinoal SMTP server not working", error);
+            } else {
+                console.log("Transactinoal SMTP server is ready to take our messages");
             }
         });
     }
@@ -211,7 +233,7 @@ class EmailStatic {
             from: data.from, // sender address
             bcc: (STAMHOOFD.environment === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
             replyTo: data.replyTo,
-            to: STAMHOOFD.environment === "production" ? to : "hallo@stamhoofd.be",
+            to: STAMHOOFD.environment === "production" || to.endsWith("@bounce-testing.postmarkapp.com") ? to : "hallo@stamhoofd.be",
             subject: data.subject, // Subject line
             text: data.text, // plain text body
         };
@@ -231,8 +253,9 @@ class EmailStatic {
         }
 
         try {
-            const info = await this.transporter.sendMail(mail);
-            console.log("Message sent: %s", info.messageId);
+            const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
+            const info = await transporter.sendMail(mail);
+            console.log("Message sent: %s via %s", info.messageId, data.type);
         } catch (e) {
             console.error("Failed to send e-mail:")
             console.error(e);
@@ -252,7 +275,8 @@ class EmailStatic {
                     this.sendInternal({
                         to: "hallo@stamhoofd.be",
                         subject: "E-mail kon niet worden verzonden",
-                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? "")
+                        text: "Een e-mail vanaf "+data.from+" kon niet worden verstuurd aan "+mail.to+": \n\n"+e+"\n\n"+(mail.text ?? ""),
+                        type: (data.type === "transactional") ? "broadcast" : "transactional"
                     }, new I18n("nl", "BE"))
                 }
             }
@@ -261,6 +285,10 @@ class EmailStatic {
 
     getInternalEmailFor(i18n: I18n) {
         return '"Stamhoofd" <'+ (i18n.$t("shared.emails.general")) +'>'
+    }
+
+    getPersonalEmailFor(i18n: I18n) {
+        return '"Simon Backx" <'+ (i18n.$t("shared.emails.personal")) +'>'
     }
 
     /**

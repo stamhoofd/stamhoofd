@@ -52,7 +52,7 @@ export default class Steps extends Vue {
             this.canPop = (this.navigationController.mainComponent?.componentInstance() as any)?.isStepsPoppable ?? (this.navigationController.components.length > 1);
             this.step = (this.navigationController.mainComponent?.componentInstance() as any)?.step ?? -1;
             if (this.step == -1) {
-               this.step = this.navigationController.components.length 
+                this.step = this.navigationController.components.length 
             }
         })
         
@@ -90,15 +90,15 @@ export default class Steps extends Vue {
         position: fixed;
         left: 0;
         top: 0;
-        height: $border-width;
+        height: 2px;
         pointer-events: none;
         background: $color-primary;
-        border-top-right-radius: $border-width/2;
-        border-bottom-right-radius: $border-width/2;
+        border-top-right-radius: 1px;
+        border-bottom-right-radius: 1px;
         width: 0;
         opacity: 1;
         transition: width 0.3s, opacity 0.3s;
-        z-index: 12;
+        z-index: 300;
 
         &.hide {
             transition: width 0.3s, opacity 0.2s 0.3s;

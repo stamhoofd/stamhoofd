@@ -1,6 +1,8 @@
 package com.stamhoofd.stamhoofd;
 
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.BridgeWebChromeClient;
+import com.getcapacitor.BridgeWebViewClient;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -9,14 +11,20 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.net.http.SslError;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.webkit.PermissionRequest;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.compose.ui.graphics.Color;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.webkit.WebSettingsCompat;
@@ -34,8 +42,11 @@ public class MainActivity extends BridgeActivity {
         WebView webView = this.bridge.getWebView();
         WebSettings webSettings = webView.getSettings();
 
+        // Fix background color in dark mode: always use a color that switches depending on the theme
+        webView.setBackgroundColor(this.getResources().getColor(R.color.navigationBarColor));
+
         if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // As of Android 10, you can simply force the dark mode
                 webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
 
@@ -45,7 +56,7 @@ public class MainActivity extends BridgeActivity {
                 }
             }
         } else {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
             }
         }
@@ -56,7 +67,26 @@ public class MainActivity extends BridgeActivity {
         webSettings.setMediaPlaybackRequiresUserGesture(false);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
+
         MainActivity me = this;
+
+        // Because trusted root CA don't work in WebViews in Android...
+        if (BuildConfig.BUILD_TYPE.equals("debug")) {
+            // We need to make sure we keep using the bridges custom logic
+            BridgeWebViewClient client = new BridgeWebViewClient(this.bridge) {
+                @Override
+                public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                    if (BuildConfig.BUILD_TYPE.equals("debug")) {
+                        //Do something
+                        handler.proceed();
+                        return;
+                    }
+                    super.onReceivedSslError(view, handler, error);
+                }
+            };
+            webView.setWebViewClient(client);
+            this.bridge.setWebViewClient(client);
+        }
 
         webView.setWebChromeClient(new WebChromeClient(){
             @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -73,9 +103,9 @@ public class MainActivity extends BridgeActivity {
                             String[] permissions = { Manifest.permission.CAMERA };
 
                             ActivityCompat.requestPermissions(
-                                me,
-                                permissions,
-                                PERMISSION_REQUEST_CODE);
+                                    me,
+                                    permissions,
+                                    PERMISSION_REQUEST_CODE);
                             return;
                         }
 
@@ -104,6 +134,12 @@ public class MainActivity extends BridgeActivity {
                 }
                 break;
         }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        registerPlugin(FileOpenerPlugin.class);
     }
 
     @Override

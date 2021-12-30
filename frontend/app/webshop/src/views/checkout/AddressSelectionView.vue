@@ -122,7 +122,7 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-           const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Address, true)
+            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Address, true)
             if (!nextStep) {
                 throw new SimpleError({
                     code: "missing_config",
@@ -141,7 +141,7 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/checkout/"+CheckoutStepType.Address.toLowerCase())
+        UrlHelper.setUrl("/checkout/"+CheckoutStepType.Address.toLowerCase())
     }
 }
 </script>

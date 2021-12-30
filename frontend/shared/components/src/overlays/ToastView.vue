@@ -100,7 +100,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
     box-sizing: border-box;
     @extend .style-input-shadow;
     background: $color-primary-light;
-    border-radius: $border-radius;
+    border-radius: $border-radius-modals;
     pointer-events:all;   
 
     display: flex;
@@ -110,7 +110,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
 
     font-size: 16px;
     line-height: 1.4;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
     color: $color-primary;
 
     div, .icon.dark {
@@ -127,8 +127,8 @@ export default class ToastView extends Mixins(NavigationMixin) {
         height: $border-width;
         pointer-events: none;
         background: $color-primary;
-        border-top-right-radius: $border-width/2;
-        border-bottom-right-radius: $border-width/2;
+        border-top-right-radius: calc($border-width / 2);
+        border-bottom-right-radius: calc($border-width / 2);
         width: 0;
         opacity: 1;
         transition: width 0.3s, opacity 0.3s;
@@ -171,7 +171,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
         color: $color-warning-dark;;
 
         .progress {
-            background: $color-warning-primary;
+            background: $color-warning;
         }
 
         .button {

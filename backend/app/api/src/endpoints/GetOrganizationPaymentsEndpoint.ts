@@ -6,7 +6,7 @@ import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedPaymentGeneral,Order as OrderStruct, OrderStatus } from "@stamhoofd/structures";
+import { EncryptedPaymentGeneral,Order as OrderStruct, OrderStatus, PaymentMethod } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -15,10 +15,6 @@ type ResponseBody = EncryptedPaymentGeneral[]
 type RegistrationWithMember = Registration & { member: Member}
 type PaymentWithRegistrations = Payment & { registrations: RegistrationWithMember[] }
 type PaymentWithOrder = Payment & { order: Order }
-
-/**
- * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
- */
 
 export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -72,22 +68,28 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
             createdAt: p.createdAt,
             updatedAt: p.updatedAt,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r)) ?? [],
+            registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r, true)) ?? [],
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             order: (p as any).order ? OrderStruct.create(Object.assign({...(p as any).order}, { payment: null })) : null,
         })
     }
     
-    static async getPaymentsWithOrder(organizationId: string, withCanceled = false): Promise<PaymentWithOrder[]> {
+    static async getPaymentsWithOrder(organizationId: string, withCanceledOrDeleted = false, onlyTransfer = true): Promise<PaymentWithOrder[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Order.getDefaultSelect()} from \`${Payment.table}\`\n`;
         query += `JOIN \`${Order.table}\` ON \`${Order.table}\`.\`${Order.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\`\n`
         query += `where \`${Order.table}\`.\`organizationId\` = ?`
 
-        const params = [organizationId]
+        const params: any = [organizationId]
 
-        if (!withCanceled) {
-            query += ` AND \`${Order.table}\`.\`status\` != ?`
-            params.push(OrderStatus.Canceled)
+        if (!withCanceledOrDeleted) {
+            query += ` AND \`${Order.table}\`.\`status\` NOT IN (?)`
+            params.push([OrderStatus.Canceled, OrderStatus.Deleted])
+        }
+
+        if (onlyTransfer) {
+            // Only return non paid paymetns and payments of last 2 months
+            query += ` AND (\`${Payment.table}\`.\`method\` = ?)`
+            params.push(PaymentMethod.Transfer)
         }
 
         const [results] = await Database.select(query, params)
@@ -120,7 +122,7 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
      * This needs to be here to prevent reference cycles (temporary)
      * Fetch all members with their corresponding (valid) registrations and payment
      */
-    static async getPaymentsWithRegistrations(organizationId: string, memberId: string | null = null): Promise<PaymentWithRegistrations[]> {
+    static async getPaymentsWithRegistrations(organizationId: string, memberId: string | null = null, onlyTransfer = true): Promise<PaymentWithRegistrations[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Member.getDefaultSelect()} from \`${Payment.table}\`\n`;
         if (memberId) {
             query += `JOIN \`${Registration.table}\` AS \`MemberCheckTable\` ON \`MemberCheckTable\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND \`MemberCheckTable\`.\`registeredAt\` is not null\n`
@@ -133,11 +135,21 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
 
         query += `where \`${Member.table}\`.\`organizationId\` = ?`
 
-        const params = [organizationId]
+        const params: any[] = [organizationId]
 
         if (memberId) {
             query += ` AND \`MemberCheckTable\`.\`${Member.registrations.foreignKey}\` = ?`
             params.push(memberId)
+        } else {
+            // Only return non paid paymetns and payments of last 2 months
+            query += ` AND (\`${Payment.table}\`.\`paidAt\` is NULL OR \`${Payment.table}\`.\`paidAt\` > ?)`
+            params.push(new Date(Date.now() - (24 * 60 * 60 * 1000 * 30 * 2)))
+        }
+
+        if (onlyTransfer) {
+            // Only return non paid paymetns and payments of last 2 months
+            query += ` AND (\`${Payment.table}\`.\`method\` = ?)`
+            params.push(PaymentMethod.Transfer)
         }
 
         const [results] = await Database.select(query, params)

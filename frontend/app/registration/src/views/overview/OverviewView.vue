@@ -41,14 +41,13 @@
                     <p v-else class="info-box">
                         Je hebt nog geen leden ingeschreven op dit account. Voeg ze toe met de knop hieronder.
                     </p>
-
-                    <STToolbar :sticky="false">
-                        <button slot="right" class="button secundary full" @click="addNewMember">
-                            <span class="icon left add" />
-                            <span>Nieuw lid toevoegen</span>
-                        </button>
-                    </STToolbar>
                 </main>
+                <STToolbar :sticky="false">
+                    <button slot="right" class="button secundary full" type="button" @click="addNewMember">
+                        <span class="icon left add" />
+                        <span>Nieuw lid toevoegen</span>
+                    </button>
+                </STToolbar>
             </section>
 
             <section class="view gray-shadow">

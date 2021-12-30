@@ -1,10 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
 import { Group } from "@stamhoofd/models";
-
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
@@ -60,6 +59,6 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        return new Response(members.filter(member => member.hasReadAccess(user, groups)).map(m => m.getStructureWithRegistrations()));
+        return new Response(members.filter(member => member.hasReadAccess(user, groups)).map(m => m.getStructureWithRegistrations(true)));
     }
 }

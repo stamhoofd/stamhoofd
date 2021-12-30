@@ -1,39 +1,25 @@
 <template>
-    <form class="auto st-view login-view" @submit.prevent="submit">
-        <STNavigationBar title="Wachtwoord wijzigen">
-            <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
-        </STNavigationBar>
-        <main>
-            <h1>Wachtwoord wijzigen</h1>
+    <SaveView class="auto" data-submit-last-field title="Wachtwoord wijzigen" save-icon="lock" @save="submit">
+        <h1>Wachtwoord wijzigen</h1>
 
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Kies een wachtwoord">
-                <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
-            </STInputBox>
+        <STInputBox title="Kies een wachtwoord">
+            <input v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
+        </STInputBox>
 
-            <STInputBox title="Herhaal wachtwoord">
-                <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
-            </STInputBox>
+        <STInputBox title="Herhaal wachtwoord">
+            <input v-model="passwordRepeat" enterkeyhint="go" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
+        </STInputBox>
 
-            <PasswordStrength v-model="password" />
-        </main>
-
-        <STFloatingFooter>
-            <LoadingButton :loading="loading">
-                <button class="button primary full">
-                    <span class="lock icon" />
-                    <span>Wijzigen</span>
-                </button>
-            </LoadingButton>
-        </STFloatingFooter>
-    </form>
+        <PasswordStrength v-model="password" />
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, LoadingButton, PasswordStrength, SaveView,STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -44,7 +30,8 @@ import { Component, Mixins } from "vue-property-decorator";
         STInputBox,
         LoadingButton,
         STErrorsDefault,
-        PasswordStrength
+        PasswordStrength,
+        SaveView
     }
 })
 export default class ChangePasswordView extends Mixins(NavigationMixin){

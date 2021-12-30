@@ -1,29 +1,31 @@
 <template>
     <transition appear name="show">
-        <div class="centered-message-container">
+        <form class="centered-message-container" @submit.prevent>
             <div class="centered-message">
                 <Spinner v-if="centeredMessage.type == 'loading'" class="center" />
                 <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg">
                 <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
                 <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg">
                 <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
-                <h1>{{ centeredMessage.title }}</h1>
+                <h1>
+                    {{ centeredMessage.title }}
+                </h1>
                 <p>{{ centeredMessage.description }}</p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <a v-if="button.href" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
+                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </a>
-                    <button v-else class="button full" :class="button.type" @click="onClickButton(button)">
+                    <button v-else ref="buttons" class="button full" :class="button.type" :tabindex="0" type="button" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </button>
                 </LoadingButton>
             </div>
-        </div>
+        </form>
     </transition>
 </template>
 
@@ -52,11 +54,12 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     mounted() {
-        if (document.activeElement && (document.activeElement as any).blur) {
-            (document.activeElement as any).blur();
-        }
         this.centeredMessage.doHide = () => {
             this.close()
+        }
+
+        if (document.activeElement && (document.activeElement as any).blur) {
+            (document.activeElement as any).blur();
         }
     }
 
@@ -111,29 +114,21 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
                 return;
             }
 
-            this.onClickButton(closeButton)
+            this.onClickButton(closeButton).catch(console.error)
             event.preventDefault();
             return;
         }
 
-        const confirmButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
-
-        if (!confirmButton && !closeButton) {
-            return
-        }
-
-        if (key === "Enter") {
-            if (confirmButton) {
-                this.onClickButton(confirmButton)
-            } else {
-                this.close();
+        if (key === "Enter" || key === 13) {
+            // Do we have a default action?
+            const defaultButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
+            if (defaultButton) {
+                this.onClickButton(defaultButton).catch(console.error)
+                event.preventDefault();
+                return;
             }
-            event.preventDefault();
         }
     }
-
-   
-
 }
 </script>
 
@@ -148,20 +143,25 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     top: 50%;
     transform: translate(-50%, -50%);
     @extend .style-overlay-shadow;
-    border-radius: $border-radius;
-    background: $color-white;
+    border-radius: $border-radius-modals;
+    background: $color-background;
     max-width: calc(100vw - 30px);
     width: 350px;
-    padding: 20px 20px;
+    padding: 30px;
     box-sizing: border-box;
     max-height: 100vh;
     overflow: auto;
     overflow-x: hidden;
 
+    @media (max-width: 500px) {
+        padding: 20px;
+    }
+
     > *:first-child {
         margin-top: 10px;
     }
-    > .center {
+    
+    > img.center, > .icon.center {
         display: block;
         margin: 0 auto;
     }
@@ -171,8 +171,8 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     > h1 {
-        padding-bottom: 20px;
-        padding-top: 20px;
+        padding-bottom: 25px;
+        padding-top: 5px;
         text-align: center;
         @extend .style-title-1;
 
@@ -182,7 +182,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     > button, .loading-button {
-        margin-top: 15px;
+        margin-top: 10px;
     }
 }
 
@@ -196,11 +196,15 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     background: rgba(0, 0, 0, 0.3);
     opacity: 1;
 
+    @media (prefers-color-scheme: dark) {
+        background: rgba(8, 8, 8, 0.7);
+    }
+
     &.show-enter-active {
         transition: opacity 0.30s;
 
         > .centered-message  {
-            transition: transform 0.30s;
+            transition: transform 0.30s cubic-bezier(0.0, 0.0, 0.2, 1);
         }
     }
 
@@ -209,7 +213,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         transition: opacity 0.25s;
 
         > .centered-message  {
-            transition: transform 0.25s;
+            transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1);
         }
     }
 

@@ -262,7 +262,7 @@ $slider-height: 6px;
         text-align: right;
         width: 50px;
         display: block;
-        border-bottom: 2px dashed $color-gray-light;
+        border-bottom: 2px dashed $color-border;
         padding: 5px 0;
 
         // Firefox fix
@@ -283,20 +283,20 @@ $slider-height: 6px;
 
     .middle {
         top: 0;
-        left: $border-width/2;
-        right: $slider-height/2;
+        left: calc($border-width / 2);
+        right: calc($slider-height / 2);
         bottom: 0;
         position: absolute;
-        background: $color-gray-light;
+        background: $color-gray-2;
         clip-path: polygon(
-            0 $slider-height/2 - $border-width/2,
+            0 calc($slider-height / 2 - $border-width / 2),
             100% 0,
             100% 100%,
-            0 $slider-height/2 + $border-width/2
+            0 calc($slider-height / 2 + $border-width / 2)
         );
 
         .fill {
-            left: -$border-width/2;
+            left: calc(-1 * $border-width / 2);
             // todo: also right + width should get corrected
             top: 0;
             bottom: 0;
@@ -317,9 +317,9 @@ $slider-height: 6px;
         transform: translate(-50%, -50%);
         height: 25px;
         width: 25px;
-        background: $color-gray-lighter;
+        background: $color-gray-3;
         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.1);
-        border-radius: (25px)/2;
+        border-radius: calc(25px / 2);
         cursor: pointer;
         z-index: 3;
 
@@ -328,8 +328,8 @@ $slider-height: 6px;
             top: 1px;
             bottom: 1px;
             right: 1px;
-            background: $color-white-interaction;
-            border-radius: (25px - 2px)/2;
+            background: $color-background-interactive;
+            border-radius: calc( (25px - 2px) / 2);
             position: absolute;
             content: "";
         }
@@ -344,24 +344,24 @@ $slider-height: 6px;
         content: "";
         background: $color-primary;
         left: 0;
-        top: $slider-height/2 - $border-width/2;
+        top: calc($slider-height / 2 - $border-width / 2);
         height: $border-width;
         width: $border-width;
         position: absolute;
-        border-radius: $border-width/2;
+        border-radius: calc($border-width / 2);
         z-index: 2;
     }
 
     &::after {
         content: "";
-        background: $color-gray-light;
+        background: $color-gray-2;
         right: 0;
         top: 0;
 
         height: $slider-height;
         width: $slider-height;
         position: absolute;
-        border-radius: $slider-height/2;
+        border-radius: calc($slider-height / 2);
         z-index: 2;
     }
 }

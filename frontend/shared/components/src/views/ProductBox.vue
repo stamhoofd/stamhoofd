@@ -178,8 +178,8 @@ export default class ProductBox extends Mixins(NavigationMixin){
         border: 0;
         outline: 0;
         height: $border-width;
-        background: var(--color-current-border, #{$color-border});
-        border-radius: $border-width/2;
+        background: $color-border;
+        border-radius: calc($border-width / 2);
         margin: 0;
         position: absolute;
         bottom: 0;
@@ -325,7 +325,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
 .enable-grid .product-box {
     @media (min-width: 801px) {
-        background: $color-white;
+        background: $color-background;
         border-radius: $border-radius;
         margin: 0;
         @include style-side-view-shadow();

@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
+    <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
         <ContextMenuItem @click="setPermission('read')">
             Bekijken
         </ContextMenuItem>
@@ -31,6 +31,12 @@ export default class GroupPermissionContextMenu extends Mixins(NavigationMixin) 
 
     @Prop({ default: 0 })
     y!: number;
+
+    @Prop()
+    xPlacement?: string;
+
+    @Prop()
+    yPlacement?: string;
 
     @Prop()
     callback!: (status: "read" | "write" | "full") => void;

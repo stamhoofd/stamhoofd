@@ -1,301 +1,290 @@
 <template>
-    <div class="st-view record-edit-view">
-        <STNavigationBar :title="title">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1>
-                {{ title }}
-            </h1>
+    <SaveView :loading="false" :title="title" :disabled="!hasChanges" @save="save">
+        <h1 class="style-navigation-title">
+            {{ title }}
+        </h1>
         
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Naam (kort)" error-fields="name" :error-box="errorBox">
-                        <input
-                            ref="firstInput"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            placeholder="bv. Toestemming publicatie foto’s"
-                            autocomplete=""
-                        >
-                    </STInputBox>
-                </div>
-
-                <div />
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Naam (kort)" error-fields="name" :error-box="errorBox">
+                    <input
+                        ref="firstInput"
+                        v-model="name"
+                        class="input"
+                        type="text"
+                        placeholder="bv. Toestemming publicatie foto’s"
+                        autocomplete=""
+                        enterkeyhint="next"
+                    >
+                </STInputBox>
             </div>
 
-            <STInputBox title="Type" error-fields="type" :error-box="errorBox" class="max">
+            <div />
+        </div>
+
+        <STInputBox title="Type" error-fields="type" :error-box="errorBox" class="max">
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.Checkbox" name="type" />
+                    <h3 class="style-title-list">
+                        Aankruisvakje
+                    </h3>
+                    <p class="style-description-small">
+                        Je kan nog een extra opmerking vragen indien aangevinkt
+                    </p>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.ChooseOne" name="type" />
+                    Kies één uit lijst
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.MultipleChoice" name="type" />
+                    Kies meerdere uit lijst
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.Text" name="type" />
+                    Tekst op één lijn
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.Textarea" name="type" />
+                    Meerdere lijnen tekst
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.Address" name="type" />
+                    Adres
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.Phone" name="type" />
+                    Telefoonnummer
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="type" :value="RecordType.Email" name="type" />
+                    E-mailadres
+                </STListItem>
+            </STList>
+        </STInputBox>
+
+        <STInputBox v-if="type == RecordType.MultipleChoice || type == RecordType.ChooseOne" title="Keuzemogelijkheden" error-fields="choices" :error-box="errorBox" class="max">
+            <template slot="right">
+                <button class="button text" type="button" @click="addChoice">
+                    <span class="icon add" />
+                    <span>Nieuw</span>
+                </button>
+            </template>
+
+            <STList v-if="patchedRecord.choices.length > 0">
+                <RecordChoiceRow v-for="choice in patchedRecord.choices" :key="choice.id" :choice="choice" :parent-record="patchedRecord" :selectable="true" @patch="addChoicesPatch" />
+            </STList>
+                
+            <p v-else class="info-box">
+                <span>Geen keuzemogelijkheden. Voeg een keuze toe via de <span class="icon add middle" />-knop.</span>
+            </p>
+        </STInputBox>
+
+        <hr>
+        <h2 class="style-with-button">
+            <div>Formulier</div>
+            <div>
+                <button class="button text" type="button" @click="openPreview">
+                    <span class="icon eye" />
+                    <span>Voorbeeld</span>
+                </button>
+            </div>
+        </h2>
+        <p>Het kenmerk dat je hebt toegevoegd moet natuurlijk op één of andere manier kunnen worden ingesteld. Hier bepaal je hoe dat formulier eruit ziet en welke beschrijving en tekst daarbij staat. Kijk zeker het voorbeeld na om te zien hoe iemand het kenmerk zal kunnen wijzigen of instellen.</p>
+
+        <STInputBox :title="labelTitle" error-fields="label" :error-box="errorBox" class="max">
+            <input
+                v-model="label"
+                class="input"
+                type="text"
+                :placeholder="name"
+                autocomplete=""
+                enterkeyhint="next"
+            >
+        </STInputBox>
+        <Checkbox v-model="required">
+            {{ requiredText }}
+        </Checkbox>
+
+        <STInputBox :title="descriptionTitle" error-fields="description" :error-box="errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Optioneel"
+                autocomplete=""
+            />
+        </STInputBox>
+        <p class="style-description-small">
+            Gebruik deze tekst voor een langere uitleg bij het instellen van dit kenmerk, enkel indien dat echt nodig is.
+        </p>
+
+        <Checkbox v-if="type == RecordType.Checkbox" v-model="askComments">
+            Voeg tekstvak toe indien aangevinkt
+        </Checkbox>
+
+        <STInputBox v-if="shouldAskInputPlaceholder" title="Tekst in leeg tekstvak" error-fields="label" :error-box="errorBox" class="max">
+            <input
+                v-model="inputPlaceholder"
+                class="input"
+                type="text"
+                placeholder="bv. 'Vul hier jouw naam in'"
+                autocomplete=""
+            >
+        </STInputBox>
+        <p class="style-description-small">
+            Het is netter als je een tekst in lege tekstvakken instelt. Je kan van deze plaats gebruik maken om een voorbeeld te geven, om het duidelijker te maken (zoals we zelf doen hierboven).
+        </p>
+
+        <STInputBox v-if="shouldAskCommentsDescription" title="Tekst onder tekstvak" error-fields="label" :error-box="errorBox" class="max">
+            <textarea
+                v-model="commentsDescription"
+                class="input"
+                type="text"
+                placeholder="Optioneel"
+                autocomplete=""
+            />
+        </STInputBox>
+        <p v-if="shouldAskCommentsDescription" class="style-description-small">
+            Laat hier eventueel extra instructies achter onder het tekstveld, als het aankruisvakje is aangevinkt.
+        </p>
+
+        <template v-if="canAddWarning">
+            <hr>
+            <h2>Waarschuwing</h2>
+            <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar als dit kenmerk een bepaalde waarde heeft.</p>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="warningInverted" :value="null" name="warningInverted" />
+                    <h3 class="style-title-list">
+                        Geen waarschuwing
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="warningInverted" :value="false" name="warningInverted" />
+                    <h3 class="style-title-list">
+                        {{ warningNonInvertedText }}
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <Radio slot="left" v-model="warningInverted" :value="true" name="warningInverted" />
+                    <h3 class="style-title-list">
+                        {{ warningInvertedText }}
+                    </h3>
+                </STListItem>
+            </STList>
+
+            <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
+                <input
+                    v-model="warningText"
+                    class="input"
+                    type="text"
+                    placeholder="bv. 'Geen toestemming om foto's te maken'"
+                    autocomplete=""
+                >
+            </STInputBox>
+
+            <STInputBox v-if="warningType" class="max" title="Type">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Checkbox" name="type" />
+                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
                         <h3 class="style-title-list">
-                            Aankruisvakje
+                            Informatief
                         </h3>
                         <p class="style-description-small">
-                            Je kan nog een extra opmerking vragen indien aangevinkt
+                            Grijze achtergrond. Voor minder belangrijke zaken
                         </p>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.ChooseOne" name="type" />
-                        Kies één uit lijst
+                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
+                        <h3 class="style-title-list">
+                            Waarschuwing
+                        </h3>
+                        <p class="style-description-small">
+                            Gele achtergrond
+                        </p>
                     </STListItem>
 
                     <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.MultipleChoice" name="type" />
-                        Kies meerdere uit lijst
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Text" name="type" />
-                        Tekst op één lijn
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Textarea" name="type" />
-                        Meerdere lijnen tekst
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Address" name="type" />
-                        Adres
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Phone" name="type" />
-                        Telefoonnummer
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="type" :value="RecordType.Email" name="type" />
-                        E-mailadres
+                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
+                        <h3 class="style-title-list">
+                            Foutmelding
+                        </h3>
+                        <p class="style-description-small">
+                            Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
+                        </p>
                     </STListItem>
                 </STList>
             </STInputBox>
+        </template>
 
-            <STInputBox v-if="type == RecordType.MultipleChoice || type == RecordType.ChooseOne" title="Keuzemogelijkheden" error-fields="choices" :error-box="errorBox" class="max">
-                <template slot="right">
-                    <button class="button text" @click="addChoice">
-                        <span class="icon add" />
-                        <span>Nieuw</span>
-                    </button>
-                </template>
+        <hr>
+        <h2>Opslag en beveiliging</h2>
+        <p>
+            Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a :href="'https://'+$t('shared.domains.marketing')+'/docs/toestemming-gegevens-verzamelen'" class="inline-link" target="_blank" rel="noopener">
+                Lees onze gids
+            </a>
+        </p>
 
-                <STList v-if="patchedRecord.choices.length > 0">
-                    <RecordChoiceRow v-for="choice in patchedRecord.choices" :key="choice.id" :choice="choice" :parent-record="patchedRecord" :selectable="true" @patch="addChoicesPatch" />
-                </STList>
-                
-                <p v-else class="info-box">
-                    Geen keuzemogelijkheden. Voeg een keuze toe via de <span class="icon add middle" />-knop.
-                </p>
-            </STInputBox>
 
+        <Checkbox v-model="sensitive">
+            Ik heb toestemming nodig om deze informatie te verzamelen, of de antwoorden zijn (of bevatten mogelijks) gevoelige informatie
+        </Checkbox>
+        <Checkbox v-if="!sensitive" v-model="encrypted">
+            <h3 class="style-title-list">
+                Sla antwoorden end-to-end-versleuteld op
+            </h3>
+            <p class="style-description-small">
+                Vink dit zeker aan bij: vrije invoer, contactgegevens of persoonsgegevens
+            </p>
+        </Checkbox>
+
+        <div v-if="!isNew" class="container">
             <hr>
-            <h2 class="style-with-button">
-                <div>Formulier</div>
-                <div>
-                    <button class="button text" @click="openPreview">
-                        <span class="icon eye" />
-                        <span>Voorbeeld</span>
-                    </button>
-                </div>
+            <h2>
+                Kenmerk verwijderen
             </h2>
-            <p>Het kenmerk dat je hebt toegevoegd moet natuurlijk op één of andere manier kunnen worden ingesteld. Hier bepaal je hoe dat formulier eruit ziet en welke beschrijving en tekst daarbij staat. Kijk zeker het voorbeeld na om te zien hoe iemand het kenmerk zal kunnen wijzigen of instellen.</p>
 
-            <STInputBox :title="labelTitle" error-fields="label" :error-box="errorBox" class="max">
-                <input
-                    v-model="label"
-                    class="input"
-                    type="text"
-                    :placeholder="name"
-                    autocomplete=""
-                >
-            </STInputBox>
-            <Checkbox v-model="required">
-                {{ requiredText }}
-            </Checkbox>
-
-            <STInputBox :title="descriptionTitle" error-fields="description" :error-box="errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel"
-                    autocomplete=""
-                />
-            </STInputBox>
-            <p class="style-description-small">
-                Gebruik deze tekst voor een langere uitleg bij het instellen van dit kenmerk, enkel indien dat echt nodig is.
-            </p>
-
-            <Checkbox v-if="type == RecordType.Checkbox" v-model="askComments">
-                Voeg tekstvak toe indien aangevinkt
-            </Checkbox>
-
-            <STInputBox v-if="shouldAskInputPlaceholder" title="Tekst in leeg tekstvak" error-fields="label" :error-box="errorBox" class="max">
-                <input
-                    v-model="inputPlaceholder"
-                    class="input"
-                    type="text"
-                    placeholder="bv. 'Vul hier jouw naam in'"
-                    autocomplete=""
-                >
-            </STInputBox>
-            <p class="style-description-small">
-                Het is netter als je een tekst in lege tekstvakken instelt. Je kan van deze plaats gebruik maken om een voorbeeld te geven, om het duidelijker te maken (zoals we zelf doen hierboven).
-            </p>
-
-            <STInputBox v-if="shouldAskCommentsDescription" title="Tekst onder tekstvak" error-fields="label" :error-box="errorBox" class="max">
-                <textarea
-                    v-model="commentsDescription"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel"
-                    autocomplete=""
-                />
-            </STInputBox>
-            <p v-if="shouldAskCommentsDescription" class="style-description-small">
-                Laat hier eventueel extra instructies achter onder het tekstveld, als het aankruisvakje is aangevinkt.
-            </p>
-
-            <template v-if="canAddWarning">
-                <hr>
-                <h2>Waarschuwing</h2>
-                <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar als dit kenmerk een bepaalde waarde heeft.</p>
-
-                <STList>
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningInverted" :value="null" name="warningInverted" />
-                        <h3 class="style-title-list">
-                            Geen waarschuwing
-                        </h3>
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningInverted" :value="false" name="warningInverted" />
-                        <h3 class="style-title-list">
-                            {{ warningNonInvertedText }}
-                        </h3>
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningInverted" :value="true" name="warningInverted" />
-                        <h3 class="style-title-list">
-                            {{ warningInvertedText }}
-                        </h3>
-                    </STListItem>
-                </STList>
-
-                <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
-                    <input
-                        v-model="warningText"
-                        class="input"
-                        type="text"
-                        placeholder="bv. 'Geen toestemming om foto's te maken'"
-                        autocomplete=""
-                    >
-                </STInputBox>
-
-                <STInputBox v-if="warningType" class="max" title="Type">
-                    <STList>
-                        <STListItem :selectable="true" element-name="label">
-                            <Radio slot="left" v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
-                            <h3 class="style-title-list">
-                                Informatief
-                            </h3>
-                            <p class="style-description-small">
-                                Grijze achtergrond. Voor minder belangrijke zaken
-                            </p>
-                        </STListItem>
-
-                        <STListItem :selectable="true" element-name="label">
-                            <Radio slot="left" v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
-                            <h3 class="style-title-list">
-                                Waarschuwing
-                            </h3>
-                            <p class="style-description-small">
-                                Gele achtergrond
-                            </p>
-                        </STListItem>
-
-                        <STListItem :selectable="true" element-name="label">
-                            <Radio slot="left" v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
-                            <h3 class="style-title-list">
-                                Foutmelding
-                            </h3>
-                            <p class="style-description-small">
-                                Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
-                            </p>
-                        </STListItem>
-                    </STList>
-                </STInputBox>
-            </template>
-
-            <hr>
-            <h2>Opslag en beveiliging</h2>
-            <p>
-                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a :href="'https://'+$t('shared.domains.marketing')+'/docs/toestemming-gegevens-verzamelen'" class="inline-link" target="_blank" rel="noopener">
-                    Lees onze gids
-                </a>
-            </p>
-
-
-            <Checkbox v-model="sensitive">
-                Ik heb toestemming nodig om deze informatie te verzamelen, of de antwoorden zijn (of bevatten mogelijks) gevoelige informatie
-            </Checkbox>
-            <Checkbox v-if="!sensitive" v-model="encrypted">
-                <h3 class="style-title-list">
-                    Sla antwoorden end-to-end-versleuteld op
-                </h3>
-                <p class="style-description-small">
-                    Vink dit zeker aan bij: vrije invoer, contactgegevens of persoonsgegevens
-                </p>
-            </Checkbox>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, Radio,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning,RecordWarningType,Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { CenteredMessage, Checkbox, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
 import DataPermissionSettingsView from '../DataPermissionSettingsView.vue';
 import EditRecordChoiceView from './EditRecordChoiceView.vue';
 import PreviewRecordView from './PreviewRecordView.vue';
-import RecordChoiceRow from "./RecordChoiceRow.vue"
+import RecordChoiceRow from "./RecordChoiceRow.vue";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        Spinner,
         STList,
         STListItem,
         Radio,
@@ -476,7 +465,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
             type,
             // Set required if choose one and if it wasn't choose one when opening
             required: type === RecordType.ChooseOne && this.record.type !== RecordType.ChooseOne ? true : undefined
-         })
+        })
     }
 
     get description() {
@@ -503,7 +492,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
         if (inverted === null) {
             this.patchRecord = this.patchRecord.patch({ 
                 warning: null
-             })
+            })
             return
         }
         if (this.warningInverted === null) {
@@ -511,13 +500,13 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
                 warning: RecordWarning.create({
                     inverted
                 })
-             })
+            })
         } else {
             this.patchRecord = this.patchRecord.patch({ 
                 warning: RecordWarning.patch({
                     inverted
                 })
-             })
+            })
         }
     }
 
@@ -529,7 +518,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
         if (text === null) {
             this.patchRecord = this.patchRecord.patch({ 
                 warning: null
-             })
+            })
             return
         }
         if (this.warningText === null) {
@@ -537,13 +526,13 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
                 warning: RecordWarning.create({
                     text
                 })
-             })
+            })
         } else {
             this.patchRecord = this.patchRecord.patch({ 
                 warning: RecordWarning.patch({
                     text
                 })
-             })
+            })
         }
     }
 
@@ -555,7 +544,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
         if (type === null) {
             this.patchRecord = this.patchRecord.patch({ 
                 warning: null
-             })
+            })
             return
         }
         if (this.warningType === null) {
@@ -563,13 +552,13 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
                 warning: RecordWarning.create({
                     type
                 })
-             })
+            })
         } else {
             this.patchRecord = this.patchRecord.patch({ 
                 warning: RecordWarning.patch({
                     type
                 })
-             })
+            })
         }
     }
 
@@ -666,12 +655,12 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
         this.pop()
     }
 
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchRecord, this.record, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

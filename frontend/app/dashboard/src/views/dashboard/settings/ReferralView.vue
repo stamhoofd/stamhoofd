@@ -104,7 +104,7 @@
 
                 <hr>
                 <h2>Overzicht van te verdienen tegoed</h2>
-                <p>Het bedrag dat je ontvangt stijgt per vereniging tot maximaal 100 euro per vereniging. Dus als je 6 verenigingen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro. Er zijn 45.000+ verenigingen in Vlaanderen, the sky is the limit 💰🤑.</p>
+                <p>Het bedrag dat je ontvangt stijgt per vereniging tot maximaal 100 euro per vereniging. Dus als je 6 verenigingen hebt aangebracht, verdien je in totaal € 210! Breng je er 10 aan, dan verdien je 550 euro.</p>
 
                 <STList>
                     <STListItem v-for="n in 9" :key="n">
