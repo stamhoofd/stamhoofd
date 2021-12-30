@@ -145,15 +145,11 @@ export class Product extends AutoEncoder {
     askName = false
 
     /**
-     * For now, we keep the stock stored with the product. But keep in mind that we'll move this to a different more performant place in the future.
-     * We'll combine writes to the same product to reduce database writes for every order.
+     * Total stock, excluding already sold items into account
      */
     @field({ decoder: IntegerDecoder, nullable: true })
     stock: number | null = null
 
-    /**
-     * Only increased when stock is not null.
-     */
     @field({ decoder: IntegerDecoder })
     usedStock = 0
 

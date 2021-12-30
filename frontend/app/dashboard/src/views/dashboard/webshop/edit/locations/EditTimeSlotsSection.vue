@@ -6,7 +6,7 @@
                 {{ title }}
             </div>
             <div>
-                <button class="button text" @click="addTimeSlot">
+                <button class="button text" type="button" @click="addTimeSlot">
                     <span class="icon add" />
                     <span>Keuze</span>
                 </button>
@@ -36,12 +36,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures"
+import { STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import EditTimeSlotView from './EditTimeSlotView.vue';
 
@@ -79,7 +79,7 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
         const p = WebshopTimeSlots.patch({})
         p.timeSlots.addPut(timeSlot)
         
-        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots.patch(p), timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
+        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots.patch(p), isNew: true, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
             // Merge both patches
             this.addPatch(p.patch(patch))
 

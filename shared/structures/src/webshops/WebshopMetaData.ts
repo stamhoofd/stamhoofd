@@ -37,6 +37,22 @@ export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     endTime: number = 14*60
 
+    /**
+     * Total stock, excluding already sold items into account
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 141 })
+    stock: number | null = null
+
+    @field({ decoder: IntegerDecoder, version: 141 })
+    usedStock = 0
+
+    get remainingStock(): number | null {
+        if (this.stock === null) {
+            return null
+        }
+        return Math.max(0, this.stock - this.usedStock)
+    }
+
     static sort(a: WebshopTimeSlot, b: WebshopTimeSlot){
         const aa = Formatter.dateIso(a.date)+" "+Formatter.minutesPadded(a.startTime)+" "+Formatter.minutesPadded(a.endTime)
         const bb = Formatter.dateIso(b.date)+" "+Formatter.minutesPadded(b.startTime)+" "+Formatter.minutesPadded(b.endTime)

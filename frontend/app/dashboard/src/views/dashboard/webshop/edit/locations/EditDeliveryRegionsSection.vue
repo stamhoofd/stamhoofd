@@ -96,7 +96,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
         this.loadingSearch = true
         this.searchCount++;
 
-         if (this.searchQuery.length == 0) {
+        if (this.searchQuery.length == 0) {
             this.searchResults = null
             this.loadingSearch = false
             return
@@ -169,6 +169,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
             p.cities.addDelete(city.id)
         } else {
             p.cities.addPut(city)
+            this.searchQuery = ""
         }
 
         this.$emit('patch', p)
@@ -185,6 +186,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
             p.provinces.addDelete(province.id)
         } else {
             p.provinces.addPut(province)
+            this.searchQuery = ""
         }
 
         this.$emit('patch', p)
@@ -201,6 +203,7 @@ export default class EditDeliveryregionsSection extends Mixins(NavigationMixin) 
             p.countries.addDelete(country)
         } else {
             p.countries.addPut(country)
+            this.searchQuery = ""
         }
 
         this.$emit('patch', p)

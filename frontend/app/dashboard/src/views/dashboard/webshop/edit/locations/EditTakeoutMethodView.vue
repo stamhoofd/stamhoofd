@@ -1,98 +1,78 @@
 <template>
-    <div class="st-view product-edit-view">
-        <STNavigationBar :title="locationTitleName">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1 v-if="isNew">
-                {{ locationTitleName }} toevoegen
-            </h1>
-            <h1 v-else>
-                {{ locationTitleName }} bewerken
-            </h1>
+    <SaveView :title="locationTitleName" :loading="saving" :disabled="!hasChanges" @save="save">
+        <h1 v-if="isNew">
+            {{ locationTitleName }} toevoegen
+        </h1>
+        <h1 v-else>
+            {{ locationTitleName }} bewerken
+        </h1>
         
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Locatienaam" error-fields="name" :error-box="errorBox">
-                        <input
-                            ref="firstInput"
-                            v-model="name"
-                            class="input"
-                            type="text"
-                            placeholder="bv. kantine"
-                            autocomplete=""
-                        >
-                    </STInputBox>
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Locatienaam" error-fields="name" :error-box="errorBox">
+                    <input
+                        ref="firstInput"
+                        v-model="name"
+                        class="input"
+                        type="text"
+                        placeholder="bv. kantine"
+                        autocomplete=""
+                    >
+                </STInputBox>
 
-                    <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
-                        <textarea
-                            v-model="description"
-                            class="input"
-                            type="text"
-                            placeholder="Hier kan je eventeel afhaalinstructies kwijt (optioneel)"
-                            autocomplete=""
-                        />
-                    </STInputBox>
-                </div>
-                <div>
-                    <AddressInput v-model="address" title="Adres" :validator="validator" :required="true" />
-                </div>
+                <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+                    <textarea
+                        v-model="description"
+                        class="input"
+                        type="text"
+                        placeholder="Hier kan je eventeel afhaalinstructies kwijt (optioneel)"
+                        autocomplete=""
+                    />
+                </STInputBox>
             </div>
+            <div>
+                <AddressInput v-model="address" title="Adres" :validator="validator" :required="true" />
+            </div>
+        </div>
 
-            <EditTimeSlotsSection v-if="isTakeout" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit afhaalintervallen" @patch="patchTimeSlots">
-                <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
-            </EditTimeSlotsSection>
-            <EditTimeSlotsSection v-else :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit shiften" @patch="patchTimeSlots">
-                <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
-            </EditTimeSlotsSection>
-        </main>
+        <EditTimeSlotsSection v-if="isTakeout" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit afhaalintervallen" @patch="patchTimeSlots">
+            <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+        </EditTimeSlotsSection>
+        <EditTimeSlotsSection v-else :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit shiften" @patch="patchTimeSlots">
+            <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
+        </EditTimeSlotsSection>
 
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+        <div v-if="!isNew" class="container">
+            <hr>
+            <h2>
+                Verwijderen
+            </h2>
+
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, Radio, RadioGroup, SegmentedControl, Spinner,STErrorsDefault,STInputBox, STList, STNavigationBar, STToolbar, UploadButton, Validator } from "@stamhoofd/components";
-import { Address, CheckoutMethodType, PrivateWebshop, Version, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { AddressInput, CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
+import { Address, CheckoutMethodType, PrivateWebshop, Version, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTimeSlots } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import EditTimeSlotsSection from "./EditTimeSlotsSection.vue"
+import EditTimeSlotsSection from "./EditTimeSlotsSection.vue";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        SegmentedControl,
-        DateSelection,
-        RadioGroup,
         AddressInput,
-        Radio,
-        Checkbox,
-        NumberInput,
-        Spinner,
-        UploadButton,
         STList,
         EditTimeSlotsSection
     },
@@ -194,12 +174,12 @@ export default class EditTakeoutMethodView extends Mixins(NavigationMixin) {
         this.pop()
     }
 
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchTakeoutMethod, this.takeoutMethod, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

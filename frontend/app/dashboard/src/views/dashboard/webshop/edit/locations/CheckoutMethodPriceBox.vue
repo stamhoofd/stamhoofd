@@ -21,11 +21,9 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ErrorBox,PriceInput, STInputBox } from "@stamhoofd/components";
-import { CheckoutMethodPrice } from "@stamhoofd/structures"
-import { Component, Mixins, Prop, Vue } from "vue-property-decorator";
+import { Checkbox, ErrorBox, PriceInput, STInputBox } from "@stamhoofd/components";
+import { CheckoutMethodPrice } from "@stamhoofd/structures";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({
     components: {
