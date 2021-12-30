@@ -1,3 +1,5 @@
+import { Toast } from '@stamhoofd/components';
+import { AppManager } from '@stamhoofd/networking';
 import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PrivateOrder } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
@@ -162,7 +164,7 @@ export class OrdersExcelExport {
                 OrderStatusHelper.getName(order.status),
                 ...(shouldIncludeSettements ? 
                     (order.payment?.settlement ? [Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.payment.settlement.settledAt)), order.payment.settlement.reference] : ["/", "/"])
-                     : []
+                    : []
                 )
             ]);
         }
@@ -249,7 +251,7 @@ export class OrdersExcelExport {
         const arr = Array.from(counter.values())
         arr.sort((a, b) => Sorter.byDateValue(a.settledAt, b.settledAt))
 
-         for (const item of arr) {
+        for (const item of arr) {
           
             wsData.push([
                 item.reference,
@@ -298,10 +300,10 @@ export class OrdersExcelExport {
 
         for (const order of orders) {
             for (const item of order.data.cart.items) {
-                const code = item.code
+                const code = item.codeWithoutFields
                 let existing = counter.get(code)
                 if (!existing) {
-                    existing = { amount: 0, name: item.product.name,  variant: item.description}
+                    existing = { amount: 0, name: item.product.name,  variant: item.descriptionWithoutFields}
                     counter.set(code, existing)
                 }
                 existing.amount += item.amount
@@ -312,7 +314,7 @@ export class OrdersExcelExport {
         const arr = Array.from(counter.values())
         arr.sort((a, b) => Sorter.stack(Sorter.byStringProperty(a, b, "name"), Sorter.byNumberProperty(a, b, "amount")))
 
-         for (const item of arr) {
+        for (const item of arr) {
           
             wsData.push([
                 item.name,
@@ -397,7 +399,7 @@ export class OrdersExcelExport {
                 break
             }
             if (empty) {
-               for (const row of wsData) {
+                for (const row of wsData) {
                     row.splice(index, 1)
                 } 
             }
@@ -423,9 +425,14 @@ export class OrdersExcelExport {
         if (shouldIncludeSettements) {
             XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Mollie uitbetalingen");
         }
-        
 
-        // todo: also add other sheets
-        XLSX.writeFile(wb, "bestellingen.xlsx");
+        if (AppManager.shared.downloadFile) {
+            const data = XLSX.write(wb, { type: 'base64' });
+            AppManager.shared.downloadFile(data, "bestellingen.xlsx").catch(e => {
+                Toast.fromError(e).show()
+            });
+        } else {
+            XLSX.writeFile(wb, "bestellingen.xlsx");
+        }
     }
 }

@@ -11,14 +11,15 @@
 
 .input {
     @extend .style-input;
-    @extend .style-input-shadow;
+    //@extend .style-input-shadow;
     color: $color-dark;
-    border: $border-width solid $color-gray-light;
-    background: var(--color-white, white);
+    border: $border-width solid $color-border;
+    background: $color-background;
     border-radius: $border-radius;
     padding: 5px 15px;
+    text-align: left;
     height: $input-height;
-    line-height: $input-height - 10px - 2 * $border-width;
+    line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
     margin: 0;
     width: 100%;
     box-sizing: border-box;
@@ -26,6 +27,21 @@
     transition: border-color 0.2s;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    word-break: normal;
+
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+
+    // On iOS, the time is centered on inputs, this is not what we want
+    &::-webkit-date-and-time-value {
+        text-align: left;
+    }
+
+    &.selectable {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        user-select: none;
+        cursor: pointer;
+    }
 
     &:not(textarea) {
         text-overflow: ellipsis;
@@ -33,7 +49,13 @@
         white-space: nowrap;
     }
 
-    &:hover {
+    @media (hover: hover) {
+        &:hover {
+            border-color: $color-primary-gray-light;
+        }
+    }
+
+    &:active {
         border-color: $color-primary-gray-light;
     }
 
@@ -42,33 +64,38 @@
     }
 
     &:disabled {
-        color: $color-gray;
+        color: $color-gray-1;
         cursor: not-allowed;
 
         // Safari fix color opacity
-        -webkit-text-fill-color: $color-gray;
+        -webkit-text-fill-color: $color-gray-1;
         opacity: 1; /* required on iOS */
 
-        &:hover {
-            border-color: $color-gray-light;
+        @media (hover: hover) {
+            &:hover {
+                border-color: $color-border;
+            }
         }
     }
 
     &:focus,
     &:focus-within {
         border-color: $color-primary;
+        box-shadow: 0 0 0 1px $color-primary;
     }
 
     &::placeholder {
-        color: $color-gray;
+        color: $color-gray-5;
     }
 
     &.error {
         border-color: $color-error-border;
+        box-shadow: 0 0 0 1px $color-error-border;
 
         &:focus,
         &:focus-within {
             border-color: $color-error-border-focus;
+            box-shadow: 0 0 0 1px $color-error-border-focus;
         }
     }
 }
@@ -76,10 +103,25 @@
 .input-errors {
     .input {
         border-color: $color-error-border;
+        box-shadow: 0 0 0 1px $color-error-border;
 
         &:focus,
         &:focus-within {
             border-color: $color-error-border-focus;
+            box-shadow: 0 0 0 1px $color-error-border-focus;
+        }
+    }
+}
+
+.input-success {
+    .input {
+        border-color: $color-success-border;
+        box-shadow: 0 0 0 1px $color-success-border;
+
+        &:focus,
+        &:focus-within {
+            border-color: $color-success-border-focus;
+            box-shadow: 0 0 0 1px $color-success-border-focus;
         }
     }
 }
@@ -88,17 +130,17 @@ textarea.input {
     max-width: none;
     padding: 12px 15px;
     // 3 lines height
-    line-height: $input-height - 18px - 2 * $border-width;
-    height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 4;
+    line-height: calc(#{$input-height} - 18px - 2 * #{$border-width});
+    height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 4);
 
     resize: none;
 
     &.large {
-        height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 8;
+        height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 8);
     }
 
     &.small {
-        height: $input-height + 4px + 10px + ($input-height - 18px - 2 * $border-width) * 3;
+        height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 3);
     }
 }
 

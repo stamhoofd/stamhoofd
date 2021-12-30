@@ -33,6 +33,16 @@ export class Payment extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt: Date
+
+    matchQuery(query: string): boolean {
+        const lowerQuery = query.toLowerCase();
+        if (
+            this.transferDescription && this.transferDescription.toLowerCase().includes(lowerQuery)
+        ) {
+            return true;
+        }
+        return false;
+    }
 }
 
 export class Settlement extends AutoEncoder {

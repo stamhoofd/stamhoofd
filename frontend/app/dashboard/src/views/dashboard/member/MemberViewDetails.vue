@@ -9,33 +9,65 @@
                 {{ member.firstName }} is niet ingeschreven
             </p>
 
-            <div v-if="member.details.memberNumber || member.details.birthDay || member.details.phone || member.details.email || member.details.address" class="hover-box container">
+            <div v-if="$isMobile && hasWarnings" class="hover-box container">
                 <hr v-if="member.activeRegistrations.length == 0">
-                <h2 class="style-with-button">
-                    <div>Algemeen</div>
-                    <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editMember()" />
-                    </div>
-                </h2>
-                <dl class="details-grid">
+                <ul class="member-records">
+                    <li
+                        v-for="warning in sortedWarnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
+                    >
+                        <span :class="'icon '+getIcon(warning)" />
+                        <span class="text">{{ warning.text }}</span>
+                    </li>
+                </ul>
+
+                <p v-if="warnings.length == 0" class="info-box">
+                    Geen waarschuwingen
+                </p>
+            </div>
+
+            <div class="hover-box container">
+                <hr v-if="($isMobile && hasWarnings) || member.activeRegistrations.length == 0">
+                <dl class="details-grid hover">
+                    <template v-if="member.details.firstName">
+                        <dt>Voornaam</dt>
+                        <dd v-copyable>
+                            {{ member.details.firstName }}
+                        </dd>
+                    </template>
+
+                    <template v-if="member.details.lastName">
+                        <dt>Achternaam</dt>
+                        <dd v-copyable>
+                            {{ member.details.lastName }}
+                        </dd>
+                    </template>
+
                     <template v-if="member.details.memberNumber">
                         <dt>Lidnummer</dt>
-                        <dd>{{ member.details.memberNumber }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.memberNumber }}
+                        </dd>
                     </template>
 
                     <template v-if="member.details.birthDay">
                         <dt>Verjaardag</dt>
-                        <dd>{{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)</dd>
+                        <dd v-copyable>
+                            {{ member.details.birthDayFormatted }} ({{ member.details.age }} jaar)
+                        </dd>
                     </template>
 
                     <template v-if="member.details.phone">
                         <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
-                        <dd>{{ member.details.phone }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.phone }}
+                        </dd>
                     </template>
 
                     <template v-if="member.details.email">
                         <dt>E-mailadres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ member.details.email }}
                             <span v-if="getInvalidEmailDescription(member.details.email)" v-tooltip="getInvalidEmailDescription(member.details.email)" class="icon warning yellow" />
                         </dd>
@@ -43,7 +75,7 @@
 
                     <template v-if="member.details.address">
                         <dt>Adres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ member.details.address.street }} {{ member.details.address.number }}<br>{{ member.details.address.postalCode }}
                             {{ member.details.address.city }}
                             <template v-if="member.details.address.country !== currentCountry">
@@ -52,12 +84,12 @@
                         </dd>
                     </template>
                 </dl>
-                <hr v-if="member.activeRegistrations.length > 0">
             </div>
 
             <div v-if="member.activeRegistrations.length > 0" class="container">
+                <hr>
                 <h2 class="style-with-button with-list">
-                    <div>Ingeschreven voor</div>
+                    <div>Inschrijvingen</div>
                     <div>
                         <button class="button text limit-space" @click="editGroup()">
                             <span class="icon sync" />
@@ -106,18 +138,22 @@
                     </div>
                 </h2>
 
-                <dl class="details-grid">
+                <dl class="details-grid hover">
                     <dt>Naam</dt>
-                    <dd>{{ parent.name }}</dd>
+                    <dd v-copyable>
+                        {{ parent.name }}
+                    </dd>
 
                     <template v-if="parent.phone">
                         <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
-                        <dd>{{ parent.phone }}</dd>
+                        <dd v-copyable>
+                            {{ parent.phone }}
+                        </dd>
                     </template>
 
                     <template v-if="parent.email">
                         <dt>E-mailadres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ parent.email }}
                             <span v-if="getInvalidEmailDescription(parent.email)" v-tooltip="getInvalidEmailDescription(parent.email)" class="icon warning yellow" />
                         </dd>
@@ -125,7 +161,7 @@
 
                     <template v-if="parent.address">
                         <dt>Adres</dt>
-                        <dd>
+                        <dd v-copyable>
                             {{ parent.address.street }} {{ parent.address.number }}<br>{{ parent.address.postalCode }}
                             {{ parent.address.city }}
                             <template v-if="parent.address.country !== currentCountry">
@@ -145,12 +181,16 @@
                     </div>
                 </h2>
 
-                <dl class="details-grid">
+                <dl class="details-grid hover">
                     <dt>Naam</dt>
-                    <dd>{{ contact.name }}</dd>
+                    <dd v-copyable>
+                        {{ contact.name }}
+                    </dd>
 
                     <dt>{{ $t('shared.inputs.mobile.label') }}</dt>
-                    <dd>{{ contact.phone }}</dd>
+                    <dd v-copyable>
+                        {{ contact.phone }}
+                    </dd>
                 </dl>
             </div>
 
@@ -163,15 +203,19 @@
                     </div>
                 </h2>
 
-                <dl class="details-grid">
+                <dl class="details-grid hover">
                     <template v-if="member.details.doctor.name">
                         <dt>Naam</dt>
-                        <dd>{{ member.details.doctor.name }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.doctor.name }}
+                        </dd>
                     </template>
 
                     <template v-if="member.details.doctor.phone">
                         <dt>Telefoonnummer</dt>
-                        <dd>{{ member.details.doctor.phone }}</dd>
+                        <dd v-copyable>
+                            {{ member.details.doctor.phone }}
+                        </dd>
                     </template>
                 </dl>
             </div>
@@ -214,10 +258,8 @@
             </div>
         </div>
 
-        <div v-if="hasWarnings || member.users.length > 0 || familyMembers.length > 0">
-            <div v-if="hasWarnings" class="hover-box container">
-                <h2>Waarschuwingen</h2>
-
+        <div v-if="(hasWarnings && !$isMobile) || member.users.length > 0 || familyMembers.length > 0">
+            <div v-if="hasWarnings && !$isMobile" class="hover-box container">
                 <ul class="member-records">
                     <li
                         v-for="warning in sortedWarnings"
@@ -239,10 +281,12 @@
             </div>
 
             <div v-if="activeAccounts.length > 0" class="hover-box container">
+                <hr v-if="$isMobile">
                 <h2>
-                    <span class="icon-spacer">Accounts</span><span
+                    <span class="icon-spacer">Accounts</span><span 
+                        v-if="!$isTouch"
                         v-tooltip="
-                            'Deze accounts bestaan, kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
+                            'Deze accounts kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
                         "
                         class="icon gray help"
                     />
@@ -250,13 +294,18 @@
                 <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
                     <span>{{ user.email }}</span>
                     <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
-                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" @click="unlinkUser(user)" />
+                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" type="button" @click="unlinkUser(user)" />
                 </p>
+
+                <template v-if="placeholderAccounts.length > 0">
+                    <hr>
+                </template>
             </div>
 
             <div v-if="placeholderAccounts.length > 0" class="hover-box container">
                 <h2>
                     <span class="icon-spacer">Kunnen registereren</span><span
+                        v-if="!$isTouch"
                         v-tooltip="
                             'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op de inschrijvingspagina). Deze worden automatisch bepaald aan de hand van de gegevens van het lid.'
                         "
@@ -306,7 +355,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { CenteredMessage, CopyableDirective, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { Keychain, SessionManager } from "@stamhoofd/networking";
 import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { CountryHelper } from "@stamhoofd/structures/esm/dist";
@@ -328,7 +377,7 @@ import MemberView from './MemberView.vue';
         STList,
         RecordCategoryAnswersBox
     },
-    directives: { Tooltip },
+    directives: { Tooltip, Copyable: CopyableDirective },
     filters: {
         dateTime: Formatter.dateTime.bind(Formatter)
     },
@@ -373,12 +422,12 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get missingAnswers(): RecordAnswer[] {
         const missing: RecordAnswer[] = []
-         for (const answer of this.member.details.recordAnswers) {
+        for (const answer of this.member.details.recordAnswers) {
             // Search
             if (!this.recordCategories.find(cat => !!cat.records.find(record => record.id === answer.settings.id))) {
                 missing.push(answer)
             }
-         }
+        }
         return missing
     }
 
@@ -592,19 +641,13 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             const missing: PatchableArrayAutoEncoder<User> = new PatchableArray()
             missing.addDelete(user.id)
             encryptedMembers.addPatch(
-                    EncryptedMemberWithRegistrations.patch({
-                        id: this.member.id,
-                        users: missing
-                    })
-                )
+                EncryptedMemberWithRegistrations.patch({
+                    id: this.member.id,
+                    users: missing
+                })
+            )
 
-            const updated = await MemberManager.patchMembers(encryptedMembers, false)
-
-            const updatedData = updated.find(m => m.id === this.member.id)
-            if (updatedData) {
-                this.member.copyFrom(updatedData)
-            }
-            
+            await MemberManager.patchMembersAndSync([this.member], encryptedMembers, false)
         } catch (e) {
             // Reset
             console.error(e)

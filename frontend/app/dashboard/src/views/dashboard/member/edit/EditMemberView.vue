@@ -1,92 +1,72 @@
 <template>
-    <form class="st-view edit-member-view" @submit.prevent="save">
-        <STNavigationBar :title="member ? member.details.name : 'Nieuw lid'">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
-        </STNavigationBar>
-        
-        <main>
-            <h1 v-if="member">
-                Wijzig gegevens van {{ member.details.firstName }}
-            </h1>
-            <h1 v-else>
-                Nieuw lid toevoegen
-            </h1>
+    <SaveView :title="member ? member.details.name : 'Nieuw lid'" :disabled="!isChanged" :loading="loading" @save="save">
+        <h1 v-if="member">
+            Wijzig gegevens van {{ member.details.firstName }}
+        </h1>
+        <h1 v-else>
+            Nieuw lid toevoegen
+        </h1>
 
-            <STErrorsDefault :error-box="errorBox" />
-            <EditMemberGeneralView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
+        <STErrorsDefault :error-box="errorBox" />
+        <EditMemberGeneralView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
 
-            <EditMemberContactsView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
+        <EditMemberContactsView v-model="memberDetails" :member="member" :family-manager="familyManager" :validator="validator" />
 
-            <template v-if="dataPermissionsEnabled">
-                <hr>
-                <h2>{{ dataPermissionsTitle }}</h2>
-                
-                <Checkbox v-model="dataPermissionsValue">
-                    Er werd toestemming gegeven
-                </Checkbox>
+        <template v-if="dataPermissionsEnabled">
+            <hr>
+            <h2>{{ dataPermissionsTitle }}</h2>
+            
+            <Checkbox v-model="dataPermissionsValue">
+                Er werd toestemming gegeven
+            </Checkbox>
 
-                <p v-if="dataPermissionsChangeDate" class="style-description-small">
-                    Laatst gewijzigd op {{ formatDate(dataPermissionsChangeDate) }}
-                </p>
-            </template>
+            <p v-if="dataPermissionsChangeDate" class="style-description-small">
+                Laatst gewijzigd op {{ formatDate(dataPermissionsChangeDate) }}
+            </p>
+        </template>
 
-            <template v-if="financialSupportEnabled">
-                <hr>
-                <h2>{{ financialSupportTitle }}</h2>
-                <Checkbox v-model="financialSupportValue">
-                    {{ financialSupportLabel }}
-                </Checkbox>
+        <template v-if="financialSupportEnabled">
+            <hr>
+            <h2>{{ financialSupportTitle }}</h2>
+            <Checkbox v-model="financialSupportValue">
+                {{ financialSupportLabel }}
+            </Checkbox>
 
-                <p v-if="financialSupportChangeDate" class="style-description-small">
-                    Laatst gewijzigd op {{ formatDate(financialSupportChangeDate) }}
-                </p>
-            </template>
+            <p v-if="financialSupportChangeDate" class="style-description-small">
+                Laatst gewijzigd op {{ formatDate(financialSupportChangeDate) }}
+            </p>
+        </template>
 
-            <div v-for="category of recordCategories" :key="category.id" class="container">
-                <hr>
-                <h2>{{ category.name }}</h2>
+        <div v-for="category of recordCategories" :key="category.id" class="container">
+            <hr>
+            <h2>{{ category.name }}</h2>
 
-                <STList v-if="category.childCategories.length > 0">
-                    <STListItem v-for="child of filterRecordCategories(category.childCategories)" :key="child.id" :selectable="true" @click="editRecordCategory(child)">
-                        <h3 class="style-title-list">
-                            {{ child.name }}
-                        </h3>
-                        <p v-if="getCategoryFillStatus(child)" class="style-description-small">
-                            {{ getCategoryFillStatus(child) }}
-                        </p>
+            <STList v-if="category.childCategories.length > 0">
+                <STListItem v-for="child of filterRecordCategories(category.childCategories)" :key="child.id" :selectable="true" @click="editRecordCategory(child)">
+                    <h3 class="style-title-list">
+                        {{ child.name }}
+                    </h3>
+                    <p v-if="getCategoryFillStatus(child)" class="style-description-small">
+                        {{ getCategoryFillStatus(child) }}
+                    </p>
 
-                        <button slot="right" type="button" class="button text">
-                            <span class="icon edit" />
-                            <span class="hide-small">Bewerken</span>
-                        </button>
-                    </STListItem>
-                </STList>
-                <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" :all-optional="true" />
-            </div>
-        </main>
-
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="loading">
-                    <button class="button primary" @click="save">
-                        Opslaan
+                    <button slot="right" type="button" class="button text">
+                        <span class="icon edit" />
+                        <span class="hide-small">Bewerken</span>
                     </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </form>
+                </STListItem>
+            </STList>
+            <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" :all-optional="true" />
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox,FillRecordCategoryView,RecordAnswerInput,STErrorsDefault,STList, STListItem,STNavigationTitle, Validator } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton, LoadingButton,SegmentedControl, STToolbar } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, FillRecordCategoryView, LoadingButton, RecordAnswerInput, SaveView, SegmentedControl, STErrorsDefault, STList, STListItem, STToolbar, Validator } from "@stamhoofd/components";
 import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, Version } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from "../../../../classes/FamilyManager";
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
@@ -96,8 +76,7 @@ import EditMemberGroupView from './EditMemberGroupView.vue';
 
 @Component({
     components: {
-        STNavigationBar,
-        STNavigationTitle,
+        SaveView,
         SegmentedControl,
         BackButton,
         STToolbar,
@@ -286,9 +265,16 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         this.present(displayedComponent);
     }
 
-    async shouldNavigateAway() {
+    get isChanged() {
         const compareTo = this.member ? this.member.details : MemberDetails.create({})
         if (JSON.stringify(this.memberDetails.encode({ version: Version })) == JSON.stringify(compareTo.encode({ version: Version }))) {
+            return false
+        }
+        return true
+    }
+
+    async shouldNavigateAway() {
+        if (!this.isChanged) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

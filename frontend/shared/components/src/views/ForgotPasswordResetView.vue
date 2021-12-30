@@ -25,11 +25,11 @@
             <div v-if="!loadingToken" class="split-inputs">
                 <div>
                     <STInputBox title="Kies een nieuw wachtwoord">
-                        <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
                     </STInputBox>
 
                     <STInputBox title="Herhaal wachtwoord">
-                        <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="passwordRepeat" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
                     </STInputBox>
                 </div>
                 <div>
@@ -118,15 +118,15 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                 this.session.organization = this.initialSession.organization
                 return await this.session.fetchUser()
             })
-            .then((user) => {
-                this.email = user.email
-                localStorage.setItem("email", this.email)
-                this.user = user
-                this.loadingToken = false;
-            }).catch(e => {
-                new Toast("Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.", "error red").show()
-                this.dismiss({ force: true })
-            })
+                .then((user) => {
+                    this.email = user.email
+                    localStorage.setItem("email", this.email)
+                    this.user = user
+                    this.loadingToken = false;
+                }).catch(e => {
+                    new Toast("Deze link is ongeldig of vervallen. Stuur een nieuwe e-mail om je wachtwoord opnieuw in te stellen.", "error red").show()
+                    this.dismiss({ force: true })
+                })
         } else {
             new Toast("Deze link is ongeldig", "error red").show()
             this.dismiss({ force: true })

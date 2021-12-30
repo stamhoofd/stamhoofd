@@ -52,10 +52,10 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
             })
         }
 
-
-        const payments = await GetOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId)
-        const orderPayments = await GetOrganizationPaymentsEndpoint.getPaymentsWithOrder(user.organizationId, true)
         const changedPayments: (PaymentWithRegistrations | PaymentWithOrder)[] = []
+
+        const paymentOrderRelation = new ManyToOneRelation(Order, "order")
+        const paymentRegistrationsRelation = new OneToManyRelation(Payment, Registration, "registrations", Registration.payment.foreignKey as keyof Registration)
 
         let groups: Group[] = []
         let webshops: Webshop[] = []
@@ -69,9 +69,11 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
 
         // Modify payments
         for (const patch of request.body) {
-            const pay = payments.find(p => p.id == patch.id)
+            const model = await Payment.getByID(patch.id)
+
+            /*const pay = payments.find(p => p.id == patch.id)
             const orderPay = orderPayments.find(p => p.id == patch.id)
-            const model = pay ?? orderPay
+            const model = pay ?? orderPay*/
 
             if (!model) {
                 throw new SimpleError({
@@ -81,10 +83,28 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 })
             }
 
+            /// null = already loaded, but none
+            /// undefined = not yet loaded
+            // if it has registrations
+            const registrations = await Member.getRegistrationWithMembersForPayment(model.id)
+
+            // if it has orders
+            const order = registrations.length > 0 ? null : (await Order.getForPayment(user.organization.id, model.id) ?? null)
+
             if (!user.permissions.hasFullAccess() && !user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
-                if (!pay) {
-                    const webshop = webshops.find(w => w.id === orderPay?.order.webshopId)
-                    if (!orderPay || !webshop || getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+                // Is this an order payment or a registration payment?
+
+                if (!order && registrations.length == 0) {
+                    throw new SimpleError({
+                        code: "payment_not_found",
+                        message: "Payment with id "+patch.id+" does not exist",
+                        human: "De betaling die je wilt wijzigen bestaat niet of je hebt er geen toegang toe"
+                    })
+                }
+
+                if (order) {
+                    const webshop = webshops.find(w => w.id === order.webshopId)
+                    if (!webshop || getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
                         throw new SimpleError({
                             code: "payment_not_found",
                             message: "Payment with id "+patch.id+" does not exist",
@@ -93,7 +113,6 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                     }
                 } else {
                     // Check permissions if not full permissions or paymetn permissions
-                    const registrations = pay.registrations
                     if (!Member.haveRegistrationsWriteAccess(registrations, user, groups, true)) {
                         throw new SimpleError({
                             code: "payment_not_found",
@@ -139,7 +158,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 model.method = patch.method
 
                 if (model.method === PaymentMethod.Transfer && patch.transferDescription === undefined && !model.transferDescription) {
-                    model.transferDescription = Payment.generateDescription(user.organization, user.organization.meta.transferSettings, pay?.registrations.map(r => r.member.firstName).join(", ") ?? orderPay?.order.number?.toString() ?? "")
+                    model.transferDescription = Payment.generateDescription(user.organization, user.organization.meta.transferSettings, order?.number?.toString() ?? registrations.map(r => r.member.firstName).join(", "))
                 }
             }
 
@@ -159,21 +178,18 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 model.price = patch.price
             }
 
+            await model.save()
+
             if (markPaid) {
                 // Send e-mail if needed with tickets
-                await orderPay?.order?.markPaid(orderPay, user.organization)
+                await order?.markPaid(model, user.organization)
             }
 
-            changedPayments.push(model)
+            changedPayments.push(order ? model.setRelation(paymentOrderRelation, order) : (model.setManyRelation(paymentRegistrationsRelation, registrations) as PaymentWithRegistrations))
         }
 
-        for (const payment of changedPayments) {
-            // Automatically checks if it is changed or not
-            await payment.save()
-        }
-
-         return new Response(
-            (request.request.getVersion() >= 97 ? changedPayments : [...payments, ...orderPayments]).map((p) => {
+        return new Response(
+            changedPayments.map((p) => {
                 return GetOrganizationPaymentsEndpoint.getPaymentStructure(p)
             })
         );

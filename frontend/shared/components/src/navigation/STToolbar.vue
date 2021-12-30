@@ -29,7 +29,7 @@ export default class STToolbar extends Vue {
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
 .st-toolbar {
-    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    margin: 0;
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
     padding-top: var(--st-vertical-padding, 20px);
@@ -39,13 +39,16 @@ export default class STToolbar extends Vue {
 
     &.sticky {
         position: sticky;
+        z-index: 10;
     }
 
     > div {
         padding: 10px var(--st-horizontal-padding, 40px);
+        --default-footer-padding: 10px;
+        
         padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 10px);
-        background: $color-white;
-        border-top: $border-width solid $color-shadow;
+        background: $color-current-background;
+        border-top: $border-width-thin solid $color-border;
         display: flex;
         align-items: center;
         justify-content: space-between;

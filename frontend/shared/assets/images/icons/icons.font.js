@@ -17,5 +17,32 @@ module.exports = {
         ctx.box_icons[icon] = ctx.codepoints[icon]
       }
     }
+
+    // Custom android icons
+    ctx.android_icons = {}
+    for (const icon in ctx.codepoints) {
+      if (icon.endsWith("-android")) {
+        // Remove android suffix
+        ctx.android_icons[icon.substr(0, icon.length-("-android".length))] = ctx.codepoints[icon]
+      }
+    }
+
+    // Custom iOS icons
+    ctx.ios_icons = {}
+    for (const icon in ctx.codepoints) {
+      if (icon.endsWith("-ios")) {
+        // Remove android suffix
+        ctx.ios_icons[icon.substr(0, icon.length-("-ios".length))] = ctx.codepoints[icon]
+      }
+    }
+
+    // Custom Apple icons
+    ctx.apple_icons = {}
+    for (const icon in ctx.codepoints) {
+      if (icon.endsWith("-apple")) {
+        // Remove android suffix
+        ctx.apple_icons[icon.substr(0, icon.length-("-apple".length))] = ctx.codepoints[icon]
+      }
+    }
   }
 };

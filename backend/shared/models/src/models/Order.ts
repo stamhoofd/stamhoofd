@@ -96,12 +96,12 @@ export class Order extends Model {
     }
 
     shouldIncludeStock() {
-        return this.status !== OrderStatus.Canceled
+        return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
     }
 
     async onPaymentFailed(this: Order) {
         if (this.shouldIncludeStock()) {
-            this.status = OrderStatus.Canceled
+            this.status = OrderStatus.Deleted
             await this.save()
 
             await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
@@ -302,7 +302,7 @@ export class Order extends Model {
             replyTo,
             to: toStr,
             subject: "["+this.webshop.meta.name+"] Betaling ontvangen (bestelling "+this.number+")",
-            text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen (via overschrijving). Je kan jouw bestelling nakijken via de volgende link:"
+            text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van jouw bestelling (#"+ this.number +") in onze administratie gemarkeerd als betaald. Je kan jouw bestelling nakijken via de volgende link:"
             + "\n"
             + this.getUrl()
             +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",

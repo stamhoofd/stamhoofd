@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 131
+export const Version = 140
 
 // General
 export * from "./src/addresses/Address"
@@ -51,6 +51,7 @@ export * from "./src/endpoints/tokens/PasswordTokenGrantStruct"
 export * from "./src/endpoints/tokens/RefreshTokenGrantStruct"
 export * from "./src/endpoints/tokens/RequestChallengeGrantStruct"
 export * from "./src/endpoints/VerifyEmailRequest"
+export * from "./src/endpoints/WebshopUriAvailabilityResponse"
 
 // Grouping
 export * from "./src/grouping/KeychainedMembers"

@@ -2,9 +2,9 @@
     <label class="upload-button">
         <LoadingButton :loading="uploading">
             <slot>
-                <div class="button text" type="button">
-                    <span class="icon upload" />
-                    <span>{{ text || "Foto uploaden" }}</span>
+                <div class="button text only-icon-smartphone" type="button">
+                    <span class="icon camera-line" />
+                    <span>{{ text || "Uploaden" }}</span>
                 </div>
             </slot>
         </LoadingButton>
@@ -79,7 +79,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
             .finally(() => {
                 this.uploading = false;
 
-                 // Clear selection
+                // Clear selection
                 event.target.value = null;
             });
     }

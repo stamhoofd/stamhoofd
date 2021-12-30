@@ -1,160 +1,124 @@
 <template>
-    <div id="records-settings-view" class="st-view background">
-        <STNavigationBar title="Eigen kenmerken en gegevens">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
-
-        <main>
-            <h1>
-                Kenmerken en gegevens van leden
-            </h1>
-            <p>Je kan zelf kiezen welke extra informatie je van jouw leden wilt verzamelen. Stamhoofd heeft enkele ingebouwde zaken, maar je kan de informatie die je wilt verzamelen zo veel uitbreiden als je wilt.</p>
+    <SaveView :loading="saving" title="Kenmerken en gegevens van leden" :disabled="!hasChanges" @save="save">
+        <h1>
+            Kenmerken en gegevens van leden
+        </h1>
+        <p>Je kan zelf kiezen welke extra informatie je van jouw leden wilt verzamelen. Stamhoofd heeft enkele ingebouwde zaken, maar je kan de informatie die je wilt verzamelen zo veel uitbreiden als je wilt.</p>
             
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <hr>
-            <h2>Ingebouwde gegevens</h2>
+        <hr>
+        <h2>Ingebouwde gegevens</h2>
 
-            <p>Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten, en eventueel bepaalde gegevens optioneel maken (altijd of bijvoorbeeld op basis van de leeftijd).</p>
+        <p>Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten, en eventueel bepaalde gegevens optioneel maken (altijd of bijvoorbeeld op basis van de leeftijd).</p>
 
-            <STList>
-                <STListItem>
-                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
-                    <p class="style-title-list">
-                        {{ $t('shared.inputs.mobile.label') }} (van lid zelf)
-                    </p>
-                    <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
-                        {{ patchedOrganization.meta.recordsConfiguration.phone }}
-                    </p>
-                    <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))">
-                        <span clas="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
-                </STListItem>
-                <STListItem>
-                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
-                    <p class="style-title-list">
-                        E-mailadres (van lid zelf)
-                    </p>
-                    <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
-                        {{ patchedOrganization.meta.recordsConfiguration.emailAddress }}
-                    </p>
-                    <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')">
-                        <span clas="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
-                </STListItem>
-                <STListItem>
-                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
-                    <p class="style-title-list">
-                        Geslacht
-                    </p>
-                    <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
-                        {{ patchedOrganization.meta.recordsConfiguration.gender }}
-                    </p>
-                    <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')">
-                        <span clas="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
-                </STListItem>
-                <STListItem>
-                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
-                    <p class="style-title-list">
-                        Geboortedatum
-                    </p>
-                    <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
-                        {{ patchedOrganization.meta.recordsConfiguration.birthDay }}
-                    </p>
-                    <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')">
-                        <span clas="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
-                </STListItem>
-                <STListItem>
-                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
-                    <p class="style-title-list">
-                        Adres (van lid zelf)
-                    </p>
-                    <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
-                        {{ patchedOrganization.meta.recordsConfiguration.address }}
-                    </p>
-                    <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('address', 'Adres')">
-                        <span clas="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
-                </STListItem>
-                <STListItem>
-                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
-                    <p class="style-title-list">
-                        Ouders
-                    </p>
-                    <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
-                        {{ patchedOrganization.meta.recordsConfiguration.parents }}
-                    </p>
-                    <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')">
-                        <span clas="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
-                </STListItem>
-                <STListItem>
-                    <Checkbox slot="left" :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
-                    <p class="style-title-list">
-                        Noodcontactpersoon
-                    </p>
-                    <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
-                        {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts }}
-                    </p>
-                    <button v-if="getEnableFilterConfiguration('emergencyContacts')" slot="right" class="button text" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')">
-                        <span clas="icon edit" />
-                        <span class="hide-small">Wijzig</span>
-                    </button>
-                </STListItem>
-            </STList>
+        <STList>
+            <STListItem>
+                <Checkbox slot="left" :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
+                <p class="style-title-list">
+                    {{ $t('shared.inputs.mobile.label') }} (van lid zelf)
+                </p>
+                <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
+                    {{ patchedOrganization.meta.recordsConfiguration.phone }}
+                </p>
+                <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" />
+            </STListItem>
+            <STListItem>
+                <Checkbox slot="left" :checked="getEnableFilterConfiguration('emailAddress')" @change="setEnableFilterConfiguration('emailAddress', $event)" />
+                <p class="style-title-list">
+                    E-mailadres (van lid zelf)
+                </p>
+                <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
+                    {{ patchedOrganization.meta.recordsConfiguration.emailAddress }}
+                </p>
+                <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" />
+            </STListItem>
+            <STListItem>
+                <Checkbox slot="left" :checked="getEnableFilterConfiguration('gender')" @change="setEnableFilterConfiguration('gender', $event)" />
+                <p class="style-title-list">
+                    Geslacht
+                </p>
+                <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
+                    {{ patchedOrganization.meta.recordsConfiguration.gender }}
+                </p>
+                <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" />
+            </STListItem>
+            <STListItem>
+                <Checkbox slot="left" :checked="getEnableFilterConfiguration('birthDay')" @change="setEnableFilterConfiguration('birthDay', $event)" />
+                <p class="style-title-list">
+                    Geboortedatum
+                </p>
+                <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
+                    {{ patchedOrganization.meta.recordsConfiguration.birthDay }}
+                </p>
+                <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" />
+            </STListItem>
+            <STListItem>
+                <Checkbox slot="left" :checked="getEnableFilterConfiguration('address')" @change="setEnableFilterConfiguration('address', $event)" />
+                <p class="style-title-list">
+                    Adres (van lid zelf)
+                </p>
+                <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
+                    {{ patchedOrganization.meta.recordsConfiguration.address }}
+                </p>
+                <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" />
+            </STListItem>
+            <STListItem>
+                <Checkbox slot="left" :checked="getEnableFilterConfiguration('parents')" @change="setEnableFilterConfiguration('parents', $event)" />
+                <p class="style-title-list">
+                    Ouders
+                </p>
+                <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
+                    {{ patchedOrganization.meta.recordsConfiguration.parents }}
+                </p>
+                <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" />
+            </STListItem>
+            <STListItem>
+                <Checkbox slot="left" :checked="getEnableFilterConfiguration('emergencyContacts')" @change="setEnableFilterConfiguration('emergencyContacts', $event)" />
+                <p class="style-title-list">
+                    Noodcontactpersoon
+                </p>
+                <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
+                    {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts }}
+                </p>
+                <button v-if="getEnableFilterConfiguration('emergencyContacts')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')" />
+            </STListItem>
+        </STList>
 
-            <hr>
-            <h2>Vragen tijdens inschrijven</h2>
+        <hr>
+        <h2>Vragen tijdens inschrijven</h2>
 
-            <p>
-                Voeg zelf kenmerken toe die ingevuld kunnen worden bij het inschrijven. De kenmerken worden onderverdeeld in verschillende categorieën om de structuur te bewaren.
-            </p>
+        <p>
+            Voeg zelf kenmerken toe die ingevuld kunnen worden bij het inschrijven. De kenmerken worden onderverdeeld in verschillende categorieën om de structuur te bewaren.
+        </p>
 
-            <STList>
-                <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" @patch="addCategoriesPatch" />
-            </STList>
+        <STList>
+            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" @patch="addCategoriesPatch" />
+        </STList>
 
-            <p>
-                <button class="button text" @click="addCategory">
-                    <span class="icon add" />
-                    <span>Nieuwe categorie</span>
-                </button>
-            </p>
+        <p>
+            <button class="button text" type="button" @click="addCategory">
+                <span class="icon add" />
+                <span>Nieuwe categorie</span>
+            </button>
+        </p>
 
-            <hr>
-            <h2>Interne gegevens</h2>
+        <hr>
+        <h2>Interne gegevens</h2>
 
-            <p class="info-box">
-                Nog even geduld. Het wordt binnenkort mogelijk om zelf kenmerken toe te voegen aan leden die niet zichtbaar zijn voor die leden zelf. Bv. om de status van iets bij te houden.
-            </p>
-        </main>
+        <a class="info-box selectable" href="https://stamhoofd.nolt.io/13" target="_blank">
+            Wil je ook interne gegevens bijhouden die niet zichtbaar zijn voor het lid zelf (Bv. om de status van iets bij te houden)? Dat kan momenteel nog niet, maar stem zeker op deze functie als je dit wilt gebruiken: dan kunnen we hier meer prioriteit aan geven.
 
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+            <span class="button text">Stemmen</span>
+        </a>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PropertyFilterView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ErrorBox, PropertyFilterView, SaveView, STErrorsDefault, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -165,13 +129,9 @@ import RecordCategoryRow from "./records/RecordCategoryRow.vue";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
-        STInputBox,
+        SaveView,
         STErrorsDefault,
         STList,
-        BackButton,
-        LoadingButton,
         RecordCategoryRow,
         STListItem,
         Checkbox
@@ -320,8 +280,12 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
+    get hasChanges() {
+        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+    }
+
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+        if (!this.hasChanges) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

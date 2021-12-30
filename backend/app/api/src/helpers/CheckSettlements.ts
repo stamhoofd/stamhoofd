@@ -28,6 +28,11 @@ export async function checkSettlements(checkAll = false) {
         return
     }
 
+     if (STAMHOOFD.environment !== "production") {
+        console.log("Skip settlement check")
+        return
+    }
+
     console.log("Checking settlements...")
     lastSettlementCheck = new Date()
 

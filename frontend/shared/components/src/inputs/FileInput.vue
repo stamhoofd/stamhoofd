@@ -89,7 +89,7 @@ export default class FileInput extends Mixins(NavigationMixin) {
             })
             .finally(() => {
                 this.uploading = false;
-                 // Clear selection
+                // Clear selection
                 event.target.value = null;
             });
     }
@@ -103,9 +103,9 @@ export default class FileInput extends Mixins(NavigationMixin) {
 .file-input-box {
     @extend .style-input;
     @extend .style-input-shadow;
-    border: $border-width solid $color-gray-light;
-    color: $color-gray;
-    background: var(--color-white, white);
+    border: $border-width solid $color-border;
+    color: $color-gray-5;
+    background: $color-background;
     border-radius: $border-radius;
     padding: 5px 15px;
     height: 50px;
@@ -157,11 +157,10 @@ export default class FileInput extends Mixins(NavigationMixin) {
         opacity: 0;
         transition: opacity 0.2s;
         margin-left: auto;
-        color: $color-gray;
+        color: $color-error;
        
         &:hover {
             opacity: 1;
-            color: $color-error;
         }
     }
 

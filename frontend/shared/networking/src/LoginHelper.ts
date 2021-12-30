@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/browser';
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
 import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem,KeychainedResponseDecoder,KeychainItem, KeyConstants, MyUser, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
-import KeyWorker from 'worker-loader!@stamhoofd/workers/KeyWorker.ts'
+import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem, KeychainedResponseDecoder, KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { Keychain } from './Keychain';
 import { NetworkManager } from './NetworkManager';
@@ -362,6 +361,44 @@ export class LoginHelper {
         //await SessionManager.setCurrentSession(session)
     }
 
+    static async retryEmail(session: Session, token: string): Promise<boolean> {
+        const response = await session.server.request({
+            method: "POST",
+            path: "/verify-email/retry",
+            body: PollEmailVerificationRequest.create({
+                token
+            }),
+            decoder: PollEmailVerificationResponse as Decoder<PollEmailVerificationResponse>
+        })
+
+        if (!response.data.valid) {
+            // the code has been used or is expired
+            session.loadFromStorage()
+            if (session.canGetCompleted()) {
+                // yay! We are signed in
+                await session.updateData(true)
+                return true
+            }
+
+            const savedKeys = this.getTemporaryKey(token)
+            if (!savedKeys) {
+                return true
+            }
+
+            // Try to login with stored key
+            try {
+                console.log("Trying to login with a saved key...")
+                await this.login(session, savedKeys.email, savedKeys)
+            } catch (e) {
+                // If it fails: just dismiss. The token is invalid
+                console.error(e)
+                return true
+            }
+            return true
+        }
+        return false
+    }
+
     /**
      * Return true when the polling should end + confirmation should stop
      */
@@ -483,7 +520,7 @@ export class LoginHelper {
         let authSignKeys: { privateKey: string }
 
         if (typeof password === "string") {
-             try {
+            try {
                 authSignKeys = await this.createSignKeys(password, challengeResponse.keyConstants)
             } catch (e) {
                 console.error(e)

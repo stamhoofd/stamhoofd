@@ -1,3 +1,4 @@
+require('@stamhoofd/backend-env').load({path: __dirname+'/../../.env.test.json'})
 import { Database, Migration } from "@simonbackx/simple-database";
 import { User } from "../src/models/User";
 

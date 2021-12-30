@@ -35,6 +35,7 @@
                 <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness">
                 <div v-else class="placeholder" />
                 <span>{{ ticket.secret }}</span>
+                <span v-if="ticket.scannedAt">Al gescand</span>
             </figure>
         </article>
         <div class="ticket-buttons">
@@ -143,7 +144,7 @@ export default class TicketBox extends Mixins(NavigationMixin){
         const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
 
         // Increase scanning speed on mobile screens by adding more correction levels
-        this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage, { errorCorrectionLevel: "H" })
+        this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage)
     }
 }
 </script>
@@ -265,13 +266,13 @@ export default class TicketBox extends Mixins(NavigationMixin){
         padding: 30px;
         text-align: center;
 
-        border-left: 2px solid $color-border;
+        border-left: $border-width solid $color-border;
 
         @media (max-width: 700px) {
             align-self: stretch;
             border-left: 0;
             padding: 20px;
-            border-top: 2px solid $color-border;
+            border-top: $border-width solid $color-border;
         }
 
         > img, .placeholder {
@@ -282,15 +283,11 @@ export default class TicketBox extends Mixins(NavigationMixin){
                 width: 70vw;
                 height: 70vw;
             }
-
-            &.scanned {
-                opacity: 0.3;
-            }
         }
 
         > span {
             display: block;
-            color: $color-gray;
+            color: $color-gray-text;
             font-size: 10px;
             font-weight: bold;
         }

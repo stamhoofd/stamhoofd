@@ -1,12 +1,12 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { PaymentStatus,PermissionLevel,Permissions } from '@stamhoofd/structures';
-
 import { GroupFactory } from '@stamhoofd/models';
 import { MemberFactory } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { RegistrationFactory } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { PaymentStatus,PermissionLevel,Permissions } from '@stamhoofd/structures';
+
 import { PatchOrganizationPaymentsEndpoint } from './PatchOrganizationPaymentsEndpoint';
 
 
@@ -46,8 +46,8 @@ describe("Endpoint.PatchOrganizationPayments", () => {
         const response = await endpoint.test(r);
         expect(response.body).toBeDefined();
 
-        expect(response.body).toHaveLength(3)
-        expect(response.body.map(a => a.id)).toIncludeSameMembers(registrations.map(r => r.payment?.id))
+        expect(response.body).toHaveLength(2) // Only return patched payments
+        expect(response.body.map(a => a.id)).toIncludeSameMembers(registrations.slice(1, 3).map(r => r.payment?.id))
     
     });
 

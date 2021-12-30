@@ -20,7 +20,5 @@ export const CORSMiddleware: ResponseMiddleware = {
         if (request.headers.origin && !response.headers["Vary"]) {
             response.headers["Vary"] = "Origin"
         }
-
-        console.log(JSON.stringify(response.headers, undefined, "  "))
     }
 }

@@ -1,19 +1,10 @@
 <template>
     <div class="st-view order-view">
-        <STNavigationBar :title="'Bestelling ' + patchedOrder.number">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-                <button v-if="hasPreviousOrder" class="button text" @click="goBack">
-                    <span class="icon arrow-left" />
-                    <span>Vorige</span>
-                </button>
-            </template>
+        <STNavigationBar :title="'Bestelling ' + patchedOrder.number" :pop="canPop" :dismiss="canDismiss">
             <template #right>
-                <button v-if="hasNextOrder" class="button text" @click="goNext">
-                    <span>Volgende</span>
-                    <span class="icon arrow-right" />
-                </button>
-                <button class="button icon close gray" @click="pop" />
+                <button v-if="hasPreviousOrder || hasNextOrder" v-tooltip="'Ga naar vorige bestelling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" @click="goBack" />
+                <button v-if="hasNextOrder || hasPreviousOrder" v-tooltip="'Ga naar volgende bestelling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" @click="goNext" />
+                <button v-long-press="(e) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
         <main>
@@ -30,22 +21,31 @@
                     Naam
 
                     <template slot="right">
-                        <p>{{ patchedOrder.data.customer.name }}</p>
-                        <p>{{ patchedOrder.data.customer.phone }}</p>
-                        <p>{{ patchedOrder.data.customer.email }}</p>
+                        {{ patchedOrder.data.customer.name }}
                     </template>
                 </STListItem>
 
-                <STListItem class="right-description" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
+                <STListItem class="right-description">
+                    GSM-nummer
+
+                    <template slot="right">
+                        <p>{{ patchedOrder.data.customer.phone }}</p>
+                    </template>
+                </STListItem>
+
+                <STListItem class="right-description">
+                    E-mailadres
+
+                    <template slot="right">
+                        {{ patchedOrder.data.customer.email }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-long-press="(e) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     Status
 
                     <template slot="right">
-                        <span v-if="patchedOrder.status == 'Created'" class="style-tag">Nieuw</span>
-                        <span v-else-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
-                        <span v-else-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
-                        <span v-else-if="order.status == 'Completed'" class="style-tag success">Voltooid</span>
-                        <span v-else-if="order.status == 'Canceled'" class="style-tag error">Geannuleerd</span>
-                        <span v-else>Onbekend</span>
+                        <span :class="'style-tag '+statusColor">{{ statusName }}</span>
                         <span v-if="hasWrite" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
@@ -70,21 +70,14 @@
                     </span>
                 </STListItem>
 
-                <STListItem v-for="a in patchedOrder.data.fieldAnswers" :key="a.field.id" class="right-description">
-                    {{ a.field.name }}
-
-                    <template slot="right">
-                        {{ a.answer || "/" }}
-                    </template>
-                </STListItem>
-                <STListItem v-if="patchedOrder.payment" class="right-description right-stack">
+                <STListItem v-if="patchedOrder.payment" v-long-press="(e) => (hasPaymentsWrite && patchedOrder.payment.method == 'Transfer' ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && patchedOrder.payment.method == 'Transfer'" @click="hasPaymentsWrite && patchedOrder.payment.method == 'Transfer' ? changePaymentStatus($event) : null">
                     Betaalmethode
 
                     <template slot="right">
-                        {{ getName(patchedOrder.payment.method) }}
-
+                        <span>{{ getName(patchedOrder.payment.method) }}</span>
                         <span v-if="patchedOrder.payment.status == 'Succeeded'" class="icon green success" />
                         <span v-else class="icon clock" />
+                        <span v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
                 <STListItem v-if="patchedOrder.payment && patchedOrder.payment.method == 'Transfer'" class="right-description right-stack">
@@ -92,6 +85,14 @@
 
                     <template slot="right">
                         {{ patchedOrder.payment.transferDescription }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-for="a in patchedOrder.data.fieldAnswers" :key="a.field.id" class="right-description">
+                    {{ a.field.name }}
+
+                    <template slot="right">
+                        {{ a.answer || "/" }}
                     </template>
                 </STListItem>
                 <STListItem v-if="patchedOrder.validAt" class="right-description">
@@ -185,20 +186,6 @@
                 </STListItem>
             </STList>
 
-            <LoadingButton v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" :loading="loadingPayment">
-                <p>
-                    <button v-if="patchedOrder.payment && (patchedOrder.payment.status !== 'Succeeded' || patchedOrder.payment.price != patchedOrder.data.totalPrice)" class="button secundary" @click="markPaid(patchedOrder.payment)">
-                        <span class="icon success" />
-                        <span>Markeer als betaald</span>
-                    </button>
-
-                    <button v-if="patchedOrder.payment && patchedOrder.payment.status == 'Succeeded'" class="button secundary" @click="markNotPaid(patchedOrder.payment)">
-                        <span class="icon canceled" />
-                        <span>Markeer als niet betaald</span>
-                    </button>
-                </p>
-            </LoadingButton>
-
             <div v-if="patchedOrder.data.checkoutMethod && patchedOrder.data.checkoutMethod.description" class="container">
                 <hr>
                 <h2 v-if="patchedOrder.data.checkoutMethod.type == 'Takeout'">
@@ -233,7 +220,7 @@
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
                         </p>
                         <div @click.stop>
-                            <button class="button icon trash gray" @click="deleteItem(cartItem)" />
+                            <button type="button" class="button icon trash gray" @click="deleteItem(cartItem)" />
                         </div>
                     </footer>
 
@@ -244,7 +231,7 @@
             </STList>
 
             <p v-if="hasWrite">
-                <button class="button text" @click="addProduct">
+                <button class="button text" type="button" @click="addProduct">
                     <span class="icon add" />
                     <span>Nieuw</span>
                 </button>
@@ -269,7 +256,7 @@
 
         <STToolbar v-if="hasWrite && isChanged()">
             <LoadingButton slot="right" :loading="saving">
-                <button class="button primary" @click="save()">
+                <button class="button primary" type="button" @click="save()">
                     Opslaan
                 </button>
             </LoadingButton>
@@ -278,18 +265,19 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, patchContainsChanges } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components"
+import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, EncryptedPaymentDetailed, getPermissionLevelNumber, OrderData, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderData, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { WebshopManager } from "../WebshopManager";
 import AddItemView from "./AddItemView.vue";
-import OrderStatusContextMenu from "./OrderStatusContextMenu.vue";
+import { OrderActionBuilder } from "./OrderActionBuilder";
 
 @Component({
     components: {
@@ -311,12 +299,12 @@ import OrderStatusContextMenu from "./OrderStatusContextMenu.vue";
         capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
     },
     directives: {
-        tooltip: TooltipDirective
+        tooltip: TooltipDirective,
+        LongPress: LongPressDirective
     }
 })
 export default class OrderView extends Mixins(NavigationMixin){
     loading = false
-    loadingPayment = false
     errorBox: ErrorBox | null = null
 
     @Prop({ required: true })
@@ -344,6 +332,13 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     @Prop({ default: null })
     getPreviousOrder!: (order: PrivateOrder) => PrivateOrder | null;
+
+    @Watch("order.payment.status")
+    onChangePaymentStatus(n: string, old: string) {
+        if (n === PaymentStatus.Succeeded && old !== PaymentStatus.Succeeded) {
+            this.downloadNewTickets()
+        }
+    }
 
     get patchedOrder() {
         return this.order.patch(this.patchOrder)
@@ -390,12 +385,58 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.tickets.reduce((c, ticket) => c + (ticket.scannedAt ? 1 : 0), 0)
     }
 
+    get actionBuilder() {
+        return new OrderActionBuilder({
+            webshopManager: this.webshopManager,
+            component: this,
+        })
+    }
+
+    get statusName() {
+        return this.patchedOrder ? OrderStatusHelper.getName(this.order.status) : ""
+    }
+
+    get statusColor() {
+        return this.patchedOrder ? OrderStatusHelper.getColor(this.order.status) : ""
+    }
+
+    showContextMenu(event) {
+        const el = event.currentTarget;
+        const bounds = el.getBoundingClientRect()
+
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: bounds.left,
+            y: bounds.bottom,
+            xPlacement: "right",
+            yPlacement: "bottom",
+            actions: this.actionBuilder.getActions(),
+            focused: [this.order]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
     markAs(event) {
-        const displayedComponent = new ComponentWithProperties(OrderStatusContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
-            orders: [this.order],
-            webshopManager: this.webshopManager
+        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
+            actions: this.actionBuilder.getStatusActions(),
+            focused: [this.order]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    changePaymentStatus(event) {
+        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
+            actions: this.actionBuilder.getPaymentActions(),
+            focused: [this.order]
         });
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
@@ -437,7 +478,8 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.show({
             components: [component],
             replace: 1,
-            reverse: true
+            reverse: true,
+            animated: false
         })
     }
 
@@ -455,6 +497,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.show({
             components: [component],
             replace: 1,
+            animated: false
         })
     }
 
@@ -498,48 +541,6 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     imageSrc(cartItem: CartItem) {
         return cartItem.product.images[0]?.getPathForSize(100, 100)
-    }
-
-    async markPaid(payment: Payment) {
-        if (this.loadingPayment) {
-            return;
-        }
-
-        const data: AutoEncoderPatchType<Payment>[] = []
-        if (payment.status != PaymentStatus.Succeeded || this.order.data.cart.price != payment.price) {
-            data.push(Payment.patch({
-                id: payment.id,
-                price: this.order.data.cart.price,
-                status: PaymentStatus.Succeeded
-            }))
-        }
-
-        if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker?", "Markeer als betaald", "De besteller ontvangt een automatische e-mail. Tip: je kan dit ook via het menu 'Overschrijvingen' doen voor meerdere overschrijvingen in één keer, dat spaart je wat werk uit.")) {
-                return;
-            }
-            this.loadingPayment = true
-            const session = SessionManager.currentSession!
-
-            try {
-                const response = await session.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/organization/payments",
-                    body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>),
-                    shouldRetry: false
-                })
-                const p = response.data.find(pp => pp.id === payment.id)
-                if (p) {
-                    payment.set(p)
-                }
-                this.downloadNewTickets()
-            } catch (e) {
-                Toast.fromError(e).show()
-            }
-            this.loadingPayment = false
-            
-        }
     }
 
     saving = false
@@ -668,46 +669,6 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
             cart: clone
         })})
-    }
-
-    async markNotPaid(payment: Payment) {
-        if (this.loadingPayment) {
-            return;
-        }
-
-        const data: AutoEncoderPatchType<Payment>[] = []
-        if (payment.status == PaymentStatus.Succeeded) {
-            data.push(Payment.patch({
-                id: payment.id,
-                status: PaymentStatus.Created
-            }))
-        }
-
-        if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker dat deze betaling niet uitgevoerd is?", "Niet betaald")) {
-                return;
-            }
-            this.loadingPayment = true
-            const session = SessionManager.currentSession!
-
-            try {
-                const response = await session.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/organization/payments",
-                    body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>),
-                    shouldRetry: false
-                })
-                const p = response.data.find(pp => pp.id === payment.id)
-                if (p) {
-                    payment.set(p)
-                }
-            } catch (e) {
-                Toast.fromError(e).show()
-            }
-            this.loadingPayment = false
-            
-        }
     }
 
     get orderUrl() {

@@ -1,5 +1,6 @@
 <template>
-    <main class="webshop-view-page">
+    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" class="webshop-view-page" @save="save">
+        <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errorBox" />
         <STInputBox title="Titel" error-fields="meta.title" :error-box="errorBox">
             <input
@@ -26,11 +27,11 @@
         <h2 class="style-with-button">
             <div>Omslagfoto</div>
             <div>
-                <button v-if="coverPhoto" class="button text" @click="coverPhoto = null">
+                <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
-                <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Foto uploaden'" :resolutions="hs" />
+                <UploadButton v-model="coverPhoto" :text="coverPhoto ? 'Vervangen' : 'Uploaden'" :resolutions="hs" />
             </div>
         </h2>
 
@@ -40,59 +41,6 @@
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
         </figure>
 
-        <hr>
-        <h2>Link van jouw webshop</h2>
-
-        <Checkbox v-model="hasCustomDomain">
-            Eigen domeinnaam gebruiken
-        </Checkbox>
-
-        <template v-if="hasCustomDomain">
-            <STInputBox title="Eigen link" error-fields="customUrl" :error-box="errorBox" class="max">
-                <input
-                    v-model="customUrl"
-                    class="input"
-                    type="text"
-                    :placeholder="$t('dashboard.inputs.shopUrl.placeholder')"
-                    autocomplete=""
-                    @blur="resetCache"
-                >
-            </STInputBox>
-            <p class="st-list-description">
-                {{ $t('dashboard.webshop.customDomain.description') }}
-            </p>
-            
-            <template v-if="dnsRecord">
-                <STInputBox title="Stel deze DNS-records in" class="max">
-                    <DNSRecordBox :record="dnsRecord" />
-                </STInputBox>
-            </template>
-        </template>
-
-        <template v-else>
-            <STInputBox title="Eigen achtervoegsel (optioneel)" error-fields="uri" :error-box="errorBox">
-                <input
-                    v-model="uri"
-                    class="input"
-                    type="text"
-                    placeholder="bv. wafelbak"
-                    autocomplete=""
-                    @blur="resetCache"
-                >
-            </STInputBox>
-
-            <STInputBox title="Jouw link" error-fields="url" :error-box="errorBox" class="max">
-                <input
-                    v-tooltip="'Klik om te kopiëren'"
-                    :value="url"
-                    class="input"
-                    type="text"
-                    autocomplete=""
-                    readonly
-                    @click="copyElement"
-                >
-            </STInputBox>
-        </template>
 
         <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
 
@@ -100,7 +48,7 @@
         <h2 class="style-with-button">
             <div>Externe links</div>
             <div>
-                <button class="button text" @click="addPolicy">
+                <button type="button" class="button text only-icon-smartphone" @click="addPolicy">
                     <span class="icon add" />
                     <span>Toevoegen</span>
                 </button>
@@ -114,66 +62,54 @@
         <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
             De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
         </p>
-    </main>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Tooltip, TooltipDirective, UploadButton, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { DNSRecord, DNSRecordType,Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { SaveView, STErrorsDefault, STInputBox, UploadButton } from "@stamhoofd/components";
+import { Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
+import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import DNSRecordBox from '../../../../components/DNSRecordBox.vue';
-import EditPolicyBox from "./EditPolicyBox.vue"
+import EditPolicyBox from "./EditPolicyBox.vue";
+import EditWebshopMixin from "./EditWebshopMixin";
 
 @Component({
     components: {
-        STListItem,
-        STList,
         STInputBox,
         STErrorsDefault,
         UploadButton,
-        Checkbox,
-        DNSRecordBox,
-        EditPolicyBox
-    },
-    directives: { Tooltip: TooltipDirective },
+        EditPolicyBox,
+        SaveView
+    }
 })
-export default class EditWebshopPageView extends Mixins(NavigationMixin) {
-    @Prop()
-    webshop!: PrivateWebshop;
-
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-
-    cachedHasCustomDomain: boolean | null = this.hasCustomDomain
-    cachedCustomUrl: string | null = this.customUrl
-    cachedUri: string | null = this.uri
-
+export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     get organization() {
         return OrganizationManager.organization
+    }
+
+    get viewTitle() {
+        return "Webshop pagina wijzigen"
     }
 
     patchPolicy(policy: Policy, patch: AutoEncoderPatchType<Policy>) {
         const p = WebshopMetaData.patch({})
         patch.id = policy.id
         p.policies.addPatch(patch)
-        this.$emit("patch", PrivateWebshop.patch({ meta: p }) )
+        this.addPatch(PrivateWebshop.patch({ meta: p }) )
     }
 
     deletePolicy(policy: Policy) {
         const p = WebshopMetaData.patch({})
         p.policies.addDelete(policy.id)
-        this.$emit("patch", PrivateWebshop.patch({ meta: p }) )
+        this.addPatch(PrivateWebshop.patch({ meta: p }) )
     }
 
     addPolicy() {
         const p = WebshopMetaData.patch({})
         p.policies.addPut(Policy.create({}))
-        this.$emit("patch", PrivateWebshop.patch({ meta: p }) )
+        this.addPatch(PrivateWebshop.patch({ meta: p }) )
     }
 
     get policies() {
@@ -186,7 +122,7 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
 
     set title(title: string) {
         const patch = WebshopMetaData.patch({ title })
-        this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
     }
 
     get description() {
@@ -195,93 +131,7 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
 
     set description(description: string) {
         const patch = WebshopMetaData.patch({ description })
-        this.$emit("patch", PrivateWebshop.patch({ meta: patch}) )
-    }
-
-    resetCache() {
-        this.cachedCustomUrl = null
-        this.cachedUri = null
-    }
-
-    get hasCustomDomain() {
-        if (this.cachedHasCustomDomain) {
-            return this.cachedHasCustomDomain
-        }
-        return !!this.webshop.domain
-    }
-
-    set hasCustomDomain(hasCustomDomain: boolean) {
-        this.cachedHasCustomDomain = hasCustomDomain
-
-        if (!hasCustomDomain) {
-            const patch = PrivateWebshop.patch({  })
-            patch.domain = null
-            patch.domainUri = null
-            this.$emit("patch", patch)
-        } else {
-            // Force patch
-            this.customUrl = this.customUrl as any
-        }
-    }
-
-    get url() {
-        return "https://"+this.webshop.getUrl(SessionManager.currentSession!.organization!)
-    }
-
-    get customUrl() {
-        if (this.cachedCustomUrl) {
-            return this.cachedCustomUrl
-        }
-
-        if (!this.webshop.domain) {
-            return ""
-        }
-        return this.webshop.getUrl(SessionManager.currentSession!.organization!)
-    }
-
-    set customUrl(customUrl: string) {
-        this.cachedCustomUrl = customUrl
-        const split = customUrl.split("/")
-
-        const patch = PrivateWebshop.patch({  })
-        if (split[0].length == 0) {
-            patch.domain = null
-            patch.domainUri = null
-        } else {
-            patch.domain = split[0]
-
-            if (!split[1] || split[1].length == 0) {
-                patch.domainUri = null
-            } else {
-                patch.domainUri = split[1]
-            }
-        }
-
-        this.$emit("patch", patch)
-    }
-
-    get uri() {
-        return this.webshop.uri
-    }
-
-    set uri(uri: string) {
-        this.cachedUri = uri
-
-        const patch = PrivateWebshop.patch({  })
-        patch.uri = uri
-
-        this.$emit("patch", patch)
-    }
-
-    get dnsRecord() {
-        if (!this.webshop.domain) {
-            return null;
-        }
-        return DNSRecord.create({
-            type: DNSRecordType.CNAME,
-            name: this.webshop.domain+".",
-            value: "domains.stamhoofd.shop."
-        })
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
     }
 
     get coverPhoto() {
@@ -290,10 +140,10 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
 
     set coverPhoto(coverPhoto: Image | null) {
         const patch = WebshopMetaData.patch({ coverPhoto })
-        this.$emit("patch", PrivateWebshop.patch({ meta: patch }) )
+        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
     }
 
-     get hs() {
+    get hs() {
         return [
             ResolutionRequest.create({
                 width: 1600
@@ -327,33 +177,6 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
     get coverImageHeight() {
         return this.coverPhotoResolution?.height
     }
-
-    copyElement(event) {
-        event.target.contentEditable = true;
-
-        document.execCommand('selectAll', false);
-        document.execCommand('copy')
-
-        event.target.contentEditable = false;
-
-        const el = event.target;
-        const rect = event.target.getBoundingClientRect();
-
-        // Present
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "📋 Gekopieerd!",
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-
-        setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
-        }, 1000);
-    }
-
-  
 }
 </script>
 
@@ -372,7 +195,7 @@ export default class EditWebshopPageView extends Mixins(NavigationMixin) {
 
      .webshop-banner {
         height: 300px;
-        background: $color-gray;
+        background: $color-gray-3;
         border-radius: $border-radius;
         margin-top: 20px;
 

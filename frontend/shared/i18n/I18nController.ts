@@ -1,4 +1,5 @@
 //i18n-setup.js
+import { HistoryManager } from "@simonbackx/vue-app-navigation"
 import { countries, languages } from "@stamhoofd/locales"
 import { SessionManager, Storage, UrlHelper } from '@stamhoofd/networking'
 import { Country } from "@stamhoofd/structures"
@@ -13,6 +14,7 @@ export class I18nController {
     static shared: I18nController
     static addUrlPrefix = true
     static skipUrlPrefixForLocale?: string
+    static forceCanonicalHostProtocolAndPrefix?: string
 
     /**
      * Whether only one country is enabled for the whole domain
@@ -58,8 +60,8 @@ export class I18nController {
     }
 
     async switchToLocale(options: {
-            language?: string,
-            country?: Country
+        language?: string,
+        country?: Country
     }) {
         if ((options.country ?? this.country) == this.country && (options.language ?? this.language) == this.language) {
             return
@@ -77,7 +79,7 @@ export class I18nController {
     }
 
     updateUrl() {
-         // Update url's
+        // Update url's
         const current = new UrlHelper()
         UrlHelper.setUrl(current.getPath({ removeLocale: true }))
     }
@@ -214,6 +216,9 @@ export class I18nController {
                 case "de": country = Country.Germany; break;
                 case "lu": country = Country.Luxembourg; break;
                 case "fr": country = Country.France; break;
+
+                // We used .shop before, but were only active in Belgium
+                case "shop": country = Country.Belgium; break;
             }
 
             if (country) {
@@ -221,8 +226,8 @@ export class I18nController {
             }
         }
 
-         // 4. Use the browesr language and/or country
-         if (!isPrerender) {
+        // 4. Use the browesr language and/or country
+        if (!isPrerender) {
             if (!language && navigator.language && navigator.language.length >= 2) {
                 const l = navigator.language.substr(0, 2).toLowerCase()
                 if (languages.includes(l)) {
@@ -291,6 +296,13 @@ export class I18nController {
             }
         })
 
+        // Update already pushed urls
+        for (const state of HistoryManager.states) {
+            if (state.url) {
+                state.url = UrlHelper.transformUrlForLocale(state.url, def.language, def.country)
+            }
+        }
+
         // If we go back, we might need to update the path of previous urls if the language has changed since then
         window.addEventListener("popstate", (event) => {
             I18nController.shared?.updateUrl()
@@ -320,7 +332,9 @@ export class I18nController {
         const listCountries = I18nController.fixedCountry ? [this.country] : countries
         const url = new UrlHelper()
         const path = url.getPath()
-        const hostProtocol = url.getHostWithProtocol()
+        const hostProtocol = I18nController.forceCanonicalHostProtocolAndPrefix ?? url.getHostWithProtocol()
+
+        const addPrefix  = I18nController.forceCanonicalHostProtocolAndPrefix ? false : true
 
         const links: MetaInfo["link"] = []
         const meta: MetaInfo["meta"] = []
@@ -340,7 +354,7 @@ export class I18nController {
                 links.push({
                     hid: `i18n-alt-${locale}`,
                     rel: "alternate",
-                    href: hostProtocol + UrlHelper.transformUrlForLocale(path, language, country),
+                    href: hostProtocol + UrlHelper.transformUrlForLocale(path, language, country, addPrefix),
                     hreflang: locale
                 })
 
@@ -362,7 +376,7 @@ export class I18nController {
             links.push({
                 hid: `i18n-alt-default`,
                 rel: "alternate",
-                href: hostProtocol + UrlHelper.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountry),
+                href: hostProtocol + UrlHelper.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountry, addPrefix),
                 hreflang: "x-default"
             })
         }
@@ -372,8 +386,39 @@ export class I18nController {
         links.push({
             hid: 'i18n-can',
             rel: 'canonical',
-            href: hostProtocol+UrlHelper.transformUrlForLocale(path, this.language, this.country)
+            href: hostProtocol+UrlHelper.transformUrlForLocale(path, this.language, this.country, addPrefix)
         })
+
+        // If we are in prerender mode, we also want to redirect the crawler if needed
+        /*
+         <meta name="prerender-status-code" content="302">
+         <meta name="prerender-header" content="Location: https://www.google.com">
+        */
+
+        const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
+
+        if (isPrerender) {
+            const currentPath = UrlHelper.transformUrlForLocale(path, this.language, this.country)
+
+            let redirected = false
+            if (currentPath != UrlHelper.initial.path) {
+                redirected = true
+            }
+            meta.push({
+                hid: `prerender-status-code`,
+                name: 'prerender-status-code',
+                content: redirected ? "302" : "200"
+            })
+
+            if (redirected) {
+            // Don't use canonical host (for now)
+                meta.push({
+                    hid: `prerender-header`,
+                    name: 'prerender-header',
+                    content: "Location: "+url.getHostWithProtocol()+currentPath
+                })
+            }
+        }
 
         return {
             htmlAttrs: {

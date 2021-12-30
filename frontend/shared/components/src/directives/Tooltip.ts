@@ -5,7 +5,8 @@ import Tooltip from "../overlays/Tooltip.vue";
 export default {
     inserted(el, binding, vnode) {
         let isMouseHover = false;
-        let displayedComponent: ComponentWithProperties | null = null;
+        const displayedComponent: ComponentWithProperties | null = el.$tooltipDisplayedComponent ?? null;
+        el.$tooltipDisplayedComponent = displayedComponent;
 
         if (!binding.value) {
             return;
@@ -27,18 +28,16 @@ export default {
                     isMouseHover = true;
 
                     setTimeout(() => {
-                        if (isMouseHover && !displayedComponent) {
+                        if (isMouseHover && !el.$tooltipDisplayedComponent) {
                             const rect = el.getBoundingClientRect();
 
                             // Present
-
-                            displayedComponent = new ComponentWithProperties(Tooltip, {
+                            el.$tooltipDisplayedComponent = new ComponentWithProperties(Tooltip, {
                                 text: binding.value,
                                 x: rect.left,
-                                y: rect.top + el.offsetHeight + 5,
+                                y: rect.bottom,
                             });
-                            parentComponent.present(displayedComponent.setDisplayStyle("overlay"));
-                            el.tooltipComponent = displayedComponent
+                            parentComponent.present(el.$tooltipDisplayedComponent.setDisplayStyle("overlay"));
                         }
                     }, 200);
                 }
@@ -50,17 +49,27 @@ export default {
             (_event) => {
                 isMouseHover = false;
 
-                if (displayedComponent && displayedComponent.vnode) {
-                    // Todo: hide component again
+                if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
                     try {
-                        displayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+                        el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
                     } catch (e) {
                         // Ignore
                     }
                 }
-                displayedComponent = null;
+                el.$tooltipDisplayedComponent = null;
             },
             { passive: true }
         );
     },
+
+    unbind(el, binding, vnode) {
+        if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
+            try {
+                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+            } catch (e) {
+                // Ignore
+            }
+        }
+        el.$tooltipDisplayedComponent = null;
+    }
 };

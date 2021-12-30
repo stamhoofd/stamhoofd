@@ -112,6 +112,10 @@ a.st-list-item {
                 &:last-child {
                     margin-right: 0;
                 }
+
+                &:first-child {
+                    margin-left: 0;
+                }
             }
 
             > .button {
@@ -119,6 +123,10 @@ a.st-list-item {
 
                 &:last-child {
                     margin-right: 0;
+                }
+
+                &:first-child {
+                    margin-left: 0;
                 }
             }
         }
@@ -153,7 +161,6 @@ a.st-list-item {
 
             > .middle {
                 padding-top: 15px;
-                padding-right: 15px;
                 padding-bottom: 15px;
                 flex-grow: 1;
                 min-width: 0; // flexbox disable becoming bigger than parent
@@ -166,6 +173,7 @@ a.st-list-item {
 
                 padding-top: 10px;
                 padding-bottom: 10px;
+                padding-left: 15px;
 
                 &:empty {
                     display: none;
@@ -176,10 +184,10 @@ a.st-list-item {
         > hr {
             border: 0;
             outline: 0;
-            height: $border-width;
+            height: $border-width-thin;
             width: 100%;
-            background: var(--color-current-border, #{$color-border});
-            border-radius: $border-width/2;
+            background: $color-border;
+            border-radius: $border-width-thin/2;
             margin: 0;
             margin-right: calc(-1 * var(--st-horizontal-padding, 15px));
 

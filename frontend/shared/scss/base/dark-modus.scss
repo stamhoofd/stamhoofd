@@ -1,22 +1,70 @@
+@use "./variables.scss" as *;
+
 body {
     @media (prefers-color-scheme: dark) {
         //--color-primary: var(--dark-theme-color-primary);
-        --color-white: var(--dark-theme-color-white);
-        --color-dark: var(--dark-theme-color-dark);
+        --color-background: #{$dark-theme-color-background};
+        --color-background-shade: #{$dark-theme-color-background-shade};
+        --color-background-shade-darker: #{$dark-theme-color-background-shade-darker};
 
-        --color-error-border: var(--dark-theme-color-error-border);
-        --color-gray-dark: var(--dark-theme-color-gray-dark);
-        --color-gray: var(--dark-theme-color-gray);
-        --color-gray-light: var(--dark-theme-color-gray-light);
-        --color-gray-lighter: var(--dark-theme-color-gray-lighter);
+        --color-dark: #{$dark-theme-color-dark};
+        --color-gray-1: #{$dark-theme-color-gray-1};
+        --color-gray-2: #{$dark-theme-color-gray-2};
+        --color-gray-3: #{$dark-theme-color-gray-3};
+        --color-gray-4: #{$dark-theme-color-gray-4};
+
+        --color-background-highlight: #{$dark-theme-color-background-highlight};
+        --color-background-interactive: #{$dark-theme-color-background-interactive};
+
+        --color-error-dark: #{$dark-theme-color-error-dark};
+        --color-error-background: #{$dark-theme-color-error-background};
+        --color-error-border: #{$dark-theme-color-error-border};
+
+        --color-success-dark: #{$dark-theme-color-success-dark};
+        --color-success-background: #{$dark-theme-color-success-background};
+        --color-success-border: #{$dark-theme-color-success-border};
+
+        --color-warning-dark: #{$dark-theme-color-warning-dark};
+        --color-warning-background: #{$dark-theme-color-warning-background};
+        --color-warning-border: #{$dark-theme-color-warning-border};
+
+        --color-secundary-dark: #{$dark-theme-color-secundary-dark};
+        --color-secundary-background: #{$dark-theme-color-secundary-background};
+        --color-secundary-border: #{$dark-theme-color-secundary-border};
+
+        --color-tertiary-dark: #{$dark-theme-color-tertiary-dark};
+        --color-tertiary-background: #{$dark-theme-color-tertiary-background};
+        --color-tertiary-border: #{$dark-theme-color-tertiary-border};
+
+        --color-primary-lighter: #{$dark-theme-color-primary-lighter};
+        --color-primary-light: #{$dark-theme-color-primary-light};
+        --color-primary-background: #{$dark-theme-color-primary-background};
+        --color-primary-dark: #{$dark-theme-color-primary-dark};
+        --color-primary-gray-light: #{$dark-theme-color-primary-gray-light};
+
+        --color-border-shade: #{$dark-theme-color-border-shade};
+
+        // Manual
+         --color-shadow: rgba(255, 255, 255, 0.05);
+
+        --color-box-shadow: rgba(0, 0, 0, 0.5);
+
+        // extra dark overlay shadows to increase contrast
+        //--color-side-view-shadow: rgba(0, 0, 0, 0.7);
+        //--color-overlay-shadow: rgba(0, 0, 0, 0.9);
+
+        /*--color-error-border: var(--dark-theme-color-error-border);
+        --color-gray-4: var(--dark-theme-color-gray-4);
+        --color-gray-1: var(--dark-theme-color-gray-1);
+        --color-gray-2: var(--dark-theme-color-gray-2);
+        --color-gray-3: var(--dark-theme-color-gray-3);
         --color-primary-lighter: var(--dark-theme-color-primary-lighter);
         --color-primary-light: var(--dark-theme-color-primary-light);
         --color-primary-gray-light: var(--dark-theme-color-primary-gray-light);
         --color-primary-background: var(--dark-theme-color-primary-background);
-        --color-white-shade: var(--dark-theme-color-white-shade);
         --color-primary-contrast: var(--dark-theme-color-primary-contrast);
-        --color-white-highlight: var(--dark-theme-color-white-highlight);
-        --color-white-interaction: var(--dark-theme-color-white-interaction);
+        --color-background-highlight: var(--dark-theme-color-background-highlight);
+        --color-background-interaction: var(--dark-theme-color-background-interaction);
         --color-error-background: var(--dark-theme-color-error-background);
         --color-error-dark: var(--dark-theme-color-error-dark);
         --color-warning-background: var(--dark-theme-color-warning-background);
@@ -32,6 +80,12 @@ body {
 
         // extra dark overlay shadows to increase contrast
         --color-side-view-shadow: rgba(0, 0, 0, 0.7);
-        --color-overlay-shadow: rgba(0, 0, 0, 0.9);
+        --color-overlay-shadow: rgba(0, 0, 0, 0.9);*/
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    img[src*=".svg"] {
+        filter: contrast(0.7);
     }
 }

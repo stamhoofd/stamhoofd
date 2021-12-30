@@ -41,6 +41,7 @@
                         Alle leden
 
                         <template slot="right">
+                            <span v-if="totalCount !== null" class="style-description-small">{{ totalCount }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -48,6 +49,7 @@
                         {{ group.settings.name }}
 
                         <template slot="right">
+                            <span v-if="group.settings.registeredMembers" class="style-description-small">{{ group.settings.registeredMembers }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -62,7 +64,7 @@
             </p>
 
             <p v-if="categories.length == 0 && canCreate">
-                <button class="button text" @click="createGroup">
+                <button class="button text" type="button" @click="createGroup">
                     <span class="icon add" />
                     <span>Nieuwe groep toevoegen</span>
                 </button>
@@ -115,6 +117,21 @@ export default class CategoryView extends Mixins(NavigationMixin) {
             return c
         }
         return this.category
+    }
+
+    get totalCount() {
+        if (this.groups.length == 0) {
+            return null
+        }
+
+        let count = 0
+        for (const group of this.groups) {
+            if (group.settings.registeredMembers === null) {
+                return null
+            }
+            count += group.settings.registeredMembers
+        }
+        return count
     }
 
     get tree() {

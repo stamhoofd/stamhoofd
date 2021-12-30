@@ -12,6 +12,7 @@ export * from "./src/ViewportHelper"
 // Navigation
 export { default as BackButton } from "./src/navigation/BackButton.vue"
 export { default as LoadingButton } from "./src/navigation/LoadingButton.vue"
+export { default as SaveView } from "./src/navigation/SaveView.vue"
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"
 export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue"
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"
@@ -30,6 +31,7 @@ export { default as Tooltip } from "./src/overlays/Tooltip.vue"
 
 // Directives
 export { default as CopyableDirective } from "./src/directives/Copyable"
+export { default as LongPressDirective } from "./src/directives/LongPress"
 export { default as TooltipDirective } from "./src/directives/Tooltip"
 
 // Cotnainers
@@ -70,6 +72,7 @@ export { default as ImageInput } from "./src/inputs/ImageInput.vue"
 export { default as NumberInput } from "./src/inputs/NumberInput.vue"
 export { default as PasswordStrength } from "./src/inputs/PasswordStrength.vue"
 export { default as PhoneInput } from "./src/inputs/PhoneInput.vue"
+export { default as PrefixInput } from "./src/inputs/PrefixInput.vue"
 export { default as PriceInput } from "./src/inputs/PriceInput.vue"
 export { default as Radio } from "./src/inputs/Radio.vue"
 export { default as RadioGroup } from "./src/inputs/RadioGroup.vue"
@@ -114,3 +117,9 @@ export { default as PropertyFilterInput } from "./src/filters/PropertyFilterInpu
 export { default as PropertyFilterView } from "./src/filters/PropertyFilterView.vue"
 export { default as RegistrationsFilterView } from "./src/filters/RegistrationsFilterView.vue"
 export { default as StringFilterView } from "./src/filters/StringFilterView.vue"
+
+// tables
+export * from "./src/tables/Column"
+export * from "./src/tables/TableAction"
+export { default as TableView } from "./src/tables/TableView.vue"
+export * from "./src/VueGlobalHelper"

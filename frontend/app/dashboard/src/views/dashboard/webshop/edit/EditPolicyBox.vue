@@ -4,7 +4,7 @@
         <h2 class="style-with-button">
             <div>Externe link: {{ policy.name || "Naamloos" }}</div>
             <div>
-                <button class="button text" @click="$emit('delete')">
+                <button class="button text only-icon-smartphone" type="button" @click="$emit('delete')">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>

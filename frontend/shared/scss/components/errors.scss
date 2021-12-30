@@ -4,38 +4,10 @@
 
 .error-box {
     background: $color-error-background;
-    border-radius: $border-radius;
     color: $color-error-dark;
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 500;
-    padding: 15px 15px 15px 50px;
-    box-sizing: border-box;
-    position: relative;
-    margin: 15px 0;
-
-    @extend .icon-base;
-
-    @media (max-width: 450px) {
-        font-size: 14px;
-    }
 
     &::before {
-        position: absolute;
         color: $color-error;
-        font-size: 24px;
-        left: 12px;
-        top: 50%;
-        transform: translate(0, -50%);
-    }
-
-    &.selectable {
-        cursor: pointer;
-        touch-action: manipulation;
-        
-        &:active {
-            opacity: 0.8;
-        }
     }
 }
 
@@ -45,99 +17,116 @@
 
 .warning-box {
     background: $color-warning-background;
-    border-radius: $border-radius;
     color: $color-warning-dark;
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 500;
-    padding: 15px 15px 15px 50px;
-    box-sizing: border-box;
-    margin: 15px 0;
-    position: relative;
-
-    @extend .icon-base;
-
-    @media (max-width: 450px) {
-        font-size: 14px;
-    }
 
     &::before {
-        position: absolute;
-        color: $color-warning-primary;
-        font-size: 24px;
-        left: 12px;
-        top: 50%;
-        transform: translate(0, -50%);
+        color: $color-warning;
     }
 }
 
 .info-box {
     background: $color-primary-background;
-    border-radius: $border-radius;
     color: $color-dark;
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 500;
-    padding: 15px 15px 15px 50px;
-    box-sizing: border-box;
-    margin: 15px 0;
-    position: relative;
-    
-    @extend .icon-base;
-
-    @media (max-width: 450px) {
-        font-size: 14px;
-    }
 
     &::before {
-        position: absolute;
         color: $color-primary;
-        font-size: 24px;
-        left: 12px;
-        top: 50%;
-        transform: translate(0, -50%);
     }
 }
 
 .success-box {
     background: $color-success-background;
-    border-radius: $border-radius;
     color: $color-success-dark;
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 500;
-    padding: 15px 15px 15px 50px;
-    box-sizing: border-box;
-    margin: 15px 0;
-    position: relative;
-
-    @extend .icon-base;
-
-    @media (max-width: 450px) {
-        font-size: 14px;
-    }
 
     &::before {
-        position: absolute;
         color: $color-success;
-        font-size: 24px;
+    }
+}
+
+.loading-box {
+    background: $color-primary-background;
+    color: $color-dark;
+    
+    > .spinner-container {
+        position: absolute;
+        color: $color-primary;
         left: 12px;
         top: 50%;
         transform: translate(0, -50%);
     }
 }
 
+.error-box, .success-box, .info-box, .warning-box, .loading-box {
+    border-radius: $border-radius;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: $font-weight-default;
+    padding: 15px 15px 15px 50px;
+
+    min-height: 49px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    width: 100%; // In case of button element (required to fit width)
+    text-align: left; // In case of button element
+
+    box-sizing: border-box;
+    margin: 15px 0;
+    position: relative;
+
+    &:link, &:visited, &:active, &:hover, &:focus {
+        text-decoration: none;
+    }
+
+    .custom-bottom-box + & {
+        margin-top: 5px;
+    }
+
+    +.error-box, +.success-box, +.info-box, +.warning-box, +.loading-box  {
+        margin-top: -10px;
+    }
+
+    > .button {
+        &.text.button {
+            color: inherit;
+        }
+    }
+
+    @media (max-width: 400px){
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    @media (min-width: 401px){
+        > .button {
+            flex-shrink: 0;
+            margin: -15px 0;
+            padding: 0;
+            justify-self: stretch;
+            padding-left: 15px;
+            margin-left: auto;
+        }
+    }
+}
+
 .error-box, .success-box, .info-box, .warning-box {
+    @extend .icon-base;
+
+    &::before {
+        position: absolute;
+        font-size: 24px;
+        left: 12px;
+        top: 50%;
+        transform: translate(0, -50%);
+    }
+
     &.icon {
-        display: block;
+        display: flex;
         width: auto;
         height: auto;
         overflow: visible;
         white-space: inherit;
-    }
-
-    +.error-box, +.success-box, +.info-box, +.warning-box  {
-        margin-top: -10px;
     }
 
     &.selectable {
@@ -148,23 +137,6 @@
 
         &:active {
             opacity: 0.5;
-        }
-    }
-
-    &.with-button {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        > .button {
-            flex-shrink: 0;
-            padding-left: 15px;
-            margin-left: auto;
-            @extend .only-icon-smartphone;
-
-            &.text.button {
-                color: inherit;
-            }
         }
     }
 }

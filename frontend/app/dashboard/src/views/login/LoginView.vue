@@ -1,44 +1,44 @@
 <template>
-    <form class=" st-view login-view" @submit.prevent="submit">
-        <STNavigationBar title="Inloggen">
-            <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
-        </STNavigationBar>
+    <form class=" st-view login-view" autocomplete="off" data-submit-last-field @submit.prevent="submit">
+        <STNavigationBar title="Inloggen" :pop="canPop" :dismiss="canDismiss" />
         <main>
             <h1>Inloggen</h1>
 
-            <STInputBox title="E-mailadres">
-                <input ref="emailInput" v-model="email" class="input" name="email" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" type="email">
-            </STInputBox>
+            <STErrorsDefault :error-box="errorBox" />
+
+            <EmailInput ref="emailInput" v-model="email" enterkeyhint="next" class="max" name="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="animating || lock !== null" />
+            <p v-if="lock" class="style-description-small">
+                {{ lock }}
+            </p>
 
             <STInputBox title="Wachtwoord">
-                <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
+                <button slot="right" class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
-                <input v-model="password" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password">
+                <input v-model="password" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
-        </main>
 
-        <STFloatingFooter class="no-sticky">
-            <LoadingButton :loading="loading">
-                <button class="button primary full">
+
+            <button class="button text" type="button" tabindex="-1" @click="help">
+                <span class="help icon" />
+                <span>Ik heb geen account</span>
+            </button>
+
+            <LoadingButton :loading="loading" class="block bottom">
+                <button class="button primary full" type="submit">
                     <span class="lock icon" />
                     <span>Inloggen</span>
                 </button>
             </LoadingButton>
-            <button class="button secundary full" type="button" @click="help">
-                <span class="help icon" />
-                <span>Geen account?</span>
-            </button>
-        </STFloatingFooter>
+        </main>
     </form>
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
-import { Request } from "@simonbackx/simple-networking";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, ForgotPasswordView,LoadingButton, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
 import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
@@ -46,9 +46,11 @@ import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
     components: {
         STNavigationBar,
         STFloatingFooter,
+        STErrorsDefault,
         STInputBox,
-        LoadingButton
-    }
+        LoadingButton,
+        EmailInput
+    },
 })
 export default class LoginView extends Mixins(NavigationMixin){
     @Prop({ required: true})
@@ -59,25 +61,40 @@ export default class LoginView extends Mixins(NavigationMixin){
     @Prop({ default: ""})
     initialEmail!: string
 
+    @Prop({ default: null})
+    lock!: string | null
+
     email = this.initialEmail
     password = ""
+
+    errorBox: ErrorBox | null = null
+    validator = new Validator()
+
+    // Prevent browsers from already autofocusing the input on animation
+    animating = true
 
     get isNative() {
         return AppManager.shared.isNative
     }
 
     @Ref("emailInput")
-    emailInput: HTMLInputElement
+    emailInput: EmailInput
 
     mounted() {
-        this.email = this.session.user?.email ?? ""
+        this.email = this.initialEmail ? this.initialEmail : (this.session.user?.email ?? "");
 
         if (this.email.length == 0) {
             setTimeout(() => {
+                this.animating = false;
                 // Needed the any here because typescript is getting mad only in production mode
                 if (this.emailInput) {
                     (this.emailInput as any).focus()
                 }
+            }, 300);
+        } else {
+            setTimeout(() => {
+                // Needed the any here because typescript is getting mad only in production mode
+                this.animating = false;
             }, 300);
         }
     }
@@ -89,6 +106,7 @@ export default class LoginView extends Mixins(NavigationMixin){
     gotoPasswordForgot() {
         this.show(new ComponentWithProperties(ForgotPasswordView, {
             session: this.session,
+            initialEmail: this.email,
             isAdmin: true
         }))
     }
@@ -97,6 +115,13 @@ export default class LoginView extends Mixins(NavigationMixin){
         if (this.loading) {
             return
         }
+
+        const valid = await this.validator.validate()
+
+        if (!valid) {
+            return
+        }
+
 
         this.loading = true
         
@@ -107,25 +132,22 @@ export default class LoginView extends Mixins(NavigationMixin){
             const result = await LoginHelper.login(this.session, this.email, this.password)
 
             if (result.verificationToken) {
-                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken }))
+                this.show(new ComponentWithProperties(ConfirmEmailView, { login: true, session: this.session, token: result.verificationToken, email: this.email }))
             } else {
                 this.dismiss({ force: true });
             }
         } catch (e) {
-            console.error(e)
-            this.loading = false;
-
-            if (Request.isNetworkError(e)) {
-                new CenteredMessage("Geen internetverbinding", "Kijk jouw internetverbinding na en probeer het opnieuw.", "error").addCloseButton().show()           
-            } else if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
-                new CenteredMessage("Ongeldig wachtwoord of e-mailadres", "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven.", "error").addCloseButton().show()           
+            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode("invalid_signature")) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    code: "invalid_signature",
+                    message: "Jouw e-mailadres of wachtwoord is ongeldig. Kijk na of je wel het juiste e-mailadres of wachtwoord hebt ingegeven."
+                }))
             } else {
-                new CenteredMessage("Inloggen mislukt", e.human ?? e.message ?? "Er ging iets mis", "error").addCloseButton().show()           
-            }         
-            return;
-        } finally {
-            component.hide()
+                this.errorBox = new ErrorBox(e)
+            }  
         }
+        this.loading = false;
+        component.hide()
     }
 }
 </script>

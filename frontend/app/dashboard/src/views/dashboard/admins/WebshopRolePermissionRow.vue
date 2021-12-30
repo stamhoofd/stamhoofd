@@ -9,7 +9,7 @@
         </p>
 
         <div v-if="selected" slot="right">
-            <button class="button text" @click.stop.prevent="choosePermissions($event)">
+            <button class="button text" type="button" @click.stop.prevent="choosePermissions($event)">
                 <span>{{ getLevelText(permissions) }}</span>
                 <span class="icon arrow-down-small" />
             </button>
@@ -168,9 +168,12 @@ export default class WebshopRolePermissionRow extends Mixins(NavigationMixin) {
     }
 
     choosePermissions(event) {
+        const el = event.currentTarget
         const displayedComponent = new ComponentWithProperties(GroupPermissionContextMenu, {
-            x: event.clientX,
-            y: event.clientY,
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
             callback: (level: "none" | "write" | "read" | "full") => {
                 this.permissions = level
             }

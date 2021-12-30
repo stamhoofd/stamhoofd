@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
+    <ContextMenu v-bind="{ x, y, xPlacement: 'left', preferredWidth }">
         <aside class="date-selection-view">
             <header>
                 <button class="button icon gray arrow-left" @click="previousMonth" />
@@ -44,6 +44,9 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
 
     @Prop({ default: 0 })
     y!: number;
+
+    @Prop()
+    preferredWidth?: number;
 
     @Prop()
     setDate!: (date: Date) => void;
@@ -176,12 +179,12 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     min-width: 300px;
     user-select: none;
 
-    @media (max-width: 330px) {
-        min-width: calc(100vw - 30px);
+    @media (max-width: 400px) {
+        min-width: calc(100vw - 30px - 40px - 4px);
     }
 
     > header{
-        padding: 10px 10px;
+        padding: 10px 0px;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -198,10 +201,10 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
 
         > .days {
             display: flex;
-            padding: 0px 10px;
+            padding: 0px 0px;
             padding-bottom: 7px;
             margin-bottom: 5px;
-            border-bottom: 2px solid $color-gray-lighter;
+            border-bottom: $border-width solid $color-border;
 
             > div {
                 flex-grow: 1;
@@ -217,7 +220,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
 
         > .row {
             display: flex;
-            padding: 3px 10px;
+            padding: 3px 0px;
 
             > button {
                 flex-grow: 1;
@@ -227,9 +230,14 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                 margin: 0;
                 padding: 7px 0;
 
+                @media (max-width: 400px) {
+                    padding: 12px 0;
+                }
+
                 cursor: pointer;
                 touch-action: manipulation;
                 user-select: none;
+                transition: color 0.2s;
 
                 @extend .style-interactive-small;
 
@@ -242,26 +250,50 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
                     bottom: 0;
                     z-index: -1;
                     border-radius: $border-radius;
-                    background: $color-white;
+                    background: $color-background;
+                    background: var(--color-current-background, #{$color-background});
                     transition: background-color 0.2s, transform 0.2s;
                     transform: scale(0.9, 0.9);
                 }
 
-                &.selected {
+                &:active, &:hover {
+
+                    &::after {
+                        background: var(--color-current-background-shade, #{$color-background-shade});
+                        transform: scale(1, 1);
+                    }
+                }
+
+                &:active {
                     color: white;
+
+                    &::after {
+                        background: $color-gray-1;
+                        transform: scale(0.9, 0.9);
+                    }
+                }
+
+                &.selected {
+                    color: $color-primary-contrast;
                     font-weight: bold;
 
                     &::after {
                         background: $color-primary;
                         transform: scale(1, 1);
                     }
-                }
 
-                &:active, &:hover {
+                    &:hover {
+                        color: $color-background;
 
-                    &::after {
-                        background: $color-white-shade;
-                        transform: scale(1, 1);
+                        &::after {
+                            background: $color-dark;
+                        }
+                    }
+
+                    &:active {
+                        &::after {
+                            transform: scale(0.9, 0.9);
+                        }
                     }
                 }
 

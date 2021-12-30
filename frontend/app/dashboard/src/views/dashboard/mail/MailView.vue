@@ -2,7 +2,7 @@
     <div class="st-view mail-view">
         <STNavigationBar title="E-mail versturen">
             <template #right>
-                <button class="button icon close gray" @click="dismiss" />
+                <button class="button icon close gray" type="button" @click="dismiss" />
             </template>
         </STNavigationBar>
 
@@ -10,6 +10,8 @@
             <h1>
                 E-mail versturen
             </h1>
+
+            <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="emails.length == 0">
                 <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
@@ -29,7 +31,7 @@
                     <input id="mail-subject" v-model="subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
                 </STInputBox>
                 <STInputBox v-if="emails.length > 0" title="Versturen vanaf">
-                    <button v-if="fullAccess" slot="right" class="button text" @click="manageEmails">
+                    <button v-if="fullAccess" slot="right" class="button text" type="button" @click="manageEmails">
                         <span class="icon settings" />
                         <span>Wijzigen</span>
                     </button>
@@ -77,7 +79,7 @@
 
                             <template #right>
                                 <span>{{ file.size }}</span>
-                                <span><button class="button icon gray trash" @click.stop="deleteAttachment(index)" /></span>
+                                <span><button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" /></span>
                             </template>
                         </STListItem>
                     </STList>
@@ -169,12 +171,12 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, Webshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
 
@@ -208,6 +210,7 @@ class TmpFile {
         STListItem,
         Checkbox,
         Dropdown,
+        STErrorsDefault,
         MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
 })
@@ -618,7 +621,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                             ],
                             userId: existing?.userId ?? null,
                             type
-                    }))
+                        }))
                 }
             }
         }
@@ -686,7 +689,16 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     async getHTML(withButton: boolean | null = null) {
-        let base = (this.$refs.editor as any).editor!.getHTML();
+        const editor = (this.$refs.editor as any)?.editor
+        if (!editor) {
+            // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
+            return {
+                text: "",
+                html: ""
+            }
+        }
+
+        let base = editor.getHTML();
 
         // Append footer HTML if needed
         if ((withButton ?? this.addButton) && this.$refs.footerButton) {

@@ -102,7 +102,7 @@ export default class ToastBox extends Vue {
     padding: 10px 20px;
     pointer-events:none;   
     width: 350px + 40px;
-    padding-bottom: calc(10px + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
+    padding-bottom: 0;
     padding-top: calc(10px + var(--st-safe-area-top, 0px));
 
     @media (max-width: 450px) {
@@ -113,10 +113,20 @@ export default class ToastBox extends Vue {
 
     max-width: 100vw;
     box-sizing: border-box;
-    transition: transform 0.3s;
+    transition: transform 0.2s;
+
+    transform: translateY(
+        calc(
+            -10px 
+            - max(
+                var(--st-safe-area-bottom, 0px), 
+                var(--keyboard-height, 0px)
+            ) 
+        )
+    );
     
     &.withOffset {
-        transform: translateY(-60px);
+        transform: translateY(calc(-70px - max(var(--st-safe-area-bottom, 0px), var(--bottom-padding, 0px), var(--keyboard-height, 0px)) + var(--bottom-padding, 0px)));
     }
 
     > div > div {

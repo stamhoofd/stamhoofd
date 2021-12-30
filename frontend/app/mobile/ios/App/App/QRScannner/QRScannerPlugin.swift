@@ -10,10 +10,41 @@ import Capacitor
 import AVFoundation
 import UIKit
 
+struct QRTarget {
+    var value: String
+    var since: Date
+}
+
 @objc(QRScannerPlugin)
 public class QRScannerPlugin: CAPPlugin {
     var captureSession: AVCaptureSession?
     var previewLayer: AVCaptureVideoPreviewLayer?
+    
+    var detectionView: UIView?
+    var listenerView: UIView?
+    var lastViewed: Date?
+    var target: QRTarget?
+    
+    private func updatePreviewLayerOrientation() {
+        if let connection =  self.previewLayer?.connection  {
+            let currentDevice: UIDevice = UIDevice.current
+           let orientation: UIDeviceOrientation = currentDevice.orientation
+                              
+           if connection.isVideoOrientationSupported {
+               switch (orientation) {
+                   case .portrait: connection.videoOrientation = .portrait
+                                       
+                   case .landscapeRight: connection.videoOrientation = .landscapeLeft
+                                       
+                    case .landscapeLeft: connection.videoOrientation = .landscapeRight
+                                       
+                   case .portraitUpsideDown: connection.videoOrientation =  .portraitUpsideDown
+                                       
+                   default: connection.videoOrientation =  .portrait
+               }
+           }
+       }
+    }
     
     private func setupCaptureSession(call: CAPPluginCall) {
         DispatchQueue.main.async {
@@ -66,18 +97,20 @@ public class QRScannerPlugin: CAPPlugin {
                 return
             }
             
-            // Limit detection size to square
-            // Get video dimensions
-            let formatDescription = videoCaptureDevice.activeFormat.formatDescription
-            let dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
+            let listenerView = ListenerView()
+            self.listenerView = listenerView
+            listenerView.frame = view.bounds
+            view.addSubview(listenerView)
+            view.sendSubviewToBack(listenerView)
             
-            // Note: resoloution is in landscape, but all other logic is also in landscape
-            let resolution = CGSize(width: CGFloat(dimensions.width), height: CGFloat(dimensions.height))
-            let xscale = CGFloat(0.7)
-            let yscale = xscale * resolution.height / resolution.width
-            
-            // Note: we need to swap x and y scale because logic is in landscape
-            metadataOutput.rectOfInterest = CGRect(x: 0.5 - yscale/2, y: 0.5 - xscale/2, width: yscale, height: xscale)
+            listenerView.translatesAutoresizingMaskIntoConstraints = false
+
+            NSLayoutConstraint.activate([
+                listenerView.topAnchor.constraint(equalTo: view.topAnchor),
+                listenerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                listenerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                listenerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ])
             
             // Make sure webview is transparent
             webView.isOpaque = false
@@ -85,24 +118,75 @@ public class QRScannerPlugin: CAPPlugin {
             
             let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             self.previewLayer = previewLayer
-            previewLayer.frame = view.layer.bounds
+            previewLayer.frame = listenerView.layer.bounds
             previewLayer.videoGravity = .resizeAspect
-            view.layer.insertSublayer(previewLayer, at: 0)
+            listenerView.layer.insertSublayer(previewLayer, at: 0)
+            self.updatePreviewLayerOrientation()
+            
+            self.detectionView = UIView()
+            self.detectionView!.translatesAutoresizingMaskIntoConstraints = false
+            self.detectionView!.layer.borderWidth = 2
+            self.detectionView!.layer.borderColor = UIColor.systemRed.cgColor
+            self.detectionView!.layer.cornerRadius = 5
+            self.detectionView?.isHidden = true
+            
+            listenerView.addSubview(self.detectionView!)
             
             // Start!
             captureSession.startRunning()
-                        
-
-            // Create the camera view
-
-            // Start the scanning and setup a delegate
-
-            // Error if needed
-            // using call.reject("Must provide an id")
-
-
+            
+            listenerView.onFrameChanged = { [weak self] (bounds: CGRect) -> () in
+                self?.updatePreviewLayerOrientation()
+                self?.previewLayer?.frame = bounds
+            }
+            
             // We are done
             call.resolve()
+        }
+    }
+    
+    private func stopFlashLight() {
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video),
+              device.hasTorch else { return }
+        
+        if !device.isTorchActive {
+            return
+        }
+        
+        do {
+  
+            try device.lockForConfiguration()
+            try device.setTorchModeOn(level: 1.0)
+            device.torchMode = .off
+            device.unlockForConfiguration()
+        } catch {
+            // failed
+        }
+    }
+    
+    @objc func getTorch(_ call: CAPPluginCall) {
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video),
+              device.hasTorch else { return }
+        let status = device.isTorchActive ? true : false
+        call.resolve([
+            "status": status
+        ])
+    }
+    
+    @objc func toggleTorch(_ call: CAPPluginCall) {
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video),
+              device.hasTorch else { return }
+        do {
+            let wasActive = device.isTorchActive ? true : false
+            try device.lockForConfiguration()
+            try device.setTorchModeOn(level: 1.0)
+            device.torchMode = device.isTorchActive ? .off : .on
+            device.unlockForConfiguration()
+            call.resolve([
+                "status": !wasActive
+            ])
+        } catch {
+            call.reject("Torch not supported")
         }
     }
     
@@ -147,9 +231,19 @@ public class QRScannerPlugin: CAPPlugin {
         self.captureSession = nil
         
         DispatchQueue.main.async {
-            self.previewLayer?.removeFromSuperlayer()
+            self.listenerView?.removeFromSuperview()
+            self.listenerView = nil
             self.previewLayer = nil
+            self.detectionView = nil
+            
+            // Reset background color again
+            self.webView?.isOpaque = true
+            self.webView?.backgroundColor = UIColor.systemBackground
+            
         }
+        
+        self.stopFlashLight()
+        
         // Not yet implemented
         call.resolve()
     }
@@ -164,13 +258,90 @@ public class QRScannerPlugin: CAPPlugin {
 }
 
 extension QRScannerPlugin: AVCaptureMetadataOutputObjectsDelegate {
+    private func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
+        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
+    }
+
+    private func calculateDistanceToCenter(metadataObject: AVMetadataObject) -> CGFloat {
+        // We don't need to take the square root, because we only care about the magnitude
+        return CGPointDistanceSquared(
+            from: CGPoint(
+                x: metadataObject.bounds.midX,
+                y: metadataObject.bounds.midY
+            ),
+            to: CGPoint(x: 0.5, y: 0.5)
+        )
+    }
+    
     public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        // captureSession?.stopRunning()
+        // Choose the QR-code that is most to the center
+        var closed: AVMetadataObject?
+        var current: CGFloat?
         
-        if let metadataObject = metadataObjects.first {
+        for m in metadataObjects {
+            let distance = calculateDistanceToCenter(metadataObject: m)
+            
+            guard let currentDistance = current else {
+                closed = m
+                current = distance
+                continue
+            }
+            
+            if distance < currentDistance {
+                closed = m
+                current = distance
+            }
+        }
+        
+        if let metadataObject = closed {
+            // We need to use height, since that represents the width in portrait mode
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
-            self.notifyListeners("scannedQRCode", data: [ "value": stringValue ])
+            
+            if let previewLayer = self.previewLayer, let detectionView = self.detectionView {
+                if detectionView.isHidden || lastViewed == nil || lastViewed!.timeIntervalSinceNow < -0.2 {
+                    detectionView.isHidden = false
+                    detectionView.alpha = 1
+                    detectionView.frame = previewLayer.layerRectConverted(fromMetadataOutputRect: metadataObject.bounds)
+                } else {
+                    UIView.animate(withDuration: 0.2) {
+                        detectionView.frame = previewLayer.layerRectConverted(fromMetadataOutputRect: metadataObject.bounds)
+                        detectionView.alpha = 1
+                    }
+                }
+            }
+            
+            
+            lastViewed = Date(timeIntervalSinceNow: 0)
+
+            if (metadataObject.bounds.height < 0.05) {
+                // Clear target if too small
+                target = nil
+                self.detectionView?.layer.borderColor = UIColor.red.cgColor
+                return
+            }
+            
+            if target != nil && target!.value == stringValue {
+                // Still same value
+            } else {
+                target = QRTarget(value: stringValue, since: Date(timeIntervalSinceNow: 0))
+            }
+            
+            self.detectionView?.layer.borderColor = UIColor.init(named: "primary")!.cgColor
+            
+            // If multiple targets: give some time to adjust
+            let timeNeeded = metadataObjects.count <= 1 ? -0.2 : -1
+            
+            if target!.since.timeIntervalSinceNow < timeNeeded {
+                self.notifyListeners("scannedQRCode", data: [ "value": stringValue ])
+            }
+        } else {
+            // Don't clear the target, because in some situations, the qr recognition will stutter and we'll never reach 200ms
+            if let detectionView = self.detectionView {
+                UIView.animate(withDuration: 0.2) {
+                    detectionView.alpha = 0
+                }
+            }
         }
     }
 

@@ -143,7 +143,7 @@ export default class MailEditor extends Vue {
     max-width: none;
     padding: 15px 15px;
     height: auto;
-    min-height: $input-height * 2;
+    min-height: calc($input-height * 2);
     line-height: normal;
     outline: none;
 }
@@ -151,9 +151,15 @@ export default class MailEditor extends Vue {
 .editor .editor-container {
     padding: 0;
     height: auto;
-    min-height: $input-height * 2;
+    min-height: calc($input-height * 2);
     line-height: normal;
     outline: none;
+
+    user-select: auto;
+    user-select: contain;
+    -webkit-user-select: text;
+    -webkit-user-select: auto;
+    -webkit-touch-callout: default;
 
     > footer {
         padding: 0 15px 15px 15px;
@@ -162,7 +168,7 @@ export default class MailEditor extends Vue {
         > div.disabled {
             user-select: none;
             cursor: not-allowed;
-            color: $color-gray-dark;
+            color: $color-gray-4;
 
             .button {
                 pointer-events: none
@@ -228,7 +234,7 @@ export default class MailEditor extends Vue {
 
             &:hover {
                 &::after {
-                    background: $color-gray-dark;
+                    background: $color-gray-4;
                     transform: scale(1, 1);
                 }
             }
@@ -262,7 +268,7 @@ export default class MailEditor extends Vue {
         border-radius: $border-radius;
         @extend .style-description;
         @extend .style-overlay-shadow;
-        color: $color-white;
+        color: $color-background;
 
         &.is-active {
             pointer-events: initial;
@@ -286,7 +292,7 @@ export default class MailEditor extends Vue {
         border-radius: $border-radius;
         @extend .style-description;
         @extend .style-overlay-shadow;
-        color: $color-white;
+        color: $color-background;
         transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-end;
         opacity: 0;
 
@@ -331,16 +337,16 @@ export default class MailEditor extends Vue {
         }
 
         .replace-placeholder {
-            background: $color-gray-lighter;
+            background: $color-gray-3;
             padding: 3px 5px;
             font-weight: 600;
-            color: $color-gray;
+            color: $color-gray-5;
             border-radius: $border-radius;
             white-space: nowrap;
 
             &.ProseMirror-selectednode {
                 background: $color-primary;
-                color: white;
+                color: $color-primary-contrast;
             }
         }
     }

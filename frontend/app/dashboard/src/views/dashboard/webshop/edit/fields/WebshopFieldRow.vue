@@ -1,12 +1,12 @@
 <template>
-    <STListItem :selectable="true" class="right-stack no-margin" @click="editField()">
+    <STListItem :selectable="true" class="right-stack" @click="editField()">
         <h2 class="style-title-list">
             {{ field.name || 'Naamloos' }}
         </h2>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <button type="button" class="button icon arrow-up gray" @click.stop="moveUp" />
+            <button type="button" class="button icon arrow-down gray" @click.stop="moveDown" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>

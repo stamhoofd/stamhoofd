@@ -1,146 +1,131 @@
 <template>
-    <div class="st-view choice-choice-edit-view">
-        <STNavigationBar :title="title">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
-
-        <main>
-            <h1>
-                {{ title }}
-            </h1>
+    <SaveView :loading="false" :title="title" :disabled="!hasChanges" @save="save">
+        <h1>
+            {{ title }}
+        </h1>
         
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Naam van deze keuze"
-                    autocomplete=""
-                >
-            </STInputBox>
+        <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+            <input
+                ref="firstInput"
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="Naam van deze keuze"
+                autocomplete=""
+            >
+        </STInputBox>
     
-            <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
-                <textarea
-                    v-model="description"
-                    class="input"
-                    type="text"
-                    placeholder="Optioneel"
-                    autocomplete=""
-                />
-            </STInputBox>
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Optioneel"
+                autocomplete=""
+            />
+        </STInputBox>
 
-            <hr>
-            <h2>Waarschuwing</h2>
-            <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen.</p>
+        <hr>
+        <h2>Waarschuwing</h2>
+        <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen.</p>
 
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <Radio slot="left" v-model="warningInverted" :value="null" name="warningInverted" />
+                <h3 class="style-title-list">
+                    Geen waarschuwing
+                </h3>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <Radio slot="left" v-model="warningInverted" :value="false" name="warningInverted" />
+                <h3 class="style-title-list">
+                    Waarschuwing als aangevinkt
+                </h3>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="label">
+                <Radio slot="left" v-model="warningInverted" :value="true" name="warningInverted" />
+                <h3 class="style-title-list">
+                    Waarschuwing als niet aangevinkt
+                </h3>
+            </STListItem>
+        </STList>
+
+        <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
+            <input
+                v-model="warningText"
+                class="input"
+                type="text"
+                placeholder="bv. 'Geen toestemming om foto's te maken'"
+                autocomplete=""
+            >
+        </STInputBox>
+
+        <STInputBox v-if="warningType" class="max" title="Type">
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="warningInverted" :value="null" name="warningInverted" />
+                    <Radio slot="left" v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
                     <h3 class="style-title-list">
-                        Geen waarschuwing
+                        Informatief
                     </h3>
+                    <p class="style-description-small">
+                        Grijze achtergrond. Voor minder belangrijke zaken
+                    </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="warningInverted" :value="false" name="warningInverted" />
+                    <Radio slot="left" v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
                     <h3 class="style-title-list">
-                        Waarschuwing als aangevinkt
+                        Waarschuwing
                     </h3>
+                    <p class="style-description-small">
+                        Gele achtergrond
+                    </p>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="warningInverted" :value="true" name="warningInverted" />
+                    <Radio slot="left" v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
                     <h3 class="style-title-list">
-                        Waarschuwing als niet aangevinkt
+                        Foutmelding
                     </h3>
+                    <p class="style-description-small">
+                        Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
+                    </p>
                 </STListItem>
             </STList>
+        </STInputBox>
+        <div v-if="!isNew" class="container">
+            <hr>
+            <h2>
+                Keuzemogelijkheid verwijderen
+            </h2>
 
-            <STInputBox v-if="warningText !== null" title="Waarschuwingstekst" error-fields="label" :error-box="errorBox" class="max">
-                <input
-                    v-model="warningText"
-                    class="input"
-                    type="text"
-                    placeholder="bv. 'Geen toestemming om foto's te maken'"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <STInputBox v-if="warningType" class="max" title="Type">
-                <STList>
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Info" name="warningType" />
-                        <h3 class="style-title-list">
-                            Informatief
-                        </h3>
-                        <p class="style-description-small">
-                            Grijze achtergrond. Voor minder belangrijke zaken
-                        </p>
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Warning" name="warningType" />
-                        <h3 class="style-title-list">
-                            Waarschuwing
-                        </h3>
-                        <p class="style-description-small">
-                            Gele achtergrond
-                        </p>
-                    </STListItem>
-
-                    <STListItem :selectable="true" element-name="label">
-                        <Radio slot="left" v-model="warningType" :value="RecordWarningType.Error" name="warningType" />
-                        <h3 class="style-title-list">
-                            Foutmelding
-                        </h3>
-                        <p class="style-description-small">
-                            Voor zaken die echt heel belangrijk zijn. Probeer dit weinig te gebruiken, zet niet alles op 'foutmelding', anders valt het niet meer op.
-                        </p>
-                    </STListItem>
-                </STList>
-            </STInputBox>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <button class="button primary" @click="save">
-                    Opslaan
-                </button>
-            </template>
-        </STToolbar>
-    </div>
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,ErrorBox, Radio,Spinner,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { CenteredMessage, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { RecordChoice, RecordSettings, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
-        Spinner,
         STList,
         STListItem,
-        Radio,
-        Checkbox
+        Radio
     },
 })
 export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
@@ -200,7 +185,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         if (inverted === null) {
             this.patchChoice = this.patchChoice.patch({ 
                 warning: null
-             })
+            })
             return
         }
         if (this.warningInverted === null) {
@@ -208,13 +193,13 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
                 warning: RecordWarning.create({
                     inverted
                 })
-             })
+            })
         } else {
             this.patchChoice = this.patchChoice.patch({ 
                 warning: RecordWarning.patch({
                     inverted
                 })
-             })
+            })
         }
     }
 
@@ -226,7 +211,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         if (text === null) {
             this.patchChoice = this.patchChoice.patch({ 
                 warning: null
-             })
+            })
             return
         }
         if (this.warningText === null) {
@@ -234,13 +219,13 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
                 warning: RecordWarning.create({
                     text
                 })
-             })
+            })
         } else {
             this.patchChoice = this.patchChoice.patch({ 
                 warning: RecordWarning.patch({
                     text
                 })
-             })
+            })
         }
     }
 
@@ -252,7 +237,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         if (type === null) {
             this.patchChoice = this.patchChoice.patch({ 
                 warning: null
-             })
+            })
             return
         }
         if (this.warningType === null) {
@@ -260,13 +245,13 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
                 warning: RecordWarning.create({
                     type
                 })
-             })
+            })
         } else {
             this.patchChoice = this.patchChoice.patch({ 
                 warning: RecordWarning.patch({
                     type
                 })
-             })
+            })
         }
     }
 
@@ -314,12 +299,12 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
         this.pop()
     }
 
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchChoice, this.choice, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
+        if (!this.hasChanges) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")

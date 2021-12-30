@@ -320,8 +320,50 @@ export class Session implements RequestMiddleware {
         }
     }
 
+    /**
+     * Set the organization, including the reference
+     */
     setOrganization(organization: Organization) {
         Vue.set(this, "organization", organization)
+    }
+
+    /**
+     * Set the organization, but keep the same reference and update
+     * other references (like groups) correctly to keep the app reactive
+     */
+    updateOrganization(organization: Organization) {
+        if (!this.organization) {
+            this.organization = organization
+        } else {
+            const oldGroups = this.organization.groups
+            const oldWebshopPreviews = this.organization.webshops
+
+            this.organization.set(organization)
+
+            for (const group of oldGroups) {
+                const newGroupIndex = this.organization.groups.findIndex(g => g.id === group.id)
+                if (newGroupIndex != -1) {
+                    const newGroup = this.organization.groups[newGroupIndex]
+                    
+                    // Update old group, so we can keep the same
+                    // group reference, in instead of a new one
+                    group.set(newGroup)
+                    this.organization.groups[newGroupIndex] = group
+                }
+            }
+
+            for (const preview of oldWebshopPreviews) {
+                const newWebshopIndex = this.organization.webshops.findIndex(w => w.id === preview.id)
+                if (newWebshopIndex != -1) {
+                    const newWebshop = this.organization.webshops[newWebshopIndex]
+                    
+                    // Update old group, so we can keep the same
+                    // group reference, in instead of a new one
+                    preview.set(newWebshop)
+                    this.organization.webshops[newWebshopIndex] = preview
+                }
+            }
+        }
     }
 
     async fetchOrganization(shouldRetry = true): Promise<Organization> {
@@ -334,16 +376,11 @@ export class Session implements RequestMiddleware {
             shouldRetry
         })
 
-        if (!this.organization) {
-            this.organization = response.data.data
-        } else {
-            this.organization.set(response.data.data)
-        }
-        
+        this.updateOrganization(response.data.data)
         Keychain.addItems(response.data.keychainItems)
        
         this.callListeners("organization")
-        return this.organization
+        return this.organization!
     }
 
     /**

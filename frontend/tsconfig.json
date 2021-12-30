@@ -23,8 +23,10 @@
     },
     "include": [
         "app/**/*.ts",
+        "app/**/*.ts.map",
         "app/**/*.vue",
         "shared/**/*.ts",
+        "shared/**/*.ts.map",
         "shared/**/*.vue",
         "../*.d.ts",
         "*.d.ts"

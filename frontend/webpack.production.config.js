@@ -39,6 +39,9 @@ module.exports = merge(common, {
                     sourceMap: true,
                     output: {
                         comments: false,
+                    },
+                    compress: {
+                        pure_funcs: ["console.log"] // remove console.logs in production output
                     }
                 }
             }),

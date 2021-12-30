@@ -2,7 +2,7 @@
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Kies inschrijvingsgroepen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop" />
+            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -28,7 +28,7 @@
 
         <STToolbar>
             <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" @click="save">
+                <button class="button primary" type="button" @click="save">
                     Opslaan
                 </button>
             </LoadingButton>

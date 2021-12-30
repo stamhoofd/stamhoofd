@@ -1,35 +1,47 @@
 <template>
-    <div class="context-menu-item" :class="{ clicked: clicked }" @click="onClick">
+    <component :is="elementName" class="context-menu-item" type="button" :class="{ isOpen: isOpen, hover: isHovered }" @click.passive="onClick" @mouseover.passive="onMouseOver" @mouseleave.passive="onMouseLeave">
+        <div class="left">
+            <slot name="left" />
+        </div>
         <div class="middle">
             <slot />
         </div>
         <div class="right">
             <slot name="right" />
         </div>
-    </div>
+    </component>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component
-export default class ContextMenuItem extends Vue {
+export default class ContextMenuItem extends Mixins(NavigationMixin) {
     clicked = false;
+    isHovered = false
+
+    @Prop({ default: 'button' })
+    elementName!: string;
+
+    @Prop({ default: null })
+    childContextMenu!: ComponentWithProperties | null;
+
+    get isOpen() {
+        return (this.$parent as any).childMenu && (this.$parent as any).childMenu === this.childContextMenu
+    }
+
+    onMouseOver() {
+        (this.$parent as any).onHoverItem(this)
+    }
+
+    onMouseLeave() {
+        (this.$parent as any).onMouseLeaveItem(this)
+    }
 
     onClick(event) {
-        if (this.clicked) {
-            return;
-        }
-        // blink
-        this.clicked = true;
-        setTimeout(() => {
-            this.clicked = false;
-
-            setTimeout(() => {
-                this.$emit("click", event);
-                (this.$parent as any).pop();
-            }, 80);
-        }, 80);
+        (this.$parent as any).onClickItem(this, event)
+        
     }
 }
 </script>

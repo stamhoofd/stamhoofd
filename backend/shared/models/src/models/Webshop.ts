@@ -1,7 +1,9 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { Category, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
+import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+import { validateDNSRecords } from "../helpers/DNSValidator";
+const { Resolver } = require('dns').promises;
 
 import { Organization } from './Organization';
 
@@ -31,9 +33,14 @@ export class Webshop extends Model {
     domainUri: string | null = null;
 
     // Unique representation of this webshop from a string, that is used to provide the default domains
-    // in org.stamhoofd.shop/name-of-webshop
+    // in shop.stamhoofd.be/uri, and stamhoofd.be/shop/uri
     @column({ type: "string" })
     uri: string;
+
+    // Old uri format, which was only unique on a per-organization basis
+    // in org.stamhoofd.shop/legacyUri
+    @column({ type: "string", nullable: true })
+    legacyUri: string | null = null;
 
     /**
      * Public meta data
@@ -91,9 +98,9 @@ export class Webshop extends Model {
     static organization = new ManyToOneRelation(Organization, "organization");
 
     // Methods
-    static async getByURI(organizationId: string, uri: string): Promise<Webshop | undefined> {
+    static async getByLegacyURI(organizationId: string, uri: string): Promise<Webshop | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`organizationId\` = ? AND \`uri\` = ? LIMIT 1`,
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`organizationId\` = ? AND \`legacyUri\` = ? LIMIT 1`,
             [organizationId, uri]
         );
 
@@ -106,10 +113,10 @@ export class Webshop extends Model {
     }
 
     // Methods
-    static async getByDomainOnly(host: string): Promise<Webshop | undefined> {
+    static async getByURI(uri: string): Promise<Webshop | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? LIMIT 1`,
-            [host]
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`uri\` = ? LIMIT 1`,
+            [uri]
         );
 
         if (rows.length == 0) {
@@ -121,10 +128,21 @@ export class Webshop extends Model {
     }
 
     // Methods
+    static async getByDomainOnly(host: string): Promise<Webshop[]> {
+        const [rows] = await Database.select(
+            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? LIMIT 200`,
+            [host]
+        );
+
+        // Read member + address from first row
+        return this.fromRows(rows, this.table);
+    }
+
+    // Methods
     static async getByDomain(host: string, uri: string | null): Promise<Webshop | undefined> {
         if (uri === null || uri.length == 0) {
             const [rows] = await Database.select(
-                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND \`domainUri\` is null LIMIT 1`,
+                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND (\`domainUri\` is null OR \`domainUri\` = "") LIMIT 1`,
                 [host]
             );
 
@@ -157,12 +175,34 @@ export class Webshop extends Model {
             return this.domain
         }
 
-        if (this.uri.length > 0) {
-            return this.organization.uri+"."+STAMHOOFD.domains.webshop+"/"+this.uri
-        }
-
-        return this.organization.uri+"."+STAMHOOFD.domains.webshop
+        const domain = STAMHOOFD.domains.webshop[this.organization.address.country] ?? STAMHOOFD.domains.webshop[""];
+        return domain+"/"+this.uri
     }
 
- 
+    async updateDNSRecords(background = false) {
+        // Check initial status
+        let isValidRecords = true
+        for (const record of this.privateMeta.dnsRecords) {
+            if (record.status != DNSRecordStatus.Valid) {
+                isValidRecords = false
+            }
+        }
+
+        let { allValid } = await validateDNSRecords(this.privateMeta.dnsRecords)
+
+        if (STAMHOOFD.environment === "development") {
+            allValid = true
+        }
+
+        if (allValid) {
+            if (!this.meta.domainActive && background) {
+                // todo: send an email
+                // + prevent ping pong emails when the dns is not workign properly
+            }
+            this.meta.domainActive = true
+        } else {
+            this.meta.domainActive = false
+        }
+        await this.save()
+    }
 }

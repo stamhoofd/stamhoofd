@@ -2,7 +2,7 @@
     <div class="st-view cart-view">
         <STNavigationBar :title="title">
             <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
-            <button slot="right" class="button icon close gray" @click="pop" />
+            <button slot="right" type="button" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
             <h1>{{ title }}</h1>
@@ -25,8 +25,8 @@
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(cart) | price }}
                         </p>
                         <div @click.stop>
-                            <button class="button icon trash gray" @click="deleteItem(cartItem)" />
-                            <StepperInput v-model="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @click.native.stop />
+                            <button class="button icon trash gray" type="button" @click="deleteItem(cartItem)" />
+                            <StepperInput v-model="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="cartItem.calculateUnitPrice(cart)" @click.native.stop />
                         </div>
                     </footer>
 
@@ -40,7 +40,7 @@
         <STToolbar v-if="cart.items.length > 0">
             <span slot="left">Totaal: {{ cart.price | price }}</span>
             <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" @click="goToCheckout">
+                <button class="button primary" type="button" @click="goToCheckout">
                     <span class="icon flag" />
                     <span>Bestellen</span>
                 </button>
@@ -93,14 +93,10 @@ export default class CartView extends Mixins(NavigationMixin){
             return
         }
 
-        if (WebshopManager.organization.meta.packages.isWebshopsTrial) {
-            new CenteredMessage("Dit is een demo", "De bestelling die je gaat plaatsen is enkel om te testen.").addCloseButton("Ik begrijp het").show()
-        }
-        
         this.loading = true
         this.errorBox = null
 
-         try {
+        try {
             await GlobalEventBus.sendEvent("checkout", this)
         } catch (e) {
             console.error(e)
@@ -137,7 +133,7 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl(WebshopManager.webshop.getUrlSuffix()+"/cart")
+        UrlHelper.setUrl("/cart")
         
         try {
             this.cart.validate(WebshopManager.webshop)

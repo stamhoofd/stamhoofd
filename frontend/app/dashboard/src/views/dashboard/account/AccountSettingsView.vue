@@ -1,51 +1,38 @@
 <template>
-    <div id="account-view" class="st-view background">
-        <STNavigationBar title="Mijn account">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
-
-        <main>
-            <h1>
-                Mijn account
-            </h1>
+    <SaveView id="account-view" class="st-view" title="Mijn account" data-submit-last-field @save="save">
+        <h1>
+            Mijn account
+        </h1>
         
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
-                <div class="input-group">
-                    <div>
-                        <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                    </div>
-                    <div>
-                        <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                    </div>
+        <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+            <div class="input-group">
+                <div>
+                    <input v-model="firstName" enterkeyhint="next" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                 </div>
-            </STInputBox>
+                <div>
+                    <input v-model="lastName" enterkeyhint="next" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                </div>
+            </div>
+        </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+        <EmailInput v-model="email" enterkeyhint="go" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
 
-            <button class="button text" @click="openChangePassword">
-                Wachtwoord wijzigen
-            </button>
-        </main>
+        <hr>
 
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <button class="button text" type="button" @click="openChangePassword">
+            <span class="icon key" />
+            <span>Wachtwoord wijzigen</span>
+        </button>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ChangePasswordView,Checkbox, ConfirmEmailView, DateSelection, EmailInput, ErrorBox, LoadingButton, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, ChangePasswordView,Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, SaveView, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
 import { LoginHelper,SessionManager } from '@stamhoofd/networking';
 import { UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPatch, User, Version } from "@stamhoofd/structures"
@@ -60,8 +47,7 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        DateSelection,
-        RadioGroup,
+        SaveView,
         BackButton,
         LoadingButton,
         EmailInput
@@ -141,10 +127,9 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
             const result = await LoginHelper.patchUser(SessionManager.currentSession!, this.userPatch)
 
             if (result.verificationToken) {
-                this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken }).setDisplayStyle("sheet"))
+                this.present(new ComponentWithProperties(ConfirmEmailView, { session: SessionManager.currentSession!, token: result.verificationToken, email: SessionManager.currentSession!.user?.email ?? ""}).setDisplayStyle("sheet"))
             } else {
                 const toast = new Toast('De wijzigingen zijn opgeslagen', "success green")
-                toast.withOffset = true
                 toast.show()
             }
 
@@ -155,6 +140,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         }
 
         this.saving = false
+
+        if (this.canPop) {
+            this.pop({ force: true })
+        }
     }
 
     async shouldNavigateAway() {

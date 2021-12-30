@@ -36,10 +36,10 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
-                        <input v-model="password" name="new-password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="password" name="new-password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
                     </STInputBox>
                     <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                        <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password">
+                        <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
                     </STInputBox>
                 </div>
 
@@ -70,7 +70,7 @@
             </template>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click.prevent="goNext">
+                    <button class="button primary" type="button" @click.prevent="goNext">
                         Account aanmaken
                     </button>
                 </LoadingButton>
@@ -210,7 +210,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 component.hide()
 
                 const session = new Session(this.organization.id)
-                this.show(new ComponentWithProperties(ConfirmEmailView, { token, session }))
+                this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
                 
             } catch (e) {
                 this.loading = false;

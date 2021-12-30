@@ -2,7 +2,9 @@
 @use '../base/text-styles' as *;
 
 .st-menu {
-    --st-horizontal-padding: 30px;
+    @media (min-width: 801px) {
+        --st-horizontal-padding: 30px;
+    }
 
     #organization-switcher {
         margin-bottom: 15px;
@@ -42,13 +44,13 @@
     > .padding-group {
     }
 
-    hr {
-        height: $border-width;
-        border-radius: $border-width/2;
-        background: $color-gray-light;
+    > main > hr, > main > .container > hr {
+        height: $border-width-thin;
+        border-radius: $border-width-thin/2;
+        background: $color-gray-2;
         border: 0;
         outline: 0;
-        margin: 20px 0;
+        margin: 15px 0;
     }
 
     .menu-button {
@@ -88,6 +90,15 @@
             white-space: nowrap;
         }
 
+        .count {
+            margin-left: auto;
+            flex-shrink: 0;
+            opacity: 0.7;
+            font-size: 13px;
+            font-weight: $font-weight-semibold;
+            padding-left: 5px;
+        }
+
         .bubble {
             @extend .style-bubble;
             
@@ -98,24 +109,28 @@
         .right-icon {
             margin-left: auto;
             flex-shrink: 0;
+            padding-right: 0
         }
 
         &.heading {
             @extend .style-button-small;
-            color: $color-gray-dark;
+            color: $color-gray-4;
         }
 
-        &.selected {
+        &.cta {
+            color: $color-primary;
+        }
+
+        .split-view-controller[data-has-detail="true"] &.selected  {
             background-color: $color-primary-light;
             color: $color-primary;
-            font-weight: 600;
         }
 
         &.button {
             cursor: pointer;
 
-            &:active {
-                background-color: $color-gray-lighter;
+            &:active, &.active {
+                background-color: $color-gray-3;
             }
         }
 

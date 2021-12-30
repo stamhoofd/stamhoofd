@@ -2,7 +2,8 @@
   "shared": {
     "login": "Login",
     "emails": {
-      "general": "hello@stamhoofd.be"
+      "general": "hello@stamhoofd.be",
+      "personal": "simon@stamhoofd.be"
     },
     "inputs": {
       "iban": {

@@ -3,14 +3,9 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItemHelper } from '@stamhoofd/crypto';
 import { Email, EmailInterfaceBase } from '@stamhoofd/email';
-import { EmailVerificationCode, STCredit, UsedRegisterCode } from '@stamhoofd/models';
-import { KeychainItem } from '@stamhoofd/models';
-import { Organization } from "@stamhoofd/models";
-import { RegisterCode } from '@stamhoofd/models';
-import { User } from "@stamhoofd/models";
-import { CreateOrganization, CreditItem, PermissionLevel,Permissions, SignupResponse } from "@stamhoofd/structures";
+import { EmailVerificationCode, KeychainItem, Organization, RegisterCode, STCredit, UsedRegisterCode, User } from '@stamhoofd/models';
+import { CreateOrganization, PermissionLevel, Permissions, SignupResponse } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -54,6 +49,15 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         const uri = Formatter.slug(request.body.organization.name);
+
+        if (uri.length > 100) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Field is too long",
+                human: "De naam van de vereniging is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
+                field: "organization.name"
+            })
+        }
         const alreadyExists = await Organization.getByURI(uri);
 
         if (alreadyExists) {
@@ -154,6 +158,12 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.meta = request.body.organization.meta
         organization.address = request.body.organization.address
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? []
+
+        // call CompleteRegistration
+        // content_name, currency, status, value
+        // InitiateCheckout
+        // Purchase
+        // StartTrial
 
         try {
             await organization.save();

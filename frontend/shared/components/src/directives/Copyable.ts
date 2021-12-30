@@ -11,6 +11,7 @@ const helper = {
 
         event.target.contentEditable = false;
 
+
         const w = window as any;
         if (w.getSelection) {
             if (w.getSelection().empty) {  // Chrome
@@ -19,16 +20,18 @@ const helper = {
                 w.getSelection().removeAllRanges();
             }
         }
-        this.copiedPopup(event, vnode)
+        this.copiedPopup(event, vnode);
+
+        (document.activeElement as HTMLElement)?.blur()
     },
     
     copiedPopup(event, vnode) {
-        const el = event.target
+        const el = event.currentTarget || event.target
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "Gekopieerd",
-            icon: "success green",
+            text: "Gekopieerd naar klembord",
+            icon: "",
             x: rect.left,
             y: rect.top + el.offsetHeight + 5
         });
@@ -38,24 +41,39 @@ const helper = {
             displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
         }, 1000);
 
-        if (el.tooltipComponent) {
+        if (el.$tooltipDisplayedComponent) {
             try {
-                el.tooltipComponent.vnode.componentInstance?.$parent.$emit("pop");
+                el.$tooltipDisplayedComponent.vnode.componentInstance?.$parent.$emit("pop");
+                el.$tooltipDisplayedComponent = null;
             } catch (e) {
                 // ignore
             }
         }
+        el.$tooltipDisplayedComponent = displayedComponent;
+
+
+        // Add style
+        el.classList.add("copied");
+        setTimeout(() => {
+            el.classList.remove("copied");
+        }, 500);
     },
 
     copyElement(event, bindingValue: any, vnode: any) {
+        if (window.getSelection() !== null && window.getSelection()!.toString().length > 0) {
+            return
+        }
         if (navigator.clipboard) {
-            const myText = bindingValue ?? event.target.textContent;
+            // Select all
+            const myText = bindingValue ?? event.currentTarget.textContent.trim();
             navigator.clipboard.writeText(myText).then(() => {
                 this.copiedPopup(event, vnode);
-            }).catch(() => {
+            }).catch((e) => {
+                console.error(e);
                 this.copyElementFallback(event, vnode);
             });
         } else {
+            console.warn("No navigator.clipboard support");
             this.copyElementFallback(event, vnode);
         }        
     },

@@ -14,7 +14,11 @@
     box-shadow: 0px 2px 3px $color-box-shadow;
 }
 .style-overlay-shadow {
-    box-shadow: 0px 5px 50px 3px $color-overlay-shadow;
+    box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+
+    @media (prefers-color-scheme: dark) {
+        box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+    }
 }
 
 .style-nowrap {
@@ -24,9 +28,9 @@
 }
 
 .style-hr {
-    height: $border-width;
+    height: $border-width-thin;
     background: $color-border;
-    border-radius: $border-width/2;
+    border-radius: $border-width-thin/2;
     padding: 0;
     margin: 20px 0;
     outline: none;
@@ -34,8 +38,8 @@
 }
 
 .style-huge-title-1 {
-    font-size: 38px;
-    font-weight: 600;
+    font-size: 34px;
+    font-weight: $font-weight-semibold;
     line-height: 1.3;
 
     @media (max-width: 500px) {
@@ -49,27 +53,62 @@
 
 .style-title-1 {
     font-size: 28px;
-    font-weight: 600;
-    line-height: 1.3;
+    font-weight: $font-weight-semibold;
+    line-height: 1.4;
 
-    @media (max-width: 400px) {
+    @media (max-width: 350px) {
         font-size: 24px;
     }
 }
 
+// Use this style only for shorter titles
+.style-navigation-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 32px;
+    font-weight: $font-weight-semibold;
+    line-height: 1.4;
+
+    @media (max-width: 350px) {
+        font-size: 28px;
+    }
+
+    padding-bottom: 10px;
+
+    &.with-icons {
+        display: flex;
+        align-items: center;
+
+        > *:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        > *:not(:first-child) {
+            flex-shrink: 0;
+        }
+    }
+}
+
+
 .style-title-2 {
-    font-size: 19px;
-    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: $font-weight-semibold;
 }
 
 .style-title-3 {
     font-size: 17px;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
 }
 
 .style-title-small {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
 
     @media (max-width: 400px) {
         font-size: 14px;
@@ -78,26 +117,45 @@
 
 .style-title-list {
     font-size: 16px;
+    line-height: 1.3;
+    font-weight: $font-weight-medium;
+
+    @media (max-width: 400px) {
+        font-size: 15px;
+    }
 
     + p {
-       padding-top: 4px; 
+       padding-top: 3px; 
     }
 }
 
 .style-text-large {
     font-size: 20px;
-    font-weight: 500;
+    font-weight: $font-weight-default;
     line-height: 1.4;
 }
 
 .style-tag {
     font-size: 11px;
     text-transform: uppercase;
-    font-weight: bold;
+    font-weight: $font-weight-bold;
     color: $color-primary;
+
+    @media (prefers-color-scheme: dark) {
+        color: $color-primary-dark;
+    }
+
     background: $color-primary-background;
-    padding: 5px 7px;
+    padding: 7px 8px;
     border-radius: $border-radius;
+    line-height: 1;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    max-width: 100%; // needed for inline-block to work with text-overflow
+    box-sizing: border-box;
 
     &.large {
         font-size: 13px;
@@ -119,6 +177,17 @@
         background: $color-success-background;
     }
 
+
+    &.secundary {
+        color: $color-secundary-dark;
+        background: $color-secundary-background;
+    }
+
+    &.tertiary {
+        color: $color-tertiary-dark;
+        background: $color-tertiary-background;
+    }
+
     &.inline {
         // need to evaluate the usage of this class
         display: inline-block;
@@ -127,19 +196,15 @@
 
 .style-normal {
     font-size: 15px;
-    line-height: 1.4;
-    font-weight: 500;
+    line-height: 1.5;
+    font-weight: $font-weight-default;
     color: $color-dark;
-
-    @media (max-width: 400px) {
-        font-size: 14px;
-    }
 }
 
 .style-definition-label {
     font-size: 12px;
-    line-height: 1.4;
-    font-weight: 600;
+    line-height: 1.5;
+    font-weight: $font-weight-semibold;
     color: $color-primary;
     text-transform: uppercase;
     padding-bottom: 3px;
@@ -147,16 +212,17 @@
 
 .style-definition-text {
     font-size: 18px;
-    line-height: 1.4;
-    font-weight: 500;
+    line-height: 1.5;
+    font-weight: $font-weight-default;
     color: $color-dark;
 }
 
 .style-description {
-    font-size: 14px;
-    line-height: 1.4;
-    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: $font-weight-default;
     color: $color-gray-text;
+    font-variation-settings: 'opsz' 19;
 
     @media (max-width: 400px) {
         font-size: 14px;
@@ -165,6 +231,14 @@
 
 .pre-wrap {
     white-space: pre-wrap;
+}
+
+.style-limit-lines {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .style-description-block {
@@ -179,107 +253,120 @@
 .style-description-small {
     font-size: 14px;
     line-height: 1.4;
-    font-weight: 500;
+    font-weight: $font-weight-default;
     color: $color-gray-text;
+    font-variation-settings: 'opsz' 19;
 
     @media (max-width: 400px) {
-        font-size: 12px;
+        font-size: 14px;
     }
 }
 
 .style-price-big {
     font-size: 20px;
     line-height: 1.4;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
     color: $color-primary;
 }
 
 .style-interactive-small {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
     color: $color-gray-text;
 
     @media (max-width: 400px) {
-        font-size: 12px;
+        font-size: 13px;
     }
 }
 
 .style-input {
     font-size: 15px;
-    font-weight: 500;
+    font-weight: $font-weight-default;
     line-height: 1.2;
-}
-
-
-.style-button {
-    font-size: 17px;
-    font-weight: 600;
 
     @media (max-width: 400px) {
+        // Fix zoom on mobile devices
         font-size: 16px;
     }
 }
 
+
+.style-button {
+    font-size: 16px;
+    font-weight: $font-weight-semibold;
+}
+
 .style-button-small {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
 
     @media (max-width: 450px) {
-        font-size: 14px;
+        font-size: 16px;
     }
 }
 
 .style-button-smaller {
     @extend .style-button-small;
-    font-weight: 500;
+    font-weight: $font-weight-medium;
+
+    @media (max-width: 450px) {
+        font-size: 15px;
+    }
 }
 
 .style-label {
-    @extend .style-title-small;
+    font-size: 14px;
+    font-weight: $font-weight-semibold;
     display: block;
-    margin-top: 20px;
 }
 
 .style-table-head {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
 }
 
 .style-placeholder {
     font-size: 15px;
-    font-weight: 500;
-    color: $color-gray;
-}
-
-.style-caption {
-    font-size: 14px;
-    font-weight: 600;
-    color: $color-gray;
-    text-transform: uppercase;
-
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    font-weight: $font-weight-default;
+    color: $color-gray-5;
 }
 
 .style-description-small {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: $font-weight-default;
     line-height: 1.5;
 }
+
 .style-context-menu-item {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: $font-weight-semibold;
+
+    @media (max-width: 450px) {
+        font-size: 15px;
+        font-weight: $font-weight-default;
+    }
 }
 
 .style-definition-term {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: $font-weight-default;
     line-height: 1.5;
+    color: $color-gray-text;
+
+    @media (max-width: 550px) {
+        font-size: 13px;
+    }
 }
+
 .style-definition-description {
     @extend .style-description-small;
-    color: $color-gray;
+    color: $color-dark;
+
+    font-size: 16px;
+
+    @media (max-width: 550px) {
+        font-size: 15px;
+    }
 }
 
 .style-with-button {
@@ -292,9 +379,22 @@
 
     &> *:last-child {
         flex-shrink: 0;
+        margin-top: -13px;
 
-        > .button.text {
-            margin: -5px 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        > * {
+            margin: 0 10px;
+
+            &.button.text {
+                margin: -5px 10px;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
         }
     }
 }
@@ -306,8 +406,9 @@
 
 .details-grid {
     display: grid;
-    grid-template-columns: 40% 1fr;
-    gap: 8px 15px;
+    grid-template-columns: auto 1fr;
+    gap: 8px 25px;
+
 
     &.small {
         grid-template-columns: 150px 1fr;
@@ -315,31 +416,98 @@
 
     dt {
         @extend .style-definition-term;
+        cursor: default;
     }
 
     dd {
         @extend .style-definition-description;
+        
+        -webkit-touch-callout: default;
+        
+        // user-select contain is not supported in safari
+        -webkit-user-select: text;
+        user-select: text;
+        user-select: contain;
+        position: relative;
+        z-index: 1;
+        cursor: default;
+
+        transition: color 0.2s;
     }
 
+    dd:before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -10px;
+        right: -10px;
+        bottom: -8px;
+        border-radius: $border-radius;
+        background: $color-primary-background;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+
+    @media (hover: hover) {
+        dd:after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -10px;
+            right: -10px;
+            bottom: -8px;
+            border-radius: $border-radius;
+            background: $color-background-shade;
+            z-index: -2;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        &.hover {
+            dt:hover + dd, dd:hover{
+                &:not(.icons):after {
+                    opacity: 1;
+                }
+            }
+
+            dd.icons + dd {
+                &:before {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    dd.copied {
+        color: $color-primary;
+
+        &:before {
+            opacity: 1;
+        }
+    }
+    
     .center {
         align-self: center;
     }
 
     .icons {
         line-height: 1;
+        margin-left: auto;
     }
 
     dd.description {
         grid-column: 1 / span 2;
         margin-top: -5px;
-        @extend .style-description-small;
+        font-size: 15px;
     }
 }
 
 .main-text-container {
     &, .container {
-        > h1:first-child {
-            padding-bottom: 20px;
+        > h1:not([class]):first-child {
+            padding-bottom: 10px;
             @extend .style-title-1;
 
             + p:not([class]), + p.style-description {
@@ -349,18 +517,18 @@
         
         > h2 {
             @extend .style-title-2;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
         }
 
         > h2.style-with-button {
             > *:first-child {
-                padding-bottom: 20px;
+                padding-bottom: 15px;
             }
             padding-bottom: 0;
         }
 
         .segmented-control + h2 {
-            padding-top: 20px;
+            padding-top: 15px;
         }
 
         > h2 + p {
@@ -379,22 +547,28 @@
             @extend .style-hr;
             margin: 30px 0;
             margin: 30px calc(-1 * var(--st-horizontal-padding, 40px));
+
+            @media (max-width: 550px) {
+                margin: 20px 0;
+            }
         }
     }
 }
 
 .style-illustration-img {
-    width: 50px;
-    height: 50px;
+    width: 35px;
+    height: 35px;
+    margin-right: 5px;
 
     @media (max-width: 400px) {
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
+        margin-right: 0px;
     }
 
     @media (max-width: 350px) {
-        width: 30px;
-        height: 30px;
+        width: 25px;
+        height: 25px;
     }
 }
 
@@ -402,18 +576,39 @@
     background: $color-error;
     border-radius: 30px;
     font-size: 13px;
-    color: $color-white;
+    color: $color-background;
     display: inline-block;
     text-align: center;
     padding: 0 4px;
     height: 21px;
     min-width: 21px;
     box-sizing: border-box;
-    font-weight: bold;
+    font-weight: $font-weight-bold;
     line-height: 21px;
     vertical-align: text-bottom;
+
+    &.warn {
+        color: $color-warning;
+    }
+
+    &.error {
+        color: $color-error;
+    }
+
+    &.success {
+        color: $color-success;
+    }
+
+
+    &.secundary {
+        color: $color-secundary;
+    }
+
+    &.tertiary {
+        color: $color-tertiary;
+    }
 }
 
 .style-strong {
-    font-weight: 600;
+    font-weight: $font-weight-semibold;
 }

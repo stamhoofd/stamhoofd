@@ -13,7 +13,6 @@ import { STCredit } from "./STCredit";
 import { Email } from "@stamhoofd/email";
 import { UsedRegisterCode } from "./UsedRegisterCode";
 
-
 export class STInvoice extends Model {
     static table = "stamhoofd_invoices";
 

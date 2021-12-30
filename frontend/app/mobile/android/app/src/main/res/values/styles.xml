@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- This theme is not used... -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -12,7 +12,16 @@
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:background">@null</item>
+        <item name="android:background">@color/navigationBarColor</item>
+
+        <item name="android:windowBackground">@color/navigationBarColor</item>
+
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/statusBar</item>
+
+        <item name="android:statusBarColor">@color/statusBar</item>
+        <item name="android:navigationBarColor">@color/navigationBarColor</item>
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
 

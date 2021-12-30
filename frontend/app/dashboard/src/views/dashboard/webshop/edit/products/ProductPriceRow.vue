@@ -1,13 +1,13 @@
 <template>
-    <STListItem :selectable="true" class="right-description right-stack no-margin" @click="editPrice()">
+    <STListItem :selectable="true" class="right-description right-stack" @click="editPrice()">
         {{ productPrice.name || 'Naamloos' }}
         <template slot="right">
             <template v-if="productPrice.discountPrice">
                 {{ productPrice.discountPrice | price }} /
             </template>
             {{ productPrice.price | price }}
-            <button class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" @click.stop="moveDown" />
+            <button type="button" class="button icon arrow-up gray" @click.stop="moveUp" />
+            <button type="button" class="button icon arrow-down gray" @click.stop="moveDown" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>

@@ -1,9 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
-
 import { Member } from "@stamhoofd/models";
 import { Token } from '@stamhoofd/models';
+import { EncryptedMemberWithRegistrations } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -58,6 +57,6 @@ export class GetOrganizationKeyRequestsEndpoint extends Endpoint<Params, Query, 
             })
         }
 
-        return new Response(members.map(m => m.getStructureWithRegistrations()));
+        return new Response(members.map(m => m.getStructureWithRegistrations(true)));
     }
 }

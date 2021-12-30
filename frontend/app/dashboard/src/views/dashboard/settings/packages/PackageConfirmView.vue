@@ -278,7 +278,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                     includePending: true,
                     proForma: true,
                     organizationPatch: this.organizationPatch.encode({ version: Version }),
-                    userPatch: this.userPatch.encode({ version: Version })
+                    userPatch: this.userPatch.encode({ version: Version }),
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
             })
@@ -458,7 +458,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                     includePending: true,
                     paymentMethod: this.selectedPaymentMethod,
                     organizationPatch: this.organizationPatch.encode({ version: Version }),
-                    userPatch: this.userPatch.encode({ version: Version })
+                    userPatch: this.userPatch.encode({ version: Version }),
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
             })

@@ -11,16 +11,17 @@
 <style lang="scss">
 @use '~@stamhoofd/scss/base/variables' as *;
 
-.spinner-container  > div.spinner {
-    display: inline-block;
+.spinner-container > div.spinner {
+    display: block;
     animation: spinner-spin 2s linear infinite;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     overflow: hidden;
 
+
     > svg {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         display: block;
         animation: spinner-spin 2s infinite;
         overflow: hidden;
@@ -34,13 +35,24 @@
 }
 
 .spinner-container {
+    width: 24px;
+    height: 24px;
+
+    &.inline {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
     &.center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        text-align: center;
+        height: auto;
     }
     &.gray {
         div.spinner > svg > circle {
-            stroke: $color-gray;
+            stroke: $color-gray-1;
         }
     }
 }

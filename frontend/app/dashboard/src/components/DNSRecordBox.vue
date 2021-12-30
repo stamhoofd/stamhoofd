@@ -92,7 +92,7 @@ export default class DNSRecordBox extends Mixins(NavigationMixin) {
     padding: 20px 20px;
     margin: 15px 0;
     border-radius: $border-radius;
-    background: $color-white-shade;
+    background: $color-background-shade;
 
     &.success {
         background: $color-success-background;

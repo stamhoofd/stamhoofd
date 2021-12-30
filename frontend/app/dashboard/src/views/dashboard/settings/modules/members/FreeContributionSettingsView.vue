@@ -1,77 +1,66 @@
 <template>
-    <div id="free-contribution-settings-view" class="st-view background">
-        <STNavigationBar title="Vrije bijdrage">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+    <SaveView :loading="saving" title="Vrije bijdrage" :disabled="!hasChanges" @save="save">
+        <h1>
+            Vrije bijdrage
+        </h1>
 
-        <main>
-            <h1>
-                Vrije bijdrage
-            </h1>
+        <p>
+            Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. Een lid kan dan kiezen uit 0 euro, enkele voorgestelde bedragen of een eigen gekozen bedrag. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/vrije-bijdrage'" target="_blank">Meer info</a>.
+        </p>
 
-            <p>
-                Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. We tonen dan drie opties waaruit ze kunnen kiezen, waarbij ze ook altijd zelf een bedrag kunnen ingeven. Je kan hieronder de drie standaard bedragen aanpassen. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/vrije-bijdrage'" target="_blank">Meer info</a>.
+        <Checkbox v-model="freeContribution">
+            <h3 class="style-title-list">
+                Vraag een vrije bijdrage bij het inschrijven
+            </h3>
+            <p v-if="enableFinancialSupport" class="style-description-small">
+                We slaan deze stap altijd over bij leden met financiële ondersteuning.
+            </p>
+        </Checkbox>
+
+        <div v-if="freeContribution" class="free-contribution-box">
+            <STInputBox title="Beschrijving" class="max">
+                <textarea v-model="freeContributionDescription" class="input" placeholder="Beschrijving bovenaan (bv. verduidelijking waarom je vrije bijdrage vraagt en wat je ermee gaat doen)" />
+            </STInputBox>
+
+            <STInputBox v-for="n in amountCount" :key="n" :title="'Voorgesteld bedrag '+n">
+                <PriceInput :value="getFreeContributionAmounts(n - 1)" :placeholder="'Optie '+n" @input="setFreeContributionAmounts(n - 1, $event)" />
+
+                <button slot="right" class="button icon trash gray" type="button" @click="deleteOption(n - 1)" />
+            </STInputBox>
+
+            <p v-if="amountCount == 0" class="info-box">
+                Er zijn geen voorgestelde bedragen. Een lid kan enkel zelf een bedrag ingeven.
             </p>
 
-            <Checkbox v-model="freeContribution">
-                Vraag een vrije bijdrage bij het inschrijven (optioneel)
-                <p v-if="financialProblems" class="style-description-small">
-                    We slaan deze stap altijd over bij kansarme gezinnen
-                </p>
-            </Checkbox>
+            <button class="button text" type="button" @click="addOption">
+                <span class="icon add" />
+                <span>Voorgesteld bedrag</span>
+            </button>
 
-            <div v-if="freeContribution" class="free-contribution-box">
-                <STInputBox title="Beschrijving" class="max">
-                    <textarea v-model="freeContributionDescription" class="input" placeholder="Beschrijving bovenaan (bv. verduidelijking waarom je vrije bijdrage vraagt en wat je ermee gaat doen)" />
-                </STInputBox>
-
-                <STInputBox title="Standaard opties">
-                    <PriceInput :value="getFreeContributionAmounts(0)" placeholder="Optie 1" @input="setFreeContributionAmounts(0, $event)" />
-                    <PriceInput :value="getFreeContributionAmounts(1)" placeholder="Optie 2" @input="setFreeContributionAmounts(1, $event)" />
-                    <PriceInput :value="getFreeContributionAmounts(2)" placeholder="Optie 3" @input="setFreeContributionAmounts(2, $event)" />
-                </STInputBox>
-                <p class="style-description-small">
-                    Een lid kan naast deze opties altijd 0 euro aanduiden, dat is standaard geselecteerd.
-                </p>
-            </div>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+            <p class="style-description-small">
+                Een lid kan naast deze opties altijd 0 euro aanduiden (dat is standaard geselecteerd) of zelf een bedrag ingeven.
+            </p>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, PriceInput,Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ErrorBox, PriceInput, SaveView, STErrorsDefault, STInputBox, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { FreeContributionSettings } from '@stamhoofd/structures';
-import { Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from "@stamhoofd/structures"
+import { FreeContributionSettings, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, Version } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../../../classes/OrganizationManager";
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STInputBox,
         STErrorsDefault,
         Checkbox,
-        RadioGroup,
-        Radio,
-        BackButton,
-        LoadingButton,
         PriceInput
     },
 })
@@ -85,6 +74,10 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get enableFinancialSupport() {
+        return this.organization.meta.recordsConfiguration.financialSupport !== null
     }
 
     get freeContribution() {
@@ -115,12 +108,16 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
         }
     }
 
+    get amountCount() {
+        return this.organization.meta.recordsConfiguration.freeContribution?.amounts?.length ?? 0
+    }
+
     getFreeContributionAmounts(index: number ) {
         return this.organization.meta.recordsConfiguration.freeContribution?.amounts[index] ?? 0
     }
 
     setFreeContributionAmounts(index: number, amount: number) {
-        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice(0, 3)
+        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice()
         amounts[index] = amount
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
@@ -133,6 +130,39 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
             })
         })
     }
+
+    deleteOption(index: number) {
+        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice()
+        amounts.splice(index, 1)
+        this.organizationPatch = this.organizationPatch.patch({
+            meta: OrganizationMetaData.patch({
+                recordsConfiguration: OrganizationRecordsConfiguration.patch({
+                    freeContribution: FreeContributionSettings.create({
+                        description: this.freeContributionDescription,
+                        amounts
+                    })
+                })
+            })
+        })
+    }
+
+
+    addOption() {
+        const last = this.organization.meta.recordsConfiguration.freeContribution?.amounts?.slice(-1)[0] ?? 0
+        const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice()
+        amounts.push(last + 10*100)
+        this.organizationPatch = this.organizationPatch.patch({
+            meta: OrganizationMetaData.patch({
+                recordsConfiguration: OrganizationRecordsConfiguration.patch({
+                    freeContribution: FreeContributionSettings.create({
+                        description: this.freeContributionDescription,
+                        amounts
+                    })
+                })
+            })
+        })
+    }
+
 
     get freeContributionDescription() {
         return this.organization.meta.recordsConfiguration.freeContribution?.description ?? ""
@@ -185,8 +215,12 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
         this.saving = false
     }
 
+    get hasChanges() {
+        return patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })
+    }
+
     async shouldNavigateAway() {
-        if (!patchContainsChanges(this.organizationPatch, OrganizationManager.organization, { version: Version })) {
+        if (!this.hasChanges) {
             return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
