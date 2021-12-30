@@ -79,7 +79,6 @@
         "file-loader": "^6.2.0",
         "fork-ts-checker-webpack-plugin": "^6.5.0",
         "html-webpack-plugin": "^5.5.0",
-        "iconfont-webpack-plugin": "^5.0.1",
         "jest": "^27.4.5",
         "jest-extended": "^1.2.0",
         "mini-css-extract-plugin": "^2.4.5",

@@ -1,15 +1,13 @@
-import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../filters/ChoicesFilter"
 import { NumberFilterDefinition } from "../filters/NumberFilter"
 import { PropertyFilter, PropertyFilterDecoder, SetPropertyFilterDecoder } from "../filters/PropertyFilter"
 import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from "../filters/RegistrationsFilter"
-import { OrganizationType, } from "../OrganizationType"
 import { RegisterItem } from "./checkout/RegisterItem"
 import { Gender } from "./Gender"
 import { MemberDetails } from "./MemberDetails"
 import { MemberWithRegistrations } from "./MemberWithRegistrations"
-import { LegacyRecord } from "./records/LegacyRecord"
 import { LegacyRecordType } from "./records/LegacyRecordType"
 import { RecordCategory } from "./records/RecordCategory"
 
