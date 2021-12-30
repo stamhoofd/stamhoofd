@@ -47,13 +47,13 @@
                     <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box with-button">
                         Betaald op {{ payment.paidAt | date }}
 
-                        <button class="button text" @click="markNotPaid(payment)">
+                        <button v-if="hasWrite" class="button text" type="button" @click="markNotPaid(payment)">
                             Ongedaan maken
                         </button>
                     </p>
 
-                    <LoadingButton v-else :loading="loading">
-                        <button class="button primary" @click="markPaid(payment)">
+                    <LoadingButton v-else-if="hasWrite" :loading="loading">
+                        <button class="button primary" type="button" @click="markPaid(payment)">
                             Markeer als betaald
                         </button>
                     </LoadingButton>
@@ -61,7 +61,7 @@
                 <p v-if="payments.length == 0" class="info-box">
                     Er zijn nog geen betalingen aangemaakt voor dit lid. Hiermee kan je bijhouden dat er nog een bepaald bedrag verschuldigd is voor een inschrijving.
                 </p>
-                <button v-if="hasRegistrationsWithoutPayments" class="button text" @click="addPayment">
+                <button v-if="hasRegistrationsWithoutPayments && hasWrite" class="button text" type="button" @click="addPayment">
                     <span class="icon add" />
                     <span>Afrekening aanmaken</span>
                 </button>
