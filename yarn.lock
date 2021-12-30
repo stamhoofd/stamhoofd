@@ -2397,17 +2397,18 @@
   resolved "https://registry.yarnpkg.com/@types/libsodium-wrappers/-/libsodium-wrappers-0.7.9.tgz#89c3ad2156d5143e64bce86cfeb0045a983aeccc"
   integrity sha512-LisgKLlYQk19baQwjkBZZXdJL0KbeTpdEnrAfz5hQACbklCY0gVFnsKUyjfNWF1UQsCSjw93Sj5jSbiO8RPfdw==
 
-"@types/luxon@^2.0.7":
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-2.0.7.tgz#6189930542400e2c48b4d5ed06c4f136ee38bb1a"
-  integrity sha512-AxiYycfO+/M4VIH0ribSr2iPFC+APewpJIaQSydwVnzorK3mjSFXkA3HmhQidGx44MpwaatFyEkbW/WD4zdDaQ==
+"@types/luxon@^2.0.8":
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-2.0.8.tgz#a0fdd7ab0b67e08bf1d301232a7fef79b74ded69"
+  integrity sha512-lGmxL6hMEVqXr8w9bL52RUWXVu90o7vH8WQSutQssr2e+w0TNttXx2Zfw2V2lHHHWfW6OGqB8bXDvtKocv19qQ==
 
-"@types/mailparser@^2.7.4":
-  version "2.7.4"
-  resolved "https://registry.yarnpkg.com/@types/mailparser/-/mailparser-2.7.4.tgz#7faae72f874077fbb89c075ad898e6fd8a41119e"
-  integrity sha512-JGIV4RtcjBO1jsD0RTDoXOmm1zzHr07rWPmNREBBM1oAjjfy99Ne4Y7s/akVSZoksm/JWQMcFQ42LbsufHRVfg==
+"@types/mailparser@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@types/mailparser/-/mailparser-3.4.0.tgz#89dae9d5ca68d9f450b9ed51518e89d57092fef9"
+  integrity sha512-MotFinA1sT2nPFtQw1WpaF3X6I1OdbEloaixMmk924BOYqwHmlZkoi7XcVUXHI+7i0to8JguHqYj5k/E6c9Chw==
   dependencies:
     "@types/node" "*"
+    iconv-lite "^0.6.3"
 
 "@types/mime@^1":
   version "1.3.2"
@@ -2438,10 +2439,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-15.0.3.tgz#ee09fcaac513576474c327da5818d421b98db88a"
   integrity sha512-/WbxFeBU+0F79z9RdEOXH4CsDga+ibi5M8uEYr91u3CkT/pdWcV8MCook+4wDPnZBexRdwWS+PiVZ2xJviAzcQ==
 
-"@types/node@^14.0.26":
-  version "14.14.19"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.19.tgz#5135176a8330b88ece4e9ab1fdcfc0a545b4bab4"
-  integrity sha512-4nhBPStMK04rruRVtVc6cDqhu7S9GZai0fpXgPXrFpcPX6Xul8xnrjSdGB4KPBVYG/R5+fXWdCM8qBoiULWGPQ==
+"@types/node@^16.11.17":
+  version "16.11.17"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.17.tgz#ae146499772e33fc6382e1880bc567e41a528586"
+  integrity sha512-C1vTZME8cFo8uxY2ui41xcynEotVkczIVI5AjLmy5pkpBv/FtG+jhtOlfcPysI8VRVwoOMv6NJm44LGnoMSWkw==
 
 "@types/nodemailer@^6.4.2":
   version "6.4.2"
@@ -2462,10 +2463,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/pdfkit@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@types/pdfkit/-/pdfkit-0.11.0.tgz#838ad3c62573508f4975a10bd62d3ee363db3262"
-  integrity sha512-vPFsKobO4sKviWjlSUBaBRbtNjvMdbGh6EjYoGLsSpDNFckaHm9WD7cKNFcp+qoG/+CaQs5xfc/T+aJCQXm31w==
+"@types/pdfkit@^0.12.3":
+  version "0.12.3"
+  resolved "https://registry.yarnpkg.com/@types/pdfkit/-/pdfkit-0.12.3.tgz#cc433ab2a6feedd518eed55dd9a621c8433e6268"
+  integrity sha512-c19Izds2F/eks/c/YXl0Gtov/rkcmazNVQHKmYn+b6kpqry4jwQnvZ/dFo39l83Fuxb2yRw3Ha/CzH3GaB6zWQ==
   dependencies:
     "@types/node" "*"
 
@@ -4470,10 +4471,15 @@ crypto-browserify@^3.12.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
-crypto-js@^3.1.9-1, crypto-js@^3.3.0:
+crypto-js@^3.1.9-1:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-3.3.0.tgz#846dd1cce2f68aacfa156c8578f926a609b7976b"
   integrity sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q==
+
+crypto-js@^4.0.0:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.1.1.tgz#9e485bcf03521041bd85844786b83fb7619736cf"
+  integrity sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==
 
 css-color-names@^1.0.1:
   version "1.0.1"
@@ -6744,7 +6750,7 @@ iconv-lite@0.6.2:
   dependencies:
     safer-buffer ">= 2.1.2 < 3.0.0"
 
-iconv-lite@0.6.3, iconv-lite@^0.6.2:
+iconv-lite@0.6.3, iconv-lite@^0.6.2, iconv-lite@^0.6.3:
   version "0.6.3"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.6.3.tgz#a52f80bf38da1952eb5c681790719871a1a72501"
   integrity sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==
@@ -9282,12 +9288,12 @@ pdfkit@^0.11.0:
     linebreak "^1.0.2"
     png-js "^1.0.0"
 
-pdfkit@^0.12.1:
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.12.1.tgz#0df246b46cffd3d8fb99b1ea33dc1854430a9199"
-  integrity sha512-ruNLx49hVW3ePJziKjHtWdTHN1VZHLCUCcbui/vx4lYwFLEM1d8W0L7ObYPbN8EifK7s281ZMugCLgSbk+KRhg==
+pdfkit@^0.13.0:
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.13.0.tgz#da4c2becd63a129e3aae448fdaed4ee7be790f8f"
+  integrity sha512-AW79eHU5eLd2vgRDS9z3bSoi0FA+gYm+100LLosrQQMLUzOBGVOhG7ABcMFpJu7Bpg+MT74XYHi4k9EuU/9EZw==
   dependencies:
-    crypto-js "^3.3.0"
+    crypto-js "^4.0.0"
     fontkit "^1.8.1"
     linebreak "^1.0.2"
     png-js "^1.0.0"
