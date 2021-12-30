@@ -1,8 +1,8 @@
 <template>
-    <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Maak jouw account">
+    <form class="st-view" @submit.prevent="goNext">
+        <STNavigationBar title="Functies uitproberen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -18,10 +18,10 @@
 
         <STToolbar>
             <template #left>
-                Je kan later deze functies wijzigingen bij je instellingen
+                Je kan later deze functies wijzigingen via het instellingen menu.
             </template>
             <template #right>
-                <button class="button primary" @click="goNext">
+                <button class="button primary" type="submit">
                     Aan de slag
                 </button>
             </template>

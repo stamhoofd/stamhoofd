@@ -40,28 +40,6 @@
                 </div>
             </label>
         </div>
-
-        <h3>Verwacht in de loop van 2022</h3>
-
-        <div class="module-box">
-            <label class="box disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg"></div>
-                <div>
-                    <h2 class="style-title-list">Bouw zelf je website</h2>
-                    <p class="style-description">Maak een unieke website die je zelf kan aanpassen. Geen technische kennis vereist</p>
-                </div>
-                <div />
-            </label>
-
-            <label class="box disabled">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg"></div>
-                <div>
-                    <h2 class="style-title-list">Verhuur materiaal en lokalen</h2>
-                    <p class="style-description">Online reservaties, automatische contracten en kalenders</p>
-                </div>
-                <div />
-            </label>
-        </div>
     </div>
 </template>
 
