@@ -1,5 +1,5 @@
 <template>
-    <form class="login-view st-view auto" @submit.prevent="submit">
+    <form class="login-view st-view auto" autocomplete="off" data-submit-last-field @submit.prevent="submit">
         <STNavigationBar title="Inloggen">
             <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
         </STNavigationBar>
@@ -13,7 +13,7 @@
             </p>
 
             <STInputBox title="Wachtwoord" class="max">
-                <button slot="right" class="button text" type="button" @click="gotoPasswordForgot">
+                <button slot="right" class="button text" type="button" tabindex="-1" @click="gotoPasswordForgot">
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
@@ -23,7 +23,7 @@
 
         <STFloatingFooter>
             <LoadingButton :loading="loading">
-                <button class="button primary full">
+                <button class="button primary full" type="submit">
                     <span class="icon lock" />
                     <span>Inloggen</span>
                 </button>

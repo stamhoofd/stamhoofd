@@ -62,7 +62,7 @@
 
                         <div class="columns">
                             <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}" :data-align="column.align">
-                                <button type="button" @mouseup="toggleSort(column)" @mousedown="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
+                                <button type="button" @mouseup.left="toggleSort(column)" @mousedown.left="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
                                     <span>{{ column.name }}</span>
 
                                     <span v-if="sortBy === column"
@@ -1315,7 +1315,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             style.overflowY == "scroll" ||
             style.overflow == "scroll" ||
             style.overflow == "auto" ||
-            style.overflowY == "auto"
+            style.overflowY == "auto" ||
+            // Windows fix
+            style.overflow == "overlay" ||
+            style.overflowY == "overlay"
         ) {
             return element;
         } else {

@@ -75,7 +75,9 @@ body.modern.web-iOS {
             // Prevent scrolling outer scroll area's
             overscroll-behavior: contain;
             position: relative;
-            z-index: 0;
+
+            // z-index bug on chrome 93 causes scrollbar to be below content :/
+            //z-index: 0;
 
             // Windows scrollbars
             scrollbar-gutter: stable;

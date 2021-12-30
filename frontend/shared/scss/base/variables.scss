@@ -63,7 +63,6 @@ $color-primary-gray-light-original: #9DB7EC;
 $color-primary-hue: var(--color-primary-hue, color.hue($color-primary-original));
 $color-primary-saturation: var(--color-primary-saturation, color.saturation($color-primary-original));
 
-
 $color-primary: var(--color-primary, $color-primary-original);
 $color-primary-lighter: var(--color-primary-lighter, #{changeHue($color-primary-lighter-original, $color-primary-hue)});
 $color-primary-light: var(--color-primary-light, #{changeHue($color-primary-light-original, $color-primary-hue)});

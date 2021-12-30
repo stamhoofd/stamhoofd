@@ -5,10 +5,11 @@
     Not supports in Firefox and IE */
 
     &::-webkit-scrollbar {
-        //background-color: var(--color-current-background, white);
+        background-color: var(--color-current-background, white);
         //background-color: transparent;
         width: 16px;
         //order-radius: 16px;
+        transform: translate3d(0, 0, 0);
     }
 
     // /* background of the scrollbar except button or resizer */
@@ -25,6 +26,8 @@
         transition: 0.2s background-color;
         border: 2px solid var(--color-current-background, white);
         //border-radius: 0px;
+        z-index: 300;
+        transform: translate3d(0, 0, 0);
     }
 
     &::-webkit-scrollbar-thumb:hover {
@@ -48,6 +51,6 @@
         // Set Firefox scrollbar width
         scrollbar-width: thin;
 
-        @include scrollbars();
+        //@include scrollbars();
     }
 }

@@ -12,7 +12,7 @@
             </p>
 
             <STInputBox title="Wachtwoord">
-                <button slot="right" class="button text" type="button" @click.prevent="gotoPasswordForgot">
+                <button slot="right" class="button text" type="button" tabindex="-1" @click.prevent="gotoPasswordForgot">
                     <span>Vergeten</span>
                     <span class="icon help" />
                 </button>
@@ -20,13 +20,13 @@
             </STInputBox>
 
 
-            <button class="button text" type="button" @click="help">
+            <button class="button text" type="button" tabindex="-1" @click="help">
                 <span class="help icon" />
                 <span>Ik heb geen account</span>
             </button>
 
             <LoadingButton :loading="loading" class="block bottom">
-                <button class="button primary full">
+                <button class="button primary full" type="submit">
                     <span class="lock icon" />
                     <span>Inloggen</span>
                 </button>
