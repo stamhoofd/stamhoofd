@@ -79,19 +79,6 @@ export class CheckoutStepsManager {
 
         steps.push(
             new CheckoutStep(
-                CheckoutStepType.Address,
-                checkoutMethod !== null && checkoutMethod.type == CheckoutMethodType.Delivery,
-                () => {
-                    // Skip behaviour
-                    // Clear address
-                    CheckoutManager.checkout.address = null
-                    CheckoutManager.saveCheckout()
-                }
-            )
-        )
-
-        steps.push(
-            new CheckoutStep(
                 CheckoutStepType.Time,
                 checkoutMethod !== null && checkoutMethod.timeSlots.timeSlots.length > 1,
                 () => {
@@ -106,6 +93,20 @@ export class CheckoutStepsManager {
                 }
             )
         )
+
+        steps.push(
+            new CheckoutStep(
+                CheckoutStepType.Address,
+                checkoutMethod !== null && checkoutMethod.type == CheckoutMethodType.Delivery,
+                () => {
+                    // Skip behaviour
+                    // Clear address
+                    CheckoutManager.checkout.address = null
+                    CheckoutManager.saveCheckout()
+                }
+            )
+        )
+
         steps.push(new CheckoutStep(CheckoutStepType.Customer))
         steps.push(new CheckoutStep(CheckoutStepType.Payment))
 
@@ -130,6 +131,9 @@ export class CheckoutStepsManager {
                     return s
                 }
                 s.skipHandler()
+
+                // Also validate skipped steps
+                s.validate(CheckoutManager.checkout, WebshopManager.webshop, WebshopManager.organization.meta)
                 continue
             }
 
