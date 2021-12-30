@@ -1,5 +1,5 @@
 <template>
-    <SaveView title="Leveringsoptie" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView title="Leveringsoptie" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
             Leveringsoptie toevoegen
         </h1>
@@ -31,7 +31,7 @@
         </STInputBox>
         <EditDeliveryRegionsSection :delivery-method="patchedDeliveryMethod" @patch="addPatch" />
 
-        <EditTimeSlotsSection :time-slots="patchedDeliveryMethod.timeSlots" title="Keuze uit leveringstijdstip" @patch="patchTimeSlots">
+        <EditTimeSlotsSection :webshop="webshop" :time-slots="patchedDeliveryMethod.timeSlots" title="Keuze uit leveringstijdstip" @patch="patchTimeSlots">
             <p>Je kan tijdsintervallen toevoegen waartussen je de bestelling aan huis kan leveren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. via post versturen). Als je leveren organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
         </EditTimeSlotsSection>
 

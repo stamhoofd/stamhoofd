@@ -21,7 +21,7 @@
                     enterkeyhint="next"
                 >
             </STInputBox>
-            <STInputBox v-if="isTicket" title="Type" error-fields="name" :error-box="errorBox">
+            <STInputBox v-if="isTicket" title="Type" error-fields="type" :error-box="errorBox">
                 <Dropdown
                     v-model="type"
                 >
@@ -30,6 +30,19 @@
                     </option>
                     <option value="Voucher">
                         Voucher
+                    </option>
+                </Dropdown>
+            </STInputBox>
+
+            <STInputBox v-else title="Type" error-fields="type" :error-box="errorBox">
+                <Dropdown
+                    v-model="type"
+                >
+                    <option value="Product">
+                        Stuks
+                    </option>
+                    <option value="Person">
+                        Personen
                     </option>
                 </Dropdown>
             </STInputBox>
@@ -217,7 +230,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
     get isTicket() {
-        return this.type !== ProductType.Product || this.webshop.meta.ticketType === WebshopTicketType.Tickets
+        return this.type === ProductType.Ticket || this.type === ProductType.Voucher || this.webshop.meta.ticketType === WebshopTicketType.Tickets
     }
 
     get patchedWebshop() {
@@ -230,7 +243,9 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     get typeName(): string {
         switch (this.product.type) {
-            case ProductType.Product: return "Artikel"
+            case ProductType.Product: 
+            case ProductType.Person:
+                return "Artikel"
             case ProductType.Ticket: return "Ticket"
             case ProductType.Voucher: return "Voucher"
         }

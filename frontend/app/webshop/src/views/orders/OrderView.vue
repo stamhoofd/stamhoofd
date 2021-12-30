@@ -339,7 +339,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get hasTickets() {
-        return (this.order && this.order.status != OrderStatus.Canceled && this.order.status != OrderStatus.Deleted) && (this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type !== ProductType.Product))
+        return (this.order && this.order.status != OrderStatus.Canceled && this.order.status != OrderStatus.Deleted) && (this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order?.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket))
     }
 
     get hasSingleTicket() {

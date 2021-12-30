@@ -37,20 +37,57 @@ export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     endTime: number = 14*60
 
-    /**
-     * Total stock, excluding already sold items into account
-     */
-    @field({ decoder: IntegerDecoder, nullable: true, version: 141 })
-    stock: number | null = null
+    @field({ decoder: IntegerDecoder, nullable: true, version: 143 })
+    maxOrders: number | null = null
 
-    @field({ decoder: IntegerDecoder, version: 141 })
-    usedStock = 0
+    @field({ decoder: IntegerDecoder, version: 143 })
+    usedOrders = 0
 
-    get remainingStock(): number | null {
-        if (this.stock === null) {
+    @field({ decoder: IntegerDecoder, nullable: true, version: 143 })
+    maxPersons: number | null = null
+
+    @field({ decoder: IntegerDecoder, version: 143 })
+    usedPersons = 0
+
+    get remainingOrders(): number | null {
+        if (this.maxOrders === null) {
             return null
         }
-        return Math.max(0, this.stock - this.usedStock)
+        return Math.max(0, this.maxOrders - this.usedOrders)
+    }
+
+    get remainingPersons(): number | null {
+        if (this.maxPersons === null) {
+            return null
+        }
+        return Math.max(0, this.maxPersons - this.usedPersons)
+    }
+
+    /**
+     * In case maxPersons and maxOrders are used at the same time, try to transform it onto 1 number of remainign 'stock' for this timeslot,
+     * which will be visible for customers
+     */
+    get listedRemainingStock(): number | null {
+        const remainingOrders = this.remainingOrders
+        const remainingPersons = this.remainingPersons
+        if (remainingOrders === null && remainingPersons === null) {
+            return null
+        }
+
+        if (remainingPersons === null) {
+            return remainingOrders
+        }
+
+        if (remainingOrders === null) {
+            return remainingPersons
+        }
+
+        if (remainingPersons === 0 || remainingOrders === 0) {
+            return 0
+        }
+
+        // If we still have at least one remaining order, the remaining persons always is the number we need to show
+        return remainingPersons
     }
 
     static sort(a: WebshopTimeSlot, b: WebshopTimeSlot){

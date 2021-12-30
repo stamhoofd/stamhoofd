@@ -30,7 +30,7 @@
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary">
+                    <button class="button primary" type="submit">
                         <span>Doorgaan</span>
                         <span class="icon arrow-right" />
                     </button>

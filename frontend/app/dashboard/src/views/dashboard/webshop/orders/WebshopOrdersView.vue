@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :prefix-column="prefixColumn" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="isLoadingOrders ? [] : orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="refresh(false)" @click="openOrder">
+    <TableView ref="table" :prefix-column="prefixColumn" default-sort-direction="DESC" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="isLoadingOrders ? [] : orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="refresh(false)" @click="openOrder">
         <template #empty>
             Er zijn nog geen bestellingen.
         </template>

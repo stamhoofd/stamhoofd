@@ -22,12 +22,18 @@
         </p>
 
         <STList>
-            <STListItem v-for="timeSlot in sortedSlots" :key="timeSlot.id" :selectable="true" class="right-description" @click="editTimeSlot(timeSlot)">
-                {{ timeSlot.date | date }}
-
-                <template slot="right">
+            <STListItem v-for="timeSlot in sortedSlots" :key="timeSlot.id" :selectable="true" class="right-stack" @click="editTimeSlot(timeSlot)">
+                <h3 class="style-title-list">
+                    {{ timeSlot.date | date }}
+                </h3>
+                <p class="style-description-small">
                     {{ timeSlot.startTime | minutes }}
                     - {{ timeSlot.endTime | minutes }}
+                </p>
+
+                <template slot="right">
+                    <span v-if="timeSlot.maxOrders" class="style-tag">{{ timeSlot.usedOrders }} / {{ timeSlot.maxOrders }}</span>
+                    <span v-if="timeSlot.maxPersons" class="style-tag">{{ timeSlot.usedPersons }} / {{ timeSlot.maxPersons }}p</span>
                     <span class="icon arrow-right-small gray" />
                 </template>
             </STListItem>
@@ -39,7 +45,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures";
+import { PrivateWebshop, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -64,6 +70,9 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     timeSlots!: WebshopTimeSlots
 
+    @Prop({ required: true })
+    webshop: PrivateWebshop
+
     addPatch(patch: AutoEncoderPatchType<WebshopTimeSlots>) {
         this.$emit("patch", patch)
     }
@@ -79,7 +88,7 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
         const p = WebshopTimeSlots.patch({})
         p.timeSlots.addPut(timeSlot)
         
-        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots.patch(p), isNew: true, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
+        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots.patch(p), isNew: true, webshop: this.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
             // Merge both patches
             this.addPatch(p.patch(patch))
 
@@ -88,7 +97,7 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
     }
 
     editTimeSlot(timeSlot: WebshopTimeSlot) {
-        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
+        this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots, isNew: false, webshop: this.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
             this.addPatch(patch)
 
             // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?

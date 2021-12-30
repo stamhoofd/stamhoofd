@@ -60,6 +60,7 @@ export class OptionMenu extends AutoEncoder {
 
 export enum ProductType {
     Product = "Product",
+    Person = "Person",
     Ticket = "Ticket",
     Voucher = "Voucher"
 }

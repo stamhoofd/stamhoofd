@@ -378,7 +378,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get hasTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.patchedOrder.data.cart.items.find(i => i.product.type !== ProductType.Product)
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.patchedOrder.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket)
     }
 
     get scannedCount() {

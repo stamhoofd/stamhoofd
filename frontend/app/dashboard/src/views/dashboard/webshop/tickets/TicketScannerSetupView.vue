@@ -129,7 +129,7 @@ export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
     }
 
     get ticketProducts() {
-        return this.webshopManager.webshop?.products.filter(p => p.type !== ProductType.Product)
+        return this.webshopManager.webshop?.products.filter(p => p.type === ProductType.Ticket || p.type === ProductType.Voucher)
     }
 
     isProductSelected(product: Product) {

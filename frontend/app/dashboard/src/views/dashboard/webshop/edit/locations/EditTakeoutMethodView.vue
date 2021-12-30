@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="locationTitleName" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="locationTitleName" :disabled="!hasChanges" @save="save">
         <h1 v-if="isNew">
             {{ locationTitleName }} toevoegen
         </h1>
@@ -37,10 +37,10 @@
             </div>
         </div>
 
-        <EditTimeSlotsSection v-if="isTakeout" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit afhaalintervallen" @patch="patchTimeSlots">
+        <EditTimeSlotsSection v-if="isTakeout" :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit afhaalintervallen" @patch="patchTimeSlots">
             <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling kan afhalen. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (bv. als je het elke week kan afhalen na activiteiten). Als je afhalen organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
         </EditTimeSlotsSection>
-        <EditTimeSlotsSection v-else :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit shiften" @patch="patchTimeSlots">
+        <EditTimeSlotsSection v-else :webshop="webshop" :time-slots="patchedTakeoutMethod.timeSlots" title="Datum en tijd + keuze uit shiften" @patch="patchTimeSlots">
             <p>Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).</p>
         </EditTimeSlotsSection>
 

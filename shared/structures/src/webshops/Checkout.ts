@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 
 import { ValidatedAddress } from '../addresses/Address';
@@ -35,6 +35,18 @@ export class Checkout extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null
+
+    /**
+     * Number of persons we did reserve in webshop time slots (and maybe future other maximums)
+     */
+    @field({ decoder: NumberDecoder, version: 143 })
+    reservedPersons = 0;
+
+    /**
+     * Whether we reserved order stock in webshop time slots (and maybe future other maximums)
+     */
+    @field({ decoder: BooleanDecoder, version: 143 })
+    reservedOrder = false;
 
     get deliveryPrice() {
         if (!this.checkoutMethod || this.checkoutMethod.type != CheckoutMethodType.Delivery) {
@@ -207,13 +219,44 @@ export class Checkout extends AutoEncoder {
         const timeSlot = this.checkoutMethod.timeSlots.timeSlots.find(s => s.id == current.id)
         
         if (!timeSlot) {
-             throw new SimpleError({
+            throw new SimpleError({
                 code: "invalid_timeslot",
                 message: "Checkout timeslot is invalid",
                 human: "Het afhaaltijdstip dat je had gekozen werd gewijzigd terwijl je aan het bestellen was, kies een nieuw tijdstip.",
                 field: "timeSlot"
             })
         }
+
+        // Check maximum
+        if (!this.reservedOrder && timeSlot.remainingOrders === 0) {
+            throw new SimpleError({
+                code: "timeslot_full",
+                message: "Timeslot has reached maximum orders",
+                human: "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.",
+                field: "timeSlot"
+            })
+        }
+
+        // Check maximum
+        if (timeSlot.remainingPersons !== null && this.cart.persons - this.reservedPersons > timeSlot.remainingPersons) {
+            const remaingPersons = timeSlot.remainingPersons
+            if (remaingPersons === 0) {
+                throw new SimpleError({
+                    code: "timeslot_full",
+                    message: "Timeslot has reached maximum orders",
+                    human: "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.",
+                    field: "timeSlot"
+                })
+            }
+            throw new SimpleError({
+                code: "timeslot_full",
+                message: "Timeslot has reached maximum persons",
+                human: "Er "+(remaingPersons != 1 ? "zijn" : "is")+" nog maar "+remaingPersons+" "+(remaingPersons != 1 ? "plaatsen" : "plaats")+" vrij op het gekozen tijdstip. Jouw mandje is voor " + this.cart.persons + " "+(this.cart.persons != 1 ? "personen" : "persoon")+". Kies een ander tijdstip indien mogelijk.",
+                field: "timeSlot"
+            })
+        }
+
+
         this.timeSlot = timeSlot
     }
 

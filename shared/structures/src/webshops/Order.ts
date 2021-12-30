@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Payment, PrivatePayment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';

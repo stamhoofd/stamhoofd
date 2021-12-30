@@ -145,6 +145,36 @@ export class Order extends Model {
                 }
             }
         }
+
+        
+
+        if (this.data.timeSlot !== null) {
+            const s = this.data.timeSlot
+            const timeSlot = this.webshop.meta.checkoutMethods.flatMap(m => m.timeSlots).flatMap(t => t.timeSlots).find(t => t.id === s.id)
+
+            if (timeSlot) {
+                if (this.data.reservedOrder !== add) {
+                    this.data.reservedOrder = add
+                    timeSlot.usedOrders += add ? 1 : -1
+                    if (timeSlot.usedOrders < 0) {
+                        timeSlot.usedOrders = 0
+                    }
+                    changed = true
+                }
+
+                const personDifference = (add ? this.data.cart.persons : 0) - this.data.reservedPersons 
+
+                if (personDifference !== 0) {
+                    timeSlot.usedPersons += personDifference
+                    if (timeSlot.usedPersons < 0) {
+                        timeSlot.usedPersons = 0
+                    }
+                    this.data.reservedPersons += personDifference
+                    changed = true
+                }
+            }
+        }
+
         if (changed) {
             await this.webshop.save()
             await this.save()

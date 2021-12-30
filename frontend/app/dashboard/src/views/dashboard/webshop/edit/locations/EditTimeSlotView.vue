@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? 'Tijdvak toevoegen' : 'Tijdvak bewerken'" :loading="saving" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? 'Tijdvak toevoegen' : 'Tijdvak bewerken'" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             Tijdvak toevoegen
         </h1>
@@ -16,12 +16,21 @@
         <TimeMinutesInput v-model="startTime" title="Van" :validator="validator" />
         <TimeMinutesInput v-model="endTime" title="Tot" :validator="validator" />
 
-        <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Verwijder dit tijdsvak
-            </h2>
+        <STInputBox error-fields="maxOrders" title="Maximum aantal bestellingen" :error-box="errorBox">
+            <NumberInput v-model="maxOrders" :required="false" placeholder="Geen limiet" />
+        </STInputBox>
+        <p v-if="remainingOrders !== null && remainingOrders !== maxOrders" class="style-description">
+            Nog {{ remainingOrders }} bestellingen
+        </p>
 
+        <STInputBox error-fields="maxPersons" title="Maximum aantal personen" :error-box="errorBox">
+            <NumberInput v-model="maxPersons" :required="false" placeholder="Geen limiet" />
+        </STInputBox>
+        <p v-if="remainingPersons !== null && remainingPersons !== maxPersons" class="style-description">
+            Nog {{ remainingPersons }} personen
+        </p>
+
+        <div v-if="!isNew" class="container">
             <button class="button secundary danger" type="button" @click="deleteMe">
                 <span class="icon trash" />
                 <span>Verwijderen</span>
@@ -32,9 +41,10 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, DateSelection, ErrorBox, SaveView, STErrorsDefault, STInputBox, TimeMinutesInput, Validator } from "@stamhoofd/components";
-import { Version, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures";
+import { CenteredMessage, Checkbox, DateSelection, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, TimeMinutesInput, Validator } from "@stamhoofd/components";
+import { PrivateWebshop, ProductType, Version, WebshopTimeSlot, WebshopTimeSlots } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
@@ -43,7 +53,9 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         STInputBox,
         STErrorsDefault,
         TimeMinutesInput,
-        DateSelection
+        DateSelection,
+        Checkbox,
+        NumberInput
     },
 })
 export default class EditTimeSlotView extends Mixins(NavigationMixin) {
@@ -55,6 +67,9 @@ export default class EditTimeSlotView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     isNew!: boolean
+
+    @Prop({ required: true })
+    webshop: PrivateWebshop
 
     patchTimeSlot: AutoEncoderPatchType<WebshopTimeSlot> = WebshopTimeSlot.patch({ id: this.timeSlot.id })
 
@@ -92,6 +107,30 @@ export default class EditTimeSlotView extends Mixins(NavigationMixin) {
         this.addPatch(WebshopTimeSlot.patch({ endTime }))
     }
 
+    // Stock
+    get remainingOrders() {
+        return this.patchedTimeSlot.remainingOrders
+    }
+
+    get maxOrders() {
+        return this.patchedTimeSlot.maxOrders
+    }
+
+    set maxOrders(maxOrders: number | null) {
+        this.patchTimeSlot = this.patchTimeSlot.patch({ maxOrders })
+    }
+
+    get remainingPersons() {
+        return this.patchedTimeSlot.remainingPersons
+    }
+
+    get maxPersons() {
+        return this.patchedTimeSlot.maxPersons
+    }
+
+    set maxPersons(maxPersons: number | null) {
+        this.patchTimeSlot = this.patchTimeSlot.patch({ maxPersons })
+    }
 
     addPatch(patch: AutoEncoderPatchType<WebshopTimeSlot>) {
         this.patchTimeSlot = this.patchTimeSlot.patch(patch)
@@ -100,6 +139,20 @@ export default class EditTimeSlotView extends Mixins(NavigationMixin) {
     async save() {
         if (!await this.validator.validate()) {
             return;
+        }
+
+        try {
+            if (this.patchedTimeSlot.maxPersons !== null && !this.webshop.products.find(p => p.type === ProductType.Person)) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    field: "maxPersons",
+                    message: "Je hebt geen enkel artikel in jouw webshop met type 'Personen'. Het maximum aantal voor personen werkt dan niet. Voeg eerst een product toe aan je webshop met type 'Personen'."
+                })
+            }
+        } catch (e) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            this.errorBox = new ErrorBox(e)
+            return
         }
         const p = WebshopTimeSlots.patch({})
         p.timeSlots.addPatch(this.patchTimeSlot)

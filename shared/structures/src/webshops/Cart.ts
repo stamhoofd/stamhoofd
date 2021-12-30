@@ -386,6 +386,10 @@ export class Cart extends AutoEncoder {
         return this.items.reduce((c, item) => c + item.amount, 0)
     }
 
+    get persons() {
+        return this.items.reduce((sum, item) => sum + (item.product.type === ProductType.Person ? item.amount : 0), 0)
+    }
+
     /**
      * Refresh all items with the newest data, throw if something failed (at the end)
      */

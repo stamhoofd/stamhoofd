@@ -35,13 +35,16 @@
                         <p class="style-description">
                             Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
                         </p>
+
+                        <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
+                        <span v-else-if="slot.listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
                     </STListItem>
                 </STList>
             </main>
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary" type="button" @click="goNext">
                         <span>Doorgaan</span>
                         <span class="icon arrow-right" />
                     </button>
