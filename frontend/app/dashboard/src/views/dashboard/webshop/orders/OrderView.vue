@@ -219,7 +219,7 @@
                         <p class="price">
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
                         </p>
-                        <div @click.stop>
+                        <div v-if="hasWrite" @click.stop>
                             <button type="button" class="button icon trash gray" @click="deleteItem(cartItem)" />
                         </div>
                     </footer>
