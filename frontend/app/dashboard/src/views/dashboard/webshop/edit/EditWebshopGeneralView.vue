@@ -51,7 +51,18 @@
             <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
                 Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
             </p>
+
+            <template v-if="roles.length > 0">
+                <hr>
+                <h2>Toegangsbeheer</h2>
+                <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
+
+                <STList>
+                    <WebshopRolePermissionRow v-for="role in roles" :key="role.id" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
+                </STList>
+            </template>
         </template>
+        
 
         <hr>
         <h2>Beschikbaarheid</h2>
@@ -74,9 +85,11 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { PaymentMethod, PrivateWebshop, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import WebshopRolePermissionRow from '../../admins/WebshopRolePermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
@@ -90,9 +103,36 @@ import EditWebshopMixin from './EditWebshopMixin';
         TimeInput,
         Radio,
         SaveView,
+        WebshopRolePermissionRow
     },
 })
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
+    mounted() {
+        // Auto assign roles
+        if (this.isNew && OrganizationManager.user.permissions && this.webshop.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+            // By default, add full permissions for all the roles this user has, that also have create webshop permissions
+            const roles = OrganizationManager.organization.privateMeta?.roles.flatMap(r => {
+                const has = OrganizationManager.user.permissions?.roles.find(i => i.id === r.id)
+                if (r.createWebshops && has) {
+                    return [PermissionRole.create(r)]
+                }
+                return []
+            }) ?? []
+
+            if (roles.length > 0) {
+                const permissions = PermissionsByRole.patch({})
+                for (const role of roles) {
+                    permissions.full.addPut(role)
+                }
+                this.addPatch(PrivateWebshop.patch({
+                    privateMeta: WebshopPrivateMetaData.patch({
+                        permissions
+                    })
+                }))
+            }
+        }
+    }
+    
     get viewTitle() {
         if (this.isNew) {
             return "Nieuwe verkoop starten"
@@ -111,6 +151,10 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     set name(name: string) {
         const patch = WebshopMetaData.patch({ name })
         this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+    }
+
+    get roles() {
+        return this.organization.privateMeta?.roles ?? []
     }
 
     get ticketType() {
