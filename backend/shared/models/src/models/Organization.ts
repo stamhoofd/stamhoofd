@@ -352,20 +352,63 @@ export class Organization extends Model {
             // save
             await organization.save()
 
-            if (organization.serverMeta.DNSRecordWarningCount < 2 && organization.serverMeta.firstInvalidDNSRecords <= new Date(new Date().getTime() - 1000 * 60 * 60 * 2 - (organization.serverMeta.DNSRecordWarningCount * 1000 * 60 * 60 * 24))) {
+            // Only send a warning once
+            if (organization.serverMeta.DNSRecordWarningCount == 0 && organization.serverMeta.firstInvalidDNSRecords <= new Date(new Date().getTime() - 1000 * 60 * 60 * 24 - (organization.serverMeta.DNSRecordWarningCount * 1000 * 60 * 60 * 24))) {
                 organization.serverMeta.DNSRecordWarningCount += 1
                 await organization.save()
 
-                // Became invalid for longer than 2 hours -> send an e-mail to the organization admins
+                // Became invalid for longer than 24 hours -> send an e-mail to the organization admins
                 if (STAMHOOFD.environment === "production") {
                     const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
                     Email.sendInternal({
                         to,
                         subject: "Domeinnaam instellingen ongeldig"+(organization.serverMeta.DNSRecordWarningCount == 2 ? " (herinnering)" : ""),
-                        text: "Hallo daar!\n\nBij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jouw domeinnaam niet geldig zijn. Hierdoor kunnen we jouw e-mails niet langer versturen vanaf jullie domeinnaam, maar maken we (tijdelijk) gebruik van @stamhoofd.email. "+(this.meta.modules.useMembers && organization.registerDomain === null ? " Ook jullie inschrijvingspagina is niet meer bereikbaar via jullie domeinnaam." : "")+" Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen -> personalisatie?\n\nBedankt!\n\nHet Stamhoofd team"
+                        text: "Hallo daar!\n\nIn Stamhoofd hebben jullie een eigen domeinnaam gekoppeld. Maar bij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jullie domeinnaam niet (meer) geldig zijn. Hierdoor kunnen we e-mails niet langer versturen vanaf jullie domeinnaam, maar moeten we gebruik van @stamhoofd.email. "+(this.meta.modules.useMembers && organization.registerDomain === null ? " Ook jullie inschrijvingspagina is niet meer bereikbaar via jullie domeinnaam." : "")+" Je stuurt deze e-mail best door naar de persoon in jullie vereniging die de technische zaken regelt. Kijken jullie dit zo snel mogelijk na op stamhoofd.app -> instellingen -> personalisatie?\n\nBedankt!\n\nHet Stamhoofd team"
                     }, this.i18n)
                 }
             }
+        }
+    }
+
+    async deleteAWSMailIdenitity(mailDomain: string) {
+
+        // Protect specific domain names
+        if (["stamhoofd.be", "stamhoofd.nl", "stamhoofd.shop", "stamhoofd.app", "stamhoofd.email"].includes(mailDomain)) {
+            return
+        }
+
+        if (STAMHOOFD.environment != "production") {
+            // Temporary ignore this
+            return;
+        }
+
+        const sesv2 = new SES();
+
+        // Check if mail identitiy already exists..
+        let exists = false
+        let existing: PromiseResult<SES.GetEmailIdentityResponse, AWSError> | undefined = undefined
+        try {
+            existing = await sesv2.getEmailIdentity({
+                EmailIdentity: mailDomain
+            }).promise()
+            exists = true
+
+            // Check if DKIM keys are the same
+            if (existing.VerifiedForSendingStatus === true) {
+                console.log("Cant delete AWS mail idenitiy @"+this.id+" for "+mailDomain+": already validated and might be in use by other organizations")
+                return
+            }
+
+            console.log("Deleting AWS mail idenitiy @"+this.id+" for "+mailDomain)
+
+            await sesv2.deleteEmailIdentity({
+                EmailIdentity: mailDomain
+            }).promise()
+            console.log("Deleted AWS mail idenitiy @"+this.id+" for "+this.privateMeta.mailDomain)
+
+        } catch (e) {
+            console.error("Could not delete AWS email identitiy @"+this.id+" for "+this.privateMeta.mailDomain)
+            console.error(e)
         }
     }
 

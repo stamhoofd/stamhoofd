@@ -75,6 +75,8 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 })
             }
 
+            const oldMailDomain = organization.privateMeta.mailDomain ?? organization.privateMeta.pendingMailDomain
+
             organization.privateMeta.pendingRegisterDomain = request.body.registerDomain?.toLowerCase() ?? null
             organization.privateMeta.pendingMailDomain = request.body.mailDomain?.toLowerCase() ?? null
 
@@ -120,7 +122,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 let pub: string
 
                 if (!organization.serverMeta.privateDKIMKey || !organization.serverMeta.publicDKIMKey ) {
-                    const key = new NodeRSA({ b: 1024 }); // AWS SES doesn't support 2048 yet
+                    const key = new NodeRSA({ b: 2048 });
                     const privArr = (key.exportKey('private') as string).split("\n")
                     priv = privArr.splice(1, privArr.length - 2).join("");
 
@@ -143,6 +145,21 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                     name: "stamhoofd._domainkey." + request.body.mailDomain + ".",
                     value: "v=DKIM1; k=rsa; p=" + pub + ""
                 }))
+            } else {
+                if (oldMailDomain) {
+                    organization.deleteAWSMailIdenitity(oldMailDomain).catch(console.error)
+                }
+
+                if (organization.serverMeta.privateDKIMKey && organization.serverMeta.publicDKIMKey ) {
+                    // Allow creation of new keys for new domains
+                    console.log("Backup DKIM keys for "+organization.id)
+                    console.log("Private: "+organization.serverMeta.privateDKIMKey)
+                    console.log("Public: "+organization.serverMeta.publicDKIMKey)
+
+                    // Delete keys if mail domain is deleted -> to allow new keys
+                    organization.serverMeta.privateDKIMKey = undefined
+                    organization.serverMeta.publicDKIMKey = undefined
+                }
             }
 
             await organization.save()
