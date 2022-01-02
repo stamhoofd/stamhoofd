@@ -18,8 +18,6 @@ import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
-// kick off the polyfill!
-//smoothscroll.polyfill();
 @Component({
     components: {
         ModalStackComponent,

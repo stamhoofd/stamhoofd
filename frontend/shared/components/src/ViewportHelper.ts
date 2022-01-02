@@ -6,7 +6,7 @@ export class ViewportHelper {
 
     static getScrollElement(element: HTMLElement): HTMLElement {
         const style = window.getComputedStyle(element);
-        if (style.overflowY == "scroll" || style.overflow == "scroll" || style.overflow == "auto" || style.overflowY == "auto") {
+        if (style.overflowY == "scroll" || style.overflow == "scroll" || style.overflow == "auto" || style.overflowY == "auto" || style.overflow == "overlay" || style.overflowY == "overlay") {
             return element;
         } else {
             if (!element.parentElement) {
@@ -169,5 +169,58 @@ export class ViewportHelper {
             }
             
         }
+    }
+
+    /**
+     * Smooth scroll polyfill for Safari
+     */
+    static scrollTo(element: HTMLElement, endPosition: number, duration: number, easingFunction: (t: number) => number) {
+        //const duration = Math.min(600, Math.max(300, element.scrollTop / 2)) // ms
+        let start: number
+        let previousTimeStamp: number
+
+        const startPosition = element.scrollTop
+
+        let previousPosition = element.scrollTop
+
+        element.style.willChange = "scroll-position";
+        (element.style as any).webkitOverflowScrolling = "auto"
+        element.style.overflow = "hidden"
+
+        // animate scrollTop of element to zero
+        const step = function (timestamp) {
+            if (start === undefined) {
+                start = timestamp;
+
+            }
+            const elapsed = timestamp - start;
+
+            if (element.scrollTop !== previousPosition && start !== timestamp){
+                // The user has scrolled the page: stop animation
+                element.style.overflow = ""
+                element.style.willChange = "";
+                (element.style as any).webkitOverflowScrolling = ""
+                return
+            }
+
+            if (previousTimeStamp !== timestamp) {
+                // Math.min() is used here to make sure the element stops at exactly 200px
+                element.scrollTop = Math.round((startPosition - endPosition) * (1 - easingFunction(elapsed / duration)) + endPosition)
+                element.style.overflow = ""
+            }
+
+            if (elapsed < duration) { // Stop the animation after 2 seconds
+                previousTimeStamp = timestamp
+                previousPosition = element.scrollTop
+                window.requestAnimationFrame(step);
+            } else {
+                element.scrollTop = endPosition
+                element.style.overflow = ""
+                element.style.willChange = "";
+                (element.style as any).webkitOverflowScrolling = ""
+            }
+        }
+
+        window.requestAnimationFrame(step);
     }
 }

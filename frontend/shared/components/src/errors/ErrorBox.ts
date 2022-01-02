@@ -1,4 +1,6 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+
+import { ViewportHelper } from '../ViewportHelper';
 /***
  * Distributes errors to components that ask for it. The first that asks receives
  */
@@ -42,6 +44,35 @@ export class ErrorBox {
         return this.errors
     }
 
+
+    scrollIntoView(element: HTMLElement) {
+        // default scrollIntoView is broken on Safari and sometimes causes the scrollview to scroll too far and get stuck
+        const scrollElement = ViewportHelper.getScrollElement(element)
+        const elRect = element.getBoundingClientRect()
+        const scrollRect = scrollElement.getBoundingClientRect()
+
+        let scrollPosition = elRect.bottom - scrollRect.top - scrollElement.clientHeight + scrollElement.scrollTop
+        // todo: add the bottom padding of scrollRect as an extra offset (e.g. for the keyboard of st-view)
+
+        let bottomPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'))
+        if (isNaN(bottomPadding)) {
+            bottomPadding = 25
+        }
+        console.info("bottomPadding", bottomPadding)
+        let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'))
+        if (isNaN(elBottomPadding)) {
+            elBottomPadding = 0
+        }
+        scrollPosition += Math.max(0, bottomPadding - elBottomPadding)
+        scrollPosition = Math.max(0, Math.min(scrollPosition, scrollElement.scrollHeight - scrollElement.clientHeight))
+
+        const exponential = function(x: number): number {
+            return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
+        }
+
+        ViewportHelper.scrollTo(scrollElement, scrollPosition, Math.min(600, Math.max(300, Math.abs(element.scrollTop - scrollPosition) / 2)), exponential)
+    }
+
     private fireScroll() {
         // Take the highest element
         let minimum: number | undefined
@@ -58,10 +89,9 @@ export class ErrorBox {
             }
         }
 
-        firstElement?.scrollIntoView({
-            block: "center",
-            behavior: "smooth"
-        });
+        if (firstElement) {
+            this.scrollIntoView(firstElement)
+        }
         this.scrollToElements = []
         this.scrollTimer = undefined
     }

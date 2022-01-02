@@ -10,7 +10,9 @@ function getScrollElement(element: HTMLElement | null = null): HTMLElement {
         style.overflowY == "scroll" ||
         style.overflow == "scroll" ||
         style.overflow == "auto" ||
-        style.overflowY == "auto"
+        style.overflowY == "auto" || 
+        style.overflow == "overlay" || 
+        style.overflowY == "overlay"
     ) {
         return element;
     } else {

@@ -10,7 +10,7 @@
             </template>
 
             <LoadingButton v-if="$isMobile" slot="right" :loading="loading">
-                <button class="button navigation highlight" :disabled="disabled" @click="$emit('save')">
+                <button class="button navigation highlight" :disabled="disabled" type="submit">
                     {{ saveText }}
                 </button>
             </LoadingButton>
@@ -25,7 +25,7 @@
                     {{ cancelText }}
                 </button>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" :disabled="disabled" @click="$emit('save')">
+                    <button class="button primary" :disabled="disabled" type="submit">
                         <span v-if="saveIcon" class="icon " :class="saveIcon" />
                         <span>{{ saveText }}</span>
                     </button>

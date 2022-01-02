@@ -29,7 +29,6 @@ import { Component, Vue } from "vue-property-decorator";
 
 
 // kick off the polyfill!
-//smoothscroll.polyfill();
 @Component({
     components: {
         ModalStackComponent,
