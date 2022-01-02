@@ -185,7 +185,8 @@ export class STPackageStatus extends AutoEncoder {
     get isActive() {
         const d = new Date()
 
-        if (this.startDate && this.startDate > d) {
+        /// Active if it starts within 10 seconds (fixes time differences between server and clients)
+        if (this.startDate && this.startDate > new Date(d.getTime() + 10 * 1000)) {
             return false
         }
 
