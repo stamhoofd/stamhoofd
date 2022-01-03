@@ -1,10 +1,6 @@
 <template>
     <div class="st-view member-summary-view">
-        <STNavigationBar title="Samenvatting">
-            <template #right>
-                <button class="button icon close gray" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Exporteren naar PDF" :dismiss="canDismiss" />
 
         <main>
             <h1>

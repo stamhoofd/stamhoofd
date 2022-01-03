@@ -1,11 +1,12 @@
-import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation"
-import { CenteredMessage, CenteredMessageButton, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
-import { EncryptedMemberWithRegistrationsPatch, Group, MemberWithRegistrations, Registration } from "@stamhoofd/structures"
+import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageButton, LoadComponent, TableAction, Toast } from "@stamhoofd/components";
+import { EncryptedMemberWithRegistrationsPatch, Group, MemberWithRegistrations, Registration } from "@stamhoofd/structures";
 
-import { MemberManager } from "../../../classes/MemberManager"
+import { MemberManager } from "../../../classes/MemberManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import SMSView from "../sms/SMSView.vue";
+
 
 export class MemberActionBuilder {
     component: any
@@ -71,7 +72,7 @@ export class MemberActionBuilder {
                 groupIndex: 3,
                 childActions: [
                     new TableAction({
-                        name: "Excel",
+                        name: "Excel...",
                         priority: 0,
                         groupIndex: 0,
                         handler: async (members: MemberWithRegistrations[]) => {
@@ -222,14 +223,13 @@ export class MemberActionBuilder {
     }
 
     async exportToExcel(members: MemberWithRegistrations[]) {
-        try {
-            const d = await import(/* webpackChunkName: "MemberExcelExport" */ "../../../classes/MemberExcelExport");
-            const MemberExcelExport = d.MemberExcelExport
-            MemberExcelExport.export(members);
-        } catch (e) {
-            console.error(e)
-            Toast.fromError(e).show()
-        }
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: await LoadComponent(() => import(/* webpackChunkName: "MemberExcelBuilderView"*/ '../member/MemberExcelBuilderView.vue'), {
+                members,
+                group: this.group
+            })
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async exportToPDF(members: MemberWithRegistrations[]) {

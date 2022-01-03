@@ -3,7 +3,7 @@
         <STNavigationBar :title="cartItem.product.name">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <span slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | price }}</span>
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         <main>
             <h1>{{ cartItem.product.name }}</h1>
@@ -72,7 +72,7 @@
                 Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
             </p>
 
-            <NumberInput v-model="cartItem.amount" suffix="stuks" suffix-singular="stuk" :max="maximumRemaining" :min="1" :stepper="true" />
+            <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
             <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
                 <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
                 Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
@@ -80,11 +80,11 @@
         </main>
 
         <STToolbar :sticky="oldItem ? true : false">
-            <button v-if="oldItem" slot="right" class="button primary" @click="addToCart">
+            <button v-if="oldItem" slot="right" class="button primary" type="button" @click="addToCart">
                 <span class="icon basket" />
                 <span>Opslaan</span>
             </button>
-            <button v-else slot="right" class="button primary" @click="addToCart">
+            <button v-else slot="right" class="button primary" type="button" @click="addToCart">
                 <span class="icon basket" />
                 <span>Toevoegen</span>
             </button>
@@ -96,7 +96,7 @@
 <script lang="ts">
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { BackButton,ErrorBox, NumberInput,Radio,StepperInput,STErrorsDefault,STList, STListItem,STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { Cart,CartItem, ProductDateRange, Webshop } from '@stamhoofd/structures';
+import { Cart,CartItem, ProductDateRange, ProductType, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Prop } from 'vue-property-decorator';
 import { Mixins } from 'vue-property-decorator';
@@ -158,6 +158,20 @@ export default class CartItemView extends Mixins(NavigationMixin){
         CheckoutManager.cart.addItem(this.cartItem)
         CheckoutManager.saveCart()*/
         this.dismiss({ force: true })
+    }
+
+    get suffixSingular() {
+        if (this.cartItem.product.type == ProductType.Ticket) {
+            return "ticket"
+        }
+        return this.cartItem.product.type == ProductType.Person ? 'persoon' : 'stuk'
+    }
+
+    get suffix() {
+        if (this.cartItem.product.type == ProductType.Ticket) {
+            return "tickets"
+        }
+        return this.cartItem.product.type == ProductType.Person ? 'personen' : 'stuks'
     }
 
     get image() {
