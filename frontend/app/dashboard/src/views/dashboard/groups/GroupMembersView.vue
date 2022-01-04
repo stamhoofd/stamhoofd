@@ -269,7 +269,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     }
                     return new Date(Math.min(...filtered))
                 }, 
-                format: (v, width) => v ? (width < 160 ? (width < 120 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : Formatter.date(v, true)) : "Onbekend",
+                format: (v, width) => v ? (width < 160 ? (width < 120 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : "Onbekend",
                 getStyle: (v) => v === null ? "gray" : "",
                 compare: (a, b) => Sorter.byDateValue(b ?? new Date(1900, 0, 1), a ?? new Date(1900, 0, 1)),
                 minimumWidth: 80,
