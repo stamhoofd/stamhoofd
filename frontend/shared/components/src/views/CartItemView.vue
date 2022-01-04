@@ -15,7 +15,7 @@
             </figure>
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
 
-            <STList v-if="cartItem.product.type != 'Product' && cartItem.product.location" class="info">
+            <STList v-if="(cartItem.product.type == 'Ticket' || cartItem.product.type == 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
                         Locatie
@@ -38,7 +38,7 @@
                 </STListItem>
             </STList>
 
-            <hr v-if="cartItem.product.description || imageSrc || cartItem.product.type != 'Product'">
+            <hr v-if="cartItem.product.description || imageSrc || (cartItem.product.type == 'Ticket' || cartItem.product.type == 'Voucher')">
 
             <div v-if="cartItem.product.prices.length > 1" class="container">
                 <STList>

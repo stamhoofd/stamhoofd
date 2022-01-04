@@ -1,5 +1,5 @@
 <template>
-    <article class="product-box" :class="{ selected: count > 0, ticket: product.type != 'Product'}" @click="onClicked">
+    <article class="product-box" :class="{ selected: count > 0, ticket: (product.type == 'Ticket' || product.type == 'Voucher')}" @click="onClicked">
         <svg width="100%" height="100%" class="maskingSvg">
             <defs>
                 <mask :id="'ProductBoxMask-'+product.id">
@@ -21,8 +21,8 @@
                     {{ product.name }}
                 </h3>
 
-                <p v-if="product.type != 'Product' && product.location" class="description" v-text="product.location.name" />
-                <p v-if="product.type != 'Product' && product.dateRange" class="description" v-text="formatDateRange(product.dateRange)" />
+                <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.location" class="description" v-text="product.location.name" />
+                <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.dateRange" class="description" v-text="formatDateRange(product.dateRange)" />
                 <p v-else-if="product.description" class="description" v-text="product.description" />
 
                 <p class="price">
