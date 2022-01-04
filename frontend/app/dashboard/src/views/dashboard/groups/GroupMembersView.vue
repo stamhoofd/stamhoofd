@@ -261,7 +261,9 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     if (registrations.length == 0) {
                         return null
                     }
-                    const filtered = registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime())
+
+                    let filtered = !this.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.filter(r => r.waitingList).map(r => r.createdAt!.getTime())
+
                     if (filtered.length == 0) {
                         return null
                     }
