@@ -21,7 +21,8 @@
         </main>
         <STToolbar v-if="!$isMobile">
             <template #right>
-                <button v-if="$parent.canPop || $parent.canDismiss" class="button secundary" type="button" @click="$parent.pop">
+                <slot name="toolbar" />
+                <button v-if="!$slots.toolbar && ($parent.canPop || $parent.canDismiss)" class="button secundary" type="button" @click="$parent.pop">
                     {{ cancelText }}
                 </button>
                 <LoadingButton :loading="loading">

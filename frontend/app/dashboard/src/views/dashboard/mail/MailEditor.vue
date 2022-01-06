@@ -143,7 +143,7 @@ export default class MailEditor extends Vue {
     max-width: none;
     padding: 15px 15px;
     height: auto;
-    min-height: calc($input-height * 2);
+    min-height: calc($input-height * 4);
     line-height: normal;
     outline: none;
 }
@@ -151,7 +151,7 @@ export default class MailEditor extends Vue {
 .editor .editor-container {
     padding: 0;
     height: auto;
-    min-height: calc($input-height * 2);
+    min-height: calc($input-height * 4);
     line-height: normal;
     outline: none;
 

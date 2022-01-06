@@ -91,6 +91,10 @@
         > *:not(:first-child) {
             flex-shrink: 0;
         }
+
+        > .style-bubble {
+            margin-left: 5px;
+        }
     }
 }
 

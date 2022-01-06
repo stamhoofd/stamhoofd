@@ -1,184 +1,166 @@
 <template>
-    <div class="st-view mail-view">
-        <STNavigationBar title="E-mail versturen">
-            <template #right>
-                <button class="button icon close gray" type="button" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+    <SaveView class="mail-view" title="E-mailen" save-text="Versturen" @save="send">
+        <h1 class="style-navigation-title with-icons">
+            <span>E-mailen</span>
+            <span class="style-bubble">{{ recipients.length }}</span>
+        </h1>
 
-        <main>
-            <h1>
-                E-mail versturen
-            </h1>
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openHardBounces">
+            {{ hardBounces.length != 1 ? hardBounces.length+' e-mailadressen zijn' : 'Eén e-mailadres is' }} ongeldig. Deze worden uitgesloten.
+            <span class="button text inherit-color">
+                Toon
+            </span>
+        </p>
 
-            <template v-if="emails.length == 0">
-                <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
-                    Stel eerst jouw e-mailadressen in
-                    <span class="button text inherit-color">
-                        <span class="icon settings" />
-                        <span>Wijzigen</span>
-                    </span>
-                </p>
-                <p v-else class="warning-box">
-                    Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
-                </p>
-            </template>
+        <p v-if="spamComplaints.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openSpamComplaints">
+            {{ spamComplaints.length != 1 ? spamComplaints.length +' e-mailadressen hebben' : 'Eén e-mailadres heeft' }} eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.
+            <span class="button text inherit-color">
+                Toon
+            </span>
+        </p>
 
-            <div class="split-inputs">
-                <STInputBox title="Onderwerp" error-fields="subject" :error-box="errorBox">
-                    <input id="mail-subject" v-model="subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
-                </STInputBox>
-                <STInputBox v-if="emails.length > 0" title="Versturen vanaf">
-                    <button v-if="fullAccess" slot="right" class="button text" type="button" @click="manageEmails">
-                        <span class="icon settings" />
-                        <span>Wijzigen</span>
-                    </button>
-                    <Dropdown v-model="emailId">
-                        <option v-for="email in emails" :key="email.id" :value="email.id">
-                            {{ email.name ? (email.name+" <"+email.email+">") : email.email }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
-            </div>
+        <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button limit-height" @click="showMissingFirstNames">
+            Niet elk e-mailadres heeft een gekoppelde naam
+            <span class="button text inherit-color">
+                Toon
+            </span>
+        </p>
+        <p v-if="webshop" class="info-box" v-text="'Gebruik slimme vervangingen in jouw tekst: {{nr}} wordt automatisch vervangen door het bestelnummer van de klant. Test het uit en klik op \'Voorbeeld\'.'" />
 
-            <p v-if="fileWarning" class="warning-box">
-                We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
+
+
+        <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
+            E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
+                (of leden met onbekende leeftijd)
+            </template> zelf sturen
+        </Checkbox>
+
+        <Checkbox v-if="members.length > 0 && hasGrownUpParents" v-model="includeGrownUpParents">
+            E-mail ook naar ouders van 18+ leden<template v-if="hasUnknownAge">
+                (of leden met onbekende leeftijd)
+            </template> sturen
+        </Checkbox>
+
+        <Checkbox v-if="members.length > 0" v-model="addButton" :disabled="!hasAllUsers">
+            <h3 class="style-title-list">
+                Voeg magische inlogknop toe (aangeraden)
+            </h3>
+            <p v-if="addButton" class="style-description-small">
+                Als een lid op de knop duwt, wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.
             </p>
+        </Checkbox>
+        <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
+            Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
+        </p>
 
-            <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
-                <label slot="right" class="button text">
-                    <span class="icon add" />
-                    <span>Bijlage</span>
-                    <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
-                </label>
-            </STInputBox>
-            
-            <MailEditor ref="editor" :has-first-name="hasFirstName">
-                <div v-if="addButton && orders.length == 0" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
-                    <hr>
-                    <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
-                    <p class="style-description-small button-description">
-                        <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
-                    </p>
-                </div>
-                <div v-if="addButton && orders.length > 0 && webshop" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
-                    <hr>
-                    <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
-                    <p class="style-description-small button-description">
-                        <em>Via de bovenstaande knop kan je jouw bestelling bekijken.</em>
-                    </p>
-                </div>
-                <template v-if="files.length > 0" slot="footer">
-                    <hr>
-                    <STList>
-                        <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
-                            <span slot="left" class="icon file" />
-                            {{ file.name }}
-
-                            <template #right>
-                                <span>{{ file.size }}</span>
-                                <span><button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" /></span>
-                            </template>
-                        </STListItem>
-                    </STList>
+        <Checkbox v-if="orders.length > 0 && webshop" v-model="addButton">
+            <h3 v-if="webshop.meta.ticketType == 'None'" class="style-title-list">
+                Voeg knop naar bestelling toe
+            </h3>
+            <h3 v-else class="style-title-list">
+                Voeg knop naar tickets en bestelling toe
+            </h3>
+            <p v-if="addButton" class="style-description-small">
+                <template v-if="webshop.meta.ticketType == 'None'">
+                    Daar staan ook de betaalinstructies indien de bestelling nog niet betaald werd.
                 </template>
-            </MailEditor>
-
-            <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
-                E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
-                    (of leden met onbekende leeftijd)
-                </template> zelf sturen
-            </Checkbox>
-
-            <Checkbox v-if="members.length > 0 && hasGrownUpParents" v-model="includeGrownUpParents">
-                E-mail ook naar ouders van 18+ leden<template v-if="hasUnknownAge">
-                    (of leden met onbekende leeftijd)
-                </template> sturen
-            </Checkbox>
-
-            <Checkbox v-if="members.length > 0" v-model="addButton" :disabled="!hasAllUsers">
-                <h3 class="style-title-list">
-                    Voeg magische inlogknop toe (aangeraden)
-                </h3>
-                <p v-if="addButton" class="style-description-small">
-                    Als een lid op de knop duwt, wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.
-                </p>
-            </Checkbox>
-            <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
-                Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
+                <template v-else>
+                    Als de tickets nog niet betaald werden, zal de knop enkel naar de bestelling wijzen (met daar de betaalinstructies).
+                </template>
             </p>
+        </Checkbox>
 
-            <Checkbox v-if="orders.length > 0 && webshop" v-model="addButton">
-                <h3 v-if="webshop.meta.ticketType == 'None'" class="style-title-list">
-                    Voeg knop naar bestelling toe
-                </h3>
-                <h3 v-else class="style-title-list">
-                    Voeg knop naar tickets en bestelling toe
-                </h3>
-                <p v-if="addButton" class="style-description-small">
-                    <template v-if="webshop.meta.ticketType == 'None'">
-                        Daar staan ook de betaalinstructies indien de bestelling nog niet betaald werd.
-                    </template>
-                    <template v-else>
-                        Als de tickets nog niet betaald werden, zal de knop enkel naar de bestelling wijzen (met daar de betaalinstructies).
-                    </template>
-                </p>
-            </Checkbox>
-
-            <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openHardBounces">
-                {{ hardBounces.length != 1 ? hardBounces.length+' e-mailadressen zijn' : 'Eén e-mailadres is' }} ongeldig. Deze worden uitgesloten.
+        <template v-if="emails.length == 0">
+            <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
+                Stel eerst jouw e-mailadressen in
                 <span class="button text inherit-color">
-                    Toon
+                    <span class="icon settings" />
+                    <span>Wijzigen</span>
                 </span>
             </p>
-
-            <p v-if="spamComplaints.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openSpamComplaints">
-                {{ spamComplaints.length != 1 ? spamComplaints.length +' e-mailadressen hebben' : 'Eén e-mailadres heeft' }} eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.
-                <span class="button text inherit-color">
-                    Toon
-                </span>
+            <p v-else class="warning-box">
+                Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
             </p>
+        </template>
 
-            <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button limit-height" @click="showMissingFirstNames">
-                Niet elk e-mailadres heeft een gekoppelde naam
-                <span class="button text inherit-color">
-                    Toon
-                </span>
-            </p>
-            <p v-if="webshop" class="info-box" v-text="'Gebruik slimme vervangingen in jouw tekst: {{nr}} wordt automatisch vervangen door het bestelnummer van de klant. Test het uit en klik op \'Voorbeeld\'.'" />
-        </main>
-
-        <STToolbar :sticky="false">
-            <template #right>
-                <button class="button secundary" type="button" @click="openPreview">
-                    <span class="icon eye" />
-                    <span>Voorbeeld</span>
+        <div class="split-inputs">
+            <STInputBox title="Onderwerp" error-fields="subject" :error-box="errorBox">
+                <input id="mail-subject" v-model="subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
+            </STInputBox>
+            <STInputBox v-if="emails.length > 0" title="Versturen vanaf">
+                <button v-if="fullAccess" slot="right" class="button text" type="button" @click="manageEmails">
+                    <span class="icon settings" />
+                    <span>Wijzigen</span>
                 </button>
-                <LoadingButton :loading="sending">
-                    <button class="button primary" :disabled="recipients.length == 0 || emails.length == 0" type="button" @click="send">
-                        <span>Versturen</span>
-                        <span class="bubble">{{ recipients.length }}</span>
-                    </button>
-                </LoadingButton>
+                <Dropdown v-model="emailId">
+                    <option v-for="email in emails" :key="email.id" :value="email.id">
+                        {{ email.name ? (email.name+" <"+email.email+">") : email.email }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+        </div>
+
+        <p v-if="fileWarning" class="warning-box">
+            We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
+        </p>
+
+        <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
+            <label slot="right" class="button text">
+                <span class="icon add" />
+                <span>Bijlage</span>
+                <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
+            </label>
+        </STInputBox>
+        
+        <MailEditor ref="editor" :has-first-name="hasFirstName">
+            <div v-if="addButton && orders.length == 0" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
+                <hr>
+                <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
+                <p class="style-description-small button-description">
+                    <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
+                </p>
+            </div>
+            <div v-if="addButton && orders.length > 0 && webshop" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
+                <hr>
+                <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
+                <p class="style-description-small button-description">
+                    <em>Via de bovenstaande knop kan je jouw bestelling bekijken.</em>
+                </p>
+            </div>
+            <template v-if="files.length > 0" slot="footer">
+                <hr>
+                <STList>
+                    <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
+                        <span slot="left" class="icon file" />
+                        {{ file.name }}
+
+                        <template #right>
+                            <span>{{ file.size }}</span>
+                            <span><button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" /></span>
+                        </template>
+                    </STListItem>
+                </STList>
             </template>
-        </STToolbar>
-    </div>
+        </MailEditor>
+
+        <button slot="toolbar" class="button secundary" type="button" @click="openPreview">
+            <span class="icon eye" />
+            <span>Voorbeeld</span>
+        </button>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties,NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationTitle, Toast } from "@stamhoofd/components";
-import { STToolbar } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { SegmentedControl } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -200,12 +182,8 @@ class TmpFile {
 
 @Component({
     components: {
-        STNavigationBar,
-        STNavigationTitle,
-        SegmentedControl,
-        STToolbar,
+        SaveView,
         STInputBox,
-        LoadingButton,
         STList,
         STListItem,
         Checkbox,
