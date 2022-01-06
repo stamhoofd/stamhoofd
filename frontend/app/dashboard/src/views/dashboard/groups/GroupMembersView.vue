@@ -520,15 +520,34 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         })
     }
 
+    addMemberIfInGroup(member: MemberWithRegistrations) {
+        if (member.registrations.find(r => this.groupIds.includes(r.groupId) && r.waitingList === this.waitingList)) {
+            this.allValues.push(member)
+        }
+    }
+
+    removeMember(member: MemberWithRegistrations) {
+        const index = this.allValues.findIndex(m => m.id === member.id)
+        if (index >= 0) {
+            this.allValues.splice(index, 1)
+        }
+    }
+
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
         if (type === "created" && member) {
-            if (member.registrations.find(r => this.groupIds.includes(r.groupId))) {
-                this.allValues.push(member)
-            }
+            this.addMemberIfInGroup(member)
             return
         }
-        if (type == "changedGroup" || type == "deleted" || type == "payment") {
-            this.reload()
+
+        if (type === "deleted" && member) {
+            this.removeMember(member)
+            return
+        }
+
+        if (type === "changedGroup" && member) {
+            this.removeMember(member)
+            this.addMemberIfInGroup(member)
+            return
         }
     }
 

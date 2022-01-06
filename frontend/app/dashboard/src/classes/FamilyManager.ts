@@ -111,6 +111,8 @@ export class FamilyManager {
  
         const session = SessionManager.currentSession!
 
+        const oldRegistrations = member.registrations.slice()
+
         // Send the request
         const response = await session.authenticatedServer.request({
             method: "PATCH",
@@ -123,10 +125,46 @@ export class FamilyManager {
 
         const i = this.members.findIndex(_m => _m.id === m.id)
         if (i != -1) {
-            this.members[i].copyFrom(m)
+            this.members[i].set(m)
         }
 
-        member.copyFrom(m)
+        member.set(m)
+
+        // Update group counts only when succesfully adjusted
+        if (m) {
+            let updateOrganization = false
+
+            for (const registration of oldRegistrations) {
+                const group = session.organization?.groups.find(g => g.id === registration.groupId)
+                if (group && group.cycle === registration.cycle) {
+                    if (group.settings.waitingListSize !== null && registration.waitingList) {
+                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - 1)
+                        updateOrganization = true
+                    } else if (group.settings.registeredMembers !== null && !registration.waitingList && registration.registeredAt !== null) {
+                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - 1)
+                        updateOrganization = true
+                    }
+                }
+            }
+
+            for (const registration of m.registrations) {
+                const group = session.organization?.groups.find(g => g.id === registration.groupId)
+                if (group && group.cycle === registration.cycle) {
+                    if (group.settings.waitingListSize !== null && registration.waitingList) {
+                        group.settings.waitingListSize += 1
+                        updateOrganization = true
+                    } else if (group.settings.registeredMembers !== null && !registration.waitingList && registration.registeredAt !== null) {
+                        group.settings.registeredMembers += 1
+                        updateOrganization = true
+                    }
+                }
+            }
+
+            if (updateOrganization) {
+                // Save organization to disk
+                session.callListeners("organization")
+            }
+        }
 
         MemberManager.callListeners("changedGroup", member)
         return member

@@ -313,7 +313,9 @@ export class MemberManagerStatic extends MemberManagerBase {
             SessionManager.currentSession?.callListeners("organization")
         }
 
-        this.callListeners("deleted", null)
+        for (const member of members) {
+            this.callListeners("deleted", member)
+        }
     }
 
     async deleteMember(member: MemberWithRegistrations) {
@@ -375,7 +377,9 @@ export class MemberManagerStatic extends MemberManagerBase {
             }
         }
 
-        this.callListeners("deleted", null)
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
     }
 
     async unregisterMember(member: MemberWithRegistrations, group: Group | null = null, cycleOffset = 0, waitingList = false) {
@@ -444,7 +448,9 @@ export class MemberManagerStatic extends MemberManagerBase {
             }
         }
 
-        this.callListeners("deleted", null)
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
     }
 
     async deleteDataExceptContacts(members: MemberWithRegistrations[]) {
@@ -560,7 +566,9 @@ export class MemberManagerStatic extends MemberManagerBase {
             }
         }
         
-        this.callListeners("deleted", null)
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
     }
 }
 
