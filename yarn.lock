@@ -951,10 +951,8 @@
   resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-3.3.3.tgz#b09708e58fb942e2b5afe6081c7377d4785271aa"
   integrity sha512-YfLW8gh/b3ZifmhQPFS9ybAnPp4MutQWGFYiAVecRh3O5nJD/UgZAmUmqpSoWRAOWbNGLX4lhWUIs+cCf552fg==
 
-"@capacitor/android@^3.3.4":
+"@capacitor/android@file:frontend/app/mobile/.yalc/@capacitor/android":
   version "3.3.4"
-  resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-3.3.4.tgz#ee6565f53d9e78368b9b2d50ee778b961f4d3729"
-  integrity sha512-5eaiZr79Dm1MNBjszVBXx8Io8YH+/RyFS6ix6V2LaKC4xj4i24kBJug5AHV4UbBBr9e/+RsAE9sui+SlkB1jNg==
 
 "@capacitor/app-launcher@^1.0.7":
   version "1.0.7"
@@ -1830,10 +1828,10 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.10.0.tgz#f6669e4012a6aec4b1ea8d67a802b880b0cf023c"
   integrity sha512-YVyV/XnSBprBEmGmitUxQmnTVzYSfI1IymxlAh0YjbMoy6i55uX/2RjU6TILbI0gerdolXCNljPHC4xzWYNehQ==
 
-"@simonbackx/vue-app-navigation@1.23.5":
-  version "1.23.5"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.23.5.tgz#96b8da45f3a4b94584c650346f6d80a7be9488f5"
-  integrity sha512-ZES0opXLbOoZkAs3lchAae2WIRqH7Sk/brYTP37RIQn+eaZjYdXpkG7wnq7W0sapK06RJHVsI817hl6/0yw6gQ==
+"@simonbackx/vue-app-navigation@1.23.6":
+  version "1.23.6"
+  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.23.6.tgz#7577991989e34b96c123c7fdf3c16bb8e96404d3"
+  integrity sha512-DTE5Tgk+6ZSPql28pX7w1nIeNFAc5ymsocETrf20z/fPCObdrXLV8iJEUS6IUTpbl/PkLjMkHWGJ8FjKg0MA7Q==
 
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"
