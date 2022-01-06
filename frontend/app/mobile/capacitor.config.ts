@@ -19,10 +19,10 @@ const config: CapacitorConfig = {
         }
     },
     // Uncomment to enable live reload
-    /*server: {
+    server: {
         url: "https://dashboard.stamhoofd.dev",
         cleartext: true
-    }*/
+    }
 };
 
 export default config;

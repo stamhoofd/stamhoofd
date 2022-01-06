@@ -30,6 +30,7 @@ import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedC
 import { UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
+import { info } from "pdfkit";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
@@ -508,10 +509,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     created() {
         this.reload();
+        MemberManager.addListener(this, this.onUpdateMember)
     }
 
     activated() {
-        MemberManager.addListener(this, this.onUpdateMember)
+        
         GlobalEventBus.addListener(this, "encryption", async () => {
             this.reload()
             return Promise.resolve()
@@ -519,17 +521,23 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     onUpdateMember(type: MemberChangeEvent, member: MemberWithRegistrations | null) {
-        if (type == "changedGroup" || type == "deleted" || type == "created" || type == "payment") {
+        if (type === "created" && member) {
+            if (member.registrations.find(r => this.groupIds.includes(r.groupId))) {
+                this.allValues.push(member)
+            }
+            return
+        }
+        if (type == "changedGroup" || type == "deleted" || type == "payment") {
             this.reload()
         }
     }
 
     deactivated() {
-        MemberManager.removeListener(this)
         GlobalEventBus.removeListener(this)
     }
 
     beforeDestroy() {
+        MemberManager.removeListener(this)
         Request.cancelAll(this)
     }
 

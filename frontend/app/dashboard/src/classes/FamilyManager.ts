@@ -76,6 +76,28 @@ export class FamilyManager {
         this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
         const m = this.members?.find(m => m.id == encryptedMember.id) ?? null
 
+        // Update group counts only when succesfully adjusted
+        if (m) {
+            let updateOrganization = false
+            for (const registration of m.registrations) {
+                const group = session.organization?.groups.find(g => g.id === registration.groupId)
+                if (group && group.cycle === registration.cycle) {
+                    if (group.settings.waitingListSize !== null && registration.waitingList) {
+                        group.settings.waitingListSize += 1
+                        updateOrganization = true
+                    } else if (group.settings.registeredMembers !== null && !registration.waitingList && registration.registeredAt !== null) {
+                        group.settings.registeredMembers += 1
+                        updateOrganization = true
+                    }
+                }
+            }
+
+            if (updateOrganization) {
+                // Save organization to disk
+                session.callListeners("organization")
+            }
+        }
+
         MemberManager.callListeners("created", m)
         return m;
     }
