@@ -152,12 +152,12 @@
 
         <STToolbar :sticky="false">
             <template #right>
-                <button class="button secundary" @click="openPreview">
+                <button class="button secundary" type="button" @click="openPreview">
                     <span class="icon eye" />
                     <span>Voorbeeld</span>
                 </button>
                 <LoadingButton :loading="sending">
-                    <button class="button primary" :disabled="recipients.length == 0 || emails.length == 0" @click="send">
+                    <button class="button primary" :disabled="recipients.length == 0 || emails.length == 0" type="button" @click="send">
                         <span>Versturen</span>
                         <span class="bubble">{{ recipients.length }}</span>
                     </button>
@@ -175,7 +175,7 @@ import { CenteredMessage, Checkbox,Dropdown,ErrorBox, LoadingButton, STErrorsDef
 import { STToolbar } from "@stamhoofd/components";
 import { STNavigationBar } from "@stamhoofd/components";
 import { SegmentedControl } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
+import { AppManager, SessionManager } from '@stamhoofd/networking';
 import { EmailAttachment,EmailInformation,EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop, Watch } from "vue-property-decorator";
@@ -814,6 +814,9 @@ export default class MailView extends Mixins(NavigationMixin) {
             })
             this.dismiss({ force: true })
             new Toast("Jouw e-mail is verstuurd", "success").show()
+
+            // Mark review moment
+            AppManager.shared.markReviewMoment()
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

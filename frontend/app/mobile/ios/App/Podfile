@@ -18,6 +18,7 @@ def capacitor_pods
   pod 'CapacitorShare', :path => '../../../../../node_modules/@capacitor/share'
   pod 'CapacitorStatusBar', :path => '../../../../../node_modules/@capacitor/status-bar'
   pod 'CapacitorStorage', :path => '../../../../../node_modules/@capacitor/storage'
+  pod 'CapacitorRateApp', :path => '../../../../../node_modules/capacitor-rate-app'
 end
 
 target 'App' do

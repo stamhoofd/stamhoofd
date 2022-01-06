@@ -64,6 +64,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, FillRecordCategoryView, LoadingButton, RecordAnswerInput, SaveView, SegmentedControl, STErrorsDefault, STList, STListItem, STToolbar, Validator } from "@stamhoofd/components";
+import { AppManager } from "@stamhoofd/networking";
 import { BooleanStatus, DataPermissionsSettings, FinancialSupportSettings, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, Version } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -204,6 +205,9 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             this.errorBox = null
             this.loading = false;
             this.pop({ force: true })
+
+            // Mark review moment
+            AppManager.shared.markReviewMoment()
             return true
         } catch (e) {
             if (this.member && o) {

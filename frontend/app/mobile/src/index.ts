@@ -11,7 +11,7 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import Vue from "vue";
 import VueMeta from 'vue-meta'
 
-import { AppManager, Storage } from '../../../shared/networking';
+import { AppManager, SessionManager, Storage } from '../../../shared/networking';
 // Kick off the app
 import App from "../../dashboard/src/App.vue";
 import { CapacitorStorage } from './CapacitorStorage';
@@ -149,6 +149,54 @@ AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 }
 
+import { RateApp } from 'capacitor-rate-app';
+
+async function markReviewMoment() {
+    // 1. Check if we are signed in.
+    const session = SessionManager.currentSession
+
+    if (!session) {
+        return
+    }
+
+    if (!session.organization) {
+        return
+    }
+    
+    // Check if at least one package active (only ask reviews to organizations who bought the app)
+    if ((session.organization.meta.packages.useMembers && !session.organization.meta.packages.isMembersTrial) || (session.organization.meta.packages.useWebshops && !session.organization.meta.packages.isWebshopsTrial)) {
+        // Use a counter, that can only increment once a day
+        const counterRaw = await Storage.keyValue.getItem("reviewCounter")
+        let counter = counterRaw ? parseInt(counterRaw) : 0
+        if (isNaN(counter)) {
+            counter = 0
+        }
+        const lastDateRaw = await Storage.keyValue.getItem("reviewLastCounterIncrease")
+        const lastDate = lastDateRaw ? new Date(parseInt(lastDateRaw)) : new Date(0)
+
+        // Only increase counter if last counter increase was at least 2 hours ago
+        if (lastDate < new Date(Date.now() - 2 * 60 * 60 * 1000)) {
+            counter++
+
+            // When the counter reaches 4, we'll ask for a review and reset the counter
+            if (counter >= 4) {
+                // Ask for a review
+                RateApp.requestReview().catch(console.error);
+                counter = 0
+            }
+        
+            // Save this date
+            await Storage.keyValue.setItem("reviewLastCounterIncrease", Date.now().toString())
+        }
+
+        await Storage.keyValue.setItem("reviewCounter", counter.toString())
+    }
+}
+
+AppManager.shared.markReviewMoment = () => {
+    markReviewMoment().catch(console.error)
+}
+
 
 window.addEventListener('statusTap',  () => {
     console.log("Status tapped")
@@ -168,9 +216,8 @@ window.addEventListener('statusTap',  () => {
     }
 });
 
-import { Directory, Encoding,Filesystem } from '@capacitor/filesystem';
+import { Directory,Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
-import { StatusBar } from '@capacitor/status-bar';
 
 import FileOpener from './FileOpenerPlugin';
 
@@ -206,12 +253,4 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
         }
         throw e
     }
-
-    /*try {
-        await Filesystem.deleteFile({
-            path: result.uri
-        })
-    } catch (e) {
-        console.error(e)
-    }*/
 }

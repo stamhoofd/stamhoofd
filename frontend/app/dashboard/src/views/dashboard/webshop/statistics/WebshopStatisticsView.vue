@@ -110,7 +110,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Spinner, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
+import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { Category, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -177,6 +177,8 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
     totalByProduct: { amount: number, name: string, description: string, price: number }[] = []
 
+    reviewTimer: NodeJS.Timeout | null = null
+
     mounted() {
         this.reload().catch(console.error)
 
@@ -203,12 +205,40 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
             const orderIds = new Set<string>()
 
             await this.webshopManager.loadWebshopIfNeeded(false)
+
+            /**
+             * Count the tickets per order item (we need to order item type to know if it is a voucher or a ticket)
+             */
+            const orderTicketMap: Map<string, Map<string, { scanned: number, total: number }>> = new Map()
+
+            if (this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
+                await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
+                    // determine ticket type
+                    if (ticket.itemId !== null) {
+                        // Add it to the orderTicketMap
+                        const orderId = ticket.orderId
+                        const orderItemMap: Map<string, { scanned: number, total: number }> = orderTicketMap.get(orderId) ?? new Map()
+                        orderItemMap.set(ticket.itemId, {
+                            scanned: (orderItemMap.get(ticket.itemId)?.scanned ?? 0) + (ticket.scannedAt ? 1 : 0),
+                            total: (orderItemMap.get(ticket.itemId)?.total ?? 0) + 1
+                        })
+                        orderTicketMap.set(orderId, orderItemMap)
+                        return
+                    }
+
+                    // A general ticket for an order
+                    if (ticket.scannedAt) {
+                        this.totalScannedTickets++
+                    }
+                    this.totalTickets += 1
+                })
+            }
+
             await this.webshopManager.streamOrders((order: Order) => {
                 if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                     orderIds.add(order.id)
                     this.totalRevenue += order.data.totalPrice
                     this.totalOrders += 1
-                    
 
                     for (const item of order.data.cart.items) {
                         const code = item.codeWithoutFields
@@ -225,6 +255,25 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                             })
                         }
                     }
+
+                    // Check if we have tickets in orderTicketMap
+                    const orderItemMap = orderTicketMap.get(order.id)
+                    if (orderItemMap) {
+                        for (const [itemId, counter] of orderItemMap) {
+                            // Find item
+                            const item = order.data.cart.items.find(i => i.id === itemId)
+                            if (item) {
+                                // Check if it is a voucher
+                                if (item.product.type === ProductType.Voucher) {
+                                    this.totalScannedVouchers += counter.scanned
+                                    this.totalVouchers += counter.total
+                                } else {
+                                    this.totalScannedTickets += counter.scanned
+                                    this.totalTickets += counter.total
+                                }
+                            }
+                        }
+                    }
                 }
             })
 
@@ -235,46 +284,25 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                 this.averagePrice = Math.round(this.totalRevenue / this.totalOrders)
             }
 
-            if (this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
-                await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
-                    (async () => {
-                        let type: ProductType = ProductType.Ticket
-
-                        // determine ticket type
-                        if (ticket.itemId !== null) {
-                            const order = await this.webshopManager.getOrderFromDatabase(ticket.orderId)
-                            if (order) {
-                                const item = order.data.cart.items.find(i => i.id === ticket.itemId)
-                                if (item) {
-                                    type = item.product.type
-                                }
-                            }
-                        }
-
-                        if (type === ProductType.Voucher) {
-                            if (ticket.scannedAt) {
-                                this.totalScannedVouchers++
-                            }
-                            this.totalVouchers += 1
-                        } else {
-                            if (ticket.scannedAt) {
-                                this.totalScannedTickets++
-                            }
-                            this.totalTickets += 1
-                        }
-                    })().catch(console.error)
-                })
-            }
-
             
         } catch (e) {
             Toast.fromError(e).show()
         }
 
         this.loading = false
+
+        this.reviewTimer = setTimeout(() => {
+            if (!this.loading && (this.totalOrders > 10 || this.totalRevenue > 50000)) {
+                AppManager.shared.markReviewMoment()
+            }
+        }, 5*1000)
     }
 
-
+    beforeDestroy() {
+        if (this.reviewTimer) {
+            clearTimeout(this.reviewTimer)
+        }
+    }
 }
 </script>
 

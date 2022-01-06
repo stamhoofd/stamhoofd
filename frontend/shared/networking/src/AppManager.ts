@@ -57,6 +57,13 @@ export class AppManager {
         }
     }
 
+    /**
+     * Mark a place in the app where an app review is appropriate.
+     */
+    markReviewMoment = () => {
+        // No default implementation
+    }
+
     downloadFile: ((data: any, filename: string) => Promise<void>) | null = null
 
     // Optional: if the current platform ahs a native scanner (see QRScannerPlugin in mobile frontend), this pluging will get instered here

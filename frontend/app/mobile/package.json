@@ -27,6 +27,7 @@
         "@capacitor/storage": "^1.2.3",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
-        "@stamhoofd/scss": "1.0.0"
+        "@stamhoofd/scss": "1.0.0",
+        "capacitor-rate-app": "^2.0.0"
     }
 }
