@@ -12,7 +12,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
-import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
+import { Order, WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -333,7 +333,20 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         
         // Disabled for now: first fix needed for payment status + deleted orders
         try {
-            this.orders = await this.webshopManager.getOrdersFromDatabase()
+            // We use stream orders because that doesn't block the main thread on iOS
+            // (we don't need to decode all orders at the same time on the main thread)
+
+            // We use a buffer to prevent DOM updates or Vue slowdown during streaming
+            let arrayBuffer: PrivateOrder[] = []
+
+            await this.webshopManager.streamOrders((order) => {
+                arrayBuffer.push(order)
+            })
+
+            if (arrayBuffer.length > 0) {
+                this.orders = arrayBuffer
+                this.isLoadingOrders = false
+            }
         } catch (e) {
             // Database error. We can ignore this and simply move on.
             console.error(e)
