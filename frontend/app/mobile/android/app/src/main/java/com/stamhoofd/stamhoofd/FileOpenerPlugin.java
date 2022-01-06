@@ -1,18 +1,32 @@
 package com.stamhoofd.stamhoofd;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.*;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
+import android.webkit.PermissionRequest;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebView;
+
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+
+import com.getcapacitor.BridgeWebChromeClient;
+import com.getcapacitor.BridgeWebViewClient;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -28,6 +42,32 @@ import java.nio.file.Files;
 public class FileOpenerPlugin extends Plugin {
     private boolean isPresenting = false;
     private Uri saveFrom;
+
+    @Override
+    public void load() {
+        // This is the moment where we can replace the chrome and webview
+        // Because trusted root CA don't work in WebViews in Android...
+        if (BuildConfig.BUILD_TYPE.equals("debug")) {
+            // We need to make sure we keep using the bridges custom logic
+            BridgeWebViewClient client = new BridgeWebViewClient(this.bridge) {
+                @Override
+                public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                    //Do something
+                    handler.proceed();
+                }
+            };
+            this.bridge.setWebViewClient(client);
+        }
+
+        BridgeWebChromeClient chromeClient = new BridgeWebChromeClient(this.bridge) {
+            // Remove default ugly play icon in video posters
+            @Override
+            public Bitmap getDefaultVideoPoster() {
+                return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
+            }
+        };
+        this.bridge.setWebChromeClient(chromeClient);
+    }
 
     private String getMimeType(String url) {
         String type = null;
