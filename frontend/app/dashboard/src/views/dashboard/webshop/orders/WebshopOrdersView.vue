@@ -577,7 +577,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.preview.meta.name
+        return "Bestellingen"
     }
 
     openOrder(order: PrivateOrder) {

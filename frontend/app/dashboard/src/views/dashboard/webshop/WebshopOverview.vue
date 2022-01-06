@@ -5,8 +5,8 @@
         </STNavigationBar>
 
         <main>
-            <h1>
-                {{ title }}
+            <h1 class="style-navigation-title with-icons">
+                <span>{{ title }}</span>
 
                 <span v-if="isOpen" class="icon dot green" />
                 <span v-else-if="isArchive" class="icon archive" />
