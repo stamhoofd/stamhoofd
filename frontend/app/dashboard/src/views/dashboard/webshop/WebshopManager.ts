@@ -64,7 +64,8 @@ export class WebshopManager {
             method: "GET",
             path: "/webshop/"+this.preview.id,
             decoder: PrivateWebshop as Decoder<PrivateWebshop>,
-            shouldRetry
+            shouldRetry,
+            owner: this
         })
 
         // Clone data and keep references
@@ -82,7 +83,8 @@ export class WebshopManager {
             method: "PATCH",
             path: "/webshop/"+this.preview.id,
             body: webshopPatch,
-            decoder: PrivateWebshop as Decoder<PrivateWebshop>
+            decoder: PrivateWebshop as Decoder<PrivateWebshop>,
+            owner: this
         })
 
         this.updateWebshop(response.data)
@@ -574,7 +576,8 @@ export class WebshopManager {
             path: "/webshop/"+this.preview.id+"/orders",
             decoder: new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>),
             body: patches,
-            shouldRetry: false
+            shouldRetry: false,
+            owner: this
         })
 
         // Move all data to original order
@@ -637,7 +640,8 @@ export class WebshopManager {
             path: "/webshop/"+this.preview.id+"/tickets/private",
             decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
             body: patches,
-            shouldRetry: false
+            shouldRetry: false,
+            owner: this
         })
 
         // Move all data to original order

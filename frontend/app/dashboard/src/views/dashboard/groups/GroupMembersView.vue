@@ -591,8 +591,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         })
     }
 
-
-
     addMember() {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EditMemberView, {
@@ -640,8 +638,5 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             }
         }).setDisplayStyle("popup"))
     }
-
-
-  
 }
 </script>
