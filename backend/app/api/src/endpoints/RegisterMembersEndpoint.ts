@@ -210,10 +210,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Update occupancy
             for (const group of groups) {
-                if (payRegistrations.find(p => p.groupId === group.id)) {
+                //if (payRegistrations.find(p => p.groupId === group.id)) {
                     await group.updateOccupancy()
                     await group.save()
-                }
+                //}
             }
 
             let paymentUrl: string | null = null
@@ -270,6 +270,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r, false)),
                 paymentUrl
             }));
+        }
+
+        // Update occupancy
+        for (const group of groups) {
+            await group.updateOccupancy()
+            await group.save()
         }
         
         return new Response(RegisterResponse.create({
