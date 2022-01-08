@@ -61,8 +61,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LoadingButton, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LoadingButton, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -160,6 +160,11 @@ export default class HomeView extends Mixins(NavigationMixin){
                 }
             }
         }
+
+        ModalStackEventBus.addListener(this, "present", async (options: PushOptions | ComponentWithProperties) => {
+            this.present(options);
+            return Promise.resolve()
+        })
 
         CenteredMessage.addListener(this, (centeredMessage) => {
             this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))

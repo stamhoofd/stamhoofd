@@ -1,21 +1,21 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem v-for="definition in definitions" :key="definition.id" @click="chooseDefinition(definition)">
+    <ContextMenuView v-bind="{ x, y }">
+        <ContextMenuItemView v-for="definition in definitions" :key="definition.id" @click="chooseDefinition(definition)">
             {{ definition.name }}
-        </ContextMenuItem>
-    </ContextMenu>
+        </ContextMenuItemView>
+    </ContextMenuView>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, ContextMenuLine } from "@stamhoofd/components";
+import { ContextMenuItemView, ContextMenuLine,ContextMenuView } from "@stamhoofd/components";
 import { Filter, FilterDefinition } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
     components: {
-        ContextMenu,
-        ContextMenuItem,
+        ContextMenuView,
+        ContextMenuItemView,
         ContextMenuLine
     },
 })

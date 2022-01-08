@@ -1,69 +1,69 @@
 <template>
-    <ContextMenu v-bind="{ x, y }">
-        <ContextMenuItem @click="openMember">
+    <ContextMenuView v-bind="{ x, y }">
+        <ContextMenuItemView @click="openMember">
             Openen
             <span slot="right" class="icon info" />
-        </ContextMenuItem>
+        </ContextMenuItemView>
 
         <template v-if="hasWrite">
-            <ContextMenuItem @click="editMember">
+            <ContextMenuItemView @click="editMember">
                 Gegevens wijzigen
                 <span slot="right" class="icon edit" />
-            </ContextMenuItem>
+            </ContextMenuItemView>
 
-            <ContextMenuItem @click="changeGroup">
+            <ContextMenuItemView @click="changeGroup">
                 Inschrijvingen wijzigen
                 <span slot="right" class="icon sync" />
-            </ContextMenuItem>
+            </ContextMenuItemView>
         </template>
 
         <template v-if="member.details && member.details.parents.length > 0">
             <ContextMenuLine />
-            <ContextMenuItem v-for="(parent, index) in member.details.parents" :key="index" @click="call(parent.phone)">
+            <ContextMenuItemView v-for="(parent, index) in member.details.parents" :key="index" @click="call(parent.phone)">
                 Bel {{ parent.firstName }} ({{ ParentTypeHelper.getName(parent.type) }})
-            </ContextMenuItem>
-            <ContextMenuItem @click="openSMS('parents')">
+            </ContextMenuItemView>
+            <ContextMenuItemView @click="openSMS('parents')">
                 Ouders SMS'en
-            </ContextMenuItem>
-            <ContextMenuItem @click="openMail">
+            </ContextMenuItemView>
+            <ContextMenuItemView @click="openMail">
                 Ouders e-mailen
-            </ContextMenuItem>
+            </ContextMenuItemView>
         </template>
         <template v-else-if="member.details && member.details.emergencyContacts.length > 0">
             <ContextMenuLine />
-            <ContextMenuItem v-for="contact in member.details.emergencyContacts" :key="contact.id" @click="call(contact.phone)">
+            <ContextMenuItemView v-for="contact in member.details.emergencyContacts" :key="contact.id" @click="call(contact.phone)">
                 Bel {{ contact.name }} (noodcontact)
-            </ContextMenuItem>
+            </ContextMenuItemView>
         </template>
 
         <template v-if="member.details && member.details.phone">
             <ContextMenuLine />
-            <ContextMenuItem @click="call(member.details.phone)">
+            <ContextMenuItemView @click="call(member.details.phone)">
                 Bel {{ member.details.firstName }}
-            </ContextMenuItem>
-            <ContextMenuItem @click="openSMS('members')">
+            </ContextMenuItemView>
+            <ContextMenuItemView @click="openSMS('members')">
                 SMS {{ member.details.firstName }}
-            </ContextMenuItem>
+            </ContextMenuItemView>
         </template>
 
         <ContextMenuLine v-if="hasWrite || canDelete" />
 
-        <ContextMenuItem v-if="hasWrite" @click="deleteRegistration">
+        <ContextMenuItemView v-if="hasWrite" @click="deleteRegistration">
             Uitschrijven
             <span slot="right" class="icon unregister" />
-        </ContextMenuItem>
-        <ContextMenuItem v-if="canDelete" @click="deleteData">
+        </ContextMenuItemView>
+        <ContextMenuItemView v-if="canDelete" @click="deleteData">
             <span slot="right" class="icon trash" />
             Verwijderen
-        </ContextMenuItem>
-    </ContextMenu>
+        </ContextMenuItemView>
+    </ContextMenuView>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageButton, ContextMenu, Toast } from "@stamhoofd/components";
-import { ContextMenuItem } from "@stamhoofd/components";
+import { CenteredMessage, CenteredMessageButton, ContextMenuView, Toast } from "@stamhoofd/components";
+import { ContextMenuItemView } from "@stamhoofd/components";
 import { ContextMenuLine } from "@stamhoofd/components";
 import { getPermissionLevelNumber, Group, MemberWithRegistrations, ParentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -79,8 +79,8 @@ import MemberView from "./MemberView.vue";
 
 @Component({
     components: {
-        ContextMenu,
-        ContextMenuItem,
+        ContextMenuView,
+        ContextMenuItemView,
         ContextMenuLine,
     },
 })

@@ -1,26 +1,26 @@
 <template>
-    <ContextMenu v-bind="{ x, y, xPlacement, yPlacement }">
-        <ContextMenuItem @click="setPermission('read')">
+    <ContextMenuView v-bind="{ x, y, xPlacement, yPlacement }">
+        <ContextMenuItemView @click="setPermission('read')">
             Bekijken
-        </ContextMenuItem>
-        <ContextMenuItem @click="setPermission('write')">
+        </ContextMenuItemView>
+        <ContextMenuItemView @click="setPermission('write')">
             Bekijken en bewerken
-        </ContextMenuItem>
-        <ContextMenuItem @click="setPermission('full')">
+        </ContextMenuItemView>
+        <ContextMenuItemView @click="setPermission('full')">
             Volledige toegang
-        </ContextMenuItem>
-    </ContextMenu>
+        </ContextMenuItemView>
+    </ContextMenuView>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, ContextMenuLine, Spinner } from "@stamhoofd/components";
+import { ContextMenuView, ContextMenuItemView, ContextMenuLine, Spinner } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
     components: {
-        ContextMenu,
-        ContextMenuItem,
+        ContextMenuView,
+        ContextMenuItemView,
         ContextMenuLine,
         Spinner
     },

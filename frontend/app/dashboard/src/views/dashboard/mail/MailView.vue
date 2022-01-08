@@ -1,77 +1,118 @@
 <template>
-    <SaveView class="mail-view" title="E-mailen" save-text="Versturen" @save="send">
-        <h1 class="style-navigation-title with-icons">
-            <span>E-mailen</span>
-            <span class="style-bubble">{{ recipients.length }}</span>
+    <EditorView class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" @save="send">
+        <h1 class="style-navigation-title">
+            Nieuwe e-mail
         </h1>
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <p v-if="hardBounces.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openHardBounces">
-            {{ hardBounces.length != 1 ? hardBounces.length+' e-mailadressen zijn' : 'Eén e-mailadres is' }} ongeldig. Deze worden uitgesloten.
-            <span class="button text inherit-color">
-                Toon
-            </span>
-        </p>
+        <!-- Buttons -->
+        <template slot="buttons">
+            <button v-if="!$isMobile" v-tooltip="'Voorbeeld tonen'" class="button navigation icon eye" type="button" @click="openPreview" />
+            <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
+                <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
+            </label>
+        </template>
 
-        <p v-if="spamComplaints.length > 0" class="warning-box warning-box selectable with-button limit-height" @click="openSpamComplaints">
-            {{ spamComplaints.length != 1 ? spamComplaints.length +' e-mailadressen hebben' : 'Eén e-mailadres heeft' }} eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.
-            <span class="button text inherit-color">
-                Toon
-            </span>
-        </p>
+        <!-- List -->
+        <template slot="list">
+            <STListItem v-if="members.length > 0" class="no-padding right-stack">
+                <div class="list-input-box">
+                    <span>Aan:</span>
 
-        <p v-if="!hasFirstName" class="warning-box warning-box selectable with-button limit-height" @click="showMissingFirstNames">
-            Niet elk e-mailadres heeft een gekoppelde naam
-            <span class="button text inherit-color">
-                Toon
-            </span>
-        </p>
-        <p v-if="webshop" class="info-box" v-text="'Gebruik slimme vervangingen in jouw tekst: {{nr}} wordt automatisch vervangen door het bestelnummer van de klant. Test het uit en klik op \'Voorbeeld\'.'" />
+                    <div class="list-input" @click="showToMenu">
+                        <span>{{ memberFilterDescription }}</span>
+                        <span class="icon arrow-down-small gray" />
+                    </div>
+                </div>
+                <span slot="right" class="style-description-small">{{ recipients.length }}</span>
+                <button v-if="hasToWarnings" slot="right" class="button icon warning yellow" type="button" @click="showToWarnings" />
+            </STListItem>
+            <STListItem class="no-padding" element-name="label">
+                <div class="list-input-box">
+                    <span>Onderwerp:</span>
+                    <input id="mail-subject" v-model="subject" class="list-input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
+                </div>
+            </STListItem>
+            <STListItem v-if="emails.length > 0" class="no-padding" element-name="label">
+                <div class="list-input-box">
+                    <span>Van:</span>
 
+                    <div class="input-icon-container right icon arrow-down-small gray">
+                        <select v-model="emailId" class="list-input">
+                            <option v-for="email in emails" :key="email.id" :value="email.id">
+                                {{ email.name ? (email.name+" <"+email.email+">") : email.email }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
 
+                <button v-if="fullAccess" slot="right" class="button text" type="button" @click="manageEmails">
+                    <span class="icon settings" />
+                </button>
+            </STListItem>
+        </template>
 
-        <Checkbox v-if="members.length > 0 && hasMinors" v-model="includeMinorMembers">
-            E-mail ook naar minderjarige leden<template v-if="hasUnknownAge">
-                (of leden met onbekende leeftijd)
-            </template> zelf sturen
-        </Checkbox>
+        <!-- Editor footer -->
+        <template slot="footer">
+            <!-- Buttons that are included in the e-mail -->
+            <div v-if="addButton && orders.length == 0" ref="footerButton" key="loginButton" v-tooltip="'Klik om te verwijderen'" class="disabled" title="Knop voor inschrijvingen" @click="addButton = false">
+                <hr>
+                <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
+                <p class="style-description-small button-description">
+                    <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
+                </p>
+            </div>
+            <div v-else-if="addButton && orders.length > 0 && webshop" ref="footerButton" key="orderButton" class="disabled" title="Knop voor bestelling">
+                <hr>
+                <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
+                <p class="style-description-small button-description">
+                    <em>Via de bovenstaande knop kan je jouw bestelling bekijken.</em>
+                </p>
+            </div>
 
-        <Checkbox v-if="members.length > 0 && hasGrownUpParents" v-model="includeGrownUpParents">
-            E-mail ook naar ouders van 18+ leden<template v-if="hasUnknownAge">
-                (of leden met onbekende leeftijd)
-            </template> sturen
-        </Checkbox>
+            <!-- E-mail attachments -->
+            <STList v-if="files.length > 0">
+                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
+                    <span slot="left" class="icon file" />
+                    {{ file.name }}
 
-        <Checkbox v-if="members.length > 0" v-model="addButton" :disabled="!hasAllUsers">
-            <h3 class="style-title-list">
-                Voeg magische inlogknop toe (aangeraden)
-            </h3>
-            <p v-if="addButton" class="style-description-small">
-                Als een lid op de knop duwt, wordt hij automatisch door het proces geloodst om in te loggen of te registreren zodat hij aan de gegevens kan die al in het systeem zitten. De tekst die getoond wordt is maar als voorbeeld en verschilt per persoon waar je naartoe verstuurt.
-            </p>
-        </Checkbox>
-        <p v-if="!hasAllUsers && members.length > 0" class="style-description-small">
-            Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je de knop niet toevoegen.
-        </p>
+                    <template #right>
+                        <span>{{ file.size }}</span>
+                        <span><button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" /></span>
+                    </template>
+                </STListItem>
+            </STList>
 
-        <Checkbox v-if="orders.length > 0 && webshop" v-model="addButton">
-            <h3 v-if="webshop.meta.ticketType == 'None'" class="style-title-list">
-                Voeg knop naar bestelling toe
-            </h3>
-            <h3 v-else class="style-title-list">
-                Voeg knop naar tickets en bestelling toe
-            </h3>
-            <p v-if="addButton" class="style-description-small">
+            <!-- Button to add smart buttons in e-mail -->
+            <div v-if="!addButton && members.length > 0 && hasAllUsers" key="addButton" class="style-description-small">
+                <button class="button text" type="button" @click="addButton = true">
+                    <span class="icon add" />
+                    <span>Inlogknop toevoegen</span>
+                </button>
+                Knop waarmee ontvangers automatisch kunnen inloggen op de registratiepagina of een account kunnen aanmaken.
+            </div>
+
+            <div v-if="!addButton && orders.length > 0 && webshop" key="addButton-webshop" class="style-description-small">
+                <button class="button text" type="button" @click="addButton = true">
+                    <span class="icon add" />
+                    <span v-if="webshop.meta.ticketType == 'None'">
+                        Voeg knop naar bestelling toe
+                    </span>
+                    <span v-else>
+                        Voeg knop naar tickets en bestelling toe
+                    </span>
+                </button>
                 <template v-if="webshop.meta.ticketType == 'None'">
                     Daar staan ook de betaalinstructies indien de bestelling nog niet betaald werd.
                 </template>
                 <template v-else>
                     Als de tickets nog niet betaald werden, zal de knop enkel naar de bestelling wijzen (met daar de betaalinstructies).
                 </template>
-            </p>
-        </Checkbox>
+            </div>
+        </template>
 
+        <!-- Warnings and errors -->
         <template v-if="emails.length == 0">
             <p v-if="fullAccess" class="warning-box selectable with-button" @click="manageEmails">
                 Stel eerst jouw e-mailadressen in
@@ -85,80 +126,26 @@
             </p>
         </template>
 
-        <div class="split-inputs">
-            <STInputBox title="Onderwerp" error-fields="subject" :error-box="errorBox">
-                <input id="mail-subject" v-model="subject" class="input" type="text" placeholder="Typ hier het onderwerp van je e-mail">
-            </STInputBox>
-            <STInputBox v-if="emails.length > 0" title="Versturen vanaf">
-                <button v-if="fullAccess" slot="right" class="button text" type="button" @click="manageEmails">
-                    <span class="icon settings" />
-                    <span>Wijzigen</span>
-                </button>
-                <Dropdown v-model="emailId">
-                    <option v-for="email in emails" :key="email.id" :value="email.id">
-                        {{ email.name ? (email.name+" <"+email.email+">") : email.email }}
-                    </option>
-                </Dropdown>
-            </STInputBox>
-        </div>
+        <p v-if="!hasAllUsers && members.length > 0" class="info-box">
+            Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je geen inlogknop toevoegen in de e-mail.
+        </p>
+
+        <p v-if="webshop && false " class="info-box" v-text="'Gebruik slimme vervangingen in jouw tekst: {{nr}} wordt automatisch vervangen door het bestelnummer van de klant. Test het uit en klik op \'Voorbeeld\'.'" />
 
         <p v-if="fileWarning" class="warning-box">
             We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
         </p>
-
-        <STInputBox id="message-title" title="Bericht" error-fields="message" :error-box="errorBox" class="max">
-            <label slot="right" class="button text">
-                <span class="icon add" />
-                <span>Bijlage</span>
-                <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
-            </label>
-        </STInputBox>
-        
-        <MailEditor ref="editor" :has-first-name="hasFirstName">
-            <div v-if="addButton && orders.length == 0" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
-                <hr>
-                <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
-                <p class="style-description-small button-description">
-                    <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
-                </p>
-            </div>
-            <div v-if="addButton && orders.length > 0 && webshop" slot="footer" ref="footerButton" class="disabled" title="Knop voor inschrijvingen">
-                <hr>
-                <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
-                <p class="style-description-small button-description">
-                    <em>Via de bovenstaande knop kan je jouw bestelling bekijken.</em>
-                </p>
-            </div>
-            <template v-if="files.length > 0" slot="footer">
-                <hr>
-                <STList>
-                    <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
-                        <span slot="left" class="icon file" />
-                        {{ file.name }}
-
-                        <template #right>
-                            <span>{{ file.size }}</span>
-                            <span><button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" /></span>
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
-        </MailEditor>
-
-        <button slot="toolbar" class="button secundary" type="button" @click="openPreview">
-            <span class="icon eye" />
-            <span>Voorbeeld</span>
-        </button>
-    </SaveView>
+    </EditorView>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartVariable, EditorView, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
 import { EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { OrderStatusHelper } from '@stamhoofd/structures/esm/dist';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -180,17 +167,37 @@ class TmpFile {
     }
 }
 
+enum MemberFilter {
+    All = "all",
+    GrownUps = "GrownUps",
+    None = "none"
+}
+
+enum ParentFilter {
+    All = "all",
+    Minors = "Minors",
+    None = "none"
+}
+
+enum UserFilter {
+    All = "all",
+    Existing = "Existing",
+    None = "none"
+}
+
 @Component({
     components: {
-        SaveView,
+        EditorView,
         STInputBox,
         STList,
         STListItem,
         Checkbox,
         Dropdown,
         STErrorsDefault,
-        MailEditor: () => import(/* webpackChunkName: "MailEditor" */ './MailEditor.vue'),
     },
+    directives: {
+        Tooltip: TooltipDirective
+    }
 })
 export default class MailView extends Mixins(NavigationMixin) {
     @Prop({ default: () => []})
@@ -225,14 +232,215 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     files: TmpFile[] = []
 
-    includeGrownUpParents = false
-    includeMinorMembers = false
-
     checkingBounces = false
     emailInformation: EmailInformation[] = []
 
-    deleteAttachment(index) {
+    memberFilter = MemberFilter.GrownUps
+    parentFilter = ParentFilter.Minors
+    userFilter = UserFilter.All
+
+    get smartVariables() {
+        const variables = [
+            new EditorSmartVariable({
+                id: "firstName", 
+                name: "Voornaam", 
+                example: this.recipients.find(r => r.firstName && r.firstName.length > 0)?.firstName ?? undefined,
+            }),
+            new EditorSmartVariable({
+                id: "lastName", 
+                name: "Achternaam", 
+                example: this.recipients.find(r => r.lastName && r.lastName.length > 0)?.lastName ?? undefined,
+            })
+        ]
+
+        if (this.orders.length > 0) {
+            variables.push(new EditorSmartVariable({
+                id: "orderNumber", 
+                name: "Bestelnummer", 
+                example: this.orders[0].number?.toString(),
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "orderPrice", 
+                name: "Bestelbedrag", 
+                example: this.orders[0].data.totalPrice ? Formatter.price(this.orders[0].data.totalPrice) : undefined,
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "orderStatus", 
+                name: "Bestelstatus", 
+                example: this.orders[0].status ? OrderStatusHelper.getName(this.orders[0].status) : undefined,
+            }))
+        }
+
+        return variables
+    }
+
+    getMemberFilter(filter: MemberFilter, none = true): string | undefined {
+        switch (filter) {
+            case MemberFilter.All:
+                return "alle leden"
+            case MemberFilter.GrownUps:
+                return "alleen volwassen leden"
+            case MemberFilter.None:
+                if (none) {
+                    return "geen leden"
+                }
+                break
+        }
+    }
+
+    getParentFilter(filter: ParentFilter, none = true): string | undefined {
+        switch (filter) {
+            case ParentFilter.All:
+                return "alle ouders"
+            case ParentFilter.None:
+                if (none) {
+                    return "geen ouders"
+                }
+                break
+            case ParentFilter.Minors:
+                return "ouders van minderjarige leden"
+        }
+    }
+
+    getUserFilter(filter: UserFilter, none = true): string | undefined {
+        switch (filter) {
+            case UserFilter.All:
+                return "alle accounts"
+            case UserFilter.Existing:
+                return "bestaande accounts"
+            case UserFilter.None:
+                if (none) {
+                    return "geen accounts"
+                }
+                break
+        }
+    }
+
+    get hasToWarnings() {
+        return this.hardBounces.length > 0 || this.spamComplaints.length > 0 || !this.hasFirstName
+    }
+
+    showToWarnings() {
+        if (this.hardBounces.length > 0) {
+            new Toast((this.hardBounces.length != 1 ? this.hardBounces.length+' e-mailadressen zijn' : 'Eén e-mailadres is')+" ongeldig. Deze worden uitgesloten.", "warning yellow")
+                .setButton(new ToastButton("Toon", () => {
+                    this.openHardBounces()
+                }))
+                .setHide(10*1000)
+                .show()
+        }
+        if (this.spamComplaints.length > 0) {
+            new Toast((this.hardBounces.length != 1 ? this.hardBounces.length+' e-mailadressen hebben' : 'Eén e-mailadres heeft')+" eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.", "warning yellow")
+                .setButton(new ToastButton("Toon", () => {
+                    this.openSpamComplaints()
+                }))
+                .setHide(10*1000)
+                .show()
+        }
+        if (!this.hasFirstName) {
+            new Toast("Bij niet elk e-mailadres staat er een voornaam in het systeem. Daarom kan je geen automatische begroeting toevoegen in de e-mail.", "warning yellow")
+                .setButton(new ToastButton("Toon", () => {
+                    this.showMissingFirstNames()
+                }))
+                .setHide(10*1000)
+                .show()
+        }
+    }
+
+    get memberFilterDescription() {
+        const list: string[] = []
+
+        const mFilter = this.getMemberFilter(this.memberFilter, false)
+        if (mFilter) {
+            list.push(mFilter)
+        }
+
+        const pFilter = this.getParentFilter(this.parentFilter, false)
+        if (pFilter) {
+            list.push(pFilter)
+        }
+
+        const uFilter = this.getUserFilter(this.userFilter, false)
+        if (uFilter) {
+            list.push(uFilter)
+        }
+
+        if (list.length == 0) {
+            return "Geen ontvangers"
+        }
+
+        list[0] = Formatter.capitalizeFirstLetter(list[0])
+        return Formatter.joinLast(list, ", ", " en ")
+    }
+
+    deleteAttachment(index: number) {
         this.files.splice(index, 1)
+    }
+
+    showToMenu(event) {
+        const m = this
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: Formatter.capitalizeFirstLetter(this.getMemberFilter(this.memberFilter)!),
+                    childMenu: new ContextMenu([
+                        Object.values(MemberFilter).map(filter => 
+                            new ContextMenuItem({
+                                name: Formatter.capitalizeFirstLetter(this.getMemberFilter(filter)!),
+                                selected: filter === this.memberFilter,
+                                action() {
+                                    this.selected = true
+                                    if (this.selected) {
+                                        m.memberFilter = filter
+                                    }
+                                    return false
+                                }
+                            })
+                        ),
+                    ])
+                }),
+                new ContextMenuItem({
+                    name: Formatter.capitalizeFirstLetter(this.getParentFilter(this.parentFilter)!),
+                    childMenu: new ContextMenu([
+                        Object.values(ParentFilter).map(filter => 
+                            new ContextMenuItem({
+                                name: Formatter.capitalizeFirstLetter(this.getParentFilter(filter)!),
+                                selected: filter === this.parentFilter,
+                                action() {
+                                    this.selected = true
+                                    if (this.selected) {
+                                        m.parentFilter = filter
+                                    }
+                                    return false
+                                }
+                            })
+                        ),
+                    ])
+                }),
+                new ContextMenuItem({
+                    name: Formatter.capitalizeFirstLetter(this.getUserFilter(this.userFilter)!),
+                    childMenu: new ContextMenu([
+                        Object.values(UserFilter).map(filter => 
+                            new ContextMenuItem({
+                                name: Formatter.capitalizeFirstLetter(this.getUserFilter(filter)!),
+                                selected: filter === this.userFilter,
+                                action() {
+                                    this.selected = true
+                                    if (this.selected) {
+                                        m.userFilter = filter
+                                    }
+                                    return false
+                                }
+                            })
+                        ),
+                    ])
+                }),
+            ]
+        ])
+
+        menu.show({ button: event.currentTarget }).catch(console.error)
     }
 
     async checkBounces() {
@@ -263,16 +471,8 @@ export default class MailView extends Mixins(NavigationMixin) {
         return this.emailInformation.filter(e => e.markedAsSpam).map(e => e.email)
     }
 
-    get hasUnknownAge() {
-        return !!this.members.find(m => m.details.age === null)
-    }
-
-    get hasMinors() {
-        return !![...this.allRecipients.values()].find(r => r.type === "minor")
-    }
-
-    get hasGrownUpParents() {
-        return !![...this.allRecipients.values()].find(r => r.type === "grownUpParent")
+    get hasGrownUps() {
+        return !!this.members.find(m => m.details.defaultAge < 18)
     }
 
     get fullAccess() {
@@ -319,6 +519,11 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     mounted() {
         if (this.members.length > 0) {
+            if (!this.hasGrownUps) {
+                this.memberFilter = MemberFilter.None
+                this.parentFilter = ParentFilter.All
+            }
+
             // Check if all the parents + members already have access (and an account) when they should have access
             MemberManager.updateMembersAccess(this.members).then(() => {
                 // We created some users, so we might check the button again
@@ -466,6 +671,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                                 value: order.data.customer.firstName ?? ""
                             }),
                             Replacement.create({
+                                token: "lastName",
+                                value: order.data.customer.lastName ?? ""
+                            }),
+                            Replacement.create({
                                 token: "email",
                                 value: email
                             }),
@@ -486,13 +695,87 @@ export default class MailView extends Mixins(NavigationMixin) {
         
 
         for (const member of this.members) {
-            const isMinor = (member.details.age == null || member.details.age < 18 || (member.details.age < 24 && !member.details.address && !member.details.email))
+            const isMinor = (member.details.age == null || member.details.age < 18)
+
+            if (this.parentFilter !== ParentFilter.None && !(this.parentFilter === ParentFilter.Minors && !isMinor)) {
+                for (const parent of member.details.parents) {
+                    if (!parent.email) {
+                        continue;
+                    }
+
+                    const existing = recipients.get(parent.email.toLowerCase())
+
+                    if (existing && existing.firstName) {
+                        // Mark this e-mail for deletion
+                        continue
+                    }
+
+                    recipients.set(parent.email.toLowerCase(), Recipient.create({
+                        firstName: parent.firstName,
+                        lastName: parent.lastName,
+                        email: parent.email.toLowerCase(),
+                        replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: parent.firstName
+                            }),
+                            Replacement.create({
+                                token: "email",
+                                value: parent.email.toLowerCase()
+                            })
+                        ],
+                        userId: existing?.userId,
+                        type: "parent"
+                    }))
+                }
+            }
+
+            if (member.details.email) {
+                if (this.memberFilter !== MemberFilter.None && !(this.memberFilter === MemberFilter.GrownUps && isMinor)) {
+                    // Create a loop for convenience (to allow break/contniue)
+                    for (const email of [member.details.email.toLowerCase()]) {
+                        const existing = recipients.get(email)
+                        if (existing && existing.firstName) {
+                            if (existing.type === "parent" && isMinor) {
+                                // This is a duplicate email address that was also added to the member.
+                                // Keep this as a parent email address
+                                continue
+                            }
+
+                            // Mark this e-mail as a member's one
+                            existing.type = "member"
+
+                            continue
+                        }
+                        recipients.set(
+                            email, 
+                            Recipient.create({
+                                firstName: member.details.firstName,
+                                lastName: member.details.lastName,
+                                email,
+                                replacements: [
+                                    Replacement.create({
+                                        token: "firstName",
+                                        value: member.details.firstName
+                                    }),
+                                    Replacement.create({
+                                        token: "email",
+                                        value: email
+                                    })
+                                ],
+                                userId: existing?.userId ?? null,
+                                type: "member"
+                            })
+                        )
+                    }
+                }
+            }
 
             for (const user of member.users) {
                 if (!user.email) {
                     continue;
                 }
-
+               
                 const email = user.email.toLowerCase()
                 const existing = recipients.get(email)
 
@@ -503,11 +786,24 @@ export default class MailView extends Mixins(NavigationMixin) {
                     if (!existing.firstName && user.firstName) {
                         existing.firstName = user.firstName
                     }
+
+                    if (!existing.lastName && user.lastName) {
+                        existing.lastName = user.lastName
+                    }
+                    continue
+                }
+
+                if (this.userFilter === UserFilter.None) {
+                    continue
+                }
+
+                if (this.userFilter === UserFilter.Existing && user.publicKey === null) {
                     continue
                 }
 
                 recipients.set(email, Recipient.create({
                     firstName: user.firstName,
+                    lastName: user.lastName,
                     email,
                     replacements: [
                         Replacement.create({
@@ -515,92 +811,17 @@ export default class MailView extends Mixins(NavigationMixin) {
                             value: user.firstName ?? ""
                         }),
                         Replacement.create({
+                            token: "lastName",
+                            value: user.lastName ?? ""
+                        }),
+                        Replacement.create({
                             token: "email",
                             value: email
                         })
                     ],
                     // Create sign-in replacement 'signInUrl'
-                    userId: user.id,
-                    type: "user"
+                    userId: user.id
                 }))
-            }
-        
-            for (const parent of member.details.parents) {
-                if (!parent.email) {
-                    continue;
-                }
-
-                const existing = recipients.get(parent.email.toLowerCase())
-                let type = isMinor ? 'minorParent' : 'grownUpParent'
-
-                if (existing && existing.type === "minorParent") {
-                    // If this was a minor parent, keep it as a minor parent
-                    type = "minorParent"
-                }
-
-                if (existing && existing.firstName) {
-                    // Mark this e-mail for deletion
-
-                    if (existing.type === "user" || (type == "minorParent" && existing.type == "grownUpParent")) {
-                        existing.type = type
-                    }
-                    continue
-                }
-
-                recipients.set(parent.email.toLowerCase(), Recipient.create({
-                    firstName: parent.firstName,
-                    email: parent.email.toLowerCase(),
-                    replacements: [
-                        Replacement.create({
-                            token: "firstName",
-                            value: parent.firstName
-                        }),
-                        Replacement.create({
-                            token: "email",
-                            value: parent.email.toLowerCase()
-                        })
-                    ],
-                    userId: existing?.userId,
-                    type
-                }))
-            }
-
-            if (member.details.email) {
-                // Create a loop for convenience (to allow break/contniue)
-                for (const email of [member.details.email.toLowerCase()]) {
-                    const existing = recipients.get(email)
-                    const type = isMinor ? 'minor' : 'grownUp'
-                    if (existing && existing.firstName) {
-                        if (existing.type !== "user" && isMinor) {
-                            // This is a duplicate email address that was also added to the member.
-                            // Keep this as a parent email address
-                            continue
-                        }
-
-                        // Mark this e-mail as a member's one
-                        existing.type = type
-
-                        continue
-                    }
-                    recipients.set(
-                        email, 
-                        Recipient.create({
-                            firstName: member.details.firstName,
-                            email,
-                            replacements: [
-                                Replacement.create({
-                                    token: "firstName",
-                                    value: member.details.firstName
-                                }),
-                                Replacement.create({
-                                    token: "email",
-                                    value: email
-                                })
-                            ],
-                            userId: existing?.userId ?? null,
-                            type
-                        }))
-                }
             }
         }
       
@@ -635,26 +856,6 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     get recipients(): Recipient[] {
         const recipients: Map<string, Recipient> = new Map(this.allRecipients)
-
-        // Only at the end, remove minor / parents
-        if (!this.includeGrownUpParents) {
-            // Remove parents
-            for (const [email, recipient] of recipients) {
-                if (recipient.type == "grownUpParent") {
-                    recipients.delete(email)
-                }
-            }
-        }
-
-        if (!this.includeMinorMembers) {
-            // Remove minor members
-            for (const [email, recipient] of recipients) {
-                if (recipient.type == "minor") {
-                    recipients.delete(email)
-                }
-            }
-        }
-
         return Array.from(recipients.values())
     }
 
@@ -676,7 +877,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
         }
 
-        let base = editor.getHTML();
+        let base: string = editor.getHTML();
 
         // Append footer HTML if needed
         if ((withButton ?? this.addButton) && this.$refs.footerButton) {
@@ -818,6 +1019,11 @@ export default class MailView extends Mixins(NavigationMixin) {
         flex-grow: 1;
         flex-direction: column;
 
+        .mail-hr {
+            margin: 0;
+            margin-right: calc(-1 * var(--st-horizontal-padding, 40px));
+        }
+
         #message-title {
             padding-bottom: 0;
         }
@@ -837,7 +1043,6 @@ export default class MailView extends Mixins(NavigationMixin) {
                 flex-direction: column;
 
                 & > .editor-content {
-                    flex-grow: 1;
                     display: flex;
                     flex-direction: column;
 

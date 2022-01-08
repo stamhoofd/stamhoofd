@@ -1,24 +1,24 @@
 <template>
-    <ContextMenu v-bind="$attrs">
-        <ContextMenuItem v-for="column of sortedColumns" :key="column.id" @click="setSortByColumn(column)">
+    <ContextMenuView v-bind="$attrs">
+        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" @click="setSortByColumn(column)">
             <span v-if="getSortByColumn(column)" slot="left" :class="'icon '+getSortDirectionIcon()" />
             <span v-else slot="left" class="icon" />
             {{ column.name }}
-        </ContextMenuItem>
-    </ContextMenu>
+        </ContextMenuItemView>
+    </ContextMenuView>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,ContextMenu, ContextMenuItem, ContextMenuLine, TableView } from "@stamhoofd/components";
+import { Checkbox,ContextMenuItemView, ContextMenuLine, ContextMenuView, TableView } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { Column } from "./Column";
 
 @Component({
     components: {
-        ContextMenu,
-        ContextMenuItem,
+        ContextMenuView,
+        ContextMenuItemView,
         ContextMenuLine,
         Checkbox
     },

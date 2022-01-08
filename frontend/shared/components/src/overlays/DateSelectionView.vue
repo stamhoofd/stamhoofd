@@ -1,5 +1,5 @@
 <template>
-    <ContextMenu v-bind="{ x, y, xPlacement: 'left', preferredWidth }">
+    <ContextMenuView v-bind="{ x, y, xPlacement: 'left', preferredWidth }">
         <aside class="date-selection-view">
             <header>
                 <button class="button icon gray arrow-left" @click="previousMonth" />
@@ -23,7 +23,7 @@
                 </div>
             </div>
         </aside>
-    </ContextMenu>
+    </ContextMenuView>
 </template>
 
 <script lang="ts">
@@ -31,11 +31,11 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Formatter } from "@stamhoofd/utility"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import ContextMenu from "./ContextMenu.vue";
+import ContextMenuView from "./ContextMenuView.vue";
 
 @Component({
     components: {
-        ContextMenu
+        ContextMenuView
     },
 })
 export default class DateSelectionView extends Mixins(NavigationMixin) {

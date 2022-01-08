@@ -1,48 +1,43 @@
 <template>
     <div class="editor">
-        <editor-menu-bubble v-slot="{ commands, isActive, menu, getMarkAttrs }" class="menu-bubble" :editor="editor">
-            <div :class="{ 'is-active': menu.isActive }" :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`">
-                <form v-if="linkMenuIsActive" class="menububble__form" @submit.prevent="setLinkUrl(commands.link, linkUrl)">
-                    <input ref="linkInput" v-model="linkUrl" class="menububble__input" type="text" placeholder="https://" @keydown.esc="hideLinkMenu">
-                    <button type="button" class="icon trash" @click="setLinkUrl(commands.link, null)" />
-                </form>
+        <div ref="content" class="editor-container">
+            <div class="editor-button-bar">
+                <button class="button icon text" :class="{ 'is-active': editor.isActive('bold') }" type="button" @click="editor.chain().focus().toggleBold().run()" />
+                              
+                <hr>
 
-                <template v-else>
-                    <button :class="{ 'is-active': isActive.bold() }" class="icon bold" @click="commands.bold" />
-                    <button :class="{ 'is-active': isActive.italic() }" class="icon italic" @click="commands.italic" />
-                    <button :class="{ 'is-active': isActive.underline() }" class="icon underline" @click="commands.underline" />
-                    <button :class="{ 'is-active': isActive.link() }" class="icon link" @click="showLinkMenu(getMarkAttrs('link'))" />
+                <button class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
+                <button class="button icon link" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
 
-                    <button :class="{ 'is-active': isActive.heading({ level: 1 }) }" @click="commands.heading({ level: 1 })">
-                        H1
-                    </button>
-                    <button :class="{ 'is-active': isActive.heading({ level: 2 }) }" @click="commands.heading({ level: 2 })">
-                        H2
-                    </button>
-                    <button :class="{ 'is-active': isActive.heading({ level: 3 }) }" @click="commands.heading({ level: 3 })">
-                        H3
-                    </button>
-                    <button :class="{ 'is-active': isActive.bullet_list() }" class="icon ul" @click="commands.bullet_list" />
-                    <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
-                </template>
+                <hr v-if="!!$slots.buttons">
+
+                <slot name="buttons" />
+
+
+                <hr>
+                
+                <button class="button icon undo" type="button" @click="editor.chain().focus().undo().run()" />
+                <button class="button icon redo" type="button" @click="editor.chain().focus().redo().run()" />
             </div>
-        </editor-menu-bubble>
-        <editor-floating-menu v-slot="{ commands, isActive, menu }" :editor="editor">
-            <div class="floating-menu" :class="{ 'is-active': menu.isActive }" :style="`top: ${menu.top}px`">
-                <button :class="{ 'is-active': isActive.heading({ level: 1 }) }" @click="commands.heading({ level: 1 })">
-                    H1
-                </button>
-                <button :class="{ 'is-active': isActive.heading({ level: 2 }) }" @click="commands.heading({ level: 2 })">
-                    H2
-                </button>
-                <button :class="{ 'is-active': isActive.heading({ level: 3 }) }" @click="commands.heading({ level: 3 })">
-                    H3
-                </button>
-                <button :class="{ 'is-active': isActive.bullet_list() }" class="icon ul" @click="commands.bullet_list" />
-                <button :class="{ 'is-active': isActive.ordered_list() }" class="icon ol" @click="commands.ordered_list" />
+
+            <div v-if="false" class="editor-button-bar">
+                <button class="button icon bold" :class="{ 'is-active': editor.isActive('bold') }" type="button" @click="editor.chain().focus().toggleBold().run()" />
+                <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()" />
+                <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('strike') }" @click="editor.chain().focus().toggleUnderline().run()" />
+                
+                <hr>
+
+                <button class="button icon clear" type="button" @click="editor.chain().focus().unsetAllMarks().run()" />
+                <button class="button icon paragraph" type="button" :class="{ 'is-active': editor.isActive('paragraph') }" @click="editor.chain().focus().setParagraph().run()" />
+                <button class="button icon h1" type="button" :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }" @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" />
+                <button class="button icon h2" type="button" :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()" />
+                <button class="button icon h3" type="button" :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()" />
+                
+                <hr>
+
+                <button class="button icon ul" type="button" :class="{ 'is-active': editor.isActive('bulletList') }" @click="editor.chain().focus().toggleBulletList().run()" />
+                <button class="button icon ol" type="button" :class="{ 'is-active': editor.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()" />
             </div>
-        </editor-floating-menu>
-        <div ref="content" class="editor-container input">
             <editor-content :editor="editor" class="editor-content" />
             <footer>
                 <slot name="footer" />
@@ -52,26 +47,17 @@
 </template>
 
 <script lang="ts">
-import { Editor, EditorContent, EditorFloatingMenu, EditorMenuBubble } from "tiptap";
-import {
-    Bold,
-    BulletList,
-    HardBreak,
-    Heading,
-    History,
-    Italic,
-    Link,
-    ListItem,
-    OrderedList,
-    Underline,
-} from "tiptap-extensions";
+import StarterKit from '@tiptap/starter-kit'
+import { Editor, EditorContent } from '@tiptap/vue-2'
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
-import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
+//import ReplacePlaceholderMark from "./ReplacePlaceholderMark";
 
 @Component({
-    components: { EditorContent, EditorMenuBubble, EditorFloatingMenu },
+    components: {
+        EditorContent,
+    },
 })
 export default class MailEditor extends Vue {
     linkUrl = null
@@ -82,21 +68,11 @@ export default class MailEditor extends Vue {
     
     editor = (() => {
         return new Editor({
+            content: '<p>I’m running Tiptap with Vue.js. 🎉</p>',
             extensions: [
-                new BulletList(),
-                new HardBreak(),
-                new Heading({ levels: [1, 2, 3, 4, 5] }),
-                new ListItem(),
-                new OrderedList(),
-                new Link({ openOnClick: false }),
-                new Bold(),
-                new Italic(),
-                new Underline(),
-                new History(),
-                new ReplacePlaceholderMark(),
+                StarterKit,
             ],
-            content: this.hasFirstName ? '<p>Dag <span data-replace-type="firstName"></span>,</p>' : '',
-        });
+        })
     })();
 
     mounted() {
@@ -139,216 +115,4 @@ export default class MailEditor extends Vue {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
 
-.editor .ProseMirror {
-    max-width: none;
-    padding: 15px 15px;
-    height: auto;
-    min-height: calc($input-height * 4);
-    line-height: normal;
-    outline: none;
-}
-
-.editor .editor-container {
-    padding: 0;
-    height: auto;
-    min-height: calc($input-height * 4);
-    line-height: normal;
-    outline: none;
-
-    user-select: auto;
-    user-select: contain;
-    -webkit-user-select: text;
-    -webkit-user-select: auto;
-    -webkit-touch-callout: default;
-
-    > footer {
-        padding: 0 15px 15px 15px;
-        --st-horizontal-padding: 15px;
-        
-        > div.disabled {
-            user-select: none;
-            cursor: not-allowed;
-            color: $color-gray-4;
-
-            .button {
-                pointer-events: none
-            }
-
-            > hr {
-                @extend .style-hr;
-            }
-
-            .button-description {
-                margin: 10px 0;
-            }
-
-            strong {
-                font-weight: bold;
-            }
-
-            em {
-                font-style: italic;
-            }
-        }
-
-        > hr {
-            @extend .style-hr;
-            margin-bottom: 10px;
-        }
-    }
-}
-
-.editor {
-    position: relative;
-
-    .floating-menu, .menu-bubble {
-        font-size: 14px;
-
-        button {
-            position: relative;
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            text-align: center;
-            line-height: 24px;
-            vertical-align: middle;
-            cursor: pointer;
-            touch-action: manipulation;
-            font-weight: bold;
-            padding: 5px;
-            box-sizing: content-box;
-
-            &::after {
-                position: absolute;
-                content: '';
-                left: 0;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                z-index: -1;
-                border-radius: $border-radius;
-                background: $color-dark;
-                transition: background-color 0.2s, transform 0.2s;
-                transform: scale(0.9, 0.9);
-            }
-
-            &:hover {
-                &::after {
-                    background: $color-gray-4;
-                    transform: scale(1, 1);
-                }
-            }
-
-            &.is-active {
-                &::after {
-                    background: $color-primary;
-                    transform: scale(1, 1);
-                }
-            }
-
-            &:active {
-                &::after {
-                    transform: scale(0.8, 0.8);
-                }
-            }
-        }
-    }
-
-    .floating-menu {
-        position: absolute;
-        transform: translate(-15px, 0);
-        z-index: 100;
-        transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-end;
-        opacity: 0;
-        padding: 8px 15px;
-        right: 15px;
-        pointer-events: none;
-
-        background: $color-dark;
-        border-radius: $border-radius;
-        @extend .style-description;
-        @extend .style-overlay-shadow;
-        color: $color-background;
-
-        &.is-active {
-            pointer-events: initial;
-            visibility: visible;
-            transition: transform 0.2s 0.2s, opacity 0.2s 0.2s, visibility 0.2s step-start 0.2s;
-            opacity: 1;
-            
-            transform: translate(0, 0);
-        }
-    }
-
-    .menu-bubble {
-        position: absolute;
-        visibility: hidden;
-        pointer-events: none;
-        transform: translate(-50%, 5px);
-        z-index: 100;
-
-        background: $color-dark;
-        padding: 8px 15px;
-        border-radius: $border-radius;
-        @extend .style-description;
-        @extend .style-overlay-shadow;
-        color: $color-background;
-        transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-end;
-        opacity: 0;
-
-        &.is-active {
-            pointer-events: initial;
-            visibility: visible;
-            transition: transform 0.2s 0.2s, opacity 0.2s 0.2s, visibility 0.2s step-start 0.2s;
-            opacity: 1;
-            transform: translate(-50%, -5px);
-        }
-    }
-
-    .editor-content {
-        p {
-            margin: 5px 0;
-        }
-
-        strong {
-            font-weight: bold;
-        }
-
-        em {
-            font-style: italic;
-        }
-
-        h1 {
-            @extend .style-title-1;
-        }
-
-        h2 {
-            @extend .style-title-2;
-        }
-
-        h3 {
-            @extend .style-title-small;
-        }
-
-        ol, ul {
-            list-style-position: outside;
-            padding-left: 30px;
-
-        }
-
-        .replace-placeholder {
-            background: $color-gray-3;
-            padding: 3px 5px;
-            font-weight: 600;
-            color: $color-gray-5;
-            border-radius: $border-radius;
-            white-space: nowrap;
-
-            &.ProseMirror-selectednode {
-                background: $color-primary;
-                color: $color-primary-contrast;
-            }
-        }
-    }
-}
 </style>

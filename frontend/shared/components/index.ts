@@ -7,27 +7,33 @@ export * from "./src/errors/Validator"
 
 // Classes
 export * from "./src/EventBus"
+export * from "./src/navigation/EditorSmartVariable"
 export * from "./src/ViewportHelper"
 
 // Navigation
 export { default as BackButton } from "./src/navigation/BackButton.vue"
+export { default as EditorView } from "./src/navigation/EditorView.vue"
 export { default as LoadingButton } from "./src/navigation/LoadingButton.vue"
 export { default as SaveView } from "./src/navigation/SaveView.vue"
+export { default as STButtonToolbar } from "./src/navigation/STButtonToolbar.vue"
 export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.vue"
 export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue"
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"
 export { default as STToolbar } from "./src/navigation/STToolbar.vue"
-
 // Overlays
 export { CenteredMessage, CenteredMessageButton } from "./src/overlays/CenteredMessage"
 export { default as CenteredMessageView } from "./src/overlays/CenteredMessageView.vue"
-export { default as ContextMenu } from "./src/overlays/ContextMenu.vue"
-export { default as ContextMenuItem } from "./src/overlays/ContextMenuItem.vue"
+export { default as ContextMenuItemView } from "./src/overlays/ContextMenuItemView.vue"
 export { default as ContextMenuLine } from "./src/overlays/ContextMenuLine.vue"
+export { default as ContextMenuView } from "./src/overlays/ContextMenuView.vue"
 export * from "./src/overlays/Toast"
 export { default as ToastBox } from "./src/overlays/ToastBox.vue"
 export { default as ToastView } from "./src/overlays/ToastView.vue"
 export { default as Tooltip } from "./src/overlays/Tooltip.vue"
+
+// Menu builder
+export * from "./src/overlays/ContextMenu"
+export * from "./src/overlays/ModalStackEventBus"
 
 // Directives
 export { default as CopyableDirective } from "./src/directives/Copyable"

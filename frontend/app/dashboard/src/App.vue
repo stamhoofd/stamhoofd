@@ -7,8 +7,8 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ForgotPasswordResetView, GlobalEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController,PushOptions,SplitViewController } from "@simonbackx/vue-app-navigation";
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ContextMenu, ForgotPasswordResetView, GlobalEventBus, ModalStackEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Logger } from "@stamhoofd/logger"
@@ -222,6 +222,18 @@ export default class App extends Vue {
 
         // Update organization when opening an old tab again
         SessionManager.listenForOrganizationUpdates()
+
+        ModalStackEventBus.addListener(this, "present", async (options: PushOptions | ComponentWithProperties) => {
+            if (this.$refs.modalStack === undefined) {
+                // Could be a webpack dev server error (HMR) (not fixable) or called too early
+                await this.$nextTick()
+            }
+            if (!(options as any).components) {
+                (this.$refs.modalStack as any).present({ components: [options] });
+            } else {
+                (this.$refs.modalStack as any).present(options)
+            }
+        })
         
         CenteredMessage.addListener(this, async (centeredMessage) => {
             if (this.$refs.modalStack === undefined) {

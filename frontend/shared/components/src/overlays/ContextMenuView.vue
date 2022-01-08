@@ -5,7 +5,7 @@
                 ref="context"
                 class="context-menu"
                 :class="usedXPlacement+' '+usedYPlacement"
-                :style="{ transformOrigin, top: top ? top + 'px' : undefined, left: left ? (left + 'px') : undefined, right: right ? (right + 'px') : undefined, bottom: bottom ? (bottom + 'px') : undefined, width: usedPreferredWidth ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight ? (usedPreferredHeight + 'px') : undefined }"
+                :style="{ transformOrigin, top: top !== null ? top + 'px' : undefined, left: left !== null ? (left + 'px') : undefined, right: right !== null ? (right + 'px') : undefined, bottom: bottom !== null ? (bottom + 'px') : undefined, width: usedPreferredWidth !== null ? (usedPreferredWidth + 'px') : undefined, height: usedPreferredHeight !== null ? (usedPreferredHeight + 'px') : undefined }"
                 @click.stop=""
             >
                 <slot />
@@ -20,7 +20,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
-import ContextMenuItem from "./ContextMenuItem.vue";
+import ContextMenuItemView from "./ContextMenuItemView.vue";
 
 function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
 
@@ -34,7 +34,7 @@ function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
 
 @Component({
 })
-export default class ContextMenu extends Vue {
+export default class ContextMenuView extends Vue {
     @Prop({
         default: 0,
     })
@@ -77,7 +77,7 @@ export default class ContextMenu extends Vue {
     @Prop({
         default: null,
     })
-    parentMenu!: ContextMenu | null;
+    parentMenu!: ContextMenuView | null;
 
     /**
      * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
@@ -86,6 +86,14 @@ export default class ContextMenu extends Vue {
         default: null,
     })
     wrapWidth!: number | null
+
+    /**
+     * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
+     */
+    @Prop({
+        default: null,
+    })
+    wrapHeight!: number | null
 
     isPopped = false
 
@@ -156,17 +164,45 @@ export default class ContextMenu extends Vue {
             }
         }
 
+        let usedY = this.y
+
         if (this.yPlacement === "bottom") {
-            this.top = this.y - Math.max(0, height - (clientHeight - viewPadding - this.y)); // remove border
+            this.top = this.y// - Math.max(0, height - (clientHeight - viewPadding - this.y)); // remove border
+
+            // If the remaining space is too small, we need to wrap
+            if (height > clientHeight - viewPadding - this.y) {
+                this.top = null
+                this.usedYPlacement = "top"
+
+                if (this.wrapHeight !== null) {
+                    // Wrap instead of sticking to bottom
+                    usedY = usedY - this.wrapHeight
+                    this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPadding - height);
+
+                    if (this.bottom < viewPadding) {
+                        this.bottom = viewPadding
+                    }
+                } else {
+                    this.bottom = viewPadding
+                }
+            } else {
+                if (this.top < viewPadding) {
+                    this.top = viewPadding
+                }
+            }
         } else {
-            this.bottom = Math.min(clientHeight - this.y, clientHeight - viewPadding - height); // remove border
+            this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPadding - height); // remove border
+
+            if (this.bottom < viewPadding) {
+                this.bottom = viewPadding
+            }
         }
 
         const objLeft = this.left ? this.left : (clientWidth - this.right! - width)
         const xTransform = ((usedX - objLeft) / width * 100).toFixed(2)
 
-        const objTop = this.top ? this.top : (clientHeight - this.right! - height)
-        const yTransform = ((this.y - objTop) / height * 100).toFixed(2)
+        const objTop = this.top ? this.top : (clientHeight - this.bottom! - height)
+        const yTransform = ((usedY - objTop) / height * 100).toFixed(2)
 
         this.transformOrigin = xTransform + "% "+yTransform+"%"
         
@@ -193,11 +229,11 @@ export default class ContextMenu extends Vue {
         this.childMenu = null
     }
 
-    currentlyHoveredItem: ContextMenuItem | null = null
+    currentlyHoveredItem: ContextMenuItemView | null = null
 
     // When we hover an item that has a child menu, we need to cancel other hovers if the mouse moves to the child menu
     ignoreHover = false
-    ignoreHoverItem: ContextMenuItem | null = null
+    ignoreHoverItem: ContextMenuItemView | null = null
     ignoreHoverTimeout: NodeJS.Timeout | null = null
     ignoreHoverTriangle: { p1: { x: number, y: number }, p2: { x: number, y: number }, p3: { x: number, y: number } } | null = null
 
@@ -247,7 +283,7 @@ export default class ContextMenu extends Vue {
 
     hoverTimeout: NodeJS.Timeout | null = null
 
-    onHoverItem(item: ContextMenuItem) {
+    onHoverItem(item: ContextMenuItemView) {
         this.currentlyHoveredItem = item
 
         if (this.shouldIgnoreHover()) {
@@ -282,7 +318,6 @@ export default class ContextMenu extends Vue {
                         const el = item.$el as HTMLElement;
                         const bounds = el.getBoundingClientRect()
 
-                        // todo: calculate better position
                         item.childContextMenu.properties.x = bounds.right
                         item.childContextMenu.properties.y = bounds.top
                         item.childContextMenu.properties.xPlacement = "right"
@@ -301,7 +336,7 @@ export default class ContextMenu extends Vue {
         }
     }
 
-    onMouseLeaveItem(item: ContextMenuItem) {
+    onMouseLeaveItem(item: ContextMenuItemView) {
         if (this.currentlyHoveredItem === item) {
             this.currentlyHoveredItem = null
 
@@ -314,7 +349,7 @@ export default class ContextMenu extends Vue {
         item.isHovered = false
     }
 
-    onClickItem(item: ContextMenuItem, event) {
+    onClickItem(item: ContextMenuItemView, event) {
         if (item.clicked) {
             return;
         }

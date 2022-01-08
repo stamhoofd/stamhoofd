@@ -9,8 +9,8 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { GetWebshopFromDomainResult } from '@stamhoofd/structures';
@@ -159,6 +159,18 @@ export default class App extends Vue {
     }
 
     mounted() {
+        ModalStackEventBus.addListener(this, "present", async (options: PushOptions | ComponentWithProperties) => {
+            if (this.$refs.modalStack === undefined) {
+                // Could be a webpack dev server error (HMR) (not fixable) or called too early
+                await this.$nextTick()
+            }
+            if (!(options as any).components) {
+                (this.$refs.modalStack as any).present({ components: [options] });
+            } else {
+                (this.$refs.modalStack as any).present(options)
+            }
+        })
+        
         CenteredMessage.addListener(this, async (centeredMessage) => {
             if (this.$refs.modalStack === undefined) {
                 // Could be a webpack dev server error (HMR) (not fixable) or called too early

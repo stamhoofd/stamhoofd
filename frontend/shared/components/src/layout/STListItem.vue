@@ -143,6 +143,16 @@ a.st-list-item {
             }
         }
     }
+
+    &.no-padding {
+        > .main > div > .middle {
+            padding: 0 !important;
+        }
+
+        > .main > div > .right {
+            padding: 0 !important;
+        }
+    }
     
     > .main {
         flex-grow: 1;

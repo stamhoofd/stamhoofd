@@ -27,9 +27,9 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, FramedComponent, NavigationController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, FramedComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView,OrganizationLogo, STNavigationBar } from "@stamhoofd/components"
+import { CenteredMessage, CenteredMessageView,ModalStackEventBus,OrganizationLogo, STNavigationBar } from "@stamhoofd/components"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../classes/OrganizationManager";
@@ -119,6 +119,11 @@ export default class TabBarController extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        ModalStackEventBus.addListener(this, "present", async (options: PushOptions | ComponentWithProperties) => {
+            this.present(options);
+            return Promise.resolve()
+        })
+        
         CenteredMessage.addListener(this, (centeredMessage) => {
             this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
         })

@@ -1,4 +1,4 @@
-import { Node } from "tiptap";
+/*import { Node } from "tiptap";
 import { replaceText } from "tiptap-commands";
 
 export default class ReplacePlaceholderMark extends Node {
@@ -59,3 +59,4 @@ export default class ReplacePlaceholderMark extends Node {
         return (attrs) => replaceText(null, schema.nodes[this.name], attrs);
     }
 }
+*/

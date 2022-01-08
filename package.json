@@ -103,7 +103,6 @@
         "webpack-merge": "^5.8.0"
     },
     "resolutions": {
-        "prosemirror-model": "^1.16",
         "**/axios": "^0.24.0",
         "axios": "^0.24.0",
         "elliptic": "^6.5.4"

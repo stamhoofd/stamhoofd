@@ -1,23 +1,23 @@
 <template>
-    <ContextMenu v-bind="$attrs">
-        <ContextMenuItem v-for="column of sortedColumns" :key="column.id" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
+    <ContextMenuView v-bind="$attrs">
+        <ContextMenuItemView v-for="column of sortedColumns" :key="column.id" element-name="label" @click="setColumnEnabled(column, !column.enabled)">
             <Checkbox slot="left" :checked="column.enabled" :only-line="true" />
             {{ column.name }}
-        </ContextMenuItem>
-    </ContextMenu>
+        </ContextMenuItemView>
+    </ContextMenuView>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox,ContextMenu, ContextMenuItem, ContextMenuLine } from "@stamhoofd/components";
+import { Checkbox,ContextMenuItemView, ContextMenuLine,ContextMenuView } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { Column } from "./Column";
 
 @Component({
     components: {
-        ContextMenu,
-        ContextMenuItem,
+        ContextMenuView,
+        ContextMenuItemView,
         ContextMenuLine,
         Checkbox
     },

@@ -1,5 +1,6 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
+import { ModalStackEventBus } from "../..";
 import Tooltip from "../overlays/Tooltip.vue";
 
 export default {
@@ -23,8 +24,6 @@ export default {
             (_event) => {
                 
                 if (!isMouseHover) {
-                    const parentComponent = vnode.context;
-
                     isMouseHover = true;
 
                     setTimeout(() => {
@@ -36,8 +35,17 @@ export default {
                                 text: binding.value,
                                 x: rect.left,
                                 y: rect.bottom,
+                                xPlacement: "right",
+                                yPlacement: "bottom",
+                                wrapHeight: rect.height,
                             });
-                            parentComponent.present(el.$tooltipDisplayedComponent.setDisplayStyle("overlay"));
+
+                            ModalStackEventBus.sendEvent("present", {
+                                components: [
+                                    el.$tooltipDisplayedComponent
+                                ],
+                                modalDisplayStyle: "overlay",
+                            }).catch(console.error)
                         }
                     }, 200);
                 }

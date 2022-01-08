@@ -1,19 +1,19 @@
 <template>
-    <ContextMenu v-bind="$attrs">
+    <ContextMenuView v-bind="$attrs">
         <template v-for="(actions, groupIndex) of groupedActions">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
-            <ContextMenuItem v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="isDisabled(action)" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
+            <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :disabled="isDisabled(action)" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
                 {{ action.name }}
                 <span v-if="action.childMenu || action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
-            </ContextMenuItem>
+            </ContextMenuItemView>
         </template>
-    </ContextMenu>
+    </ContextMenuView>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ContextMenu, ContextMenuItem, ContextMenuLine, Toast } from "@stamhoofd/components";
+import { Checkbox, ContextMenuItemView, ContextMenuLine, ContextMenuView, Toast } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { TableAction } from "./TableAction";
@@ -21,8 +21,8 @@ import TableView from "./TableView.vue";
 
 @Component({
     components: {
-        ContextMenu,
-        ContextMenuItem,
+        ContextMenuView,
+        ContextMenuItemView,
         ContextMenuLine,
         Checkbox
     },

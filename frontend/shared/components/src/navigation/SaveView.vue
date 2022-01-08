@@ -9,6 +9,8 @@
                 </button>
             </template>
 
+            <slot v-if="!$isMobile" slot="right" name="buttons" />
+
             <LoadingButton v-if="$isMobile" slot="right" :loading="loading">
                 <button class="button navigation highlight" :disabled="disabled" type="submit">
                     {{ saveText }}
@@ -33,6 +35,10 @@
                 </LoadingButton>
             </template>
         </STToolbar>
+        <STButtonToolbar v-else-if="!!$slots.buttons || !!$slots.toolbar" class="sticky">
+            <slot name="buttons" />
+            <slot name="toolbar" />
+        </STButtonToolbar>
     </form>
 </template>
 
@@ -42,6 +48,7 @@ import { Component,Prop,Vue } from "vue-property-decorator";
 
 import BackButton from "./BackButton.vue";
 import LoadingButton from "./LoadingButton.vue";
+import STButtonToolbar from "./STButtonToolbar.vue";
 import STNavigationBar from "./STNavigationBar.vue";
 import STToolbar from "./STToolbar.vue";
 
@@ -50,7 +57,8 @@ import STToolbar from "./STToolbar.vue";
         STNavigationBar,
         STToolbar,
         LoadingButton,
-        BackButton
+        BackButton,
+        STButtonToolbar
     }
 })
 export default class SaveView extends Vue {

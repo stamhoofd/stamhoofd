@@ -244,3 +244,31 @@ select.input {
         padding-left: 0;
     }
 }
+
+.list-input-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    > span:first-child {
+        color: $color-gray-1;
+        flex-shrink: 0;
+        min-width: 0;
+    }
+
+    > *:last-child {
+        flex-grow: 1;
+        min-width: 0;
+    }
+}
+
+.list-input {
+    @extend .style-input;
+    color: $color-dark;
+    padding: 15px;
+    width: 100%;
+    
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}

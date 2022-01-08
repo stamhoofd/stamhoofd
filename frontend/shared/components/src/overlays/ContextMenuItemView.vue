@@ -17,7 +17,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component
-export default class ContextMenuItem extends Mixins(NavigationMixin) {
+export default class ContextMenuItemView extends Mixins(NavigationMixin) {
     clicked = false;
     isHovered = false
 

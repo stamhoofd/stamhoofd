@@ -12,7 +12,7 @@ const webpack = require("webpack")
 const fs = require("fs")
 const path = require("path")
 
-const useMiniCssExtractPlugin = true
+const useMiniCssExtractPlugin = process.env.NODE_ENV === "production"
 const use_env = {}
 
 // This is a debug config as a replacement for process.env.NODE_ENV which seems to break webpack 5
