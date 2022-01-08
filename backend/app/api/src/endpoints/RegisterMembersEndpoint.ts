@@ -72,10 +72,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Update occupancies
+        // todo: might not be needed in the future (for performance)
         for (const group of groups) {
-            await group.updateOccupancy()
-            // no need to save yet
-            // await group.save()
+            if (request.body.cart.items.find(i => i.groupId == group.id)) {
+                await group.updateOccupancy()
+                // no need to save yet
+                // await group.save()
+            }
         }
 
         // Save the price that the client did calculate (to alert price changes before we continue)
@@ -210,10 +213,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Update occupancy
             for (const group of groups) {
-                //if (payRegistrations.find(p => p.groupId === group.id)) {
+                if (registrations.find(p => p.groupId === group.id)) {
                     await group.updateOccupancy()
                     await group.save()
-                //}
+                }
             }
 
             let paymentUrl: string | null = null
@@ -272,11 +275,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }));
         }
 
-        // Update occupancies
+        // Update occupancy
         for (const group of groups) {
-            await group.updateOccupancy()
-            // no need to save yet
-            await group.save()
+            if (registrations.find(p => p.groupId === group.id)) {
+                await group.updateOccupancy()
+                await group.save()
+            }
         }
         
         return new Response(RegisterResponse.create({
