@@ -92,7 +92,7 @@ body.modern.web-iOS {
             touch-action: auto;
 
             padding-bottom: calc(15px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
-            scroll-padding-bottom: max(var(--keyboard-height, 0px), var(--bottom-padding, 0px));
+            scroll-padding-bottom: calc(30px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
 
             &:first-child {
                 padding-top: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px));
@@ -100,7 +100,7 @@ body.modern.web-iOS {
 
             &:last-child {
                 padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
-                scroll-padding-bottom: max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px));
+                scroll-padding-bottom: calc(30px + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
             }
 
 
