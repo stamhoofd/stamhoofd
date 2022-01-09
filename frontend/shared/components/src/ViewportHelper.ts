@@ -78,6 +78,11 @@ export class ViewportHelper {
                     if (document.documentElement.scrollTop > 0) {
                         document.documentElement.scrollTop = 0
                     }
+
+                    // Fixes an iOS bug where documentElement is not scrolled, but body is
+                    if (document.body.scrollTop > 0) {
+                        document.body.scrollTop = 0
+                    }
                 });
             }, { passive: true });
 
@@ -121,6 +126,8 @@ export class ViewportHelper {
 
                 document.body.addEventListener("touchend", (event) => {
                     if (!clickedElement) {
+                        // Force scroll back to top
+                        document.body.scrollTop = 0; // window.scrollTo doesn't work on iOS (not always)
                         return
                     }
 
@@ -132,7 +139,7 @@ export class ViewportHelper {
                     }
 
                     // Force scroll back to top
-                    window.scrollTo(0,0);
+                    document.body.scrollTop = 0; // window.scrollTo doesn't work on iOS (not always)
 
                     clickedElement = null
                 }, { passive: true })
@@ -169,6 +176,17 @@ export class ViewportHelper {
             }
             
         }
+    }
+
+    static getBottomPadding() {
+        if (window.visualViewport && this.modern) {
+            const bodyHeight = document.body.clientHeight;
+            const bottomPadding = bodyHeight - window.visualViewport.height
+
+            return bottomPadding
+        }
+        return 0
+
     }
 
     /**

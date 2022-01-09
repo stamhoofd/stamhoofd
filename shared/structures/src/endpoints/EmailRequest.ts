@@ -1,4 +1,5 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 
 export class EmailInformation extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -46,8 +47,29 @@ export class Recipient extends AutoEncoder {
     userId: string | null = null
 
     /// For reference and filtering
+    /**
+     * @deprecated
+     * Use types instead
+     */
     @field({ decoder: StringDecoder, nullable: true, version: 96 })
     type: string | null = null
+
+    /// For reference and filtering
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
+    types: string[] = []
+
+    merge(recipient: Recipient) {
+        this.firstName = this.firstName ?? recipient.firstName
+        this.lastName = this.lastName ?? recipient.lastName
+        this.email = recipient.email
+        for (const replacement of recipient.replacements) {
+            if (!this.replacements.find(r => r.token == replacement.token)) {
+                this.replacements.push(replacement)
+            }
+        }
+        this.userId = this.userId ?? recipient.userId
+        this.types = Formatter.uniqueArray(this.types.concat(recipient.types))
+    }
 }
 
 export class EmailAttachment extends AutoEncoder {

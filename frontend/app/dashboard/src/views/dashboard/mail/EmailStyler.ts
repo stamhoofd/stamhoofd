@@ -8,8 +8,8 @@ export class EmailStyler {
         const scss = imported[0][1].replaceAll("#0053ff", primaryColor)
 
         let styles = scss;
-            const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";
-            styles += " hr {"+hrCSS+"}";
+        const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";
+        styles += " hr {"+hrCSS+"}";
             
         const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: white; padding: 12px 27px; background: "+primaryColor+"; text-align: center; border-radius: 5px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
         styles += " .button.primary { "+buttonCSS+" } .button.primary:active { transform: scale(0.95, 0.95); } ";
@@ -21,10 +21,10 @@ export class EmailStyler {
         const element = document.createElement("div.email-style-apply-here")
         element.innerHTML = html
 
-        const elements = element.querySelectorAll("span.replace-placeholder[data-replace-type]")
+        const elements = element.querySelectorAll("span[data-type=\"smartVariable\"]")
         for (const el of elements) {
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-            el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-replace-type")+"}}"), el)
+            el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-id")+"}}"), el)
         }
 
 

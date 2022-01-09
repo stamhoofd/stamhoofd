@@ -1,59 +1,61 @@
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core'
 
-export class EditorSmartVariable {
+export class EditorSmartButton {
     id: string;
     name: string;
-    example: string;
+    text: string;
 
-    constructor(options: { id: string, name: string, example?: string }) {
+    constructor(options: { id: string, name: string, text: string }) {
         this.id = options.id;
         this.name = options.name;
-        this.example = options.example ?? options.name;
+        this.text = options.text;
     }
 }
 
 
-export type SmartVariableNodeOptions = {
+export type SmartButtonNodeOptions = {
     HTMLAttributes: Record<string, any>,
-    smartVariables: EditorSmartVariable[]
+    smartButtons: EditorSmartButton[]
 }
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        smartVariableNode: {
-            insertSmartVariable: (smartVariable: EditorSmartVariable) => ReturnType,
+        smartButtonNode: {
+            insertSmartButton: (smartButton: EditorSmartButton) => ReturnType,
         }
     }
 }
 
-export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
-    name: 'smartVariable',
+export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
+    priority: 1000,
+    name: 'smartButton',
 
     addOptions() {
         return {
             HTMLAttributes: {},
-            smartVariables: []
+            smartButtons: []
         }
     }, 
 
     group: 'inline',
 
     inline: true,
-    selectable: true,
-    draggable: true,
+    //selectable: true,
+    //draggable: true,
 
-    atom: true,
+    atom: false,
+    content: "text*",
 
     addCommands() {
         return {
-            insertSmartVariable: (smartVariable: EditorSmartVariable) => ({ commands }) => {
-                return commands.insertContent({ type: this.name, attrs: { id: smartVariable.id } })
+            insertSmartButton: (smartButton: EditorSmartButton) => ({ commands }) => {
+                return commands.insertContent({ type: this.name, attrs: { id: smartButton.id }, content: [{ type: "text", text: smartButton.text }] })
             },
         }
     },
 
     addInputRules() {
-        return this.options.smartVariables.map(s => {
+        return this.options.smartButtons.map(s => {
             return nodeInputRule({
                 find: new RegExp(`\\{\\{${s.id}\\}\\}$`),
                 type: this.type,
@@ -81,19 +83,20 @@ export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
     },
 
     parseHTML() {
-        return this.options.smartVariables.map(variable => {
-            return {
-                tag: `span[data-type="${this.name}"][data-id="${variable.id}"]`,
-            };
-        })
+        return [
+            {
+                tag: `span[data-type="${this.name}"]`,
+            },
+        ]
     },
 
     renderHTML({ node, HTMLAttributes }) {
+        const button = this.options.smartButtons.find(s => s.id === node.attrs.id)
         return [
             'span',
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            mergeAttributes({ 'data-type': this.name }, this.options.HTMLAttributes, HTMLAttributes),
-            this.options.smartVariables.find(s => s.id === node.attrs.id)?.example ?? "Onbekend",
+            mergeAttributes({ 'data-type': this.name, href: "{{"+(button?.id ?? "")+"}}", class: "button primary" }, this.options.HTMLAttributes, HTMLAttributes),
+            0,
         ]
     },
 

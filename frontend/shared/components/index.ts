@@ -7,7 +7,8 @@ export * from "./src/errors/Validator"
 
 // Classes
 export * from "./src/EventBus"
-export * from "./src/navigation/EditorSmartVariable"
+export { EditorSmartButton } from "./src/navigation/EditorSmartButton"
+export { EditorSmartVariable } from "./src/navigation/EditorSmartVariable"
 export * from "./src/ViewportHelper"
 
 // Navigation

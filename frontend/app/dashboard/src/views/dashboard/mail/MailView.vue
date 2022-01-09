@@ -1,5 +1,5 @@
 <template>
-    <EditorView class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" @save="send">
+    <EditorView ref="editorView" class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
         <h1 class="style-navigation-title">
             Nieuwe e-mail
         </h1>
@@ -56,14 +56,14 @@
         <!-- Editor footer -->
         <template slot="footer">
             <!-- Buttons that are included in the e-mail -->
-            <div v-if="addButton && orders.length == 0" ref="footerButton" key="loginButton" v-tooltip="'Klik om te verwijderen'" class="disabled" title="Knop voor inschrijvingen" @click="addButton = false">
+            <div v-if="false && addButton && orders.length == 0" ref="footerButton" key="loginButton" v-tooltip="'Klik om te verwijderen'" class="disabled" title="Knop voor inschrijvingen" @click="addButton = false">
                 <hr>
                 <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
                 <p class="style-description-small button-description">
                     <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
                 </p>
             </div>
-            <div v-else-if="addButton && orders.length > 0 && webshop" ref="footerButton" key="orderButton" class="disabled" title="Knop voor bestelling">
+            <div v-else-if="false && addButton && orders.length > 0 && webshop" ref="footerButton" key="orderButton" class="disabled" title="Knop voor bestelling">
                 <hr>
                 <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
                 <p class="style-description-small button-description">
@@ -83,33 +83,6 @@
                     </template>
                 </STListItem>
             </STList>
-
-            <!-- Button to add smart buttons in e-mail -->
-            <div v-if="!addButton && members.length > 0 && hasAllUsers" key="addButton" class="style-description-small">
-                <button class="button text" type="button" @click="addButton = true">
-                    <span class="icon add" />
-                    <span>Inlogknop toevoegen</span>
-                </button>
-                Knop waarmee ontvangers automatisch kunnen inloggen op de registratiepagina of een account kunnen aanmaken.
-            </div>
-
-            <div v-if="!addButton && orders.length > 0 && webshop" key="addButton-webshop" class="style-description-small">
-                <button class="button text" type="button" @click="addButton = true">
-                    <span class="icon add" />
-                    <span v-if="webshop.meta.ticketType == 'None'">
-                        Voeg knop naar bestelling toe
-                    </span>
-                    <span v-else>
-                        Voeg knop naar tickets en bestelling toe
-                    </span>
-                </button>
-                <template v-if="webshop.meta.ticketType == 'None'">
-                    Daar staan ook de betaalinstructies indien de bestelling nog niet betaald werd.
-                </template>
-                <template v-else>
-                    Als de tickets nog niet betaald werden, zal de knop enkel naar de bestelling wijzen (met daar de betaalinstructies).
-                </template>
-            </div>
         </template>
 
         <!-- Warnings and errors -->
@@ -142,7 +115,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartVariable, EditorView, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
 import { EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { OrderStatusHelper } from '@stamhoofd/structures/esm/dist';
@@ -169,7 +142,7 @@ class TmpFile {
 
 enum MemberFilter {
     All = "all",
-    GrownUps = "GrownUps",
+    Adults = "Adults",
     None = "none"
 }
 
@@ -235,7 +208,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     checkingBounces = false
     emailInformation: EmailInformation[] = []
 
-    memberFilter = MemberFilter.GrownUps
+    memberFilter = MemberFilter.Adults
     parentFilter = ParentFilter.Minors
     userFilter = UserFilter.All
 
@@ -250,6 +223,11 @@ export default class MailView extends Mixins(NavigationMixin) {
                 id: "lastName", 
                 name: "Achternaam", 
                 example: this.recipients.find(r => r.lastName && r.lastName.length > 0)?.lastName ?? undefined,
+            }),
+            new EditorSmartVariable({
+                id: "email", 
+                name: "E-mailadres", 
+                example: this.recipients[0]?.email ?? undefined,
             })
         ]
 
@@ -273,14 +251,43 @@ export default class MailView extends Mixins(NavigationMixin) {
             }))
         }
 
-        return variables
+        // Remove all smart variables that are not set in the recipients
+        return variables.filter(variable => {
+            for (const recipient of this.recipients) {
+                if (!recipient.replacements.find(r => r.token === variable.id && r.value.length > 0)) {
+                    // Not found
+                    return false
+                }
+            }
+            return true
+        })
+    }
+
+    get smartButtons() {
+        const buttons: EditorSmartButton[] = []
+        if (this.hasAllUsers && this.members.length > 0) {
+            buttons.push(new EditorSmartButton({
+                id: "signInUrl",
+                name: "Inlog-knop",
+                text: "Inschrijvingen beheren"
+            }))
+        }
+
+        if (this.orders.length > 0) {
+            buttons.push(new EditorSmartButton({
+                id: "orderUrl",
+                name: "Bestelling-knop",
+                text: this.orderButtonText
+            }))
+        }
+        return buttons
     }
 
     getMemberFilter(filter: MemberFilter, none = true): string | undefined {
         switch (filter) {
             case MemberFilter.All:
                 return "alle leden"
-            case MemberFilter.GrownUps:
+            case MemberFilter.Adults:
                 return "alleen volwassen leden"
             case MemberFilter.None:
                 if (none) {
@@ -471,8 +478,12 @@ export default class MailView extends Mixins(NavigationMixin) {
         return this.emailInformation.filter(e => e.markedAsSpam).map(e => e.email)
     }
 
-    get hasGrownUps() {
-        return !!this.members.find(m => m.details.defaultAge < 18)
+    get hasAdults() {
+        return !!this.members.find(m => !m.isMinor)
+    }
+
+    get hasMinors() {
+        return !!this.members.find(m => m.isMinor)
     }
 
     get fullAccess() {
@@ -517,22 +528,50 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
     }
 
+    get editor() {
+        return (this.$refs.editorView as EditorView).editor
+    }
+
+    didInsertButton = false
+
+    insertButton() {
+        this.didInsertButton = true
+        // Insert <hr> and content
+        // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
+        const content = `<p></p><hr><p><a data-type="smartButton" data-id="signInUrl"></a></p><p></p><p><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
+        console.log(this.editor.state.doc)
+        this.editor.chain()/*.focus()*/.insertContentAt(this.editor.state.doc.content.size, content, { updateSelection: false })/*.focus()*/.run()
+    }
+
     mounted() {
         if (this.members.length > 0) {
-            if (!this.hasGrownUps) {
+            if (!this.hasAdults) {
                 this.memberFilter = MemberFilter.None
                 this.parentFilter = ParentFilter.All
+            } else {
+                if (this.hasMinors) {
+                    this.parentFilter = ParentFilter.Minors
+                } else {
+                    this.parentFilter = ParentFilter.None
+                }
             }
 
             // Check if all the parents + members already have access (and an account) when they should have access
             MemberManager.updateMembersAccess(this.members).then(() => {
                 // We created some users, so we might check the button again
-                if (!this.addButton && this.hasAllUsers) {
-                    this.addButton = true
+                if (this.hasAllUsers && !this.didInsertButton) {
+                    this.insertButton()
+                } else {
+                    console.info("doent insert button")
                 }
             }).catch(e => {
                 Toast.fromError(e).show()
             })
+        }
+
+        if (this.hasFirstName) {
+            // Insert "Dag <naam>," into editor
+            this.editor.chain().setTextSelection(0).insertContent("Dag ").insertSmartVariable(this.smartVariables[0]).insertContent(",\n\n")/*.focus()*/.run()
         }
 
         this.checkBounces().catch(e => {
@@ -558,7 +597,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get hasFirstName() {
-        return !this.recipients.find(r => r.firstName == null)
+        return !this.recipients.find(r => !r.replacements.find(r => r.token === "firstName" && r.value.length > 0))
     }
 
     showMissingFirstNames() {
@@ -609,8 +648,8 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     @Watch('hasAllUsers')
     onUpdateHasAllUsers(hasAllUsers: boolean) {
-        if (!hasAllUsers) {
-            this.addButton = false
+        if (hasAllUsers && !this.didInsertButton) {
+            this.insertButton()
         }
     }
 
@@ -695,79 +734,85 @@ export default class MailView extends Mixins(NavigationMixin) {
         
 
         for (const member of this.members) {
-            const isMinor = (member.details.age == null || member.details.age < 18)
+            // Minor if no age and registered in a group with max age = 17, or if member has age and is lower than 18
+            const isMinor = member.isMinor
 
-            if (this.parentFilter !== ParentFilter.None && !(this.parentFilter === ParentFilter.Minors && !isMinor)) {
-                for (const parent of member.details.parents) {
-                    if (!parent.email) {
-                        continue;
-                    }
-
-                    const existing = recipients.get(parent.email.toLowerCase())
-
-                    if (existing && existing.firstName) {
-                        // Mark this e-mail for deletion
-                        continue
-                    }
-
-                    recipients.set(parent.email.toLowerCase(), Recipient.create({
-                        firstName: parent.firstName,
-                        lastName: parent.lastName,
-                        email: parent.email.toLowerCase(),
-                        replacements: [
-                            Replacement.create({
-                                token: "firstName",
-                                value: parent.firstName
-                            }),
-                            Replacement.create({
-                                token: "email",
-                                value: parent.email.toLowerCase()
-                            })
-                        ],
-                        userId: existing?.userId,
-                        type: "parent"
-                    }))
+            for (const parent of member.details.parents) {
+                if (!parent.email) {
+                    continue;
                 }
+
+                const recipient = Recipient.create({
+                    firstName: parent.firstName,
+                    lastName: parent.lastName,
+                    email: parent.email.toLowerCase(),
+                    replacements: [
+                        Replacement.create({
+                            token: "firstName",
+                            value: parent.firstName
+                        }),
+                        Replacement.create({
+                            token: "email",
+                            value: parent.email.toLowerCase()
+                        })
+                    ],
+                    types: ["parent", isMinor ? "minor-parent" : "adult-parent"]
+                })
+
+                const existing = recipients.get(recipient.email)
+
+                if (existing) {
+                    existing.merge(recipient)
+                    continue
+                }
+
+                recipients.set(recipient.email, recipient)
             }
 
             if (member.details.email) {
-                if (this.memberFilter !== MemberFilter.None && !(this.memberFilter === MemberFilter.GrownUps && isMinor)) {
-                    // Create a loop for convenience (to allow break/contniue)
-                    for (const email of [member.details.email.toLowerCase()]) {
-                        const existing = recipients.get(email)
-                        if (existing && existing.firstName) {
-                            if (existing.type === "parent" && isMinor) {
-                                // This is a duplicate email address that was also added to the member.
-                                // Keep this as a parent email address
-                                continue
-                            }
+                // Create a loop for convenience (to allow break/contniue)
+                for (const email of [member.details.email.toLowerCase()]) {
+                    const existing = recipients.get(email)
 
-                            // Mark this e-mail as a member's one
-                            existing.type = "member"
-
-                            continue
-                        }
-                        recipients.set(
-                            email, 
-                            Recipient.create({
-                                firstName: member.details.firstName,
-                                lastName: member.details.lastName,
-                                email,
-                                replacements: [
-                                    Replacement.create({
-                                        token: "firstName",
-                                        value: member.details.firstName
-                                    }),
-                                    Replacement.create({
-                                        token: "email",
-                                        value: email
-                                    })
-                                ],
-                                userId: existing?.userId ?? null,
-                                type: "member"
+                    const recipient = Recipient.create({
+                        firstName: member.details.firstName,
+                        lastName: member.details.lastName,
+                        email,
+                        replacements: [
+                            Replacement.create({
+                                token: "firstName",
+                                value: member.details.firstName
+                            }),
+                            Replacement.create({
+                                token: "email",
+                                value: email
                             })
-                        )
+                        ],
+                        userId: existing?.userId ?? null,
+                        types: ["member", isMinor ? "minor-member" : "adult-member"]
+                    })
+
+                    if (existing) {
+                        if (existing.types.includes("parent") && !existing.types.includes("member")) {
+                            existing.merge(recipient)
+                            
+                            if (isMinor) {
+                                // This is a duplicate email address that was also added to a minor member.
+                                // probably because they didn't read and just entered their email address in a member email address field
+                                // Keep this as a parent only email address
+                                existing.types = existing.types.filter(t => !t.includes("member"))
+                            }
+                        } else {
+                            existing.merge(recipient)
+                        }
+                        
+                        continue
                     }
+
+                    recipients.set(
+                        email, 
+                        recipient
+                    )
                 }
             }
 
@@ -779,29 +824,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 const email = user.email.toLowerCase()
                 const existing = recipients.get(email)
 
-                if (existing) {
-                    // Link user
-                    existing.userId = user.id
-
-                    if (!existing.firstName && user.firstName) {
-                        existing.firstName = user.firstName
-                    }
-
-                    if (!existing.lastName && user.lastName) {
-                        existing.lastName = user.lastName
-                    }
-                    continue
-                }
-
-                if (this.userFilter === UserFilter.None) {
-                    continue
-                }
-
-                if (this.userFilter === UserFilter.Existing && user.publicKey === null) {
-                    continue
-                }
-
-                recipients.set(email, Recipient.create({
+                const recipient = Recipient.create({
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email,
@@ -820,20 +843,25 @@ export default class MailView extends Mixins(NavigationMixin) {
                         })
                     ],
                     // Create sign-in replacement 'signInUrl'
-                    userId: user.id
-                }))
+                    userId: user.id,
+                    types: ["user", user.publicKey !== null ? "existing-user" : "pending-user"]
+                })
+
+                if (existing) {
+                    // Link user
+                    existing.merge(recipient)
+                    continue
+                }
+
+                recipients.set(email, recipient)
             }
         }
       
+        // todo: need to validate the recplacements of other recipients
         for (const recipient of this.otherRecipients) {
             const email = recipient.email.toLowerCase()
             const existing = recipients.get(email)
-
-            if (existing && existing.firstName) {
-                continue
-            }
-
-            recipients.set(email, Recipient.create({
+            const r = Recipient.create({
                 firstName: recipient.firstName,
                 email,
                 replacements: [
@@ -847,8 +875,14 @@ export default class MailView extends Mixins(NavigationMixin) {
                     })
                 ],
                 userId: existing?.userId ?? null,
-                type: existing?.type ?? null
-            }))
+            });
+
+            if (existing) {
+                existing.merge(r)
+                continue
+            }
+
+            recipients.set(email, r)
         }
 
         return recipients
@@ -856,6 +890,54 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     get recipients(): Recipient[] {
         const recipients: Map<string, Recipient> = new Map(this.allRecipients)
+
+        // Filter
+        // Keep track of all the types that we should filter out
+        // If all the types of a given recipient are in this list, we should filter it out
+        const deleteFilterList: string[] = []
+        if (this.memberFilter !== MemberFilter.All) {
+            deleteFilterList.push("member")
+
+            if (this.memberFilter === MemberFilter.Adults || this.memberFilter === MemberFilter.None) {
+                deleteFilterList.push("minor-member")
+            }
+
+            if (this.memberFilter === MemberFilter.None) {
+                deleteFilterList.push("adult-member")
+            }
+        }
+
+        if (this.parentFilter !== ParentFilter.All) {
+            deleteFilterList.push("parent")
+
+            if (this.parentFilter === ParentFilter.Minors || this.parentFilter === ParentFilter.None) {
+                deleteFilterList.push("adult-parent")
+            }
+
+            if (this.parentFilter === ParentFilter.None) {
+                deleteFilterList.push("minor-parent")
+            }
+        }
+
+        if (this.userFilter !== UserFilter.All) {
+            deleteFilterList.push("user")
+
+            if (this.userFilter === UserFilter.Existing || this.userFilter === UserFilter.None) {
+                deleteFilterList.push("pending-user")
+            }
+
+            if (this.userFilter === UserFilter.None) {
+                deleteFilterList.push("existing-user")
+            }
+        }
+
+        // Filter recipients based on deleteFilterList
+        for (const recipient of recipients.values()) {
+            if (recipient.types.every(t => deleteFilterList.includes(t))) {
+                recipients.delete(recipient.email)
+            }
+        }
+
         return Array.from(recipients.values())
     }
 
@@ -868,7 +950,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     async getHTML(withButton: boolean | null = null) {
-        const editor = (this.$refs.editor as any)?.editor
+        const editor = this.editor
         if (!editor) {
             // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
             return {
@@ -879,11 +961,6 @@ export default class MailView extends Mixins(NavigationMixin) {
 
         let base: string = editor.getHTML();
 
-        // Append footer HTML if needed
-        if ((withButton ?? this.addButton) && this.$refs.footerButton) {
-            base += (this.$refs.footerButton as Element).innerHTML;
-        }
-        
         return await EmailStyler.format(base, this.subject, OrganizationManager.organization)
     }
 
@@ -1014,58 +1091,23 @@ export default class MailView extends Mixins(NavigationMixin) {
 <style lang="scss">
 
 .mail-view {
-    > main {
-        display: flex;
-        flex-grow: 1;
-        flex-direction: column;
+    .mail-hr {
+        margin: 0;
+        margin-right: calc(-1 * var(--st-horizontal-padding, 40px));
+    }
 
-        .mail-hr {
-            margin: 0;
-            margin-right: calc(-1 * var(--st-horizontal-padding, 40px));
-        }
+    #message-title {
+        padding-bottom: 0;
+    }
 
-        #message-title {
-            padding-bottom: 0;
-        }
-
-        & > .editor {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-
-            justify-content: stretch;
-            align-items: stretch;
-            min-height: 200px;
-
-            & > .editor-container {
-                flex-grow: 1;
-                display: flex;
-                flex-direction: column;
-
-                & > .editor-content {
-                    display: flex;
-                    flex-direction: column;
-
-                    & > .ProseMirror {
-                        flex-grow: 1;
-                    }
-                }
-            }
-
-            + * {
-                margin-top: 10px;
-            }
-
-            
-        }
-
-        .file-list-item {
-            .middle {
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-            }
+    
+    .file-list-item {
+        .middle {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
     }
+    
 }
 </style>

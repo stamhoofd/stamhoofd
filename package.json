@@ -37,6 +37,7 @@
         "@simonbackx/simple-errors": "^1.3.0",
         "@simonbackx/simple-networking": "~1.10.0",
         "@simonbackx/vue-app-navigation": "1.23.6",
+        "@tiptap/extension-link": "^2.0.0-beta.35",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",
         "@zxcvbn-ts/language-nl-be": "^0.3.0",

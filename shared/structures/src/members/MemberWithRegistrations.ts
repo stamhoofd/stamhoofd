@@ -36,6 +36,10 @@ export class MemberWithRegistrations extends Member {
         return this.registrations.filter(r => !!this.activeRegistrations.find(r2 => r2.id == r.id))
     }
 
+    get isMinor() {
+        return (this.details.age == null && !!this.groups.find(g => g.settings.maxAge !== null && g.settings.maxAge < 18)) || (this.details.age !== null && this.details.age < 18)
+    }
+
     /**
      * Groups the member is currently registered for
      */

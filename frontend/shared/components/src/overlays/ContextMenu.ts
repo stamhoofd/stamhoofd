@@ -1,6 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation"
 
-import { ContextMenuView } from "../.."
 import GeneralContextMenuView from "./GeneralContextMenuView.vue"
 import { ModalStackEventBus } from "./ModalStackEventBus"
 
@@ -32,6 +31,11 @@ export class ContextMenuItem {
 }
 
 export class ContextMenu {
+    /**
+     * Prevent the default behaviour of click on the item, e.g. to keep the focus on an input element
+     */
+    preventDefault = false
+
     items: ContextMenuItem[][]
 
     constructor(items: ContextMenuItem[][]) {

@@ -1,5 +1,5 @@
 <template>
-    <ContextMenuView v-bind="$attrs">
+    <ContextMenuView v-bind="$attrs" @mousedown.native.prevent>
         <template v-for="(items, groupIndex) of menu.items">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
 
