@@ -1,12 +1,12 @@
 <template>
     <div class="toast-view-container">
-        <div class="toast-view" :class="toast.icon" @click="clicked">
+        <div class="toast-view" :class="toast.icon" @click="clicked" @mousedown.prevent>
             <div v-if="toast.progress !== null" class="progress" :style="{ width: toast.progress * 100 + '%' }" :class="{ hide: toast.progress >= 1 }" />
             <Spinner v-if="toast.icon == 'spinner'" />
             <span v-else-if="toast.icon" class="first icon" :class="toast.icon" />
             <div>
                 <div>{{ message }}</div>
-                <button v-if="toast.button" class="button text" @click.stop="clickedButton">
+                <button v-if="toast.button" class="button text" type="button" @click.stop="clickedButton">
                     {{ toast.button.text }}
                 </button>
             </div>

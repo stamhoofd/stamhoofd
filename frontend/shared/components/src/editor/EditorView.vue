@@ -60,7 +60,7 @@
                     <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @click.prevent="editor.chain().focus().run(); showTextStyles = !showTextStyles" />
                     <hr>
                     <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-                    <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
+                    <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
                     <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
                 
                     <slot name="buttons" />
@@ -76,14 +76,14 @@
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.prevent>
             <template v-if="showTextStyles">
-                <TextStyleButtonsView class="editor-button-bar" :editor="editor" />
+                <TextStyleButtonsView class="editor-button-bar mobile" :editor="editor" />
                 <button class="button close icon" type="button" @click.prevent="showTextStyles = false" @mousedown.prevent />
             </template>
             <template v-else>
                 <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @click.prevent="editor.chain().focus().run(); showTextStyles = !showTextStyles" />
                 <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-                <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
-                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" />
+                <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
+                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
                 <slot name="buttons" />
             </template>
         </STButtonToolbar>
@@ -107,12 +107,12 @@ import LoadingButton from "../navigation/LoadingButton.vue";
 import STButtonToolbar from "../navigation/STButtonToolbar.vue";
 import STNavigationBar from "../navigation/STNavigationBar.vue";
 import STToolbar from "../navigation/STToolbar.vue";
-import TextStyleButtonsView from '../navigation/TextStyleButtonsView.vue';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { DescriptiveText } from "./EditorDescriptiveText";
 import { EditorSmartButton, SmartButtonNode } from './EditorSmartButton';
 import { EditorSmartVariable, SmartVariableNode } from './EditorSmartVariable';
+import TextStyleButtonsView from './TextStyleButtonsView.vue';
 
 @Component({
     components: {
@@ -173,6 +173,10 @@ export default class EditorView extends Vue {
             this.$nextTick(() => {
                 this.showLinkEditor = false
             })
+            return
+        }
+        if (!this.editor.isActive("link") && this.editor.state.selection.empty) {
+            new Toast("Selecteer eerst tekst die je klikbaar wilt maken", "info").show()
             return
         }
         this.editLink = this.editor.getAttributes('link')?.href ?? ""
@@ -245,6 +249,10 @@ export default class EditorView extends Vue {
                 if (this.showLinkEditor){
                     if (editor.isActive("link")) {
                         this.editLink = editor.getAttributes('link')?.href ?? ""
+                    } else {
+                        if (this.editor.state.selection.empty) {
+                            this.showLinkEditor = false
+                        }
                     }
                 }
             }
@@ -253,7 +261,6 @@ export default class EditorView extends Vue {
 
     @Watch('smartVariables')
     onSmartVariablesChanged(newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
-        console.log("Reload editor!!")
         const content = this.editor.getJSON()
 
         // Loop all nodes with type smartButton or smartText and remove them if needed (when they are not in the smartVariables + list warning)
@@ -486,6 +493,15 @@ export default class EditorView extends Vue {
             display: block;
         }
 
+        &.mobile {
+            flex-wrap: wrap;
+            flex-grow: 1;
+
+            > .button {
+                flex-grow: 1;
+            }
+        }
+
         &.sticky {
             position: sticky; 
             bottom: 0;
@@ -507,7 +523,7 @@ export default class EditorView extends Vue {
         }
 
         > .button {
-            padding: 5px;
+            padding: 5px 10px;
             margin: 0 auto;
 
             &.is-active {
