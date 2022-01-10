@@ -32,29 +32,27 @@
                     <slot name="footer" />
                 </footer>
             </div>
-            <TextStyleButtonsView v-if="!$isMobile" class="editor-button-bar sticky" :class="{ hidden: !showTextStyles }" :editor="editor" />
+            <TextStyleButtonsView v-if="!$isMobile && showTextStyles" class="editor-button-bar sticky" :editor="editor" />
 
             <div v-if="editor.isActive('smartButton')" class="editor-button-bar hint sticky">
                 {{ getSmartButton(editor.getAttributes('smartButton').id).hint }}
             </div>
 
-            <div class="editor-button-bar sticky link" :class="{ hidden: !showLinkEditor }">
+            <form v-if="showLinkEditor" class="editor-button-bar sticky link" autocomplete="off" novalidate data-submit-last-field @submit.prevent="saveLink()">
                 <STList>
                     <STListItem class="no-padding right-stack">
                         <div class="list-input-box">
                             <span>Link:</span>
 
-                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://">
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://" enterkeyhint="go">
                         </div>
-                        <button slot="right" class="button text" type="button" @mousedown.prevent @click.prevent="saveLink()">
-                            Opslaan
+                        <button slot="right" class="button text" type="submit" @mousedown.prevent>
+                            {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
                         </button>
                         <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash" type="button" @mousedown.prevent @click.prevent="clearLink()" />
                     </STListItem>
                 </STList>
-            </div>
-
-            {{ editLink }}
+            </form>
         </main>
         <STToolbar v-if="!$isMobile">
             <template #right>
@@ -76,7 +74,7 @@
                 </LoadingButton>
             </template>
         </STToolbar>
-        <STButtonToolbar v-else class="sticky" @mousedown.prevent>
+        <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.prevent>
             <template v-if="showTextStyles">
                 <TextStyleButtonsView class="editor-button-bar" :editor="editor" />
                 <button class="button close icon" type="button" @click.prevent="showTextStyles = false" @mousedown.prevent />
@@ -170,6 +168,13 @@ export default class EditorView extends Vue {
     }
 
     openLinkEditor() {
+        if (this.showLinkEditor) {
+            this.editor.chain().focus().run()
+            this.$nextTick(() => {
+                this.showLinkEditor = false
+            })
+            return
+        }
         this.editLink = this.editor.getAttributes('link')?.href ?? ""
         this.showLinkEditor = true;
         this.$nextTick(() => {
@@ -206,13 +211,17 @@ export default class EditorView extends Vue {
             return
         }
 
-        this.editor.chain().setLink({ href: cleanedUrl }).focus().run()
-        this.showLinkEditor = false
+        this.editor.chain().focus().setLink({ href: cleanedUrl }).focus().run()
+        this.$nextTick(() => {
+            this.showLinkEditor = false
+        })
     }
 
     clearLink() {
-        this.editor.chain().unsetLink().run()
-        this.showLinkEditor = false
+        this.editor.chain().focus().unsetLink().focus().run()
+        this.$nextTick(() => {
+            this.showLinkEditor = false
+        })
     }
 
     buildEditor(content: Content = "") {
@@ -488,7 +497,7 @@ export default class EditorView extends Vue {
             &.hidden {
                 transform: translate(0, 100%);
                 opacity: 0;
-                visibility: hidden;
+                //visibility: hidden;
                 transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-end;
             }
 

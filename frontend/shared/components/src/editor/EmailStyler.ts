@@ -10,8 +10,8 @@ export class EmailStyler {
         const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: white; padding: 0 27px; line-height: 42px; background: "+primaryColor+"; text-align: center; border-radius: 7px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
         styles += " .button.primary { "+buttonCSS+" } .button.primary:active { transform: scale(0.95, 0.95); } ";
 
-        const buttonDescriptionCSS = "margin: 10px 0; font-size: 14px; line-height: 1.4; font-weight: 500; color: #868686;"
-        styles += " .button-description { "+buttonDescriptionCSS+" } "
+        const descriptionCSS = "color: #5e5e5e;"
+        styles += " .button { "+descriptionCSS+" } "
 
         // Transform HTML into text + do replacements
         const element = document.createElement("div.email-style-apply-here")
@@ -59,9 +59,9 @@ export class EmailStyler {
         }
 
         // Force button
-        const buttonDescriptionElements = element.querySelectorAll(".button-description")
+        const buttonDescriptionElements = element.querySelectorAll(".description")
         for (const el of buttonDescriptionElements) {
-            (el as any).style.cssText = buttonDescriptionCSS
+            (el as any).style.cssText = descriptionCSS
         }
         
 
