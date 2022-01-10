@@ -4,11 +4,13 @@ export class EditorSmartVariable {
     id: string;
     name: string;
     example: string;
+    deleteMessage?: string
 
-    constructor(options: { id: string, name: string, example?: string }) {
+    constructor(options: { id: string, name: string, example?: string, deleteMessage?: string }) {
         this.id = options.id;
         this.name = options.name;
         this.example = options.example ?? options.name;
+        this.deleteMessage = options.deleteMessage;
     }
 }
 
@@ -93,7 +95,7 @@ export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
             'span',
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             mergeAttributes({ 'data-type': this.name }, this.options.HTMLAttributes, HTMLAttributes),
-            this.options.smartVariables.find(s => s.id === node.attrs.id)?.example ?? "Onbekend",
+            this.options.smartVariables.find(s => s.id === node.attrs.id)?.example ?? "", // Empty string won't get rendered but kept for reference in case the smart variable is found again later
         ]
     },
 

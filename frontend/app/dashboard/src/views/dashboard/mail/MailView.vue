@@ -217,17 +217,19 @@ export default class MailView extends Mixins(NavigationMixin) {
             new EditorSmartVariable({
                 id: "firstName", 
                 name: "Voornaam", 
-                example: this.recipients.find(r => r.firstName && r.firstName.length > 0)?.firstName ?? undefined,
+                example: "", 
+                deleteMessage: "De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald."
             }),
             new EditorSmartVariable({
                 id: "lastName", 
                 name: "Achternaam", 
-                example: this.recipients.find(r => r.lastName && r.lastName.length > 0)?.lastName ?? undefined,
+                example: "", 
+                deleteMessage: "De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald."
             }),
             new EditorSmartVariable({
                 id: "email", 
                 name: "E-mailadres", 
-                example: this.recipients[0]?.email ?? undefined,
+                example: "", 
             })
         ]
 
@@ -235,28 +237,33 @@ export default class MailView extends Mixins(NavigationMixin) {
             variables.push(new EditorSmartVariable({
                 id: "orderNumber", 
                 name: "Bestelnummer", 
-                example: this.orders[0].number?.toString(),
+                example: "", 
             }))
 
             variables.push(new EditorSmartVariable({
                 id: "orderPrice", 
                 name: "Bestelbedrag", 
-                example: this.orders[0].data.totalPrice ? Formatter.price(this.orders[0].data.totalPrice) : undefined,
+                example: "", 
             }))
 
             variables.push(new EditorSmartVariable({
                 id: "orderStatus", 
                 name: "Bestelstatus", 
-                example: this.orders[0].status ? OrderStatusHelper.getName(this.orders[0].status) : undefined,
+                example: "", 
             }))
         }
 
         // Remove all smart variables that are not set in the recipients
         return variables.filter(variable => {
             for (const recipient of this.recipients) {
-                if (!recipient.replacements.find(r => r.token === variable.id && r.value.length > 0)) {
+                const replacement = recipient.replacements.find(r => r.token === variable.id && r.value.length > 0)
+                if (!replacement) {
                     // Not found
                     return false
+                } else {
+                    if (variable.example.length == 0) {
+                        variable.example = replacement.value
+                    }
                 }
             }
             return true
@@ -269,7 +276,8 @@ export default class MailView extends Mixins(NavigationMixin) {
             buttons.push(new EditorSmartButton({
                 id: "signInUrl",
                 name: "Inlog-knop",
-                text: "Inschrijvingen beheren"
+                text: "Inschrijvingen beheren",
+                hint: "Als gebruikers op deze knop klikken, zorgt het systeem ervoor dat ze inloggen of registreren op het juiste e-mailadres dat al in het systeem zit."
             }))
         }
 
@@ -277,7 +285,8 @@ export default class MailView extends Mixins(NavigationMixin) {
             buttons.push(new EditorSmartButton({
                 id: "orderUrl",
                 name: "Bestelling-knop",
-                text: this.orderButtonText
+                text: this.orderButtonText,
+                hint: "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies."
             }))
         }
         return buttons
@@ -538,9 +547,21 @@ export default class MailView extends Mixins(NavigationMixin) {
         this.didInsertButton = true
         // Insert <hr> and content
         // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
-        const content = `<p></p><hr><p><a data-type="smartButton" data-id="signInUrl"></a></p><p></p><p><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
-        console.log(this.editor.state.doc)
-        this.editor.chain()/*.focus()*/.insertContentAt(this.editor.state.doc.content.size, content, { updateSelection: false })/*.focus()*/.run()
+        
+        const content2 = `<p class="description"></p><p><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
+        this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
+            {
+                type: "paragraph",
+                content: []
+            },
+            {
+                type: "horizontalRule",
+            },
+            {
+                type: "paragraph",
+                content: []
+            },
+        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0]).insertContent(content2, { updateSelection: false })/*.focus()*/.run()
     }
 
     mounted() {
@@ -571,7 +592,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
         if (this.hasFirstName) {
             // Insert "Dag <naam>," into editor
-            this.editor.chain().setTextSelection(0).insertContent("Dag ").insertSmartVariable(this.smartVariables[0]).insertContent(",\n\n")/*.focus()*/.run()
+            this.editor.chain().setTextSelection(0).insertContent("Dag ").insertSmartVariable(this.smartVariables[0]).insertContent(",<p></p>")/*.focus()*/.run()
         }
 
         this.checkBounces().catch(e => {

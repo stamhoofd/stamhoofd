@@ -16,6 +16,8 @@
         "@stamhoofd/components": "1.0.0",
         "@stamhoofd/logger": "1.0.0",
         "@stamhoofd/scss": "1.0.0",
+        "@tiptap/extension-link": "^2.0.0-beta.35",
+        "@tiptap/extension-underline": "^2.0.0-beta.22",
         "@tiptap/starter-kit": "^2.0.0-beta.168",
         "@tiptap/vue-2": "^2.0.0-beta.74",
         "ibantools": "^3.1.0",

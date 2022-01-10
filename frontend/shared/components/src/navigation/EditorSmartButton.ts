@@ -4,11 +4,15 @@ export class EditorSmartButton {
     id: string;
     name: string;
     text: string;
+    hint: string;
+    deleteMessage?: string
 
-    constructor(options: { id: string, name: string, text: string }) {
+    constructor(options: { id: string, name: string, text: string, hint: string, deleteMessage?: string }) {
         this.id = options.id;
         this.name = options.name;
         this.text = options.text;
+        this.hint = options.hint;
+        this.deleteMessage = options.deleteMessage;
     }
 }
 
@@ -37,15 +41,18 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
         }
     }, 
 
-    group: 'inline',
+    group: 'block',
 
-    inline: true,
-    //selectable: true,
-    //draggable: true,
+    inline: false,
+    selectable: true,
+    draggable: true,
 
     atom: false,
     content: "text*",
 
+    // disallows all marks
+    marks: '',
+     
     addCommands() {
         return {
             insertSmartButton: (smartButton: EditorSmartButton) => ({ commands }) => {
@@ -100,6 +107,9 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
         ]
     },
 
+    /**
+     * Text when copying to the clipboard
+     */
     renderText({ node }) {
         return "{{"+node.attrs.id+"}}"
     },

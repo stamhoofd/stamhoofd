@@ -34,8 +34,8 @@
             </div>
             <TextStyleButtonsView v-if="!$isMobile" class="editor-button-bar sticky" :class="{ hidden: !showTextStyles }" :editor="editor" />
 
-            <div v-if="editor.isActive('smartButton')" class="editor-button-bar sticky">
-                Deze slimme knop doet iets als gebruikers erop klikken.
+            <div v-if="editor.isActive('smartButton')" class="editor-button-bar hint sticky">
+                {{ getSmartButton(editor.getAttributes('smartButton').id).hint }}
             </div>
         </main>
         <STToolbar v-if="!$isMobile">
@@ -77,7 +77,9 @@
 
 
 <script lang="ts">
+import { Content, JSONContent } from '@tiptap/core'
 import Link from '@tiptap/extension-link'
+import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
 import { Editor, EditorContent } from '@tiptap/vue-2'
 import { Component,Prop,Vue, Watch } from "vue-property-decorator";
@@ -86,8 +88,9 @@ import { default as TooltipDirective } from "../directives/Tooltip";
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
-import { ViewportHelper } from '../ViewportHelper';
+import { Toast } from '../overlays/Toast';
 import BackButton from "./BackButton.vue";
+import { DescriptiveText } from "./EditorDescriptiveText";
 import { EditorSmartButton, SmartButtonNode } from './EditorSmartButton';
 import { EditorSmartVariable, SmartVariableNode } from './EditorSmartVariable';
 import LoadingButton from "./LoadingButton.vue";
@@ -147,7 +150,7 @@ export default class EditorView extends Vue {
         this.editor.destroy()
     }
 
-    buildEditor(content = "") {
+    buildEditor(content: Content = "") {
         return new Editor({
             content,
             extensions: [
@@ -161,45 +164,64 @@ export default class EditorView extends Vue {
                 Link.configure({
                     openOnClick: false,
                 }),
+                Underline,
+                DescriptiveText
             ],
-            // Listen for selection changes and make sure the selected range stays above the keyboard (and scroll if needed)
-            /*onSelectionUpdate: ({ editor }) => {
-                console.log("Selection change")
-                // The selection has changed.
-                const selection = window.getSelection()
-                if (selection) {
-   
-                    const range = selection.getRangeAt(0).cloneRange() // Clone is needed, else it wont work for an unknown reason
-                    if (range) {
-                        const rect = range.getBoundingClientRect()
-                        const scrollElement = this.$refs.main as HTMLElement
-                        const scrollElementRect = scrollElement.getBoundingClientRect()
-                        console.log("rect", rect)
-                        console.log("scrollElementRect", scrollElementRect)
-                        if (rect.bottom > scrollElementRect.bottom) {
-                            const scroll = rect.bottom - scrollElementRect.bottom
-                            const endPosition = scrollElement.scrollTop + scroll
-
-                            console.log("Scroll to position", endPosition)
-                            console.log("Scroll offset", scroll)
-
-                            const exponential = function(x: number): number {
-                                return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
-                            }
-                            ViewportHelper.scrollTo(scrollElement, endPosition, 300, exponential)
-                        }
-                    }
-                }
-            },*/
         })
     }
 
     @Watch('smartVariables')
-    onSmartVariablesChanged() {
+    onSmartVariablesChanged(newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
         console.log("Reload editor!!")
-        const content = this.editor.getHTML()
+        const content = this.editor.getJSON()
+
+        // Loop all nodes with type smartButton or smartText and remove them if needed (when they are not in the smartVariables + list warning)
+        //this.checkNode(content, newSmartVariables, oldSmartVariables)
+        this.warnInvalidNodes(content, newSmartVariables, oldSmartVariables)
+        this.deleteInvalidButtons(content)
+
+        // console.log(content)
         this.editor.destroy()
         this.editor = this.buildEditor(content)
+    }
+
+    /**
+     * Return true if node needs to be kept
+     */
+    warnInvalidNodes(node: JSONContent, newSmartVariables: EditorSmartVariable[], oldSmartVariables: EditorSmartVariable[]) {
+        if (node.type == "smartVariable") {
+            if (!newSmartVariables.find(smartVariable => smartVariable.id == node.attrs?.id)) {
+                // If did found in old?
+                const old = oldSmartVariables.find(smartVariable => smartVariable.id == node.attrs?.id)
+                if (old && old.deleteMessage) {
+                    new Toast(old.deleteMessage, "warning yellow").setHide(30*1000).show()
+                }
+            }
+        }
+
+        if (node.content) {
+            for (const childNode of node.content)
+                this.warnInvalidNodes(childNode, newSmartVariables, oldSmartVariables)
+        }
+    }
+
+    /**
+     * Return true if node needs to be kept
+     */
+    deleteInvalidButtons(node: JSONContent) {
+        if (node.type == "smartButton") {
+            return !!this.smartButtons.find(smartButton => smartButton.id == node.attrs?.id)
+        }
+        if (node.content) {
+            node.content = node.content.filter(childNode => {
+                return this.deleteInvalidButtons(childNode,)
+            })
+        }
+        return true
+    }
+
+    getSmartButton(id: string) {
+        return this.smartButtons.find(button => button.id === id)
     }
 
     showSmartVariableMenu(event) {
@@ -337,6 +359,10 @@ export default class EditorView extends Vue {
             line-height: 1.4;
         }
 
+        p.description {
+            color: $color-gray-4;
+        }
+
         strong {
             font-weight: bold;
         }
@@ -378,6 +404,10 @@ export default class EditorView extends Vue {
             user-select: auto;
             cursor: default;
 
+            // The display flex style, doesn't render the carret correctly on an empty node
+            display: inline-block !important;
+            line-height: 42px;
+
             &:active {
                 transform: none;
             }
@@ -387,9 +417,15 @@ export default class EditorView extends Vue {
             background: $color-gray-3;
             padding: 3px 2px;
             margin: 0 -2px;
-            color: $color-gray-5;
+            //color: $color-gray-5;
             border-radius: $border-radius;
             white-space: nowrap;
+
+            &:empty {
+                padding: 0;
+                margin: 0;
+                background: none;
+            }
 
             &.ProseMirror-selectednode {
                 background: $color-primary;
@@ -412,6 +448,11 @@ export default class EditorView extends Vue {
         display: flex;
         flex-direction: row;
         align-items: center;
+
+        &.hint {
+            padding: 10px 15px;
+            @extend .style-description;
+        }
 
         &.sticky {
             position: sticky; 
