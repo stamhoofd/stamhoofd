@@ -49,7 +49,7 @@
                         <button slot="right" class="button text" type="submit" @mousedown.prevent>
                             {{ editLink.length == 0 ? "Sluiten" : "Opslaan" }}
                         </button>
-                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash" type="button" @mousedown.prevent @click.prevent="clearLink()" />
+                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash gray" type="button" @mousedown.prevent @click.prevent="clearLink()" />
                     </STListItem>
                 </STList>
             </form>
@@ -57,7 +57,7 @@
         <STToolbar v-if="!$isMobile">
             <template #right>
                 <div class="editor-button-bar">
-                    <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @click.prevent="editor.chain().focus().run(); showTextStyles = !showTextStyles" />
+                    <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />
                     <hr>
                     <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
                     <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
@@ -75,17 +75,11 @@
             </template>
         </STToolbar>
         <STButtonToolbar v-else-if="!showLinkEditor" class="sticky" @mousedown.prevent>
-            <template v-if="showTextStyles">
-                <TextStyleButtonsView class="editor-button-bar mobile" :editor="editor" />
-                <button class="button close icon" type="button" @click.prevent="showTextStyles = false" @mousedown.prevent />
-            </template>
-            <template v-else>
-                <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @click.prevent="editor.chain().focus().run(); showTextStyles = !showTextStyles" />
-                <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
-                <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
-                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
-                <slot name="buttons" />
-            </template>
+            <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" type="button" @click.prevent="openTextStyles($event)" @mousedown.prevent />
+            <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
+            <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
+            <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
+            <slot name="buttons" />
         </STButtonToolbar>
     </form>
 </template>
@@ -226,6 +220,101 @@ export default class EditorView extends Vue {
         this.$nextTick(() => {
             this.showLinkEditor = false
         })
+    }
+
+    openTextStyles(event) {
+        // Get initial selection        
+        const m = this
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Vet",
+                    icon: "bold",
+                    selected: this.editor.isActive("bold"),
+                    action: () => {
+                        m.editor.chain().focus().toggleBold().run()
+                        return true
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Cursief",
+                    icon: "italic",
+                    selected: this.editor.isActive("italic"),
+                    action: () => {
+                        m.editor.chain().focus().toggleItalic().run()
+                        return true
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Onderstrepen",
+                    icon: "underline",
+                    selected: this.editor.isActive("underline"),
+                    action: () => {
+                        m.editor.chain().focus().toggleUnderline().run()
+                        return true
+                    }
+                }),
+            ],
+            [
+                new ContextMenuItem({
+                    name: "Titel",
+                    icon: "h1",
+                    selected: this.editor.isActive("heading", { level: 1 }),
+                    action: () => {
+                        m.editor.chain().focus().toggleHeading({ level: 1 }).run()
+                        return true
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Koptekst",
+                    icon: "h2",
+                    selected: this.editor.isActive("heading", { level: 2 }),
+                    action: () => {
+                        m.editor.chain().focus().toggleHeading({ level: 2 }).run()
+                        return true
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Subkop",
+                    icon: "h3",
+                    selected: this.editor.isActive("heading", { level: 3 }),
+                    action: () => {
+                        m.editor.chain().focus().toggleHeading({ level: 3 }).run()
+                        return true
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Licht gekleurd",
+                    icon: "info-circle",
+                    selected: this.editor.isActive("descriptiveText"),
+                    action: () => {
+                        m.editor.chain().focus().toggleDescriptiveText().run()
+                        return true
+                    }
+                }),
+            ],
+            [
+                new ContextMenuItem({
+                    name: "Opsomming met bolletjes",
+                    icon: "ul",
+                    selected: this.editor.isActive("bulletList"),
+                    action: () => {
+                        m.editor.chain().focus().toggleBulletList().run()
+                        return true
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Opsomming met nummers",
+                    icon: "ol",
+                    selected: this.editor.isActive("orderedList"),
+                    action: () => {
+                        m.editor.chain().focus().toggleOrderedList().run()
+                        return true
+                    }
+                }),
+            ]
+        ])
+        menu.show({ button: event.currentTarget, yPlacement: "top" }).catch(console.error)
     }
 
     buildEditor(content: Content = "") {

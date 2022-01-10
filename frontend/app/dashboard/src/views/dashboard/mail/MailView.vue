@@ -305,7 +305,22 @@ export default class MailView extends Mixins(NavigationMixin) {
                 hint: "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies."
             }))
         }
-        return buttons
+
+        // Remove all smart variables that are not set in the recipients
+        return buttons.filter(button => {
+            if (button.id === "signInUrl") {
+                // Already checked initially
+                return true
+            }
+            for (const recipient of this.recipients) {
+                const replacement = recipient.replacements.find(r => r.token === button.id && r.value.length > 0)
+                if (!replacement) {
+                    // Not found
+                    return false
+                }
+            }
+            return true
+        })
     }
 
     getMemberFilter(filter: MemberFilter, none = true): string | undefined {

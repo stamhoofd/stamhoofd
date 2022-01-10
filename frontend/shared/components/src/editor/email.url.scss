@@ -93,3 +93,10 @@ hr {
         transform: none;
     }
 }
+
+a {
+    &, &:link, &:visited, &:active, &:hover {
+        text-decoration: underline;
+        color: blue;
+    }
+}
