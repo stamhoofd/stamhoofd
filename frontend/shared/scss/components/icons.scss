@@ -50,6 +50,18 @@
         color: $color-warning;
     }
 
+    &.color-word {
+        color: #0023DB;
+    }
+
+    &.color-excel {
+        color: #1D7200;
+    }
+
+    &.color-pdf {
+        color: #EE0000;
+    }
+
     &.middle {
         vertical-align: middle;
     }

@@ -67,13 +67,17 @@
 
             <!-- E-mail attachments -->
             <STList v-if="files.length > 0">
-                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description right-stack">
-                    <span slot="left" class="icon file" />
-                    {{ file.name }}
+                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description">
+                    <span slot="left" :class="'icon '+getFileIcon(file)" />
+                    <h3 class="style-title-list">
+                        {{ file.name }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ file.size }}
+                    </p>
 
                     <template #right>
-                        <span>{{ file.size }}</span>
-                        <span><button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" /></span>
+                        <button class="button icon gray trash" type="button" @click.stop="deleteAttachment(index)" />
                     </template>
                 </STListItem>
             </STList>
@@ -92,10 +96,6 @@
                 Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
             </p>
         </template>
-
-        <p v-if="fileWarning" class="warning-box">
-            We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
-        </p>
     </EditorView>
 </template>
 
@@ -530,15 +530,6 @@ export default class MailView extends Mixins(NavigationMixin) {
         return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
     }
 
-    get fileWarning() {
-        for (const file of this.files) {
-            if (file.file.name.endsWith(".docx") || file.file.name.endsWith(".xlsx") || file.file.name.endsWith(".doc") || file.file.name.endsWith(".xls")) {
-                return true
-            }
-        }
-        return false;
-    }
-
     get orderButtonType() {
         for (const order of this.orders) {
             if (order.payment?.paidAt !== null) {
@@ -631,13 +622,35 @@ export default class MailView extends Mixins(NavigationMixin) {
         })
     }
 
+    getFileIcon(file: TmpFile) {
+        if (file.file.name.endsWith(".png") || file.file.name.endsWith(".jpg") || file.file.name.endsWith(".jpeg") || file.file.name.endsWith(".gif")) {
+            return "file-image"
+        }
+        if (file.file.name.endsWith(".pdf")) {
+            return "file-pdf color-pdf"
+        }
+        if (file.file.name.endsWith(".xlsx") || file.file.name.endsWith(".xls")) {
+            return "file-excel color-excel"
+        }
+        if (file.file.name.endsWith(".docx") || file.file.name.endsWith(".doc")) {
+            return "file-word color-word"
+        }
+        return "file"
+    }
+
     changedFile(event) {
         if (!event.target.files || event.target.files.length == 0) {
             return;
         }
 
         for (const file of event.target.files as FileList) {
-            this.files.push(new TmpFile(file.name, file))
+            const f = new TmpFile(file.name, file)
+            this.files.push(f)
+
+            if (f.file.name.endsWith(".docx") || f.file.name.endsWith(".xlsx") || f.file.name.endsWith(".doc") || f.file.name.endsWith(".xls")) {
+                const error = "We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door."
+                new Toast(error, "warning yellow").setHide(30*1000).show()
+            }
         }
         
         // Clear selection
