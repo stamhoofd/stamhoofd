@@ -37,6 +37,24 @@
             <div v-if="editor.isActive('smartButton')" class="editor-button-bar hint sticky">
                 {{ getSmartButton(editor.getAttributes('smartButton').id).hint }}
             </div>
+
+            <div class="editor-button-bar sticky link" :class="{ hidden: !showLinkEditor }">
+                <STList>
+                    <STListItem class="no-padding right-stack">
+                        <div class="list-input-box">
+                            <span>Link:</span>
+
+                            <input ref="linkInput" v-model="editLink" class="list-input" type="url" placeholder="https://">
+                        </div>
+                        <button slot="right" class="button text" type="button" @mousedown.prevent @click.prevent="saveLink()">
+                            Opslaan
+                        </button>
+                        <button v-if="editor.isActive('link')" slot="right" v-tooltip="'Link verwijderen'" class="button icon trash" type="button" @mousedown.prevent @click.prevent="clearLink()" />
+                    </STListItem>
+                </STList>
+            </div>
+
+            {{ editLink }}
         </main>
         <STToolbar v-if="!$isMobile">
             <template #right>
@@ -45,7 +63,7 @@
                     <hr>
                     <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
                     <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
-                    <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
+                    <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
                 
                     <slot name="buttons" />
                 </div>  
@@ -65,10 +83,9 @@
             </template>
             <template v-else>
                 <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @click.prevent="editor.chain().focus().run(); showTextStyles = !showTextStyles" />
-                <hr>
                 <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
                 <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
-                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" @click="editor.chain().focus().setHorizontalRule().run()" />
+                <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" />
                 <slot name="buttons" />
             </template>
         </STButtonToolbar>
@@ -143,11 +160,59 @@ export default class EditorView extends Vue {
     // Handling
 
     showTextStyles = false
+    editLink = ""
+    showLinkEditor = false
 
     editor = this.buildEditor()
 
     beforeDestroy() {
         this.editor.destroy()
+    }
+
+    openLinkEditor() {
+        this.editLink = this.editor.getAttributes('link')?.href ?? ""
+        this.showLinkEditor = true;
+        this.$nextTick(() => {
+            (this.$refs.linkInput as HTMLInputElement).focus()
+        })
+    }
+
+    isValidHttpUrl(string: string) {
+        let url;
+        
+        try {
+            url = new URL(string);
+        } catch (_) {
+            return false;  
+        }
+
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+
+    saveLink() {
+        let cleanedUrl = this.editLink.trim()
+
+        if (cleanedUrl.length == 0) {
+            this.clearLink()
+            return
+        }
+
+        if (!cleanedUrl.startsWith("http://") && !cleanedUrl.startsWith("https://")) {
+            cleanedUrl = "http://" + cleanedUrl
+        }
+
+        if (!this.isValidHttpUrl(cleanedUrl)) {
+            new Toast("Ongeldige URL", "error red").show()
+            return
+        }
+
+        this.editor.chain().setLink({ href: cleanedUrl }).focus().run()
+        this.showLinkEditor = false
+    }
+
+    clearLink() {
+        this.editor.chain().unsetLink().run()
+        this.showLinkEditor = false
     }
 
     buildEditor(content: Content = "") {
@@ -167,6 +232,13 @@ export default class EditorView extends Vue {
                 Underline,
                 DescriptiveText
             ],
+            onSelectionUpdate: ({editor}) => {
+                if (this.showLinkEditor){
+                    if (editor.isActive("link")) {
+                        this.editLink = editor.getAttributes('link')?.href ?? ""
+                    }
+                }
+            }
         })
     }
 
@@ -394,8 +466,15 @@ export default class EditorView extends Vue {
         align-items: center;
 
         &.hint {
+            display: block;
             padding: 10px 15px;
             @extend .style-description;
+        }
+
+        &.link {
+            --st-horizontal-padding: 15px;
+            padding: 0 15px;
+            display: block;
         }
 
         &.sticky {

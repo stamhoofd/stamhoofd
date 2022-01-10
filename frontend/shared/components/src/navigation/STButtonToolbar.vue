@@ -57,6 +57,10 @@ export default class STButtonToolbar extends Vue {
                 margin-bottom: 4px;
             }
 
+            &.is-active {
+                color: $color-primary;
+            }
+
             > .bubble {
                 background: $color-error;
                 position: absolute;

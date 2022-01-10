@@ -8,10 +8,11 @@
 
         <!-- Buttons -->
         <template slot="buttons">
-            <button v-if="!$isMobile" v-tooltip="'Voorbeeld tonen'" class="button navigation icon eye" type="button" @click="openPreview" />
             <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
                 <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
             </label>
+            <hr v-if="!$isMobile">
+            <button v-if="!$isMobile" v-tooltip="'Voorbeeld tonen'" class="button icon eye" type="button" @click="openPreview" />
         </template>
 
         <!-- List -->
@@ -56,14 +57,7 @@
         <!-- Editor footer -->
         <template slot="footer">
             <!-- Buttons that are included in the e-mail -->
-            <div v-if="false && addButton && orders.length == 0" ref="footerButton" key="loginButton" v-tooltip="'Klik om te verwijderen'" class="disabled" title="Knop voor inschrijvingen" @click="addButton = false">
-                <hr>
-                <p><a class="button primary" :href="'{{signInUrl}}'">Inschrijvingen beheren</a></p>
-                <p class="style-description-small button-description">
-                    <em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span class="replace-placeholder" data-replace-type="email">linda.voorbeeld@gmail.com</span></strong>. Anders heb je geen toegang tot jouw gegevens.</em>
-                </p>
-            </div>
-            <div v-else-if="false && addButton && orders.length > 0 && webshop" ref="footerButton" key="orderButton" class="disabled" title="Knop voor bestelling">
+            <div v-if="false && addButton && orders.length > 0 && webshop" ref="footerButton" key="orderButton" class="disabled" title="Knop voor bestelling">
                 <hr>
                 <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
                 <p class="style-description-small button-description">
@@ -98,12 +92,6 @@
                 Een hoofdbeheerder van jouw vereniging moet eerst e-mailadressen instellen voor je een e-mail kan versturen.
             </p>
         </template>
-
-        <p v-if="!hasAllUsers && members.length > 0" class="info-box">
-            Niet elke ontvanger heeft toegang tot de gegevens van de leden. Daarom kan je geen inlogknop toevoegen in de e-mail.
-        </p>
-
-        <p v-if="webshop && false " class="info-box" v-text="'Gebruik slimme vervangingen in jouw tekst: {{nr}} wordt automatisch vervangen door het bestelnummer van de klant. Test het uit en klik op \'Voorbeeld\'.'" />
 
         <p v-if="fileWarning" class="warning-box">
             We raden af om Word of Excel bestanden door te sturen omdat veel mensen hun e-mails lezen op hun smartphone en die bestanden vaak niet (correct) kunnen openen. Sommige mensen hebben ook geen licentie voor Word/Excel, want dat is niet gratis. Zet de bestanden om in een PDF en stuur die door.
