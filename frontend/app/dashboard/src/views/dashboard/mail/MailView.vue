@@ -115,17 +115,15 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler,ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
-import { OrderStatusHelper } from '@stamhoofd/structures/esm/dist';
+import { EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
-import { EmailStyler } from './EmailStyler';
 import MissingFirstNameView from './MissingFirstNameView.vue';
 
 class TmpFile {
@@ -235,7 +233,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
         if (this.orders.length > 0) {
             variables.push(new EditorSmartVariable({
-                id: "orderNumber", 
+                id: "nr", 
                 name: "Bestelnummer", 
                 example: "", 
             }))
@@ -249,6 +247,36 @@ export default class MailView extends Mixins(NavigationMixin) {
             variables.push(new EditorSmartVariable({
                 id: "orderStatus", 
                 name: "Bestelstatus", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "paymentMethod", 
+                name: "Betaalmethode", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "orderPriceToPay", 
+                name: "Te betalen bedrag", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "transferDescription", 
+                name: "Mededeling (overschrijving)", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "transferBankAccount", 
+                name: "Rekeningnummer (overschrijving)", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "transferBankCreditor", 
+                name: "Begunstigde (overschrijving)", 
                 example: "", 
             }))
         }
@@ -548,7 +576,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         // Insert <hr> and content
         // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
         
-        const content2 = `<p class="description"></p><p><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
+        const content2 = `<p></p><p class="description"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
         this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
             {
                 type: "paragraph",
@@ -745,6 +773,34 @@ export default class MailView extends Mixins(NavigationMixin) {
                             Replacement.create({
                                 token: "nr",
                                 value: (order.number ?? "")+""
+                            }),
+                            Replacement.create({
+                                token: "orderPrice",
+                                value: Formatter.price(order.data.totalPrice)
+                            }),
+                            Replacement.create({
+                                token: "orderPriceToPay",
+                                value: order.payment?.status !== PaymentStatus.Succeeded ? Formatter.price(order.payment!.price) : ""
+                            }),
+                            Replacement.create({
+                                token: "paymentMethod",
+                                value: order.payment?.method ? PaymentMethodHelper.getName(order.payment.method) : ""
+                            }),
+                            Replacement.create({
+                                token: "transferDescription",
+                                value: order.payment?.status !== PaymentStatus.Succeeded && order.payment?.method === PaymentMethod.Transfer ? (order.payment?.transferDescription ?? "") : ""
+                            }),
+                            Replacement.create({
+                                token: "transferBankAccount",
+                                value: order.payment?.status !== PaymentStatus.Succeeded && order.payment?.method === PaymentMethod.Transfer ? (this.webshop?.meta.transferSettings.iban ?? this.organization.meta.transferSettings.iban ?? "") : ""
+                            }),
+                            Replacement.create({
+                                token: "transferBankCreditor",
+                                value: order.payment?.status !== PaymentStatus.Succeeded && order.payment?.method === PaymentMethod.Transfer ? (this.webshop?.meta.transferSettings.creditor ?? this.organization.meta.transferSettings.creditor ?? this.organization.name) : ""
+                            }),
+                            Replacement.create({
+                                token: "orderStatus",
+                                value: OrderStatusHelper.getName(order.status)
                             })
                         ]
                     }))
@@ -982,7 +1038,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
         let base: string = editor.getHTML();
 
-        return await EmailStyler.format(base, this.subject, OrganizationManager.organization)
+        return await EmailStyler.format(base, this.subject, OrganizationManager.organization.meta.color ?? "black")
     }
 
     existingWindow: Window | null

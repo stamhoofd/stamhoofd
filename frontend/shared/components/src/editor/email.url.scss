@@ -1,0 +1,95 @@
+// Define colors, but still allow overrides for dark modes
+$color-gray-4-original: #5e5e5e;
+$color-gray-4: var(--color-gray-4, $color-gray-4-original);
+
+$color-gray-2-original: #dcdcdc;
+$color-gray-2: var(--color-gray-2, $color-gray-2-original);
+
+$color-border-original: $color-gray-2; 
+$color-border: var(--color-border, $color-border-original);
+
+body {
+    color: #000716;
+    font-family: -apple-system-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 12pt;
+    line-height: 1.4;
+}
+
+/// New
+p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+}
+
+p.description {
+    color: $color-gray-4;
+}
+
+strong {
+    font-weight: bold;
+}
+
+em {
+    font-style: italic;
+}
+
+h1 {
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 1.2;
+
+    @media (max-width: 350px) {
+        font-size: 24px;
+    }
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-size: 20px;
+    line-height: 1.2;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+
+h3 {
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+
+ol, ul {
+    list-style-position: outside;
+    padding-left: 30px;
+
+}
+
+hr {
+    height: 1px;
+    background: $color-border;
+    border-radius: 1px;
+    padding: 0;
+    margin: 20px 0;
+    outline: none;
+    border: 0;
+}
+
+.button {
+    touch-action: inherit;
+    user-select: auto;
+    cursor: default;
+
+    // The display flex style, doesn't render the carret correctly on an empty node
+    display: inline-block !important;
+    line-height: 42px;
+    font-size: 16px; 
+    font-weight: bold;
+
+    &:active {
+        transform: none;
+    }
+}

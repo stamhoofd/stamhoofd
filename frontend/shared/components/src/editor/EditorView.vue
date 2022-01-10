@@ -87,17 +87,17 @@ import { Component,Prop,Vue, Watch } from "vue-property-decorator";
 import { default as TooltipDirective } from "../directives/Tooltip";
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
+import BackButton from "../navigation/BackButton.vue";
+import LoadingButton from "../navigation/LoadingButton.vue";
+import STButtonToolbar from "../navigation/STButtonToolbar.vue";
+import STNavigationBar from "../navigation/STNavigationBar.vue";
+import STToolbar from "../navigation/STToolbar.vue";
+import TextStyleButtonsView from '../navigation/TextStyleButtonsView.vue';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
-import BackButton from "./BackButton.vue";
 import { DescriptiveText } from "./EditorDescriptiveText";
 import { EditorSmartButton, SmartButtonNode } from './EditorSmartButton';
 import { EditorSmartVariable, SmartVariableNode } from './EditorSmartVariable';
-import LoadingButton from "./LoadingButton.vue";
-import STButtonToolbar from "./STButtonToolbar.vue";
-import STNavigationBar from "./STNavigationBar.vue";
-import STToolbar from "./STToolbar.vue";
-import TextStyleButtonsView from './TextStyleButtonsView.vue';
 
 @Component({
     components: {
@@ -351,87 +351,31 @@ export default class EditorView extends Vue {
 
         & > .ProseMirror {
             flex-grow: 1;
-        }
 
-        p {
-            margin: 0;
-            padding: 0;
-            line-height: 1.4;
-        }
+            @import './email.url.scss';
 
-        p.description {
-            color: $color-gray-4;
-        }
+            span[data-type="smartVariable"] {
+                background: $color-gray-3;
+                padding: 3px 2px;
+                margin: 0 -2px;
+                //color: $color-gray-5;
+                border-radius: $border-radius;
+                white-space: nowrap;
 
-        strong {
-            font-weight: bold;
-        }
+                &:empty {
+                    padding: 0;
+                    margin: 0;
+                    background: none;
+                }
 
-        em {
-            font-style: italic;
-        }
-
-        h1 {
-            @extend .style-title-1;
-            margin: 0;
-            padding: 0;
-        }
-
-        h2 {
-            @extend .style-title-2;
-            margin: 0;
-            padding: 0;
-        }
-
-        h3 {
-            @extend .style-title-3;
-            margin: 0;
-            padding: 0;
-        }
-
-        ol, ul {
-            list-style-position: outside;
-            padding-left: 30px;
-
-        }
-
-        hr {
-            @extend .style-hr;
-        }
-
-        .button {
-            touch-action: inherit;
-            user-select: auto;
-            cursor: default;
-
-            // The display flex style, doesn't render the carret correctly on an empty node
-            display: inline-block !important;
-            line-height: 42px;
-
-            &:active {
-                transform: none;
+                &.ProseMirror-selectednode {
+                    background: $color-primary;
+                    color: $color-primary-contrast;
+                }
             }
         }
 
-        span[data-type="smartVariable"] {
-            background: $color-gray-3;
-            padding: 3px 2px;
-            margin: 0 -2px;
-            //color: $color-gray-5;
-            border-radius: $border-radius;
-            white-space: nowrap;
-
-            &:empty {
-                padding: 0;
-                margin: 0;
-                background: none;
-            }
-
-            &.ProseMirror-selectednode {
-                background: $color-primary;
-                color: $color-primary-contrast;
-            }
-        }
+       
     }
 
     .ProseMirror {

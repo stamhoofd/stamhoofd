@@ -6,14 +6,15 @@ export { default as STErrorsInput } from "./src/errors/STErrorsInput.vue"
 export * from "./src/errors/Validator"
 
 // Classes
+export { EditorSmartButton } from "./src/editor/EditorSmartButton"
+export { EditorSmartVariable } from "./src/editor/EditorSmartVariable"
+export { EmailStyler } from "./src/editor/EmailStyler"
 export * from "./src/EventBus"
-export { EditorSmartButton } from "./src/navigation/EditorSmartButton"
-export { EditorSmartVariable } from "./src/navigation/EditorSmartVariable"
 export * from "./src/ViewportHelper"
 
 // Navigation
+export { default as EditorView } from "./src/editor/EditorView.vue"
 export { default as BackButton } from "./src/navigation/BackButton.vue"
-export { default as EditorView } from "./src/navigation/EditorView.vue"
 export { default as LoadingButton } from "./src/navigation/LoadingButton.vue"
 export { default as SaveView } from "./src/navigation/SaveView.vue"
 export { default as STButtonToolbar } from "./src/navigation/STButtonToolbar.vue"

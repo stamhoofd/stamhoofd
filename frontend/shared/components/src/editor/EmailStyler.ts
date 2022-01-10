@@ -1,17 +1,13 @@
-import { Organization } from "@stamhoofd/structures";
- 
 export class EmailStyler {
-    static async format(html: string, subject: string, organization: Organization): Promise<{ text: string; html: string }> {
-        const primaryColor = organization.meta.color ?? "#0053ff"
-
+    static async format(html: string, subject: string, primaryColor: string): Promise<{ text: string; html: string }> {
         const imported = ((await import(/* webpackChunkName: "email-css" */ "./email.url.scss")).default)
-        const scss = imported[0][1].replaceAll("#0053ff", primaryColor)
+        const scss = imported[0][1].replaceAll("#0053ff", primaryColor) as string
 
         let styles = scss;
         const hrCSS = "height: 2px;background: #e7e7e7; border-radius: 1px; padding: 0; margin: 20px 0; outline: none; border: 0;";
         styles += " hr {"+hrCSS+"}";
             
-        const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: white; padding: 12px 27px; background: "+primaryColor+"; text-align: center; border-radius: 5px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
+        const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: white; padding: 0 27px; line-height: 42px; background: "+primaryColor+"; text-align: center; border-radius: 7px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
         styles += " .button.primary { "+buttonCSS+" } .button.primary:active { transform: scale(0.95, 0.95); } ";
 
         const buttonDescriptionCSS = "margin: 10px 0; font-size: 14px; line-height: 1.4; font-weight: 500; color: #868686;"
@@ -50,7 +46,7 @@ export class EmailStyler {
     <td>
         <table cellspacing="0" cellpadding="0">
             <tr>
-                <td style="border-radius: 5px;" bgcolor="${primaryColor};">
+                <td style="border-radius: 7px;" bgcolor="${primaryColor}">
                 ${el.outerHTML}
                 </td>
             </tr>
