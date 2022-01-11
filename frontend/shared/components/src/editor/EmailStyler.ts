@@ -29,7 +29,7 @@ export class EmailStyler {
             (el as HTMLElement).innerText = "{{"+el.getAttribute("data-id")+"}}"
         }
 
-        const buttonElements = element.querySelectorAll("*[data-type=\"smartButton\"]")
+        const buttonElements = element.querySelectorAll("span.button")
         for (const el of buttonElements) {
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             const button = document.createElement("a");
@@ -41,7 +41,7 @@ export class EmailStyler {
         }
 
         // add force add padding and margin inline
-        const blocks = element.querySelectorAll("h1,h2,h3,p")
+        const blocks = element.querySelectorAll("h1,h2,h3,h4,p")
         for (const el of blocks) {
             (el as any).style.cssText = "margin: 0; padding: 0;"
         }

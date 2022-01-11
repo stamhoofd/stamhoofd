@@ -100,10 +100,15 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
     renderHTML({ node, HTMLAttributes }) {
         const button = this.options.smartButtons.find(s => s.id === node.attrs.id)
         return [
+            // We need the extra div because display: block is required (and button should be display inline block)
             'div',
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            mergeAttributes({ 'data-type': this.name, href: "{{"+(button?.id ?? "")+"}}", class: "button primary" }, this.options.HTMLAttributes, HTMLAttributes),
-            0,
+            mergeAttributes({ 'data-type': this.name }, this.options.HTMLAttributes, HTMLAttributes),
+            [
+                "span",
+                mergeAttributes({ href: "{{"+(button?.id ?? "")+"}}", class: "button primary" }, this.options.HTMLAttributes, HTMLAttributes),
+                0
+            ],
         ]
     },
 

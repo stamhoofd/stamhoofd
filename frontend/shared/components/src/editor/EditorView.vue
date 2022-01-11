@@ -649,9 +649,10 @@ export default class EditorView extends Vue {
 
             hr {
                 // Override selection area
-                padding: 10px 0;
+                padding: 20px 0;
                 margin: 0;
                 background: none;
+                display: block;
 
                 &:after {
                     content: "";
