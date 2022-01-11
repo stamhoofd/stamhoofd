@@ -62,7 +62,9 @@
                     <button v-if="smartVariables.length > 0" v-tooltip="'Magische tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
                     <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
                     <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.prevent />
-                
+                    <UploadButton :resolutions="imageResolutions" @input="insertImage" @mousedown.native.prevent>
+                        <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
+                    </UploadButton>
                     <slot name="buttons" />
                 </div>  
 
@@ -79,6 +81,9 @@
             <button v-if="smartVariables.length > 0" v-tooltip="'Slimme tekstvervanging'" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.prevent />
             <button v-tooltip="'Horizontale lijn'" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.prevent />
             <button v-tooltip="'Link toevoegen'" class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" @click="openLinkEditor()" @mousedown.prevent />
+            <UploadButton :resolutions="imageResolutions" @input="insertImage" @mousedown.native.prevent>
+                <div v-tooltip="'Afbeelding toevoegen'" class="button icon image" type="button" />
+            </UploadButton>
             <slot name="buttons" />
         </STButtonToolbar>
     </form>
@@ -86,7 +91,9 @@
 
 
 <script lang="ts">
+import { Image, ResolutionRequest } from "@stamhoofd/structures"
 import { Content, JSONContent } from '@tiptap/core'
+import { Image as ImageExtension } from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
@@ -94,6 +101,7 @@ import { Editor, EditorContent } from '@tiptap/vue-2'
 import { Component,Prop,Vue, Watch } from "vue-property-decorator";
 
 import { default as TooltipDirective } from "../directives/Tooltip";
+import UploadButton from "../inputs/UploadButton.vue"
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import BackButton from "../navigation/BackButton.vue";
@@ -108,6 +116,32 @@ import { EditorSmartButton, SmartButtonNode } from './EditorSmartButton';
 import { EditorSmartVariable, SmartVariableNode } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
 
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+        customImage: {
+            /**
+             * Add an image
+             */
+            setImage: (options: { src: string, alt?: string, title?: string, width?: number, height?: number }) => ReturnType,
+        }
+    }
+}
+
+const CustomImage = ImageExtension.extend({
+    name: 'customImage',
+    addAttributes() {
+        return {
+            ...this.parent?.(),
+            width: {
+                default: null,
+            },
+            height: {
+                default: null,
+            },
+        }
+    },
+})
+
 @Component({
     components: {
         STNavigationBar,
@@ -118,7 +152,8 @@ import TextStyleButtonsView from './TextStyleButtonsView.vue';
         BackButton,
         STButtonToolbar,
         EditorContent,
-        TextStyleButtonsView
+        TextStyleButtonsView,
+        UploadButton
     },
     directives: {
         Tooltip: TooltipDirective
@@ -220,6 +255,27 @@ export default class EditorView extends Vue {
         this.$nextTick(() => {
             this.showLinkEditor = false
         })
+    }
+
+    get imageResolutions(): ResolutionRequest[] {
+        return [
+            ResolutionRequest.create({
+                width: 600
+            })
+        ]
+    }
+
+    insertImage(image: Image | null) {
+        if (image === null) {
+            return
+        }
+        const resolution = image.resolutions[0]
+        if (!resolution) {
+            return
+        }
+        this.editor.chain().focus().setImage({ src: resolution.file.getPublicPath(), alt: image.source.name ?? undefined, width: resolution.width, height: resolution.height }).run()
+        new Toast("Beperk het gebruik van afbeeldingen in e-mails. Afbeeldingen worden bestraft door spamfilters, en e-mails komen daardoor vaker bij spam terecht.", "info").show()
+
     }
 
     openTextStyles(event) {
@@ -332,7 +388,8 @@ export default class EditorView extends Vue {
                     openOnClick: false,
                 }),
                 Underline,
-                DescriptiveText
+                DescriptiveText,
+                CustomImage
             ],
             onSelectionUpdate: ({editor}) => {
                 if (this.showLinkEditor){
@@ -550,6 +607,17 @@ export default class EditorView extends Vue {
                     color: $color-primary-contrast;
                 }
             }
+
+            img {
+                max-width: 100%;
+                height: auto;
+                margin: 0;
+                
+                &.ProseMirror-selectednode {
+                    box-shadow: 0 0 0 2px $color-primary;
+                    border-radius: $border-radius;
+                }
+            }
         }
 
        
@@ -611,7 +679,7 @@ export default class EditorView extends Vue {
             }
         }
 
-        > .button {
+        > .button, > .upload-button {
             padding: 5px 10px;
             margin: 0 auto;
 

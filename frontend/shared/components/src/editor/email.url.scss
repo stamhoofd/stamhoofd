@@ -94,6 +94,11 @@ hr {
     }
 }
 
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 a {
     &, &:link, &:visited, &:active, &:hover {
         text-decoration: underline;

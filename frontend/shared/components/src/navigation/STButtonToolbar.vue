@@ -41,7 +41,7 @@ export default class STButtonToolbar extends Vue {
         position: sticky;
         bottom: 0;
         
-        > .button {
+        > .button, > .upload-button {
             flex-grow: 1;
 
             display: flex;
