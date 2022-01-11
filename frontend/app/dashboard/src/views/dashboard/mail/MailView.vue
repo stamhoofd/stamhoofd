@@ -35,6 +35,7 @@
                     <span>Aan:</span>
                     <span class="list-input">{{ recipients.length == 1 ? recipients[0].firstName+" "+recipients[0].lastName : recipients.length +" ontvangers" }}</span>
                 </div>
+                <button v-if="hasToWarnings" slot="right" class="button icon warning yellow" type="button" @click="showToWarnings" />
             </STListItem>
             <STListItem class="no-padding" element-name="label">
                 <div class="list-input-box">
@@ -63,15 +64,6 @@
 
         <!-- Editor footer -->
         <template slot="footer">
-            <!-- Buttons that are included in the e-mail -->
-            <div v-if="false && addButton && orders.length > 0 && webshop" ref="footerButton" key="orderButton" class="disabled" title="Knop voor bestelling">
-                <hr>
-                <p><a class="button primary" :href="'{{orderUrl}}'">{{ orderButtonText }}</a></p>
-                <p class="style-description-small button-description">
-                    <em>Via de bovenstaande knop kan je jouw bestelling bekijken.</em>
-                </p>
-            </div>
-
             <!-- E-mail attachments -->
             <STList v-if="files.length > 0">
                 <STListItem v-for="(file, index) in files" :key="index" class="file-list-item">
