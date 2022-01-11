@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" @save="send">
+    <EditorView ref="editorView" class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor}" @save="send">
         <h1 class="style-navigation-title">
             Nieuwe e-mail
         </h1>
@@ -1092,7 +1092,11 @@ export default class MailView extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(NavigationController, { root : new ComponentWithProperties(EmailSettingsView)}).setDisplayStyle("popup"))
     }
 
-    async getHTML(withButton: boolean | null = null) {
+    get primaryColor() {
+        return OrganizationManager.organization.meta.color ?? "black"
+    }
+
+    async getHTML() {
         const editor = this.editor
         if (!editor) {
             // When editor is not yet loaded: slow internet -> need to know html on dismiss confirmation
@@ -1102,9 +1106,8 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
         }
 
-        let base: string = editor.getHTML();
-
-        return await EmailStyler.format(base, this.subject, OrganizationManager.organization.meta.color ?? "black")
+        const base: string = editor.getHTML();
+        return await EmailStyler.format(base, this.subject, this.primaryColor)
     }
 
     existingWindow: Window | null
@@ -1223,7 +1226,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
-        if ((await this.getHTML(false)).text.length <= "Dag {{firstName}},".length + 2 && this.subject.length < 2) {
+        if ((await this.getHTML()).text.length <= "Dag {{firstName}},".length + 2 && this.subject.length < 2) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder te versturen?", "Niet versturen")

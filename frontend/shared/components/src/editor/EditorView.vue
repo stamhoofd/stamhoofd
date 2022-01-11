@@ -586,10 +586,13 @@ export default class EditorView extends Vue {
         display: flex;
         flex-direction: column;
 
+        $element: ".ProseMirror";
+
+        @import './email.url.scss';
+
         & > .ProseMirror {
             flex-grow: 1;
-
-            @import './email.url.scss';
+            
 
             span[data-type="smartVariable"] {
                 background: $color-gray-3;
@@ -623,6 +626,10 @@ export default class EditorView extends Vue {
 
             .button {
                 cursor: default !important;
+
+                &.primary {
+                    background-color: var(--editor-primary-color, #{$color-primary});
+                }
             }
 
             img {
