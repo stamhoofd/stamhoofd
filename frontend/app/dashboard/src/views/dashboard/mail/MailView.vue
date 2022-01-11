@@ -104,6 +104,7 @@ import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, Edit
 import { AppManager, SessionManager } from '@stamhoofd/networking';
 import { EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { TextSelection } from 'prosemirror-state'
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -554,10 +555,8 @@ export default class MailView extends Mixins(NavigationMixin) {
     insertSignInButton() {
         this.didInsertButton = true
 
-
         // Insert <hr> and content
         // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
-        
         const content2 = `<p></p><p class="description"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
         this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
             {
@@ -571,7 +570,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                 type: "paragraph",
                 content: []
             },
-        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0]).insertContent(content2, { updateSelection: false })/*.focus()*/.run()
+        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0], { updateSelection: true }).insertContent(content2, { updateSelection: false }).setTextSelection(0)/*.focus()*/.run()
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        //this.editor.state.tr.setSelection(TextSelection.create(this.editor.state.tr.doc, position))
     }
 
 
@@ -625,7 +627,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 type: "paragraph",
                 content: []
             },
-        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0]).insertContent(content2, { updateSelection: false })/*.focus()*/.run()
+        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0], { updateSelection: true }).insertContent(content2, { updateSelection: false }).setTextSelection(0)/*.focus()*/.run()
     }
 
     mounted() {

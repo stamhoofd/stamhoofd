@@ -25,7 +25,7 @@ export type SmartButtonNodeOptions = {
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         smartButtonNode: {
-            insertSmartButton: (smartButton: EditorSmartButton) => ReturnType,
+            insertSmartButton: (smartButton: EditorSmartButton, options?: { updateSelection?: boolean }) => ReturnType,
         }
     }
 }
@@ -55,8 +55,8 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
      
     addCommands() {
         return {
-            insertSmartButton: (smartButton: EditorSmartButton) => ({ commands }) => {
-                return commands.insertContent({ type: this.name, attrs: { id: smartButton.id }, content: [{ type: "text", text: smartButton.text }] })
+            insertSmartButton: (smartButton: EditorSmartButton, options?: { updateSelection?: boolean }) => ({ commands }) => {
+                return commands.insertContent({ type: this.name, attrs: { id: smartButton.id }, content: [{ type: "text", text: smartButton.text }] }, options)
             },
         }
     },
