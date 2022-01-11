@@ -23,6 +23,16 @@ export class EmailStyler {
             el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-id")+"}}"), el)
         }
 
+        const buttonElements = element.querySelectorAll("span[data-type=\"smartButton\"]")
+        for (const el of buttonElements) {
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            const button = document.createElement("a");
+            button.innerText = (el as HTMLElement).innerText;
+            button.className = el.className;
+            button.setAttribute("href", el.getAttribute("href") ?? "");
+            button.setAttribute("target", el.getAttribute("target") ?? "");
+            el.parentElement!.replaceChild(button, el)
+        }
 
         // add force add padding and margin inline
         const blocks = element.querySelectorAll("h1,h2,h3,p")
