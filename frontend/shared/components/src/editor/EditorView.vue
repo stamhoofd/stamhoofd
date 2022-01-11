@@ -646,6 +646,29 @@ export default class EditorView extends Vue {
                     border-radius: $border-radius;
                 }
             }
+
+            hr {
+                // Override selection area
+                padding: 10px 0;
+                margin: 0;
+                background: none;
+
+                &:after {
+                    content: "";
+                    display: block;
+                    height: 1px;
+                    background: $color-border;
+                    width: 100%;
+                }
+
+                &.ProseMirror-selectednode {
+                    &:after {
+                        background: $color-primary;
+                        box-shadow: 0 0 0 1px $color-primary;
+                        border-radius: 4px;
+                    }
+                }
+            }
         }
 
        
