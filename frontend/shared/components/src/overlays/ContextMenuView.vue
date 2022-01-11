@@ -20,6 +20,7 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
+import { ViewportHelper } from "../ViewportHelper";
 import ContextMenuItemView from "./ContextMenuItemView.vue";
 
 function triangleContains(ax, ay, bx, by, cx, cy, x, y) {
@@ -104,7 +105,6 @@ export default class ContextMenuView extends Vue {
         let width = (this.$refs.context as HTMLElement).offsetWidth;
         let height = (this.$refs.context as HTMLElement).offsetHeight;
 
-        const viewPadding = 15;
 
         const win = window,
             doc = document,
@@ -112,14 +112,19 @@ export default class ContextMenuView extends Vue {
             body = doc.getElementsByTagName("body")[0],
             clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth,
             clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
+        
+        
+        const viewPadding = 15;
+        const viewPaddingBottom = Math.max(clientHeight < 900 ? 5 : 15, ViewportHelper.getBottomPadding());
+        const viewPaddingTop = clientHeight < 900 ? 5 : 15
 
         if (width > clientWidth - viewPadding * 2) {
             this.usedPreferredWidth = clientWidth - viewPadding * 2;
             width = this.usedPreferredWidth
         }
 
-        if (height > clientHeight - viewPadding * 2) {
-            this.usedPreferredHeight = clientHeight - viewPadding * 2;
+        if (height > clientHeight - viewPaddingTop - viewPaddingBottom) {
+            this.usedPreferredHeight = clientHeight - viewPaddingTop - viewPaddingBottom;
             height = this.usedPreferredHeight
         }
 
@@ -170,31 +175,31 @@ export default class ContextMenuView extends Vue {
             this.top = this.y// - Math.max(0, height - (clientHeight - viewPadding - this.y)); // remove border
 
             // If the remaining space is too small, we need to wrap
-            if (height > clientHeight - viewPadding - this.y) {
+            if (height > clientHeight - viewPaddingBottom - this.y) {
                 this.top = null
                 this.usedYPlacement = "top"
 
                 if (this.wrapHeight !== null) {
                     // Wrap instead of sticking to bottom
                     usedY = usedY - this.wrapHeight
-                    this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPadding - height);
+                    this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPaddingBottom - height);
 
-                    if (this.bottom < viewPadding) {
-                        this.bottom = viewPadding
+                    if (this.bottom < viewPaddingBottom) {
+                        this.bottom = viewPaddingBottom
                     }
                 } else {
-                    this.bottom = viewPadding
+                    this.bottom = viewPaddingBottom
                 }
             } else {
-                if (this.top < viewPadding) {
-                    this.top = viewPadding
+                if (this.top < viewPaddingTop) {
+                    this.top = viewPaddingTop
                 }
             }
         } else {
-            this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPadding - height); // remove border
+            this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height); // remove border
 
-            if (this.bottom < viewPadding) {
-                this.bottom = viewPadding
+            if (this.bottom < viewPaddingBottom) {
+                this.bottom = viewPaddingBottom
             }
         }
 
@@ -205,15 +210,24 @@ export default class ContextMenuView extends Vue {
         const yTransform = ((usedY - objTop) / height * 100).toFixed(2)
 
         this.transformOrigin = xTransform + "% "+yTransform+"%"
-        
-        window.addEventListener("touchmove", this.onTouchMove, { passive: false });
-        window.addEventListener("touchend", this.onTouchUp, { passive: false });
 
+        if (!this.usedPreferredHeight) {
+            // Allow scrolling if height is restricted, else add touch listeners to allow selection by dragging
+            window.addEventListener("touchmove", this.onTouchMove, { passive: false });
+            window.addEventListener("touchend", this.onTouchUp, { passive: false });
+        }
+       
         if (this.isPopped || this.parentMenu?.isPopped || (this.parentMenu && (!this.parentMenu.$el || !this.parentMenu.$el.isConnected))) {
             // Pop was dismissed before we could mount this context menu
             console.error("Context menu lost its parent menu during mounting")
             this.pop(false)
         }
+    }
+
+    beforeDestroy() {
+        this.popChildMenu()
+        window.removeEventListener("touchmove", this.onTouchMove);
+        window.removeEventListener("touchend", this.onTouchUp);
     }
 
     childMenu: ComponentWithProperties | null = null
@@ -563,12 +577,6 @@ export default class ContextMenuView extends Vue {
         }
     }
 
-    beforeDestroy() {
-        this.popChildMenu()
-        window.removeEventListener("touchmove", this.onTouchMove);
-        window.removeEventListener("touchend", this.onTouchUp);
-    }
-
     delayPop(popParents = false) {
         if (this.isPopped) {
             // Ignore
@@ -730,6 +738,9 @@ export default class ContextMenuView extends Vue {
     overflow: hidden;
     overflow-y: auto;
 
+    // Hide carret in element below the context menu
+    transform: translate3d(0, 0, 0);
+
     .context-menu-item {
         @extend .style-context-menu-item;
         cursor: pointer;
@@ -750,7 +761,7 @@ export default class ContextMenuView extends Vue {
         box-sizing: content-box;
 
         @media (max-width: 450px) {
-            min-height: 40px;
+            min-height: 38px;
         }
 
         > .left {
@@ -817,6 +828,10 @@ export default class ContextMenuView extends Vue {
         border-radius: $border-width-thin;
         height: $border-width-thin;
         margin: 6px 0;
+
+        @media (max-width: 450px) {
+            margin: 6px 0;
+        }
     }
 }
 </style>

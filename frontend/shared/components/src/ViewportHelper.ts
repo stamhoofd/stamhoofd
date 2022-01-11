@@ -183,7 +183,7 @@ export class ViewportHelper {
             const bodyHeight = document.body.clientHeight;
             const bottomPadding = bodyHeight - window.visualViewport.height
 
-            return bottomPadding
+            return Math.round(bottomPadding)
         }
         return 0
 
