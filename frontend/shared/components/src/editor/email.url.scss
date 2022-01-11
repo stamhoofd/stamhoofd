@@ -62,6 +62,13 @@ h3 {
     padding: 0;
 }
 
+h4 {
+    line-height: 1.2;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+}
+
 ol, ul {
     list-style-position: outside;
     padding-left: 30px;
@@ -81,7 +88,7 @@ hr {
 .button {
     touch-action: inherit;
     user-select: auto;
-    cursor: default;
+    cursor: pointer;
 
     // The display flex style, doesn't render the carret correctly on an empty node
     display: inline-block !important;
@@ -104,4 +111,37 @@ a {
         text-decoration: underline;
         color: blue;
     }
+}
+
+.email-data-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+        text-align: left;
+        padding: 10px 10px 10px 0;
+        border-bottom: 1px solid $color-border;
+        vertical-align: middle;
+
+        &:last-child {
+            text-align: right;
+            padding-right: 0;
+        }
+    }
+
+    thead {
+        font-weight: bold;
+
+        th {
+            font-size: 10pt;
+        }
+    }
+
+    h4 + p {
+        padding-top: 3px;
+        opacity: 0.8;
+        font-size: 11pt;
+    }
+
+    
 }

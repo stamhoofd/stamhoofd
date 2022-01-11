@@ -266,6 +266,13 @@ export default class MailView extends Mixins(NavigationMixin) {
                 name: "Begunstigde (overschrijving)", 
                 example: "", 
             }))
+
+            variables.push(new EditorSmartVariable({
+                id: "orderTable", 
+                name: "Tabel met bestelling", 
+                example: "order table", 
+                html: ""
+            }))
         }
 
         // Remove all smart variables that are not set in the recipients
@@ -276,7 +283,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                     // Not found
                     return false
                 } else {
-                    if (variable.example.length == 0) {
+                    if (variable.html === "") {
+                        variable.html = replacement.value
+                    }
+                    if (variable.html === undefined && variable.example.length == 0) {
                         variable.example = replacement.value
                     }
                 }
@@ -853,6 +863,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                             Replacement.create({
                                 token: "orderStatus",
                                 value: OrderStatusHelper.getName(order.status)
+                            }),
+                            Replacement.create({
+                                token: "orderTable",
+                                value: order.getHTMLTable()
                             })
                         ]
                     }))
@@ -1100,7 +1114,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             // Disable reuse in some browsers
             this.existingWindow.close()
         }
-        const newWindow = window.open("", "Voorbeeld"+Math.floor(Math.random()*9999999), "width=800,height=800,menubar=no,toolbar=no,location=no,resizable=yes");
+        const newWindow = window.open("", "Voorbeeld"+Math.floor(Math.random()*9999999), "width=650,height=800,menubar=no,toolbar=no,location=no,resizable=yes");
         if (!newWindow) {
             return
         }

@@ -113,7 +113,7 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { DescriptiveText } from "./EditorDescriptiveText";
 import { EditorSmartButton, SmartButtonNode } from './EditorSmartButton';
-import { EditorSmartVariable, SmartVariableNode } from './EditorSmartVariable';
+import { EditorSmartVariable, SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
 
 declare module '@tiptap/core' {
@@ -379,7 +379,10 @@ export default class EditorView extends Vue {
             extensions: [
                 StarterKit,
                 SmartVariableNode.configure({
-                    smartVariables: this.smartVariables,
+                    smartVariables: this.smartVariables.filter(s => s.html === undefined),
+                }),
+                SmartVariableNodeBlock.configure({
+                    smartVariables: this.smartVariables.filter(s => s.html !== undefined),
                 }),
                 SmartButtonNode.configure({
                     smartButtons: this.smartButtons,
@@ -606,6 +609,20 @@ export default class EditorView extends Vue {
                     background: $color-primary;
                     color: $color-primary-contrast;
                 }
+            }
+
+            div[data-type="smartVariableBlock"] {
+                padding: 0 15px;
+                margin: 0 -15px;
+
+                &.ProseMirror-selectednode {
+                    box-shadow: 0 0 0 2px $color-primary;
+                    border-radius: $border-radius;
+                }
+            }
+
+            .button {
+                cursor: default !important;
             }
 
             img {

@@ -1,4 +1,5 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 
 import { Payment, PrivatePayment } from '../members/Payment';
 import { PaymentMethod } from '../PaymentMethod';
@@ -170,6 +171,18 @@ export class Order extends AutoEncoder {
             return true
         }
         return this.data.matchQuery(query)
+    }
+
+    getHTMLTable(): string {
+        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><th>Artikel</th><th>Prijs</th></thead><tbody>`
+        
+        for (const item of this.data.cart.items) {
+            str += `<tr><td><h4>${item.amount} x ${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p>"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(Formatter.price(item.getPrice(this.data.cart)))}</td></tr>`
+        }
+        
+        // <tbody><tr><td>Test artikel</td><td>5</td><td>€ 50,00</td></tr></tbody></table>`
+
+        return str+"</tbody></table>";
     }
 }
 
