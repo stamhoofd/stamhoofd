@@ -130,6 +130,7 @@ export const SmartVariableNodeBlock = SmartVariableNode.extend({
         const smartVariable = this.options.smartVariables.find(s => s.id === node.attrs.id)
         const dom = document.createElement('div')
         dom.setAttribute('data-type', this.name)
+        dom.setAttribute('data-id', (node.attrs.id ?? "") + "")
         dom.innerHTML = smartVariable?.html ?? ""
         return { dom }
     },

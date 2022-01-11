@@ -24,6 +24,9 @@ export class Replacement extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     value: string 
+
+    @field({ decoder: StringDecoder, optional: true })
+    html?: string 
 }
 
 export class Recipient extends AutoEncoder {

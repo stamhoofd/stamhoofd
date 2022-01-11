@@ -172,7 +172,7 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
             for (const replacement of recipient.replacements) {
                 if (html) {
-                    html = html.replaceAll("{{"+replacement.token+"}}", Formatter.escapeHtml(replacement.value))
+                    html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
                 }
                 subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
             }

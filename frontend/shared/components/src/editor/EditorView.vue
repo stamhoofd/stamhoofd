@@ -467,36 +467,40 @@ export default class EditorView extends Vue {
         
         const m = this
         const menu = new ContextMenu([
-            this.smartVariables.map(variable => {
-                return new ContextMenuItem({
-                    name: variable.name,
-                    action: () => {
-                        if (initialSelection && initialSelection.tagName === 'INPUT') {
-                            // Allow replacements in input fields
-                            const input = initialSelection as HTMLInputElement
+            ...(this.smartVariables.length > 0 ? [
+                this.smartVariables.map(variable => {
+                    return new ContextMenuItem({
+                        name: variable.name,
+                        action: () => {
+                            if (initialSelection && initialSelection.tagName === 'INPUT') {
+                                // Allow replacements in input fields
+                                const input = initialSelection as HTMLInputElement
 
-                            if (input.selectionStart !== null && input.selectionEnd !== null) {
-                                input.setRangeText(`{{${variable.id}}}`, input.selectionStart, input.selectionEnd, 'end');
-                                input.focus()
+                                if (input.selectionStart !== null && input.selectionEnd !== null) {
+                                    input.setRangeText(`{{${variable.id}}}`, input.selectionStart, input.selectionEnd, 'end');
+                                    input.focus()
+                                }
+                            } else {
+                                m.editor.chain().focus().insertSmartVariable(variable).run()
                             }
-                        } else {
-                            m.editor.chain().focus().insertSmartVariable(variable).run()
+
+                            return true
                         }
-
-                        return true
-                    }
+                    })
                 })
-            }),
-            this.smartButtons.map(variable => {
-                return new ContextMenuItem({
-                    name: variable.name,
-                    action: () => {
-                        m.editor.chain().focus().insertSmartButton(variable).run()
+            ] : []),
+            ...(this.smartButtons.length > 0 ? [
+                this.smartButtons.map(variable => {
+                    return new ContextMenuItem({
+                        name: variable.name,
+                        action: () => {
+                            m.editor.chain().focus().insertSmartButton(variable).run()
 
-                        return true
-                    }
+                            return true
+                        }
+                    })
                 })
-            })
+            ]: [])
         ])
         menu.show({ button: event.currentTarget, yPlacement: "top" }).catch(console.error)
     }

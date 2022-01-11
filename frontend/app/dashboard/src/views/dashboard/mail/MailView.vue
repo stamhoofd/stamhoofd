@@ -30,6 +30,12 @@
                 <span slot="right" class="style-description-small">{{ recipients.length }}</span>
                 <button v-if="hasToWarnings" slot="right" class="button icon warning yellow" type="button" @click="showToWarnings" />
             </STListItem>
+            <STListItem v-else-if="orders.length > 0" class="no-padding right-stack">
+                <div class="list-input-box">
+                    <span>Aan:</span>
+                    <span class="list-input">{{ recipients.length }} {{ recipients.length == 1 ? "ontvanger" : "ontvangers" }}</span>
+                </div>
+            </STListItem>
             <STListItem class="no-padding" element-name="label">
                 <div class="list-input-box">
                     <span>Onderwerp:</span>
@@ -278,13 +284,13 @@ export default class MailView extends Mixins(NavigationMixin) {
         // Remove all smart variables that are not set in the recipients
         return variables.filter(variable => {
             for (const recipient of this.recipients) {
-                const replacement = recipient.replacements.find(r => r.token === variable.id && r.value.length > 0)
+                const replacement = recipient.replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined))
                 if (!replacement) {
                     // Not found
                     return false
                 } else {
-                    if (variable.html === "") {
-                        variable.html = replacement.value
+                    if (replacement.html && (variable.html === undefined || variable.html.length == 0)) {
+                        variable.html = replacement.html
                     }
                     if (variable.html === undefined && variable.example.length == 0) {
                         variable.example = replacement.value
@@ -866,7 +872,8 @@ export default class MailView extends Mixins(NavigationMixin) {
                             }),
                             Replacement.create({
                                 token: "orderTable",
-                                value: order.getHTMLTable()
+                                value: "",
+                                html: order.getHTMLTable()
                             })
                         ]
                     }))
@@ -1140,7 +1147,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         if (recipient) {
             for (const replacement of recipient.replacements) {
                 if (html) {
-                    html = html.replaceAll("{{"+replacement.token+"}}", replacement.value)
+                    html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
                 }
                 subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
             }

@@ -23,6 +23,12 @@ export class EmailStyler {
             el.parentElement!.replaceChild(document.createTextNode("{{"+el.getAttribute("data-id")+"}}"), el)
         }
 
+        const blockSmartVariables = element.querySelectorAll("div[data-type=\"smartVariableBlock\"]")
+        for (const el of blockSmartVariables) {
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            (el as HTMLElement).innerText = "{{"+el.getAttribute("data-id")+"}}"
+        }
+
         const buttonElements = element.querySelectorAll("span[data-type=\"smartButton\"]")
         for (const el of buttonElements) {
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
