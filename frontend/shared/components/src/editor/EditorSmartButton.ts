@@ -92,7 +92,7 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
     parseHTML() {
         return [
             {
-                tag: `span[data-type="${this.name}"]`,
+                tag: `div[data-type="${this.name}"]`,
             },
         ]
     },
@@ -100,7 +100,7 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
     renderHTML({ node, HTMLAttributes }) {
         const button = this.options.smartButtons.find(s => s.id === node.attrs.id)
         return [
-            'span',
+            'div',
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             mergeAttributes({ 'data-type': this.name, href: "{{"+(button?.id ?? "")+"}}", class: "button primary" }, this.options.HTMLAttributes, HTMLAttributes),
             0,

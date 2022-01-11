@@ -29,7 +29,7 @@ export class EmailStyler {
             (el as HTMLElement).innerText = "{{"+el.getAttribute("data-id")+"}}"
         }
 
-        const buttonElements = element.querySelectorAll("span[data-type=\"smartButton\"]")
+        const buttonElements = element.querySelectorAll("*[data-type=\"smartButton\"]")
         for (const el of buttonElements) {
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             const button = document.createElement("a");

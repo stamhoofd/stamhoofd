@@ -32,9 +32,9 @@
                     <slot name="footer" />
                 </footer>
             </div>
-            <TextStyleButtonsView v-if="!$isMobile && showTextStyles" class="editor-button-bar sticky" :editor="editor" />
+            <TextStyleButtonsView v-if="!$isMobile && showTextStyles && !showLinkEditor" class="editor-button-bar sticky" :editor="editor" />
 
-            <div v-if="editor.isActive('smartButton')" class="editor-button-bar hint sticky">
+            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartButton')" class="editor-button-bar hint sticky">
                 {{ getSmartButton(editor.getAttributes('smartButton').id).hint }}
             </div>
 

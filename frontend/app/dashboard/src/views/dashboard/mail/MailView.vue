@@ -33,7 +33,7 @@
             <STListItem v-else-if="orders.length > 0" class="no-padding right-stack">
                 <div class="list-input-box">
                     <span>Aan:</span>
-                    <span class="list-input">{{ recipients.length }} {{ recipients.length == 1 ? "ontvanger" : "ontvangers" }}</span>
+                    <span class="list-input">{{ recipients.length == 1 ? recipients[0].firstName+" "+recipients[0].lastName : recipients.length +" ontvangers" }}</span>
                 </div>
             </STListItem>
             <STListItem class="no-padding" element-name="label">
