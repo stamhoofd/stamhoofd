@@ -61,12 +61,12 @@ export default class STButtonToolbar extends Vue {
                 color: $color-primary;
             }
 
-            > .bubble {
+            > .style-bubble {
                 background: $color-error;
                 position: absolute;
                 left: 50%;
-                top: 0;
-                transform: translate(calc(12px - 20%), -20%);
+                bottom: 50%;
+                transform: translate(6px, 0);
             }
         }
     }

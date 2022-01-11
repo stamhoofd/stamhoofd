@@ -10,6 +10,7 @@
         <template slot="buttons">
             <label v-tooltip="'Bijlage toevoegen'" class="button icon attachment">
                 <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
+                <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
             </label>
             <hr v-if="!$isMobile">
             <button v-if="!$isMobile" v-tooltip="'Voorbeeld tonen'" class="button icon eye" type="button" @click="openPreview" />
@@ -67,11 +68,9 @@
 
             <!-- E-mail attachments -->
             <STList v-if="files.length > 0">
-                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item right-description">
+                <STListItem v-for="(file, index) in files" :key="index" class="file-list-item">
                     <span slot="left" :class="'icon '+getFileIcon(file)" />
-                    <h3 class="style-title-list">
-                        {{ file.name }}
-                    </h3>
+                    <h3 class="style-title-list" v-text="file.name" />
                     <p class="style-description-small">
                         {{ file.size }}
                     </p>
@@ -1199,6 +1198,12 @@ export default class MailView extends Mixins(NavigationMixin) {
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+
+            > h3 {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
         }
     }
     

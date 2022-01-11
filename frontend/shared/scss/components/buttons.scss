@@ -323,7 +323,7 @@
                 margin-bottom: 4px;
             }
 
-            > .bubble {
+            > .bubble, > .style-bubble {
                 background: $color-error;
                 position: absolute;
                 left: 50%;
