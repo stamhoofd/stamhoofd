@@ -272,4 +272,30 @@ select.input {
     overflow: hidden;
     white-space: nowrap;
     word-break: break-all;
+
+    &.dropdown {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        
+        cursor: pointer;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+        &:active {
+            opacity: 0.3;
+        }
+
+        > span {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        > .icon {
+            flex-shrink: 0;
+        }
+    }
 }

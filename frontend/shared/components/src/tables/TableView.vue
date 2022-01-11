@@ -534,15 +534,23 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.loadColumnConfiguration().catch(console.error)
         this.getScrollElement(this.$refs["table"] as HTMLElement).addEventListener("scroll", this.onScroll, { passive: true })
 
-        if (!this.wrapColumns) {
-            window.addEventListener("resize", this.onResize, { passive: true })
-        }
-
         if (!this.canLeaveSelectionMode) {
             this.showSelection = true
         }
 
         this.refreshOnReturn()
+    }
+
+    activated() {
+        if (!this.wrapColumns) {
+            window.addEventListener("resize", this.onResize, { passive: true })
+            this.onResize()
+        }
+    }
+
+    deactivated() {
+        // Better to remove event resize listener, because on resize, we don't need to rerender the table
+        window.removeEventListener("resize", this.onResize)
     }
 
     beforeDestroy() {
@@ -805,6 +813,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         const rightPadding = this.horizontalPadding
 
         const availableWidth = (forceWidth ?? (this.$refs["table"] as HTMLElement).clientWidth) - this.selectionColumnWidth - leftPadding - rightPadding;
+
+        if (isNaN(availableWidth) || availableWidth <= 0) {
+            console.warn("Available width is NaN or <= 0")
+            return
+        }
         const currentWidth = this.columns.reduce((acc, col) => acc + (col.width ?? 0), 0);
         let distributeWidth = availableWidth - currentWidth;
 
@@ -881,7 +894,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     change = Math.sign(distributeWidth)
                 }
 
-                //console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
+                console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
                 
                 // We'll make sure we never grow or shrink more than the distribute width
 

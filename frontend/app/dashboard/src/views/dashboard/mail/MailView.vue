@@ -22,10 +22,10 @@
                 <div class="list-input-box">
                     <span>Aan:</span>
 
-                    <div class="list-input" @click="showToMenu">
+                    <button class="list-input dropdown" type="button" @click="showToMenu">
                         <span>{{ memberFilterDescription }}</span>
                         <span class="icon arrow-down-small gray" />
-                    </div>
+                    </button>
                 </div>
                 <span slot="right" class="style-description-small">{{ recipients.length }}</span>
                 <button v-if="hasToWarnings" slot="right" class="button icon warning yellow" type="button" @click="showToWarnings" />
@@ -529,6 +529,44 @@ export default class MailView extends Mixins(NavigationMixin) {
         return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
     }
 
+
+    activated() {
+        // Update email id if created
+        if (!this.emailId) {
+            this.emailId = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+        }
+    }
+
+    get editor() {
+        return (this.$refs.editorView as EditorView).editor
+    }
+
+    didInsertButton = false
+
+    insertSignInButton() {
+        this.didInsertButton = true
+
+
+        // Insert <hr> and content
+        // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
+        
+        const content2 = `<p></p><p class="description"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
+        this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
+            {
+                type: "paragraph",
+                content: []
+            },
+            {
+                type: "horizontalRule",
+            },
+            {
+                type: "paragraph",
+                content: []
+            },
+        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0]).insertContent(content2, { updateSelection: false })/*.focus()*/.run()
+    }
+
+
     get orderButtonType() {
         for (const order of this.orders) {
             if (order.payment?.paidAt !== null) {
@@ -551,25 +589,22 @@ export default class MailView extends Mixins(NavigationMixin) {
         return "Bestelling bekijken"
     }
 
-    activated() {
-        // Update email id if created
-        if (!this.emailId) {
-            this.emailId = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+    get orderButtonDescription() {
+        if (this.orderButtonType === "payment") {
+            return "Via de bovenstaande knop kan je jouw bestelling en betaalinstructies bekijken."
         }
+        if (this.orderButtonType === "tickets") {
+            return "Via de bovenstaande knop kan je jouw tickets bekijken."
+        }
+        return "Via de bovenstaande knop kan je jouw bestelling bekijken."
     }
 
-    get editor() {
-        return (this.$refs.editorView as EditorView).editor
-    }
-
-    didInsertButton = false
-
-    insertButton() {
+    insertOrderButton() {
         this.didInsertButton = true
+
         // Insert <hr> and content
         // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
-        
-        const content2 = `<p></p><p class="description"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
+        const content2 = `<p></p><p class="description"><em>${this.orderButtonDescription}</em></p>`;
         this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
             {
                 type: "paragraph",
@@ -602,18 +637,20 @@ export default class MailView extends Mixins(NavigationMixin) {
             MemberManager.updateMembersAccess(this.members).then(() => {
                 // We created some users, so we might check the button again
                 if (this.hasAllUsers && !this.didInsertButton) {
-                    this.insertButton()
+                    this.insertSignInButton()
                 } else {
                     console.info("doent insert button")
                 }
             }).catch(e => {
                 Toast.fromError(e).show()
             })
+        } else if (this.orders.length > 0 && !this.didInsertButton) {
+            this.insertOrderButton()
         }
 
         if (this.hasFirstName) {
             // Insert "Dag <naam>," into editor
-            this.editor.chain().setTextSelection(0).insertContent("Dag ").insertSmartVariable(this.smartVariables[0]).insertContent(",<p></p>")/*.focus()*/.run()
+            this.editor.chain().setTextSelection(0).insertContent("Dag ").insertSmartVariable(this.smartVariables[0]).insertContent(",<p></p><p></p>")/*.focus()*/.run()
         }
 
         this.checkBounces().catch(e => {
@@ -713,7 +750,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     @Watch('hasAllUsers')
     onUpdateHasAllUsers(hasAllUsers: boolean) {
         if (hasAllUsers && !this.didInsertButton) {
-            this.insertButton()
+            this.insertSignInButton()
         }
     }
 
