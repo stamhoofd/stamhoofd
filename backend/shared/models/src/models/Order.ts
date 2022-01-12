@@ -285,6 +285,9 @@ export class Order extends Model {
 
     markUpdated() {
         this.updatedAt = new Date()
+
+        // Also save if this is the only saved property
+        this.forceSaveProperty("updatedAt")
     }
 
     /**
