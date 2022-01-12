@@ -410,7 +410,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 .show()
         }
         if (this.spamComplaints.length > 0) {
-            new Toast((this.hardBounces.length != 1 ? this.hardBounces.length+' e-mailadressen hebben' : 'Eén e-mailadres heeft')+" eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.", "warning yellow")
+            new Toast((this.spamComplaints.length != 1 ? this.spamComplaints.length+' e-mailadressen hebben' : 'Eén e-mailadres heeft')+" eerdere e-mails als spam gemarkeerd. Deze worden uitgesloten.", "warning yellow")
                 .setButton(new ToastButton("Toon", () => {
                     this.openSpamComplaints()
                 }))

@@ -16,9 +16,5 @@
 				"alert"
 			]
 		}
-	},
-	"server": {
-		"url": "https://dashboard.stamhoofd.dev",
-		"cleartext": true
 	}
 }
