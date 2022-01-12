@@ -188,6 +188,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
                 await order?.markPaid(model, user.organization)
             }
 
+            // Save after mark paid, only if still needed (not saved by markPaid)
             await order?.save()
 
             changedPayments.push(order ? model.setRelation(paymentOrderRelation, order) : (model.setManyRelation(paymentRegistrationsRelation, registrations) as PaymentWithRegistrations))

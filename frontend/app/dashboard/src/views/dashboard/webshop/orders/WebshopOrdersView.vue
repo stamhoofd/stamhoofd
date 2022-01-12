@@ -278,6 +278,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         for (const order of orders) {
             this.putOrder(order)
         }
+
+        console.log(this.orders)
         return Promise.resolve()
     }
 
@@ -340,8 +342,9 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             let arrayBuffer: PrivateOrder[] = []
 
             await this.webshopManager.streamOrders((order) => {
+                // Same orders could be seen twice
                 arrayBuffer.push(order)
-            })
+            }, false)
 
             if (arrayBuffer.length > 0) {
                 this.orders = arrayBuffer
@@ -351,7 +354,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // Database error. We can ignore this and simply move on.
             console.error(e)
         }
-
         await this.refresh(false) 
     }
 

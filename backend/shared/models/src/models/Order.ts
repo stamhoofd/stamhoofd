@@ -322,7 +322,7 @@ export class Order extends Model {
 
     sendPaidMail(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
-        const { from, replyTo } = organization.getDefaultEmail()
+        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
 
         const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
     
@@ -345,7 +345,7 @@ export class Order extends Model {
 
     sendTickets(this: Order & { webshop: Webshop & { organization: Organization } }) {        
         const organization = this.webshop.organization
-        const { from, replyTo } = organization.getDefaultEmail()
+        const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
 
         const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
     
@@ -387,7 +387,7 @@ export class Order extends Model {
             const webshop = this.webshop
             const organization = webshop.organization
             
-            const { from, replyTo } = organization.getDefaultEmail()
+            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId)
             
             const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
             const customer = this.data.customer

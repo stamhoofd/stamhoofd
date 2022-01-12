@@ -641,6 +641,44 @@ export class Organization extends Model {
         return '"'+this.name.replace("\"", "\\\"")+'" <'+ (this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
     }
 
+    getEmail(id: string | null): { from: string; replyTo: string | undefined } {
+        if (id === null) {
+            return this.getDefaultEmail()
+        }
+        
+        // Send confirmation e-mail
+        let from = this.uri+"@stamhoofd.email";
+        const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.id === id)
+        let replyTo: string | undefined = undefined
+
+        if (sender) {
+            replyTo = sender.email
+
+            // Can we send from this e-mail or reply-to?
+            if (replyTo && this.privateMeta.mailDomain && this.privateMeta.mailDomainActive && sender.email.endsWith("@"+this.privateMeta.mailDomain)) {
+                from = sender.email
+                replyTo = undefined
+            }
+
+            // Include name in form field
+            if (sender.name) {
+                from = '"'+sender.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            }  else {
+                from = '"'+this.name.replace("\"", "\\\"")+"\" <"+from+">" 
+            }
+
+            if (replyTo) {
+                if (sender.name) {
+                    replyTo = '"'+sender.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                }  else {
+                    replyTo = '"'+this.name.replace("\"", "\\\"")+"\" <"+replyTo+">" 
+                }
+            }
+            return { from, replyTo }
+        }
+        return this.getDefaultEmail()
+    }
+
     getDefaultEmail(): { from: string; replyTo: string | undefined } {
         // Send confirmation e-mail
         let from = this.uri+"@stamhoofd.email";

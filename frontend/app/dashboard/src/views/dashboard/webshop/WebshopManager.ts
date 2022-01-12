@@ -442,7 +442,10 @@ export class WebshopManager {
         })
     }
 
-    async streamOrders(callback: (order: PrivateOrder) => void): Promise<void> {
+    /**
+     * Warning: might stream same orders multiple times if they have been changed
+     */
+    async streamOrders(callback: (order: PrivateOrder) => void, networkFetch = true): Promise<void> {
         const db = await this.getDatabase()
 
         await new Promise<void>((resolve, reject) => {
@@ -461,7 +464,6 @@ export class WebshopManager {
                 const cursor = event.target.result;
                 if (cursor) {
                     const rawOrder = cursor.value
-                    // Todo: need version fix here
                     const order = PrivateOrder.decode(new ObjectData(rawOrder, { version: Version }))
                     callback(order)
                     cursor.continue();
@@ -472,15 +474,20 @@ export class WebshopManager {
             }
         })
 
-        const owner = {}
-        this.ordersEventBus.addListener(owner, "fetched", (orders: PrivateOrder[]) => {
-            for (const order of orders) {
-                callback(order)
+        if (networkFetch) {
+            const owner = {}
+            this.ordersEventBus.addListener(owner, "fetched", (orders: PrivateOrder[]) => {
+                for (const order of orders) {
+                    callback(order)
+                }
+                return Promise.resolve()
+            })
+            try {
+                await this.fetchNewOrders(false, false)
+            } finally {
+                this.ordersEventBus.removeListener(owner)
             }
-            return Promise.resolve()
-        })
-        await this.fetchNewOrders(false, false)
-        this.ordersEventBus.removeListener(owner)
+        }
     }
 
     async clearOrdersFromDatabase(): Promise<void> {
