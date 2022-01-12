@@ -1204,6 +1204,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     handleAction(action: TableAction<Value>, event) {
+        const selection = this.getSelection(action.allowAutoSelectAll)
+        if (selection.length == 0) {
+            return
+        }
+
         if (action.childActions.length > 0) {
             const el = event.currentTarget;
             const bounds = el.getBoundingClientRect()
@@ -1216,12 +1221,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 yPlacement: isOnTop ? "bottom" : "top",
                 actions: action.childActions,
                 table: this,
-                focused: this.showSelection  && this.isMobile ? this.getSelection() : []
+                focused: this.showSelection && this.isMobile ? selection : []
             });
             this.present(displayedComponent.setDisplayStyle("overlay"));
             return
         }
-        action.handle(this.getSelection(action.allowAutoSelectAll))?.catch((e) => {
+
+        action.handle(selection)?.catch((e) => {
             console.error(e)
             Toast.fromError(e).show
         })

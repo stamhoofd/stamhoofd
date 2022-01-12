@@ -30,7 +30,6 @@ import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedC
 import { UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { info } from "pdfkit";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager";
