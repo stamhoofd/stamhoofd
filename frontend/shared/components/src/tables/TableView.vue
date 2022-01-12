@@ -894,7 +894,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                     change = Math.sign(distributeWidth)
                 }
 
-                console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
+                // console.log("Distributing columns ", change, "px", "of", distributeWidth, "px")
                 
                 // We'll make sure we never grow or shrink more than the distribute width
 
