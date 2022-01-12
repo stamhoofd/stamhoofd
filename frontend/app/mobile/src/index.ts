@@ -92,6 +92,21 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
     }).catch(e => console.error(e));
 }
 
+// Fix for prosemirror scrollIntoView causing all overflow hidden elements to also scroll (need to make a PR to prosemirror to fix this)
+window.addEventListener("scroll", () => {
+    // Disalbe scrolling the body
+    requestAnimationFrame(() => {
+        if (document.documentElement.scrollTop > 0) {
+            document.documentElement.scrollTop = 0
+        }
+
+        // Fixes an iOS bug where documentElement is not scrolled, but body is
+        if (document.body.scrollTop > 0) {
+            document.body.scrollTop = 0
+        }
+    });
+}, { passive: true });
+
 // Faster click handling
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 window.addEventListener("touchstart", () => { }, { passive: true });

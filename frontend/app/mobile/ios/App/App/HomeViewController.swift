@@ -48,5 +48,9 @@ class HomeViewController: CAPBridgeViewController {
         }
         self.webView!.configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         self.webView!.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        
+        // Disable scroll on body/html
+        webView!.scrollView.isScrollEnabled = false
+        webView?.allow
     }
 }

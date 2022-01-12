@@ -397,7 +397,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get hasToWarnings() {
-        return this.hardBounces.length > 0 || this.spamComplaints.length > 0 || !this.hasFirstName
+        return this.recipients.length == 0 || this.hardBounces.length > 0 || this.spamComplaints.length > 0 || !this.hasFirstName
     }
 
     showToWarnings() {
@@ -417,13 +417,20 @@ export default class MailView extends Mixins(NavigationMixin) {
                 .setHide(10*1000)
                 .show()
         }
-        if (!this.hasFirstName) {
-            new Toast("Bij niet elk e-mailadres staat er een voornaam in het systeem. Daarom kan je geen automatische begroeting toevoegen in de e-mail.", "warning yellow")
-                .setButton(new ToastButton("Toon", () => {
-                    this.showMissingFirstNames()
-                }))
+
+        if (this.recipients.length == 0) {
+            new Toast("Geen ontvangers gevonden. Kijk na of er wel e-mailadressen beschikbaar zijn.", "warning yellow")
                 .setHide(10*1000)
                 .show()
+        } else {
+            if (!this.hasFirstName) {
+                new Toast("Bij niet elk e-mailadres staat er een voornaam in het systeem. Daarom kan je geen automatische begroeting toevoegen in de e-mail.", "warning yellow")
+                    .setButton(new ToastButton("Toon", () => {
+                        this.showMissingFirstNames()
+                    }))
+                    .setHide(10*1000)
+                    .show()
+            }
         }
     }
 
