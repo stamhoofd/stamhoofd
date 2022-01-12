@@ -399,6 +399,9 @@ export class WebshopPrivateMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(DNSRecord), version: 135 })
     dnsRecords: DNSRecord[] = [];
 
+    @field({ decoder: StringDecoder, nullable: true, version: 145 })
+    defaultEmailId: string | null = null
+
     static buildDNSRecords(domain: string): DNSRecord[] {
         return [
             DNSRecord.create({

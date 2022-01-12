@@ -182,7 +182,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
 
-    emailId: string | null = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+    emailId: string | null = null
     subject = this.defaultSubject ?? ""
 
     errorBox: ErrorBox | null = null
@@ -508,7 +508,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/email/check-bounces",
-                body: this.recipients.map(r => r.email),
+                body: [...this.allRecipients.values()].map(r => r.email),
                 decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
             })
             this.emailInformation = response.data
@@ -538,11 +538,23 @@ export default class MailView extends Mixins(NavigationMixin) {
         return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
     }
 
+    getDefaultEmailId() {
+        if (this.webshop) {
+            const id = this.webshop.privateMeta.defaultEmailId
+            if (!this.emails.find(e => e.id === id)) {
+                // Invalid: take first again
+                return this.emails[0]?.id ?? null
+            }
+            return id
+        }
+        return (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+    }
+
 
     activated() {
         // Update email id if created
         if (!this.emailId) {
-            this.emailId = (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
+            this.emailId = this.getDefaultEmailId()
         }
     }
 
@@ -631,6 +643,8 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        this.emailId = this.getDefaultEmailId()
+
         if (this.members.length > 0) {
             if (!this.hasAdults) {
                 this.memberFilter = MemberFilter.None

@@ -180,10 +180,15 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
 
             await model.save()
 
+            // Make sure we update the updatedAt timestamp of orders, so the frontend can load these orders again
+            order?.markUpdated()
+
             if (markPaid) {
                 // Send e-mail if needed with tickets
                 await order?.markPaid(model, user.organization)
             }
+
+            await order?.save()
 
             changedPayments.push(order ? model.setRelation(paymentOrderRelation, order) : (model.setManyRelation(paymentRegistrationsRelation, registrations) as PaymentWithRegistrations))
         }

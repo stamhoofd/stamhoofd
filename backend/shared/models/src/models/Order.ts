@@ -283,6 +283,10 @@ export class Order extends Model {
         return { tickets, didCreateTickets }
     }
 
+    markUpdated() {
+        this.updatedAt = new Date()
+    }
+
     /**
      * Only call this once! Make sure you use the queues correctly
      */

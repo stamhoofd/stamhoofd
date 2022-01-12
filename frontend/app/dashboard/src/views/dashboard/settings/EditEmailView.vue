@@ -21,9 +21,18 @@
 
         <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="E-mailadres waarmee je wilt versturen" />
 
+        <Checkbox v-model="isDefault">
+            <h3 class="style-title-list">
+                Standaard e-mailadres
+            </h3>
+            <p class="style-description-small">
+                Voor algemene e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
+            </p>
+        </Checkbox>
+
         <template v-if="enableMemberModule">
             <hr>
-            <h2>Standaard e-mailadres voor...</h2>
+            <h2>Inschrijvingsgroepen</h2>
             <p class="st-list-description">
                 Selecteer de groepen die standaard met dit e-mailadres moeten versturen.
             </p>
@@ -35,25 +44,25 @@
                         {{ group.group.settings.name }}<h3 />
                     </h3>
                 </STListItem>
-                <STListItem element-name="label" :selectable="true">
-                    <Checkbox slot="left" v-model="isDefault" />
+            </STList>
+        </template>
+
+        <template v-if="enableWebshopModule">
+            <hr>
+            <h2>Webshops</h2>
+            <p class="st-list-description">
+                Selecteer de webshops waarvoor we dit e-mailadres moeten gebruiken (bv. bestelbevestiging).
+            </p>
+
+            <STList>
+                <STListItem v-for="webshop in webshops" :key="webshop.webshop.id" element-name="label" :selectable="true">
+                    <Checkbox slot="left" v-model="webshop.selected" />
                     <h3 class="style-title-list">
-                        Standaard e-mails
+                        {{ webshop.webshop.meta.name }}<h3 />
                     </h3>
-                    <p class="style-description-small">
-                        Voor andere e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
-                    </p>
                 </STListItem>
             </STList>
         </template>
-        <Checkbox v-else v-model="isDefault">
-            <h3 class="style-title-list">
-                Standaard e-mails
-            </h3>
-            <p class="style-description-small">
-                Voor algemene e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
-            </p>
-        </Checkbox>
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -74,7 +83,8 @@ import { AutoEncoderPatchType, isPatchable, PartialWithoutMethods, PatchableArra
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version } from "@stamhoofd/structures";
+import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version, WebshopPreview } from "@stamhoofd/structures";
+import { WebshopPrivateMetaData } from '@stamhoofd/structures/esm/dist';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -85,6 +95,15 @@ class SelectableGroup {
     constructor(group: Group, selected = false) {
         this.selected = selected
         this.group = group
+    }
+}
+
+class SelectableWebshop {
+    webshop: WebshopPreview;
+    selected = false;
+    constructor(webshop: WebshopPreview, selected = false) {
+        this.selected = selected
+        this.webshop = webshop
     }
 }
 
@@ -119,6 +138,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
     organizationPatch = this.initialPatch ? this.initialPatch : OrganizationManager.getPatch()
 
     groups: SelectableGroup[] = []
+    webshops: SelectableWebshop[] = []
 
     OrganizationManager = OrganizationManager
 
@@ -130,9 +150,17 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
         return this.organization.meta.modules.useMembers
     }
 
+    get enableWebshopModule() {
+        return this.organization.meta.modules.useWebshops
+    }
+
     mounted() {
         for (const group of this.organization.groups) {
             this.groups.push(new SelectableGroup(group, group.privateSettings !== null && group.privateSettings.defaultEmailId !== null && group.privateSettings.defaultEmailId === this.emailId))
+        }
+
+        for (const webshop of this.organization.webshops) {
+            this.webshops.push(new SelectableWebshop(webshop, webshop.privateMeta !== null && webshop.privateMeta.defaultEmailId !== null && webshop.privateMeta.defaultEmailId === this.emailId))
         }
     }
 
@@ -280,6 +308,14 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
             }
         }
 
+        for (const webshop of this.webshops) {
+            // Check if changed
+            const prev = webshop.webshop.privateMeta !== null && webshop.webshop.privateMeta.defaultEmailId !== null && webshop.webshop.privateMeta.defaultEmailId === this.emailId
+            if (prev != webshop.selected) {
+                return true
+            }
+        }
+
         return patchContainsChanges(this.organizationPatch, this.initialPatch ? OrganizationManager.organization.patch(this.initialPatch) : OrganizationManager.organization, { version: Version })
     }
 
@@ -317,6 +353,19 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
                     id: group.group.id,
                     privateSettings: GroupPrivateSettingsPatch.create({
                         defaultEmailId: group.selected ? this.emailId : null,
+                    })
+                }))
+            }
+        }
+
+        for (const webshop of this.webshops) {
+            // Check if changed
+            const prev = webshop.webshop.privateMeta !== null && webshop.webshop.privateMeta.defaultEmailId !== null && webshop.webshop.privateMeta.defaultEmailId === this.emailId
+            if (prev != webshop.selected) {
+                this.organizationPatch.webshops.addPatch(WebshopPreview.patch({
+                    id: webshop.webshop.id,
+                    privateMeta: WebshopPrivateMetaData.patch({
+                        defaultEmailId: webshop.selected ? this.emailId : null,
                     })
                 }))
             }
