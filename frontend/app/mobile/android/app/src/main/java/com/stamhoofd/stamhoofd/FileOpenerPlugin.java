@@ -47,7 +47,8 @@ public class FileOpenerPlugin extends Plugin {
     public void load() {
         // This is the moment where we can replace the chrome and webview
         // Because trusted root CA don't work in WebViews in Android...
-        if (BuildConfig.BUILD_TYPE.equals("debug")) {
+        // Android review rejects because of this code, even in release mode :/ (it doesn't see the debug check)
+        /*if (BuildConfig.BUILD_TYPE.equals("debug")) {
             // We need to make sure we keep using the bridges custom logic
             BridgeWebViewClient client = new BridgeWebViewClient(this.bridge) {
                 @Override
@@ -57,7 +58,7 @@ public class FileOpenerPlugin extends Plugin {
                 }
             };
             this.bridge.setWebViewClient(client);
-        }
+        }*/
 
         BridgeWebChromeClient chromeClient = new BridgeWebChromeClient(this.bridge) {
             // Remove default ugly play icon in video posters
