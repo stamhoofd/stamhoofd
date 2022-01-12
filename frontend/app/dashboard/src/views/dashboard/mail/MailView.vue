@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor}" @save="send">
+    <EditorView ref="editorView" :disabled="!emailId" class="mail-view" title="Nieuwe e-mail" save-text="Versturen" :smart-variables="smartVariables" :smart-buttons="smartButtons" :style="{'--editor-primary-color': primaryColor}" @save="send">
         <h1 class="style-navigation-title">
             Nieuwe e-mail
         </h1>
@@ -104,7 +104,6 @@ import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, Edit
 import { AppManager, SessionManager } from '@stamhoofd/networking';
 import { CheckoutMethodType, EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { TextSelection } from 'prosemirror-state'
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -1151,6 +1150,13 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     get emails() {
         return this.organization.privateMeta?.emails ?? []
+    }
+
+    @Watch("emails")
+    onChangeEmails() {
+        if (!this.emailId) {
+            this.emailId = this.getDefaultEmailId()
+        }
     }
 
     manageEmails() {
