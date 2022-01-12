@@ -102,7 +102,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler,ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
-import { EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { CheckoutMethodType, EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { TextSelection } from 'prosemirror-state'
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
@@ -267,6 +267,30 @@ export default class MailView extends Mixins(NavigationMixin) {
             }))
 
             variables.push(new EditorSmartVariable({
+                id: "orderTime", 
+                name: "Tijdstip", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "orderDate", 
+                name: "Afhaal/leverdatum", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "orderMethod", 
+                name: "Afhaalmethode (afhalen, leveren, ter plaatse)", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
+                id: "orderLocation", 
+                name: "Locatie of leveradres", 
+                example: "", 
+            }))
+
+            variables.push(new EditorSmartVariable({
                 id: "orderTable", 
                 name: "Tabel met bestelling", 
                 example: "order table", 
@@ -299,7 +323,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         if (this.hasAllUsers && this.members.length > 0) {
             buttons.push(new EditorSmartButton({
                 id: "signInUrl",
-                name: "Inlog-knop",
+                name: "Knop om in te loggen",
                 text: "Inschrijvingen beheren",
                 hint: "Als gebruikers op deze knop klikken, zorgt het systeem ervoor dat ze inloggen of registreren op het juiste e-mailadres dat al in het systeem zit."
             }))
@@ -308,7 +332,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         if (this.orders.length > 0) {
             buttons.push(new EditorSmartButton({
                 id: "orderUrl",
-                name: "Bestelling-knop",
+                name: "Knop naar bestelling",
                 text: this.orderButtonText,
                 hint: "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies."
             }))
@@ -877,6 +901,32 @@ export default class MailView extends Mixins(NavigationMixin) {
                             Replacement.create({
                                 token: "orderStatus",
                                 value: OrderStatusHelper.getName(order.status)
+                            }),
+                            Replacement.create({
+                                token: "orderMethod",
+                                value: order.data.checkoutMethod?.typeName ?? ""
+                            }),
+                            Replacement.create({
+                                token: "orderLocation",
+                                value: ((order) => {
+                                    if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                                        return order.data.checkoutMethod.name
+                                    }
+
+                                    if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
+                                        return order.data.checkoutMethod.name
+                                    }
+
+                                    return order.data.address?.shortString() ?? ""
+                                })(order)
+                            }),
+                            Replacement.create({
+                                token: "orderDate",
+                                value: order.data.timeSlot?.dateString() ?? ""
+                            }),
+                            Replacement.create({
+                                token: "orderTime",
+                                value: order.data.timeSlot?.timeRangeString() ?? ""
                             }),
                             Replacement.create({
                                 token: "orderTable",
