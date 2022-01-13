@@ -1,4 +1,5 @@
 import { column, Model } from "@simonbackx/simple-database";
+import { v4 as uuidv4 } from "uuid";
 
 
 /**
@@ -7,8 +8,12 @@ import { column, Model } from "@simonbackx/simple-database";
 export class EmailTemplate extends Model {
     static table = "email_templates";
 
-    @column({ primary: true, type: "integer" })
-    id: number;
+    @column({
+        primary: true, type: "string", beforeSave(value) {
+            return value ?? uuidv4();
+        }
+    })
+    id!: string;
 
     @column({ type: "string" })
     organizationId: string;
