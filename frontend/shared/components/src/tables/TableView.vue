@@ -1205,7 +1205,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     handleAction(action: TableAction<Value>, event) {
         const selection = this.getSelection(action.allowAutoSelectAll)
-        if (selection.length == 0) {
+        if (selection.length == 0 && action.needsSelection) {
             return
         }
 
