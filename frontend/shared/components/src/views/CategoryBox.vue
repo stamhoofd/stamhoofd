@@ -1,6 +1,7 @@
 <template>
     <div class="category-box container">
         <h2>{{ category.name }}</h2>
+        <p v-if="category.description.length > 0" class="style-description-small" v-text="category.description" />
 
         <ProductGrid :products="products" :webshop="webshop" :cart="cart" :save-handler="saveHandler" />
         <hr v-if="!isLast">
@@ -59,3 +60,10 @@ export default class CategoryBox extends Mixins(NavigationMixin){
 
 }
 </script>
+
+<style lang="scss">
+.category-box > p {
+    padding-bottom: 20px;
+    white-space: pre-wrap;
+}
+</style>

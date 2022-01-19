@@ -75,7 +75,7 @@
             <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
             <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
                 <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
-                Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
+                Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
             </p>
         </main>
 
@@ -237,6 +237,10 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     get remainingStock() {
         return (this.product.remainingStock ?? 0) + (this.oldItem?.reservedAmount ?? 0) + this.reservedAmountFromOthers
+    }
+
+    get remainingStockText() {
+        return this.product.getRemainingStockText(this.remainingStock)
     }
 
     formatDateRange(dateRange: ProductDateRange) {

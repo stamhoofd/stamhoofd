@@ -30,7 +30,7 @@
 
                     <span v-if="!product.enabled" class="style-tag error">Tijdelijk onbeschikbaar</span>
                     <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
-                    <span v-else-if="remainingStock && remainingStock <= 10" class="style-tag warn">Nog {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }}</span>
+                    <span v-else-if="product.stockText !== null" class="style-tag warn">{{ product.stockText }}</span>
                 </p>
             </div>
             <figure v-if="imageSrc">

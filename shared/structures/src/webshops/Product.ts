@@ -190,4 +190,37 @@ export class Product extends AutoEncoder {
         }
         return Math.max(0, this.stock - this.usedStock)
     }
+
+    getRemainingStockText(stock: number): string {
+        if (stock === 1) {
+            if (this.type === ProductType.Ticket) {
+                return "één ticket"
+            }
+            if (this.type === ProductType.Person) {
+                return "één persoon"
+            }
+            return "één stuk"
+        }
+
+        if (this.type === ProductType.Ticket) {
+            return stock+" tickets"
+        }
+
+        if (this.type === ProductType.Person) {
+            return stock+" personen"
+        }
+        return stock+" stuks"
+    }
+
+    get stockText(): string | null {
+        if (this.remainingStock === null || this.remainingStock > 25) {
+            return null
+        }
+
+        if (this.remainingStock === 0) {
+            return "Uitverkocht"
+        }
+
+        return "Nog "+this.getRemainingStockText(this.remainingStock)
+    }
 }
