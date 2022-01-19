@@ -3,7 +3,7 @@
         <STInputBox title="Locatienaam" error-fields="name" :error-box="errorBox">
             <input v-model="name" placeholder="bv. Gemeentelijke feestzaal" class="input">
         </STInputBox>
-        <AddressInput v-model="address" title="Adres" :validator="validator" />
+        <AddressInput v-model="address" title="Adres (optioneel)" :validator="validator" :required="false" />
     </div>
 </template>
 
@@ -11,7 +11,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AddressInput,ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { Address, ProductLocation} from "@stamhoofd/structures"
-import { Component, Prop, Vue, Watch } from "vue-property-decorator";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -60,7 +60,7 @@ export default class ProductLocationInput extends Vue {
     }
 
     set address(address: Address | null) {
-        if (address && this.value) {
+        if (this.value) {
             this.$emit("input", this.value.patch({ address }))
         }
     }

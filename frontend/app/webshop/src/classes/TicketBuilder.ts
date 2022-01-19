@@ -183,9 +183,9 @@ export class TicketBuilder {
             const location = ticket.items[0].product.location
             if (location) {
                 if (!dryRun) {
-                    this.document.text(location.name+"\n"+location.address, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+                    this.document.text(location.name+(location.address ? "\n"+location.address : ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
                 }
-                height += this.document.heightOfString(location.name+"\n"+location.address, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+                height += this.document.heightOfString(location.name+(location.address ? "\n"+location.address : ""), { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
             }
 
             const dateRange = ticket.items[0].product.dateRange

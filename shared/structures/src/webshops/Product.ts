@@ -76,7 +76,13 @@ export class ProductLocation extends AutoEncoder {
     name = ""
 
     @field({ decoder: Address })
-    address: Address
+    @field({ decoder: Address, nullable: true, version: 146, downgrade: (v) => {
+        if (!v) {
+            return Address.createDefault()
+        }
+        return v
+    } })
+    address: Address | null = null
 
     // todo: coordinates here (only filled in by backend)
 }

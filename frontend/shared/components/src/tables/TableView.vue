@@ -236,8 +236,8 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     @Prop({ required: true})
     allColumns!: Column<Value, any>[]
 
-    @Prop({ required: true })
-    organization: Organization
+    @Prop({ required: false })
+    organization?: Organization
 
     /**
      * Prefix column in wrapped state
