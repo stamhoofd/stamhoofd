@@ -186,11 +186,6 @@ export class MemberManagerBase {
 
                 const memberPatch = EncryptedMember.patch({ id: member.id })
                 memberPatch.firstName = member.details.firstName
-
-                if (!member.details.isRecovered) {
-                    // Delete the encrypted information
-                    memberPatch.encryptedDetails = [] as any
-                }
                 memberPatch.nonEncryptedDetails = member.details
 
                 patch.members.addPatch(memberPatch)

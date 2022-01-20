@@ -251,6 +251,7 @@ export class MemberWithRegistrations extends Member {
         this.waitingGroups = member.waitingGroups
         this.acceptedWaitingGroups = member.acceptedWaitingGroups
         this.encryptedDetails = member.encryptedDetails
+        this.nonEncryptedDetails = member.nonEncryptedDetails
         this.allGroups = member.allGroups
         
         if (member.groups !== this.groups) {

@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { KeychainItem } from '@stamhoofd/models';
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainItem as KeychainItemStruct, MemberDetails } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = AutoEncoderPatchType<KeychainedMembers>
@@ -45,6 +45,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             member.organizationId = user.organizationId
             member.firstName = struct.firstName
             member.encryptedDetails = struct.encryptedDetails
+            member.details = struct.nonEncryptedDetails
 
             await member.save()
             addedMembers.push(member)
@@ -70,6 +71,17 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             member.firstName = struct.firstName ?? member.firstName
             if (struct.encryptedDetails) {
                 member.encryptedDetails = struct.encryptedDetails.applyTo(member.encryptedDetails)
+            }
+            if (struct.nonEncryptedDetails) {
+                if (member.details) {
+                    member.details.patchOrPut(struct.nonEncryptedDetails)
+                } else {
+                    member.details = MemberDetails.create({})
+                    member.details.patchOrPut(struct.nonEncryptedDetails)
+                }
+                if (!member.details.isRecovered) {
+                    member.encryptedDetails = []
+                }
             }
             await member.save();
         }

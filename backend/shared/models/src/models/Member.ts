@@ -1,6 +1,6 @@
 import { column,Database,ManyToManyRelation,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, getPermissionLevelNumber, MemberDetails, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
@@ -38,6 +38,9 @@ export class Member extends Model {
 
     @column({ type: "json", decoder: new ArrayDecoder(EncryptedMemberDetails) })
     encryptedDetails: EncryptedMemberDetails[] = []
+
+    @column({ type: "json", decoder: MemberDetails, nullable: true })
+    details: MemberDetails | null = null
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -311,6 +314,7 @@ export class Member extends Model {
                 return EncryptedMemberDetails.create({ ...d, ciphertext: ""})
             }),
             registrations: this.registrations.map(r => r.getStructure()),
+            nonEncryptedDetails: this.details,
             users: this.users.map(u => UserStruct.create(u)),
         })
     }
@@ -326,6 +330,7 @@ export class Member extends Model {
             updatedAt: registration.updatedAt,
             member: EncryptedMember.create({ 
                 ...registration.member,
+                nonEncryptedDetails: registration.member.details,
 
                 encryptedDetails: forOrganization === null ? registration.member.encryptedDetails : registration.member.encryptedDetails.map(d => {
                     if (d.forOrganization === forOrganization) {
