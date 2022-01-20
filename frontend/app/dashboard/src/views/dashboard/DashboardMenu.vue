@@ -135,7 +135,7 @@
                     <span>Documentatie</span>
                 </a>
 
-                <button type="button" class="menu-button button heading" @click="gotoFeedback(false)">
+                <button v-if="!isAppReview" type="button" class="menu-button button heading" @click="gotoFeedback(false)">
                     <span class="icon feedback" />
                     <span>Feedback</span>
                 </button>
@@ -298,6 +298,10 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         GlobalEventBus.addListener(this, "new-webshop", async (webshop: PrivateWebshop) => {
             await this.openWebshop(webshop, false)
         })
+    }
+
+    get isAppReview() {
+        return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
     }
 
     get webshops() {
