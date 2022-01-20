@@ -83,9 +83,14 @@ export class MemberManagerStatic extends MemberManagerBase {
         })
 
         // Add encryption blobs
-        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, keyPair.publicKey, false, OrganizationManager.organization))
-        encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
-
+        // Add encryption blob (only one)
+        if (session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
+            encryptedMember.nonEncryptedDetails = memberDetails
+        } else {
+            encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, keyPair.publicKey, false, OrganizationManager.organization))
+            encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
+        }
+        
         // Prepare patch
         const patch = KeychainedMembers.patch({})
         patch.keychainItems.addPut(keychainItem)

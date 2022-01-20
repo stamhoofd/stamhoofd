@@ -54,7 +54,11 @@ export class FamilyManager {
         })
 
         // Add encryption blob (only one)
-        encryptedMember.encryptedDetails.push(await MemberManager.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
+        if (session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
+            encryptedMember.nonEncryptedDetails = memberDetails
+        } else {
+            encryptedMember.encryptedDetails.push(await MemberManager.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
+        }
 
         // Prepare patch
         const patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()

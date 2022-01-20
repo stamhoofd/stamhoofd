@@ -208,7 +208,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
     }
 
-    async checkInaccurateMetaData(members) {
+    async checkInaccurateMetaData(members: MemberWithRegistrations[]) {
         const inaccurate: MemberWithRegistrations[] = []
         for (const member of members) {
             const meta = member.getDetailsMeta()

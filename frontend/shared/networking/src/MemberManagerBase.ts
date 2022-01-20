@@ -30,6 +30,11 @@ export class MemberManagerBase {
     }
 
     async decryptMember(member: EncryptedMember, organization: Organization): Promise<Member> {
+        if (member.nonEncryptedDetails) {
+            const details = member.nonEncryptedDetails
+            return Member.create({ ...member, details })
+        }
+
         // Get the newest complete blob where we have a key for
         const oldToNew = member.encryptedDetails.sort((a, b) => Sorter.byDateValue(b.meta.date, a.meta.date))
 
@@ -172,6 +177,26 @@ export class MemberManagerBase {
         const patch = KeychainedMembers.patch({})
         const session = SessionManager.currentSession!
         const organizationPublicKey = organization.publicKey
+
+        // For new organizations, that accepted the terms
+        if (organization.meta.didAcceptEndToEndEncryptionRemoval) {
+            for (const member of members) {
+                // Clean the member details
+                member.details.cleanData()
+
+                const memberPatch = EncryptedMember.patch({ id: member.id })
+                memberPatch.firstName = member.details.firstName
+
+                if (!member.details.isRecovered) {
+                    // Delete the encrypted information
+                    memberPatch.encryptedDetails = [] as any
+                }
+                memberPatch.nonEncryptedDetails = member.details
+
+                patch.members.addPatch(memberPatch)
+            }
+            return patch
+        }
 
         for (const member of members) {
             // Gather all public keys that we are going to encrypt for
