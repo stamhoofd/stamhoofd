@@ -192,6 +192,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 })
                 return;
             }
+            this.organization.meta.lastSignedTerms = new Date()
 
             if (!valid) {
                 this.loading = false 

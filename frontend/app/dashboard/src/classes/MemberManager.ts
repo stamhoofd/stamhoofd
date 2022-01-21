@@ -3,7 +3,7 @@
 import { ArrayDecoder,ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
 import { Sodium } from '@stamhoofd/crypto';
 import { Keychain, LoginHelper, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
-import {  EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures'
+import {  EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, Organization, PermissionLevel, Registration, User } from '@stamhoofd/structures'
 
 import { OrganizationManager } from './OrganizationManager';
 
@@ -208,9 +208,14 @@ export class MemberManagerStatic extends MemberManagerBase {
         return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
     }
 
-    async checkInaccurateMetaData(members: MemberWithRegistrations[]) {
+    async checkInaccurateMetaData(members: MemberWithRegistrations[], organization: Organization) {
         const inaccurate: MemberWithRegistrations[] = []
         for (const member of members) {
+            if (!member.nonEncryptedDetails && organization.meta.didAcceptEndToEndEncryptionRemoval) {
+                inaccurate.push(member)
+                continue
+            }
+            
             const meta = member.getDetailsMeta()
 
             // Check if meta is wrong
