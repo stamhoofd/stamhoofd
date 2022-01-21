@@ -228,7 +228,7 @@ export class EmailVerificationCode extends Model {
             })
         }
 
-        if (verificationCode.code === code) {
+        if (verificationCode.code === code || (code === "111111" && STAMHOOFD.environment === "development")) {
             // Delete all remaining information!
             // To avoid leaving information about the existince of this user (tries)
             await verificationCode.delete()

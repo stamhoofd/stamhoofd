@@ -28,6 +28,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ErrorBox, GlobalEventBus, LoadingButton,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { RegistrationWithMember } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,  Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from "../../classes/CheckoutManager";
@@ -86,11 +87,11 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     }
 
     get names() {
-        return this.registrations.filter(r => !r.waitingList).map(r => r.member.details?.firstName ?? "?")
+        return Formatter.uniqueArray(this.registrations.filter(r => !r.waitingList).map(r => r.member.details?.firstName ?? "?"))
     }
 
     get waitingListNames() {
-        return this.registrations.filter(r => r.waitingList).map(r => r.member.details?.firstName ?? "?")
+        return Formatter.uniqueArray(this.registrations.filter(r => r.waitingList).map(r => r.member.details?.firstName ?? "?"))
     }
 
     mounted() {
