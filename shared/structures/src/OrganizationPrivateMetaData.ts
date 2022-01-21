@@ -57,6 +57,9 @@ export class MollieOnboarding extends AutoEncoder  {
 }
 
 export class OrganizationPrivateMetaData extends AutoEncoder {
+    @field({ decoder: StringDecoder, version: 149, nullable: true })
+    privateKey: string | null = null
+
     /**
      * DNS records that need to be set in order to activate mail domain and registration domain
      */

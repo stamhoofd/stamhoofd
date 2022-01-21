@@ -8,14 +8,25 @@ import { Keychain } from "./Keychain"
 import { SessionManager } from "./SessionManager"
 
 export class MemberManagerBase {
-    async decryptMemberDetails(encrypted: EncryptedMemberDetails, organization: Organization): Promise<MemberDetails> {
+    private async getKeyPair(encrypted: EncryptedMemberDetails, organization: Organization) {
+        if (encrypted.publicKey === organization.publicKey && organization.privateMeta?.privateKey) {
+            // We can use the stored key
+            const keyPair = {
+                publicKey: organization.publicKey,
+                privateKey: organization.privateMeta.privateKey
+            }
+            return keyPair
+        }
         const keychainItem = Keychain.getItem(encrypted.publicKey)
 
         if (!keychainItem) {
             throw new Error("Keychain item missing for this member")
         }
         const session = SessionManager.currentSession!
-        const keyPair = await session.decryptKeychainItem(keychainItem)
+        return await session.decryptKeychainItem(keychainItem)
+    }
+    async decryptMemberDetails(encrypted: EncryptedMemberDetails, organization: Organization): Promise<MemberDetails> {
+        const keyPair = await this.getKeyPair(encrypted, organization)
         const json = await Sodium.unsealMessage(encrypted.ciphertext, keyPair.publicKey, keyPair.privateKey)
         const data = new ObjectData(JSON.parse(json), { version: Version }); // version doesn't matter here
         const decoded = data.decode(new VersionBoxDecoder(MemberDetails as Decoder<MemberDetails>))
@@ -43,7 +54,7 @@ export class MemberManagerBase {
         for (const encryptedDetails of oldToNew.slice().reverse()) {
             if (!encryptedDetails.meta.isRecovered) {
                 // Do we have a key?
-                if (Keychain.hasItem(encryptedDetails.publicKey) && encryptedDetails.ciphertext.length > 0) {
+                if ((Keychain.hasItem(encryptedDetails.publicKey) || (organization.privateMeta?.privateKey && encryptedDetails.publicKey === organization.publicKey)) && encryptedDetails.ciphertext.length > 0) {
                     try {
                         latest = await this.decryptMemberDetails(encryptedDetails, organization)
                         latestEncryptedDetails = encryptedDetails
@@ -61,7 +72,7 @@ export class MemberManagerBase {
             // Use the oldest available recovered blob and keep applying all the updates
             for (const encryptedDetails of oldToNew) {
                 // Do we have a key?
-                if (Keychain.hasItem(encryptedDetails.publicKey) && encryptedDetails.ciphertext.length > 0) {
+                if ((Keychain.hasItem(encryptedDetails.publicKey) || (organization.privateMeta?.privateKey && encryptedDetails.publicKey === organization.publicKey)) && encryptedDetails.ciphertext.length > 0) {
                     try {
                         latest = await this.decryptMemberDetails(encryptedDetails, organization)
                         latestEncryptedDetails = encryptedDetails
@@ -104,7 +115,7 @@ export class MemberManagerBase {
         // From old to new
         for (const encryptedDetails of oldToNew) {
             if (encryptedDetails.id !== latestEncryptedDetails.id && encryptedDetails.meta.isRecovered && latestEncryptedDetails.meta.date < encryptedDetails.meta.date) {
-                if (Keychain.hasItem(encryptedDetails.publicKey) && encryptedDetails.ciphertext.length > 0) {
+                if ((Keychain.hasItem(encryptedDetails.publicKey) || (organization.privateMeta?.privateKey && encryptedDetails.publicKey === organization.publicKey)) && encryptedDetails.ciphertext.length > 0) {
                     try {
                         const updates = await this.decryptMemberDetails(encryptedDetails, organization)
                         details.merge(updates)

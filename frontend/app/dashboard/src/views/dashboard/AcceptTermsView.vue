@@ -99,6 +99,9 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
     }
 
     shouldNavigateAway() {
+        if (STAMHOOFD.environment === "development") {
+            return true
+        }
         new CenteredMessage("Je moet de nieuwe overeenkomsten eerst accepteren.").addCloseButton().show()
         return false
     }

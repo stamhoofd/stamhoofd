@@ -75,6 +75,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
+                organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey
 
                 if (request.body.privateMeta.payconiqApiKey !== undefined) {
                     if (request.body.privateMeta.payconiqApiKey === null) {
