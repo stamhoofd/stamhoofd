@@ -86,7 +86,7 @@
                 </dl>
             </div>
 
-            <div v-if="member.activeRegistrations.length > 0" class="container">
+            <div v-if="member.activeRegistrations.length > 0" key="registrations" class="container">
                 <hr>
                 <h2 class="style-with-button with-list">
                     <div>Inschrijvingen</div>
@@ -129,12 +129,12 @@
                 </STList>
             </div>
 
-            <div v-for="(parent, index) in member.details.parents" :key="index" class="hover-box container">
+            <div v-for="parent in member.details.parents" :key="'parent-'+parent.id" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
                     <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editParent(parent)" />
+                        <button v-if="hasWrite" class="button icon gray edit" type="button" @click="editParent(parent)" />
                     </div>
                 </h2>
 
@@ -220,7 +220,7 @@
                 </dl>
             </div>
 
-            <div v-if="!member.details || member.details.isRecovered" class="container">
+            <div v-if="!member.details || member.details.isRecovered" key="recovered" class="container">
                 <hr>
                 <p v-if="!hasLatestKey" class="error-box">
                     Een deel van de gegevens van dit lid is versleuteld met een sleutel die je niet hebt — en is dus onleesbaar voor jou. Vraag een hoofdbeheerder - die deze sleutel wel heeft - om jou terug toegang te geven (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven).
@@ -236,7 +236,7 @@
             </div>
 
             <!-- Loop all records -->
-            <div v-for="category in recordCategories" :key="category.id" class="hover-box container">
+            <div v-for="category in recordCategories" :key="'category-'+category.id" class="hover-box container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>{{ category.name }}</div>

@@ -82,6 +82,9 @@ export class MemberManagerStatic extends MemberManagerBase {
             firstName: memberDetails.firstName
         })
 
+        // Prepare patch
+        const patch = KeychainedMembers.patch({})
+
         // Add encryption blobs
         // Add encryption blob (only one)
         if (session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
@@ -89,11 +92,9 @@ export class MemberManagerStatic extends MemberManagerBase {
         } else {
             encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, keyPair.publicKey, false, OrganizationManager.organization))
             encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
+            patch.keychainItems.addPut(keychainItem)
         }
-        
-        // Prepare patch
-        const patch = KeychainedMembers.patch({})
-        patch.keychainItems.addPut(keychainItem)
+
         patch.members.addPut(encryptedMember)
 
         // Also update other members that might have been changed (e.g. when a shared address have been changed)

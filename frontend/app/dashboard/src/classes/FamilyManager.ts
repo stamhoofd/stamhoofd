@@ -260,15 +260,18 @@ export class FamilyManager {
             if (!member.details) {
                 continue
             }
-            for (const [index, parent] of member.details.parents.entries()) {
+
+            const cleaned = new Map<string, Parent>()
+            for (const parent of member.details.parents) {
                 const other = parents.get(parent.name.toLowerCase())
                 if (other) {
                     other.merge(parent)
-                    member.details.parents[index] = other
                 } else {
                     parents.set(parent.name.toLowerCase(), parent)
                 }
+                cleaned.set(parent.name.toLowerCase(), other ?? parent)
             }
+            member.details.parents = [...cleaned.values()]
         }
     }
     

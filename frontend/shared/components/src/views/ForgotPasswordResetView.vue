@@ -170,7 +170,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
         this.loading = true
         
         // Request the key constants
-        const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die jouw gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
+        const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die jouw gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
 
         try {
             await LoginHelper.changePassword(this.session, this.password, true)
@@ -187,7 +187,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
 
             this.errorBox = new ErrorBox(e)
 
-            new CenteredMessage("Er ging iets mis", "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
+            new CenteredMessage("Er ging iets mis", "Het is niet gelukt om jouw wachtwoord te wijzigen. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
             return;
         }
         

@@ -68,7 +68,7 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
         this.loading = true
 
 
-        const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
+        const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
 
         try {
             await LoginHelper.changePassword(SessionManager.currentSession!, this.password)

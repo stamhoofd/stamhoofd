@@ -192,10 +192,6 @@
                 <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :data-permission="dataPermission" />
                 <hr>
             </div>
-
-            <h2>Gegevens worden end-to-end versleuteld</h2>
-
-            <p>Om de gegevens van onze leden te beschermen, worden alle gegevens (met uitzondering van de voornaam van het lid en de e-mailadressen) end-to-end versleuteld opgeslagen: we plaatsen ze in een digitale kluis waar het computersysteem niet in kan. Normaal heb je toegang tot de digitale sleutel (dit gebeurt automatisch) van deze kluis, maar je kan deze kwijt geraken als je jouw wachtwoord vergeet of een nieuw account aanmaakt. We kunnen deze sleutel terug met jou delen, maar dat gaat niet automatisch. Dus zodra je een nieuw wachtwoord hebt gekozen, krijgen wij een melding en kunnen wij op een wiskundig veilige manier de sleutel bij jou brengen zonder dat het computersysteem dit kan lezen. Allemaal erg ingewikkeld, maar op die manier worden de gegevens van onze leden zo veilig mogelijk opgeslagen.</p>
         </main>
 
         <STToolbar>
