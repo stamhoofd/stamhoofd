@@ -143,7 +143,7 @@ export default class SignupView extends Mixins(NavigationMixin){
         this.errorBox = null
         // Request the key constants
         
-        const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end versleuteling. Dit kan even duren.", "loading").show()
+        const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit kan even duren.", "loading").show()
 
         try {
             const session = new Session(OrganizationManager.organization.id)

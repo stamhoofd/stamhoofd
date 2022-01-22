@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController,PushOptions,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ContextMenu, ForgotPasswordResetView, GlobalEventBus, ModalStackEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, GlobalEventBus, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Logger } from "@stamhoofd/logger"
