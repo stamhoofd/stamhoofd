@@ -966,6 +966,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                             value: parent.firstName
                         }),
                         Replacement.create({
+                            token: "lastName",
+                            value: parent.lastName
+                        }),
+                        Replacement.create({
                             token: "email",
                             value: parent.email.toLowerCase()
                         })
@@ -998,16 +1002,20 @@ export default class MailView extends Mixins(NavigationMixin) {
                                 value: member.details.firstName
                             }),
                             Replacement.create({
+                                token: "lastName",
+                                value: member.details.lastName
+                            }),
+                            Replacement.create({
                                 token: "email",
                                 value: email
                             })
                         ],
-                        userId: existing?.userId ?? null,
                         types: ["member", isMinor ? "minor-member" : "adult-member"]
                     })
 
                     if (existing) {
                         if (existing.types.includes("parent") && !existing.types.includes("member")) {
+                            // Only merge after check!
                             existing.merge(recipient)
                             
                             if (isMinor) {
@@ -1077,6 +1085,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             const existing = recipients.get(email)
             const r = Recipient.create({
                 firstName: recipient.firstName,
+                lastName: recipient.lastName,
                 email,
                 replacements: [
                     Replacement.create({
@@ -1084,11 +1093,14 @@ export default class MailView extends Mixins(NavigationMixin) {
                         value: recipient.firstName ?? ""
                     }),
                     Replacement.create({
+                        token: "lastName",
+                        value: recipient.lastName ?? ""
+                    }),
+                    Replacement.create({
                         token: "email",
                         value: email
                     })
-                ],
-                userId: existing?.userId ?? null,
+                ]
             });
 
             if (existing) {

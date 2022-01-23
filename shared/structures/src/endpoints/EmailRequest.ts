@@ -62,12 +62,17 @@ export class Recipient extends AutoEncoder {
     types: string[] = []
 
     merge(recipient: Recipient) {
-        this.firstName = this.firstName ?? recipient.firstName
-        this.lastName = this.lastName ?? recipient.lastName
+        this.firstName = this.firstName !== null && this.firstName.length > 0 ? this.firstName : recipient.firstName
+        this.lastName = this.lastName !== null && this.lastName.length > 0 ? this.lastName : recipient.lastName
         this.email = recipient.email
         for (const replacement of recipient.replacements) {
-            if (!this.replacements.find(r => r.token == replacement.token)) {
+            const existing = this.replacements.find(r => r.token == replacement.token)
+            if (!existing) {
                 this.replacements.push(replacement)
+            } else {
+                if (existing.value.length == 0) {
+                    existing.value = replacement.value
+                }
             }
         }
         this.userId = this.userId ?? recipient.userId
