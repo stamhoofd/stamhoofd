@@ -59,8 +59,8 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     definitions!: FilterDefinition<any, any, any>[]
 
-    @Prop({ required: true })
-    organization!: Organization
+    @Prop({ required: false })
+    organization?: Organization
 
     editingFilter: FilterGroup<any> = (this.selectedFilter?.clone() ?? new FilterGroup<any>(this.definitions)) as FilterGroup<any>
 

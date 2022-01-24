@@ -192,6 +192,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 })
                 return;
             }
+            this.organization.meta.lastSignedTerms = new Date()
 
             if (!valid) {
                 this.loading = false 
@@ -199,7 +200,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 return;
             }
         
-            const component = new CenteredMessage("Sleutels aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
+            const component = new CenteredMessage("Sleutels aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
             plausible('signupKeys');
             try {
 

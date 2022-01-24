@@ -246,7 +246,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
             this.present(component.setAnimated(false))
         }
 
-        if (!didShow && this.members.find(m => m.details.isRecovered)) {
+        if (!didShow && this.members.find(m => m.details.isRecovered && !m.nonEncryptedDetails)) {
             // Show error message
             this.present(new ComponentWithProperties(MissingKeyView).setDisplayStyle("sheet"))
         }

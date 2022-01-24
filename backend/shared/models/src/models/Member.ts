@@ -1,6 +1,6 @@
 import { column,Database,ManyToManyRelation,ManyToOneRelation,Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
+import { EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, getPermissionLevelNumber, MemberDetails, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
@@ -23,12 +23,7 @@ export class Member extends Model {
     id!: string;
 
     /**
-     * Firstname of this member. This is needed when the password is lost, when the member receives an invite etc. This is the only field that is not stored end-to-end encrypted.
-     * It has been a trade off to keep the system accessible for all users and make the 'password forgot' method not impossibly hard to recover from for non technical users.
-     * It is also needed when the users receives an invite to manage a user without receiving the private key. (in the case the organization added the user manually, and when they send invites)
-     * Additionally, in most e-mails the firstName will get used anyway, so let's not pretend that is is end-to-end encrypted.
-     * It also makes it possible to provide automated e-mails from the server during registration, e.g. "Simon has been registered succesfully!" or "We received the payment for the registration of Simon"
-     * We might consider an option to make this field optional in the future for e.g. religious or political organizations or other organizations where the members should be kept secret.
+     * Could get removed as soon as we removed the encryptedDetails field, since we now also store the details.
      */
     @column({ type: "string" })
     firstName: string;
@@ -38,6 +33,9 @@ export class Member extends Model {
 
     @column({ type: "json", decoder: new ArrayDecoder(EncryptedMemberDetails) })
     encryptedDetails: EncryptedMemberDetails[] = []
+
+    @column({ type: "json", decoder: MemberDetails, nullable: true })
+    details: MemberDetails | null = null
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -311,6 +309,7 @@ export class Member extends Model {
                 return EncryptedMemberDetails.create({ ...d, ciphertext: ""})
             }),
             registrations: this.registrations.map(r => r.getStructure()),
+            nonEncryptedDetails: this.details,
             users: this.users.map(u => UserStruct.create(u)),
         })
     }
@@ -326,6 +325,7 @@ export class Member extends Model {
             updatedAt: registration.updatedAt,
             member: EncryptedMember.create({ 
                 ...registration.member,
+                nonEncryptedDetails: registration.member.details,
 
                 encryptedDetails: forOrganization === null ? registration.member.encryptedDetails : registration.member.encryptedDetails.map(d => {
                     if (d.forOrganization === forOrganization) {

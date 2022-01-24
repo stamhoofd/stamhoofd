@@ -58,7 +58,6 @@ export class ErrorBox {
         if (isNaN(bottomPadding)) {
             bottomPadding = 25
         }
-        console.info("bottomPadding", bottomPadding)
         let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'))
         if (isNaN(elBottomPadding)) {
             elBottomPadding = 0

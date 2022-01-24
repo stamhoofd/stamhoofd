@@ -26,11 +26,11 @@
                 <p v-else-if="product.description" class="description" v-text="product.description" />
 
                 <p class="price">
-                    {{ price | price }}
+                    {{ price | priceFree }}
 
                     <span v-if="!product.enabled" class="style-tag error">Tijdelijk onbeschikbaar</span>
                     <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
-                    <span v-else-if="remainingStock && remainingStock <= 10" class="style-tag warn">Nog {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }}</span>
+                    <span v-else-if="product.stockText !== null" class="style-tag warn">{{ product.stockText }}</span>
                 </p>
             </div>
             <figure v-if="imageSrc">
@@ -62,7 +62,13 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         Checkbox
     },
     filters: {
-        price: Formatter.price
+        price: Formatter.price,
+        priceFree: (p: number) => {
+            if (p === 0) {
+                return "Gratis"
+            }
+            return Formatter.price(p);
+        }
     }
 })
 export default class ProductBox extends Mixins(NavigationMixin){

@@ -23,7 +23,7 @@
                     Dit is een demo webshop. Bestellingen zijn fictief.
                 </p>
                 
-                <p>Jouw bestelling zal worden geplaatst, je kan dit niet ongedaan maken.</p>
+                <p>Jouw bestelling zal worden geplaatst als je verder gaat.</p>
 
                 <STErrorsDefault :error-box="errorBox" />
             </main>

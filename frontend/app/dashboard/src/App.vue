@@ -8,14 +8,15 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController,PushOptions,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ContextMenu, ForgotPasswordResetView, GlobalEventBus, ModalStackEventBus, PromiseView, Toast,ToastBox, ToastButton } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, GlobalEventBus, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { Sodium } from '@stamhoofd/crypto';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Logger } from "@stamhoofd/logger"
 import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Country, EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
+import { Country, EmailAddressSettings, Invite, Organization, OrganizationPrivateMetaData, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
+import { OrganizationManager } from './classes/OrganizationManager';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 @Component({
@@ -344,6 +345,8 @@ export default class App extends Vue {
         }
     }
 
+    didTryKey = false
+
     async checkKey() {
         console.log("Checking key...")
 
@@ -376,28 +379,48 @@ export default class App extends Vue {
             GlobalEventBus.sendEvent("encryption", null).catch(console.error)
         }
 
+        if (OrganizationManager.organization.privateMeta?.privateKey) {
+            console.info("Private key successfully stored on the server")
+            return
+        }
+
+        if (this.didTryKey || !OrganizationManager.organization.meta.didAcceptEndToEndEncryptionRemoval) {
+            // Inf loop stop
+            return
+        }
+
         try {
             const keychainItem = Keychain.getItem(session.organization!.publicKey)
             if (!keychainItem) {
                 throw new Error("Missing organization keychain")
             }
 
-            await session.decryptKeychainItem(keychainItem)
+            const organizationKey = await session.decryptKeychainItem(keychainItem)
 
             console.log("We have access to the current organization private key")
+            this.didTryKey = true
+
+            // Publish the key to the server as a backup mechanism
+            await OrganizationManager.patch(Organization.patch({
+                id: OrganizationManager.organization!.id,
+                privateMeta: OrganizationPrivateMetaData.patch({
+                    privateKey: organizationKey.privateKey
+                })
+            }), false)
+
         } catch (e) {
             console.error(e)
 
             // Show warnign instead
-            new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
-                (this.$refs.modalStack as any).present(
-                    {
-                        components: [
-                            AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './views/dashboard/NoKeyView.vue')).setDisplayStyle("popup")
-                        ]
-                    }
-                )
-            })).show()
+            // new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
+            //     (this.$refs.modalStack as any).present(
+            //         {
+            //             components: [
+            //                 AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './views/dashboard/NoKeyView.vue')).setDisplayStyle("popup")
+            //             ]
+            //         }
+            //     )
+            // })).show()
         }
     }
 }

@@ -338,7 +338,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
 
     get canGoBack() {
-        return !this.loading // always allow to go to -1
+        return true
     }
 
     get canGoNext() {
@@ -568,7 +568,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         this.checkingInaccurate = true
         try {
             // Patch member with new details
-            await MemberManager.checkInaccurateMetaData(this.allValues)
+            await MemberManager.checkInaccurateMetaData(this.allValues,  this.organization)
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()

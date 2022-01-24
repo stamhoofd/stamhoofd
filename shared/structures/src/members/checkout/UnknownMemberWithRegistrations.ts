@@ -23,5 +23,5 @@ export interface UnknownMemberWithRegistrations {
     /**
      * Only the decrypted version has details. Backend can't use this
      */
-    details?: MemberDetails
+    details?: MemberDetails | null
 }

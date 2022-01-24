@@ -199,7 +199,10 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         try {
             if (this.member) {
                 this.member.details.set(this.memberDetails)
+                // If saving fails, keep changes
+                this.forceChange = true
                 await this.familyManager.patchAllMembersWith(this.member)
+                this.forceChange = false
             }
           
             this.errorBox = null
@@ -269,7 +272,12 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
         this.present(displayedComponent);
     }
 
+    forceChange = false
+
     get isChanged() {
+        if (this.forceChange) {
+            return true
+        }
         const compareTo = this.member ? this.member.details : MemberDetails.create({})
         if (JSON.stringify(this.memberDetails.encode({ version: Version })) == JSON.stringify(compareTo.encode({ version: Version }))) {
             return false

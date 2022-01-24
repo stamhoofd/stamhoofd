@@ -8,6 +8,11 @@
             <h1>
                 Gebruikers goedkeuren
             </h1>
+
+            <p class="info-box">
+                De end-to-end versleuteling wordt uitgefaseerd. In de toekomst zal je dit niet langer moeten doen.
+            </p>
+
             <p>End-to-end versleuteling ligt aan de basis van de beveiliging van Stamhoofd. Als een gebruiker zijn wachtwoord vergeet, of een nieuw account aanmaakt binnen hetzelfde gezin, dan heeft die gebruiker geen toegang meer tot de encryptiesleutels. De gebruiker krijgt dan een melding dat hun account nog moet worden goedgekeurd. Ze kunnen wel al inschrijven, maar ze kunnen gewoon de bestaande gegevens niet bekijken (behalve voornaam) tenzij ze alles opnieuw ingeven. Hier kan je nakijken voor wie dit het geval is en kan je nieuwe sleutels delen met deze gebruikers. Dit kan voorlopig niet worden geautomatiseerd of uitgeschakeld. Feedback op dit systeem is welkom via {{ $t('shared.emails.general') }}!</p>
         
             <STErrorsDefault :error-box="errorBox" />

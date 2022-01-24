@@ -578,7 +578,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 id: "order_products",
                 name: "Bestelde artikels",
                 choices: (this.webshop?.products ?? []).map(product => {
-                    return new ChoicesFilterChoice(product.id, product.name)
+                    return new ChoicesFilterChoice(product.id, product.name+(product.dateRange ? " ("+product.dateRange.toString()+")" : ""))
                 }),
                 defaultMode: ChoicesFilterMode.Or,
                 getValue: (order) => {

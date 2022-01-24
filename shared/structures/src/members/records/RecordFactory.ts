@@ -592,9 +592,7 @@ export class RecordFactory {
                 record.type = RecordType.Checkbox
                 record.name = "Toedienen van medicatie"
 
-                // Never store permissions end-to-end encrypted
                 record.sensitive = false
-                record.encrypted = false
                 
                 record.label = "Wij geven toestemming aan de begeleiders om bij hoogdringendheid aan onze zoon of dochter een dosis via de apotheek vrij verkrijgbare pijnstillende en koortswerende medicatie toe te dienen*"
                 record.description = "* gebaseerd op aanbeveling Kind & Gezin 09.12.2009 – Aanpak van koorts / Toedienen van geneesmiddelen in de kinderopvang";

@@ -244,14 +244,6 @@
         <Checkbox v-model="sensitive">
             Ik heb toestemming nodig om deze informatie te verzamelen, of de antwoorden zijn (of bevatten mogelijks) gevoelige informatie
         </Checkbox>
-        <Checkbox v-if="!sensitive" v-model="encrypted">
-            <h3 class="style-title-list">
-                Sla antwoorden end-to-end-versleuteld op
-            </h3>
-            <p class="style-description-small">
-                Vink dit zeker aan bij: vrije invoer, contactgegevens of persoonsgegevens
-            </p>
-        </Checkbox>
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -579,16 +571,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
             return
         }
         // Always require encryption for sensitive information
-        this.patchRecord = this.patchRecord.patch({ sensitive, encrypted: sensitive ? true : undefined })
-    }
-
-    get encrypted() {
-        return this.patchedRecord.encrypted
-    }
-
-    set encrypted(encrypted: boolean) {
-        // Always require encryption for sensitive information
-        this.patchRecord = this.patchRecord.patch({ encrypted })
+        this.patchRecord = this.patchRecord.patch({ sensitive })
     }
 
     addPatch(patch: AutoEncoderPatchType<RecordSettings>) {

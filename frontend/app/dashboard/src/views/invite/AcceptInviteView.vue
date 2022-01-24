@@ -215,7 +215,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 }
                 this.errorBox = null
 
-                const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens sterk beveiligen door middel van end-to-end encryptie. Dit duurt maar heel even.", "loading").show()
+                const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
                 try {
                     const token = await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
                     LoginHelper.saveInvite(this.invite, this.secret)

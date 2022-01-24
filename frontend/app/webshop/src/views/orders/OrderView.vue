@@ -43,11 +43,11 @@
                             </template> via e-mail zodra we jouw overschrijving manueel hebben gemarkeerd als betaald. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Als jouw bedrag te laat op de rekening komt, ontvang je geen tickets en wordt het bedrag teruggestort. Klik onderaan op de knop om de instructies nog eens te tonen.
                         </p>
                         <p v-else>
-                            Zorg dat je <template v-if="singleTicket">
+                            Je vindt <template v-if="singleTicket">
                                 jouw ticket
                             </template><template v-else>
                                 jouw tickets
-                            </template> zeker meeneemt.
+                            </template> onderaan deze pagina.
                         </p>
 
                         <a v-if="isPaid" href="#tickets" class="button primary">

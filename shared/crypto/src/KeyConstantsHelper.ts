@@ -18,22 +18,8 @@ export class KeyConstantsHelper {
         // For normal users we reduce memory needs because some older devices might crash if we try to allocate 1GB memory
 
         // Switched to interactive constants because it doesn't seem to work on Firefox with higher contants
-        let opslimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE // Increase to make the generation of the key slower
-        let memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
-        
-        // We do inform admins that login takes longer due to encryption
-        // 5 seconds on an up-to-date computer is okay
-        // Admins can have access to more than 200 members, so this is a requirement
-        // also the password requirements are more strong
-        if (sensitivityLevel == SensitivityLevel.Admin) {
-            opslimit = sodium.crypto_pwhash_OPSLIMIT_MODERATE
-            memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
-        }
-
-        if (sensitivityLevel == SensitivityLevel.Tests) {
-            opslimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE
-            memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
-        }
+        const opslimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE // Increase to make the generation of the key slower
+        const memlimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
        
         const algo = sodium.crypto_pwhash_ALG_DEFAULT
         const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);

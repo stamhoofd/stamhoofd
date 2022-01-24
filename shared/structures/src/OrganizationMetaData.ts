@@ -104,6 +104,20 @@ export class OrganizationModules extends AutoEncoder {
 
 
 export class OrganizationMetaData extends AutoEncoder {
+    /**
+     * Last time the organization signed the terms. Null means the creation date of the organization.
+     */
+    @field({ decoder: DateDecoder, nullable: true, version: 147 })
+    lastSignedTerms: Date | null = null
+
+    get didAcceptLatestTerms() {
+        return this.lastSignedTerms !== null && this.lastSignedTerms >= new Date(2022, 0, 20, 0, 0, 0, 0)
+    }
+
+    get didAcceptEndToEndEncryptionRemoval() {
+        return this.lastSignedTerms !== null && this.lastSignedTerms >= new Date(2022, 0, 20, 0, 0, 0, 0)
+    }
+
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type: OrganizationType;
 

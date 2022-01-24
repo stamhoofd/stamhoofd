@@ -2,7 +2,7 @@
     <div class="st-view cart-item-view">
         <STNavigationBar :title="cartItem.product.name">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <span slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | price }}</span>
+            <span slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | priceFree }}</span>
             <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         <main>
@@ -23,7 +23,7 @@
                     <p class="style-definition-text">
                         {{ cartItem.product.location.name }}
                     </p>
-                    <p class="style-description-small">
+                    <p v-if="cartItem.product.location.address" class="style-description-small">
                         {{ cartItem.product.location.address }}
                     </p>
                 </STListItem>
@@ -75,7 +75,7 @@
             <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
             <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
                 <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
-                Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStock }} {{ remainingStock == 1 ? 'stuk' : 'stuks' }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
+                Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
             </p>
         </main>
 
@@ -120,7 +120,13 @@ import OptionMenuBox from './OptionMenuBox.vue';
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter)
+        priceChange: Formatter.priceChange.bind(Formatter),
+        priceFree: (p: number) => {
+            if (p === 0) {
+                return "Gratis"
+            }
+            return Formatter.price(p);
+        }
     }
 })
 export default class CartItemView extends Mixins(NavigationMixin){
@@ -231,6 +237,10 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     get remainingStock() {
         return (this.product.remainingStock ?? 0) + (this.oldItem?.reservedAmount ?? 0) + this.reservedAmountFromOthers
+    }
+
+    get remainingStockText() {
+        return this.product.getRemainingStockText(this.remainingStock)
     }
 
     formatDateRange(dateRange: ProductDateRange) {

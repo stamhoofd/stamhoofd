@@ -7,7 +7,7 @@
                     <h3 class="style-title-list">
                         {{ _location.name }}
                     </h3>
-                    <p class="style-description">
+                    <p v-if="_location.address" class="style-description">
                         {{ _location.address }}
                     </p>
                     <button slot="right" type="button" class="button icon gray edit" @click.stop="doEditLocation(_location)" />

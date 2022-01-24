@@ -10,7 +10,7 @@ import { Payment } from '@stamhoofd/models';
 import { Registration, RegistrationWithPayment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel,Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, MemberDetails, PaymentMethod, PaymentStatus, PermissionLevel,Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
@@ -61,6 +61,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             member.organizationId = user.organizationId
             member.encryptedDetails = struct.encryptedDetails
             member.firstName = struct.firstName
+            member.details = struct.nonEncryptedDetails
 
             for (const registrationStruct of struct.registrations) {
                 const group = groups.find(g => g.id === registrationStruct.groupId)
@@ -166,6 +167,19 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (patch.encryptedDetails) {
                 member.encryptedDetails = patch.encryptedDetails.applyTo(member.encryptedDetails)
             }
+            if (patch.nonEncryptedDetails) {
+                if (member.details) {
+                    member.details.patchOrPut(patch.nonEncryptedDetails)
+                } else {
+                    member.details = MemberDetails.create({})
+                    member.details.patchOrPut(patch.nonEncryptedDetails)
+                }
+
+                if (!member.details.isRecovered) {
+                    member.encryptedDetails = []
+                }
+            }
+            
             await member.save();
 
             // Update registrations

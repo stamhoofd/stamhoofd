@@ -756,7 +756,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     showMissingFirstNames() {
-        const missing = this.recipients.filter(r => r.firstName == null)
+        const missing = this.recipients.filter(r => !r.replacements.find(r => r.token === "firstName" && r.value.length > 0))
         this.present(new ComponentWithProperties(MissingFirstNameView, {
             title: "Ontbrekende namen",
             description: "Voor deze e-mailadressen konden we geen voornaam terugvinden. Kijk na of ze wel aanwezig zijn als ouder of lid in het systeem. Meestal komt dit voor omdat ze puur als gebruiker gekoppeld zijn, en die hebben geen namen. Om dit op te lossen kan je ofwel het e-mailadres wijzigen of het e-maialdres toevoegen bij één van de ouders of het lid zelf.",
@@ -966,6 +966,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                             value: parent.firstName
                         }),
                         Replacement.create({
+                            token: "lastName",
+                            value: parent.lastName
+                        }),
+                        Replacement.create({
                             token: "email",
                             value: parent.email.toLowerCase()
                         })
@@ -998,16 +1002,20 @@ export default class MailView extends Mixins(NavigationMixin) {
                                 value: member.details.firstName
                             }),
                             Replacement.create({
+                                token: "lastName",
+                                value: member.details.lastName
+                            }),
+                            Replacement.create({
                                 token: "email",
                                 value: email
                             })
                         ],
-                        userId: existing?.userId ?? null,
                         types: ["member", isMinor ? "minor-member" : "adult-member"]
                     })
 
                     if (existing) {
                         if (existing.types.includes("parent") && !existing.types.includes("member")) {
+                            // Only merge after check!
                             existing.merge(recipient)
                             
                             if (isMinor) {
@@ -1077,6 +1085,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             const existing = recipients.get(email)
             const r = Recipient.create({
                 firstName: recipient.firstName,
+                lastName: recipient.lastName,
                 email,
                 replacements: [
                     Replacement.create({
@@ -1084,11 +1093,14 @@ export default class MailView extends Mixins(NavigationMixin) {
                         value: recipient.firstName ?? ""
                     }),
                     Replacement.create({
+                        token: "lastName",
+                        value: recipient.lastName ?? ""
+                    }),
+                    Replacement.create({
                         token: "email",
                         value: email
                     })
-                ],
-                userId: existing?.userId ?? null,
+                ]
             });
 
             if (existing) {

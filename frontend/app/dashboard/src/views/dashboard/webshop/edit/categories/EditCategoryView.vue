@@ -16,7 +16,18 @@
                 type="text"
                 placeholder="Naam van deze categorie"
                 autocomplete=""
+                enterkeyhint="next"
             >
+        </STInputBox>
+
+        <STInputBox title="Beschrijving (optioneel)" error-fields="description" :error-box="errorBox" class="max">
+            <textarea
+                v-model="description"
+                class="input"
+                type="text"
+                placeholder="Optioneel wat extra uitleg onder de titel van de categorie"
+                autocomplete=""
+            />
         </STInputBox>
 
         <hr>
@@ -124,6 +135,14 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
     set name(name: string) {
         this.addCategoryPatch(Category.patch({ name }))
+    }
+
+    get description() {
+        return this.patchedCategory.description
+    }
+
+    set description(description: string) {
+        this.addCategoryPatch(Category.patch({ description }))
     }
 
     addProduct() {

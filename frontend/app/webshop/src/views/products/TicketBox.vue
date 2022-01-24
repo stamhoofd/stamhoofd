@@ -26,7 +26,7 @@
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
                     <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.name" />
-                    <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.address" />
+                    <p v-if="cartItem.product.location && cartItem.product.location.address" class="description" v-text="cartItem.product.location.address" />
 
                     <p class="description" v-text="formatPrice(price)" />
                 </div>

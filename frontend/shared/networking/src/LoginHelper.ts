@@ -617,8 +617,18 @@ export class LoginHelper {
             // need to wait on this because it changes the permissions
         }
 
-        await SessionManager.setCurrentSession(session)
+        // Change password if needed
+        if (typeof password === "string" && user.authSignKeyConstants.opslimit > 2){
+            console.info("Recreating keys to speed up next sign in")
+            try {
+                await this.changePassword(session, password, false)
+            } catch (e) {
+                console.error(e)
+            }
+        }
 
+        await SessionManager.setCurrentSession(session)
+        
         return {}
     }
 

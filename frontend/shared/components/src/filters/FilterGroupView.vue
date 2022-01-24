@@ -80,8 +80,8 @@ export default class FilterGroupView extends Mixins(NavigationMixin)  {
     @Prop({ required: true }) 
     group: FilterGroup<any>
 
-    @Prop({ required: true })
-    organization!: Organization
+    @Prop({ required: false })
+    organization?: Organization
 
     get GroupFilterMode() {
         return GroupFilterMode

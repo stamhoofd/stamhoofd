@@ -9,19 +9,19 @@
 
             <div v-else class="padding-group">
                 <Logo />
-                <button id="organization-switcher" @click="switchOrganization">
+                <button id="organization-switcher" type="button" @click="switchOrganization">
                     <span class="text">{{ organization.name }}</span>
                     <span class="icon arrow-down-small gray" />
                 </button>
             </div>
 
-            <button v-if="whatsNewBadge" class="menu-button button heading" @click="manageWhatsNew()">
+            <button v-if="whatsNewBadge" class="menu-button button heading" type="button" @click="manageWhatsNew()">
                 <span class="icon gift" />
                 <span>Wat is er nieuw?</span>
                 <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
             </button>
 
-            <button v-if="fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
+            <button v-if="fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
                 <span class="icon key" />
                 <span>Gebruikers goedkeuren</span>
                 <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
@@ -29,12 +29,12 @@
 
             <hr v-if="whatsNewBadge || (fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0)">
 
-            <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" class="menu-button button heading cta" @click="addWebshop()">
+            <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" type="button" class="menu-button button heading cta" @click="addWebshop()">
                 <span class="icon add" />
                 <span>Maak je eerste webshop aan</span>
             </button>
 
-            <button v-if="enableMemberModule && tree.categories.length == 0 && fullAccess" class="menu-button button heading cta" @click="manageGroups(true)">
+            <button v-if="enableMemberModule && tree.categories.length == 0 && fullAccess" type="button" class="menu-button button heading cta" @click="manageGroups(true)">
                 <span class="icon settings" />
                 <span>Configureer ledenadministratie</span>
             </button>
@@ -135,7 +135,7 @@
                     <span>Documentatie</span>
                 </a>
 
-                <button type="button" class="menu-button button heading" @click="gotoFeedback(false)">
+                <button v-if="!isAppReview" type="button" class="menu-button button heading" @click="gotoFeedback(false)">
                     <span class="icon feedback" />
                     <span>Feedback</span>
                 </button>
@@ -298,6 +298,17 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         GlobalEventBus.addListener(this, "new-webshop", async (webshop: PrivateWebshop) => {
             await this.openWebshop(webshop, false)
         })
+
+        if (this.fullAccess && !this.organization.meta.didAcceptLatestTerms) {
+            // Show new terms view if needed
+            LoadComponent(() => import(/* webpackChunkName: "AcceptTermsView" */ "./AcceptTermsView.vue"), {}, { instant: true }).then((component) => {
+                this.present(component.setDisplayStyle("popup").setAnimated(false))
+            }).catch(console.error)
+        }
+    }
+
+    get isAppReview() {
+        return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
     }
 
     get webshops() {
