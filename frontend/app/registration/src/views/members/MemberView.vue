@@ -4,7 +4,7 @@
             <template slot="left">
                 <BackButton v-if="canPop" @click="pop" />
             </template>
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="!canPop && canDismiss" slot="right" type="button" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
         
         <main class="member-view-details">
@@ -12,6 +12,10 @@
                 <span>{{ member.name }}</span>
                 <span v-if="member.activeRegistrations.length == 0" class="style-tag error">Nog niet ingeschreven</span>
             </h1>
+
+            <p v-if="hasItems" class="info-box">
+                Ga naar het mandje om de inschrijving af te ronden.
+            </p>
 
             <p v-if="member.details.isRecovered" class="warning-box">
                 Een deel van de gegevens van dit lid zijn versleuteld (zie uitleg onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet allemaal bekijken tot we jou terug toegang hebben gegeven of tot je zelf alles terug ingeeft.
@@ -21,7 +25,7 @@
                 <h2 class="style-with-button with-list">
                     <div>Ingeschreven voor</div>
                     <div>
-                        <button class="button text limit-space" @click="chooseGroups()">
+                        <button class="button text limit-space" type="button" @click="chooseGroups()">
                             <span class="icon add" />
                             <span>Inschrijven</span>
                         </button>
@@ -65,13 +69,27 @@
                 <h2 class="style-with-button">
                     <div>Algemeen</div>
                     <div>
-                        <button class="button text limit-space" @click="editGeneral()">
+                        <button class="button text limit-space" type="button" @click="editGeneral()">
                             <span class="icon edit" />
                             <span>Bewerken</span>
                         </button>
                     </div>
                 </h2>
                 <dl class="details-grid">
+                    <template v-if="member.details.firstName">
+                        <dt>Voornaam</dt>
+                        <dd v-copyable>
+                            {{ member.details.firstName }}
+                        </dd>
+                    </template>
+
+                    <template v-if="member.details.lastName">
+                        <dt>Achternaam</dt>
+                        <dd v-copyable>
+                            {{ member.details.lastName }}
+                        </dd>
+                    </template>
+
                     <template v-if="member.details.memberNumber">
                         <dt>Lidnummer</dt>
                         <dd>{{ member.details.memberNumber }}</dd>
@@ -107,7 +125,7 @@
                 <h2 class="style-with-button">
                     <div>Ouders</div>
                     <div>
-                        <button class="button text limit-space" @click.stop="editParents()">
+                        <button class="button text limit-space" type="button" @click.stop="editParents()">
                             <span class="icon edit" />
                             <span>Bewerken</span>
                         </button>
@@ -136,7 +154,7 @@
                 <h2 class="style-with-button">
                     <div>Noodcontact: {{ contact.title }}</div>
                     <div>
-                        <button class="button text limit-space" @click.stop="editEmergencyContact(contact)">
+                        <button class="button text limit-space" type="button" @click.stop="editEmergencyContact(contact)">
                             <span class="icon edit" />
                             <span>Bewerken</span>
                         </button>
@@ -157,7 +175,7 @@
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
                     <div>
-                        <button class="button text limit-space" @click="editRecords()">
+                        <button class="button text limit-space" type="button" @click="editRecords()">
                             <span class="icon edit" />
                             <span>Bewerken</span>
                         </button>
@@ -183,7 +201,7 @@
                 <h2 class="style-with-button">
                     <div>{{ category.name }}</div>
                     <div>
-                        <button class="button text limit-space" @click="editRecordCategory(category)">
+                        <button class="button text limit-space" type="button" @click="editRecordCategory(category)">
                             <span class="icon edit" />
                             <span>Bewerken</span>
                         </button>
@@ -195,13 +213,13 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="secundary button" @click="fullCheck">
+            <button slot="right" class="secundary button" type="button" @click="fullCheck">
                 <span v-if="member.details.isRecovered" class="icon edit" />
                 <span v-else class="icon search" />
                 <span v-if="member.details.isRecovered">Opnieuw invullen</span>
                 <span v-else>Nakijken</span>
             </button>
-            <button slot="right" class="primary button" @click="chooseGroups">
+            <button slot="right" class="primary button" type="button" @click="chooseGroups">
                 <span class="icon add" />
                 <span>Inschrijven</span>
             </button>
@@ -284,6 +302,11 @@ export default class MemberView extends Mixins(NavigationMixin){
         })
     }
 
+
+    get hasItems() {
+        return !!CheckoutManager.cart.items.find(i => i.member.id === this.member.id)
+    }
+
     get dataPermission() {
         return this.member.details.dataPermissions?.value ?? false
     }
@@ -332,9 +355,13 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 
     chooseGroups() {
-        this.show(new ComponentWithProperties(MemberChooseGroupsView, {
-            member: this.member
-        }))
+        this.show({
+            components: [
+                new ComponentWithProperties(MemberChooseGroupsView, {
+                    member: this.member
+                })
+            ]
+        })
     }
 
     get cartItems() {

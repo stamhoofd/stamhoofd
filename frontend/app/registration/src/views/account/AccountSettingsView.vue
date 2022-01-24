@@ -15,7 +15,7 @@
                 
                     <STErrorsDefault :error-box="errorBox" />
 
-                    <STInputBox v-if="isAdmin" title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errorBox">
                         <div class="input-group">
                             <div>
                                 <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">

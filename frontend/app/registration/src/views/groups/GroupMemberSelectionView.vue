@@ -3,7 +3,7 @@
         <STNavigationBar title="Inschrijven">
             <template slot="left">
                 <BackButton v-if="canPop" @click="pop" />
-                <button v-else slot="right" class="button icon gray close" @click="pop" />
+                <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
             </template>
         </STNavigationBar>
         
@@ -23,11 +23,11 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="secundary button" @click="addNewMember">
+            <button slot="right" class="secundary button" type="button" @click="addNewMember">
                 <span class="icon add" />
                 <span>Nieuw lid toevoegen</span>
             </button>
-            <button v-if="hasItems" slot="right" class="primary button" @click="goToBasket">
+            <button v-if="hasItems" slot="right" class="primary button" type="button" @click="goToBasket">
                 <span>Doorgaan</span>
                 <span class="icon arrow-right" />
             </button>

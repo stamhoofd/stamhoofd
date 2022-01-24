@@ -45,7 +45,7 @@
                 <STToolbar :sticky="false">
                     <button slot="right" class="button secundary full" type="button" @click="addNewMember">
                         <span class="icon left add" />
-                        <span>Nieuw lid toevoegen</span>
+                        <span>Nieuw lid inschrijven</span>
                     </button>
                 </STToolbar>
             </section>
@@ -277,9 +277,24 @@ export default class OverviewView extends Mixins(NavigationMixin){
             (component: NavigationMixin) => {
                 // when we are ready, show the 'choose group' view for this member
                 if (stepManager.editMember) {
-                    component.show(
-                        new ComponentWithProperties(MemberChooseGroupsView, { member: stepManager.editMember })
-                    )
+                    component.show({
+                        components: [
+                            new ComponentWithProperties(MemberView, { member: stepManager.editMember  })
+                        ],
+                        replace: component.navigationController?.components.length ?? 1,
+                        force: true
+                    })
+
+                    component.present({
+                        components: [
+                            new ComponentWithProperties(NavigationController, {
+                                root: new ComponentWithProperties(MemberChooseGroupsView, {
+                                    member: stepManager.editMember 
+                                })
+                            })
+                        ],
+                        modalDisplayStyle: "popup"
+                    })
                 } else {
                     // uhm?
                     // default to dismiss

@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="member.name">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         
         <main>
@@ -15,13 +15,6 @@
                 {{ member.firstName }} kan je op dit moment niet meer inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
             </p>
         </main>
-
-        <STToolbar v-if="hasItems">
-            <button slot="right" class="primary button" @click="goToBasket">
-                <span>Doorgaan</span>
-                <span class="icon arrow-right" />
-            </button>
-        </STToolbar>
     </div>
 </template>
 
@@ -66,24 +59,8 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
         return tree
     }
 
-    get hasItems() {
-        return !!CheckoutManager.cart.items.find(i => i.member.id === this.member.id)
-    }
-
     get groups() {
         return [...this.tree.groups, ...this.tree.categories.flatMap(c => c.groups)]
-    }
-
-    goToBasket() {
-        if (this.canDismiss) {
-            this.dismiss({ force: true })
-        } else {
-            this.navigationController?.popToRoot({ force: true })
-        }
-        if (CheckoutManager.cart.items.find(i => i.member.id === this.member.id)) {
-            new Toast("Ga door naar het mandje om de inschrijvingen te bevestigen", "basket green").setHide(3000).show()
-        }
-        
     }
 }
 </script>

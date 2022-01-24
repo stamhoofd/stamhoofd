@@ -2,7 +2,7 @@
     <div class="st-view group-view">
         <STNavigationBar :title="group.settings.name">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop" />
+            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -65,7 +65,8 @@
         <STToolbar v-if="isSignedIn && registerButton && !closed">
             <button slot="right" class="primary button" type="button" @click="chooseMembers">
                 <span class="icon add" />
-                <span>Inschrijven</span>
+                <span v-if="!member">Inschrijven</span>
+                <span v-else>{{ member.firstName }} inschrijven</span>
             </button>
         </STToolbar>
     </div>
@@ -75,7 +76,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { Group, GroupGenderType, WaitingListType } from '@stamhoofd/structures';
+import { Group, GroupGenderType, MemberWithRegistrations, RegisterItem, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -105,6 +106,12 @@ export default class GroupView extends Mixins(NavigationMixin){
     @Prop({ required: true })
     group!: Group
 
+    /**
+     * In case you want to add this member
+     */
+    @Prop({ required: false, default: null })
+    member!: MemberWithRegistrations | null
+
     @Prop({ default: true })
     registerButton!: boolean
 
@@ -127,7 +134,18 @@ export default class GroupView extends Mixins(NavigationMixin){
         return new Date()
     }
 
+    get itemCanRegister() {
+        return this.member!.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
+    }
+
     chooseMembers() {
+        if (this.member) {
+            const item = new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.itemCanRegister.waitingList })
+            CheckoutManager.startAddToCartFlow(this, item, (c: NavigationMixin) => {
+                c.dismiss({ force: true })
+            }).catch(console.error)
+            return
+        }
         this.show(new ComponentWithProperties(GroupMemberSelectionView, { group: this.group }))
     }
 
