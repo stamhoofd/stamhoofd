@@ -1,86 +1,68 @@
 <template>
-    <form id="member-general-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Inschrijven">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
-        </STNavigationBar>
-        
-        <main>
-            <h1 v-if="isNew">
-                Wie ga je inschrijven?
-            </h1>
-            <h1 v-else-if="details.isRecovered">
-                Gegevens aanvullen van {{ details.firstName }}
-            </h1>
-            <h1 v-else>
-                Gegevens nakijken van {{ details.firstName }}
-            </h1>
+    <SaveView :loading="loading" save-text="Volgende" title="Inschrijven" @save="goNext">
+        <h1 v-if="isNew">
+            Wie ga je inschrijven?
+        </h1>
+        <h1 v-else-if="details.isRecovered">
+            Gegevens aanvullen van {{ details.firstName }}
+        </h1>
+        <h1 v-else>
+            Gegevens nakijken van {{ details.firstName }}
+        </h1>
             
-            <STErrorsDefault :error-box="errorBox" />
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                            </div>
-                            <div>
-                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                            </div>
+        <STErrorsDefault :error-box="errorBox" />
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <div class="input-group">
+                        <div>
+                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                         </div>
-                    </STInputBox>
+                        <div>
+                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                        </div>
+                    </div>
+                </STInputBox>
 
-                    <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
+                <BirthDayInput v-if="isPropertyEnabled('birthDay') || birthDay" v-model="birthDay" :title="isPropertyRequired('birthDay') ? 'Geboortedatum' : 'Geboortedatum (optioneel)'" :validator="validator" :required="isPropertyRequired('birthDay')" />
 
-                    <STInputBox v-if="isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
-                        <RadioGroup>
-                            <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
-                                Man
-                            </Radio>
-                            <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">
-                                Vrouw
-                            </Radio>
-                            <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">
-                                Andere
-                            </Radio>
-                        </RadioGroup>
-                    </STInputBox>
-                </div>
-
-                <div>
-                    <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : '(optioneel)')" :validator="validator" />
-                    <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
-                    <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
-                </div>
+                <STInputBox v-if="isPropertyEnabled('gender')" title="Identificeert zich als..." error-fields="gender" :error-box="errorBox">
+                    <RadioGroup>
+                        <Radio v-model="gender" value="Male" autocomplete="sex" name="sex">
+                            Man
+                        </Radio>
+                        <Radio v-model="gender" value="Female" autocomplete="sex" name="sex">
+                            Vrouw
+                        </Radio>
+                        <Radio v-model="gender" value="Other" autocomplete="sex" name="sex">
+                            Andere
+                        </Radio>
+                    </RadioGroup>
+                </STInputBox>
             </div>
-        </main>
 
-        <STToolbar>
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" type="submit">
-                    Volgende
-                </button>
-            </LoadingButton>
-        </STToolbar>
-    </form>
+            <div>
+                <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" :required="isPropertyRequired('address')" :title="'Adres' + lidSuffix + (isPropertyRequired('address') ? '' : '(optioneel)')" :validator="validator" />
+                <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" :required="isPropertyRequired('emailAddress')" :title="'E-mailadres' + lidSuffix " :placeholder="isPropertyRequired('emailAddress') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" :validator="validator" />
+                <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone') ? 'Enkel van lid zelf': 'Optioneel. Enkel van lid zelf'" />
+            </div>
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton,BirthDayInput, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { AddressInput, BirthDayInput, CenteredMessage, EmailInput, ErrorBox, PhoneInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Address, Gender, Version } from "@stamhoofd/structures"
-import { MemberDetails } from '@stamhoofd/structures';
+import { Address, Gender, MemberDetails, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
     components: {
-        STToolbar,
-        STNavigationBar,
-        Slider,
+        SaveView,
         STErrorsDefault,
         STInputBox,
         AddressInput,
@@ -88,10 +70,7 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         RadioGroup,
         Radio,
         PhoneInput,
-        EmailInput,
-        Checkbox,
-        LoadingButton,
-        BackButton
+        EmailInput
     }
 })
 export default class EditMemberGeneralView extends Mixins(NavigationMixin) {

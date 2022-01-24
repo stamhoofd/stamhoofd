@@ -29,6 +29,8 @@ export class EmailTemplate extends Model {
     @column({ type: "string" })
     html: string;
 
+    @column({ type: "string", nullable: true })
+    from: string | null = null;
    
 
     @column({

@@ -1,76 +1,59 @@
 <template>
-    <div id="parent-view" class="st-view">
-        <STNavigationBar title="Ouder">
-            <button slot="right" class="button icon gray close" @click="pop" />
-        </STNavigationBar>
-        
-        <main>
-            <h1 v-if="!parent">
-                Ouder toevoegen
-            </h1>
-            <h1 v-else>
-                Gegevens van {{ parent.firstName }}
-            </h1>
+    <SaveView :save-text="!parent ? 'Toevoegen' : 'Opslaan'" title="Ouder" @save="goNext">
+        <h1 v-if="!parent">
+            Ouder toevoegen
+        </h1>
+        <h1 v-else>
+            Gegevens van {{ parent.firstName }}
+        </h1>
 
-            <STErrorsDefault :error-box="errorBox" />
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Titel" error-fields="type" :error-box="errorBox">
-                        <Dropdown v-model="type">
-                            <option v-for="type in parentTypes" :key="type" :value="type">
-                                {{ parentTypeName(type) }}
-                            </option>
-                        </Dropdown>
-                    </STInputBox>
+        <STErrorsDefault :error-box="errorBox" />
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Titel" error-fields="type" :error-box="errorBox">
+                    <Dropdown v-model="type">
+                        <option v-for="type in parentTypes" :key="type" :value="type">
+                            {{ parentTypeName(type) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
 
-                    <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                            </div>
-                            <div>
-                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                            </div>
+                <STInputBox title="Naam" error-fields="firstName,lastName" :error-box="errorBox">
+                    <div class="input-group">
+                        <div>
+                            <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
                         </div>
-                    </STInputBox>
+                        <div>
+                            <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                        </div>
+                    </div>
+                </STInputBox>
 
-                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('registration.inputs.parentPhone.placeholder')" />
-                    <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Voor belangrijke mededelingen" autocomplete="email" />
-                </div>
-                
-                <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="validator" @modify="modifyAddress" />
+                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('registration.inputs.parentPhone.placeholder')" />
+                <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Voor belangrijke mededelingen" autocomplete="email" />
             </div>
-        </main>
-
-        <STToolbar>
-            <button slot="right" class="button primary" @click="goNext">
-                {{ !parent ? 'Toevoegen' : 'Opslaan' }}
-            </button>
-        </STToolbar>
-    </div>
+                
+            <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="validator" @modify="modifyAddress" />
+        </div>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, Dropdown,EmailInput,ErrorBox, PhoneInput, Radio, SelectionAddressInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures"
+import { Dropdown, EmailInput, ErrorBox, PhoneInput, SaveView, SelectionAddressInput, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { Address, MemberDetails, Parent, ParentType, ParentTypeHelper } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
 
 @Component({
     components: {
-        STToolbar,
-        STNavigationBar,
+        SaveView,
         STErrorsDefault,
         STInputBox,
-        Radio,
         PhoneInput,
         EmailInput,
-        Checkbox,
-        STList,
-        STListItem,
         SelectionAddressInput,
         Dropdown
     }
@@ -191,15 +174,3 @@ export default class ParentView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles" as *;
-
-#parent-view {
-    .address-selection {
-        .middle {
-            @extend .style-normal;
-        }
-    }
-}
-</style>

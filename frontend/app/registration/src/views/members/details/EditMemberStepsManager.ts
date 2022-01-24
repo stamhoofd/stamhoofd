@@ -415,9 +415,10 @@ export class EditMemberStepsManager {
         }
 
         const hasNext = !!this.getNextStep(step, details)
+        const originalDetails = this.cloneDetails(details)
         return await step.getComponent({
             // Details to check if anything is changed
-            originalDetails: this.cloneDetails(details),
+            originalDetails,
             
             // Details to edit (can happen directly, no need to copy again)
             details: this.cloneDetails(details),
@@ -439,6 +440,9 @@ export class EditMemberStepsManager {
 
                 // Save details AFTER determining the next component (because delete behaviour might update the details)
                 await this.saveDetails(details)
+
+                // Mark as saved (so there is no confirm before dismiss any longer)
+                originalDetails.set(details)
 
                 if (!next) {
                     await this.finishHandler(component)

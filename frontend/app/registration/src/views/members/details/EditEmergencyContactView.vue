@@ -1,80 +1,75 @@
 <template>
-    <div id="emergency-contact-view" class="st-view">
-        <STNavigationBar title="Noodcontact">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
+    <SaveView title="Noodcontact" :loading="loading" :save-text="saveText" :cancel-text="null" @save="goNext">
+        <h1 v-if="details.parents.length > 0">
+            Reserve noodcontactpersoon
+        </h1>
+        <h1 v-else>
+            Noodcontactpersoon
+        </h1>
 
-            <button v-if="isOptional && details.emergencyContacts.length > 0" slot="right" class="button text only-icon-smartphone" type="button" @click="skipStep">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
-        </STNavigationBar>
-        
-        <main>
-            <h1 v-if="details.parents.length > 0">
-                Gegevens van een reserve noodcontactpersoon
-            </h1>
-            <h1 v-else>
-                Gegevens van een noodcontactpersoon
-            </h1>
-            <p v-if="details.parents.length > 0">
-                Ouders worden altijd als eerste gecontacteerd in nood, maar graag hebben we nog een extra contact voor als ouders niet bereikbaar zijn.
+        <p v-if="details.parents.length > 0">
+            Ouders worden altijd als eerste gecontacteerd in nood, maar graag hebben we nog een extra contact voor als ouders niet bereikbaar zijn.
 
-                <template v-if="details.defaultAge > 40">
-                    Dit kan bijvoorbeeld een kind, vriend, ouder, buurvrouw of gelijk wie zijn die je vertrouwt. 
-                </template>
-                <template v-else>
-                    Dit kan een vriend, buurvrouw of gelijk wie zijn die je vertrouwt. 
-                </template>
-            </p>
-            <p v-else>
-                <template v-if="details.defaultAge > 40">
-                    Graag hebben we een contactpersoon voor in noodgevallen. Dit kan bijvoorbeeld een kind, vriend, ouder, buurvrouw of gelijk wie zijn die je vertrouwt. 
-                </template>
-                <template v-else>
-                    Graag hebben we een contactpersoon voor in noodgevallen. Dit kan een ouder, vriend, buurvrouw of gelijk wie zijn die je vertrouwt. 
-                </template>
-            </p>
+            <template v-if="details.defaultAge > 40">
+                Dit kan bijvoorbeeld een kind, vriend, ouder, buurvrouw of gelijk wie zijn die je vertrouwt. 
+            </template>
+            <template v-else>
+                Dit kan een vriend, buurvrouw of gelijk wie zijn die je vertrouwt. 
+            </template>
+        </p>
+        <p v-else>
+            <template v-if="details.defaultAge > 40">
+                Graag hebben we een contactpersoon voor in noodgevallen. Dit kan bijvoorbeeld een kind, vriend, ouder, buurvrouw of gelijk wie zijn die je vertrouwt. 
+            </template>
+            <template v-else>
+                Graag hebben we een contactpersoon voor in noodgevallen. Dit kan een ouder, vriend, buurvrouw of gelijk wie zijn die je vertrouwt. 
+            </template>
+        </p>
 
-            <STErrorsDefault :error-box="errorBox" />
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                        <input v-model="name" class="input" nmae="name" type="text" placeholder="Naam" autocomplete="name">
-                    </STInputBox>
+        <STErrorsDefault :error-box="errorBox" />
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                    <input v-model="name" class="input" nmae="name" type="text" placeholder="Naam" autocomplete="name">
+                </STInputBox>
 
-                    <STInputBox title="Relatie*" error-fields="title" :error-box="errorBox">
-                        <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. buurman">
-                        <datalist id="emergency-contact-types">
-                            <option v-if="details.parents.length == 0" value="Vader" />
-                            <option v-if="details.parents.length == 0" value="Moeder" />
-                            <option v-if="details.parents.length == 0" value="Ouder" />
-                            <option v-if="details.defaultAge < 30" value="Oma" />
-                            <option v-if="details.defaultAge < 30" value="Opa" />
-                            <option v-if="details.defaultAge < 30" value="Tante" />
-                            <option v-if="details.defaultAge < 30" value="Oom" />
-                            <option value="Buurvrouw" />
-                            <option value="Buurman" />
-                            <option value="Vriend" />
-                            <option v-if="details.defaultAge < 30" value="Nonkel" />
-                            <option v-if="details.defaultAge < 30" value="Pepe" />
-                            <option v-if="details.defaultAge < 30" value="Meme" />
-                            <option v-if="details.defaultAge < 30" value="Grootvader" />
-                            <option v-if="details.defaultAge < 30" value="Grootmoeder" />
-                        </datalist>
-                    </STInputBox>
-                    <p class="style-description-small">
-                        *Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.
-                    </p>
-                </div>
-
-                <div>
-                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('shared.inputs.mobile.label')" />
-                </div>
+                <STInputBox title="Relatie*" error-fields="title" :error-box="errorBox">
+                    <input v-model="title" list="emergency-contact-types" class="input" name="type" type="text" placeholder="Bv. buurman">
+                    <datalist id="emergency-contact-types">
+                        <option v-if="details.parents.length == 0" value="Vader" />
+                        <option v-if="details.parents.length == 0" value="Moeder" />
+                        <option v-if="details.parents.length == 0" value="Ouder" />
+                        <option v-if="details.defaultAge < 30" value="Oma" />
+                        <option v-if="details.defaultAge < 30" value="Opa" />
+                        <option v-if="details.defaultAge < 30" value="Tante" />
+                        <option v-if="details.defaultAge < 30" value="Oom" />
+                        <option value="Buurvrouw" />
+                        <option value="Buurman" />
+                        <option value="Vriend" />
+                        <option v-if="details.defaultAge < 30" value="Nonkel" />
+                        <option v-if="details.defaultAge < 30" value="Pepe" />
+                        <option v-if="details.defaultAge < 30" value="Meme" />
+                        <option v-if="details.defaultAge < 30" value="Grootvader" />
+                        <option v-if="details.defaultAge < 30" value="Grootmoeder" />
+                    </datalist>
+                </STInputBox>
+                <p class="style-description-small">
+                    *Vul gelijk welke benaming in met het toetsenbord of kies één uit de lijst.
+                </p>
             </div>
-        </main>
 
-        <STToolbar>
+            <div>
+                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('shared.inputs.mobile.label')" />
+            </div>
+        </div>
+
+
+        <button v-if="isOptional && details.emergencyContacts.length > 0" class="button text only-icon-smartphone" type="button" @click="skipStep">
+            <span class="icon trash" />
+            <span>Noodcontact verwijderen</span>
+        </button>
+
+        <!--<STToolbar>
             <button v-if="isOptional && details.emergencyContacts.length == 0" slot="right" class="button secundary" @click="skipStep">
                 Overslaan
             </button>
@@ -83,16 +78,15 @@
                     {{ nextText }}
                 </button>
             </LoadingButton>
-        </STToolbar>
-    </div>
+        </STToolbar>-->
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, BirthDayInput, CenteredMessage, Checkbox, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { MemberWithRegistrations, RegisterItem } from '@stamhoofd/structures';
-import { AskRequirement,EmergencyContact, MemberDetails, MemberDetailsWithGroups, Version } from "@stamhoofd/structures"
+import { AddressInput, CenteredMessage, ErrorBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { EmergencyContact, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RegisterItem, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -100,19 +94,11 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
     components: {
-        STToolbar,
-        STNavigationBar,
-        Slider,
+        SaveView,
         STErrorsDefault,
         STInputBox,
         AddressInput,
-        BirthDayInput,
-        RadioGroup,
-        Radio,
         PhoneInput,
-        Checkbox,
-        BackButton,
-        LoadingButton
     }
 })
 export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
@@ -159,6 +145,17 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
         return false;
     }
 
+    get isAllEmpty() {
+        return this.name == "" && this.title == "" && (this.phone == null || this.phone.length == 0)
+    }
+
+    get saveText() {
+        if (this.isOptional && this.isAllEmpty) {
+            return "Sla over"
+        }
+        return this.nextText
+    }
+
     mounted() {
         if (this.details.emergencyContacts.length > 0) {
             const contact = this.details.emergencyContacts[0]
@@ -184,6 +181,13 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return;
         }
+        if (!await CenteredMessage.confirm(this.details.emergencyContacts.length > 0 ? "Ben je zeker dat je deze noodcontact wilt verwijderen en deze stap wilt overslaan?" : "Ben je zeker dat je deze stap wilt overslaan?", "Overslaan")) {
+            return;
+        }
+
+        this.name = ""
+        this.title = ""
+        this.phone = null
         this.details.emergencyContacts = []
         this.errorBox = null;
         this.loading = true
@@ -200,6 +204,10 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     async goNext() {
         if (this.loading) {
             return;
+        }
+
+        if (this.isAllEmpty && this.isOptional) {
+            return await this.skipStep()
         }
 
         const errors = new SimpleErrors()
@@ -233,7 +241,7 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
 
         if (valid) {
             this.details.emergencyContacts = [
-                    EmergencyContact.create({
+                EmergencyContact.create({
                     name: this.name,
                     phone: this.phone,
                     title: this.title

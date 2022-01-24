@@ -24,7 +24,7 @@
         <STToolbar v-if="!$isMobile">
             <template #right>
                 <slot name="toolbar" />
-                <button v-if="!$slots.toolbar && ($parent.canPop || $parent.canDismiss)" class="button secundary" type="button" @click="$parent.pop">
+                <button v-if="!$slots.toolbar && ($parent.canPop || $parent.canDismiss) && cancelText !== null" class="button secundary" type="button" @click="$parent.pop">
                     {{ cancelText }}
                 </button>
                 <LoadingButton :loading="loading">
@@ -78,7 +78,7 @@ export default class SaveView extends Vue {
     saveIcon!: string | null;
 
     @Prop({ default: "Annuleren" })
-    cancelText!: string;
+    cancelText!: string | null;
 
 }
 </script>

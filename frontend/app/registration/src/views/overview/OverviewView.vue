@@ -51,21 +51,13 @@
             </section>
 
             <section class="view gray-shadow">
-                <main v-if="!isEmpty">
+                <main v-if="shouldShowSuggestions">
                     <h1>
                         Suggesties
                         <span class="icon star yellow" />
                     </h1>
-                    <p>
-                        Kies een groep waarvoor je je wilt inschrijven of klik bovenaan op een lid dat je wilt inschrijven (dan zie je de suggesties).
-                    </p>
                     <GroupTree :category="availableTree" :parent-level="0" />
                     <hr>
-                </main>
-                <main v-else>
-                    <p v-if="members.length > 0" class="warning-box">
-                        Je kan je momenteel nergens voor inschrijven, maar je kan eventueel wel een nieuw lid toevoegen.
-                    </p>
                 </main>
                 <main>
                     <GroupTree :category="fullTree" />
@@ -129,11 +121,20 @@ export default class OverviewView extends Mixins(NavigationMixin){
         return OrganizationManager.organization.categoryTree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null, this.organization.meta.packages.useActivities)
     }
 
-    get isEmpty() {
+    get shouldShowSuggestions() {
         if (this.members.length == 0) {
-            return true
+            return false
         }
-        return (this.availableTree.categories.length == 0)
+        if (this.availableTree.categories.length == 0) {
+            return false
+        }
+
+        if (this.availableTree.getAllGroups().length > 2) {
+            // Too many suggestions
+            return false
+        }
+
+        return true
     }
 
     get availableTree() {
