@@ -34,6 +34,13 @@ export default class EmailInput extends Vue {
     @Prop({ default: true })
     required!: boolean
 
+    /**
+     * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
+     * Only used if required = false
+     */
+    @Prop({ default: false })
+    nullable!: boolean
+
     @Prop({ default: false })
     disabled!: boolean
 
@@ -79,10 +86,12 @@ export default class EmailInput extends Vue {
             // Ignore empty email if not final
             this.errorBox = null
 
-            if (this.value !== "") {
+            if (this.nullable && this.value !== null) {
+                this.$emit("input", null)
+            } else if (this.value !== "") {
                 this.$emit("input", "")
             }
-            return true
+            return false
         }
         
         if (!DataValidator.isEmailValid(this.emailRaw)) {

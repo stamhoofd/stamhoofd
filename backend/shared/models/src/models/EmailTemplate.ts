@@ -15,8 +15,17 @@ export class EmailTemplate extends Model {
     })
     id!: string;
 
+    @column({ type: "string"})
+    subject: string;
+
     @column({ type: "string" })
     organizationId: string;
+
+    @column({ type: "string" })
+    groupId: string | null = null;
+
+    @column({ type: "string" })
+    webshopId: string | null = null;
 
     @column({ type: "string" })
     type: string; // should be enumeration
@@ -31,7 +40,8 @@ export class EmailTemplate extends Model {
 
     @column({ type: "string", nullable: true })
     from: string | null = null;
-   
+
+
 
     @column({
         type: "datetime", beforeSave() {

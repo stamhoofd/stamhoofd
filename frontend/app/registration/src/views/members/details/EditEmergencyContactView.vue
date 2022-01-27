@@ -64,7 +64,7 @@
         </div>
 
 
-        <button v-if="isOptional && details.emergencyContacts.length > 0" class="button text only-icon-smartphone" type="button" @click="skipStep">
+        <button v-if="isOptional && details.emergencyContacts.length > 0" class="button text" type="button" @click="skipStep">
             <span class="icon trash" />
             <span>Noodcontact verwijderen</span>
         </button>

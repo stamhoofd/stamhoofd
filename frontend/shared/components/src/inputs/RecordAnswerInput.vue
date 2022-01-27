@@ -40,9 +40,9 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.Textarea" :title="label" class="max" error-fields="input" :error-box="errorBox">
             <textarea v-model="answer.value" :placeholder="inputPlaceholder" class="input" />
         </STInputBox>
-        <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="answer.address" :title="label" :required="required" :validator="validator" />
-        <PhoneInput v-else-if="answer.settings.type == RecordType.Phone" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" />
-        <EmailInput v-else-if="answer.settings.type == RecordType.Email" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" />
+        <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="answer.address" :title="label" :required="required" :validator="validator" :nullable="true" />
+        <PhoneInput v-else-if="answer.settings.type == RecordType.Phone" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
+        <EmailInput v-else-if="answer.settings.type == RecordType.Email" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
         <p v-else class="error-box">
             Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
         </p>
@@ -169,9 +169,13 @@ export default class RecordAnswerInput extends Vue {
 
         // Create a new one
         // todo: try to migrate old values if possible
-        return type.create({
+        const a = type.create({
             settings: this.recordSettings
         })
+
+        // This is required, because in very rare situations, the answer that was set on mount could have been removed from the array
+        this.answer = a
+        return a
     }
 
     set answer(answer: RecordAnswer) {

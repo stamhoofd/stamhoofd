@@ -1,8 +1,9 @@
 import { column,Database,ManyToOneRelation,Model } from '@simonbackx/simple-database';
-import { Payment as PaymentStructure, Registration as RegistrationStructure } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Payment as PaymentStructure, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
+import { User } from './User';
 
 export type RegistrationWithPayment = Registration & { payment: Payment | null }
 export class Registration extends Model {
@@ -97,5 +98,19 @@ export class Registration extends Model {
             console.error("Unexpected result for occupancy", results)
             throw new Error("Query failed")
         }
+    }
+
+    sendConfirmationEmail(user: User, member: MemberWithRegistrations, payment: Payment | null) {
+        // Send an e-mail to this user (only if verified)
+        if (!user.verified) {
+            return
+        }
+
+        // Get the template
+
+        // Build all the magic variables needed for the template
+        const replacements: Replacement[] = []
+
+        // Send the e-mail
     }
 }

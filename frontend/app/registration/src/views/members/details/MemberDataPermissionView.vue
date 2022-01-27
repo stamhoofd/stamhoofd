@@ -1,55 +1,28 @@
 <template>
-    <div id="financial-support-view" class="st-view">
-        <STNavigationBar :title="title">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
-        </STNavigationBar>
-        <main>
-            <h1>{{ title }}</h1>
-            <p class="style-description pre-wrap" v-text="description" />
+    <SaveView :title="title" :loading="loading" save-text="Doorgaan" @save="goNext">
+        <h1>{{ title }}</h1>
+        <p class="style-description pre-wrap" v-text="description" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-            <Checkbox v-model="dataPermission">
-                {{ checkboxLabel }}
-            </Checkbox>
-        </main>
-
-        <STToolbar>
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" @click="goNext">
-                    <span>Doorgaan</span>
-                    <span class="icon arrow-right" />
-                </button>
-            </LoadingButton>
-        </STToolbar>
-    </div>
+        <Checkbox v-model="dataPermission">
+            {{ checkboxLabel }}
+        </Checkbox>
+    </SaveView>
 </template>
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton,BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { BooleanStatus, DataPermissionsSettings } from "@stamhoofd/structures"
-import { MemberDetails } from '@stamhoofd/structures';
+import { Checkbox, ErrorBox, SaveView, STErrorsDefault, Validator } from "@stamhoofd/components";
+import { BooleanStatus, DataPermissionsSettings, MemberDetails } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
     components: {
-        STToolbar,
-        STNavigationBar,
-        Slider,
+        SaveView,
         STErrorsDefault,
-        STInputBox,
-        AddressInput,
-        BirthDayInput,
-        RadioGroup,
-        Radio,
-        PhoneInput,
-        EmailInput,
-        Checkbox,
-        LoadingButton,
-        BackButton
+        Checkbox
     }
 })
 export default class MemberDataPermissionView extends Mixins(NavigationMixin) {

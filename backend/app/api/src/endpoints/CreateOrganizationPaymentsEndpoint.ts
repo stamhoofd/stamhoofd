@@ -58,7 +58,7 @@ export class CreateOrganizationPaymentsEndpoint extends Endpoint<Params, Query, 
 
         // Create payments
         for (const create of request.body) {
-            if (![PaymentMethod.Unknown, PaymentMethod.Transfer].includes(create.method)) {
+            if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(create.method)) {
                 throw new SimpleError({
                     code: "invalid_field",
                     message: "Invalid payment method",

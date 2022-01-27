@@ -14,7 +14,7 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+                <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" :context="paymentContext" />
             </main>
             <main v-else>
                 <h1>Bevestig jouw bestelling</h1>
@@ -31,7 +31,7 @@
             <STToolbar>
                 <span slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary" type="button" @click="goNext">
                         <span>Bestelling bevestigen</span>
                     </button>
                 </LoadingButton>
@@ -89,6 +89,10 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     set selectedPaymentMethod(paymentMethod: PaymentMethod | null) {
         CheckoutManager.checkout.paymentMethod = paymentMethod
         CheckoutManager.saveCheckout()
+    }
+
+    get paymentContext() {
+        return this.checkout.paymentContext
     }
 
     get checkout() {
@@ -168,7 +172,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             }
 
             // Go to success page
-            this.show(new ComponentWithProperties(OrderView, { initialOrder: response.data.order, success: true }))
+            this.loading = false
+            this.goToOrder(response.data.order.id)
             
         } catch (e) {
             console.error(e)

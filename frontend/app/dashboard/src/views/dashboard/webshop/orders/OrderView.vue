@@ -70,14 +70,14 @@
                     </span>
                 </STListItem>
 
-                <STListItem v-if="patchedOrder.payment" v-long-press="(e) => (hasPaymentsWrite && patchedOrder.payment.method == 'Transfer' ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && patchedOrder.payment.method == 'Transfer'" @click="hasPaymentsWrite && patchedOrder.payment.method == 'Transfer' ? changePaymentStatus($event) : null">
+                <STListItem v-if="patchedOrder.payment" v-long-press="(e) => (hasPaymentsWrite && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale')" @click="hasPaymentsWrite && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null">
                     Betaalmethode
 
                     <template slot="right">
                         <span>{{ getName(patchedOrder.payment.method) }}</span>
                         <span v-if="patchedOrder.payment.status == 'Succeeded'" class="icon green success" />
                         <span v-else class="icon clock" />
-                        <span v-if="hasPaymentsWrite && ((patchedOrder.payment && patchedOrder.payment.method == 'Transfer') && !isChanged())" class="icon arrow-down-small" />
+                        <span v-if="hasPaymentsWrite && ((patchedOrder.payment && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale')) && !isChanged())" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
                 <STListItem v-if="patchedOrder.payment && patchedOrder.payment.method == 'Transfer'" class="right-description right-stack">

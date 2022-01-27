@@ -54,6 +54,14 @@ export class RecordAnswer extends AutoEncoder {
     validate() {
         // valid by default
     }
+
+    /**
+     * Return true when it is not the default value as a general rule
+     * E.g. checkbox by default not checked -> empty if not checked
+     */
+    get isEmpty() {
+        return false
+    }
 }
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
@@ -110,6 +118,10 @@ export class RecordTextAnswer extends RecordAnswer {
             })
         }
     }
+
+    get isEmpty() {
+        return (this.value === null || this.value.length === 0)
+    }
 }
 
 export class RecordCheckboxAnswer extends RecordAnswer {
@@ -141,6 +153,10 @@ export class RecordCheckboxAnswer extends RecordAnswer {
                 field: "input"
             })
         }
+    }
+
+    get isEmpty() {
+        return !this.selected
     }
 }
 
@@ -185,6 +201,10 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
             })
         }
     }
+
+    get isEmpty() {
+        return this.selectedChoices.length === 0
+    }
 }
 
 export class RecordChooseOneAnswer extends RecordAnswer {
@@ -227,6 +247,10 @@ export class RecordChooseOneAnswer extends RecordAnswer {
             })
         }
     }
+
+    get isEmpty() {
+        return this.selectedChoice === null
+    }
 }
 
 export class RecordAddressAnswer extends RecordAnswer {
@@ -245,5 +269,9 @@ export class RecordAddressAnswer extends RecordAnswer {
                 field: "input"
             })
         }
+    }
+
+    get isEmpty() {
+        return this.address === null
     }
 }

@@ -1,62 +1,47 @@
 <template>
-    <form id="fill-record-category-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar :title="title">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
-        </STNavigationBar>
-        
-        <main>
-            <h1>
-                {{ title }}
-            </h1>
+    <SaveView :title="title" :cancel-text="null" :loading="loading" :save-text="saveText" @save="goNext">
+        <h1>
+            {{ title }}
+        </h1>
+        <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
+
+        <STErrorsDefault :error-box="errorBox" />
+            
+        <RecordAnswerInput v-for="record of records" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
+        <div v-for="category of childCategories" :key="category.id" class="container">
+            <hr>
+            <h2>{{ category.name }}</h2>
             <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
-            <STErrorsDefault :error-box="errorBox" />
-            
-            <RecordAnswerInput v-for="record of records" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
-            <div v-for="category of childCategories" :key="category.id" class="container">
-                <hr>
-                <h2>{{ category.name }}</h2>
-                <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
+            <RecordAnswerInput v-for="record of category.filterRecords(dataPermission)" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
+        </div>
 
-                <RecordAnswerInput v-for="record of category.filterRecords(dataPermission)" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
-            </div>
+        <hr v-if="isOptional && hasSavedAnswers">
 
+        <button v-if="isOptional && hasSavedAnswers" class="button text" type="button" @click="skipStep">
+            <span class="icon trash" />
+            <span>Wis antwoorden</span>
+        </button>
 
-            <p v-if="!markReviewed && lastReviewed" class="style-description-small">
-                Laatst nagekeken op {{ formatDate(lastReviewed) }}
-            </p>
-        </main>
-
-        <STToolbar>
-            <button v-if="isOptional" slot="right" class="button secundary" @click="skipStep">
-                Overslaan
-            </button>
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary">
-                    Volgende
-                </button>
-            </LoadingButton>
-        </STToolbar>
-    </form>
+        <p v-if="!markReviewed && lastReviewed" class="style-description-small">
+            Laatst nagekeken op {{ formatDate(lastReviewed) }}
+        </p>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,CenteredMessage, ErrorBox, LoadingButton,RecordAnswerInput, STErrorsDefault, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures"
+import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, Validator } from "@stamhoofd/components";
+import { RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
-        STToolbar,
-        STNavigationBar,
+        SaveView,
         STErrorsDefault,
-        RecordAnswerInput,
-        LoadingButton,
-        BackButton
+        RecordAnswerInput
     }
 })
 export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
@@ -103,6 +88,35 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
         return this.category.name
     }
 
+    get isAllEmpty() {
+        const allRecords = this.category.getAllRecords()
+        return !this.editingAnswers.find(answer => {
+            const record = !!allRecords.find(r => r.id == answer.settings.id)
+            if (record && !answer.isEmpty) {
+                return true
+            }
+            return false
+        })
+    }
+
+    get hasSavedAnswers() {
+        const allRecords = this.category.getAllRecords()
+        return this.answers.find(answer => {
+            const record = !!allRecords.find(r => r.id == answer.settings.id)
+            if (record) {
+                return true
+            }
+            return false
+        })
+    }
+
+    get saveText() {
+        if (this.isOptional && this.isAllEmpty) {
+            return "Sla over"
+        }
+        return "Volgende"
+    }
+
     formatDate(date: Date) {
         return Formatter.dateTime(date)
     }
@@ -132,6 +146,10 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
             return;
         }
 
+        if (!await CenteredMessage.confirm(this.hasSavedAnswers && !this.isAllEmpty ? "Antwoorden verwijderen en stap overslaan?" : "Ben je zeker dat je deze stap wilt overslaan?", "Overslaan")) {
+            return;
+        }
+
         this.loading = true
         this.errorBox = null
 
@@ -157,6 +175,10 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
     async goNext() {
         if (this.loading) {
             return;
+        }
+
+        if (this.isOptional && this.isAllEmpty) {
+            return await this.skipStep()
         }
 
         this.loading = true

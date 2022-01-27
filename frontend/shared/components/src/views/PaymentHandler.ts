@@ -61,7 +61,9 @@ export class PaymentHandler {
     }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
         const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings, additionalReference } = settings;
 
-        if (payment.method == PaymentMethod.Transfer) {
+        if (payment.method == PaymentMethod.PointOfSale) {
+            successHandler(payment)
+        } else if (payment.method == PaymentMethod.Transfer) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             component.show(new ComponentWithProperties(TransferPaymentView, {
                 created: true,

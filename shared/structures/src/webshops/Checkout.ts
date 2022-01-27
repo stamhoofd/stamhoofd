@@ -48,6 +48,16 @@ export class Checkout extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 143 })
     reservedOrder = false;
 
+    get paymentContext(): null | "takeout" | "delivery" {
+        if (this.checkoutMethod?.type == CheckoutMethodType.Takeout) {
+            return "takeout"
+        }
+        if (this.checkoutMethod?.type == CheckoutMethodType.Delivery) {
+            return "takeout"
+        }
+        return null
+    }
+
     get deliveryPrice() {
         if (!this.checkoutMethod || this.checkoutMethod.type != CheckoutMethodType.Delivery) {
             return 0;

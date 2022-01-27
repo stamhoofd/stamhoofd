@@ -196,7 +196,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     registration.paymentId = payment.id
                     registration.reservedUntil = null
 
-                    if (payment.method == PaymentMethod.Transfer || payment.status == PaymentStatus.Succeeded) {
+                    if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
                         registration.registeredAt = new Date()
                     } else {
                         // Reserve registration for 30 minutes (if needed)

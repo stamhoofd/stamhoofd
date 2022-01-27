@@ -22,13 +22,12 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg"
-import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg"
-import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg"
-import { LoadingButton, Radio, STErrorsDefault,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { PaymentMethodHelper } from "@stamhoofd/structures";
-import { Country, Organization, PaymentMethod } from '@stamhoofd/structures';
-import { Component, Mixins,  Prop,Vue } from "vue-property-decorator";
+import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg";
+import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg";
+import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg";
+import { LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Country, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -55,6 +54,9 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     @Prop({ required: true }) 
     paymentMethods: PaymentMethod[]
+
+    @Prop({ default: null }) 
+    context: null | "takeout" | "delivery"
 
     mounted() {
         if (!this.selectedPaymentMethod || this.selectedPaymentMethod === PaymentMethod.Unknown || !this.paymentMethods.includes(this.selectedPaymentMethod)) {
@@ -110,7 +112,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Payconiq: return "Payconiq, KBC mobile of ING-app (snelst)"
             case PaymentMethod.Transfer: return "Via overschrijving"
         }
-        return PaymentMethodHelper.getNameCapitalized(paymentMethod)
+        return PaymentMethodHelper.getNameCapitalized(paymentMethod, this.context)
     }
 
     getDescription(paymentMethod: PaymentMethod): string {
@@ -122,6 +124,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
             case PaymentMethod.CreditCard: return ""
+            case PaymentMethod.PointOfSale: return ""
         }
     }
 
@@ -134,6 +137,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Unknown: return null
             case PaymentMethod.DirectDebit: return null
             case PaymentMethod.CreditCard: return null
+            case PaymentMethod.PointOfSale: return null
         }
     }
 }

@@ -181,7 +181,7 @@ export default class EditPaymentView extends Mixins(NavigationMixin) {
     }
 
     get paymentMethods() {
-        return [PaymentMethod.Transfer, PaymentMethod.Unknown]
+        return [PaymentMethod.Transfer, PaymentMethod.PointOfSale, PaymentMethod.Unknown]
     }
 
     getPaymentName(method: PaymentMethod) {

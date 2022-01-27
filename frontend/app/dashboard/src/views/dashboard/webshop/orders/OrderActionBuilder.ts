@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
-import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentStatus, PrivateOrder } from "@stamhoofd/structures"
+import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentStatus, PrivateOrder } from "@stamhoofd/structures"
 
 import { WebshopManager } from "../WebshopManager"
 
@@ -174,6 +174,7 @@ export class OrderActionBuilder {
     
     async markPaid(orders: PrivateOrder[], paid = true) {
         const data: AutoEncoderPatchType<Payment>[] = []
+        let willSendEmail = false
 
         for (const order of orders) {
             const payment = order.payment
@@ -188,6 +189,10 @@ export class OrderActionBuilder {
                         price: order.data.totalPrice,
                         status: PaymentStatus.Succeeded
                     }))
+
+                    if (payment.method === PaymentMethod.Transfer && order.data.shouldSendPaymentUpdates) {
+                        willSendEmail = true
+                    }
                 }
             } else {
                 if (payment.status == PaymentStatus.Succeeded || order.data.totalPrice != payment.price) {
@@ -202,7 +207,7 @@ export class OrderActionBuilder {
         }
         
         if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker?", paid ? "Markeer als betaald" : "Markeer als niet betaald", paid ? "De besteller ontvangt een automatische e-mail." : undefined)) {
+            if (willSendEmail && !await CenteredMessage.confirm("Ben je zeker?", paid ? "Markeer als betaald" : "Markeer als niet betaald", paid ? "De besteller ontvangt een automatische e-mail." : undefined)) {
                 return;
             }
             const session = SessionManager.currentSession!

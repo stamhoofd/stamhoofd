@@ -78,14 +78,14 @@
                 <dl class="details-grid">
                     <template v-if="member.details.firstName">
                         <dt>Voornaam</dt>
-                        <dd v-copyable>
+                        <dd>
                             {{ member.details.firstName }}
                         </dd>
                     </template>
 
                     <template v-if="member.details.lastName">
                         <dt>Achternaam</dt>
-                        <dd v-copyable>
+                        <dd>
                             {{ member.details.lastName }}
                         </dd>
                     </template>

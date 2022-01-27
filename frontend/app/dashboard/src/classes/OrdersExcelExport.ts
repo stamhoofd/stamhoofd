@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PrivateOrder } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PrivateOrder } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -159,7 +159,7 @@ export class OrdersExcelExport {
                 order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime)+" - "+Formatter.minutes(order.data.timeSlot.endTime) : "/",
                 order.data.deliveryPrice / 100,
                 order.data.totalPrice / 100,
-                order.data.paymentMethod == PaymentMethod.Transfer ? "Overschrijving" : order.data.paymentMethod,
+                PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
                 order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald",
                 OrderStatusHelper.getName(order.status),
                 ...(shouldIncludeSettements ? 

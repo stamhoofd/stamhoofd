@@ -63,6 +63,7 @@ export default class EditPaymentMethodsBox extends Vue {
         }
 
         r.push(PaymentMethod.CreditCard)
+        r.push(PaymentMethod.PointOfSale)
         return r
     }
 
@@ -79,6 +80,7 @@ export default class EditPaymentMethodsBox extends Vue {
             case PaymentMethod.CreditCard: return "€ 0,25 + 1,8% voor persoonlijke kaarten (Europese Unie)\n€ 0,25 + 2,8% voor zakelijke of buiten-EU kaarten"
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
+            case PaymentMethod.PointOfSale: return "Gratis. Maar hou rekening met veel extra administratie bij cash betalingen."
         }
     }
 
@@ -91,6 +93,7 @@ export default class EditPaymentMethodsBox extends Vue {
             case PaymentMethod.Unknown: return null
             case PaymentMethod.DirectDebit: return null
             case PaymentMethod.CreditCard: return null
+            case PaymentMethod.PointOfSale: return null
         }
     }
 

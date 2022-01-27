@@ -59,8 +59,11 @@
                         <hr>
                         <h2>Overzicht</h2>
                     </template>
-                    <p v-else-if="!isPaid" class="warning-box">
+                    <p v-else-if="!isPaid && isTransfer" class="warning-box">
                         Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.
+                    </p>
+                    <p v-else-if="!isPaid && !isTransfer" class="warning-box">
+                        Opgelet: je zal deze bestelling nog moeten betalen {{ getLowerCaseName(order.payment.method) }}
                     </p>
 
                     <STList>
@@ -85,7 +88,7 @@
                                 <span>{{ getName(order.payment.method) }}</span>
 
                                 <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
-                                <span v-else class="icon help" />
+                                <span v-else-if="isTransfer" class="icon help" />
                             </template>
                         </STListItem>
                         <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
@@ -214,14 +217,14 @@
                             <span class="icon share" />
                             <span>Delen</span>
                         </button>
-                        <button v-if="!isPaid" class="button primary" type="button" @click="openTransferView">
+                        <button v-if="!isPaid && isTransfer" class="button primary" type="button" @click="openTransferView">
                             <span class="icon card" />
                             <span>Betaalinstructies</span>
                         </button>
                     </template>
                 </STToolbar>
             </section>
-            <section v-if="hasTickets && isPaid" class="gray-shadow view">
+            <section v-if="hasTickets && (isPaid || !isTransfer)" class="gray-shadow view">
                 <main id="tickets">
                     <h2 v-if="singleTicket">
                         Download ticket
@@ -334,6 +337,10 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.order && (this.order.payment === null || this.order.payment.status === PaymentStatus.Succeeded)
     }
 
+    get isTransfer() {
+        return this.order && this.order.payment !== null && this.order.payment.method === PaymentMethod.Transfer
+    }
+
     get isCanceled() {
         return !this.order || this.order.status === OrderStatus.Canceled || this.order.status === OrderStatus.Deleted
     }
@@ -367,7 +374,11 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod))
+        return PaymentMethodHelper.getNameCapitalized(paymentMethod)
+    }
+
+    getLowerCaseName(paymentMethod: PaymentMethod): string {
+        return PaymentMethodHelper.getName(paymentMethod)
     }
 
     openTransferView() {

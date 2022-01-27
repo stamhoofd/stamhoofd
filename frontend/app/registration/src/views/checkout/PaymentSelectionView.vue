@@ -2,7 +2,7 @@
     <div class="st-view boxed">
         <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         <div class="box">
             <main v-if="needsPay">
@@ -26,7 +26,7 @@
             <STToolbar>
                 <span slot="left">Totaal: {{ cart.price | price }}</span>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
+                    <button class="button primary" type="button" @click="goNext">
                         <span v-if="needsPay && selectedPaymentMethod == 'Transfer'">Inschrijving bevestigen</span>
                         <span v-else-if="needsPay">Betalen</span>
                         <span v-else>Doorgaan</span>

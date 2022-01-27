@@ -144,7 +144,7 @@ export class GroupCategoryTree extends GroupCategory {
         return Math.max(...this.categories.map(c => c.depth)) + 1
     }
 
-    getAllGroups() {
+    getAllGroups(): Group[] {
         return [...this.groups, ...this.categories.flatMap(c => c.getAllGroups())]
     }
 

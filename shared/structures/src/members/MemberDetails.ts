@@ -2,6 +2,7 @@ import { ArrayDecoder,AutoEncoder, BooleanDecoder,Data,DateDecoder,EnumDecoder,f
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address';
+import { Replacement } from '../endpoints/EmailRequest';
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
 import { NumberFilterDefinition } from '../filters/NumberFilter';
 import { StringFilterDefinition } from '../filters/StringFilter';
@@ -699,5 +700,41 @@ export class MemberDetails extends AutoEncoder {
         // Clear outdated data
         this.doctor = null
         this.records = []
+    }
+
+    /*static getAllSmartVariables() {
+        return [
+            new EditorSmartVariable({
+                id: "firstName", 
+                name: "Voornaam", 
+                example: "", 
+                deleteMessage: "De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald."
+            }),
+            new EditorSmartVariable({
+                id: "lastName", 
+                name: "Achternaam", 
+                example: "", 
+                deleteMessage: "De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald."
+            }),
+            new EditorSmartVariable({
+                id: "email", 
+                name: "E-mailadres", 
+                example: "", 
+            })
+        ]
+    }*/
+
+
+    getEmailReplacements() {
+        return [
+            Replacement.create({
+                token: "memberFirstName",
+                value: this.firstName
+            }),
+            Replacement.create({
+                token: "memberLastName",
+                value: this.lastName
+            })
+        ]
     }
 }

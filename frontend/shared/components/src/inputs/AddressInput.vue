@@ -58,6 +58,13 @@ export default class AddressInput extends Vue {
     @Prop({ default: true })
     required: boolean
 
+    /**
+     * Whether the value can be set to null if it is empty (even when it is required, will still be invalid)
+     * Only used if required = false
+     */
+    @Prop({ default: false })
+    nullable!: boolean
+
     addressLine1 = ""
     city = ""
     postalCode = ""
@@ -107,7 +114,7 @@ export default class AddressInput extends Vue {
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.isValid()
+                return this.isValid(true)
             })
         }
 
@@ -125,7 +132,7 @@ export default class AddressInput extends Vue {
         }
     }
 
-    async isValid(): Promise<boolean> {
+    async isValid(isFinal: boolean): Promise<boolean> {
         if (!this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
             this.errorBox = null
 
@@ -135,13 +142,25 @@ export default class AddressInput extends Vue {
             return true
         }
 
+        if (this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
+            if (!isFinal) {
+                this.errorBox = null
+
+                if (this.nullable && this.value !== null) {
+                    this.$emit("input", null)
+                }
+                return false
+            }
+            
+        }
+
         let address: Address
 
         try {
             address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
 
             if (!this.value || (this.validateServer && !(this.value instanceof ValidatedAddress)) || address.toString() != this.value.toString()) {
-                 // Do we need to validate on the server?
+                // Do we need to validate on the server?
                 if (this.validateServer) {
                     const response = await this.validateServer.request({
                         method: "POST",
@@ -181,7 +200,7 @@ export default class AddressInput extends Vue {
         if (this.country && this.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(this.country)) {
             I18nController.shared.switchToLocale({ country: this.country }).catch(console.error)
         }
-       this.isValid().catch(console.error)
+        this.isValid(false).catch(console.error)
     }
 }
 </script>

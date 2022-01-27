@@ -83,6 +83,10 @@ export class OrderData extends Checkout {
         return false;
     }
 
+    get shouldSendPaymentUpdates() {
+        return (!this.timeSlot || (this.timeSlot.date.getTime() + 1000*60*60*24) > new Date().getTime())
+    }
+
     /**
      * Delete the personal data associated with an order when you delete an order.
      * We still need the other data (e.g. to inform other clients about a deleted order)

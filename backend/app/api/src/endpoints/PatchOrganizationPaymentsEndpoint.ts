@@ -137,7 +137,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
             }
 
             if (patch.price || patch.method || patch.paidAt !== undefined) {
-                if (model.method && ![PaymentMethod.Unknown, PaymentMethod.Transfer].includes(model.method)) {
+                if (model.method && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(model.method)) {
                     throw new SimpleError({
                         code: "invalid_field",
                         message: "Invalid payment method",
