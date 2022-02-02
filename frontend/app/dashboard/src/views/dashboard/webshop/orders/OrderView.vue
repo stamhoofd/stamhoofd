@@ -502,7 +502,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod))
+        return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod, this.order.data.paymentContext))
     }
 
     activated() {

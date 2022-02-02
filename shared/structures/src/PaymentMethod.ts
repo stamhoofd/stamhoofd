@@ -18,6 +18,18 @@ export enum PaymentMethodV150 {
     CreditCard = "CreditCard"
 }
 
+export function downgradePaymentMethodV150(newerValue: PaymentMethod): PaymentMethodV150 {
+    if (newerValue === PaymentMethod.PointOfSale) {
+        return PaymentMethodV150.Transfer
+    }
+    return newerValue as unknown as PaymentMethodV150
+} 
+
+export function downgradePaymentMethodArrayV150(newerValue: PaymentMethod[]): PaymentMethodV150[] {
+    return newerValue.map(v => downgradePaymentMethodV150(v))
+} 
+
+
 export class PaymentMethodHelper {
     static getName(method: PaymentMethod, context: null | "takeout" | "delivery" = null): string {
         switch(method) {

@@ -53,7 +53,7 @@ export class Checkout extends AutoEncoder {
             return "takeout"
         }
         if (this.checkoutMethod?.type == CheckoutMethodType.Delivery) {
-            return "takeout"
+            return "delivery"
         }
         return null
     }

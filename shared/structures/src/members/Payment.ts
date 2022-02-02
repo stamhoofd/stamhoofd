@@ -1,7 +1,7 @@
 import { AutoEncoder, DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { PaymentMethod } from '../PaymentMethod';
+import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
 import { PaymentStatus } from '../PaymentStatus';
 
 export class Payment extends AutoEncoder {
@@ -9,7 +9,12 @@ export class Payment extends AutoEncoder {
     id: string
 
     /// Last selected payment method. Nullable if none has been selected
-    @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
+    @field({ decoder: new EnumDecoder(PaymentMethodV150), nullable: true })
+    @field({ 
+        decoder: new EnumDecoder(PaymentMethod), 
+        version: 151, 
+        downgrade: downgradePaymentMethodV150
+    })
     method: PaymentMethod | null = null
 
     @field({ decoder: new EnumDecoder(PaymentStatus) })

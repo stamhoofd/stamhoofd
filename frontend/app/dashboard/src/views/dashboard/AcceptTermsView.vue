@@ -93,7 +93,6 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
             this.loading = false
             console.error(e)
             this.errorBox = new ErrorBox(e)
-            plausible('signupAccountError');
             return;
         }
     }

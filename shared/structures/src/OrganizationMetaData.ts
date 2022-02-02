@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder,EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Address } from './addresses/Address';
 import { STPackageStatus, STPackageType } from './billing/STPackage';
@@ -9,7 +9,7 @@ import { GroupPrices } from './GroupPrices';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
-import { PaymentMethod } from './PaymentMethod';
+import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 import { TransferSettings } from './webshops/TransferSettings';
 
@@ -206,7 +206,12 @@ export class OrganizationMetaData extends AutoEncoder {
     })
     transferSettings = TransferSettings.create({})
 
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 26 })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethodV150)), version: 26 })
+    @field({ 
+        decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), 
+        version: 151, 
+        downgrade: downgradePaymentMethodArrayV150
+    })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
     @field({ 

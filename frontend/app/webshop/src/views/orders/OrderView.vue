@@ -374,11 +374,11 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     getName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getNameCapitalized(paymentMethod)
+        return PaymentMethodHelper.getNameCapitalized(paymentMethod, this.order?.data.paymentContext)
     }
 
     getLowerCaseName(paymentMethod: PaymentMethod): string {
-        return PaymentMethodHelper.getName(paymentMethod)
+        return PaymentMethodHelper.getName(paymentMethod, this.order?.data.paymentContext)
     }
 
     openTransferView() {

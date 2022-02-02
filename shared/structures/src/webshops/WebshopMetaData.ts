@@ -9,7 +9,7 @@ import { Country, CountryDecoder } from '../addresses/CountryDecoder';
 import { Province } from '../addresses/Province';
 import { DNSRecord, DNSRecordType } from '../DNSRecord';
 import { Image } from '../files/Image';
-import { PaymentMethod } from '../PaymentMethod';
+import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
 import { TransferSettings } from './TransferSettings';
@@ -344,7 +344,12 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
     checkoutMethods: CheckoutMethod[] = []
 
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), version: 41 })
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethodV150)), version: 41 })
+    @field({ 
+        decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), 
+        version: 151, 
+        downgrade: downgradePaymentMethodArrayV150
+    })
     paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
     @field({ decoder: new ArrayDecoder(Policy), version: 116 })

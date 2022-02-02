@@ -39,6 +39,7 @@
                         <option v-if="details.parents.length == 0" value="Vader" />
                         <option v-if="details.parents.length == 0" value="Moeder" />
                         <option v-if="details.parents.length == 0" value="Ouder" />
+                        <option v-if="details.parents.length == 0 && details.defaultAge >= 18" value="Partner" />
                         <option v-if="details.defaultAge < 30" value="Oma" />
                         <option v-if="details.defaultAge < 30" value="Opa" />
                         <option v-if="details.defaultAge < 30" value="Tante" />

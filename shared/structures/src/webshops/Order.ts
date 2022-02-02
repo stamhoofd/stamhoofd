@@ -2,7 +2,7 @@ import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDe
 import { Formatter } from '@stamhoofd/utility';
 
 import { Payment, PrivatePayment } from '../members/Payment';
-import { PaymentMethod } from '../PaymentMethod';
+import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
 import { Checkout } from './Checkout';
 import { Customer } from './Customer';
 
@@ -59,7 +59,12 @@ export class OrderData extends Checkout {
     consumerLanguage = "nl"
 
     // Payment method is required
-    @field({ decoder: new EnumDecoder(PaymentMethod) })
+    @field({ decoder: new EnumDecoder(PaymentMethodV150) })
+    @field({ 
+        decoder: new EnumDecoder(PaymentMethod), 
+        version: 151, 
+        downgrade: downgradePaymentMethodV150
+    })
     paymentMethod: PaymentMethod
 
     matchQuery(query: string): boolean {
