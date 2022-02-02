@@ -27,7 +27,7 @@
                 <span slot="left">Totaal: {{ cart.price | price }}</span>
                 <LoadingButton slot="right" :loading="loading">
                     <button class="button primary" type="button" @click="goNext">
-                        <span v-if="needsPay && selectedPaymentMethod == 'Transfer'">Inschrijving bevestigen</span>
+                        <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Inschrijving bevestigen</span>
                         <span v-else-if="needsPay">Betalen</span>
                         <span v-else>Doorgaan</span>
                         <span class="icon arrow-right" />

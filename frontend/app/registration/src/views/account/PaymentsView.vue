@@ -19,7 +19,7 @@
                         {{ payment.getMemberNames() }}
                     </p>
                     <p class="style-description-small">
-                        {{ paymentMethodName(payment.method) }}
+                        {{ paymentMethodName(payment) }}
                     </p>
 
                     <template slot="right">
@@ -37,7 +37,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, LoadingView, OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { PaymentMethodHelper } from "@stamhoofd/structures";
+import { PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { Payment, PaymentDetailed, PaymentMethod, RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -101,7 +101,26 @@ export default class PaymentsView extends Mixins(NavigationMixin){
         return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
     }
 
-    paymentMethodName(method: PaymentMethod) {
+    paymentMethodName(payment: Payment) {
+        const method = payment.method ?? PaymentMethod.Unknown
+        const succeeded = payment.status === PaymentStatus.Succeeded
+
+        if (method === PaymentMethod.Transfer) {
+            return succeeded ? "Betaald via overschrijving" : "Te betalen via overschrijving"
+        }
+
+        if (method === PaymentMethod.PointOfSale) {
+            return succeeded ? "Ter plaatse betaald" : "Ter plaatse te betalen"
+        }
+
+        if (method === PaymentMethod.Unknown) {
+            return succeeded ? "Betaald" : "Te betalen"
+        }
+
+        if (succeeded) {
+            return "Betaald via "+PaymentMethodHelper.getName(method)
+        }
+
         return "Betaald via "+PaymentMethodHelper.getName(method)
     }
 
