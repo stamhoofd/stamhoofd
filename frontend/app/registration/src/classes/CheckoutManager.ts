@@ -62,7 +62,7 @@ export class CheckoutManagerStatic {
     }
 
     doSelect(item: RegisterItem) {
-        const toast = new Toast("De inschrijving is toegevoegd aan jouw inschrijvingsmandje. Ga naar jouw mandje om de inschrijving af te ronden.", "success green")
+        const toast = new Toast("De inschrijving is toegevoegd aan jouw inschrijvingsmandje. Ga naar jouw mandje om de inschrijving af te ronden.", "success green").setHide(10000)
         toast.setButton(new ToastButton("Nog een inschrijving toevoegen", () => {
             ModalStackEventBus.sendEvent("present", {
                 components: [
