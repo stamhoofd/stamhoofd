@@ -93,7 +93,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 payment.transferDescription = Payment.generateDescription(organization, webshop.meta.transferSettings, (order.number ?? "")+"")
                 await payment.save()
             } else if (payment.method == PaymentMethod.PointOfSale) {
-                await order.markValid(payment, [])
+                // Not really paid, but needed to create the tickets if needed
+                await order.markPaid(payment, organization, webshop)
                 await payment.save()
             }
 
