@@ -886,7 +886,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                             }),
                             Replacement.create({
                                 token: "orderPriceToPay",
-                                value: order.payment?.status !== PaymentStatus.Succeeded ? Formatter.price(order.payment!.price) : ""
+                                value: order.payment?.status !== PaymentStatus.Succeeded ? Formatter.price(order.payment?.price ?? 0) : ""
                             }),
                             Replacement.create({
                                 token: "paymentMethod",
