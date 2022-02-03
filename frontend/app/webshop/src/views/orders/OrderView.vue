@@ -35,7 +35,7 @@
                             Jouw tickets
                         </h2>
 
-                        <p v-if="!isPaid" class="warning-box">
+                        <p v-if="!isPaid && isTransfer" class="warning-box">
                             Je ontvangt <template v-if="singleTicket">
                                 jouw ticket
                             </template><template v-else>
