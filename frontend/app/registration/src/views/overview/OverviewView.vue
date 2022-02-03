@@ -279,21 +279,12 @@ export default class OverviewView extends Mixins(NavigationMixin){
                 if (stepManager.editMember) {
                     component.show({
                         components: [
-                            new ComponentWithProperties(MemberView, { member: stepManager.editMember  })
+                            new ComponentWithProperties(MemberChooseGroupsView, {
+                                member: stepManager.editMember 
+                            })
                         ],
                         replace: component.navigationController?.components.length ?? 1,
                         force: true
-                    })
-
-                    component.present({
-                        components: [
-                            new ComponentWithProperties(NavigationController, {
-                                root: new ComponentWithProperties(MemberChooseGroupsView, {
-                                    member: stepManager.editMember 
-                                })
-                            })
-                        ],
-                        modalDisplayStyle: "popup"
                     })
                 } else {
                     // uhm?

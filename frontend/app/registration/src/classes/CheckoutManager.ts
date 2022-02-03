@@ -1,6 +1,6 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent, ModalStackEventBus, Toast, ToastButton } from '@stamhoofd/components';
 import { IDRegisterCheckout, RegisterCheckout, RegisterItem, Version } from '@stamhoofd/structures'
 
 import { EditMemberStepsManager } from '../views/members/details/EditMemberStepsManager';
@@ -62,7 +62,21 @@ export class CheckoutManagerStatic {
     }
 
     doSelect(item: RegisterItem) {
-        new Toast("De inschrijving is toegevoegd aan jouw inschrijvingsmandje. Ga naar jouw mandje om de inschrijving af te ronden.", "success green").show()
+        const toast = new Toast("De inschrijving is toegevoegd aan jouw inschrijvingsmandje. Ga naar jouw mandje om de inschrijving af te ronden.", "success green")
+        toast.setButton(new ToastButton("Nog een inschrijving toevoegen", () => {
+            ModalStackEventBus.sendEvent("present", {
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: AsyncComponent(() => import(/* webpackChunkName: "MemberChooseGroupsView" */ "../views/members/MemberChooseGroupsView.vue"), {
+                            member: item.member
+                        })
+                    })
+                ],
+                modalDisplayStyle: "popup"
+            }).catch(console.error)
+        }))
+        toast.show()
+
         this.cart.addItem(item)
         CheckoutManager.saveCart()
     }
