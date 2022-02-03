@@ -16,9 +16,9 @@
             <RecordAnswerInput v-for="record of category.filterRecords(dataPermission)" :key="record.id" :record-settings="record" :record-answers="editingAnswers" :validator="validator" />
         </div>
 
-        <hr v-if="isOptional && hasSavedAnswers">
+        <hr v-if="isOptional && hasSavedAnswers && !isAllEmpty">
 
-        <button v-if="isOptional && hasSavedAnswers" class="button text" type="button" @click="skipStep">
+        <button v-if="isOptional && hasSavedAnswers && !isAllEmpty" class="button text" type="button" @click="skipStep">
             <span class="icon trash" />
             <span>Wis antwoorden</span>
         </button>
@@ -101,6 +101,7 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
 
     get hasSavedAnswers() {
         const allRecords = this.category.getAllRecords()
+        console.log("Has saved answers", this.answers)
         return this.answers.find(answer => {
             const record = !!allRecords.find(r => r.id == answer.settings.id)
             if (record) {
@@ -146,7 +147,7 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (!await CenteredMessage.confirm(this.hasSavedAnswers && !this.isAllEmpty ? "Antwoorden verwijderen en stap overslaan?" : "Ben je zeker dat je deze stap wilt overslaan?", "Overslaan")) {
+        if (this.markReviewed && !await CenteredMessage.confirm(this.hasSavedAnswers && !this.isAllEmpty ? "Antwoorden verwijderen en stap overslaan?" : "Ben je zeker dat je deze stap wilt overslaan?", "Overslaan")) {
             return;
         }
 
@@ -155,17 +156,22 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
 
         try {
             const allRecords = this.category.getAllRecords()
+            console.log("All Records", allRecords)
+
+            // WARNING!
+            // We need to make a copy of the array, ore the Vue components will readd the answers again automatically
            
             // Delete all answers from this catgory
-            this.editingAnswers = this.editingAnswers.filter(answer => {
+            const editingAnswers = this.editingAnswers.filter(answer => {
                 const record = !!allRecords.find(r => r.id == answer.settings.id)
                 if (record) {
+                    console.log('Deleting answer', answer)
                     return false
                 }
                 return true
             })
-            
-            await this.saveHandler(this.editingAnswers, this)
+            this.editingAnswers = editingAnswers.slice()
+            await this.saveHandler(editingAnswers, this)
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
