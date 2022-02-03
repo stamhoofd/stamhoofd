@@ -396,7 +396,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     async checkTickets() {
-        if (!this.hasTickets || !this.order || !this.isPaid) {
+        if (!this.hasTickets || !this.order || (!this.isPaid && this.isTransfer)) {
             return
         }
         this.loadingTickets = true
