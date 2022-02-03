@@ -129,5 +129,6 @@ export { default as StringFilterView } from "./src/filters/StringFilterView.vue"
 // tables
 export * from "./src/tables/Column"
 export * from "./src/tables/TableAction"
+export { default as TableActionsContextMenu } from "./src/tables/TableActionsContextMenu.vue"
 export { default as TableView } from "./src/tables/TableView.vue"
 export * from "./src/VueGlobalHelper"

@@ -25,12 +25,6 @@
                 Vertrouw nooit de gegevens die op het ticket gedrukt staan. Na het scannen van de QR-code komen de onvervalsbare gegevens op jouw scherm, die zijn altijd juist.
             </p>
 
-            <hr>
-
-            <p class="info-box icon help">
-                Belangrijk evenement gepland? Laat het ons op voorhand weten via {{ $t('shared.emails.general') }} en misschien brengen we wel een bezoekje om het scannen mee in goede banen te leiden.
-            </p>
-
             <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
 
             <template v-if="shouldFilter && !isLoading && ticketProducts.length > 1">

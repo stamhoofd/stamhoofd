@@ -267,8 +267,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
+import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { CartItem, getPermissionLevelNumber, OrderData, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -316,9 +315,6 @@ export default class OrderView extends Mixins(NavigationMixin){
     get webshop() {
         return this.webshopManager.preview
     }
-
-    @Prop({ default: false })
-    success: boolean
 
     order: PrivateOrder = this.initialOrder
 

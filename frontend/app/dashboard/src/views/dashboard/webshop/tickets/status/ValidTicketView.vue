@@ -10,6 +10,10 @@
                 <span>Bestelling {{ order.number }}</span>
             </h1>
 
+            <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
+                Opgelet: deze bestelling werd nog niet betaald.
+            </p>
+
             <p v-if="order.status == 'Completed'" class="warning-box">
                 Deze bestelling werd al als voltooid gemarkeerd
             </p>
@@ -39,23 +43,20 @@
                     Naam
 
                     <template slot="right">
-                        <p>{{ order.data.customer.name }}</p>
-                        <p>{{ order.data.customer.phone }}</p>
-                        <p>{{ order.data.customer.email }}</p>
+                        {{ order.data.customer.name }}
                     </template>
                 </STListItem>
-                <STListItem class="right-description">
+
+                <STListItem v-long-press="(e) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
                     Status
 
                     <template slot="right">
-                        <span v-if="order.status == 'Created'" class="style-tag">Nieuw</span>
-                        <span v-if="order.payment && order.payment.status !== 'Succeeded'" class="style-tag warn">Niet betaald</span>
-                        <span v-if="order.status == 'Prepared'" class="style-tag">Verwerkt</span>
-                        <span v-if="order.status == 'Collect'" class="style-tag">Ligt klaar</span>
-                        <span v-if="order.status == 'Completed'" v-tooltip="'Voltooid'" class="success icon green" />
-                        <span v-if="order.status == 'Canceled'" v-tooltip="'Geannuleerd'" class="error icon canceled" />
+                        <span :class="'style-tag '+statusColor">{{ statusName }}</span>
+                        <span v-if="hasWrite" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
+
+                
                 <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
                     {{ a.field.name }}
 
@@ -63,14 +64,14 @@
                         {{ a.answer || "/" }}
                     </template>
                 </STListItem>
-                <STListItem v-if="order.payment" class="right-description right-stack">
+                <STListItem v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')" @click="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null">
                     Betaalmethode
 
                     <template slot="right">
-                        {{ getName(order.payment.method) }}
-
+                        <span>{{ getName(order.payment.method) }}</span>
                         <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
                         <span v-else class="icon clock" />
+                        <span v-if="hasPaymentsWrite && ((order.payment && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')))" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
                 <STListItem v-if="order.validAt" class="right-description">
@@ -139,6 +140,22 @@
                         {{ order.data.totalPrice | price }}
                     </template>
                 </STListItem>
+
+                <STListItem class="right-description">
+                    GSM-nummer
+
+                    <template slot="right">
+                        <p>{{ order.data.customer.phone }}</p>
+                    </template>
+                </STListItem>
+
+                <STListItem class="right-description">
+                    E-mailadres
+
+                    <template slot="right">
+                        {{ order.data.customer.email }}
+                    </template>
+                </STListItem>
             </STList>
         </main>
 
@@ -151,7 +168,22 @@
                 {{ ticket.secret }}
             </p>
 
+            <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
+                Opgelet: deze bestelling werd nog niet betaald.
+            </p>
+
             <STList class="info">
+                <STListItem :selectable="true" @click="openOrder">
+                    <h3 class="style-definition-label">
+                        Bestelling
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.number }}
+                    </p>
+
+                    <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+
                 <STListItem v-if="item.product.prices.length > 1">
                     <p class="style-definition-text">
                         {{ item.productPrice.name }}
@@ -166,8 +198,6 @@
                         {{ answer.answer }}
                     </p>
                 </STListItem>
-
-                
 
                 <STListItem v-for="option of item.options" :key="option.optionMenu.id">
                     <h3 class="style-definition-label">
@@ -203,13 +233,16 @@
 </template>
 
 <script lang="ts">
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ColorHelper,Spinner,STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox,ColorHelper,LongPressDirective,Spinner,STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Order, PaymentMethod, PaymentMethodHelper, TicketPrivate } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, Order, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, TicketPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+import { OrderActionBuilder } from "../../orders/OrderActionBuilder";
+import OrderView from "../../orders/OrderView.vue";
 import { WebshopManager } from "../../WebshopManager";
 
 @Component({
@@ -220,7 +253,7 @@ import { WebshopManager } from "../../WebshopManager";
         STListItem,
         STToolbar,
         Spinner,
-        Checkbox
+        Checkbox,
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -229,6 +262,9 @@ import { WebshopManager } from "../../WebshopManager";
         dateTime: Formatter.dateTimeWithDay.bind(Formatter),
         minutes: Formatter.minutes.bind(Formatter),
         capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
+    },
+    directives: {
+        LongPress: LongPressDirective
     }
 })
 export default class ValidTicketView extends Mixins(NavigationMixin) {
@@ -248,6 +284,71 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
     getName(paymentMethod: PaymentMethod): string {
         return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod))
     }
+
+    get actionBuilder() {
+        return new OrderActionBuilder({
+            webshopManager: this.webshopManager,
+            component: this,
+        })
+    }
+
+    get statusName() {
+        return OrderStatusHelper.getName(this.order.status)
+    }
+
+    get statusColor() {
+        return OrderStatusHelper.getColor(this.order.status)
+    }
+
+    get webshop() {
+        return this.webshopManager.preview
+    }
+
+    get hasWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
+
+    get hasPaymentsWrite() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? []) || p.hasFullAccess()) {
+            return true
+        }
+        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
+
+    markAs(event) {
+        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
+            actions: this.actionBuilder.getStatusActions(),
+            focused: [this.order]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
+    changePaymentStatus(event) {
+        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: el.getBoundingClientRect().left + el.offsetWidth,
+            y: el.getBoundingClientRect().top + el.offsetHeight,
+            xPlacement: "left",
+            yPlacement: "bottom",
+            actions: this.actionBuilder.getPaymentActions(),
+            focused: [this.order]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
 
     async cancelScan() {
         if (this.ticket.scannedAt) {
@@ -272,6 +373,18 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         }
 
         this.pop({ force: true })
+    }
+
+    openOrder() {
+        this.present({
+            components: [
+                new ComponentWithProperties(OrderView, {
+                    initialOrder: this.order,
+                    webshopManager: this.webshopManager,
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
 
     mounted() {
