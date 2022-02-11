@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,Decoder,EnumDecod
 
 import { DNSRecord } from "./DNSRecord"
 import { OrganizationEmail } from './OrganizationEmail';
+import { PaymentMethod } from './PaymentMethod';
 import { PermissionRoleDetailed } from './Permissions';
 
 export class CreditItem extends AutoEncoder {
@@ -54,6 +55,17 @@ export class MollieOnboarding extends AutoEncoder  {
 
     @field({ decoder: new EnumDecoder(MollieStatus)})
     status: MollieStatus
+}
+
+export class BuckarooSettings extends AutoEncoder  {
+    @field({ decoder: StringDecoder })
+    key = ""
+
+    @field({ decoder: StringDecoder })
+    secret = ""
+
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)) })
+    paymentMethods: PaymentMethod[] = [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
 }
 
 export class OrganizationPrivateMetaData extends AutoEncoder {
@@ -110,6 +122,12 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     // readonly
     @field({ decoder: MollieOnboarding, nullable: true, version: 27})
     mollieOnboarding: MollieOnboarding | null = null
+
+    /**
+     * When set, Buckaroo has priority over Mollie as a payment provider
+     */
+    @field({ decoder: BuckarooSettings, nullable: true, version: 152 })
+    buckarooSettings: BuckarooSettings | null = null
 
     // Only set for admins
     @field({ decoder: StringDecoder, nullable: true, version: 29 })

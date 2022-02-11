@@ -1,5 +1,5 @@
 import { column,Model } from '@simonbackx/simple-database';
-import { Country, PaymentMethod, PaymentStatus, Settlement, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { Country, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { Organization } from './Organization';
 
@@ -15,6 +15,9 @@ export class Payment extends Model {
 
     @column({ type: "string", nullable: true })
     method: PaymentMethod | null = null;
+
+    @column({ type: "string", nullable: true })
+    provider: PaymentProvider | null = null;
 
     @column({ type: "string" })
     status: PaymentStatus;

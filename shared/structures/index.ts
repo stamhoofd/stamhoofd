@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 151
+export const Version = 152
 
 // General
 export * from "./src/addresses/Address"
@@ -23,6 +23,7 @@ export * from "./src/OrganizationPrivateMetaData"
 export * from "./src/OrganizationSimple"
 export * from "./src/OrganizationType"
 export * from "./src/PaymentMethod"
+export * from "./src/PaymentProvider"
 export * from "./src/PaymentStatus"
 export * from "./src/Permissions"
 export * from "./src/Policy"
