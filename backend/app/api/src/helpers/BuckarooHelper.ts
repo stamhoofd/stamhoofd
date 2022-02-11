@@ -69,7 +69,7 @@ export class BuckarooHelper {
             data: json
             
         })
-        console.log(response.data)
+        console.log("Buckaroo request", method, url, JSON.stringify(response.data, undefined, "    "))
         return response.data
     }
 
@@ -81,12 +81,7 @@ export class BuckarooHelper {
                 service = {
                     "Name": "ideal",
                     "Action": "Pay",
-                    "Parameters": [
-                        {
-                            "Name": "ContinueOnIncomplete",
-                            "Value": "1"
-                        }
-                    ]
+                    "Parameters": []
                 };
                 break;
             }
@@ -134,6 +129,7 @@ export class BuckarooHelper {
                     service
                 ]
             },
+            "ContinueOnIncomplete": "1", // iDEAL
             "Description": description,
             "PushURL": exchangeUrl,
             "PushURLFailure": exchangeUrl,
@@ -195,6 +191,17 @@ export class BuckarooHelper {
         // Send request
         const response = await this.request("GET", "/json/transaction/status/" + buckarooPayment.transactionKey, undefined)
         console.log(response)
+
+        const parameters = response["Services"]?.[0]?.["Parameters"]
+
+        if (parameters && Array.isArray(parameters)) {
+            const iban = parameters.find(p => p.Name === "consumerIBAN")?.Value
+
+            console.log("Found iban", iban)
+            if (iban) {
+                payment.iban = iban
+            }
+        }
 
         // Read status
         return this.getStatusFromResponse(response)
