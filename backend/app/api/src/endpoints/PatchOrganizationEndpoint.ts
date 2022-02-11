@@ -8,7 +8,7 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { BuckarooSettings, GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -93,6 +93,15 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         }
                     }
                 }
+
+                if (request.body.privateMeta.buckarooSettings !== undefined) {
+                    if (request.body.privateMeta.buckarooSettings === null) {
+                        organization.privateMeta.buckarooSettings = null;
+                    } else {
+                        organization.privateMeta.buckarooSettings = organization.privateMeta.buckarooSettings ?? BuckarooSettings.create({})
+                        organization.privateMeta.buckarooSettings.patchOrPut(request.body.privateMeta.buckarooSettings)
+                    }
+                }
                 
             }
 
@@ -149,7 +158,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 // check payconiq + mollie
                 if (Array.isArray(request.body.meta.paymentMethods) || request.body.meta.paymentMethods.hasChanges) {
-                    if (!organization.privateMeta.payconiqApiKey) {
+                    if (!organization.privateMeta.payconiqApiKey && !organization.privateMeta.buckarooSettings?.paymentMethods.includes(PaymentMethod.Payconiq)) {
                         const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Payconiq)
                         if (i != -1) {
                             throw new SimpleError({
@@ -162,11 +171,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     // check payconiq + mollie
                     if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                        const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Bancontact || p == PaymentMethod.iDEAL || p == PaymentMethod.CreditCard)
+                        const i = organization.meta.paymentMethods.findIndex(p => (p == PaymentMethod.Bancontact || p == PaymentMethod.iDEAL || p == PaymentMethod.CreditCard) && !organization.privateMeta.buckarooSettings?.paymentMethods.includes(p))
                         if (i != -1) {
                             throw new SimpleError({
                                 code: "invalid_field",
-                                message: "Je kan "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" niet activeren omdat Mollie niet correct gekoppeld is. Schakel "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" uit voor je verder gaat.",
+                                message: "Je kan "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" niet activeren omdat je daarvoor nog niet aangesloten bent bij een betaalpartner. Schakel "+PaymentMethodHelper.getName(organization.meta.paymentMethods[i])+" uit voor je verder gaat.",
                                 field: "paymentMethods"
                             })
                         }

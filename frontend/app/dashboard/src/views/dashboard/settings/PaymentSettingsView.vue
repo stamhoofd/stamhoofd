@@ -60,11 +60,56 @@
             </p>
         </template>
 
+        <template>
+            <hr>
+            <h2>Online betalingen via Buckaroo</h2>
+            <p class="st-list-description">
+                Gebruik gelijk welke online betaalmethode via Buckaroo.
+            </p>
+
+            <p v-if="isBelgium" class="info-box">
+                Heb je een feitelijke vereniging? Dan kan je vanaf nu ook online betalingen accepteren via Buckaroo.
+            </p>
+
+            <Checkbox v-model="enableBuckaroo">
+                Gebruik Buckaroo voor online betalingen
+            </Checkbox>
+
+            <div v-if="enableBuckaroo" class="split-inputs">
+                <div>
+                    <STInputBox title="Key" error-fields="buckarooSettings.key" :error-box="errorBox" class="max">
+                        <input
+                            v-model="buckarooKey"
+                            class="input"
+                            type="text"
+                            placeholder="Key"
+                        >
+                    </STInputBox>
+                    <p class="style-description-small">
+                        Buckaroo Plaza > Mijn Buckaroo > Websites > Algemeen > Key
+                    </p>
+                </div>
+                <div>
+                    <STInputBox title="Secret" error-fields="buckarooSettings.secret" :error-box="errorBox" class="max">
+                        <input
+                            v-model="buckarooSecret"
+                            class="input"
+                            type="text"
+                            placeholder="Secret"
+                        >
+                    </STInputBox>
+                    <p class="style-description-small">
+                        Buckaroo Plaza > Configuratie > Beveiliging > Secret Key
+                    </p>
+                </div>
+            </div>
+        </template>
+
         <template v-if="isBelgium || payconiqApiKey">
             <hr>
-            <h2>Payconiq activeren</h2>
+            <h2>Online betalingen via Payconiq</h2>
             <p class="st-list-description">
-                Wil je Payconiq gebruiken? Volg dan de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
+                Wil je Payconiq gebruiken? Dat kan via Buckaroo (zie hierboven), of rechtstreeks via Payconiq (met een API-key). Volg voor dat laatste de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
             </p>
 
             <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
@@ -77,62 +122,61 @@
             </STInputBox>
         </template>
 
-        <hr>
-        <h2 v-if="isBelgium">
-            Bancontact, kredietkaart of iDEAL
-        </h2>
-        <h2 v-else>
-            iDEAL, kredietkaart of Bancontact
-        </h2>
+        <template v-if="!enableBuckaroo || organization.privateMeta.mollieOnboarding">
+            <hr>
+            <h2>
+                Online betalingen via Mollie
+            </h2>
 
-        <template v-if="!organization.privateMeta.mollieOnboarding">
-            <p class="st-list-description">
-                {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
-            </p>
-            <p v-if="isBelgium" class="info-box">
-                Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
-            </p>
+            <template v-if="!organization.privateMeta.mollieOnboarding">
+                <p class="st-list-description">
+                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
+                </p>
+                <p v-if="isBelgium" class="info-box">
+                    Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
+                </p>
 
-            <p class="st-list-description">
-                <button class="button text" type="button" @click="linkMollie">
-                    <span class="icon link" />
-                    <span>Mollie koppelen</span>
-                </button>
-            </p>
-        </template>
-        <template v-else>
-            <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
-                {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
-            </p>
-            <p v-else class="warning-box">
-                Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
-            </p>
-            <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
-                Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
-            </p>
-
-            <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
-                Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
-            </p>
-            <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
-                Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
-            </p>
-
-            <p class="st-list-description">
-                <LoadingButton :loading="loadingMollie">
-                    <button class="button text" type="button" @click="mollieDashboard">
-                        <span class="icon external" />
-                        <span>Ga naar het Mollie dashboard</span>
+                <p class="st-list-description">
+                    <button class="button text" type="button" @click="linkMollie">
+                        <span class="icon link" />
+                        <span>Mollie koppelen</span>
                     </button>
-                </LoadingButton>
-            </p>
+                </p>
+            </template>
+            <template v-else>
+                <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
+                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
+                </p>
+                <p v-else class="warning-box">
+                    Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
+                </p>
+                <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
+                    Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
+                </p>
 
-            <p class="st-list-description">
-                <button class="button text" type="button" @click="disconnectMollie">
-                    <span class="icon trash" />
-                    <span>Account loskoppelen van Stamhoofd</span>
-                </button>
-            </p>
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
+                    Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
+                </p>
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
+                    Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
+                </p>
+
+                <p class="st-list-description">
+                    <LoadingButton :loading="loadingMollie">
+                        <button class="button text" type="button" @click="mollieDashboard">
+                            <span class="icon external" />
+                            <span>Ga naar het Mollie dashboard</span>
+                        </button>
+                    </LoadingButton>
+                </p>
+
+                <p class="st-list-description">
+                    <button class="button text" type="button" @click="disconnectMollie">
+                        <span class="icon trash" />
+                        <span>Account loskoppelen van Stamhoofd</span>
+                    </button>
+                </p>
+            </template>
         </template>
     </SaveView>
 </template>
@@ -141,9 +185,9 @@
 import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
+import { BuckarooSettings, Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -160,6 +204,7 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         IBANInput,
         STList,
         STListItem,
+        Checkbox,
         EditPaymentMethodsBox
     },
 })
@@ -281,10 +326,51 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     set payconiqApiKey(payconiqApiKey: string) {
-        if (!this.organizationPatch.privateMeta) {
-            this.$set(this.organizationPatch, "privateMeta", OrganizationPrivateMetaData.patchType().create({}))
-        }
-        this.$set(this.organizationPatch.privateMeta!, "payconiqApiKey", payconiqApiKey.length == 0 ? null : payconiqApiKey)
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                payconiqApiKey: payconiqApiKey.length == 0 ? null : payconiqApiKey
+            })
+        })
+    }
+
+    get enableBuckaroo() {
+        return (this.organization.privateMeta?.buckarooSettings ?? null) !== null
+    }
+
+    set enableBuckaroo(enable: boolean) {
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                buckarooSettings: enable ? BuckarooSettings.create({}) : null
+            })
+        })
+    }
+
+    get buckarooKey() {
+        return this.organization.privateMeta?.buckarooSettings?.key ?? ""
+    }
+
+    set buckarooKey(key: string) {
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                buckarooSettings: BuckarooSettings.patch({
+                    key
+                })
+            })
+        })
+    }
+
+    get buckarooSecret() {
+        return this.organization.privateMeta?.buckarooSettings?.secret ?? ""
+    }
+
+    set buckarooSecret(secret: string) {
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                buckarooSettings: BuckarooSettings.patch({
+                    secret
+                })
+            })
+        })
     }
    
     async save() {

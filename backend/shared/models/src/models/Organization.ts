@@ -1,6 +1,6 @@
 import { column, Database,Model } from "@simonbackx/simple-database";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 import { AWSError } from 'aws-sdk';
@@ -715,6 +715,29 @@ export class Organization extends Model {
         return {
             from, replyTo
         }
+    }
+
+    getPaymentProviderFor(method: PaymentMethod): PaymentProvider | null  {
+        if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {
+            return null
+        }
+
+        // Is Buckaroo setup?
+        if (this.privateMeta.buckarooSettings !== null) {
+            if (this.privateMeta.buckarooSettings.paymentMethods.includes(method)) {
+                return PaymentProvider.Buckaroo
+            }
+        }
+
+        if (this.privateMeta.payconiqApiKey && method === PaymentMethod.Payconiq) {
+            return PaymentProvider.Payconiq
+        }
+
+        if (this.privateMeta.mollieOnboarding?.canReceivePayments && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
+            return PaymentProvider.Mollie
+        }
+
+        throw new Error("No payment provider configured for "+method)
     }
 
 }
