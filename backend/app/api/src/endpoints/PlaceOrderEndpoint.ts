@@ -10,7 +10,9 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Order as OrderStruct, OrderData, OrderResponse, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
+
+import { BuckarooHelper } from '../helpers/BuckarooHelper';
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData
@@ -111,6 +113,10 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             } else {
                 // Save order, because we need the id
                 await order.save()
+
+                const redirectUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)
+                const exchangeUrl = 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
+
                 
                 if (payment.provider === PaymentProvider.Mollie) {
                     // Mollie payment
@@ -138,8 +144,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         testmode: STAMHOOFD.environment != 'production',
                         profileId,
                         description,
-                        redirectUrl: "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id),
-                        webhookUrl: 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                        redirectUrl,
+                        webhookUrl: exchangeUrl,
                         metadata: {
                             paymentId: payment.id,
                             orderId: order.id
@@ -156,7 +162,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 } else if (payment.provider == PaymentProvider.Payconiq) {
                     paymentUrl = await PayconiqPayment.createPayment(payment, organization, description)
                 } else if (payment.provider == PaymentProvider.Buckaroo) {
-                    throw new Error("Buckaroo not implemented yet")
+                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "")
+                    const ip = request.request.getIP()
+                    paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, exchangeUrl)
                 } else {
                     throw new Error("Unknown payment provider")
                 }
@@ -164,7 +172,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             return new Response(OrderResponse.create({
                 paymentUrl: paymentUrl,
-                order: OrderStruct.create(order)
+                order: OrderStruct.create({...order, payment: PaymentStruct.create(payment) })
             }));
         }
         

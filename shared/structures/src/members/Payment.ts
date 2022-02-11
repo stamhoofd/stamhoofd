@@ -2,6 +2,7 @@ import { AutoEncoder, DateDecoder,EnumDecoder,field, IntegerDecoder,StringDecode
 import { v4 as uuidv4 } from "uuid";
 
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
+import { PaymentProvider } from '../PaymentProvider';
 import { PaymentStatus } from '../PaymentStatus';
 
 export class Payment extends AutoEncoder {
@@ -19,6 +20,9 @@ export class Payment extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(PaymentStatus) })
     status: PaymentStatus = PaymentStatus.Created
+
+    @field({ decoder: new EnumDecoder(PaymentProvider), version: 152 })
+    provider: PaymentProvider | null = null
 
     @field({ decoder: IntegerDecoder })
     price: number

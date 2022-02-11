@@ -147,7 +147,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                 method: "POST",
                 path: "/webshop/"+this.webshop.id+"/order",
                 body: data, // todo: add some manual casting here
-                decoder: OrderResponse as Decoder<OrderResponse>
+                decoder: OrderResponse as Decoder<OrderResponse>,
+                shouldRetry: false
             })
 
             const payment = response.data.order.payment

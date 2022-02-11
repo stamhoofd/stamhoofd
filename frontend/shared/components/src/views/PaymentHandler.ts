@@ -1,6 +1,6 @@
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Organization, Payment, PaymentMethod, PaymentStatus, TransferSettings } from "@stamhoofd/structures";
+import { Organization, Payment, PaymentMethod, PaymentProvider, PaymentStatus, TransferSettings } from "@stamhoofd/structures";
 
 import PayconiqBannerView from "./PayconiqBannerView.vue"
 import PayconiqButtonView from "./PayconiqButtonView.vue"
@@ -77,7 +77,7 @@ export class PaymentHandler {
                     successHandler(payment)
                 }
             }))
-        } else if (payment.method == PaymentMethod.Payconiq) {
+        } else if (payment.provider == PaymentProvider.Payconiq) {
             if (this.getOS() == "android" || this.getOS() == "iOS") {
                 const url = paymentUrl+"?returnUrl="+encodeURIComponent(returnUrl ? returnUrl : "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
                 

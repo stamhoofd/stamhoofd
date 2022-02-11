@@ -10,8 +10,9 @@ import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct,PaymentMethod,PaymentStatus } from "@stamhoofd/structures";
+import { Payment as PaymentStruct,PaymentMethod,PaymentProvider,PaymentStatus } from "@stamhoofd/structures";
 
+import { BuckarooHelper } from '../helpers/BuckarooHelper';
 import { GetPaymentRegistrations } from './GetPaymentRegistrations';
 type Params = {id: string};
 class Query extends AutoEncoder {
@@ -68,6 +69,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             PaymentStruct.create({
                 id: payment.id,
                 method: payment.method,
+                provider: payment.provider,
                 status: payment.status,
                 price: payment.price,
                 transferDescription: payment.transferDescription,
@@ -76,6 +78,41 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 updatedAt: payment.updatedAt
             })
         );
+    }
+
+    private static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
+        if (status == PaymentStatus.Succeeded) {
+            payment.status = PaymentStatus.Succeeded
+            payment.paidAt = new Date()
+
+            // if it has registrations
+            const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
+
+            // if it has orders
+            const order = registrations.length > 0 ? undefined : await Order.getForPayment(organization.id, payment.id)
+
+            for (const registration of registrations) {
+                if (registration.registeredAt === null) {
+                    registration.registeredAt = new Date()
+                    registration.reservedUntil = null
+                    await registration.save();
+                }
+            }
+
+            if (order) {
+                await order.markPaid(payment, organization)
+            }
+
+            await payment.save();
+        } else if (status == PaymentStatus.Failed) {
+            const order = await Order.getForPayment(organization.id, payment.id)
+            await order?.onPaymentFailed()
+            payment.status = PaymentStatus.Failed
+            await payment.save();
+        } else {
+            payment.status = status
+            await payment.save();
+        }
     }
 
     /**
@@ -92,7 +129,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {
                 
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard) {
+                if (payment.provider === PaymentProvider.Mollie) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
                     if (molliePayments.length == 1) {
@@ -109,39 +146,19 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                             console.log(mollieData) // log to log files to check issues
 
                             if (mollieData.status == "paid") {
-                                payment.status = PaymentStatus.Succeeded
-                                payment.paidAt = new Date()
-
-                                // if it has registrations
-                                const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
-
-                                // if it has orders
-                                const order = registrations.length > 0 ? undefined : await Order.getForPayment(organization.id, payment.id)
-
-                                for (const registration of registrations) {
-                                    if (registration.registeredAt === null) {
-                                        registration.registeredAt = new Date()
-                                        registration.reservedUntil = null
-                                        await registration.save();
-                                    }
-                                }
-
-                                if (order) {
-                                    await order.markPaid(payment, organization)
-                                }
-
-                                await payment.save();
+                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
                             } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
-                                const order = await Order.getForPayment(organization.id, payment.id)
-                                await order?.onPaymentFailed()
-                                payment.status = PaymentStatus.Failed
-                                await payment.save();
+                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
                             }
                         } else {
                             console.warn("Mollie payment is missing for organization "+organization.id+" while checking payment status...")
                         }
                     }
-                } else if (payment.method == PaymentMethod.Payconiq) {
+                } else if (payment.provider == PaymentProvider.Buckaroo) {
+                    const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? "", organization.privateMeta.buckarooSettings?.secret ?? "")
+                    const status = await helper.getStatus(payment)
+                    await this.handlePaymentStatusUpdate(payment, organization, status)
+                } else if (payment.provider == PaymentProvider.Payconiq) {
                     // Check status
 
                     const payconiqPayments = await PayconiqPayment.where({ paymentId: payment.id}, { limit: 1 })
@@ -149,39 +166,8 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         const payconiqPayment = payconiqPayments[0]
 
                         const status = await payconiqPayment.getStatus(organization)
-                        payment.status = status
-
-                        if (status == PaymentStatus.Succeeded) {
-                            payment.status = PaymentStatus.Succeeded
-                            payment.paidAt = new Date()
-
-                            // if it has registrations
-                            const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
-
-                            // if it has orders
-                            const order = registrations.length > 0 ? undefined : await Order.getForPayment(organization.id, payment.id)
-
-                            for (const registration of registrations) {
-                                if (registration.registeredAt === null) {
-                                    registration.registeredAt = new Date()
-                                    registration.reservedUntil = null
-                                    await registration.save();
-                                }
-                            }
-
-                            if (order) {
-                                await order.markPaid(payment, organization)
-                            }
-
-                            await payment.save();
-                        } else if (status == PaymentStatus.Failed) {
-                            const order = await Order.getForPayment(organization.id, payment.id)
-                            await order?.onPaymentFailed()
-                            payment.status = PaymentStatus.Failed
-                            await payment.save();
-                        } else {
-                            await payment.save();
-                        }
+                        await this.handlePaymentStatusUpdate(payment, organization, status)
+                        
                     } else {
                         console.warn("Payconiq payment is missing for organization "+organization.id+" while checking payment status...")
                     }

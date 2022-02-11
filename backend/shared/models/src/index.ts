@@ -24,6 +24,7 @@ export * from "./models/STCredit"
 export * from "./models/UsedRegisterCode"
 export * from "./models/Ticket"
 export * from "./models/EmailTemplate"
+export * from "./models/BuckarooPayment"
 
 export * from "./models/addresses/City"
 export * from "./models/addresses/PostalCode"

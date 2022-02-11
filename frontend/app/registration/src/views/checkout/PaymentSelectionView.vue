@@ -113,7 +113,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                 method: "POST",
                 path: "/members/register",
                 body: CheckoutManager.checkout.convert(),
-                decoder: RegisterResponse as Decoder<RegisterResponse>
+                decoder: RegisterResponse as Decoder<RegisterResponse>,
+                shouldRetry: false
             })
 
             const payment = response.data.payment
