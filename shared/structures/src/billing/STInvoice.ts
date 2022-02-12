@@ -112,10 +112,17 @@ export class STInvoiceItem extends AutoEncoder {
     }
 
     canMerge(other: STInvoiceItem): boolean {
-        if (!other.package || !this.package) {
+        // Mergeable if both don't have a packege, or both have the same package
+        if (other.package && !this.package) {
             return false
         }
-        if (other.package.id === this.package.id && this.name === other.name) {
+        if (!other.package && this.package) {
+            return false
+        }
+        if (other.package && this.package && other.package.id !== this.package.id) {
+            return false
+        }
+        if (this.name === other.name) {
             if (this.unitPrice === other.unitPrice && this.description === other.description) {
                 return true
             }
