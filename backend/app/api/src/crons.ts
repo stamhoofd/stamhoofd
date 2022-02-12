@@ -490,7 +490,7 @@ async function checkBilling() {
 
         try {
             await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
-                await STPendingInvoice.addItems(organization)
+                await STPendingInvoice.addAutomaticItems(organization)
             });
         } catch (e) {
             console.error(e)

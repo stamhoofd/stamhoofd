@@ -2,7 +2,7 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Member } from '@stamhoofd/models';
+import { Member, STPendingInvoice } from '@stamhoofd/models';
 import { MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
@@ -10,7 +10,7 @@ import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct,PaymentMethod,PaymentProvider,PaymentStatus } from "@stamhoofd/structures";
+import { Payment as PaymentStruct,PaymentMethod,PaymentMethodHelper,PaymentProvider,PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../helpers/BuckarooHelper';
 import { GetPaymentRegistrations } from './GetPaymentRegistrations';
@@ -81,6 +81,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     private static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
+        const wasPaid = payment.paidAt !== null
         if (status == PaymentStatus.Succeeded) {
             payment.status = PaymentStatus.Succeeded
             payment.paidAt = new Date()
@@ -104,6 +105,23 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             await payment.save();
+
+            if (wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
+                // Charge transaction fees
+                const transactionFee = 25
+                const name = "Transactiekosten voor "+PaymentMethodHelper.getName(payment.method)
+                const item = STInvoiceItem.create({
+                    name,
+                    description: "Via Buckaroo",
+                    amount: 1,
+                    unitPrice: transactionFee,
+                    date: new Date()
+                })
+                console.log("Scheduling transaction fee charge for ", payment.id, item)
+                await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
+                    await STPendingInvoice.addItems(organization, [item])
+                });
+            }
         } else if (status == PaymentStatus.Failed) {
             const order = await Order.getForPayment(organization.id, payment.id)
             await order?.onPaymentFailed()

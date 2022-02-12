@@ -80,14 +80,17 @@ export class STPendingInvoice extends Model {
     /**
      * Always run this in the queue!
      */
-    static async addItems(organization: Organization): Promise<STPendingInvoice | undefined> {
+    static async addItems(organization: Organization, invoiceItems: STInvoiceItem[]): Promise<STPendingInvoice | undefined> {
         // Get the pending invoice if it exists
         let pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+        return await this.addItemsTo(pendingInvoice, organization, invoiceItems)
+    }
 
-        // Generate temporary pending invoice items for the current state without adding them IRL
-        const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
-
-        if (notYetCreatedItems) {
+    /**
+     * Always run this in the queue!
+     */
+    static async addItemsTo(pendingInvoice: STPendingInvoice | undefined, organization: Organization, invoiceItems: STInvoiceItem[]): Promise<STPendingInvoice | undefined> {
+        if (invoiceItems.length > 0) {
             if (!pendingInvoice) {
                 // Create one
                 pendingInvoice = new STPendingInvoice()
@@ -100,7 +103,7 @@ export class STPendingInvoice extends Model {
                     VATPercentage: calculateVATPercentage(organization.meta.companyAddress ?? organization.address, organization.meta.VATNumber)
                 })
             }
-            pendingInvoice.meta.items.push(...notYetCreatedItems)
+            pendingInvoice.meta.items.push(...invoiceItems)
 
             // Can we compress
             if (pendingInvoice.invoiceId === null) {
@@ -110,6 +113,18 @@ export class STPendingInvoice extends Model {
             await pendingInvoice.save()
         }
         return pendingInvoice
+    }
+
+    /**
+     * Always run this in the queue!
+     */
+    static async addAutomaticItems(organization: Organization): Promise<STPendingInvoice | undefined> {
+        // Get the pending invoice if it exists
+        let pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+
+        // Generate temporary pending invoice items for the current state without adding them IRL
+        const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
+        return await this.addItemsTo(pendingInvoice, organization, notYetCreatedItems)
     }
 
     /**
@@ -157,6 +172,8 @@ export class STPendingInvoice extends Model {
                 }
             }
         }
+
+        // Add all payments that are not yet charged
 
         return pendingItems
     }
@@ -275,7 +292,7 @@ export class STPendingInvoice extends Model {
                     to: invoicingTo,
                     bcc: "simon@stamhoofd.be",
                     subject: "Pro-forma factuur voor "+organization.name,
-                    text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. Aangezien er nieuwe leden zijn ingeschreven, hebben jullie een openstaand bedrag van "+Formatter.price(price)+" in Stamhoofd (zie bijlage). Zoals eerder aangegeven zal dit via domiciliëring worden aangerekend (op dezelfde bankrekening waarmee de vorige betaling is gedaan). Hiervoor hoeven jullie dus niets te doen. Kijk eventueel na of er voldoende geld op jullie rekening staat. De betaling zal één van de komende drie werkdagen plaatsvinden. Jullie ontvangen daarna ook een definitieve factuur. Je kan in Stamhoofd altijd het openstaande bedrag nakijken bij Instellingen > Facturen en betalingen. Neem gerust contact met ons op (via hallo@stamhoofd.be) als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                    text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. Jullie hebben momenteel een openstaand bedrag van "+Formatter.price(price)+" in Stamhoofd (zie bijlage). Zoals eerder aangegeven zal dit via domiciliëring worden aangerekend (op dezelfde bankrekening waarmee de vorige betaling is gedaan). Hiervoor hoeven jullie dus niets te doen. Kijk eventueel na of er voldoende geld op jullie rekening staat. De betaling zal één van de komende drie werkdagen plaatsvinden. Jullie ontvangen daarna ook een definitieve factuur. Je kan in Stamhoofd altijd het openstaande bedrag nakijken bij Instellingen > Facturen en betalingen. Neem gerust contact met ons op (via hallo@stamhoofd.be) als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                     attachments: [
                         {
                             filename: "pro-forma-factuur.pdf",

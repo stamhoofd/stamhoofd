@@ -234,7 +234,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 
                 // Since we are about the pay something:
                 // also add the items that are in the pending queue
-                const pendingInvoice = await STPendingInvoice.addItems(user.organization)
+                const pendingInvoice = await STPendingInvoice.addAutomaticItems(user.organization)
                 if (pendingInvoice && pendingInvoice.invoiceId === null) {
                     if (!request.body.proForma) {
                         // Already generate an ID for the invoice
