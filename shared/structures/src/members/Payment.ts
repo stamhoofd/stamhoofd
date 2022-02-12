@@ -71,5 +71,11 @@ export class Settlement extends AutoEncoder {
 export class PrivatePayment extends Payment {
     @field({ decoder: Settlement, nullable: true })
     settlement: Settlement | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 153 })
+    iban: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 153 })
+    ibanName: string | null = null
 }
 

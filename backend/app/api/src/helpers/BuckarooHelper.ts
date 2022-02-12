@@ -190,8 +190,6 @@ export class BuckarooHelper {
         
         // Send request
         const response = await this.request("GET", "/json/transaction/status/" + buckarooPayment.transactionKey, undefined)
-        console.log(response)
-
         const parameters = response["Services"]?.[0]?.["Parameters"]
 
         if (parameters && Array.isArray(parameters)) {
@@ -200,6 +198,13 @@ export class BuckarooHelper {
             console.log("Found iban", iban)
             if (iban) {
                 payment.iban = iban
+            }
+
+            const name = parameters.find(p => p.Name === "consumerName")?.Value
+
+            console.log("Found name", name)
+            if (name) {
+                payment.ibanName = name
             }
         }
 

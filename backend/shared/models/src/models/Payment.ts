@@ -73,9 +73,11 @@ export class Payment extends Model {
     @column({ type: "json", decoder: Settlement, nullable: true })
     settlement: Settlement | null = null;
 
-    /// Settlement meta data
     @column({ type: "string", nullable: true })
     iban: string | null = null;
+
+    @column({ type: "string", nullable: true })
+    ibanName: string | null = null;
 
     static generateDescription(organization: Organization, settings: TransferSettings, reference: string) {
         if (settings.type == TransferDescriptionType.Structured) {

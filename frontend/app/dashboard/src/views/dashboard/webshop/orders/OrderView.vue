@@ -80,6 +80,18 @@
                         <span v-if="hasPaymentsWrite && ((patchedOrder.payment && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale')) && !isChanged())" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
+
+                <STListItem v-if="patchedOrder.payment && patchedOrder.payment.iban" class="right-description right-stack">
+                    Betaald via IBAN
+
+                    <template slot="right">
+                        {{ patchedOrder.payment.iban }}
+                        <template v-if="patchedOrder.payment.ibanName">
+                            <br>(patchedOrder.payment.ibanName)
+                        </template>
+                    </template>
+                </STListItem>
+                
                 <STListItem v-if="patchedOrder.payment && patchedOrder.payment.method == 'Transfer'" class="right-description right-stack">
                     Mededeling
 
@@ -109,6 +121,7 @@
                         Mededeling "{{ patchedOrder.payment.settlement.reference }}"
                     </template>
                 </STListItem>
+                
                 <STListItem class="right-description">
                     Bestelnummer
 

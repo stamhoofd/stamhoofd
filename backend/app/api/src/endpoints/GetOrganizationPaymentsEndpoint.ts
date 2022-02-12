@@ -6,7 +6,7 @@ import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedPaymentGeneral,Order as OrderStruct, OrderStatus, PaymentMethod } from "@stamhoofd/structures";
+import { EncryptedPaymentGeneral, Order as OrderStruct, OrderStatus, PaymentMethod } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
