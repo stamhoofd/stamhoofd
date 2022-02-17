@@ -78,11 +78,8 @@
         </template>
 
         <hr>
-        <h2 v-if="isBelgium">
-            Bancontact, kredietkaart of iDEAL
-        </h2>
-        <h2 v-else>
-            iDEAL, kredietkaart of Bancontact
+        <h2>
+            Online betalingen via Mollie
         </h2>
 
         <template v-if="!organization.privateMeta.mollieOnboarding">
@@ -90,7 +87,7 @@
                 {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
             </p>
             <p v-if="isBelgium" class="info-box">
-                Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
+                Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)
             </p>
 
             <p class="st-list-description">
