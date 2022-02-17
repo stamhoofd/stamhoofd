@@ -74,9 +74,9 @@ export default class EditPaymentMethodsBox extends Vue {
     getDescription(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
             case PaymentMethod.Transfer: return "Gratis, maar je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
-            case PaymentMethod.Payconiq: return "€ 0,20 / transactie"
-            case PaymentMethod.Bancontact: return "€ 0,31 / transactie"
-            case PaymentMethod.iDEAL: return "€ 0,29 / transactie"
+            case PaymentMethod.Payconiq: return "€ 0,20 / transactie via Payconiq zelf\n€ 0,25 / transactie via Buckaroo"
+            case PaymentMethod.Bancontact: return "€ 0,25 / transactie via Buckaroo\n€ 0,31 / transactie via Mollie"
+            case PaymentMethod.iDEAL: return "€ 0,25 / transactie via Buckaroo\n€ 0,29 / transactie via Mollie"
             case PaymentMethod.CreditCard: return "€ 0,25 + 1,8% voor persoonlijke kaarten (Europese Unie)\n€ 0,25 + 2,8% voor zakelijke of buiten-EU kaarten"
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
