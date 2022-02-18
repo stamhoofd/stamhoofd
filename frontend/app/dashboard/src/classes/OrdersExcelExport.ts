@@ -29,7 +29,8 @@ export class OrdersExcelExport {
         const wsData = [
             [
                 "Bestelnummer",
-                "Naam",
+                "Voornaam",
+                "Achternaam",
                 "E-mail",
                 "GSM-nummer",
                 ...answerNames,
@@ -52,7 +53,8 @@ export class OrdersExcelExport {
                 const showDetails = index == 0 || repeat
                 wsData.push([
                     showDetails ? `${order.number}` : "",
-                    showDetails ? order.data.customer.name : "",
+                    showDetails ? order.data.customer.firstName : "",
+                    showDetails ? order.data.customer.lastName : "",
                     showDetails ? order.data.customer.email : "",
                     showDetails ? order.data.customer.phone : "",
                     ...answers,
@@ -73,7 +75,7 @@ export class OrdersExcelExport {
             if (column.toLowerCase().startsWith("naam")) {
                 ws['!cols'].push({width: 20});
             } else if (column.toLowerCase().includes("naam")) {
-                ws['!cols'].push({width: 15});
+                ws['!cols'].push({width: 13});
             } else if (column.toLowerCase().includes("e-mail")) {
                 ws['!cols'].push({width: 25});
             } else if (column.toLowerCase().includes("adres")) {
@@ -110,7 +112,8 @@ export class OrdersExcelExport {
         const wsData: (string | number)[][] = [
             [
                 "Bestelnummer",
-                "Naam",
+                "Voornaam",
+                "Achternaam",
                 "E-mail",
                 "GSM-nummer",
                 ...answerNames,
@@ -149,7 +152,8 @@ export class OrdersExcelExport {
 
             wsData.push([
                 `${order.number}`,
-                order.data.customer.name,
+                order.data.customer.firstName,
+                order.data.customer.lastName,
                 order.data.customer.email,
                 order.data.customer.phone,
                 ...answers,
@@ -191,7 +195,7 @@ export class OrdersExcelExport {
             if (column.toLowerCase().startsWith("naam")) {
                 ws['!cols'].push({width: 20});
             } else if (column.toLowerCase().includes("naam")) {
-                ws['!cols'].push({width: 15});
+                ws['!cols'].push({width: 13});
             } else if (column.toLowerCase().includes("e-mail")) {
                 ws['!cols'].push({width: 25});
             } else if (column.toLowerCase().includes("adres")) {
