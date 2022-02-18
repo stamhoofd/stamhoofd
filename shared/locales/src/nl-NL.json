@@ -35,6 +35,9 @@
         "mollie": {
           "activeDescription": "Online betalingen (via o.a. iDEAL, kredietkaart of Bancontact) zijn mogelijk. Vink de betaalmethodes die je wilt activeren aan, en zorg dat ze ook in Mollie geactiveerd staan.",
           "description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de ondertaande knop. Hiermee kan je betalingen via iDEAL, kredietkaart en Bancontact activeren."
+        },
+        "buckaroo": {
+          "description": "Je kan online betalingen gebruiken in Stamhoofd door de onderstaande instructies te volgen (knop hieronder). Hiermee kan je betalingen via iDEAL, kredietkaart of Bancontact activeren. "
         }
       },
       "domain": {

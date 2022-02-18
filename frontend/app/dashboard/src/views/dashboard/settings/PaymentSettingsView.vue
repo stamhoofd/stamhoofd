@@ -79,6 +79,22 @@
 
         <hr>
         <h2>
+            Online betalingen via Buckaroo
+        </h2>
+        <p class="st-list-description">
+            {{ $t('dashboard.settings.paymentMethods.buckaroo.description') }}
+        </p>
+
+        <p>
+            <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-buckaroo'" target="_blank">
+                <span>Aansluiten</span>
+                <span class="icon arrow-right" />
+            </a>
+        </p>
+
+
+        <hr>
+        <h2>
             Online betalingen via Mollie
         </h2>
 
