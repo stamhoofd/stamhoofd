@@ -74,35 +74,9 @@ export default class EditPaymentMethodsBox extends Vue {
     getDescription(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
             case PaymentMethod.Transfer: return "Gratis, maar je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
-            case PaymentMethod.Payconiq: {
-                if ((this.organization.privateMeta?.payconiqApiKey ?? "").length > 0) {
-                    return "€ 0,20 / transactie via Payconiq zelf"
-                }
-
-                if (this.organization.privateMeta?.buckarooSettings?.paymentMethods.includes(PaymentMethod.Payconiq)) {
-                    return "€ 0,25 / transactie via Buckaroo"
-                }
-
-                return "Vanaf € 0,20 / transactie (afhankelijk van betaalpartner)"
-            }
-            case PaymentMethod.Bancontact: {
-                if (this.organization.privateMeta?.buckarooSettings?.paymentMethods.includes(PaymentMethod.Bancontact)) {
-                    return "€ 0,25 / transactie via Buckaroo"
-                }
-                if (this.organization.privateMeta?.mollieOnboarding) {
-                    return "€ 0,31 / transactie via Mollie"
-                }
-                return "Vanaf € 0,25 / transactie (afhankelijk van betaalpartner)"
-            }
-            case PaymentMethod.iDEAL: {
-                if (this.organization.privateMeta?.buckarooSettings?.paymentMethods.includes(PaymentMethod.Bancontact)) {
-                    return "€ 0,25 / transactie via Buckaroo"
-                }
-                if (this.organization.privateMeta?.mollieOnboarding) {
-                    return "€ 0,29 / transactie via Mollie"
-                }
-                return "Vanaf € 0,25 / transactie (afhankelijk van betaalpartner)"
-            }
+            case PaymentMethod.Payconiq: return "€ 0,20 / transactie via Payconiq zelf\n€ 0,25 / transactie via Buckaroo"
+            case PaymentMethod.Bancontact: return "€ 0,25 / transactie via Buckaroo\n€ 0,31 / transactie via Mollie"
+            case PaymentMethod.iDEAL: return "€ 0,25 / transactie via Buckaroo\n€ 0,29 / transactie via Mollie"
             case PaymentMethod.CreditCard: return "€ 0,25 + 1,8% voor persoonlijke kaarten (Europese Unie)\n€ 0,25 + 2,8% voor zakelijke of buiten-EU kaarten"
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""

@@ -60,16 +60,108 @@
             </p>
         </template>
 
-        <template>
+        <template v-if="isBelgium || payconiqApiKey">
             <hr>
-            <h2>Online betalingen via Buckaroo</h2>
+            <h2>Online betalingen via Payconiq</h2>
             <p class="st-list-description">
-                Gebruik gelijk welke online betaalmethode via Buckaroo.
+                Wil je Payconiq gebruiken? Dat kan via Buckaroo (zie hierboven), of rechtstreeks via Payconiq (met een API-key). Volg voor dat laatste de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
             </p>
 
-            <p v-if="isBelgium" class="info-box">
-                Heb je een feitelijke vereniging? Dan kan je vanaf nu ook online betalingen accepteren via Buckaroo.
-            </p>
+            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
+                <input
+                    v-model="payconiqApiKey"
+                    class="input"
+                    type="text"
+                    placeholder="API-key van Payconiq"
+                >
+            </STInputBox>
+        </template>
+
+        <hr>
+        <h2>
+            Online betalingen via Buckaroo
+        </h2>
+
+        <p v-if="isBuckarooActive" class="success-box">
+            Buckaroo betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethods }}
+        </p>
+
+        <p v-else-if="isBelgium" class="info-box">
+            Heb je een feitelijke vereniging? Dan kan je vanaf nu ook online betalingen accepteren via Buckaroo.
+        </p>
+
+        <p class="st-list-description">
+            {{ $t('dashboard.settings.paymentMethods.buckaroo.description') }}
+        </p>
+
+        <p>
+            <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-buckaroo'" target="_blank">
+                <span>Aansluiten</span>
+                <span class="icon arrow-right" />
+            </a>
+        </p>
+
+        <template v-if="!enableBuckaroo || organization.privateMeta.mollieOnboarding">
+            <hr>
+            <h2>
+                Online betalingen via Mollie
+            </h2>
+
+            <template v-if="!organization.privateMeta.mollieOnboarding">
+                <p class="st-list-description">
+                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
+                </p>
+                <p v-if="isBelgium" class="info-box">
+                    Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)
+                </p>
+
+                <p class="st-list-description">
+                    <button class="button text" type="button" @click="linkMollie">
+                        <span class="icon link" />
+                        <span>Mollie koppelen</span>
+                    </button>
+                </p>
+            </template>
+            <template v-else>
+                <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
+                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
+                </p>
+                <p v-else class="warning-box">
+                    Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
+                </p>
+                <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
+                    Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
+                </p>
+
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
+                    Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
+                </p>
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
+                    Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
+                </p>
+
+                <p class="st-list-description">
+                    <LoadingButton :loading="loadingMollie">
+                        <button class="button text" type="button" @click="mollieDashboard">
+                            <span class="icon external" />
+                            <span>Ga naar het Mollie dashboard</span>
+                        </button>
+                    </loadingbutton>
+                </p>
+                <p class="st-list-description">
+                    <button class="button text" type="button" @click="disconnectMollie">
+                        <span class="icon trash" />
+                        <span>Account loskoppelen van Stamhoofd</span>
+                    </button>
+                </p>
+            </template>
+        </template>
+
+        <template v-if="isStamhoofd">
+            <hr>
+            <h2>
+                Instellingen beheerd door Stamhoofd
+            </h2>
 
             <Checkbox v-model="enableBuckaroo">
                 Gebruik Buckaroo voor online betalingen
@@ -104,80 +196,6 @@
                 </div>
             </div>
         </template>
-
-        <template v-if="isBelgium || payconiqApiKey">
-            <hr>
-            <h2>Online betalingen via Payconiq</h2>
-            <p class="st-list-description">
-                Wil je Payconiq gebruiken? Dat kan via Buckaroo (zie hierboven), of rechtstreeks via Payconiq (met een API-key). Volg voor dat laatste de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
-            </p>
-
-            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
-                <input
-                    v-model="payconiqApiKey"
-                    class="input"
-                    type="text"
-                    placeholder="API-key van Payconiq"
-                >
-            </STInputBox>
-        </template>
-
-        <template v-if="!enableBuckaroo || organization.privateMeta.mollieOnboarding">
-            <hr>
-            <h2>
-                Online betalingen via Mollie
-            </h2>
-
-            <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p class="st-list-description">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
-                </p>
-                <p v-if="isBelgium" class="info-box">
-                    Voor Bancontact en iDEAL heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd door betaalproviders)
-                </p>
-
-                <p class="st-list-description">
-                    <button class="button text" type="button" @click="linkMollie">
-                        <span class="icon link" />
-                        <span>Mollie koppelen</span>
-                    </button>
-                </p>
-            </template>
-            <template v-else>
-                <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
-                </p>
-                <p v-else class="warning-box">
-                    Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
-                </p>
-                <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
-                    Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
-                </p>
-
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
-                    Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
-                </p>
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
-                    Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
-                </p>
-
-                <p class="st-list-description">
-                    <LoadingButton :loading="loadingMollie">
-                        <button class="button text" type="button" @click="mollieDashboard">
-                            <span class="icon external" />
-                            <span>Ga naar het Mollie dashboard</span>
-                        </button>
-                    </LoadingButton>
-                </p>
-
-                <p class="st-list-description">
-                    <button class="button text" type="button" @click="disconnectMollie">
-                        <span class="icon trash" />
-                        <span>Account loskoppelen van Stamhoofd</span>
-                    </button>
-                </p>
-            </template>
-        </template>
     </SaveView>
 </template>
 
@@ -188,6 +206,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { BuckarooSettings, Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -223,6 +242,10 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
     get isBelgium() {
         return this.organization.address.country == Country.Belgium
+    }
+
+    get isStamhoofd() {
+        return OrganizationManager.user.email.endsWith("@stamhoofd.be")
     }
 
     patchPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
@@ -371,6 +394,24 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 })
             })
         })
+    }
+
+    get payconiqActive() {
+        return (OrganizationManager.organization.privateMeta?.payconiqApiKey ?? "").length > 0
+    }
+
+    get isBuckarooActive() {
+        return this.enableBuckaroo && (OrganizationManager.organization.privateMeta?.buckarooSettings?.key ?? "").length > 0 && (OrganizationManager.organization.privateMeta?.buckarooSettings?.secret ?? "").length > 0
+    }
+
+    get buckarooPaymentMethods() {
+        let methods = this.organization.privateMeta?.buckarooSettings?.paymentMethods ?? []
+
+        if (this.payconiqActive) {
+            // Remove Payconiq if has direct link
+            methods = methods.filter(m => m !== PaymentMethod.Payconiq)
+        }
+        return Formatter.joinLast(methods, ", ", " en ")
     }
    
     async save() {
