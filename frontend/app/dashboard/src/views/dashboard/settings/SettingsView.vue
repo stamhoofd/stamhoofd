@@ -253,10 +253,10 @@
                     <STListItem :selectable="true" class="left-center" @click="openReferrals(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/credits.svg">
                         <h2 class="style-title-list">
-                            Verdien tegoed door Stamhoofd te promoten
+                            Vertel Stamhoofd door aan andere verenigingen
                         </h2>
                         <p class="style-description">
-                            Geef 25 euro en krijg tot 100 euro per vereniging
+                            Geef 25 euro en krijg zelf ook een tegoed
                         </p>
                         <template slot="right">
                             <span class="icon arrow-right-small gray" />
