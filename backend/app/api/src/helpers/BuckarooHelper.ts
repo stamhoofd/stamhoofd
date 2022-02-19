@@ -58,7 +58,9 @@ export class BuckarooHelper {
     async request(method: "GET" | "POST", uri: string, content: any) {
         const json = content ? JSON.stringify(content) : "";
         // Finally, if you want to perform live transactions, sent the API requests to https://checkout.buckaroo.nl/json/Transaction
-        const url = "https://testcheckout.buckaroo.nl"+uri;
+
+        const isLive = true
+        const url = (isLive ? "https://checkout.buckaroo.nl" : "https://testcheckout.buckaroo.nl")+uri;
         const response = await axios.request({
             method,
             url,
@@ -145,6 +147,8 @@ export class BuckarooHelper {
             throw new Error("Failed to create payment, missing key")
         }
 
+        payment.status = this.getStatusFromResponse(response)
+
         // Save payment
         const dbPayment = new BuckarooPayment()
         dbPayment.paymentId = payment.id
@@ -193,19 +197,19 @@ export class BuckarooHelper {
         const parameters = response["Services"]?.[0]?.["Parameters"]
 
         if (parameters && Array.isArray(parameters)) {
-            const iban = parameters.find(p => p.Name === "consumerIBAN")?.Value
+            const iban = parameters.find(p => p.Name === "CustomerIban")?.Value
 
             console.log("Found iban", iban)
             if (iban) {
                 payment.iban = iban
             }
+        }
 
-            const name = parameters.find(p => p.Name === "consumerName")?.Value
+        const name = response["CustomerName"]
 
-            console.log("Found name", name)
-            if (name) {
-                payment.ibanName = name
-            }
+        console.log("Found name", name)
+        if (name) {
+            payment.ibanName = name
         }
 
         // Read status

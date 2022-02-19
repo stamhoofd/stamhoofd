@@ -165,10 +165,21 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "")
                     const ip = request.request.getIP()
                     paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, exchangeUrl)
+                    await payment.save()
+
+                    // TypeScript doesn't understand that the status can change and isn't a const....
+                    if ((payment.status as any) === PaymentStatus.Failed) {
+                        throw new SimpleError({
+                            code: "payment_failed",
+                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
+                        })
+                    }
                 } else {
                     throw new Error("Unknown payment provider")
                 }
             }
+
+            console.log("Place order")
 
             return new Response(OrderResponse.create({
                 paymentUrl: paymentUrl,

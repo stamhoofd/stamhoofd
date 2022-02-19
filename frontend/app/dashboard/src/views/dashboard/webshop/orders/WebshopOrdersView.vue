@@ -221,6 +221,29 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         }
 
         cols.push(
+            new Column<PrivateOrder, Date>({
+                name: "Besteldatum", 
+                getValue: (order) => order.validAt ?? new Date(1990, 0, 1),
+                compare: (a, b) => Sorter.byDateValue(a, b),
+                format: (date, width: number) => {
+                    if (width < 120) {
+                        return Formatter.dateNumber(date, false)
+                    }
+
+                    if (width < 200) {
+                        return Formatter.capitalizeFirstLetter(Formatter.date(date))
+                    }
+                    return Formatter.capitalizeFirstLetter(Formatter.dateWithDay(date))
+                },
+                getStyle: (loc) => loc === undefined ? "gray" : "",
+                minimumWidth: 60,
+                recommendedWidth: 70,
+                index: 1,
+                enabled: false
+            }),
+        )
+
+        cols.push(
             new Column<PrivateOrder, number | undefined>({
                 name: "Bedrag", 
                 enabled: false,
