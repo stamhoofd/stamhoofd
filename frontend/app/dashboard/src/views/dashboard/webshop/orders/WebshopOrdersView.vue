@@ -558,7 +558,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }))
         }
 
-        if (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.CreditCard)) {
+        if (this.organization.privateMeta?.mollieOnboarding?.canReceivePayments && (this.webshop?.meta.paymentMethods.includes(PaymentMethod.Bancontact) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.iDEAL) || this.webshop?.meta.paymentMethods.includes(PaymentMethod.CreditCard))) {
             definitions.push(
                 new DateFilterDefinition<PrivateOrder>({
                     id: "order_settledAt",

@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PrivateOrder } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PaymentProvider,PrivateOrder } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -416,7 +416,7 @@ export class OrdersExcelExport {
         let shouldIncludeSettements = false
 
         for (const order of orders) {
-            if (order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard || order.payment?.settlement) {
+            if (((order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard) && (order.payment?.provider === PaymentProvider.Mollie)) || order.payment?.settlement) {
                 shouldIncludeSettements = true
             }
         }

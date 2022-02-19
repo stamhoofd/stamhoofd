@@ -119,7 +119,7 @@ export class Formatter {
         return (date.getHours()+"").padStart(2, "0")+":"+(date.getMinutes()+"").padStart(2, "0")
     }
 
-    static uniqueArray<T extends any>(array: T[]): T[] {
+    static uniqueArray<T>(array: T[]): T[] {
         function onlyUnique(value, index, self) {
             return self.indexOf(value) === index;
         }
@@ -203,6 +203,7 @@ export class Formatter {
     }
 
     static joinLast(array: (string | number)[], separator: string | undefined, lastSeparator: string | undefined): string {
+        array = array.slice()
         const last = array.pop()
         if (last === undefined) {
             return ""
