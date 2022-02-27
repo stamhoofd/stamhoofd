@@ -5,7 +5,7 @@
             <h3 class="style-title-list">
                 {{ getName(method) }}
             </h3>
-            <p class="style-description pre-wrap" v-text="getDescription(method)" />
+            <p v-if="showPrices" class="style-description pre-wrap" v-text="getDescription(method)" />
         </STListItem>
     </STList>
 </template>
@@ -34,12 +34,22 @@ export default class EditPaymentMethodsBox extends Vue {
 
     @Prop({ required: true })
     methods: PaymentMethod[]
+
+    @Prop({ required: false, default: null })
+    choices: PaymentMethod[] | null
+
+    @Prop({ required: false, default: true })
+    showPrices: boolean
     
     get country() {
         return I18nController.shared.country
     }
 
     get sortedPaymentMethods() {
+        if (this.choices !== null) {
+            return this.choices
+        }
+
         const r: PaymentMethod[] = [
             PaymentMethod.Transfer
         ]
@@ -109,13 +119,13 @@ export default class EditPaymentMethodsBox extends Vue {
         const arr = new PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>()
         if (enabled) {
             const errorMessage = this.getEnableErrorMessage(method)
-            if (errorMessage) {
+            if (this.choices === null && errorMessage) {
                 new Toast(errorMessage, "error red").setHide(15*1000).show()
                 return
             }
             arr.addPut(method)
         } else {
-            if (this.methods.length == 1) {
+            if (this.choices === null && this.methods.length == 1) {
                 new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
                 return
             }

@@ -10,6 +10,8 @@ import { User } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { BuckarooSettings, GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
+import { BuckarooHelper } from '../helpers/BuckarooHelper';
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = AutoEncoderPatchType<OrganizationStruct>;
@@ -71,11 +73,16 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (request.body.address) {
                 organization.address = organization.address.patch(request.body.address)
             }
+              
 
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey
+
+                if (request.body.privateMeta.useTestPayments !== undefined) {
+                    organization.privateMeta.useTestPayments = request.body.privateMeta.useTestPayments
+                }
 
                 if (request.body.privateMeta.payconiqApiKey !== undefined) {
                     if (request.body.privateMeta.payconiqApiKey === null) {
@@ -83,8 +90,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     } else {
                         organization.privateMeta.payconiqApiKey = request.body.privateMeta.payconiqApiKey ?? organization.privateMeta.payconiqApiKey
 
-                    if (!(await PayconiqPayment.createTest(organization))) {
-                        
+                        if (!(await PayconiqPayment.createTest(organization))) {
                             throw new SimpleError({
                                 code: "invalid_field",
                                 message: "De API key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.",
@@ -100,11 +106,18 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     } else {
                         organization.privateMeta.buckarooSettings = organization.privateMeta.buckarooSettings ?? BuckarooSettings.create({})
                         organization.privateMeta.buckarooSettings.patchOrPut(request.body.privateMeta.buckarooSettings)
-                    }
-                }
 
-                if (request.body.privateMeta.useTestPayments !== undefined) {
-                    organization.privateMeta.useTestPayments = request.body.privateMeta.useTestPayments
+                        // Validate buckaroo settings
+                        const buckaroo = new BuckarooHelper(organization.privateMeta.buckarooSettings.key, organization.privateMeta.buckarooSettings.secret, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+
+                        if (!(await buckaroo.createTest())) {
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "De key of secret voor Buckaroo is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.",
+                                field: "buckarooSettings"
+                            })
+                        }
+                    }
                 }
             }
 

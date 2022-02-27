@@ -83,7 +83,7 @@
         </h2>
 
         <p v-if="isBuckarooActive" class="success-box">
-            Buckaroo betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethods }}
+            Buckaroo betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethodsString }}
         </p>
 
         <p v-else-if="isBelgium" class="info-box">
@@ -199,6 +199,8 @@
                     </p>
                 </div>
             </div>
+
+            <EditPaymentMethodsBox v-if="enableBuckaroo" :methods="buckarooPaymentMethods" :organization="organization" :show-prices="false" :choices="buckarooAvailableMethods" @patch="patchBuckarooPaymentMethods" />
         </template>
     </SaveView>
 </template>
@@ -256,6 +258,16 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 paymentMethods: patch
+            })
+        })
+    }
+
+    patchBuckarooPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                buckarooSettings: BuckarooSettings.patch({
+                    paymentMethods: patch
+                })
             })
         })
     }
@@ -408,14 +420,22 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         return this.enableBuckaroo && (OrganizationManager.organization.privateMeta?.buckarooSettings?.key ?? "").length > 0 && (OrganizationManager.organization.privateMeta?.buckarooSettings?.secret ?? "").length > 0
     }
 
-    get buckarooPaymentMethods() {
-        let methods = this.organization.privateMeta?.buckarooSettings?.paymentMethods ?? []
+    get buckarooPaymentMethodsString() {
+        let methods = this.buckarooPaymentMethods
 
         if (this.payconiqActive) {
             // Remove Payconiq if has direct link
             methods = methods.filter(m => m !== PaymentMethod.Payconiq)
         }
         return Formatter.joinLast(methods, ", ", " en ")
+    }
+
+    get buckarooPaymentMethods() {
+        return this.organization.privateMeta?.buckarooSettings?.paymentMethods ?? []
+    }
+
+    get buckarooAvailableMethods() {
+        return [PaymentMethod.Bancontact, PaymentMethod.CreditCard, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
     }
 
     get useTestPayments() {

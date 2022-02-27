@@ -96,7 +96,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
 
             let paymentUrl: string | null = null
-            const description = 'Betaling bij '+organization.name+" voor "+webshop.meta.name
+            const description = webshop.meta.name+" - "+payment.id
 
             if (payment.method == PaymentMethod.Transfer) {
                 await order.markValid(payment, [])
@@ -162,6 +162,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 } else if (payment.provider == PaymentProvider.Payconiq) {
                     paymentUrl = await PayconiqPayment.createPayment(payment, organization, description)
                 } else if (payment.provider == PaymentProvider.Buckaroo) {
+                    // Increase request timeout because buckaroo is super slow
+                    request.request.request?.setTimeout(60 * 1000)
                     const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
                     const ip = request.request.getIP()
                     paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, exchangeUrl)
@@ -178,8 +180,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new Error("Unknown payment provider")
                 }
             }
-
-            console.log("Place order")
 
             return new Response(OrderResponse.create({
                 paymentUrl: paymentUrl,

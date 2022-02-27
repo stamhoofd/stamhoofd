@@ -87,7 +87,7 @@
                     <template slot="right">
                         {{ patchedOrder.payment.iban }}
                         <template v-if="patchedOrder.payment.ibanName">
-                            <br>(patchedOrder.payment.ibanName)
+                            <br>({{ patchedOrder.payment.ibanName }})
                         </template>
                     </template>
                 </STListItem>

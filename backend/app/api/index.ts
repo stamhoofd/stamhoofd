@@ -56,6 +56,11 @@ const start = async () => {
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
+    if (routerServer.server) {
+        // Default timeout is a bit too short
+        routerServer.server.timeout = 15000;
+    }
+
     const cronInterval = setInterval(crons, 5 * 60 * 1000);
     crons()
 

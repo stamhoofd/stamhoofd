@@ -1,3 +1,4 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { BuckarooPayment, Payment } from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import axios from 'axios';
@@ -42,15 +43,6 @@ export class BuckarooHelper {
         const encodedContent = this.getEncodedContent(content)
         const rawData = this.key + method + url + timestamp + nonce + encodedContent;
 
-        console.log("Key: " + this.key)
-        console.log("Method: " + method)
-        console.log("Url: " + url)
-        console.log("Timestamp: " + timestamp)
-        console.log("Nonce: " + nonce)
-        console.log("Content: " + content)
-        console.log("encodedContent: " + encodedContent)
-        console.log("Raw data: " + rawData)
-
         // The HMAC SHA256 of rawData using secret
         const hash = crypto.createHmac('sha256', this.secret).update(rawData).digest('base64');
 
@@ -58,9 +50,13 @@ export class BuckarooHelper {
     }
 
     async request(method: "GET" | "POST", uri: string, content: any) {
+
         const json = content ? JSON.stringify(content) : "";
         // Finally, if you want to perform live transactions, sent the API requests to https://checkout.buckaroo.nl/json/Transaction
         const url = (!this.testMode ? "https://checkout.buckaroo.nl" : "https://testcheckout.buckaroo.nl")+uri;
+
+        console.log("[BUCKAROO REQUEST] ", method, url, content ? "\n [BUCKAROO REQUEST] " : undefined, json)
+
         const response = await axios.request({
             method,
             url,
@@ -71,8 +67,58 @@ export class BuckarooHelper {
             data: json
             
         })
-        console.log("Buckaroo request", method, url, JSON.stringify(response.data, undefined, "    "))
+        console.log("[BUCKAROO RESPONSE] ", method, url, "\n[BUCKAROO RESPONSE] ", JSON.stringify(response.data))
         return response.data
+    }
+
+    async createTest(): Promise<boolean> {
+        const service = {
+                "Name": "bancontactmrcash",
+                "Action": "Pay",
+                "Parameters": [
+                    {
+                        "Name": "savetoken",
+                        "Value": "false"
+                    }
+                ]
+            };
+        const data = {
+            "Currency": "EUR",
+            "AmountDebit": "0.01",
+            "Invoice": "TESTPAYMENT-"+(new Date().getTime())+"-"+Math.round(Math.random()*100000),
+            "ClientIP": {
+                "Type": 0, // 0 = ipv4, 1 = ipv6
+                "Address": "0.0.0.0"
+            },
+            "Services": {
+                "ServiceList": [
+                    service
+                ]
+            },
+            "ContinueOnIncomplete": "1", // iDEAL
+            "Description": "Test payment",
+            "PushURL": "",
+            "PushURLFailure": "",
+            "ReturnURL": "https://stamhoofd.be",
+            "ReturnURLCancel": "https://stamhoofd.be",
+            "ReturnURLError": "https://stamhoofd.be",
+            "ReturnURLReject": "https://stamhoofd.be",
+        }
+
+        try {
+            const response = await this.request("POST", "/json/Transaction", data)
+            const key = response["Key"]
+
+            if (!key) {
+                return false
+            }
+            const status = this.getStatusFromResponse(response)
+
+            return status === PaymentStatus.Pending || status === PaymentStatus.Created || status === PaymentStatus.Succeeded
+        } catch (e) {
+            console.error(e)
+        }
+        return false
     }
 
     async createPayment(payment: Payment, ip: string, description: string, returnUrl: string, exchangeUrl: string): Promise<string | null> {
@@ -140,22 +186,33 @@ export class BuckarooHelper {
             "ReturnURLError": returnUrl,
             "ReturnURLReject": returnUrl,
         }
-        const response = await this.request("POST", "/json/Transaction", data)
-        const key = response["Key"]
 
-        if (!key) {
-            throw new Error("Failed to create payment, missing key")
+        try {
+            const response = await this.request("POST", "/json/Transaction", data)
+            const key = response["Key"]
+
+            if (!key) {
+                throw new Error("Failed to create payment, missing key")
+            }
+
+            payment.status = this.getStatusFromResponse(response)
+
+            // Save payment
+            const dbPayment = new BuckarooPayment()
+            dbPayment.paymentId = payment.id
+            dbPayment.transactionKey = key
+            await dbPayment.save();
+
+            return response["RequiredAction"]?.["RedirectURL"] ?? null;
+        } catch (e) {
+            console.error(e)
+            throw new SimpleError({
+                code: "buckaroo_error",
+                message: "Failed to create payment",
+                human: "Er ging iets mis bij het starten van de betaling. Herlaad de pagina en probeer het opnieuw."
+            })
         }
-
-        payment.status = this.getStatusFromResponse(response)
-
-        // Save payment
-        const dbPayment = new BuckarooPayment()
-        dbPayment.paymentId = payment.id
-        dbPayment.transactionKey = key
-        await dbPayment.save();
-
-        return response["RequiredAction"]?.["RedirectURL"] ?? null;
+        
     }
 
     private getStatusFromResponse(data: any) {
@@ -197,17 +254,21 @@ export class BuckarooHelper {
         const parameters = response["Services"]?.[0]?.["Parameters"]
 
         if (parameters && Array.isArray(parameters)) {
-            const iban = parameters.find(p => p.Name === "CustomerIban")?.Value
+            const iban = parameters.find(p => p.Name.toLowerCase() === "customeriban")?.Value
 
-            console.log("Found iban", iban)
             if (iban) {
                 payment.iban = iban
+            }
+
+            const name = parameters.find(p => p.Name.toLowerCase() === "customeraccountname")?.Value
+
+            if (name) {
+                payment.ibanName = name
             }
         }
 
         const name = response["CustomerName"]
 
-        console.log("Found name", name)
         if (name) {
             payment.ibanName = name
         }

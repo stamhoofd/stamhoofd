@@ -46,8 +46,7 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         }
         if (platform === "web") {
             response.headers["X-Platform-Latest-Version"] = Version
-        }
-        
+        }        
 
         if (error) {
             const IP = request.getIP()
