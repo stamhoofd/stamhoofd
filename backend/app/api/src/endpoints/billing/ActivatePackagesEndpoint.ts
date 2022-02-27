@@ -10,7 +10,7 @@ import { STPackage } from "@stamhoofd/models";
 import { STPendingInvoice } from "@stamhoofd/models";
 import { Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { Organization as OrganizationStruct, OrganizationPatch,PaymentMethod, PaymentStatus, STInvoiceItem,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version  } from "@stamhoofd/structures";
+import { Organization as OrganizationStruct, OrganizationPatch,PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version  } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
@@ -283,6 +283,8 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         invoice: await invoice.getStructure()
                     }));
                 }
+
+                payment.provider = PaymentProvider.Mollie
 
                 try {
                     // Mollie payment is required

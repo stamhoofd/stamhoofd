@@ -11,7 +11,7 @@
 
             <BillingWarningBox />
 
-            <p class="info-box icon help with-button">
+            <p v-if="false" class="info-box icon help with-button">
                 Hulp nodig? Neem contact met ons op via {{ $t('shared.emails.general') }}
 
                 <a :href="'mailto:'+$t('shared.emails.general')" class="button text">

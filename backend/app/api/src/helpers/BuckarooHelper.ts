@@ -6,10 +6,12 @@ import crypto from 'crypto';
 export class BuckarooHelper {
     key: string;
     secret: string;
+    testMode: boolean;
 
-    constructor(key: string, secret: string) {
+    constructor(key: string, secret: string, testMode: boolean) {
         this.key = key;
         this.secret = secret;
+        this.testMode = testMode;
     }
 
     getEncodedContent(content: string) {
@@ -58,9 +60,7 @@ export class BuckarooHelper {
     async request(method: "GET" | "POST", uri: string, content: any) {
         const json = content ? JSON.stringify(content) : "";
         // Finally, if you want to perform live transactions, sent the API requests to https://checkout.buckaroo.nl/json/Transaction
-
-        const isLive = true
-        const url = (isLive ? "https://checkout.buckaroo.nl" : "https://testcheckout.buckaroo.nl")+uri;
+        const url = (!this.testMode ? "https://checkout.buckaroo.nl" : "https://testcheckout.buckaroo.nl")+uri;
         const response = await axios.request({
             method,
             url,

@@ -163,6 +163,10 @@
                 Instellingen beheerd door Stamhoofd
             </h2>
 
+            <Checkbox v-model="useTestPayments">
+                Activeer test-modus voor betalingen
+            </Checkbox>
+
             <Checkbox v-model="enableBuckaroo">
                 Gebruik Buckaroo voor online betalingen
             </Checkbox>
@@ -412,6 +416,19 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             methods = methods.filter(m => m !== PaymentMethod.Payconiq)
         }
         return Formatter.joinLast(methods, ", ", " en ")
+    }
+
+    get useTestPayments() {
+        return this.organization.privateMeta?.useTestPayments ?? STAMHOOFD.environment != 'production'
+    }
+
+    set useTestPayments(useTestPayments: boolean) {
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                // Only save non default value
+                useTestPayments: STAMHOOFD.environment != 'production' === useTestPayments ? null : useTestPayments
+            })
+        })
     }
    
     async save() {

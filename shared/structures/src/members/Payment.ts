@@ -21,7 +21,7 @@ export class Payment extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PaymentStatus) })
     status: PaymentStatus = PaymentStatus.Created
 
-    @field({ decoder: new EnumDecoder(PaymentProvider), version: 152 })
+    @field({ decoder: new EnumDecoder(PaymentProvider), nullable: true, version: 152 })
     provider: PaymentProvider | null = null
 
     @field({ decoder: IntegerDecoder })

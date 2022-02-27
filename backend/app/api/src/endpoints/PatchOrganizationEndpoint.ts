@@ -102,7 +102,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         organization.privateMeta.buckarooSettings.patchOrPut(request.body.privateMeta.buckarooSettings)
                     }
                 }
-                
+
+                if (request.body.privateMeta.useTestPayments !== undefined) {
+                    organization.privateMeta.useTestPayments = request.body.privateMeta.useTestPayments
+                }
             }
 
             // Allow admin patches (permissions only atm). No put atm

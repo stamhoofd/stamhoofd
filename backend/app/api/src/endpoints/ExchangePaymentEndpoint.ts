@@ -157,7 +157,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         if (token) {
                             const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
                             const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
-                                testmode: STAMHOOFD.environment != 'production',
+                                testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production',
                             })
 
                             console.log(mollieData) // log to log files to check issues
@@ -172,7 +172,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         }
                     }
                 } else if (payment.provider == PaymentProvider.Buckaroo) {
-                    const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? "", organization.privateMeta.buckarooSettings?.secret ?? "")
+                    const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? "", organization.privateMeta.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
                     const status = await helper.getStatus(payment)
                     await this.handlePaymentStatusUpdate(payment, organization, status)
                 } else if (payment.provider == PaymentProvider.Payconiq) {

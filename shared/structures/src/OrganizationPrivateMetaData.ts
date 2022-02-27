@@ -129,6 +129,12 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: BuckarooSettings, nullable: true, version: 152 })
     buckarooSettings: BuckarooSettings | null = null
 
+    /**
+     * Null = use environment default
+     */
+    @field({ decoder: BooleanDecoder, nullable: true, version: 154 })
+    useTestPayments: null | boolean = null
+
     // Only set for admins
     @field({ decoder: StringDecoder, nullable: true, version: 29 })
     payconiqApiKey: string | null = null

@@ -141,7 +141,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             value: (totalPrice / 100).toFixed(2)
                         },
                         method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                        testmode: STAMHOOFD.environment != 'production',
+                        testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production',
                         profileId,
                         description,
                         redirectUrl,
@@ -162,7 +162,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 } else if (payment.provider == PaymentProvider.Payconiq) {
                     paymentUrl = await PayconiqPayment.createPayment(payment, organization, description)
                 } else if (payment.provider == PaymentProvider.Buckaroo) {
-                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "")
+                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
                     const ip = request.request.getIP()
                     paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, exchangeUrl)
                     await payment.save()

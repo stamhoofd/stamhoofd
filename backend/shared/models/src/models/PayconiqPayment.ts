@@ -33,7 +33,7 @@ export class PayconiqPayment extends Model {
             })
         }
 
-        const response = await PayconiqPayment.request("GET", "/v3/payments/"+this.payconiqId, {}, apiKey)
+        const response = await PayconiqPayment.request("GET", "/v3/payments/"+this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
         if (response.status) {
             switch (response.status) {
                 case "AUTHORIZED": return PaymentStatus.Created;
@@ -70,7 +70,7 @@ export class PayconiqPayment extends Model {
                 callbackUrl: 'https://'+organization.getApiHost(),
                 description: "Key validation test",
 
-            }, apiKey)
+            }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
             return !!response.paymentId;
         } catch (e) {
             return false;
@@ -94,7 +94,7 @@ export class PayconiqPayment extends Model {
             callbackUrl: 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
             description
 
-        }, apiKey)
+        }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
 
         const payconiqPayment = new PayconiqPayment()
         payconiqPayment.paymentId = payment.id
@@ -111,10 +111,10 @@ export class PayconiqPayment extends Model {
     /**
      * Do a post request on the API.
      */
-    private static request(method: string, path: string, data = {}, auth: string | null = null): Promise<any> {
+    private static request(method: string, path: string, data = {}, auth: string | null = null, testMode: boolean): Promise<any> {
         return new Promise((resolve, reject) => {
             const jsonData = JSON.stringify(data);
-            const hostname = STAMHOOFD.environment == 'production' ? "api.payconiq.com" : "api.ext.payconiq.com"
+            const hostname = !testMode ? "api.payconiq.com" : "api.ext.payconiq.com"
             const base = "https://"+hostname
 
             // Log all communication

@@ -8,33 +8,21 @@
             <h1>
                 Tickets scannen
             </h1>
+            
+            <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
+            <p v-else-if="shouldFilter && !isLoading && ticketProducts.length > 1">
+                Vink hieronder de tickets aan die je wilt scannen en klik op "starten". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).
+            </p>
+            <p v-else>
+                Klik op "starten" om te beginnen.
+            </p>
 
             <p v-if="noDatabaseSupport" class="error-box">
                 Dit appartaat ondersteunt de scanner niet. Probeer in een moderne browser, op een smartphone en zorg ervoor dat je niet in privé modus surft (dat voorkomt de noodzakelijk opslag van tickets als het internet wegvalt).
             </p>
 
-            <p class="info-box icon wifi">
-                Het scannen van tickets blijft werken als het internet wegvalt, maar we raden je aan wel permanent internet te voorzien als je met meerdere scanners werkt (om dubbel scannen te detecteren). In het begin is er sowieso even internet nodig om de tickets op te halen.
-            </p>
-
-            <p class="warning-box icon lightning">
-                De scanner verbruikt veel energie van je batterij, jouw toestel kan ook warm worden. Voorzie een oplader of grote powerbank. Denk ook aan een backup plan als er iets zou misgaan met je toestel.
-            </p>
-
-            <p class="info-box icon qr-code">
-                Vertrouw nooit de gegevens die op het ticket gedrukt staan. Na het scannen van de QR-code komen de onvervalsbare gegevens op jouw scherm, die zijn altijd juist.
-            </p>
-
-            <Spinner v-if="(isLoading && shouldFilter) || isChecking" />
 
             <template v-if="shouldFilter && !isLoading && ticketProducts.length > 1">
-                <hr>
-                <h2>Filter tickets</h2>
-
-                <p>Vink hieronder de tickets aan die je wilt scannen. Dat is handig als je verschillende standen hebt op je evenement (bv. drankkaarten en inkomtickets apart), op die manier scan je niet per ongeluk een ongeldig ticket.</p>
-
-                <Spinner v-if="isLoading" />
-
                 <STList>
                     <STListItem v-for="product in ticketProducts" :key="product.id" :selectable="true" element-name="label">
                         <Checkbox slot="left" :checked="isProductSelected(product)" @change="setProductSelected(product, $event)" />
@@ -42,10 +30,16 @@
                     </STListItem>
                 </STList>
             </template>
+
+            <a class="info-box icon file-pdf selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
+                Download de checklist voor het scannen van tickets
+
+                <span class="button icon gray download" />
+            </a>
         </main>
 
         <STToolbar v-if="!noDatabaseSupport">
-            <button slot="right" class="button primary" @click="start">
+            <button slot="right" class="button primary" type="button" @click="start">
                 <span class="icon play" />
                 <span>Starten</span>
             </button>
