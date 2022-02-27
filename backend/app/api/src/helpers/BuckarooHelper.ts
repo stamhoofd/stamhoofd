@@ -67,7 +67,7 @@ export class BuckarooHelper {
             data: json
             
         })
-        console.log("[BUCKAROO RESPONSE] ", method, url, "\n[BUCKAROO RESPONSE] ", JSON.stringify(response.data))
+        console.log("[BUCKAROO RESPONSE] ", method, url, "\n[BUCKAROO RESPONSE]", JSON.stringify(response.data))
         return response.data
     }
 
