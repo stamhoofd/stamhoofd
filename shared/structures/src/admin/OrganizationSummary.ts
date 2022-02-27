@@ -27,6 +27,46 @@ export class OrganizationStats extends AutoEncoder {
     activeAdmins: number;
 }
 
+export class OrganizationPaymentMandateDetails extends AutoEncoder {
+    @field({ decoder: StringDecoder, optional: true })
+    consumerName?: string
+
+    @field({ decoder: StringDecoder, optional: true })
+    consumerAccount?: string
+
+    @field({ decoder: StringDecoder, optional: true })
+    consumerBic?: string
+}
+
+export class OrganizationPaymentMandate extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    id: string;
+
+    @field({ decoder: StringDecoder })
+    method: "directdebit" | "creditcard" | "paypal";
+
+    @field({ decoder: StringDecoder })
+    status: "valid" | "pending" | "invalid";
+
+    @field({ decoder: OrganizationPaymentMandateDetails })
+    details: OrganizationPaymentMandateDetails;
+
+    /**
+     * The signature date of the mandate in YYYY-MM-DD format.
+     */
+    @field({ decoder: StringDecoder })
+    signatureDate: string;
+
+    /**
+     * The mandate’s date and time of creation, in ISO 8601 format.
+     */
+    @field({ decoder: DateDecoder })
+    createdAt: Date;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    mandateReference: string | null = null
+}
+
 export class OrganizationSummary extends Organization {
     @field({ decoder: STBillingStatus })
     billingStatus: STBillingStatus
@@ -42,6 +82,12 @@ export class OrganizationSummary extends Organization {
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), version: 130 })
     acquisitionTypes: AcquisitionType[] = [];
+
+    @field({ decoder: StringDecoder, nullable: true, version: 154 })
+    mollieCustomerId: string | null = null;
+
+    @field({ decoder: new ArrayDecoder(OrganizationPaymentMandate), version: 154 })
+    paymentMandates: OrganizationPaymentMandate[] = [];
 }
 
 export class OrganizationOverview extends AutoEncoder {

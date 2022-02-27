@@ -106,7 +106,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
             await payment.save();
 
-            if (wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
+            if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
                 // Charge transaction fees
                 const transactionFee = 25
                 const name = "Transactiekosten voor "+PaymentMethodHelper.getName(payment.method)
