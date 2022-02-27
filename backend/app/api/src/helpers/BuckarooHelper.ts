@@ -55,7 +55,7 @@ export class BuckarooHelper {
         // Finally, if you want to perform live transactions, sent the API requests to https://checkout.buckaroo.nl/json/Transaction
         const url = (!this.testMode ? "https://checkout.buckaroo.nl" : "https://testcheckout.buckaroo.nl")+uri;
 
-        console.log("[BUCKAROO REQUEST] ", method, url, content ? "\n [BUCKAROO REQUEST] " : undefined, json)
+        console.log("[BUCKAROO REQUEST]", method, url, content ? "\n [BUCKAROO REQUEST] " : undefined, json)
 
         const response = await axios.request({
             method,
@@ -67,7 +67,7 @@ export class BuckarooHelper {
             data: json
             
         })
-        console.log("[BUCKAROO RESPONSE] ", method, url, "\n[BUCKAROO RESPONSE]", JSON.stringify(response.data))
+        console.log("[BUCKAROO RESPONSE]", method, url, "\n[BUCKAROO RESPONSE]", JSON.stringify(response.data))
         return response.data
     }
 
