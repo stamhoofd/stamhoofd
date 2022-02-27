@@ -162,6 +162,20 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
                             console.log(mollieData) // log to log files to check issues
 
+                            const details = (mollieData.details as any) 
+                            if (details?.consumerName) {
+                                payment.ibanName = details.consumerName
+                            }
+                            if (details?.consumerAccount) {
+                                payment.iban = details.consumerAccount
+                            }
+                            if (details?.cardHolder) {
+                                payment.ibanName = details.cardHolder
+                            }
+                            if (details?.cardNumber) {
+                                payment.iban = "xxxx xxxx xxxx "+details.cardNumber
+                            }
+
                             if (mollieData.status == "paid") {
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
                             } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
