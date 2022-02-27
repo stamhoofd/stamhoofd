@@ -96,6 +96,13 @@ module.exports = {
         historyApiFallback: {
             disableDotRule: true, // default behaviour is to ignore all urls with a dot character. lol.
         },
+        setupMiddlewares: function (middlewares, devServer) {
+            // Force redirect from POST to GET method (needed for default Buckaroo behaviour)
+            devServer.app.post('*', (req, res) => {
+                res.redirect(req.originalUrl);
+            });
+            return middlewares
+        },
     },
     /*optimization: (process.env.NODE_ENV === "production" ? {} : {
         runtimeChunk: true,
