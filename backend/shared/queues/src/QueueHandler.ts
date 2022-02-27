@@ -26,13 +26,12 @@ export class QueueHandler {
     static queues = new Map<string, Queue>()
 
     static async schedule<T>(queue: string, handler: () => Promise<T>): Promise<T> {
-        console.log("Scheduled new item on queue "+queue+" (init)")
+        //console.log("[QUEUE] Schedule "+queue)
 
         const item = new QueueItem<T>()
         item.handler = handler
         
         const promise = new Promise<T>((resolve, reject) => {
-            console.log("Scheduled new item on queue "+queue+" (promise executed)")
             item.resolve = resolve
             item.reject = reject
 
@@ -71,15 +70,15 @@ export class QueueHandler {
         }
 
         q.running = true
-        console.log("Executing item of queue "+queue+", "+q.items.length+" remaining")
+        console.log("[QUEUE] Executing "+queue+" ("+q.items.length+" remaining)")
 
         try {
             const result = await next.handler()
             next.resolve(result)
-            console.log("Resolved item on queue "+queue)
+            console.log("[QUEUE] Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
             next.reject(e)
-            console.log("Rejected item on queue "+queue)
+            console.log("[QUEUE] Rejected "+queue+" ("+q.items.length+" remaining)")
             console.error(e)
         }
 
