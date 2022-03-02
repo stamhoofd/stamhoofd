@@ -2,7 +2,7 @@
     <div id="import-members-settings-view" class="st-view background">
         <STNavigationBar title="Leden importeren">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
+            <button v-else slot="right" class="button icon close gray" type="button" @click="pop" />
         </STNavigationBar>
 
         <main>
@@ -12,7 +12,7 @@
             </p>
 
             <p class="info-box">
-                Problemen, suggesties of vragen? Stuur een mailtje naar {{ $t('shared.emails.general') }} en we helpen je graag verder.
+                Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.
             </p>
 
             <label class="upload-box">
