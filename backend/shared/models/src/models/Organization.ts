@@ -718,26 +718,11 @@ export class Organization extends Model {
     }
 
     getPaymentProviderFor(method: PaymentMethod): PaymentProvider | null  {
-        if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {
-            return null
+        const provider = this.privateMeta.getPaymentProviderFor(method)
+        if (provider === null && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(method)) {
+            throw new Error("No payment provider configured for "+method)
         }
-
-        // Is Buckaroo setup?
-        if (this.privateMeta.buckarooSettings !== null) {
-            if (this.privateMeta.buckarooSettings.paymentMethods.includes(method)) {
-                return PaymentProvider.Buckaroo
-            }
-        }
-
-        if (this.privateMeta.payconiqApiKey && method === PaymentMethod.Payconiq) {
-            return PaymentProvider.Payconiq
-        }
-
-        if (this.privateMeta.mollieOnboarding?.canReceivePayments && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
-            return PaymentProvider.Mollie
-        }
-
-        throw new Error("No payment provider configured for "+method)
+        return provider
     }
 
 }

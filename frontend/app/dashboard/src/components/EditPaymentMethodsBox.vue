@@ -18,7 +18,7 @@ import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg";
 import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/payconiq-vertical-pos.svg";
 import { Checkbox, STList, STListItem, Toast } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { Country, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
+import { Country, Organization, PaymentMethod, PaymentMethodHelper, PaymentProvider } from "@stamhoofd/structures";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({
@@ -80,13 +80,36 @@ export default class EditPaymentMethodsBox extends Vue {
     getName(paymentMethod: PaymentMethod): string {
         return PaymentMethodHelper.getNameCapitalized(paymentMethod)
     }
+    
+    providerText(provider: PaymentProvider | null, map: {[key: string]: string}): string {
+        if (provider == null || !Object.prototype.hasOwnProperty.call(map, provider)) {
+            return Object.values(map).join("\n")
+        } else {
+            return map[provider]
+        }
+    }
 
     getDescription(paymentMethod: PaymentMethod): string {
+        const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod) ?? null
+
         switch (paymentMethod) {
             case PaymentMethod.Transfer: return "Gratis, maar je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
-            case PaymentMethod.Payconiq: return "€ 0,20 / transactie via Payconiq zelf\n€ 0,25 / transactie via Buckaroo"
-            case PaymentMethod.Bancontact: return "€ 0,25 / transactie via Buckaroo\n€ 0,31 / transactie via Mollie"
-            case PaymentMethod.iDEAL: return "€ 0,25 / transactie via Buckaroo\n€ 0,29 / transactie via Mollie"
+            case PaymentMethod.Payconiq: 
+                return this.providerText(provider, {
+                    [PaymentProvider.Payconiq]: "€ 0,20 / transactie via Payconiq zelf",
+                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
+                })
+            case PaymentMethod.Bancontact: 
+                return this.providerText(provider, {
+                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
+                    [PaymentProvider.Mollie]: "€ 0,31 / transactie via Mollie",
+                })
+            
+            case PaymentMethod.iDEAL:  
+                return this.providerText(provider, {
+                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
+                    [PaymentProvider.Mollie]: "€ 0,29 / transactie via Mollie",
+                })
             case PaymentMethod.CreditCard: return "€ 0,25 + 1,8% voor persoonlijke kaarten (Europese Unie)\n€ 0,25 + 2,8% voor zakelijke of buiten-EU kaarten"
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""

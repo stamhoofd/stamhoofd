@@ -3,6 +3,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,Decoder,EnumDecod
 import { DNSRecord } from "./DNSRecord"
 import { OrganizationEmail } from './OrganizationEmail';
 import { PaymentMethod } from './PaymentMethod';
+import { PaymentProvider } from './PaymentProvider';
 import { PermissionRoleDetailed } from './Permissions';
 
 export class CreditItem extends AutoEncoder {
@@ -160,4 +161,27 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true, version: 86 })
     VATNumber: string | null = null
+
+    getPaymentProviderFor(method: PaymentMethod): PaymentProvider | null  {
+        if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {
+            return null
+        }
+
+        if (this.payconiqApiKey && method === PaymentMethod.Payconiq) {
+            return PaymentProvider.Payconiq
+        }
+
+        // Is Buckaroo setup?
+        if (this.buckarooSettings !== null) {
+            if (this.buckarooSettings.paymentMethods.includes(method)) {
+                return PaymentProvider.Buckaroo
+            }
+        }
+
+        if (this.mollieOnboarding?.canReceivePayments && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
+            return PaymentProvider.Mollie
+        }
+
+        return null
+    }
 }
