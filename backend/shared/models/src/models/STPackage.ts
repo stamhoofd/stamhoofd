@@ -105,9 +105,15 @@ export class STPackage extends Model {
         if (this.meta.didRenewId) {
             const pack = await STPackage.getByID(this.meta.didRenewId)
             if (pack && pack.organizationId === this.organizationId) {
-                await pack.deactivate()
+                await pack.didRenew(this)
             }
         }
+    }
+
+    async didRenew(renewed: STPackage) {
+        this.removeAt = renewed.meta.startDate ?? renewed.validAt ?? new Date()
+        this.meta.allowRenew = false
+        await this.save()
     }
 
     async deactivate() {
@@ -138,7 +144,7 @@ export class STPackage extends Model {
         pack.validAt = null
         pack.organizationId = this.organizationId
 
-        pack.meta.startDate = new Date(Math.max(new Date().getTime(), pack.validUntil?.getTime() ?? 0))
+        pack.meta.startDate = new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0))
         pack.meta.paidAmount = 0
         pack.meta.paidPrice = 0
         pack.meta.firstFailedPayment = null

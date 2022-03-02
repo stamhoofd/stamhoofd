@@ -157,9 +157,9 @@ export class STPackage extends AutoEncoder {
             return false
         }
 
-        // Allow renew 1 month in advance
+        // Allow renew 2 months in advance
         const allowAfter = new Date(this.validUntil)
-        allowAfter.setDate(allowAfter.getDate() - 30)
+        allowAfter.setDate(allowAfter.getDate() - 60)
 
         if (allowAfter < new Date()) {
             return true

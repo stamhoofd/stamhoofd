@@ -11,8 +11,10 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentMethodHelper,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
+import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentMethodHelper,PaymentProvider,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
+
+import { BuckarooHelper } from '../helpers/BuckarooHelper';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout
@@ -188,6 +190,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 payment.paidAt = new Date()
             }
 
+            // Determine the payment provider
+            // Throws if invalid
+            payment.provider = organization.getPaymentProviderFor(payment.method)
+
             await payment.save()
 
             // Save registrations and add extra data if needed
@@ -222,7 +228,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             let paymentUrl: string | null = null
             const description = 'Inschrijving bij '+user.organization.name
             if (payment.status != PaymentStatus.Succeeded) {
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard) {
+                const redirectUrl = "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id)
+                const webhookUrl = 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
+
+               if (payment.provider === PaymentProvider.Mollie) {
                     
                     // Mollie payment
                     const token = await MollieToken.getTokenFor(user.organizationId)
@@ -249,8 +258,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         testmode: STAMHOOFD.environment != 'production',
                         profileId,
                         description,
-                        redirectUrl: "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id),
-                        webhookUrl: 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                        redirectUrl,
+                        webhookUrl,
                         metadata: {
                             paymentId: payment.id,
                         },
@@ -262,8 +271,25 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     dbPayment.paymentId = payment.id
                     dbPayment.mollieId = molliePayment.id
                     await dbPayment.save();
-                } else if (payment.method == PaymentMethod.Payconiq) {
+                } else if (payment.provider === PaymentProvider.Payconiq) {
                     paymentUrl = await PayconiqPayment.createPayment(payment, user.organization, description)
+                } else if (payment.provider == PaymentProvider.Buckaroo) {
+                    // Increase request timeout because buckaroo is super slow
+                    request.request.request?.setTimeout(60 * 1000)
+                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+                    const ip = request.request.getIP()
+                    paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, webhookUrl)
+                    await payment.save()
+
+                    // TypeScript doesn't understand that the status can change and isn't a const....
+                    if ((payment.status as any) === PaymentStatus.Failed) {
+                        throw new SimpleError({
+                            code: "payment_failed",
+                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
+                        })
+                    }
+                } else {
+                    throw new Error("Unknown payment provider")
                 }
             }
 
