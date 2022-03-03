@@ -275,7 +275,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "invalid_first_name",
                 message: "Invalid first name",
-                human: "Het voornaam dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                human: "De voornaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
                 field: "customer.firstName"
             })
         }
@@ -284,7 +284,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "invalid_last_name",
                 message: "Invalid last name",
-                human: "Het achternaam dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                human: "De achternaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
                 field: "customer.lastName"
             })
         }
