@@ -250,18 +250,19 @@ export class Checkout extends AutoEncoder {
         // Check maximum
         if (timeSlot.remainingPersons !== null && this.cart.persons - this.reservedPersons > timeSlot.remainingPersons) {
             const remaingPersons = timeSlot.remainingPersons
+            const availableTimeslots = this.checkoutMethod.timeSlots.timeSlots.length
             if (remaingPersons === 0) {
                 throw new SimpleError({
                     code: "timeslot_full",
                     message: "Timeslot has reached maximum orders",
-                    human: "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.",
+                    human: (availableTimeslots !=1 ? "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk." : "Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen."),
                     field: "timeSlot"
                 })
             }
             throw new SimpleError({
                 code: "timeslot_full",
                 message: "Timeslot has reached maximum persons",
-                human: "Er "+(remaingPersons != 1 ? "zijn" : "is")+" nog maar "+remaingPersons+" "+(remaingPersons != 1 ? "plaatsen" : "plaats")+" vrij op het gekozen tijdstip. Jouw mandje is voor " + this.cart.persons + " "+(this.cart.persons != 1 ? "personen" : "persoon")+". Kies een ander tijdstip indien mogelijk.",
+                human: "Er "+(remaingPersons != 1 ? "zijn" : "is")+" nog maar "+remaingPersons+" "+(remaingPersons != 1 ? "plaatsen" : "plaats")+" vrij "+(availableTimeslots !=1 ? "op het gekozen tijdstip" : "voor dit evenement")+". Jouw mandje is voor " + this.cart.persons + " "+(this.cart.persons != 1 ? "personen" : "persoon")+(availableTimeslots !=1 ? ". Kies een ander tijdstip indien mogelijk." : ""),
                 field: "timeSlot"
             })
         }
