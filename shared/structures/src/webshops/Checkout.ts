@@ -227,6 +227,7 @@ export class Checkout extends AutoEncoder {
         
         const current = this.timeSlot
         const timeSlot = this.checkoutMethod.timeSlots.timeSlots.find(s => s.id == current.id)
+        const availableTimeslots = this.checkoutMethod.timeSlots.timeSlots.length
         
         if (!timeSlot) {
             throw new SimpleError({
@@ -242,7 +243,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "timeslot_full",
                 message: "Timeslot has reached maximum orders",
-                human: "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.",
+                human: (availableTimeslots !=1 ? "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk." : "Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen."),
                 field: "timeSlot"
             })
         }
@@ -250,7 +251,6 @@ export class Checkout extends AutoEncoder {
         // Check maximum
         if (timeSlot.remainingPersons !== null && this.cart.persons - this.reservedPersons > timeSlot.remainingPersons) {
             const remaingPersons = timeSlot.remainingPersons
-            const availableTimeslots = this.checkoutMethod.timeSlots.timeSlots.length
             if (remaingPersons === 0) {
                 throw new SimpleError({
                     code: "timeslot_full",
