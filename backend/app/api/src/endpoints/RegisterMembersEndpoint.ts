@@ -288,8 +288,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
                         })
                     }
-                } else {
-                    throw new Error("Unknown payment provider")
                 }
             }
 

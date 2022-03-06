@@ -1,31 +1,30 @@
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Address, Gender, Group, LegacyRecordType,MemberDetails, MemberWithRegistrations,Parent, ParentType } from '@stamhoofd/structures';
+import { Address, Gender, Group, MemberDetails, MemberWithRegistrations,Parent, ParentType } from '@stamhoofd/structures';
 import { Formatter,StringCompare } from '@stamhoofd/utility';
 
-import { SGVLid } from './SGVGroepsadministratie';
+import { SGVLid } from './SGVStructures';
 
 function deepEqual(x, y) {
-  if (x === y) {
-    return true;
-  }
-  else if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null)) {
-    if (Object.keys(x).length != Object.keys(y).length)
-      return false;
-
-    for (const prop in x) {
-      if (y.hasOwnProperty(prop))
-      {  
-        if (! deepEqual(x[prop], y[prop]))
-          return false;
-      }
-      else
-        return false;
+    if (x === y) {
+        return true;
     }
+    else if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null)) {
+        if (Object.keys(x).length != Object.keys(y).length)
+            return false;
 
-    return true;
-  }
-  else 
-    return false;
+        for (const prop in x) {
+            if (y.hasOwnProperty(prop))
+            {  
+                if (! deepEqual(x[prop], y[prop]))
+                    return false;
+            }
+            else
+                return false;
+        }
+
+        return true;
+    }
+    else 
+        return false;
 }
 
 function trim(t: string) {
@@ -260,12 +259,13 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         patch.contacten = newContacts
     }
 
-    if (!lid.gebruikersnaam && details.email) {
+    const patchSections = lid.links && Array.isArray(lid.links) ? (lid?.links?.find(l => l.method === "PATCH")?.sections ?? []) : []
+
+    if (patchSections.includes("email") && lid.email != details.email) {
         // Not possible to edit email if the user has a username set
         patch.email = details.email
     }
-
-
+    
     return patch
 }
 

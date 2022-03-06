@@ -1,8 +1,9 @@
+import { ObjectData } from "@simonbackx/simple-encoding";
 import { Address, Country, Group, GroupSettings,MemberDetails, Parent, ParentType } from "@stamhoofd/structures";
 
 import groepFuncties from './SGVDefaultFuncties.json';
 import { getPatch, splitStreetNumber } from './SGVGroepsadministratieSync';
-
+import { SGVLid } from "./SGVStructures";
 
 describe("Groepsadministratie Sync", () => {
     test("Reuse the address id", () => {
@@ -350,7 +351,7 @@ describe("Groepsadministratie Sync", () => {
         expect(p.contacten).toHaveLength(2)
 
         expect(p.contacten[0]).toMatchObject({
-             "id": "SGVIDOUDER1",
+            "id": "SGVIDOUDER1",
             "voornaam": "Simon",
             "achternaam": "Backx",
             "gsm": "",
@@ -373,13 +374,41 @@ describe("Groepsadministratie Sync", () => {
     })
 
     test("Keep existing functies, remove managed functies", () => {
-         const details = MemberDetails.create({
+        const details = MemberDetails.create({
             birthDay: new Date(),
             parents: []
         })
 
 
         const sgv = {
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/lid/123",
+                    "method": "GET",
+                    "secties": []
+                },
+                {
+                    "rel": "self",
+                    "href": "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/lid/123",
+                    "method": "PATCH",
+                    "secties": [
+                        "functies.O2209G",
+                        "adressen",
+                        "groepseigenVelden.O2209G",
+                        "contacten",
+                        "persoonsgegevens",
+                        "vgagegevens",
+                        "email"
+                    ]
+                },
+                {
+                    "rel": "steekkaart",
+                    "href": "https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga/lid/123/steekkaart",
+                    "method": "GET",
+                    "secties": []
+                }
+            ],
             functies: [
                 {
                     "functie": "859",
@@ -403,7 +432,9 @@ describe("Groepsadministratie Sync", () => {
             settings: GroupSettings.create({
                 name: "Jin",
                 startDate: new Date(),
-                endDate: new Date()
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
             })
         })
 
@@ -411,7 +442,9 @@ describe("Groepsadministratie Sync", () => {
             settings: GroupSettings.create({
                 name: "Kapoenen",
                 startDate: new Date(),
-                endDate: new Date()
+                endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
             })
         })
 
@@ -420,6 +453,8 @@ describe("Groepsadministratie Sync", () => {
                 name: "Woudlopers",
                 startDate: new Date(),
                 endDate: new Date(),
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
             })
         })
 
@@ -429,7 +464,9 @@ describe("Groepsadministratie Sync", () => {
                 startDate: new Date(),
                 endDate: new Date(),
                 minAge: 16,
-                maxAge: 17
+                maxAge: 17,
+                registrationEndDate: new Date(),
+                registrationStartDate: new Date(),
             })
         })
 
