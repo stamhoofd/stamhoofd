@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
@@ -30,6 +30,9 @@ export class STInvoiceItem extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     unitPrice = 0
+
+    @field({ decoder: BooleanDecoder, version: 155 })
+    canUseCredits = true
 
     get price(): number {
         return this.unitPrice * this.amount

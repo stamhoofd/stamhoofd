@@ -82,7 +82,9 @@ export class STCredit extends Model {
         // Apply credits
         const balance = await STCredit.getBalance(organizationId)
         if (balance > 0) {
-            const applyValue = Math.min(invoice.meta.priceWithoutVAT, balance)
+            // Loop all items where you can use credits for
+            const maxCredits = invoice.meta.items.filter(i => i.canUseCredits).reduce((price, item) => price + item.price, 0)
+            const applyValue = Math.min(maxCredits, balance)
 
             if (applyValue > 0) {
                 invoice.meta.items.push(STInvoiceItem.create({

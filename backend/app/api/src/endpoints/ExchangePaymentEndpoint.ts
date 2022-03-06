@@ -115,6 +115,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     description: "Via Buckaroo",
                     amount: 1,
                     unitPrice: transactionFee,
+                    canUseCredits: false
                 })
                 console.log("Scheduling transaction fee charge for ", payment.id, item)
                 await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
