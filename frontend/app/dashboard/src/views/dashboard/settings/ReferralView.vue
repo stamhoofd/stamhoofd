@@ -157,7 +157,7 @@
 
                 <p class="style-description-small">
                     * We betalen het tegoed nooit uit. Je kan het enkel gebruiken om pakketten in Stamhoofd aan te kopen. Je kan je tegoed niet doorgeven aan een andere vereniging. Je kan geen tegoed krijgen voor een vereniging die al Stamhoofd gebruikt of al heeft geregistreerd. Ook als die persoon al een andere vereniging heeft op Stamhoofd kan je er geen tegoed meer voor krijgen. 
-                    Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). 
+                    Tegoed vervalt als het één jaar lang niet gebruikt wordt (de geldigheid wordt telkens verlengd zodra er minstens 1 cent van gebruikt wordt). Je kan het tegoed niet gebruiken voor het betalen van transactiekosten van online betalingen.
                     Meerdere verenigingen zelf aanmaken om zo tegoed te krijgen is niet toegestaan.
                     Als het doorverwijzen gebeurt op een manier die als spam kan worden ervaren, kunnen we beslissen om het toekennen ongedaan te maken.
                 </p>
@@ -226,7 +226,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
         return this.status?.usedCodes.reduce((c, code) => c + (code.creditValue !== null ? 1 : 0), 0) ?? 0
     }
 
-     get canShare() {
+    get canShare() {
         return !!navigator.share
     }
 
@@ -238,7 +238,7 @@ export default class ReferralView extends Mixins(NavigationMixin) {
     }
 
     async downloadQR() {
-         try {
+        try {
             const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
             const url = await QRCode.toDataURL(this.href, { scale: 10 })
             const anchor = document.createElement('a');
