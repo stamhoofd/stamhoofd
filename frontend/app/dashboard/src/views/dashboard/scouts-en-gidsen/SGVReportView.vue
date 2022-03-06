@@ -109,7 +109,7 @@
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';

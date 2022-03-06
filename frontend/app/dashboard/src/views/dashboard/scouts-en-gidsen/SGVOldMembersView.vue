@@ -46,7 +46,7 @@ import { BackButton, Checkbox,LoadingButton, STErrorsDefault,STInputBox, STList,
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { SGVLid } from '../../../classes/SGVGroepsadministratie';
+import { SGVLid } from '../../../classes/SGVStructures';
 
 @Component({
     components: {

@@ -57,7 +57,7 @@ import { BackButton, Checkbox, LoadingButton, STErrorsDefault,STInputBox, STList
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import { SGVLidMatchVerify } from '../../../classes/SGVGroepsadministratie';
+import { SGVLidMatchVerify } from '../../../classes/SGVStructures';
 
 @Component({
     components: {

@@ -124,11 +124,11 @@ export default class ToastView extends Mixins(NavigationMixin) {
         position: absolute;
         left: 0;
         top: 0;
-        height: $border-width;
+        height: 2px;
         pointer-events: none;
         background: $color-primary;
-        border-top-right-radius: calc($border-width / 2);
-        border-bottom-right-radius: calc($border-width / 2);
+        border-top-right-radius: 1px;
+        border-bottom-right-radius: 1px;
         width: 0;
         opacity: 1;
         transition: width 0.3s, opacity 0.3s;
