@@ -16,6 +16,7 @@ import { DateTime } from 'luxon';
 
 import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
 import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
+import { AddressValidator } from './helpers/AddressValidator';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
 
@@ -502,6 +503,8 @@ async function checkBilling() {
     
 }
 
+//const citySync = AddressValidator.getSlowSync()
+
 // Schedule automatic paynl charges
 export const crons = () => {
     if (isRunningCrons) {
@@ -509,7 +512,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkSettlements().then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
+        checkSettlements()/*.then(citySync)*/.then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

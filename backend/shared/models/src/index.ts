@@ -26,6 +26,7 @@ export * from "./models/Ticket"
 export * from "./models/EmailTemplate"
 export * from "./models/BuckarooPayment"
 
+export * from "./models/addresses/Street"
 export * from "./models/addresses/City"
 export * from "./models/addresses/PostalCode"
 export * from "./models/addresses/Province"

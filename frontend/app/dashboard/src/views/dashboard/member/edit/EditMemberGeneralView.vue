@@ -32,7 +32,7 @@
             </div>
 
             <div>
-                <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" title="Adres (van dit lid)" :validator="validator" :required="false" />
+                <AddressInput v-if="isPropertyEnabled('address') || address" v-model="address" title="Adres (van dit lid)" :validator="validator" :required="false" :validate-server="validateServer" />
                 <EmailInput v-if="isPropertyEnabled('emailAddress') || email" v-model="email" title="E-mailadres (van dit lid)" placeholder="Enkel van lid zelf" :required="false" name="email" :validator="validator" />
                 <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" :title="$t('shared.inputs.mobile.label')+' (van dit lid)'" :validator="validator" :required="false" name="mobile_phone" placeholder="Enkel van lid zelf" />
             </div>
@@ -44,6 +44,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BirthDayInput, Checkbox, EmailInput, ErrorBox, LoadingButton,PhoneInput, Radio, RadioGroup, Slider, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components"
+import { NetworkManager } from '@stamhoofd/networking';
 import { Address, Gender } from "@stamhoofd/structures"
 import { MemberDetails } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -92,6 +93,10 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
                 return this.isValid()
             })
         }
+    }
+
+    get validateServer() {
+        return NetworkManager.server
     }
 
     get age() {

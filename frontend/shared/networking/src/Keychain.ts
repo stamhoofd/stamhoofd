@@ -1,7 +1,6 @@
 import { Decoder, MapDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { KeychainItem, Version } from '@stamhoofd/structures';
 
-import { AppManager } from './AppManager';
 import { Storage } from './Storage';
 
 /**

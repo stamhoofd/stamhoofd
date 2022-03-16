@@ -1,10 +1,10 @@
 import { column,Database,ManyToOneRelation,Model } from '@simonbackx/simple-database';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Country } from '@stamhoofd/structures';
-import { StringCompare } from '@stamhoofd/utility';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { City } from './City';
-import { Province } from './Province';
 
 export class PostalCode extends Model {
     static table = "postal_codes"
@@ -41,6 +41,10 @@ export class PostalCode extends Model {
 
         const cities = City.fromRows(results, City.table)
 
+        if (cities.length == 1) {
+            return cities[0]
+        }
+
         // Search by city name (first exact match, then allow errors)
         let bestScore = 0
         let bestCity: City | null = null
@@ -57,16 +61,40 @@ export class PostalCode extends Model {
             }
         }
 
-        if (bestScore < 3) {
+        if (bestCity && (bestScore < 3 || StringCompare.contains(cityName, bestCity.name) || StringCompare.contains(bestCity.name, cityName))) {
             return bestCity
         }
 
-        if (cities.length == 1 && cities[0].parentCityId !== null) {
+        bestScore = 0
+        bestCity = null
+
+        for (const city of cities) {
+            const match = StringCompare.matchCount(cityName, city.name)
+
+            if (bestCity === null || match > bestScore) {
+                bestCity = city
+                bestScore = match
+            }
+        }
+
+        if (bestCity && (bestScore > cityName.length/2 || StringCompare.contains(cityName, bestCity.name))) {
+            return bestCity
+        }
+
+        if (cities.length >= 1 && cities[0].parentCityId !== null && cities.every(c => c.parentCityId === cities[0].parentCityId)) {
             // Might have put a postal code of the parent city
             const parent = await City.getByID(cities[0].parentCityId)
             if (parent) {
                 const typo = StringCompare.typoCount(cityName, parent.name)
-                if (typo < 3) {
+                if (typo < 4 || StringCompare.contains(cityName, parent.name)) {
+                    if (cities.length > 1) {
+                        throw new SimpleError({
+                            code: "invalid_field",
+                            message: "Invalid city. Suggestions: " + Formatter.joinLast(cities.map(c => c.name), ", ", " of ") + "?",
+                            human: "Welke gemeente bedoel je precies? " + Formatter.joinLast(cities.map(c => c.name), ", ", " of ") + "?",
+                            field: "city"
+                        })
+                    }
                     return cities[0] // do not return parent here, because the postal code has priority
                 }
             }
@@ -111,7 +139,23 @@ export class PostalCode extends Model {
             }
         }
 
-        if (bestScore < 2) {
+        if (bestCity && (bestScore < 3 || StringCompare.contains(cityName, bestCity.name) || StringCompare.contains(bestCity.name, cityName))) {
+            return bestCity
+        }
+
+        bestScore = 0
+        bestCity = null
+
+        for (const city of cities) {
+            const match = StringCompare.matchCount(cityName, city.name)
+
+            if (bestCity === null || match > bestScore) {
+                bestCity = city
+                bestScore = match
+            }
+        }
+
+        if (bestCity && (bestScore > cityName.length/2 || StringCompare.contains(cityName, bestCity.name))) {
             return bestCity
         }
 

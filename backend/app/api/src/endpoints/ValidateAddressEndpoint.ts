@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from '@simonbackx/simple-errors';
-import { PostalCode } from '@stamhoofd/models';
-import { Address, Country, ValidatedAddress } from "@stamhoofd/structures";
+import { Address, ValidatedAddress } from "@stamhoofd/structures";
+
+import { AddressValidator } from '../helpers/AddressValidator';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -26,52 +26,6 @@ export class ValidateAddressEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        let postalCode = request.body.postalCode
-        if (request.body.country == Country.Netherlands) {
-            // Check if we have the right syntax
-            const stripped = postalCode.replace(/\s/g, '')
-            if (stripped.length != 6) {
-                throw new SimpleError({
-                    code: "invalid_field",
-                    message: "Invalid postal code format (NL)",
-                    human: "Ongeldig postcode formaat, voer in zoals '8011 PK'",
-                    field: "postalCode"
-                })
-            }
-
-            const numbers = stripped.slice(0, 4)
-            if (!/[0-9]{4}/.test(numbers)) {
-                throw new SimpleError({
-                    code: "invalid_field",
-                    message: "Invalid postal code format (NL)",
-                    human: "Ongeldig postcode formaat, voer in zoals '8011 PK'",
-                    field: "postalCode"
-                })
-            }
-
-            // Don't do validation on last letters
-            postalCode = numbers
-        }
-
-
-        const city = await PostalCode.getCity(postalCode, request.body.city, request.body.country)
-
-        if (!city) {
-            throw new SimpleError({
-                code: "invalid_field",
-                message: "Invalid postal code or city",
-                human: "Deze postcode en/of gemeente bestaat niet, kijk je even na op een typfout?",
-                field: "postalCode"
-            })
-        }
-
-        const validated = ValidatedAddress.create(Object.assign({ ... request.body }, {
-            city: city.name, // override misspelled addresses
-            cityId: city.id,
-            parentCityId: city.parentCityId,
-            provinceId: city.provinceId,
-        }))
-        
-        return new Response(validated);
+        return new Response(await AddressValidator.validate(request.body));
     }
 }

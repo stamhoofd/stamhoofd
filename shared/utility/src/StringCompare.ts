@@ -44,7 +44,7 @@ export class StringCompare {
         const firstRight = right[0]
 
         if (firstLeft == firstRight) {
-            return 1 + this.compare(left.substr(1), right.substr(1))
+            return 1 + this.compare(left.substr(1), right.substr(1), true)
         }
 
         if (allowSplit) {
@@ -58,6 +58,13 @@ export class StringCompare {
 
         // no split allowed -> continue to remove right side
         return this.compare(left, right.substr(1), false)
+    }
+
+    static matchCount(original: string, compareWith: string): number {
+        // remove special chars + lowercase
+        original = original.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ").trim();
+        compareWith = compareWith.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/, " ").trim();
+        return this.compare(original, compareWith)
     }
 
     static typoCount(original: string, compareWith: string): number {
