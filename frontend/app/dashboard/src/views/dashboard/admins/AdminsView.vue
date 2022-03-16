@@ -1,13 +1,13 @@
 <template>
     <div class="st-view admins-list-view">
         <STNavigationBar title="Beheerders">
-            <button slot="right" class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" @click="createAdmin">
+            <button slot="right" class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" type="button" @click="createAdmin">
                 <span class="icon add" />
                 <span>Beheerder</span>
             </button>
 
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
+            <button v-else slot="right" class="button icon close gray" type="button" @click="pop" />
         </STNavigationBar>
 
     
@@ -18,10 +18,6 @@
             <Spinner v-if="loading" />
 
             <template v-else>
-                <p v-if="admins.length == 1 && enableMemberModule" class="error-box">
-                    Als je jouw wachtwoord vergeet, heb je een andere beheerder nodig om de gegevens van jouw leden terug te halen. Voe die zeker toe en zorg dat de uitnodiging geaccepteerd wordt, want die vervalt!
-                </p>
-
                 <hr>
                 <h2>
                     Hoofdbeheerders
@@ -86,9 +82,9 @@
                             {{ role.name }}
                         </div>
                         <div>
-                            <button class="button icon gray arrow-up" @click="moveRoleUp(index, role)" />
-                            <button class="button icon gray arrow-down" @click="moveRoleDown(index, role)" />
-                            <button class="button text" @click="editRole(role)">
+                            <button class="button icon gray arrow-up" type="button" @click="moveRoleUp(index, role)" />
+                            <button class="button icon gray arrow-down" type="button" @click="moveRoleDown(index, role)" />
+                            <button class="button text" type="button" @click="editRole(role)">
                                 <span class="icon settings" />
                                 <span class="hide-smartphone">Bewerken</span>
                             </button>

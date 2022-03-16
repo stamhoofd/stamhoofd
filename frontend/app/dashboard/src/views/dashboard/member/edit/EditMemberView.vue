@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="member ? member.details.name : 'Nieuw lid'" :disabled="!isChanged" :loading="loading" @save="save">
+    <SaveView :title="member ? member.details.name : 'Nieuw lid'" :loading="loading" @save="save">
         <h1 v-if="member">
             Wijzig gegevens van {{ member.details.firstName }}
         </h1>

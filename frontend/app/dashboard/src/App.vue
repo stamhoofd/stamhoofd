@@ -155,9 +155,8 @@ export default class App extends Vue {
         if (parts.length == 1 && parts[0] == 'invite') {
             UrlHelper.shared.clear()
             const key = queryString.get('key');
-            const secret = queryString.get('secret');
 
-            if (key && secret) {
+            if (key) {
                 // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
                 (this.$refs.modalStack as any).present({
@@ -189,8 +188,7 @@ export default class App extends Vue {
                                         const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
                                         return new ComponentWithProperties(AcceptInviteView, {
                                             session,
-                                            invite: response.data,
-                                            secret
+                                            invite: response.data
                                         })
                                     } catch (e) {
                                         Logger.error(e)
@@ -410,17 +408,6 @@ export default class App extends Vue {
 
         } catch (e) {
             console.error(e)
-
-            // Show warnign instead
-            // new Toast("Je hebt geen toegang tot de huidige encryptiesleutel van deze vereniging. Vraag een hoofdbeheerder om jou terug toegang te geven.", "key-lost yellow").setHide(15*1000).setButton(new ToastButton("Meer info", () => {
-            //     (this.$refs.modalStack as any).present(
-            //         {
-            //             components: [
-            //                 AsyncComponent(() => import(/* webpackChunkName: "NoKeyView" */ './views/dashboard/NoKeyView.vue')).setDisplayStyle("popup")
-            //             ]
-            //         }
-            //     )
-            // })).show()
         }
     }
 }

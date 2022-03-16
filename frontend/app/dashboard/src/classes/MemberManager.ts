@@ -176,37 +176,6 @@ export class MemberManagerStatic extends MemberManagerBase {
         encryptedMembers.merge(p.members as any) // we can merge since it's a subtype
         return encryptedMembers
     }   
-    
-    /**
-     * Reset all the member keys + send invites
-     */
-    async createNewMemberKey(members: MemberWithRegistrations[]): Promise<MemberWithRegistrations | null> {
-        const keyPair = await Sodium.generateEncryptionKeyPair()
-        const patch = await this.getEncryptedMembers(members, OrganizationManager.organization, false, keyPair.publicKey)
-
-        const session = SessionManager.currentSession!
-        const response = await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/organization/members",
-            body: patch.members,
-            decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>)
-        })
-
-        // Send invites
-        const didSendInvite = new Set<string>()
-
-        for (const member of members) {
-            for (const user of member.users) {
-                if (didSendInvite.has(user.id) || !user.publicKey) {
-                    continue
-                }
-                await LoginHelper.shareKey(keyPair, user.id, user.publicKey)
-                didSendInvite.add(user.id)
-            }
-        }
-
-        return (await this.decryptMembersWithRegistrations(response.data))[0] ?? null
-    }
 
     async checkInaccurateMetaData(members: MemberWithRegistrations[], organization: Organization) {
         const inaccurate: MemberWithRegistrations[] = []

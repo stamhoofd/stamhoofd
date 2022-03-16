@@ -158,6 +158,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.meta = request.body.organization.meta
         organization.address = request.body.organization.address
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? []
+        organization.privateMeta.privateKey = request.body.organization.privateMeta?.privateKey ?? null
 
         // call CompleteRegistration
         // content_name, currency, status, value

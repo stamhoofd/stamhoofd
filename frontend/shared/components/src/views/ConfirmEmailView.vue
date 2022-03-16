@@ -28,7 +28,7 @@
 
             <STToolbar>
                 <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary full">
+                    <button class="button primary full" type="button">
                         <span>Doorgaan</span>
                         <span class="icon arrow-right" />
                     </button>

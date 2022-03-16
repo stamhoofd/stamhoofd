@@ -1,7 +1,7 @@
 <template>
     <div id="send-invite-view" class="st-view" :class="{ 'android-icons': isAndroid }">
         <STNavigationBar title="Gelukt!">
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -37,7 +37,7 @@
 
         <STToolbar v-if="canShare">
             <template slot="right">
-                <button class="button primary" @click="share">
+                <button class="button primary" type="button" @click="share">
                     <span class="icon share" />
                     <span>Verstuur via...</span>
                 </button>
@@ -91,7 +91,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     }
 
     get url() {
-        return "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+UrlHelper.transformUrlForLocale("/invite?secret="+encodeURIComponent(this.secret)+"&key="+encodeURIComponent(this.invite.key), I18nController.shared.language, I18nController.shared.country)
+        return "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+UrlHelper.transformUrlForLocale("/invite?key="+encodeURIComponent(this.invite.key), I18nController.shared.language, I18nController.shared.country)
     }
 
     get canShare() {
@@ -101,7 +101,7 @@ export default class SendInviteView extends Mixins(NavigationMixin) {
     share() {
         navigator.share({
             title: "Uitnodiging voor Stamhoofd",
-            text: "Registreer je binnen het uur via deze link.",
+            text: "Registreer je via deze link.",
             url: this.url,
         }).catch(console.error)
     }

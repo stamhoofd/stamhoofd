@@ -280,33 +280,7 @@ export class Session implements RequestMiddleware {
 
     async checkUserInvites(user: MyUser) {
         if (user.incomingInvites.length > 0) {
-            const privateKey = this.getUserPrivateKey()
-            const publicKey = user.publicKey
-
-            if (!privateKey) {
-                console.warn("Could not trade available invites because private user key is missing")
-                return
-            }
-
             for (const invite of user.incomingInvites) {
-                try {
-                    const decryptedKeychainItems = await Sodium.unsealMessage(invite.keychainItems!, publicKey, privateKey)
-                    await this.addToKeychain(decryptedKeychainItems)
-
-                    if (invite.sender.permissions && !user.permissions) {
-                        new Toast("We hebben jou toegang gegeven tot bepaalde gegevens van leden", "key green").setHide(15*1000).show()
-                    } else {
-                        new Toast(invite.sender.firstName+" heeft een encryptiesleutel met jou gedeeld", "key green").setHide(15*1000).show()
-                    }
-                } catch (e) {
-                    console.error(e)
-                    if (invite.sender.permissions && !user.permissions) {
-                        // Do not show a message
-                    } else {
-                        new Toast(invite.sender.firstName+" wou een encryptiesleutel met jou delen, maar deze uitnodiging is ongeldig geworden. Vraag om de uitnodiging opnieuw te versturen.", "error red").setHide(15*1000).show()
-                    }
-                }
-                
                 // Remove invite if succeeded
                 await this.authenticatedServer.request({
                     method: "POST",

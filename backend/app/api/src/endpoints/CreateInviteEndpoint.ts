@@ -63,11 +63,7 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
         invite.senderId = user.id
         invite.userDetails = request.body.userDetails
         invite.organizationId = user.organizationId
-        invite.keychainItems = request.body.keychainItems
         invite.key = bs58.encode(await randomBytes(32)).toLowerCase();
-
-        // todo: validate member access ids
-        // invite.memberIds = request.body.memberIds
 
         // RESTRICTED FOR ADMINS
         if (user.permissions.hasFullAccess()) {

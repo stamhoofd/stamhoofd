@@ -108,9 +108,6 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
     @Prop({ required: true})
     invite!: Invite    
 
-    @Prop({ required: true})
-    secret!: string 
-
     loading = false
 
     firstName = this.invite.receiver?.firstName ?? this.invite?.userDetails?.firstName ?? "?"
@@ -218,7 +215,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
                 try {
                     const token = await LoginHelper.signUp(this.session, this.email, this.password, this.firstName, this.lastName);
-                    LoginHelper.saveInvite(this.invite, this.secret)
+                    LoginHelper.saveInvite(this.invite)
                     this.show(new ComponentWithProperties(ConfirmEmailView, { token, session: this.session, email: this.email }))
                 } catch (e) {
                     component.hide()
@@ -227,7 +224,7 @@ export default class AcceptInviteView extends Mixins(NavigationMixin){
                 
                 component.hide()
             } else {
-                await LoginHelper.tradeInvite(this.session!, this.invite.key, this.secret)
+                await LoginHelper.tradeInvite(this.session!, this.invite.key)
                 SessionManager.clearCurrentSession()
                 await SessionManager.setCurrentSession(this.session!)
                 this.dismiss({ force: true })

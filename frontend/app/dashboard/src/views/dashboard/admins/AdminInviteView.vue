@@ -7,13 +7,10 @@
             Beheerder bewerken
         </h1>
 
-        <p v-if="isNew && !forceCreate" class="info-box">
-            Vul een e-mailadres in om ervoor te zorgen dat de uitnodiging langer geldig is (7 dagen i.p.v. 4 uur). Zorg wel dat dit een juist e-mailadres is, want een verificatie is nodig via e-mail.
-        </p>
-        <button v-else-if="!user" class="warning-box with-button selectable" type="button" @click="resendInvite">
+        <button v-if="forceCreate || (!isNew && !user)" class="warning-box with-button selectable" type="button" @click="resendInvite">
             Deze beheerder heeft de uitnodiging nog niet geaccepteerd
 
-            <span v-if="!isNew && !user" class="button text">
+            <span class="button text">
                 Opnieuw versturen
             </span>
         </button>
@@ -74,42 +71,6 @@
             <span class="icon trash" />
             <span>Verwijderen</span>
         </button>
-
-        <template v-if="editUser !== null">
-            <hr>
-            <h2>Encryptiesleutels</h2>
-            <p>Alle gegevens van leden worden versleuteld met een sleutel. Die sleutel kan door de tijd gewijzigd worden door beheerders. Er is altijd maximaal één encryptiesleutel actief voor de hele vereniging tegelijkertijd. Als een lid inschrijft of gegevens wijzigt op dit moment, wordt altijd die sleutel gebruikt. Het kan dus zijn dat je wel toegang hebt tot de laatste sleutel, maar niet tot een oude sleutel waarmee een lid heeft geregistreerd. Daardoor kan je die gegevens niet raadplegen. Hieronder kan je zien tot welke sleutels deze beheerder toegang heeft, en je kan een sleutel waar jij toegang tot hebt doorsturen. Dit heb je nodig als deze beheerder zijn wachtwoord is vergeten, want dan verliest hij toegang tot alle sleutels nadat hij zijn wachtwoord heeft gereset. Stamhoofd heeft zelf nooit toegang tot sleutels en kan deze dus ook niet herstellen als ze verloren zijn.</p>
-
-            <p v-if="!hasKey" class="warning-box">
-                {{ user.firstName }} heeft geen toegang tot de huidige sleutel. Je kan hieronder toegang geven tot de sleutel als je die zelf hebt.
-            </p>
-
-            <Spinner v-if="loadingKeys" />
-
-            <STList>
-                <STListItem v-for="key in availableKeys" :key="key.publicKey">
-                    <span slot="left" class="icon key" />
-                    <h2 class="style-title-list">
-                        Sleutel {{ key.publicKey.substring(0, 7).toUpperCase() }}
-                    </h2>
-                    <p v-if="!key.end" class="style-description-small">
-                        Huidige sleutel voor iedereen
-                    </p>
-                    <p v-else class="style-description-small">
-                        Sommige leden die ingeschreven of gewijzigd zijn tussen {{ key.start | date }} en {{ key.end | date }} gebruiken deze sleutel nog
-                    </p>
-                    <button v-if="!key.hasAccess && canShareKey(key.publicKey)" class="button text" type="button" @click="shareKey(key.publicKey)">
-                        <span class="icon privacy" />
-                        <span>Toegang geven</span>
-                    </button>
-
-                    <template #right>
-                        <span v-if="!key.hasAccess" v-tooltip="user.firstName+' heeft geen toegang tot deze sleutel'" class="icon error" />
-                        <span v-else v-tooltip="user.firstName+' heeft toegang tot deze sleutel'" class="icon success green" />
-                    </template>
-                </STListItem>
-            </STList>
-        </template>
     </SaveView>
 </template>
 
@@ -119,9 +80,8 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
-import { Sodium } from '@stamhoofd/crypto';
-import { Keychain, LoginHelper, SessionManager } from '@stamhoofd/networking';
-import { Invite, InviteKeychainItem, InviteUserDetails, KeychainedResponseDecoder, NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures";
+import { Keychain, SessionManager } from '@stamhoofd/networking';
+import { Invite, InviteUserDetails, KeychainedResponseDecoder, NewInvite, Organization, OrganizationKeyUser, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -216,18 +176,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization
     }
 
-    get hasKey() {
-        if (this.loadingKeys) {
-            return true
-        }
-
-        return !!this.availableKeys.find(f => f.publicKey == this.organization.publicKey && f.hasAccess)
-    }
-
-    canShareKey(key: string) {
-        return !!Keychain.getItem(key)
-    }
-
     get roles() {
         return this.organization.privateMeta?.roles ?? []
     }
@@ -270,55 +218,6 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                 }
             }),
         }).setDisplayStyle("popup"))
-    }
-
-    async shareKey(key: string) {
-        if (this.saving) {
-            return;
-        }
-
-        const item = Keychain.getItem(key)
-        if (!item) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: "",
-                message: "Je hebt zelf geen toegang tot deze sleutel. Vraag aan een andere beheerder die wel toegang heeft tot deze sleutel om toegang te verlenen."
-            }))
-            return
-        }
-        let keyPair: {
-            publicKey: string;
-            privateKey: string;
-        } | undefined = undefined
-        try {
-            keyPair = await SessionManager.currentSession!.decryptKeychainItem(item)
-        } catch (e) {
-            console.log(e)
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: "",
-                message: "Je hebt zelf geen toegang tot deze sleutel. Vraag aan een andere beheerder die wel toegang heeft tot deze sleutel om toegang te verlenen."
-            }))
-            return
-        }
-
-        if (!this.editUser || !this.editUser.publicKey) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                code: "",
-                message: "Deze gebruiker heeft nog nooit ingelogd en nog nooit een wachtwoord ingesteld. We kunnen op geen enkele manier de sleutel delen. Vraag aan deze gebruiker om zich te registereren met dit e-mailadres en probeer daarna opnieuw."
-            }))
-            return
-        }
-
-        this.saving = true
-
-        try {
-            const invite = await LoginHelper.shareKey(keyPair, this.editUser.id, this.editUser.publicKey)
-            new Toast("Als "+this.editUser.firstName+" nu inlogt (voor "+Formatter.date(invite.validUntil)+") in Stamhoofd krijgt hij/zij automatisch toegang tot deze sleutel.", "success green").setHide(7000).show()
-            this.saving = false
-        } catch (e) {
-            console.error(e)
-            this.errorBox = new ErrorBox(e)
-            this.saving = false
-        }
     }
 
     mounted() {
@@ -419,22 +318,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
 
         if (this.isNew) {
             // Encrypt keychain items
-            const secret = await Sodium.generateSecretKey()
-            const keychainItem = Keychain.getItem(OrganizationManager.organization.publicKey)
-
-            if (!keychainItem) {
-                throw new Error("Missing organization keychain")
-            }
-
-            const session = SessionManager.currentSession!
-            const keyPair = await session.decryptKeychainItem(keychainItem)
-
-            const items = new VersionBox([InviteKeychainItem.create({
-                publicKey: keyPair.publicKey,
-                privateKey: keyPair.privateKey
-            })])
-
-            this.createInvite.keychainItems = await Sodium.encryptMessage(JSON.stringify(items.encode({ version: Version })), secret)
+            this.createInvite.keychainItems = null
 
             try {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
@@ -452,7 +336,7 @@ export default class AdminInviteView extends Mixins(NavigationMixin) {
                 this.editInvite?.set(response.data)
                 this.patchInvite = null
 
-                const component = new ComponentWithProperties(SendInviteView, { secret, invite: response.data })
+                const component = new ComponentWithProperties(SendInviteView, { invite: response.data })
                 if (this.forceCreate) {
                     this.present({ components: [component], modalDisplayStyle: "popup" })
                 } else {

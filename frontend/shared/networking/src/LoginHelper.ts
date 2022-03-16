@@ -27,9 +27,6 @@ class StoredKeys extends AutoEncoder {
 class StoredInvite extends AutoEncoder {
     @field({ decoder: Invite })
     invite: Invite
-
-    @field({ decoder: StringDecoder })
-    secret: string
 }
 
 export class LoginHelper {
@@ -303,10 +300,9 @@ export class LoginHelper {
     /**
      * Save an invite until the e-mail address we have is valid
      */
-    static saveInvite(invite: Invite, secret: string) {
+    static saveInvite(invite: Invite) {
         this.addStoredInvite(StoredInvite.create({
-            invite,
-            secret
+            invite
         }))
     }
 
@@ -317,7 +313,7 @@ export class LoginHelper {
         for (const invite of invites) {
             if (invite.invite.isValid() && invite.invite.organization.id === session.organizationId) {
                 try {
-                    await this.tradeInvite(session, invite.invite.key, invite.secret, true)
+                    await this.tradeInvite(session, invite.invite.key, true)
                     traded = true
                 } catch(e) {
                     console.error(e)
@@ -336,21 +332,12 @@ export class LoginHelper {
         this.clearStoredInvites()
     }
 
-    static async tradeInvite(session: Session, key: string, secret: string, multiple = false) {
-        const response = await session.authenticatedServer.request({
+    static async tradeInvite(session: Session, key: string, multiple = false) {
+        await session.authenticatedServer.request({
             method: "POST",
             path: "/invite/"+encodeURIComponent(key)+"/trade",
             decoder: TradedInvite as Decoder<TradedInvite>
         })
-
-        // todo: store this result until completed the trade in!
-
-        const encryptedKeychainItems = response.data.keychainItems
-        
-        if (encryptedKeychainItems) {
-            const decrypted = await Sodium.decryptMessage(encryptedKeychainItems, secret)
-            await session.addToKeychain(decrypted)
-        }
 
         // Clear user since permissions have changed
         if (!multiple) {
@@ -479,16 +466,15 @@ export class LoginHelper {
         try {
             session.preventComplete = true
 
-
             console.log("Set token")
             session.setToken(response.data)
+            await this.tradeInvitesIfNeeded(session)
 
             // Request additional data
             console.log("Fetching user")
             await session.fetchUser()
 
             await session.setEncryptionKey(storedKeys.authEncryptionKey)
-            await this.tradeInvitesIfNeeded(session)
 
             // if user / organization got cleared due to an invite
             if (!session.isComplete()) {
@@ -650,10 +636,11 @@ export class LoginHelper {
         });
 
         organization.publicKey = organizationKeyPair.publicKey
+        organization.privateMeta!.privateKey = organizationKeyPair.privateKey
 
         const item = KeychainItem.create({
             publicKey: organization.publicKey,
-            encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey)
+            encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey),
         })
 
         // Do netwowrk request to create organization
@@ -695,29 +682,6 @@ export class LoginHelper {
         */
     }
 
-    static async shareKey(keyPair: { publicKey: string; privateKey: string; }, receiverId: string, receiverPulicKey: string): Promise<Invite> {
-        // Create an invite (automatic one)
-        const items = new VersionBox([InviteKeychainItem.create({
-            publicKey: keyPair.publicKey,
-            privateKey: keyPair.privateKey
-        })])
-
-        const invite = NewInvite.create({ 
-            userDetails: null,
-            permissions: null,
-            receiverId,
-            keychainItems: await Sodium.sealMessage(JSON.stringify(items.encode({ version: Version })), receiverPulicKey)
-        })
-
-        const response = await SessionManager.currentSession!.authenticatedServer.request({
-            method: "POST",
-            path: "/invite",
-            body: invite,
-            decoder: Invite as Decoder<Invite>
-        })
-        return response.data
-    }
-
     static async loadAdmins(shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
@@ -729,36 +693,6 @@ export class LoginHelper {
         })
 
         return response.data
-    }
-
-    static async changeOrganizationKey(session: Session) {
-        const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
-        const item = await session.createKeychainItem(organizationKeyPair)
-
-        // Send invites to all other administrators
-        // Before we change the key
-        const organization = await this.loadAdmins()
-        for (const admin of organization.users) {
-            if (admin.publicKey && admin.id !== SessionManager.currentSession!.user!.id) {
-                await this.shareKey(organizationKeyPair, admin.id, admin.publicKey)
-            }
-        }
-
-        // Do netwowrk request to create organization
-        await session.authenticatedServer.request({
-            method: "POST",
-            path: "/organization/change-key",
-            body: ChangeOrganizationKeyRequest.create({
-                publicKey: organizationKeyPair.publicKey,
-                keychainItems: [
-                    item
-                ]
-            })
-        })
-
-        Keychain.addItem(item)
-        await session.updateData(true)
-        await SessionManager.setCurrentSession(session)
     }
 
     static async changePassword(session: Session, password: string, force = false) {

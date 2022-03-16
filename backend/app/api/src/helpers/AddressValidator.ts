@@ -79,7 +79,7 @@ export class AddressValidatorStatic {
                 streets = await Street.where({ cityId: city.parentCityId ?? city.id })
             }
 
-            if (streets.length > 0) {
+            if (STAMHOOFD.environment === "development" && streets.length > 0) {
                 // First search by typo count
                 let bestScore = 0
                 let bestStreet: Street | undefined = undefined
