@@ -1,4 +1,4 @@
-import { AutoEncoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder,BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 export class OrganizationServerMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
@@ -16,6 +16,13 @@ export class OrganizationServerMetaData extends AutoEncoder {
      */
     @field({ decoder: DateDecoder, optional: true, version: 37 })
     firstInvalidDNSRecords?: Date
+
+    /**
+     * Whether an email has been send to say that the domain is setup correctly
+     * Set back to false when changing the domain
+     */
+    @field({ decoder: BooleanDecoder, optional: true, version: 157 })
+    didSendDomainSetupMail = false
 
     /**
      * When the DNS records are invalid for the first time, this timestamp will get set.

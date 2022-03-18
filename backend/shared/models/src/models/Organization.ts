@@ -312,7 +312,13 @@ export class Organization extends Model {
                 organization.privateMeta.mailDomain = organization.privateMeta.pendingMailDomain
                 organization.privateMeta.pendingMailDomain = null;
             }
+
             organization.serverMeta.firstInvalidDNSRecords = undefined
+
+            const didSendDomainSetupMail = organization.serverMeta.didSendDomainSetupMail
+            organization.serverMeta.didSendDomainSetupMail = true
+
+            const didSendWarning = organization.serverMeta.DNSRecordWarningCount > 0
             organization.serverMeta.DNSRecordWarningCount = 0
 
             const wasActive = this.privateMeta.mailDomainActive
@@ -324,15 +330,23 @@ export class Organization extends Model {
             // yay! Do not Save until after doing AWS changes
             await organization.save()
 
-            if (!wasActive && this.privateMeta.mailDomainActive) {
+            if (!didSendDomainSetupMail || (!wasActive && this.privateMeta.mailDomainActive && didSendWarning)) {
                 // Became valid -> send an e-mail to the organization admins
                 const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
 
-                Email.sendInternal({
-                    to, 
-                    subject: "Jullie domeinnaam is nu actief", 
-                    text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via "+this.i18n.$t("shared.emails.general")+"\n\nVeel succes!\n\nSimon van Stamhoofd"
-                }, this.i18n)
+                if (!didSendDomainSetupMail) {
+                    Email.sendInternal({
+                        to, 
+                        subject: "Jullie domeinnaam is actief", 
+                        text: "Hallo daar!\n\nGoed nieuws! Vanaf nu is jullie eigen domeinnaam voor Stamhoofd volledig actief. " + (this.meta.modules.useMembers ? "Leden kunnen nu dus inschrijven via " + organization.registerDomain + " en e-mails worden verstuurd vanaf @" + organization.privateMeta.mailDomain : "E-mails worden nu verstuurd vanaf @"+organization.privateMeta.mailDomain) +". \n\nStuur ons gerust je vragen via "+this.i18n.$t("shared.emails.general")+"\n\nVeel succes!\n\nSimon van Stamhoofd"
+                    }, this.i18n)
+                } else {
+                    Email.sendInternal({
+                        to, 
+                        subject: "Domeinnaam instellingen zijn terug geldig", 
+                        text: "Hallo daar!\n\nGoed nieuws! Bij een routinecontrole hebben we gemerkt dat de DNS-instellingen van jullie domeinnaam terug geldig zijn. Vanaf nu is jullie eigen domeinnaam voor Stamhoofd dus terug volledig actief.\n\nMet vriendelijke groeten,\nStamhoofd"
+                    }, this.i18n)
+                }
             }
         } else {
             // DNS settings gone broken

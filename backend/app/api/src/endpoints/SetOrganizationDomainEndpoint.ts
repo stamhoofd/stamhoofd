@@ -96,6 +96,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             // Reset notification counters
             organization.serverMeta.DNSRecordWarningCount = 0
             organization.serverMeta.firstInvalidDNSRecords = undefined
+            organization.serverMeta.didSendDomainSetupMail = false
 
             // Generate new DNS-records
             organization.privateMeta.dnsRecords = []
