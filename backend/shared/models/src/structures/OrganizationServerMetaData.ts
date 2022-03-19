@@ -22,7 +22,7 @@ export class OrganizationServerMetaData extends AutoEncoder {
      * Set back to false when changing the domain
      */
     @field({ decoder: BooleanDecoder, optional: true, version: 157 })
-    didSendDomainSetupMail = false
+    didSendDomainSetupMail = true
 
     /**
      * When the DNS records are invalid for the first time, this timestamp will get set.

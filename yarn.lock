@@ -1818,6 +1818,11 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.4.4.tgz#0106eb5a6060f9f5210aae45f56c424ec9b71d51"
   integrity sha512-vK3fRK4VQesMN1nrC/6Ijos4X3s5xbcxk6yWOA7j7wWmn6ZSsufvwYGeMnKhJH+us93hAmoTp5SYscunz7caGw==
 
+"@simonbackx/simple-encoding@^2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.4.5.tgz#eb4e92a374ade12a38d145badc7243889be11d82"
+  integrity sha512-IaHqM5tg1Uf4o+V8E8kwSXHDDVxt8XVWnRkq2UJUatg3rbEiyLT/AJQxk7l6V8SPr1bHgkBqBdE7MGw1RTYvDg==
+
 "@simonbackx/simple-endpoints@^1.10.1":
   version "1.10.1"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.10.1.tgz#d5412d0693e6aa3952132ce2b6e766556a8dd77f"

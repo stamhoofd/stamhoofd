@@ -58,6 +58,9 @@ export class OrderData extends Checkout {
     @field({ decoder: StringDecoder, version: 129 })
     consumerLanguage = "nl"
 
+    @field({ decoder: StringDecoder, version: 158 })
+    comments = ""
+
     // Payment method is required
     @field({ decoder: new EnumDecoder(PaymentMethodV150) })
     @field({ 

@@ -199,6 +199,25 @@
                 </STListItem>
             </STList>
 
+            <div v-if="patchedOrder.data.comments" class="container">
+                <hr>
+                <h2 class="style-with-button">
+                    <div>Notities</div>
+                    <div v-if="hasWrite">
+                        <button type="button" class="button icon edit gray" @click="editComments()" />
+                    </div>
+                </h2>
+
+                <p class="pre-wrap" v-text="patchedOrder.data.comments" />
+            </div>
+            <div v-else-if="hasWrite" class="container">
+                <hr>
+                <button class="button text selected" type="button" @click="editComments()">
+                    <span class="icon add" />
+                    <span>Notities toevoegen</span>
+                </button>
+            </div>
+
             <div v-if="patchedOrder.data.checkoutMethod && patchedOrder.data.checkoutMethod.description" class="container">
                 <hr>
                 <h2 v-if="patchedOrder.data.checkoutMethod.type == 'Takeout'">
@@ -256,14 +275,6 @@
                 <p>Is deze persoon zijn link kwijt, of is er een fout e-mailadres opgegeven? Dan kan je de volgende link bezorgen om de tickets opnieuw te laten downloaden.</p>
 
                 <input v-tooltip="'Klik om te kopiëren'" class="input" :value="orderUrl" readonly @click="copyElement">
-            </div>
-
-            <div v-if="hasWrite" class="container">
-                <hr>
-                <h2>Wijzigingen maken</h2>
-                <p>
-                    Als een bestelling geplaatst wordt, dan houden we een momentopname bij van die bestelling. Als je daarna bijvoorbeeld de naam van een product wijzigt, blijft die onveranderd in deze bestelling. Je kan dit corrigeren door bovenaan op een product te klikken, de (eventuele) wijzigingen na te kijken en op te slaan. Als er intussen bijvoorbeeld nieuwe keuzemogelijkheden zijn toegevoegd, kan je dan ook een keuze maken.
-                </p>
             </div>
         </main>
 
@@ -450,6 +461,14 @@ export default class OrderView extends Mixins(NavigationMixin){
         this.present(displayedComponent.setDisplayStyle("overlay"));
     }
 
+    editOrder() {
+        this.actionBuilder.editOrder(this.order).catch(console.error)
+    }
+
+    editComments() {
+        this.actionBuilder.editOrder(this.order, "comments").catch(console.error)
+    }
+
     created() {
         if (this.hasTickets) {
             this.recheckTickets()
@@ -576,6 +595,9 @@ export default class OrderView extends Mixins(NavigationMixin){
             }
             this.patchOrder = PrivateOrder.patch({})
             this.downloadNewTickets()
+
+            // Force webshop refetch to update stocks
+            this.webshopManager.loadWebshop(false).catch(console.error);
         }).catch((e) => {
             this.saving = false
             Toast.fromError(e).show()

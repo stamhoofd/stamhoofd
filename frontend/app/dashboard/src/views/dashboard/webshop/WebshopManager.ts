@@ -59,7 +59,7 @@ export class WebshopManager {
     /**
      * Fetch a webshop every time
      */
-    async fetchWebshop(shouldRetry = true) {
+    private async fetchWebshop(shouldRetry = true) {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "GET",
             path: "/webshop/"+this.preview.id,

@@ -489,6 +489,23 @@
                 "policies": [
                     {
                         "subjects": [
+                            "stamhoofd.dev",
+                            "dev.stamhoofd.be",
+                            "dev.stamhoofd.nl",
+                            "*.dev.stamhoofd.be",
+                            "*.dev.stamhoofd.nl",
+                            "*.shop.stamhoofd.dev",
+                            "api.admin.stamhoofd.dev",
+                            "login.sgv.stamhoofd.dev",
+                            "groepsadmin.sgv.stamhoofd.dev"
+                        ],
+                        "on_demand": false,
+                        "issuers": [{
+                            "module": "internal"
+                        }]
+                    },
+                    {
+                        "subjects": [
                             "*.stamhoofd.dev",
                             "*.api.stamhoofd.dev"
                         ],
@@ -503,23 +520,6 @@
                                     }
                                 }
                             }
-                        }]
-                    },
-                    {
-                        "subjects": [
-                            "stamhoofd.dev",
-                            "dev.stamhoofd.be",
-                            "dev.stamhoofd.nl",
-                            "*.dev.stamhoofd.be",
-                            "*.dev.stamhoofd.nl",
-                            "*.shop.stamhoofd.dev",
-                            "api.admin.stamhoofd.dev",
-                            "login.sgv.stamhoofd.dev",
-                            "groepsadmin.sgv.stamhoofd.dev"
-                        ],
-                        "on_demand": false,
-                        "issuers": [{
-                            "module": "internal"
                         }]
                     },
                     {

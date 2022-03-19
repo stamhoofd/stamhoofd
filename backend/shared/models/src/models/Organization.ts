@@ -330,7 +330,7 @@ export class Organization extends Model {
             // yay! Do not Save until after doing AWS changes
             await organization.save()
 
-            if (!didSendDomainSetupMail || (!wasActive && this.privateMeta.mailDomainActive && didSendWarning)) {
+            if (!wasActive && this.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning)) {
                 // Became valid -> send an e-mail to the organization admins
                 const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
 

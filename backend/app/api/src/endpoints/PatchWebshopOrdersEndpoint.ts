@@ -65,6 +65,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 }
             })
 
+            // Todo: handle order creation here
+
             for (const patch of request.body) {
                 const model = orders.find(p => p.id == patch.id)
                 if (!model) {
@@ -81,6 +83,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 // -> the user doesn't need to download the ticket again
                 // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
 
+                const previousData = model.data.clone()
                 if (patch.data) {
                     model.data.patchOrPut(patch.data)
                 }
@@ -88,22 +91,12 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 if (model.status === OrderStatus.Deleted) {
                     model.data.removePersonalData()
                 }
-            }
 
-            // Save best inside the queue to prevent duplicate stock updates
-            for (const order of orders) {
-                // Automatically checks if it is changed or not
-                await order.save()
+                await model.save()
+                await model.setRelation(Order.webshop, webshop).updateStock(previousData)
             }
 
             const mapped = orders.map(order => order.setRelation(Order.webshop, webshop))
-
-            // Update stock if needed: add or remove it from the stock
-            // Save best inside the queue to prevent duplicate stock updates
-            for (const order of mapped) {
-                await order.updateStock()
-            }
-
             return mapped
         })
 

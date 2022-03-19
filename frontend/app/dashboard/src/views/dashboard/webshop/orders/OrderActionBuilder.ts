@@ -54,6 +54,19 @@ export class OrderActionBuilder {
     getActions() {
         return [
             new TableAction({
+                name: "Wijzig gegevens...",
+                enabled: this.webshopManager.hasWrite,
+                icon: "edit",
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: true,
+                singleSelection: true,
+                handler: async (orders: PrivateOrder[]) => {
+                    await this.editOrder(orders[0])
+                }
+            }),
+
+            new TableAction({
                 name: "Wijzig status",
                 enabled: this.webshopManager.hasWrite,
                 icon: "flag",
@@ -119,6 +132,15 @@ export class OrderActionBuilder {
                 }
             })
         ]
+    }
+
+    async editOrder(order: PrivateOrder, mode?: "comments") {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditOrderView" */ "./EditOrderView.vue"), {
+            initialOrder: order,
+            webshopManager: this.webshopManager,
+            mode
+        });
+        this.component.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     async sms(orders: PrivateOrder[]) {
