@@ -378,7 +378,7 @@ export class Order extends Model {
             replyTo,
             to: toStr,
             subject: "["+this.webshop.meta.name+"] Betaling ontvangen (bestelling "+this.number+")",
-            text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van jouw bestelling (#"+ this.number +") in onze administratie gemarkeerd als betaald. Je kan jouw bestelling nakijken via de volgende link:"
+            text: "Dag "+customer.firstName+", \n\nWe hebben jouw bestelling (#"+ this.number +") in onze administratie gemarkeerd als betaald. Je kan jouw bestelling nakijken via de volgende link:"
             + "\n"
             + this.getUrl()
             +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",

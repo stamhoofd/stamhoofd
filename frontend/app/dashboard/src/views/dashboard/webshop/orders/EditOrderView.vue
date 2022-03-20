@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!isChanged" class="order-edit-view" :loading="saving" @save="save">
+    <SaveView :title="title" class="edit-order-view" :disabled="!isChanged" :loading="saving" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -124,16 +124,63 @@
 
                 <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
             </template>
+
+            <hr>
+            <h2>Winkelmandje</h2>
+
+            <STList>
+                <STListItem v-for="cartItem in patchedOrder.data.cart.items" :key="cartItem.id" class="cart-item-row" :selectable="true" @click="editCartItem(cartItem)">
+                    <h3>
+                        <span>{{ cartItem.product.name }}</span>
+                        <span class="icon arrow-right-small gray" />
+                    </h3>
+                    <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
+
+                    <p v-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount < cartItem.amount" class="warning-box">
+                        De voorraad van {{ cartItem.product.name }} zal verminderd worden met {{ cartItem.amount - cartItem.reservedAmount }} stuk(s)
+                    </p>
+                    <p v-else-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount > cartItem.amount" class="warning-box">
+                        De voorraad van {{ cartItem.product.name }} zal aangevuld worden met {{ cartItem.reservedAmount - cartItem.amount }} stuk(s)
+                    </p>
+
+                    <footer>
+                        <p class="price">
+                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
+                        </p>
+                        <div @click.stop>
+                            <button type="button" class="button icon trash gray" @click="deleteItem(cartItem)" />
+                        </div>
+                    </footer>
+
+                    <figure v-if="imageSrc(cartItem)" slot="right">
+                        <img :src="imageSrc(cartItem)">
+                    </figure>
+                </STListItem>
+            </STList>
+
+            <p>
+                <button class="button text" type="button" @click="addProduct">
+                    <span class="icon add" />
+                    <span>Nieuw</span>
+                </button>
+            </p>
+
+            <template v-if="isNew">
+                <hr>
+                <h2>Betaalmethode</h2>
+
+                <PaymentSelectionList v-model="paymentMethod" :payment-methods="paymentMethods" :organization="organization" :context="paymentContext" />
+            </template>
         </template>
     </SaveView>
 </template>
 <script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PhoneInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
+import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager } from "@stamhoofd/networking";
-import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, OrderData, PrivateOrder, ValidatedAddress, Version, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, OrderData, PaymentMethod, PrivateOrder, ValidatedAddress, Version, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -155,7 +202,8 @@ import AddItemView from "./AddItemView.vue";
         STInputBox,
         PhoneInput,
         AddressInput,
-        FieldBox
+        FieldBox,
+        PaymentSelectionList
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -172,8 +220,8 @@ import AddItemView from "./AddItemView.vue";
     }
 })
 export default class EditOrderView extends Mixins(NavigationMixin){
-    @Prop({ required: true })
-    initialOrder!: PrivateOrder
+    @Prop({ default: null })
+    initialOrder!: PrivateOrder | null
     
     @Prop({ required: true })
     webshopManager!: WebshopManager
@@ -181,14 +229,22 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     @Prop({ default: '' })
     mode!: string;
 
-    order: PrivateOrder = this.initialOrder
+    order: PrivateOrder = this.initialOrder ?? PrivateOrder.create({ webshopId: this.webshopManager.preview.id, id: "", payment: null });
     patchOrder: AutoEncoderPatchType<PrivateOrder> = PrivateOrder.patch({})
     errorBox: ErrorBox | null = null
     saving = false
-    isNew = false
+
+    isNew = (this.initialOrder === null)
 
     validator = new Validator()
-    answersClone = this.initialOrder.data.fieldAnswers.map(a => a.clone())
+    answersClone = this.order.data.fieldAnswers.map(a => a.clone())
+
+    mounted() {
+        if (this.isNew && this.checkoutMethods.length > 0) {
+            // Force selection of method
+            this.selectedMethod = this.checkoutMethods[0]
+        }
+    }
 
     get title() {
         if (this.mode === "comments") {
@@ -198,6 +254,10 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             return "Nieuwe bestelling"
         } 
         return "Bestelling bewerken"
+    }
+
+    get organization() {
+        return OrganizationManager.organization
     }
 
     get webshop() {
@@ -222,6 +282,10 @@ export default class EditOrderView extends Mixins(NavigationMixin){
 
     get deliveryMethod() {
         return this.patchedOrder.data.deliveryMethod
+    }
+
+    get paymentMethods() {
+        return [PaymentMethod.Transfer, PaymentMethod.PointOfSale]
     }
 
     get server() {
@@ -340,6 +404,22 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         }
     }
 
+    get paymentMethod() {
+        return this.patchedOrder.data.paymentMethod
+    }
+
+    set paymentMethod(paymentMethod: PaymentMethod) {
+        this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
+            data: OrderData.patch({
+                paymentMethod
+            })
+        }))
+    }
+
+    get paymentContext() {
+        return this.patchedOrder.data.paymentContext
+    }
+
     getTypeName(type: CheckoutMethodType) {
         switch (type) {
             case CheckoutMethodType.Takeout: return "Afhalen";
@@ -397,17 +477,21 @@ export default class EditOrderView extends Mixins(NavigationMixin){
 
             await this.$nextTick();
 
-            this.patchedOrder.data.validate(this.webshopManager.webshop!, OrganizationManager.organization.meta, I18nController.i18n);
+            this.patchedOrder.data.validate(this.webshopManager.webshop!, OrganizationManager.organization.meta, I18nController.i18n, true);
 
             this.saving = true
 
             const patch = this.finalPatch
             patch.id = this.order.id
-            const orders = await this.webshopManager.patchOrders(
-                [
-                    patch
-                ]
-            )
+
+            const patches: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+            if (this.isNew) {
+                patches.addPut(this.patchedOrder)
+            } else {
+                patches.addPatch(patch)
+            }
+            const orders = await this.webshopManager.patchOrders(patches)
 
             // Force webshop refetch to update stocks
             await this.webshopManager.loadWebshop(false);
@@ -426,7 +510,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             this.dismiss({ force: true })
         } catch (e) {
             this.saving = false
-            Toast.fromError(e).show()
+            this.errorBox = new ErrorBox(e)
         }
     }
 
@@ -446,7 +530,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                     }
                     clone.addItem(cartItem)
 
-                    if (clone.price != this.patchedOrder.data.cart.price) {
+                    if (!this.isNew && clone.price != this.patchedOrder.data.cart.price) {
                         new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
                     }
 
@@ -522,3 +606,43 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     }
 }
 </script>
+
+<style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+.edit-order-view {
+    .cart-item-row {
+        h3 {
+            padding-top: 5px;
+            @extend .style-title-3;
+        }
+
+        .description {
+            @extend .style-description-small;
+            padding-top: 5px;
+            white-space: pre-wrap;
+        }
+
+        .price {
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 600;
+            padding-top: 10px;
+            color: $color-primary;
+        }
+
+        footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            border-radius: $border-radius;
+        }
+    }
+}
+</style>

@@ -12,7 +12,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
-import { Order, WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
+import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 

@@ -68,7 +68,7 @@ export class OrderData extends Checkout {
         version: 151, 
         downgrade: downgradePaymentMethodV150
     })
-    paymentMethod: PaymentMethod
+    paymentMethod: PaymentMethod = PaymentMethod.Unknown
 
     matchQuery(query: string): boolean {
         const lowerQuery = query.toLowerCase();
@@ -122,19 +122,19 @@ export class Order extends AutoEncoder {
     webshopId: string
 
     @field({ decoder: IntegerDecoder, nullable: true })
-    number: number | null
+    number: number | null = null
 
     @field({ decoder: OrderData })
-    data: OrderData
+    data: OrderData = OrderData.create({})
 
     @field({ decoder: Payment, nullable: true })
     payment: Payment | null // no default to prevent errors
 
     @field({ decoder: DateDecoder })
-    createdAt: Date
+    createdAt: Date = new Date()
 
     @field({ decoder: DateDecoder, version: 107 })
-    updatedAt: Date
+    updatedAt: Date = new Date()
 
     @field({ decoder: DateDecoder, nullable: true })
     validAt: Date | null = null
@@ -169,7 +169,7 @@ export class Order extends AutoEncoder {
             return n as any as OrderStatusV137
         } 
     })
-    status: OrderStatus
+    status = OrderStatus.Created
 
     get shouldIncludeStock() {
         return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
 import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentStatus, PrivateOrder } from "@stamhoofd/structures"
@@ -54,7 +54,19 @@ export class OrderActionBuilder {
     getActions() {
         return [
             new TableAction({
-                name: "Wijzig gegevens...",
+                name: "Bestelling toevoegen",
+                enabled: this.webshopManager.hasWrite,
+                icon: "add",
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: false,
+                handler: async () => {
+                    await this.createOrder()
+                }
+            }),
+
+            new TableAction({
+                name: "Wijzig...",
                 enabled: this.webshopManager.hasWrite,
                 icon: "edit",
                 priority: 1,
@@ -134,6 +146,14 @@ export class OrderActionBuilder {
         ]
     }
 
+    async createOrder() {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditOrderView" */ "./EditOrderView.vue"), {
+            webshopManager: this.webshopManager,
+            isNew: true
+        });
+        this.component.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
     async editOrder(order: PrivateOrder, mode?: "comments") {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "EditOrderView" */ "./EditOrderView.vue"), {
             initialOrder: order,
@@ -167,9 +187,12 @@ export class OrderActionBuilder {
 
     async markAs(orders: PrivateOrder[], status: OrderStatus) {
         try {
-            const updatedOrders = await this.webshopManager.patchOrders(
-                orders.map(o => PrivateOrder.patch({ status, id: o.id }))
-            )
+            const patches: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+            for (const order of orders) {
+                patches.addPatch(PrivateOrder.patch({ status, id: order.id }))
+            }
+            
+            const updatedOrders = await this.webshopManager.patchOrders(patches)
 
             // Move all data to original orders
             for (const order of updatedOrders) {

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Data, Decoder, EnumDecoder, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Order } from '@stamhoofd/models';
@@ -6,15 +6,44 @@ import { Payment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { getPermissionLevelNumber, OrderStatus, PaymentStatus, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
-type Body = AutoEncoderPatchType<PrivateOrder>[]
+type Body = AutoEncoderPatchType<PrivateOrder>[] | PatchableArrayAutoEncoder<PrivateOrder>
 type ResponseBody = PrivateOrder[]
 
+class VersionSpecificDecoder<A, B> implements Decoder<A | B> {
+    oldDecoder: Decoder<A>;
+    version: number;
+    newerDecoder: Decoder<B>;
+
+    constructor(oldDecoder: Decoder<A>, version: number, newerDecoder: Decoder<B>) {
+        this.oldDecoder = oldDecoder;
+        this.version = version;
+        this.newerDecoder = newerDecoder;
+    }
+
+    decode(data: Data): A | B {
+        // Set the version of the decoding context of "data"
+        const v = data.context.version
+
+        if (v >= this.version) {
+            return this.newerDecoder.decode(data);
+        }
+
+       return this.oldDecoder.decode(data);
+    }
+}
+
 export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new ArrayDecoder(PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>)
+    bodyDecoder = new VersionSpecificDecoder(
+        // Before version 159, accept an array of patches
+        new ArrayDecoder(PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>),
+        159,
+        // After or at version 159, accept a patchable array
+        new PatchableArrayDecoder(PrivateOrder as Decoder<PrivateOrder>, PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>, StringDecoder)
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
@@ -32,7 +61,18 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const token = await Token.authenticate(request);
 
-        if (request.body.length == 0) {
+        let body: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
+
+        // Migrate old syntax
+        if (Array.isArray(request.body)) {
+            for (const p of request.body) {
+                body.addPatch(p);
+            }
+        } else {
+            body = request.body
+        }
+
+        if (body.changes.length == 0) {
             return new Response([]);
         }
 
@@ -57,17 +97,86 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 })
             }
             
-            const orders = await Order.where({
+            const orders = body.getPatches().length > 0 ? await Order.where({
                 webshopId: webshop.id,
                 id: {
                     sign: "IN",
-                    value: request.body.map(o => o.id)
+                    value: body.getPatches().map(o => o.id)
                 }
-            })
+            }) : []
+
+            const organization = token.user.organization
 
             // Todo: handle order creation here
+            for (const put of body.getPuts()) {
+                const struct = put.put
+                const model = new Order()
+                model.webshopId = webshop.id
+                model.organizationId = webshop.organizationId
+                model.status = struct.status
+                model.data = struct.data
 
-            for (const patch of request.body) {
+                // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
+                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order) 
+                // -> the user doesn't need to download the ticket again
+                // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
+
+                if (model.status === OrderStatus.Deleted) {
+                    model.data.removePersonalData()
+                }
+
+                const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, token.user.organization))
+
+                // todo: validate before updating stock
+                await order.updateStock()
+                const totalPrice = order.data.totalPrice
+
+                if (totalPrice == 0) {
+                    // Force unknown payment method
+                    order.data.paymentMethod = PaymentMethod.Unknown
+
+                    // Mark this order as paid
+                    await order.markPaid(null, organization, webshop)
+                    await order.save()
+                } else {
+                    const payment = new Payment()
+                    payment.organizationId = organization.id
+                    payment.method = struct.data.paymentMethod
+                    payment.status = PaymentStatus.Created
+                    payment.price = totalPrice
+                    payment.paidAt = null
+
+                    // Determine the payment provider
+                    // Throws if invalid
+                    payment.provider = organization.getPaymentProviderFor(payment.method)
+
+                    await payment.save()
+
+                    order.paymentId = payment.id
+                    order.setRelation(Order.payment, payment)
+
+                    if (payment.method == PaymentMethod.Transfer) {
+                        await order.markValid(payment, [])
+
+                        // Only now we can update the transfer description, since we need the order number as a reference
+                        payment.transferDescription = Payment.generateDescription(organization, webshop.meta.transferSettings, (order.number ?? "")+"")
+                        await payment.save()
+                        await order.save()
+                    } else if (payment.method == PaymentMethod.PointOfSale) {
+                        // Not really paid, but needed to create the tickets if needed
+                        await order.markPaid(payment, organization, webshop)
+                        await payment.save()
+                        await order.save()
+                    } else {
+                        throw new Error("Unsupported payment method")
+                    }
+
+                }
+                
+                orders.push(order)
+            }
+
+            for (const patch of body.getPatches()) {
                 const model = orders.find(p => p.id == patch.id)
                 if (!model) {
                     throw new SimpleError({

@@ -105,7 +105,7 @@ export class Checkout extends AutoEncoder {
         this.fieldAnswers = newAnswers
     }
 
-    validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+    validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData, asAdmin = false) {
         if (this.cart.items.length == 0) {
             throw new SimpleError({
                 code: "cart_empty",
@@ -124,7 +124,7 @@ export class Checkout extends AutoEncoder {
             throw e
         }
 
-        if (webshop.meta.availableUntil && webshop.meta.availableUntil < new Date()) {
+        if (!asAdmin && webshop.meta.availableUntil && webshop.meta.availableUntil < new Date()) {
             throw new SimpleError({
                 code: "closed",
                 message: "Orders are closed",
@@ -331,14 +331,14 @@ export class Checkout extends AutoEncoder {
         }
     }
 
-    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n) {
-        this.validateCart(webshop, organizationMeta)
+    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false) {
+        this.validateCart(webshop, organizationMeta, asAdmin)
         this.validateCheckoutMethod(webshop, organizationMeta)
         this.validateDeliveryAddress(webshop, organizationMeta)
         this.validateTimeSlot(webshop, organizationMeta)
         this.validateCustomer(webshop, organizationMeta, i18n)
 
-        if (this.totalPrice != 0) {
+        if (this.totalPrice != 0 && !asAdmin) {
             this.validatePayment(webshop, organizationMeta)
         }
     }

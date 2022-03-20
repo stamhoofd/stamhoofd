@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
@@ -577,7 +577,7 @@ export class WebshopManager {
         return response.data
     }
 
-    async patchOrders(patches: AutoEncoderPatchType<PrivateOrder>[]) {
+    async patchOrders(patches: PatchableArrayAutoEncoder<PrivateOrder>) {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: "PATCH",
             path: "/webshop/"+this.preview.id+"/orders",

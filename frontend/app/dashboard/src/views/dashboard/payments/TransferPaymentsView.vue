@@ -1,7 +1,7 @@
 <template>
     <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions">
         <p class="style-description">
-            Overzicht van alle openstaande overschrijvingen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 1 maand zichtbaar).
+            Overzicht van alle openstaande overschrijvingen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 7 dagen zichtbaar).
         </p>
         <template #empty>
             Er zijn nog geen overschrijvingen.

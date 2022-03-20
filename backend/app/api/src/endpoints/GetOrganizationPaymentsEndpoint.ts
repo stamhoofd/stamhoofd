@@ -92,6 +92,10 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
             params.push(PaymentMethod.Transfer)
         }
 
+         // Only return non payments of last 7 days
+        query += ` AND (\`${Payment.table}\`.\`paidAt\` is NULL OR \`${Payment.table}\`.\`paidAt\` > ?)`
+        params.push(new Date(Date.now() - (24 * 60 * 60 * 1000 * 7 )))
+
         const [results] = await Database.select(query, params)
         const payments: PaymentWithOrder[] = []
 
@@ -141,9 +145,9 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
             query += ` AND \`MemberCheckTable\`.\`${Member.registrations.foreignKey}\` = ?`
             params.push(memberId)
         } else {
-            // Only return non paid paymetns and payments of last 2 months
+            // Only return non payments of last 7 days
             query += ` AND (\`${Payment.table}\`.\`paidAt\` is NULL OR \`${Payment.table}\`.\`paidAt\` > ?)`
-            params.push(new Date(Date.now() - (24 * 60 * 60 * 1000 * 30 * 2)))
+            params.push(new Date(Date.now() - (24 * 60 * 60 * 1000 * 7 )))
         }
 
         if (onlyTransfer) {

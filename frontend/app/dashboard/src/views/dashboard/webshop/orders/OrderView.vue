@@ -1,6 +1,6 @@
 <template>
     <div class="st-view order-view">
-        <STNavigationBar :title="'Bestelling ' + patchedOrder.number" :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar :title="'Bestelling ' + order.number" :pop="canPop" :dismiss="canDismiss">
             <template #right>
                 <button v-if="hasPreviousOrder || hasNextOrder" v-tooltip="'Ga naar vorige bestelling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" @click="goBack" />
                 <button v-if="hasNextOrder || hasPreviousOrder" v-tooltip="'Ga naar volgende bestelling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" @click="goNext" />
@@ -9,10 +9,10 @@
         </STNavigationBar>
         <main>
             <h1>
-                Bestelling {{ patchedOrder.number }}
+                Bestelling {{ order.number }}
             </h1>
 
-            <p v-if="patchedOrder.payment && patchedOrder.payment.status != 'Succeeded'" class="warning-box">
+            <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
                 Opgelet: deze bestelling werd nog niet betaald.
             </p>
 
@@ -21,7 +21,7 @@
                     Naam
 
                     <template slot="right">
-                        {{ patchedOrder.data.customer.name }}
+                        {{ order.data.customer.name }}
                     </template>
                 </STListItem>
 
@@ -29,7 +29,7 @@
                     GSM-nummer
 
                     <template slot="right">
-                        <p>{{ patchedOrder.data.customer.phone }}</p>
+                        <p>{{ order.data.customer.phone }}</p>
                     </template>
                 </STListItem>
 
@@ -37,7 +37,7 @@
                     E-mailadres
 
                     <template slot="right">
-                        {{ patchedOrder.data.customer.email }}
+                        {{ order.data.customer.email }}
                     </template>
                 </STListItem>
 
@@ -70,55 +70,55 @@
                     </span>
                 </STListItem>
 
-                <STListItem v-if="patchedOrder.payment" v-long-press="(e) => (hasPaymentsWrite && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale')" @click="hasPaymentsWrite && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null">
+                <STListItem v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')" @click="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null">
                     Betaalmethode
 
                     <template slot="right">
-                        <span>{{ getName(patchedOrder.payment.method) }}</span>
-                        <span v-if="patchedOrder.payment.status == 'Succeeded'" class="icon green success" />
+                        <span>{{ getName(order.payment.method) }}</span>
+                        <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
                         <span v-else class="icon clock" />
-                        <span v-if="hasPaymentsWrite && ((patchedOrder.payment && (patchedOrder.payment.method == 'Transfer' || patchedOrder.payment.method == 'PointOfSale')) && !isChanged())" class="icon arrow-down-small" />
+                        <span v-if="hasPaymentsWrite && ((order.payment && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')))" class="icon arrow-down-small" />
                     </template>
                 </STListItem>
 
-                <STListItem v-if="patchedOrder.payment && patchedOrder.payment.iban" class="right-description right-stack">
+                <STListItem v-if="order.payment && order.payment.iban" class="right-description right-stack">
                     Betaald via IBAN
 
                     <template slot="right">
-                        {{ patchedOrder.payment.iban }}
-                        <template v-if="patchedOrder.payment.ibanName">
-                            <br>({{ patchedOrder.payment.ibanName }})
+                        {{ order.payment.iban }}
+                        <template v-if="order.payment.ibanName">
+                            <br>({{ order.payment.ibanName }})
                         </template>
                     </template>
                 </STListItem>
                 
-                <STListItem v-if="patchedOrder.payment && patchedOrder.payment.method == 'Transfer'" class="right-description right-stack">
+                <STListItem v-if="order.payment && order.payment.method == 'Transfer'" class="right-description right-stack">
                     Mededeling
 
                     <template slot="right">
-                        {{ patchedOrder.payment.transferDescription }}
+                        {{ order.payment.transferDescription }}
                     </template>
                 </STListItem>
 
-                <STListItem v-for="a in patchedOrder.data.fieldAnswers" :key="a.field.id" class="right-description">
+                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
                     {{ a.field.name }}
 
                     <template slot="right">
                         {{ a.answer || "/" }}
                     </template>
                 </STListItem>
-                <STListItem v-if="patchedOrder.validAt" class="right-description">
+                <STListItem v-if="order.validAt" class="right-description">
                     Geplaatst op
                     <template slot="right">
-                        {{ patchedOrder.validAt | dateTime | capitalizeFirstLetter }}
+                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
                     </template>
                 </STListItem>
-                <STListItem v-if="patchedOrder.payment && patchedOrder.payment.settlement" class="right-description right-stack">
+                <STListItem v-if="order.payment && order.payment.settlement" class="right-description right-stack">
                     Uitbetaald op
 
                     <template slot="right">
-                        {{ patchedOrder.payment.settlement.settledAt | dateTime | capitalizeFirstLetter }}<br>
-                        Mededeling "{{ patchedOrder.payment.settlement.reference }}"
+                        {{ order.payment.settlement.settledAt | dateTime | capitalizeFirstLetter }}<br>
+                        Mededeling "{{ order.payment.settlement.reference }}"
                     </template>
                 </STListItem>
                 
@@ -126,15 +126,15 @@
                     Bestelnummer
 
                     <template slot="right">
-                        {{ patchedOrder.number }}
+                        {{ order.number }}
                     </template>
                 </STListItem>
-                <template v-if="patchedOrder.data.checkoutMethod">
-                    <STListItem v-if="patchedOrder.data.checkoutMethod.name" class="right-description">
-                        <template v-if="patchedOrder.data.checkoutMethod.type == 'Takeout'">
+                <template v-if="order.data.checkoutMethod">
+                    <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
+                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                             Afhaallocatie
                         </template>
-                        <template v-else-if="patchedOrder.data.checkoutMethod.type == 'OnSite'">
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
                             Locatie
                         </template>
                         <template v-else>
@@ -142,28 +142,28 @@
                         </template>
 
                         <template slot="right">
-                            {{ patchedOrder.data.checkoutMethod.name }}
+                            {{ order.data.checkoutMethod.name }}
                         </template>
                     </STListItem>
-                    <STListItem v-if="patchedOrder.data.checkoutMethod.address" class="right-description">
+                    <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
                         Adres
 
                         <template slot="right">
-                            {{ patchedOrder.data.checkoutMethod.address }}
+                            {{ order.data.checkoutMethod.address }}
                         </template>
                     </STListItem>
-                    <STListItem v-if="patchedOrder.data.address" class="right-description">
+                    <STListItem v-if="order.data.address" class="right-description">
                         Leveringsadres
 
                         <template slot="right">
-                            {{ patchedOrder.data.address }}
+                            {{ order.data.address }}
                         </template>
                     </STListItem>
-                    <STListItem v-if="patchedOrder.data.timeSlot" class="right-description">
-                        <template v-if="patchedOrder.data.checkoutMethod.type == 'Takeout'">
+                    <STListItem v-if="order.data.timeSlot" class="right-description">
+                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
                             Wanneer afhalen?
                         </template>
-                        <template v-else-if="patchedOrder.data.checkoutMethod.type == 'OnSite'">
+                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
                             Wanneer?
                         </template>
                         <template v-else>
@@ -171,35 +171,35 @@
                         </template>
 
                         <template slot="right">
-                            {{ patchedOrder.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ patchedOrder.data.timeSlot.startTime | minutes }} - {{ patchedOrder.data.timeSlot.endTime | minutes }}
+                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
                         </template>
                     </STListItem>
                 </template>
-                <STListItem v-if="patchedOrder.data.deliveryPrice > 0" class="right-description">
+                <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
                     Leveringskost
 
                     <template slot="right">
-                        {{ patchedOrder.data.deliveryPrice | price }}
+                        {{ order.data.deliveryPrice | price }}
                     </template>
                 </STListItem>
                 <STListItem class="right-description">
                     Totaal
 
                     <template slot="right">
-                        {{ patchedOrder.data.totalPrice | price }}
+                        {{ order.data.totalPrice | price }}
                     </template>
                 </STListItem>
 
-                <STListItem v-if="patchedOrder.payment && patchedOrder.payment.status === 'Succeeded' && patchedOrder.payment.price != patchedOrder.data.totalPrice" class="right-description">
+                <STListItem v-if="order.payment && order.payment.status === 'Succeeded' && order.payment.price != order.data.totalPrice" class="right-description">
                     Waarvan al betaald
                     
                     <template slot="right">
-                        {{ patchedOrder.payment.price | price }}
+                        {{ order.payment.price | price }}
                     </template>
                 </STListItem>
             </STList>
 
-            <div v-if="patchedOrder.data.comments" class="container">
+            <div v-if="order.data.comments" class="container">
                 <hr>
                 <h2 class="style-with-button">
                     <div>Notities</div>
@@ -208,7 +208,7 @@
                     </div>
                 </h2>
 
-                <p class="pre-wrap" v-text="patchedOrder.data.comments" />
+                <p class="pre-wrap" v-text="order.data.comments" />
             </div>
             <div v-else-if="hasWrite" class="container">
                 <hr>
@@ -218,42 +218,38 @@
                 </button>
             </div>
 
-            <div v-if="patchedOrder.data.checkoutMethod && patchedOrder.data.checkoutMethod.description" class="container">
+            <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr>
-                <h2 v-if="patchedOrder.data.checkoutMethod.type == 'Takeout'">
+                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
                     Afhaalopmerkingen
                 </h2>
                 <h2 v-else>
                     Leveringsopmerkingen
                 </h2>
 
-                <p class="pre-wrap" v-text="patchedOrder.data.checkoutMethod.description" />
+                <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
             </div>
 
             <hr>
 
             <STList>
-                <STListItem v-for="cartItem in patchedOrder.data.cart.items" :key="cartItem.id" class="cart-item-row" :selectable="hasWrite" @click="hasWrite ? editCartItem(cartItem) : false">
+                <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
                     <h3>
                         <span>{{ cartItem.product.name }}</span>
-                        <span v-if="hasWrite" class="icon arrow-right-small gray" />
                     </h3>
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
-                    <p v-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount < cartItem.amount" class="warning-box">
+                    <p v-if="cartItem.product.stock && order.shouldIncludeStock && cartItem.reservedAmount < cartItem.amount" class="warning-box">
                         De voorraad van {{ cartItem.product.name }} zal verminderd worden met {{ cartItem.amount - cartItem.reservedAmount }} stuk(s)
                     </p>
-                    <p v-else-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount > cartItem.amount" class="warning-box">
+                    <p v-else-if="cartItem.product.stock && order.shouldIncludeStock && cartItem.reservedAmount > cartItem.amount" class="warning-box">
                         De voorraad van {{ cartItem.product.name }} zal aangevuld worden met {{ cartItem.reservedAmount - cartItem.amount }} stuk(s)
                     </p>
 
                     <footer>
                         <p class="price">
-                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
+                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(order.data.cart) | price }}
                         </p>
-                        <div v-if="hasWrite" @click.stop>
-                            <button type="button" class="button icon trash gray" @click="deleteItem(cartItem)" />
-                        </div>
                     </footer>
 
                     <figure v-if="imageSrc(cartItem)" slot="right">
@@ -261,13 +257,6 @@
                     </figure>
                 </STListItem>
             </STList>
-
-            <p v-if="hasWrite">
-                <button class="button text" type="button" @click="addProduct">
-                    <span class="icon add" />
-                    <span>Nieuw</span>
-                </button>
-            </p>
 
             <div v-if="hasTickets" class="container">
                 <hr>
@@ -277,19 +266,11 @@
                 <input v-tooltip="'Klik om te kopiëren'" class="input" :value="orderUrl" readonly @click="copyElement">
             </div>
         </main>
-
-        <STToolbar v-if="hasWrite && isChanged()">
-            <LoadingButton slot="right" :loading="saving">
-                <button class="button primary" type="button" @click="save()">
-                    Opslaan
-                </button>
-            </LoadingButton>
-        </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, patchContainsChanges } from "@simonbackx/simple-encoding";
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
@@ -341,9 +322,6 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     order: PrivateOrder = this.initialOrder
-
-    patchOrder: AutoEncoderPatchType<PrivateOrder> = PrivateOrder.patch({})
-
     tickets: TicketPrivate[] = []
     loadingTickets = false
     
@@ -358,10 +336,6 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (n === PaymentStatus.Succeeded && old !== PaymentStatus.Succeeded) {
             this.downloadNewTickets()
         }
-    }
-
-    get patchedOrder() {
-        return this.order.patch(this.patchOrder)
     }
 
     get hasNextOrder(): boolean {
@@ -398,7 +372,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get hasTickets() {
-        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.patchedOrder.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket)
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket || !!this.order.data.cart.items.find(i => i.product.type === ProductType.Voucher || i.product.type === ProductType.Ticket)
     }
 
     get scannedCount() {
@@ -413,11 +387,11 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get statusName() {
-        return this.patchedOrder ? OrderStatusHelper.getName(this.order.status) : ""
+        return this.order ? OrderStatusHelper.getName(this.order.status) : ""
     }
 
     get statusColor() {
-        return this.patchedOrder ? OrderStatusHelper.getColor(this.order.status) : ""
+        return this.order ? OrderStatusHelper.getColor(this.order.status) : ""
     }
 
     showContextMenu(event) {
@@ -478,7 +452,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     recheckTickets() {
         if (this.hasTickets) {
             this.loadingTickets = true
-            this.webshopManager.getTicketsForOrder(this.patchedOrder.id, true).then((tickets) => {
+            this.webshopManager.getTicketsForOrder(this.order.id, true).then((tickets) => {
                 this.tickets = tickets
                 this.loadingTickets = false
             }).catch(e => {
@@ -563,45 +537,8 @@ export default class OrderView extends Mixins(NavigationMixin){
         }
     }
 
-    openTransferView() {
-        // todo
-    }
-
     imageSrc(cartItem: CartItem) {
         return cartItem.product.images[0]?.getPathForSize(100, 100)
-    }
-
-    saving = false
-
-    save() {
-        if (this.saving) {
-            return
-        }
-        this.saving = true
-        this.patchOrder.id = this.order.id
-        this.webshopManager.patchOrders(
-            [
-                PrivateOrder.patch(this.patchOrder as any)
-            ]
-        ).then((orders) => {
-            this.saving = false
-            new Toast("Wijzigingen opgeslagen", "success").setHide(1000).show()
-
-            // Move all data to original order
-            for (const order of orders) {
-                if (order.id === this.order.id) {
-                    this.order.set(order)
-                }
-            }
-            this.patchOrder = PrivateOrder.patch({})
-            this.downloadNewTickets()
-
-            // Force webshop refetch to update stocks
-            this.webshopManager.loadWebshop(false).catch(console.error);
-        }).catch((e) => {
-            this.saving = false
-            Toast.fromError(e).show()
-        })
     }
 
     downloadNewTickets() {
@@ -620,86 +557,6 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }
             }
         }).catch(console.error);
-    }
-
-    async addProduct() {
-        let clone = this.patchedOrder.data.cart.clone()
-        const webshop = await this.webshopManager.loadWebshopIfNeeded()
-
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(AddItemView, { 
-                cart: clone,
-                webshop: webshop,
-                saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
-                    cartItem.validate(webshop, clone)
-
-                    if (oldItem) {
-                        clone.removeItem(oldItem)
-                    }
-                    clone.addItem(cartItem)
-
-                    if (clone.price != this.patchedOrder.data.cart.price) {
-                        new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
-                    }
-
-                    this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-                        cart: clone
-                    })})
-                }
-            })
-        }).setDisplayStyle("sheet"))
-    }
-
-    async editCartItem(cartItem: CartItem ) {
-        let clone = this.patchedOrder.data.cart.clone()
-        const webshop = await this.webshopManager.loadWebshopIfNeeded()
-
-        const newCartItem = cartItem.clone()
-
-        // First refresh the item
-        try {
-            newCartItem.refresh(webshop)
-        } catch (e) {
-            Toast.fromError(e).show()
-        }
-
-        this.present(new ComponentWithProperties(CartItemView, { 
-            cartItem: newCartItem, 
-            oldItem: cartItem,
-            cart: clone,
-            webshop: webshop,
-            saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
-                cartItem.validate(webshop, clone)
-                if (oldItem) {
-                    clone.removeItem(oldItem)
-                }
-                clone.addItem(cartItem)
-
-                if (clone.price != this.patchedOrder.data.cart.price) {
-                    new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
-                }
-
-                this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-                    cart: clone
-                })})
-            }
-        }).setDisplayStyle("sheet"))
-    }
-
-    async deleteItem(cartItem: CartItem ) {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je dit wilt verwijderen?", "Ja, verwijderen", "Je kan de bestelling nog nakijken voor je het definitief verwijdert.")) {
-            return
-        }
-        let clone = this.patchedOrder.data.cart.clone()
-        clone.removeItem(cartItem)
-
-        if (clone.price != this.patchedOrder.data.cart.price) {
-            new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
-        }
-
-        this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-            cart: clone
-        })})
     }
 
     get orderUrl() {
@@ -724,17 +581,6 @@ export default class OrderView extends Mixins(NavigationMixin){
         setTimeout(() => {
             displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
         }, 1000);
-    }
-
-    isChanged() {
-        return patchContainsChanges(this.patchOrder, this.order, { version: Version })
-    }
-
-    async shouldNavigateAway() {
-        if (!this.isChanged()) {
-            return true
-        }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 }
 </script>
