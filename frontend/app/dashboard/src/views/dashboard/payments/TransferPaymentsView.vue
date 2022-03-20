@@ -13,7 +13,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Column, TableAction, TableView, Toast } from "@stamhoofd/components";
+import { CenteredMessage, Column, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, EncryptedPaymentGeneral, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod } from '@stamhoofd/structures';
 import { PaymentStatus } from "@stamhoofd/structures/esm/dist";
@@ -66,7 +66,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new TableAction({
                 name: "Markeer als betaald",
                 icon: "success",
-                priority: 0,
+                priority: 2,
                 groupIndex: 1,
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -78,7 +78,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new TableAction({
                 name: "Markeer als niet betaald",
                 icon: "canceled",
-                priority: 0,
+                priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -86,8 +86,47 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                     // Mark paid
                     await this.markPaid(payments, false)
                 }
-            })
+            }),
+
+            new TableAction({
+                name: "E-mailen",
+                icon: "email",
+                priority: 0,
+                groupIndex: 2,
+                allowAutoSelectAll: false,
+                
+                handler: async (payments: PaymentGeneral[]) => {
+                    await this.mail(payments)
+                }
+            }),
+        
+            new TableAction({
+                name: "SMS'en",
+                icon: "feedback-line",
+                priority: 0,
+                groupIndex: 2,
+                allowAutoSelectAll: false,
+
+                handler: async (payments: PaymentGeneral[]) => {
+                    await this.sms(payments)
+                }
+            }),
         ]
+    }
+
+    async sms(payments: PaymentGeneral[]) {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ "../sms/SMSView.vue"), {
+            customers: payments.flatMap(p => p.order ? [p.order.data.customer] : []),
+            members: payments.flatMap(p => p.registrations.map(r => r.member))
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    async mail(payments: PaymentGeneral[]) {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "MailView" */ "../mail/MailView.vue"), {
+            payments
+        });
+        this.present(displayedComponent.setDisplayStyle("popup"));
     }
 
     get filterDefinitions(): FilterDefinition<PaymentGeneral, Filter<PaymentGeneral>, any>[] {

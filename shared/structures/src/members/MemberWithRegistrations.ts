@@ -37,7 +37,7 @@ export class MemberWithRegistrations extends Member {
     }
 
     get isMinor() {
-        return (this.details.age == null && !!this.groups.find(g => g.settings.maxAge !== null && g.settings.maxAge < 18)) || (this.details.age !== null && this.details.age < 18)
+        return (this.details.age == null && !!this.groups.find(g => g.settings.maxAge !== null && g.settings.maxAge < 18)) || super.isMinor
     }
 
     /**

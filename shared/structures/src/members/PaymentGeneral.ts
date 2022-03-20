@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDeco
 
 import { PaymentMethod } from '../PaymentMethod'
 import { PaymentStatus } from '../PaymentStatus'
+import { User } from '../User'
 import { Order } from '../webshops/Order'
 import { EncryptedPaymentDetailed } from './EncryptedPaymentDetailed'
 import { PaymentDetailed } from './PaymentDetailed'
@@ -23,6 +24,13 @@ export class PaymentGeneral extends PaymentDetailed {
             return true;
         }
         return false;
+    }
+
+    getHTMLTable(): string {
+        if (this.order) {
+            return this.order.getHTMLTable()
+        }
+        return super.getHTMLTable()
     }
 }
 

@@ -30,7 +30,7 @@
                 <span slot="right" class="style-description-small">{{ recipients.length }}</span>
                 <button v-if="hasToWarnings" slot="right" class="button icon warning yellow" type="button" @click="showToWarnings" />
             </STListItem>
-            <STListItem v-else-if="orders.length > 0" class="no-padding right-stack">
+            <STListItem v-else class="no-padding right-stack">
                 <div class="list-input-box">
                     <span>Aan:</span>
                     <span class="list-input">{{ recipients.length == 1 ? recipients[0].firstName+" "+recipients[0].lastName : recipients.length +" ontvangers" }}</span>
@@ -102,7 +102,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler,ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
-import { CheckoutMethodType, EmailAttachment, EmailInformation, EmailRequest, Group, MemberWithRegistrations, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { CheckoutMethodType, EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -162,6 +162,9 @@ export default class MailView extends Mixins(NavigationMixin) {
     @Prop({ default: () => []})
     orders!: PrivateOrder[];
 
+    @Prop({ default: () => []})
+    payments!: PaymentGeneral[];
+
     @Prop({ default: null})
     webshop!: WebshopPreview | null
 
@@ -216,86 +219,105 @@ export default class MailView extends Mixins(NavigationMixin) {
             })
         ]
 
-        if (this.orders.length > 0) {
-            variables.push(new EditorSmartVariable({
-                id: "nr", 
-                name: "Bestelnummer", 
-                example: "", 
-            }))
+        //if (this.orders.length > 0) {
+        variables.push(new EditorSmartVariable({
+            id: "nr", 
+            name: "Bestelnummer", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "orderPrice", 
-                name: "Bestelbedrag", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "orderPrice", 
+            name: "Bestelbedrag", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "orderStatus", 
-                name: "Bestelstatus", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "orderStatus", 
+            name: "Bestelstatus", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "paymentMethod", 
-                name: "Betaalmethode", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "orderTime", 
+            name: "Tijdstip", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "orderPriceToPay", 
-                name: "Te betalen bedrag", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "orderDate", 
+            name: "Afhaal/leverdatum", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "transferDescription", 
-                name: "Mededeling (overschrijving)", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "orderMethod", 
+            name: "Afhaalmethode (afhalen, leveren, ter plaatse)", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "transferBankAccount", 
-                name: "Rekeningnummer (overschrijving)", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "orderLocation", 
+            name: "Locatie of leveradres", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "transferBankCreditor", 
-                name: "Begunstigde (overschrijving)", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "orderTable", 
+            name: "Tabel met bestelling", 
+            example: "order table", 
+            html: ""
+        }))
+        //}
 
-            variables.push(new EditorSmartVariable({
-                id: "orderTime", 
-                name: "Tijdstip", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "paymentMethod", 
+            name: "Betaalmethode", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "orderDate", 
-                name: "Afhaal/leverdatum", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "priceToPay", 
+            name: "Te betalen bedrag", 
+            example: "", 
+        }))     
 
-            variables.push(new EditorSmartVariable({
-                id: "orderMethod", 
-                name: "Afhaalmethode (afhalen, leveren, ter plaatse)", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "pricePaid", 
+            name: "Betaald bedrag", 
+            example: "", 
+        }))      
 
-            variables.push(new EditorSmartVariable({
-                id: "orderLocation", 
-                name: "Locatie of leveradres", 
-                example: "", 
-            }))
+        variables.push(new EditorSmartVariable({
+            id: "transferDescription", 
+            name: "Mededeling (overschrijving)", 
+            example: "", 
+        }))
 
-            variables.push(new EditorSmartVariable({
-                id: "orderTable", 
-                name: "Tabel met bestelling", 
-                example: "order table", 
-                html: ""
-            }))
-        }
+        variables.push(new EditorSmartVariable({
+            id: "transferBankAccount", 
+            name: "Rekeningnummer (overschrijving)", 
+            example: "", 
+        }))
+
+        variables.push(new EditorSmartVariable({
+            id: "transferBankCreditor", 
+            name: "Begunstigde (overschrijving)", 
+            example: "", 
+        }))
+
+        variables.push(new EditorSmartVariable({
+            id: "overviewTable", 
+            name: "Overzichtstabel", 
+            example: "overview table", 
+            html: ""
+        }))
+
+        variables.push(new EditorSmartVariable({
+            id: "overviewContext", 
+            name: "Betaalcontext", 
+            example: "", 
+        }))
 
         // Remove all smart variables that are not set in the recipients
         return variables.filter(variable => {
@@ -672,6 +694,149 @@ export default class MailView extends Mixins(NavigationMixin) {
         ], { updateSelection: true }).insertSmartButton(this.smartButtons[0], { updateSelection: true }).insertContent(content2, { updateSelection: false }).setTextSelection(0)/*.focus()*/.run()
     }
 
+    insertPaymentDefault() {
+
+        // Find all variables, if they are valid
+        const priceToPay = this.smartVariables.find(v => v.id === "priceToPay")
+        const pricePaid = this.smartVariables.find(v => v.id === "pricePaid")
+
+        const transferDescription = this.smartVariables.find(v => v.id === "transferDescription")
+        const transferBankAccount = this.smartVariables.find(v => v.id === "transferBankAccount")
+        const transferBankCreditor = this.smartVariables.find(v => v.id === "transferBankCreditor")
+        const overviewTable = this.smartVariables.find(v => v.id === "overviewTable")
+        const overviewContext = this.smartVariables.find(v => v.id === "overviewContext")
+
+        // Insert <hr> and content
+        // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
+        let chain = this.editor.chain()
+
+        if (priceToPay) {
+            chain = chain.insertContentAt(this.editor.state.doc.content.size, [
+                {
+                    type: "paragraph",
+                    content: []
+                },
+                {
+                    type: "horizontalRule",
+                    content: []
+                },
+                {
+                    type: "heading",
+                    attrs: {
+                        level: 2
+                    },
+                    content: [
+                        {
+                            type: "text",
+                            text: "Betaalinstructies"
+                        }
+                    ]
+                },
+            ]);
+
+            if (transferDescription) {
+                chain = chain
+                    .insertContent(`<p></p>`)
+                    .insertContent([
+                        {
+                            type: "paragraph",
+                            content: []
+                        },
+                    
+                        {
+                            type: "descriptiveText",
+                            marks: [{
+                                type: 'italic'
+                            }],
+                            content: [
+                                {
+                                    type: "text",
+                                    text: "Gelieve zeker de mededeling '",
+                                    marks: [{
+                                        type: 'italic'
+                                    }],
+                                },
+                                { 
+                                    ...transferDescription.getJSONContent(), 
+                                    marks: [{
+                                        type: 'italic'
+                                    }], 
+                                },
+                                {
+                                    type: "text",
+                                    text: "' te vermelden in jouw overschrijving.",
+                                    marks: [{
+                                        type: 'italic'
+                                    }],
+                                }
+                            ]
+                        }
+                    ])
+            }
+
+            if (priceToPay) {
+                chain = chain.insertContent("<p></p><h3>Te betalen bedrag: </h3><p></p>").insertSmartVariable(priceToPay)
+            }
+            if (transferDescription) {
+                chain = chain.insertContent("<p></p><h3>Mededeling: </h3><p></p>").insertSmartVariable(transferDescription)
+            }
+            if (transferBankCreditor) {
+                chain = chain.insertContent("<p></p><h3>Begunstigde: </h3><p></p>").insertSmartVariable(transferBankCreditor)
+            }
+            if (transferBankAccount) {
+                chain = chain.insertContent("<p></p><h3>Rekeningnummer: </h3><p></p>").insertSmartVariable(transferBankAccount)
+            }
+        }
+        
+        if (overviewTable) {
+            chain = chain.insertContent([
+                {
+                    type: "paragraph",
+                    content: []
+                },
+                {
+                    type: "horizontalRule",
+                    content: []
+                },
+                {
+                    type: "heading",
+                    attrs: {
+                        level: 2
+                    },
+                    content: [
+                        overviewContext ? 
+                            overviewContext.getJSONContent() 
+                            : {
+                                type: "text",
+                                text: "Overzicht"
+                            }
+                    ]
+                },
+                {
+                    type: "paragraph",
+                    content: []
+                },
+                overviewTable.getJSONContent(),
+                {
+                    type: "paragraph",
+                    content: []
+                },
+            ])
+            
+            if (priceToPay) {
+                chain = chain.insertContent("<p></p><h3>Totaal: </h3>").insertSmartVariable(priceToPay);
+            } else if (pricePaid) {
+                chain = chain.insertContent("<p></p><h3>Totaal: </h3>").insertSmartVariable(pricePaid).insertContent(" (betaald)");
+            }
+        }
+        
+        chain.run()
+    }
+
+    get hasParentsOrMembers() {
+        return !![...this.allRecipients.values()].find(r => r.types.includes('parent') || r.types.includes('member'))
+    }
+
     mounted() {
         this.emailId = this.getDefaultEmailId()
 
@@ -705,6 +870,10 @@ export default class MailView extends Mixins(NavigationMixin) {
         if (this.hasFirstName) {
             // Insert "Dag <naam>," into editor
             this.editor.chain().setTextSelection(0).insertContent("Dag ").insertSmartVariable(this.smartVariables[0]).insertContent(",<p></p><p></p>")/*.focus()*/.run()
+        }
+
+        if (this.payments.length) {
+            this.insertPaymentDefault()
         }
 
         this.checkBounces().catch(e => {
@@ -834,209 +1003,319 @@ export default class MailView extends Mixins(NavigationMixin) {
         return [...names.values()]
     }
 
+    addMemberRecipient(member: Member, recipients:  Map<string, Recipient>) {
+        // Minor if no age and registered in a group with max age = 17, or if member has age and is lower than 18
+        const isMinor = member.isMinor
+
+        for (const parent of member.details.parents) {
+            if (!parent.email) {
+                continue;
+            }
+
+            const recipient = Recipient.create({
+                firstName: parent.firstName,
+                lastName: parent.lastName,
+                email: parent.email.toLowerCase(),
+                replacements: [
+                    Replacement.create({
+                        token: "firstName",
+                        value: parent.firstName
+                    }),
+                    Replacement.create({
+                        token: "lastName",
+                        value: parent.lastName
+                    }),
+                    Replacement.create({
+                        token: "email",
+                        value: parent.email.toLowerCase()
+                    })
+                ],
+                types: ["parent", isMinor ? "minor-parent" : "adult-parent"]
+            })
+
+            const existing = recipients.get(recipient.email)
+
+            if (existing) {
+                existing.merge(recipient)
+                continue
+            }
+
+            recipients.set(recipient.email, recipient)
+        }
+
+        if (member.details.email) {
+            // Create a loop for convenience (to allow break/contniue)
+            for (const email of [member.details.email.toLowerCase()]) {
+                const existing = recipients.get(email)
+
+                const recipient = Recipient.create({
+                    firstName: member.details.firstName,
+                    lastName: member.details.lastName,
+                    email,
+                    replacements: [
+                        Replacement.create({
+                            token: "firstName",
+                            value: member.details.firstName
+                        }),
+                        Replacement.create({
+                            token: "lastName",
+                            value: member.details.lastName
+                        }),
+                        Replacement.create({
+                            token: "email",
+                            value: email
+                        })
+                    ],
+                    types: ["member", isMinor ? "minor-member" : "adult-member"]
+                })
+
+                if (existing) {
+                    if (existing.types.includes("parent") && !existing.types.includes("member")) {
+                        // Only merge after check!
+                        existing.merge(recipient)
+                        
+                        if (isMinor) {
+                            // This is a duplicate email address that was also added to a minor member.
+                            // probably because they didn't read and just entered their email address in a member email address field
+                            // Keep this as a parent only email address
+                            existing.types = existing.types.filter(t => !t.includes("member"))
+                        }
+                    } else {
+                        existing.merge(recipient)
+                    }
+                    
+                    continue
+                }
+
+                recipients.set(
+                    email, 
+                    recipient
+                )
+            }
+        }
+    }
+
+    addOrderRecipient(order: Order, recipients:  Map<string, Recipient>, payment?: Payment) {
+        if (order.data.customer.email.length > 0) {
+            let webshop: WebshopPreview | null = this.webshop
+
+            if (!webshop || order.webshopId !== webshop.id) {
+                webshop = this.organization.webshops.find(w => w.id === order.webshopId) ?? null
+            }
+            const email = order.data.customer.email.toLowerCase()
+            let forcePayment = payment ?? order.payment
+
+            // Send one e-mail for every order
+            const id = "order-"+order.id
+
+            const existing = recipients.get(id)
+            const recipient = Recipient.create({
+                firstName: order.data.customer.firstName,
+                lastName: order.data.customer.lastName,
+                email,
+                replacements: [
+                    Replacement.create({
+                        token: "firstName",
+                        value: order.data.customer.firstName ?? ""
+                    }),
+                    Replacement.create({
+                        token: "lastName",
+                        value: order.data.customer.lastName ?? ""
+                    }),
+                    Replacement.create({
+                        token: "email",
+                        value: email
+                    }),
+                    Replacement.create({
+                        token: "orderUrl",
+                        value: "https://"+webshop?.getUrl(OrganizationManager.organization)+"/order/"+(order.id)
+                    }),
+                    Replacement.create({
+                        token: "nr",
+                        value: (order.number ?? "")+""
+                    }),
+                    Replacement.create({
+                        token: "orderPrice",
+                        value: Formatter.price(order.data.totalPrice)
+                    }),
+                    Replacement.create({
+                        token: "priceToPay",
+                        value: forcePayment?.status !== PaymentStatus.Succeeded ? Formatter.price(forcePayment?.price ?? 0) : ""
+                    }),
+                    Replacement.create({
+                        token: "paymentMethod",
+                        value: forcePayment?.method ? PaymentMethodHelper.getName(forcePayment.method) : ""
+                    }),
+                    Replacement.create({
+                        token: "transferDescription",
+                        value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? (forcePayment?.transferDescription ?? "") : ""
+                    }),
+                    Replacement.create({
+                        token: "transferBankAccount",
+                        value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.iban ? webshop?.meta.transferSettings.iban : this.organization.meta.transferSettings.iban) ?? "") : ""
+                    }),
+                    Replacement.create({
+                        token: "transferBankCreditor",
+                        value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.creditor ? webshop?.meta.transferSettings.creditor : this.organization.meta.transferSettings.creditor) ?? this.organization.name) : ""
+                    }),
+                    Replacement.create({
+                        token: "orderStatus",
+                        value: OrderStatusHelper.getName(order.status)
+                    }),
+                    Replacement.create({
+                        token: "orderMethod",
+                        value: order.data.checkoutMethod?.typeName ?? ""
+                    }),
+                    Replacement.create({
+                        token: "orderLocation",
+                        value: ((order) => {
+                            if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                                return order.data.checkoutMethod.name
+                            }
+
+                            if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
+                                return order.data.checkoutMethod.name
+                            }
+
+                            return order.data.address?.shortString() ?? ""
+                        })(order)
+                    }),
+                    Replacement.create({
+                        token: "orderDate",
+                        value: order.data.timeSlot?.dateString() ?? ""
+                    }),
+                    Replacement.create({
+                        token: "orderTime",
+                        value: order.data.timeSlot?.timeRangeString() ?? ""
+                    }),
+                    Replacement.create({
+                        token: "orderTable",
+                        value: "",
+                        html: order.getHTMLTable()
+                    })
+                ]
+            })
+            if (existing) {
+                existing.merge(recipient)
+                return
+            }
+            recipients.set(id, recipient)
+        }
+    }
+
     // Unfiltered
     get allRecipients(): Map<string, Recipient> {
         const recipients: Map<string, Recipient> = new Map()
 
-        if (this.webshop) {
-            for (const order of this.orders) {
-                if (order.data.customer.email.length > 0) {
-                    const email = order.data.customer.email.toLowerCase()
+        for (const payment of this.payments) {
+            const paymentRecipientsMap: Map<string, Recipient> = new Map()
+            if (payment.order) {
+                const order = payment.order
+                this.addOrderRecipient(order, paymentRecipientsMap, payment)
+            } else {
+                const members = payment.registrations.map(r => r.member)
+                for (const member of members) {
+                    this.addMemberRecipient(member, paymentRecipientsMap)
+                }
+            }
 
-                    // Send one e-mail for every order
-                    const id = "order-"+order.id
+            // Move recipients
+            let paymentRecipients = [...paymentRecipientsMap.values()]   
 
-                    const existing = recipients.get(id)
-
-                    if (existing) {
-                        if (!existing.firstName && order.data.customer.firstName) {
-                            existing.firstName = order.data.customer.firstName
-                        }
-                        continue
+            // Filter if we have more than 1
+            if (paymentRecipients.length > 1) {
+                paymentRecipients = paymentRecipients.filter(recipient => {
+                    // filter minors
+                    if (recipient.types.includes("minor-member")) {
+                        return false
                     }
+                    if (recipient.types.includes("adult-parent")) {
+                        return false
+                    }
+                    return true
+                })         
+            }
 
-                    recipients.set(id, Recipient.create({
-                        firstName: order.data.customer.firstName,
-                        lastName: order.data.customer.lastName,
-                        email,
-                        replacements: [
+            // Readd to recipients
+            for (const recipient of paymentRecipients) {
+                recipient.replacements = recipient.replacements.filter(r => !["priceToPay", "paymentMethod", "transferDescription", "orderTable"].includes(r.token))
+
+                let webshop = payment.order ? (this.organization.webshops.find(w => w.id === payment.order!.webshopId) ?? null) : null
+                recipient.replacements.push(
+                    ...[
+                        Replacement.create({
+                            token: "overviewTable",
+                            value: "",
+                            html: payment.getHTMLTable()
+                        }),
+                        Replacement.create({
+                            token: "overviewContext",
+                            value: payment.order ? (webshop ? webshop.meta.name+" (bestelling "+payment.order.number+")" : "Bestelling "+payment.order.number) : "Inschrijvingen"
+                        }),
+                    ]
+                )
+
+                if (payment.status !== PaymentStatus.Succeeded &&  payment?.method === PaymentMethod.Transfer) {
+                    // Add data
+                    recipient.replacements.push(
+                        ...[
                             Replacement.create({
-                                token: "firstName",
-                                value: order.data.customer.firstName ?? ""
-                            }),
-                            Replacement.create({
-                                token: "lastName",
-                                value: order.data.customer.lastName ?? ""
-                            }),
-                            Replacement.create({
-                                token: "email",
-                                value: email
-                            }),
-                            Replacement.create({
-                                token: "orderUrl",
-                                value: "https://"+this.webshop.getUrl(OrganizationManager.organization)+"/order/"+(order.id)
-                            }),
-                            Replacement.create({
-                                token: "nr",
-                                value: (order.number ?? "")+""
-                            }),
-                            Replacement.create({
-                                token: "orderPrice",
-                                value: Formatter.price(order.data.totalPrice)
-                            }),
-                            Replacement.create({
-                                token: "orderPriceToPay",
-                                value: order.payment?.status !== PaymentStatus.Succeeded ? Formatter.price(order.payment?.price ?? 0) : ""
+                                token: "priceToPay",
+                                value: Formatter.price(payment.price)
                             }),
                             Replacement.create({
                                 token: "paymentMethod",
-                                value: order.payment?.method ? PaymentMethodHelper.getName(order.payment.method) : ""
+                                value: PaymentMethodHelper.getName(payment.method)
                             }),
                             Replacement.create({
                                 token: "transferDescription",
-                                value: order.payment?.status !== PaymentStatus.Succeeded && order.payment?.method === PaymentMethod.Transfer ? (order.payment?.transferDescription ?? "") : ""
+                                value: (payment.transferDescription ?? "")
                             }),
-                            Replacement.create({
-                                token: "transferBankAccount",
-                                value: order.payment?.status !== PaymentStatus.Succeeded && order.payment?.method === PaymentMethod.Transfer ? (this.webshop?.meta.transferSettings.iban ?? this.organization.meta.transferSettings.iban ?? "") : ""
-                            }),
-                            Replacement.create({
-                                token: "transferBankCreditor",
-                                value: order.payment?.status !== PaymentStatus.Succeeded && order.payment?.method === PaymentMethod.Transfer ? (this.webshop?.meta.transferSettings.creditor ?? this.organization.meta.transferSettings.creditor ?? this.organization.name) : ""
-                            }),
-                            Replacement.create({
-                                token: "orderStatus",
-                                value: OrderStatusHelper.getName(order.status)
-                            }),
-                            Replacement.create({
-                                token: "orderMethod",
-                                value: order.data.checkoutMethod?.typeName ?? ""
-                            }),
-                            Replacement.create({
-                                token: "orderLocation",
-                                value: ((order) => {
-                                    if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                                        return order.data.checkoutMethod.name
-                                    }
-
-                                    if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                                        return order.data.checkoutMethod.name
-                                    }
-
-                                    return order.data.address?.shortString() ?? ""
-                                })(order)
-                            }),
-                            Replacement.create({
-                                token: "orderDate",
-                                value: order.data.timeSlot?.dateString() ?? ""
-                            }),
-                            Replacement.create({
-                                token: "orderTime",
-                                value: order.data.timeSlot?.timeRangeString() ?? ""
-                            }),
-                            Replacement.create({
-                                token: "orderTable",
-                                value: "",
-                                html: order.getHTMLTable()
-                            })
                         ]
-                    }))
+                    )
 
-                }
-            }
-        }
-        
-
-        for (const member of this.members) {
-            // Minor if no age and registered in a group with max age = 17, or if member has age and is lower than 18
-            const isMinor = member.isMinor
-
-            for (const parent of member.details.parents) {
-                if (!parent.email) {
-                    continue;
-                }
-
-                const recipient = Recipient.create({
-                    firstName: parent.firstName,
-                    lastName: parent.lastName,
-                    email: parent.email.toLowerCase(),
-                    replacements: [
-                        Replacement.create({
-                            token: "firstName",
-                            value: parent.firstName
-                        }),
-                        Replacement.create({
-                            token: "lastName",
-                            value: parent.lastName
-                        }),
-                        Replacement.create({
-                            token: "email",
-                            value: parent.email.toLowerCase()
-                        })
-                    ],
-                    types: ["parent", isMinor ? "minor-parent" : "adult-parent"]
-                })
-
-                const existing = recipients.get(recipient.email)
-
-                if (existing) {
-                    existing.merge(recipient)
-                    continue
-                }
-
-                recipients.set(recipient.email, recipient)
-            }
-
-            if (member.details.email) {
-                // Create a loop for convenience (to allow break/contniue)
-                for (const email of [member.details.email.toLowerCase()]) {
-                    const existing = recipients.get(email)
-
-                    const recipient = Recipient.create({
-                        firstName: member.details.firstName,
-                        lastName: member.details.lastName,
-                        email,
-                        replacements: [
-                            Replacement.create({
-                                token: "firstName",
-                                value: member.details.firstName
-                            }),
-                            Replacement.create({
-                                token: "lastName",
-                                value: member.details.lastName
-                            }),
-                            Replacement.create({
-                                token: "email",
-                                value: email
-                            })
-                        ],
-                        types: ["member", isMinor ? "minor-member" : "adult-member"]
-                    })
-
-                    if (existing) {
-                        if (existing.types.includes("parent") && !existing.types.includes("member")) {
-                            // Only merge after check!
-                            existing.merge(recipient)
-                            
-                            if (isMinor) {
-                                // This is a duplicate email address that was also added to a minor member.
-                                // probably because they didn't read and just entered their email address in a member email address field
-                                // Keep this as a parent only email address
-                                existing.types = existing.types.filter(t => !t.includes("member"))
-                            }
-                        } else {
-                            existing.merge(recipient)
-                        }
-                        
-                        continue
+                    if (!payment.order) {
+                        const transferSettings = this.organization.meta.transferSettings
+                        recipient.replacements.push(
+                            ...[
+                                Replacement.create({
+                                    token: "transferBankAccount",
+                                    value: transferSettings.iban ?? ""
+                                }),
+                                Replacement.create({
+                                    token: "transferBankCreditor",
+                                    value: transferSettings.creditor ?? this.organization.name
+                                }),
+                            ]
+                        )
                     }
-
-                    recipients.set(
-                        email, 
-                        recipient
+                } else if (payment.status === PaymentStatus.Succeeded) {
+                    recipient.replacements.push(
+                        ...[
+                            Replacement.create({
+                                token: "pricePaid",
+                                value: Formatter.price(payment.price)
+                            }),
+                            Replacement.create({
+                                token: "paymentMethod",
+                                value: payment.method ? PaymentMethodHelper.getName(payment.method) : ""
+                            }),
+                        ]
                     )
                 }
+
+                recipients.set(payment.id+"-"+recipient.email, recipient)
             }
+        }
+
+        if (this.webshop) {
+            for (const order of this.orders) {
+                this.addOrderRecipient(order, recipients)
+            }
+        }
+
+        for (const member of this.members) {
+            this.addMemberRecipient(member, recipients)
 
             for (const user of member.users) {
                 if (!user.email) {

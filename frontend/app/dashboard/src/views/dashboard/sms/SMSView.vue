@@ -55,7 +55,7 @@
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Dropdown, SegmentedControl, STInputBox, STNavigationBar, STNavigationTitle, STToolbar } from "@stamhoofd/components";
-import { Customer, MemberWithRegistrations } from '@stamhoofd/structures';
+import { Customer, Member } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../registration/src/classes/OrganizationManager";
@@ -72,9 +72,9 @@ import { OrganizationManager } from "../../../../../registration/src/classes/Org
 })
 export default class SMSView extends Mixins(NavigationMixin) {
     @Prop({ default: () => []})
-    members!: MemberWithRegistrations[];
+    members!: Member[];
 
-    @Prop({ default: () => []})
+    @Prop({ default: () => []})
     customers!: Customer[];
 
     smsFilter = "all"

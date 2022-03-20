@@ -70,7 +70,7 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r, true)) ?? [],
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            order: (p as any).order ? OrderStruct.create(Object.assign({...(p as any).order}, { payment: null })) : null,
+            order: (p as any).order ? OrderStruct.create(Object.assign({...(p as any).order}, { payment: null })) : null
         })
     }
     

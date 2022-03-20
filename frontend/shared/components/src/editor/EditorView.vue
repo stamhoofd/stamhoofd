@@ -599,11 +599,9 @@ export default class EditorView extends Vue {
             
 
             span[data-type="smartVariable"] {
-                background: $color-gray-3;
                 padding: 3px 2px;
                 margin: 0 -2px;
                 //color: $color-gray-5;
-                border-radius: $border-radius;
                 white-space: nowrap;
 
                 &:empty {
@@ -613,8 +611,28 @@ export default class EditorView extends Vue {
                 }
 
                 &.ProseMirror-selectednode {
-                    background: $color-primary;
                     color: $color-primary-contrast;
+                }
+
+                position: relative;
+
+                &:after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: $color-gray-3;
+                    border-radius: $border-radius;
+                    pointer-events: none;
+                    z-index: -1;
+                }
+
+                &.ProseMirror-selectednode {
+                    &:after {
+                        background: $color-primary;
+                    }
                 }
             }
 

@@ -1,4 +1,5 @@
 import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core'
+import { TextSelection } from 'prosemirror-state'
 
 export class EditorSmartVariable {
     id: string;
@@ -15,6 +16,10 @@ export class EditorSmartVariable {
         this.html = options.html;
         this.deleteMessage = options.deleteMessage;
     }
+
+    getJSONContent() {
+        return { type: this.html ? "smartVariableBlock" : "smartVariable", attrs: { id: this.id } }
+    }
 }
 
 
@@ -26,7 +31,7 @@ export type SmartVariableNodeOptions = {
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         smartVariableNode: {
-            insertSmartVariable: (smartVariable: EditorSmartVariable) => ReturnType,
+            insertSmartVariable: (smartVariable: EditorSmartVariable, options?: { updateSelection?: boolean }) => ReturnType,
         }
     }
 }
@@ -50,8 +55,36 @@ export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
 
     addCommands() {
         return {
-            insertSmartVariable: (smartVariable: EditorSmartVariable) => ({ commands }) => {
-                return commands.insertContent({ type: smartVariable.html ? "smartVariableBlock" : "smartVariable", attrs: { id: smartVariable.id } })
+            insertSmartVariable: (smartVariable: EditorSmartVariable, options?: { updateSelection?: boolean }) => ({ chain, commands }) => {
+                if (smartVariable.html && (options?.updateSelection === undefined || options?.updateSelection)) {
+                    return chain()
+                        .insertContent(smartVariable.getJSONContent(), options)
+                        // set cursor after horizontal rule
+                        .command(({ tr, dispatch }) => {
+                            if (dispatch) {
+                                const { $to } = tr.selection
+                                const posAfter = $to.end()
+
+                                if ($to.nodeAfter) {
+                                    tr.setSelection(TextSelection.create(tr.doc, $to.pos))
+                                } else {
+                                // add node after horizontal rule if it’s the end of the document
+                                    const node = $to.parent.type.contentMatch.defaultType?.create()
+
+                                    if (node) {
+                                        tr.insert(posAfter, node)
+                                        tr.setSelection(TextSelection.create(tr.doc, posAfter))
+                                    }
+                                }
+
+                                tr.scrollIntoView()
+                            }
+
+                            return true
+                        })
+                        .run()
+                }
+                return commands.insertContent(smartVariable.getJSONContent(), options)
             },
         }
     },

@@ -7,6 +7,10 @@ export class Member extends EncryptedMember {
     @field({ decoder: MemberDetails })
     details: MemberDetails
 
+    get isMinor() {
+        return (this.details.age !== null && this.details.age < 18)
+    }
+
     get name() {
         if (this.details) {
             return this.details.name
