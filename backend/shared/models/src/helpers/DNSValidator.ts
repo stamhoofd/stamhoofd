@@ -85,7 +85,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[]) {
                     } else {
                         const val = records[0].join("").trim()
                         if (val === record.value.trim()) {
-                            if (records[0].length > 1 && val.length <= 255) {
+                            /*if (records[0].length > 1 && val.length <= 255) {
                                 // Split was not needed and is not supported by SES
                                 record.status = DNSRecordStatus.Failed
                                 allValid = false
@@ -95,9 +95,9 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[]) {
                                     message: "",
                                     human: "De waarde komt overeen maar is op één of andere manier opgesplitst in meerdere stukken, terwijl dat niet nodig is. Dit wordt niet ondersteund door onze e-mailprovider. Contacteer ons als je de oorzaak niet kan achterhalen."
                                 }))
-                            } else {
+                            } else {*/
                                 record.status = DNSRecordStatus.Valid
-                            }
+                            //}
                         } else {
                             record.status = DNSRecordStatus.Failed
                             allValid = false
