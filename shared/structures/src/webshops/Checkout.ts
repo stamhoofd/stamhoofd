@@ -227,6 +227,7 @@ export class Checkout extends AutoEncoder {
         
         const current = this.timeSlot
         const timeSlot = this.checkoutMethod.timeSlots.timeSlots.find(s => s.id == current.id)
+        const availableTimeslots = this.checkoutMethod.timeSlots.timeSlots.length
         
         if (!timeSlot) {
             throw new SimpleError({
@@ -242,7 +243,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "timeslot_full",
                 message: "Timeslot has reached maximum orders",
-                human: "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.",
+                human: (availableTimeslots !=1 ? "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk." : "Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen."),
                 field: "timeSlot"
             })
         }
@@ -254,14 +255,14 @@ export class Checkout extends AutoEncoder {
                 throw new SimpleError({
                     code: "timeslot_full",
                     message: "Timeslot has reached maximum orders",
-                    human: "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk.",
+                    human: (availableTimeslots !=1 ? "Het gekozen tijdstip is helaas volzet. Kies een ander tijdstip indien mogelijk." : "Het evenement is helaas volzet. We aanvaarden geen verdere bestellingen."),
                     field: "timeSlot"
                 })
             }
             throw new SimpleError({
                 code: "timeslot_full",
                 message: "Timeslot has reached maximum persons",
-                human: "Er "+(remaingPersons != 1 ? "zijn" : "is")+" nog maar "+remaingPersons+" "+(remaingPersons != 1 ? "plaatsen" : "plaats")+" vrij op het gekozen tijdstip. Jouw mandje is voor " + this.cart.persons + " "+(this.cart.persons != 1 ? "personen" : "persoon")+". Kies een ander tijdstip indien mogelijk.",
+                human: "Er "+(remaingPersons != 1 ? "zijn" : "is")+" nog maar "+remaingPersons+" "+(remaingPersons != 1 ? "plaatsen" : "plaats")+" vrij "+(availableTimeslots !=1 ? "op het gekozen tijdstip" : "voor dit evenement")+". Jouw mandje is voor " + this.cart.persons + " "+(this.cart.persons != 1 ? "personen" : "persoon")+(availableTimeslots !=1 ? ". Kies een ander tijdstip indien mogelijk." : ""),
                 field: "timeSlot"
             })
         }
@@ -275,7 +276,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "invalid_first_name",
                 message: "Invalid first name",
-                human: "Het voornaam dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                human: "De voornaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
                 field: "customer.firstName"
             })
         }
@@ -284,7 +285,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "invalid_last_name",
                 message: "Invalid last name",
-                human: "Het achternaam dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
+                human: "De achternaam die je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat.",
                 field: "customer.lastName"
             })
         }
