@@ -1,4 +1,6 @@
 import { column, Model } from "@simonbackx/simple-database";
+import { AnyDecoder } from "@simonbackx/simple-encoding";
+import { EmailTemplateType } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
 
 
@@ -18,30 +20,28 @@ export class EmailTemplate extends Model {
     @column({ type: "string"})
     subject: string;
 
-    @column({ type: "string" })
-    organizationId: string;
+    @column({ type: "string", nullable: true })
+    organizationId: string | null;
 
-    @column({ type: "string" })
+    @column({ type: "string", nullable: true })
     groupId: string | null = null;
 
-    @column({ type: "string" })
+    @column({ type: "string", nullable: true })
     webshopId: string | null = null;
 
     @column({ type: "string" })
-    type: string; // should be enumeration
+    type: EmailTemplateType; // should be enumeration
 
     /** Raw json structure to edit the template */ 
-    @column({ type: "string" })
-    json: string;
+    @column({ type: "json", decoder: AnyDecoder })
+    json: any;
 
     /** Template converted to HTML, with the {{replacements}} already correctly in place */
     @column({ type: "string" })
     html: string;
 
-    @column({ type: "string", nullable: true })
-    from: string | null = null;
-
-
+    @column({ type: "string" })
+    text: string;
 
     @column({
         type: "datetime", beforeSave() {

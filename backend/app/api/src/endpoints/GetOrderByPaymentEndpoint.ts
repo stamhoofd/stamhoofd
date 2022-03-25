@@ -43,6 +43,6 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         order.setRelation(Order.payment, payment)
-        return new Response(OrderStruct.create(order));
+        return new Response(await order.getStructure());
     }
 }

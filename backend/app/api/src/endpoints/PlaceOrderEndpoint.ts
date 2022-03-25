@@ -102,7 +102,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 await order.markValid(payment, [])
 
                 // Only now we can update the transfer description, since we need the order number as a reference
-                payment.transferDescription = Payment.generateDescription(organization, webshop.meta.transferSettings, (order.number ?? "")+"")
+                payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.meta.transferSettings)
+                payment.generateDescription(organization, (order.number ?? "")+"")
                 await payment.save()
                 await order.save()
             } else if (payment.method == PaymentMethod.PointOfSale) {

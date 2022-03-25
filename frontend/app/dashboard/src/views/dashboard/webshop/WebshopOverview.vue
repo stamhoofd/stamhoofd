@@ -164,6 +164,17 @@
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg">
+                        <h2 class="style-title-list">
+                            E-mails
+                        </h2>
+                        <p class="style-description">
+                            Wijzig de inhoud van automatische e-mails.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
                 </STList>
 
                 <hr>
@@ -257,6 +268,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 import EditWebshopCheckoutMethodsView from './edit/EditWebshopCheckoutMethodsView.vue';
+import EditWebshopEmailsView from './edit/EditWebshopEmailsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
 import EditWebshopInputFieldsView from './edit/EditWebshopInputFieldsView.vue';
 import EditWebshopLinkView from './edit/EditWebshopLinkView.vue';
@@ -399,6 +411,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     editPermissions(animated = true) {
         this.displayEditComponent(EditWebshopPermissionsView, animated)
+    }
+
+    editEmails(animated = true) {
+        this.displayEditComponent(EditWebshopEmailsView, animated)
     }
 
     displayEditComponent(component, animated = true) {

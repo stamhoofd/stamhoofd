@@ -14,7 +14,8 @@
         "declarationMap": true,
         "outDir": "dist",
         "lib": [
-            "es2019"
+            "es2019",
+            "ES2021.String"
         ],
         "types": [
             "node",

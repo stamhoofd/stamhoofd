@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { EmailTemplateType, OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType, WebshopTimeSlot, Order as OrderStruct, WebshopPreview, Payment as PaymentStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from '@stamhoofd/email';
@@ -10,6 +10,8 @@ import { WebshopCounter } from '../helpers/WebshopCounter';
 import { QueueHandler } from "@stamhoofd/queues";
 import { Ticket } from "./Ticket";
 import { I18n } from "@stamhoofd/backend-i18n";
+import { getEmailBuilder } from "../helpers/EmailBuilder";
+import { EmailTemplate } from "./EmailTemplate";
 
 
 export class Order extends Model {
@@ -373,7 +375,7 @@ export class Order extends Model {
         const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
 
         // Also send a copy
-        Email.send({
+        /*Email.send({
             from,
             replyTo,
             to: toStr,
@@ -382,6 +384,13 @@ export class Order extends Model {
             + "\n"
             + this.getUrl()
             +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",
+        })*/
+
+        this.sendEmailTemplate({
+            type: EmailTemplateType.OrderReceivedTransfer,
+            from,
+            replyTo,
+            to: toStr
         })
     }
 
@@ -406,6 +415,51 @@ export class Order extends Model {
             + this.getUrl()
             +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
         })
+    }
+
+    async getStructure()  {
+        if (this.paymentId) {
+            if (Order.payment.isLoaded(this)) {
+                return OrderStruct.create(Object.assign({...this}, { payment: PaymentStruct.create((this as any).payment) }));
+            }
+            const payment = await Payment.getByID(this.paymentId)
+            if (!payment) {
+                throw new Error("Failed to load relation payment")
+            }
+            this.setRelation(Order.payment, payment)
+            return OrderStruct.create(Object.assign({...this}, { payment: PaymentStruct.create(payment) }));
+        }
+        
+        return OrderStruct.create(Object.assign({}, this, { payment: null }));
+    }
+
+    async sendEmailTemplate(this: Order & { webshop: Webshop & { organization: Organization } }, data: {
+        type: EmailTemplateType,
+        from: string,
+        replyTo?: string,
+        to: string,
+    }) {
+        // First fetch template
+        const templates = await EmailTemplate.where({ type: data.type, webshopId: this.webshop.id }) ?? await EmailTemplate.where({ type: data.type, organizationId: null })
+        if (!templates || templates.length == 0) {
+            console.error("Could not find email template for type "+data.type)
+            return
+        }
+        const template = templates[0]
+
+        const recipient = (await this.getStructure()).getRecipient(await this.webshop.organization.getStructure(), WebshopPreview.create(this.webshop))
+
+        // Create e-mail builder
+        const builder = await getEmailBuilder(this.webshop.organization, {
+            recipients: [recipient],
+            subject: template.subject,
+            html: template.html,
+            text: template.text,
+            from: data.from,
+            replyTo: data.replyTo
+        })
+
+        Email.schedule(builder)
     }
 
     /**
@@ -451,20 +505,39 @@ export class Order extends Model {
                 })
             } else {
                 if (this.webshop.meta.ticketType === WebshopTicketType.None) {
-                    // Also send a copy
-                    Email.send({
-                        from,
-                        replyTo,
-                        to: toStr,
-                        subject: "["+webshop.meta.name+"] Bestelling "+this.number,
-                        text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                            ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
-                        + "\n"
-                        + this.setRelation(Order.webshop, webshop).getUrl()
-                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",
-                    })
+
+                    if (payment && payment.method === PaymentMethod.Transfer) {
+                        // Also send a copy
+                        this.sendEmailTemplate({
+                            type: EmailTemplateType.OrderConfirmationTransfer,
+                            from,
+                            replyTo,
+                            to: toStr
+                        })
+                    } else if (payment && payment.method === PaymentMethod.PointOfSale) {
+                        this.sendEmailTemplate({
+                            type: EmailTemplateType.OrderConfirmationPOS,
+                            from,
+                            replyTo,
+                            to: toStr
+                        })
+                    } else {
+                        // Also send a copy
+                        this.sendEmailTemplate({
+                            type: EmailTemplateType.OrderConfirmationOnline,
+                            from,
+                            replyTo,
+                            to: toStr,
+                            /*subject: "["+webshop.meta.name+"] Bestelling "+this.number,
+                            text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
+                                ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
+                            + "\n"
+                            + this.setRelation(Order.webshop, webshop).getUrl()
+                            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",*/
+                        })
+                    }
+                    
                 } else {
-                    // Also send a copy
                     Email.send({
                         from,
                         replyTo,

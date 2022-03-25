@@ -1,12 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email, EmailBuilder } from '@stamhoofd/email';
-import { PasswordToken } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
-import { EmailRequest, Replacement } from "@stamhoofd/structures";
-import { Formatter } from '@stamhoofd/utility';
+import { Email } from '@stamhoofd/email';
+import { getEmailBuilder, Token } from '@stamhoofd/models';
+import { EmailRequest } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -140,61 +137,13 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const email = request.body
 
-        // Update recipients
-        for (const recipient of email.recipients) {
-            
-            // Default signInUrl
-            let signInUrl = "https://"+user.organization.getHost()+"/login?email="+encodeURIComponent(user.email)
-
-            if (recipient.userId) {
-                const recipientUser = await User.getByID(recipient.userId)
-                if (recipientUser && recipientUser.organizationId === user.organizationId && recipientUser.email === recipient.email) {
-                    // We can create a special token
-                    signInUrl = await PasswordToken.getMagicSignInUrl(recipientUser.setRelation(User.organization, user.organization))
-                }
-            }
-
-            recipient.replacements.push(Replacement.create({
-                token: "signInUrl",
-                value: signInUrl
-            }))
-        }
-
         // Create e-mail builder
-        const builder: EmailBuilder = () => {
-            const recipient = email.recipients.shift()
-            if (!recipient) {
-                return undefined
-            }
-
-            let html = email.html
-            let subject = email.subject
-
-            for (const replacement of recipient.replacements) {
-                if (html) {
-                    html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
-                }
-                subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
-            }
-
-            let to = recipient.email
-
-            if (recipient.firstName && recipient.lastName) {
-                to = '"'+(recipient.firstName+" "+recipient.lastName).replace("\"", "\\\"")+"\" <"+to+">" 
-            } else if (recipient.firstName) {
-                to = '"'+recipient.firstName.replace("\"", "\\\"")+"\" <"+to+">" 
-            }
-
-            return {
-                from,
-                replyTo,
-                to,
-                subject,
-                text: email.text ?? undefined,
-                html: html ?? undefined,
-                attachments
-            }
-        }
+        const builder = await getEmailBuilder(user.organization, {
+            ...email,
+            from,
+            replyTo,
+            attachments
+        })
 
         Email.schedule(builder)
 

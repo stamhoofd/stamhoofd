@@ -44,6 +44,9 @@ export class Payment extends Model {
     @column({ type: "string", nullable: true })
     transferDescription: string | null = null;
 
+    @column({ type: "json", nullable: true })
+    transferSettings: TransferSettings | null = null;
+
     @column({
         type: "datetime", beforeSave(old?: any) {
             if (old !== undefined) {
@@ -79,19 +82,23 @@ export class Payment extends Model {
     @column({ type: "string", nullable: true })
     ibanName: string | null = null;
 
-    static generateDescription(organization: Organization, settings: TransferSettings, reference: string) {
+    generateDescription(organization: Organization, reference: string) {
+        const settings = this.transferSettings ?? organization.meta.transferSettings
         if (settings.type == TransferDescriptionType.Structured) {
             if (organization.address.country === Country.Belgium) {
-                return this.generateOGM()
+                this.transferDescription = Payment.generateOGM()
+                return
             }
-            return this.generateOGMNL()
+             this.transferDescription = Payment.generateOGMNL()
+             return
         }
 
         if (settings.type == TransferDescriptionType.Reference) {
-            return (settings.prefix ? (settings.prefix + " ") : "" ) + reference
+            this.transferDescription = (settings.prefix ? (settings.prefix + " ") : "" ) + reference
+            return
         }
 
-        return settings.prefix
+        this.transferDescription = settings.prefix
     }
 
     static generateOGMNL() {

@@ -350,14 +350,12 @@ export default class MailView extends Mixins(NavigationMixin) {
             }))
         }
 
-        if (this.orders.length > 0) {
-            buttons.push(new EditorSmartButton({
-                id: "orderUrl",
-                name: "Knop naar bestelling",
-                text: this.orderButtonText,
-                hint: "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies."
-            }))
-        }
+        buttons.push(new EditorSmartButton({
+            id: "orderUrl",
+            name: "Knop naar bestelling",
+            text: this.orderButtonText,
+            hint: "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies."
+        }))
 
         // Remove all smart variables that are not set in the recipients
         return buttons.filter(button => {
@@ -1102,99 +1100,15 @@ export default class MailView extends Mixins(NavigationMixin) {
             if (!webshop || order.webshopId !== webshop.id) {
                 webshop = this.organization.webshops.find(w => w.id === order.webshopId) ?? null
             }
-            const email = order.data.customer.email.toLowerCase()
-            let forcePayment = payment ?? order.payment
+            if (!webshop) {
+                return;
+            }
 
             // Send one e-mail for every order
             const id = "order-"+order.id
 
             const existing = recipients.get(id)
-            const recipient = Recipient.create({
-                firstName: order.data.customer.firstName,
-                lastName: order.data.customer.lastName,
-                email,
-                replacements: [
-                    Replacement.create({
-                        token: "firstName",
-                        value: order.data.customer.firstName ?? ""
-                    }),
-                    Replacement.create({
-                        token: "lastName",
-                        value: order.data.customer.lastName ?? ""
-                    }),
-                    Replacement.create({
-                        token: "email",
-                        value: email
-                    }),
-                    Replacement.create({
-                        token: "orderUrl",
-                        value: "https://"+webshop?.getUrl(OrganizationManager.organization)+"/order/"+(order.id)
-                    }),
-                    Replacement.create({
-                        token: "nr",
-                        value: (order.number ?? "")+""
-                    }),
-                    Replacement.create({
-                        token: "orderPrice",
-                        value: Formatter.price(order.data.totalPrice)
-                    }),
-                    Replacement.create({
-                        token: "priceToPay",
-                        value: forcePayment?.status !== PaymentStatus.Succeeded ? Formatter.price(forcePayment?.price ?? 0) : ""
-                    }),
-                    Replacement.create({
-                        token: "paymentMethod",
-                        value: forcePayment?.method ? PaymentMethodHelper.getName(forcePayment.method) : ""
-                    }),
-                    Replacement.create({
-                        token: "transferDescription",
-                        value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? (forcePayment?.transferDescription ?? "") : ""
-                    }),
-                    Replacement.create({
-                        token: "transferBankAccount",
-                        value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.iban ? webshop?.meta.transferSettings.iban : this.organization.meta.transferSettings.iban) ?? "") : ""
-                    }),
-                    Replacement.create({
-                        token: "transferBankCreditor",
-                        value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.creditor ? webshop?.meta.transferSettings.creditor : this.organization.meta.transferSettings.creditor) ?? this.organization.name) : ""
-                    }),
-                    Replacement.create({
-                        token: "orderStatus",
-                        value: OrderStatusHelper.getName(order.status)
-                    }),
-                    Replacement.create({
-                        token: "orderMethod",
-                        value: order.data.checkoutMethod?.typeName ?? ""
-                    }),
-                    Replacement.create({
-                        token: "orderLocation",
-                        value: ((order) => {
-                            if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                                return order.data.checkoutMethod.name
-                            }
-
-                            if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                                return order.data.checkoutMethod.name
-                            }
-
-                            return order.data.address?.shortString() ?? ""
-                        })(order)
-                    }),
-                    Replacement.create({
-                        token: "orderDate",
-                        value: order.data.timeSlot?.dateString() ?? ""
-                    }),
-                    Replacement.create({
-                        token: "orderTime",
-                        value: order.data.timeSlot?.timeRangeString() ?? ""
-                    }),
-                    Replacement.create({
-                        token: "orderTable",
-                        value: "",
-                        html: order.getHTMLTable()
-                    })
-                ]
-            })
+            const recipient = order.getRecipient(this.organization, webshop, payment)
             if (existing) {
                 existing.merge(recipient)
                 return

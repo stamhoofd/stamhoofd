@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 159
+export const Version = 160
 
 // General
 export * from "./src/addresses/Address"
@@ -130,6 +130,7 @@ export * from "./src/Graph"
 
 // Email
 export * from "./src/email/EmailAddressSettings"
+export * from "./src/email/EmailTemplate"
 
 // Filters
 export * from "./src/filters/ChoicesFilter"

@@ -1,10 +1,15 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
+import { Recipient, Replacement } from '../endpoints/EmailRequest';
 import { Payment, PrivatePayment } from '../members/Payment';
-import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
+import { Organization } from '../Organization';
+import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod';
+import { PaymentStatus } from '../PaymentStatus';
 import { Checkout } from './Checkout';
 import { Customer } from './Customer';
+import { WebshopPreview } from './Webshop';
+import { CheckoutMethodType } from './WebshopMetaData';
 
 export enum OrderStatusV103 {
     Created = "Created",
@@ -193,6 +198,181 @@ export class Order extends AutoEncoder {
         }
         
         return str+"</tbody></table>";
+    }
+
+    getDetailsHTMLTable(): string {
+        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`
+
+        const data = [
+            {
+                title: "Bestelnummer",
+                value: ""+(this.number ?? "?")
+            },
+            {
+                title: ((order) => {
+                    if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                        return "Afhaallocatie"
+                    }
+
+                    if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
+                        return "Locatie"
+                    }
+
+                    return "Leveringsadres"
+                })(this),
+                value: ((order) => {
+                    if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                        return order.data.checkoutMethod.name
+                    }
+
+                    if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
+                        return order.data.checkoutMethod.name
+                    }
+
+                    return order.data.address?.shortString() ?? ""
+                })(this)
+            },
+            {
+                title: "Datum",
+                value: Formatter.capitalizeFirstLetter(this.data.timeSlot?.dateString() ?? "")
+            },
+            {
+                title: "Tijdstip",
+                value: this.data.timeSlot?.timeRangeString() ?? ""
+            },
+            ...this.data.fieldAnswers.filter(a => a.answer).map(a => ({
+                title: a.field.name,
+                value: a.answer
+            })),
+            {
+                title: "Betaalmethode",
+                value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.data.paymentMethod))
+            },
+            {
+                title: "Prijs",
+                value: Formatter.price(this.data.totalPrice)
+            },
+        ]
+
+        for (const replacement of data) {
+            if (replacement.value.length == 0) {
+                continue;
+            }
+            str += `<tr><td><h4>${Formatter.escapeHtml(replacement.title)}</h4></td><td>${Formatter.escapeHtml(replacement.value)}</td></tr>`
+        }
+
+        return str+"</tbody></table>";
+    }
+
+    getRecipient(organization: Organization, webshop: WebshopPreview, payment?: Payment) {
+        const order = this;
+        const email = order.data.customer.email.toLowerCase()
+        const forcePayment = payment ?? order.payment
+        
+        return Recipient.create({
+            firstName: order.data.customer.firstName,
+            lastName: order.data.customer.lastName,
+            email,
+            replacements: [
+                Replacement.create({
+                    token: "firstName",
+                    value: order.data.customer.firstName ?? ""
+                }),
+                Replacement.create({
+                    token: "lastName",
+                    value: order.data.customer.lastName ?? ""
+                }),
+                Replacement.create({
+                    token: "email",
+                    value: email
+                }),
+                Replacement.create({
+                    token: "orderUrl",
+                    value: "https://"+webshop?.getUrl(organization)+"/order/"+(order.id)
+                }),
+                Replacement.create({
+                    token: "nr",
+                    value: (order.number ?? "")+""
+                }),
+                Replacement.create({
+                    token: "orderPrice",
+                    value: Formatter.price(order.data.totalPrice)
+                }),
+                Replacement.create({
+                    token: "priceToPay",
+                    value: forcePayment?.status !== PaymentStatus.Succeeded ? Formatter.price(forcePayment?.price ?? 0) : ""
+                }),
+                Replacement.create({
+                    token: "paymentMethod",
+                    value: forcePayment?.method ? PaymentMethodHelper.getName(forcePayment.method) : PaymentMethodHelper.getName(this.data.paymentMethod)
+                }),
+                Replacement.create({
+                    token: "transferDescription",
+                    value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? (forcePayment?.transferDescription ?? "") : ""
+                }),
+                Replacement.create({
+                    token: "transferBankAccount",
+                    value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.iban ? webshop?.meta.transferSettings.iban : organization.meta.transferSettings.iban) ?? "") : ""
+                }),
+                Replacement.create({
+                    token: "transferBankCreditor",
+                    value: forcePayment?.status !== PaymentStatus.Succeeded && forcePayment?.method === PaymentMethod.Transfer ? ((webshop?.meta.transferSettings.creditor ? webshop?.meta.transferSettings.creditor : organization.meta.transferSettings.creditor) ?? organization.name) : ""
+                }),
+                Replacement.create({
+                    token: "orderStatus",
+                    value: OrderStatusHelper.getName(order.status)
+                }),
+                Replacement.create({
+                    token: "orderMethod",
+                    value: order.data.checkoutMethod?.typeName ?? ""
+                }),
+                Replacement.create({
+                    token: "orderLocation",
+                    value: ((order) => {
+                        if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
+                            return order.data.checkoutMethod.name
+                        }
+
+                        if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
+                            return order.data.checkoutMethod.name
+                        }
+
+                        return order.data.address?.shortString() ?? ""
+                    })(order)
+                }),
+                Replacement.create({
+                    token: "orderDate",
+                    value: order.data.timeSlot?.dateString() ?? ""
+                }),
+                Replacement.create({
+                    token: "orderTime",
+                    value: order.data.timeSlot?.timeRangeString() ?? ""
+                }),
+                Replacement.create({
+                    token: "orderDetailsTable",
+                    value: "",
+                    html: order.getDetailsHTMLTable()
+                }),
+                Replacement.create({
+                    token: "orderTable",
+                    value: "",
+                    html: order.getHTMLTable()
+                }),
+                Replacement.create({
+                    token: "paymentTable",
+                    value: "",
+                    html: forcePayment?.getHTMLTable()
+                }),
+                Replacement.create({
+                    token: "organizationName",
+                    value: organization.name
+                }),
+                Replacement.create({
+                    token: "webshopName",
+                    value: webshop.meta.name
+                }),
+            ]
+        })
     }
 }
 

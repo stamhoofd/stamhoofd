@@ -2,6 +2,7 @@ import { AutoEncoder,DateDecoder,EnumDecoder,field,IntegerDecoder,StringDecoder 
 
 import { PaymentMethod } from '../PaymentMethod';
 import { PaymentStatus } from '../PaymentStatus';
+import { TransferSettings } from '../webshops/TransferSettings';
 
 export class PaymentPatch extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -21,4 +22,7 @@ export class PaymentPatch extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, optional: true  })
     transferDescription?: string | null
+
+    @field({ decoder: TransferSettings, nullable: true, optional: true  })
+    transferSettings?: TransferSettings | null
 }
