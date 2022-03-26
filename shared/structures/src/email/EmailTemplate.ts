@@ -13,7 +13,28 @@ export enum EmailTemplateType {
     OrderConfirmationTransfer = "OrderConfirmationTransfer",
     OrderConfirmationPOS = "OrderConfirmationPOS",
     OrderReceivedTransfer = "OrderReceivedTransfer",
+
+    /**
+     * Tickets sent immediately after ordering
+     */
+    TicketsConfirmation = "TicketsConfirmation",
+
+    /**
+     * Order received, tickets will follow when we receive your payment
+     */
+    TicketsConfirmationTransfer = "TicketsConfirmationTransfer",
+
+    /**
+     * Order received, tickets sent, but need to get paid at entrance
+     */
+    TicketsConfirmationPOS = "TicketsConfirmationPOS",
+
+    /**
+     * Tickets sent after payment is received
+     */
+    TicketsReceivedTransfer = "TicketsReceivedTransfer",
 }
+
 export class EmailTemplate extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string

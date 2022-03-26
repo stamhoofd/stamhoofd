@@ -404,8 +404,15 @@ export class Order extends Model {
 
         const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
 
+        this.sendEmailTemplate({
+            type: EmailTemplateType.TicketsReceivedTransfer,
+            from,
+            replyTo,
+            to: toStr
+        })
+
         // Also send a copy
-        Email.send({
+        /*Email.send({
             from,
             replyTo,
             to: toStr,
@@ -414,7 +421,7 @@ export class Order extends Model {
             + "\n"
             + this.getUrl()
             +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
-        })
+        })*/
     }
 
     async getStructure()  {
@@ -492,7 +499,7 @@ export class Order extends Model {
 
             if (tickets.length > 0) {
                 // Also send a copy
-                Email.send({
+                /*Email.send({
                     from,
                     replyTo,
                     to: toStr,
@@ -502,7 +509,22 @@ export class Order extends Model {
                     + "\n"
                     + this.setRelation(Order.webshop, webshop).getUrl()
                     +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
-                })
+                })*/
+                if (payment && payment.method === PaymentMethod.PointOfSale) {
+                    this.sendEmailTemplate({
+                        type: EmailTemplateType.TicketsConfirmationPOS,
+                        from,
+                        replyTo,
+                        to: toStr
+                    })
+                } else {
+                    this.sendEmailTemplate({
+                        type: EmailTemplateType.TicketsConfirmation,
+                        from,
+                        replyTo,
+                        to: toStr
+                    })
+                }
             } else {
                 if (this.webshop.meta.ticketType === WebshopTicketType.None) {
 
@@ -538,7 +560,14 @@ export class Order extends Model {
                     }
                     
                 } else {
-                    Email.send({
+                    this.sendEmailTemplate({
+                        type: EmailTemplateType.TicketsConfirmationTransfer,
+                        from,
+                        replyTo,
+                        to: toStr
+                    })
+
+                    /*Email.send({
                         from,
                         replyTo,
                         to: toStr,
@@ -548,7 +577,7 @@ export class Order extends Model {
                         + "\n"
                         + this.setRelation(Order.webshop, webshop).getUrl()
                         +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
-                    })
+                    })*/
                 }
             }
         }

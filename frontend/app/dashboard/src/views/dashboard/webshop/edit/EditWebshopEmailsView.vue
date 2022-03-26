@@ -5,21 +5,27 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <STList>
-            <STListItem v-for="emailDefinition in emailDefinitions" :key="emailDefinition.type" :selectable="true" class="right-stack" @click="editEmail(emailDefinition)">
-                <h2 class="style-title-list">
-                    {{ emailDefinition.name }}
-                </h2>
-                <p class="style-description">
-                    {{ emailDefinition.description }}
-                </p>
+        <div v-for="(category, index) in emailDefinitions" :key="index" class="container">
+            <hr>
+            <h2>{{ category.name }}</h2>
+            <p>{{ category.description }}</p>
+            <STList>
+                <STListItem v-for="emailDefinition in category.definitions" :key="emailDefinition.type" :selectable="true" class="left-center right-stack" @click="editEmail(emailDefinition)">
+                    <img slot="left" :src="emailDefinition.illustration" class="style-illustration-img">
+                    <h2 class="style-title-list">
+                        {{ emailDefinition.name }}
+                    </h2>
+                    <p class="style-description">
+                        {{ emailDefinition.description }}
+                    </p>
 
-                <template slot="right">
-                    <span v-if="hasTemplate(emailDefinition.type)" class="style-tag">Aangepast</span>
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
-        </STList>
+                    <template slot="right">
+                        <span v-if="hasTemplate(emailDefinition.type)" class="style-tag">Aangepast</span>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+        </div>
     </SaveView>
 </template>
 
@@ -27,16 +33,18 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import creditCardsIllustration from "@stamhoofd/assets/images/illustrations/creditcards.svg";
+import payPointOfSaleIllustration from "@stamhoofd/assets/images/illustrations/pay-point-of-sale.svg";
+import transferIllustration from "@stamhoofd/assets/images/illustrations/transfer.svg";
 import { CenteredMessage, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTimeSlot } from "@stamhoofd/structures";
+import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
 import { TransferDescriptionType } from "@stamhoofd/structures/esm/dist";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import EditEmailTemplateView from "../../mail/EditEmailTemplateView.vue";
 import { WebshopManager } from "../WebshopManager";
-
 
 @Component({
     components: {
@@ -96,6 +104,10 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization
     }
 
+    get hasTickets() {
+        return this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None
+    }
+
     get emailDefinitions() {
         const sharedReplacements = [
             "firstName",
@@ -112,42 +124,110 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
             "webshopName"
         ];
 
+        if (!this.hasTickets) {
+            return [
+                {
+                    name: "Bestelbevestiging",
+                    description: "Afhankelijk van de betaalmethode die de klant heeft gekozen, ontvangt de klant één van de volgende e-mails.",
+                    definitions: [
+                        {
+                            type: EmailTemplateType.OrderConfirmationOnline,
+                            illustration: creditCardsIllustration,
+                            name: "Online betaald (of totaalbedrag is 0 euro)",
+                            supportedReplacements: [
+                                ...sharedReplacements
+                            ]
+                        },
+                        {
+                            type: EmailTemplateType.OrderConfirmationTransfer,
+                            illustration: transferIllustration,
+                            name: "Te betalen via overschrijving",
+                            supportedReplacements: [
+                                ...sharedReplacements,
+                                "transferDescription",
+                                "transferBankAccount",
+                                "transferBankCreditor"
+                            ]
+                        },
+                        {
+                            type: EmailTemplateType.OrderConfirmationPOS,
+                            illustration: payPointOfSaleIllustration,
+                            name: "Ter plaatse te betalen",
+                            supportedReplacements: [
+                                ...sharedReplacements
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Overschrijving ontvangen",
+                    description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurt naar de klant.",
+                    definitions: [
+                        {
+                            type: EmailTemplateType.OrderReceivedTransfer,
+                            illustration: transferIllustration,
+                            name: "Overschrijving ontvangen",
+                            supportedReplacements: [
+                                ...sharedReplacements
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
         return [
             {
-                type: EmailTemplateType.OrderConfirmationOnline,
                 name: "Bestelbevestiging",
-                description: "Indien meteen online betaald (of totaal was 0 euro)",
-                supportedReplacements: [
-                    ...sharedReplacements
+                description: "Afhankelijk van de betaalmethode die de klant heeft gekozen, ontvangt de klant één van de volgende e-mails.",
+                definitions: [
+                    {
+                        type: EmailTemplateType.TicketsConfirmation,
+                        illustration: creditCardsIllustration,
+                        name: "Online betaald (of totaalbedrag is 0 euro)",
+                        description: "De tickets kunnen gedownload worden in de e-mail.",
+                        supportedReplacements: [
+                            ...sharedReplacements
+                        ]
+                    },
+                    {
+                        type: EmailTemplateType.TicketsConfirmationTransfer,
+                        illustration: transferIllustration,
+                        name: "Overschrijving (geen tickets)",
+                        description: "De klant ontvangt de tickets pas na het betalen van de overschrijving.",
+                        supportedReplacements: [
+                            ...sharedReplacements,
+                            "transferDescription",
+                            "transferBankAccount",
+                            "transferBankCreditor"
+                        ]
+                    },
+                    {
+                        type: EmailTemplateType.TicketsConfirmationPOS,
+                        illustration: payPointOfSaleIllustration,
+                        name: "Ter plaatse betalen",
+                        description: "De tickets kunnen gedownload worden in de e-mail, maar betaling is nog noodzakelijk ter plaatse.",
+                        supportedReplacements: [
+                            ...sharedReplacements
+                        ]
+                    },
                 ]
             },
             {
-                type: EmailTemplateType.OrderConfirmationTransfer,
-                name: "Bestelbevestiging",
-                description: "Voor overschrijvingen",
-                supportedReplacements: [
-                    ...sharedReplacements,
-                    "transferDescription",
-                    "transferBankAccount",
-                    "transferBankCreditor"
-                ]
-            },
-            {
-                type: EmailTemplateType.OrderConfirmationPOS,
-                name: "Bestelbevestiging",
-                description: "Ter plaatse te betalen",
-                supportedReplacements: [
-                    ...sharedReplacements
-                ]
-            },
-            {
-                type: EmailTemplateType.OrderReceivedTransfer,
                 name: "Overschrijving ontvangen",
-                description: "De betaling van een bestelling via overschrijving werd gemarkeerd als betaald.",
-                supportedReplacements: [
-                    ...sharedReplacements
+                description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurt met de tickets.",
+                definitions: [
+                    {
+                        type: EmailTemplateType.TicketsReceivedTransfer,
+                        illustration: transferIllustration,
+                        name: "Tickets na ontvangen overschrijving",
+                        description: "De e-mail die volgt wanneer een overschrijving als betaald werd gemarkeerd, met daarin de tickets.",
+                        supportedReplacements: [
+                            ...sharedReplacements
+                        ]
+                    }
                 ]
-            }
+            },
         ]
     }
 

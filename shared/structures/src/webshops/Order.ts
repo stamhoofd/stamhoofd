@@ -240,6 +240,10 @@ export class Order extends AutoEncoder {
                 title: "Tijdstip",
                 value: this.data.timeSlot?.timeRangeString() ?? ""
             },
+            {
+                title: "Naam",
+                value: this.data.customer.name
+            },
             ...this.data.fieldAnswers.filter(a => a.answer).map(a => ({
                 title: a.field.name,
                 value: a.answer
