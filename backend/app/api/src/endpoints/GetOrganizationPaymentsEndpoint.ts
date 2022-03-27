@@ -67,6 +67,7 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
             paidAt: p.paidAt,
             createdAt: p.createdAt,
             updatedAt: p.updatedAt,
+            transferSettings: p.transferSettings,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             registrations: (p as any).registrations?.map(r => Member.getRegistrationWithMemberStructure(r, true)) ?? [],
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

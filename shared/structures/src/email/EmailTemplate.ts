@@ -1,4 +1,4 @@
-import { AnyDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 export enum EmailTemplateType {
@@ -62,4 +62,38 @@ export class EmailTemplate extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     webshopId: string | null = null;
+
+    @field({ decoder: DateDecoder, optional: true })
+    createdAt: Date = new Date();
+
+    @field({ decoder: DateDecoder, optional: true })
+    updatedAt: Date = new Date();
+
+    static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+        const sharedReplacements = [
+            "firstName",
+            "lastName",
+            "nr",
+            "orderPrice",
+            "orderStatus",
+            "orderDetailsTable",
+            "orderTable",
+            "paymentTable",
+            "orderUrl",
+            "paymentMethod",
+            "organizationName",
+            "webshopName"
+        ]
+
+        if (type === EmailTemplateType.OrderConfirmationTransfer || type === EmailTemplateType.TicketsConfirmationTransfer) {
+            return [
+                ...sharedReplacements,
+                "transferDescription",
+                "transferBankAccount",
+                "transferBankCreditor"
+            ];
+        }
+
+        return sharedReplacements
+    }
 }

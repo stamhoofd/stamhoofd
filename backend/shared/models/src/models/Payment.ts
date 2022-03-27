@@ -44,7 +44,7 @@ export class Payment extends Model {
     @column({ type: "string", nullable: true })
     transferDescription: string | null = null;
 
-    @column({ type: "json", nullable: true })
+    @column({ type: "json", nullable: true, decoder: TransferSettings })
     transferSettings: TransferSettings | null = null;
 
     @column({

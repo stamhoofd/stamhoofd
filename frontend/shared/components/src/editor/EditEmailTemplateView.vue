@@ -32,12 +32,10 @@ import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } fro
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, Dropdown, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
+import { Replacement } from '@stamhoofd/structures';
 import { EmailTemplate, Group, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import { OrganizationManager } from '../../../classes/OrganizationManager';
 
 @Component({
     components: {
@@ -65,6 +63,9 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
 
     @Prop({ required: false, default: () => [] })
     smartButtons: EditorSmartVariable[]
+
+    @Prop({ required: false, default: () => [] })
+    defaultReplacements: Replacement[]
 
     // Used to determine default from address
     @Prop({ default: null})
@@ -99,23 +100,16 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
         this.addPatch({ subject })
     }
 
-    get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
-    }
-
     get editor() {
         return (this.$refs.editorView as EditorView).editor
     }
+
     mounted() {
         this.editor.commands.setContent(this.patchedTemplate.json)
     }
 
-    get organization() {
-        return OrganizationManager.organization
-    }
-
     get primaryColor() {
-        return OrganizationManager.organization.meta.color ?? "#0053f"
+        return this.defaultReplacements.find(r => r.token === 'primaryColor')?.value ?? "#0053f"
     }
 
     async getHTML() {
@@ -169,7 +163,7 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
             subject = subject.replaceAll("{{"+variable.id+"}}", variable.example)
         }
 
-        const extra = this.organization.meta.getEmailReplacements()
+        const extra = this.defaultReplacements ?? []
         for (const replacement of extra) {
             if (html) {
                 html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))

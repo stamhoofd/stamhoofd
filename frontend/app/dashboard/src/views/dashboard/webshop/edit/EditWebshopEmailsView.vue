@@ -36,14 +36,13 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import creditCardsIllustration from "@stamhoofd/assets/images/illustrations/creditcards.svg";
 import payPointOfSaleIllustration from "@stamhoofd/assets/images/illustrations/pay-point-of-sale.svg";
 import transferIllustration from "@stamhoofd/assets/images/illustrations/transfer.svg";
-import { CenteredMessage, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
+import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
 import { TransferDescriptionType } from "@stamhoofd/structures/esm/dist";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import EditEmailTemplateView from "../../mail/EditEmailTemplateView.vue";
 import { WebshopManager } from "../WebshopManager";
 
 @Component({
@@ -109,21 +108,6 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
     }
 
     get emailDefinitions() {
-        const sharedReplacements = [
-            "firstName",
-            "lastName",
-            "nr",
-            "orderPrice",
-            "orderStatus",
-            "orderDetailsTable",
-            "orderTable",
-            "paymentTable",
-            "orderUrl",
-            "paymentMethod",
-            "organizationName",
-            "webshopName"
-        ];
-
         if (!this.hasTickets) {
             return [
                 {
@@ -134,28 +118,16 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                             type: EmailTemplateType.OrderConfirmationOnline,
                             illustration: creditCardsIllustration,
                             name: "Online betaald (of totaalbedrag is 0 euro)",
-                            supportedReplacements: [
-                                ...sharedReplacements
-                            ]
                         },
                         {
                             type: EmailTemplateType.OrderConfirmationTransfer,
                             illustration: transferIllustration,
                             name: "Te betalen via overschrijving",
-                            supportedReplacements: [
-                                ...sharedReplacements,
-                                "transferDescription",
-                                "transferBankAccount",
-                                "transferBankCreditor"
-                            ]
                         },
                         {
                             type: EmailTemplateType.OrderConfirmationPOS,
                             illustration: payPointOfSaleIllustration,
                             name: "Ter plaatse te betalen",
-                            supportedReplacements: [
-                                ...sharedReplacements
-                            ]
                         }
                     ]
                 },
@@ -167,9 +139,6 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                             type: EmailTemplateType.OrderReceivedTransfer,
                             illustration: transferIllustration,
                             name: "Overschrijving ontvangen",
-                            supportedReplacements: [
-                                ...sharedReplacements
-                            ]
                         }
                     ]
                 }
@@ -186,30 +155,18 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                         illustration: creditCardsIllustration,
                         name: "Online betaald (of totaalbedrag is 0 euro)",
                         description: "De tickets kunnen gedownload worden in de e-mail.",
-                        supportedReplacements: [
-                            ...sharedReplacements
-                        ]
                     },
                     {
                         type: EmailTemplateType.TicketsConfirmationTransfer,
                         illustration: transferIllustration,
                         name: "Overschrijving (geen tickets)",
                         description: "De klant ontvangt de tickets pas na het betalen van de overschrijving.",
-                        supportedReplacements: [
-                            ...sharedReplacements,
-                            "transferDescription",
-                            "transferBankAccount",
-                            "transferBankCreditor"
-                        ]
                     },
                     {
                         type: EmailTemplateType.TicketsConfirmationPOS,
                         illustration: payPointOfSaleIllustration,
                         name: "Ter plaatse betalen",
                         description: "De tickets kunnen gedownload worden in de e-mail, maar betaling is nog noodzakelijk ter plaatse.",
-                        supportedReplacements: [
-                            ...sharedReplacements
-                        ]
                     },
                 ]
             },
@@ -222,9 +179,6 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                         illustration: transferIllustration,
                         name: "Tickets na ontvangen overschrijving",
                         description: "De e-mail die volgt wanneer een overschrijving als betaald werd gemarkeerd, met daarin de tickets.",
-                        supportedReplacements: [
-                            ...sharedReplacements
-                        ]
                     }
                 ]
             },
@@ -239,7 +193,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
         if (this.loading) {
             return
         }
-        const type = definition.type
+        const type: EmailTemplateType = definition.type
         const existing = this.patchedTemplates.find(template => template.type === type && template.organizationId === this.organization.id)
         const defaultTemplate = this.patchedTemplates.find(template => template.type === type && template.organizationId === null)
         const template = existing ?? EmailTemplate.create({
@@ -255,8 +209,9 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                     template,
                     isNew: !existing,
                     webshop: this.webshopManager.preview,
-                    smartVariables: this.getSmartVariables(definition.supportedReplacements as string[]),
-                    smartButtons: this.getSmartButtons(definition.supportedReplacements as string[]),
+                    smartVariables: this.getSmartVariables(EmailTemplate.getSupportedReplacementsForType(type)),
+                    smartButtons: this.getSmartButtons(EmailTemplate.getSupportedReplacementsForType(type)),
+                    defaultReplacements: this.organization.meta.getEmailReplacements(),
                     saveHandler: (patch: AutoEncoderPatchType<EmailTemplate>) => {
                         patch.id = template.id
                         if (existing) {

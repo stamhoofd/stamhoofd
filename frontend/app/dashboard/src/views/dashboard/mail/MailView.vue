@@ -262,12 +262,6 @@ export default class MailView extends Mixins(NavigationMixin) {
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
-            id: "orderTable", 
-            name: "Tabel met bestelling", 
-            example: "order table", 
-            html: ""
-        }))
         //}
 
         variables.push(new EditorSmartVariable({
@@ -307,9 +301,30 @@ export default class MailView extends Mixins(NavigationMixin) {
         }))
 
         variables.push(new EditorSmartVariable({
+            id: "orderTable", 
+            name: "Tabel met bestelde artikels", 
+            example: "order table", 
+            html: ""
+        }))
+
+        variables.push(new EditorSmartVariable({
             id: "overviewTable", 
             name: "Overzichtstabel", 
             example: "overview table", 
+            html: ""
+        }))
+
+        variables.push(new EditorSmartVariable({
+            id: "orderDetailsTable", 
+            name: "Tabel met bestelgegevens", 
+            example: "order details table", 
+            html: ""
+        }))
+
+        variables.push(new EditorSmartVariable({
+            id: "paymentTable", 
+            name: "Tabel met betaalinstructies", 
+            example: "payment table", 
             html: ""
         }))
 
@@ -703,6 +718,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         const transferBankCreditor = this.smartVariables.find(v => v.id === "transferBankCreditor")
         const overviewTable = this.smartVariables.find(v => v.id === "overviewTable")
         const overviewContext = this.smartVariables.find(v => v.id === "overviewContext")
+        const paymentTable = this.smartVariables.find(v => v.id === "paymentTable")
 
         // Insert <hr> and content
         // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
@@ -768,21 +784,27 @@ export default class MailView extends Mixins(NavigationMixin) {
                                     }],
                                 }
                             ]
-                        }
-                    ])
-            }
+                        },
 
-            if (priceToPay) {
-                chain = chain.insertContent("<p></p><h3>Te betalen bedrag: </h3><p></p>").insertSmartVariable(priceToPay)
-            }
-            if (transferDescription) {
-                chain = chain.insertContent("<p></p><h3>Mededeling: </h3><p></p>").insertSmartVariable(transferDescription)
-            }
-            if (transferBankCreditor) {
-                chain = chain.insertContent("<p></p><h3>Begunstigde: </h3><p></p>").insertSmartVariable(transferBankCreditor)
-            }
-            if (transferBankAccount) {
-                chain = chain.insertContent("<p></p><h3>Rekeningnummer: </h3><p></p>").insertSmartVariable(transferBankAccount)
+                        {
+                            type: "paragraph",
+                            content: []
+                        },
+
+                        ...(paymentTable ? [
+                            paymentTable.getJSONContent()
+                        ] : []),
+                        
+                        {
+                            type: "paragraph",
+                            content: []
+                        },
+
+                        {
+                            type: "paragraph",
+                            content: []
+                        },
+                    ])
             }
         }
         
@@ -792,10 +814,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                     type: "paragraph",
                     content: []
                 },
-                {
+                ...(transferDescription ? [] : [{
                     type: "horizontalRule",
                     content: []
-                },
+                }]),
                 {
                     type: "heading",
                     attrs: {
@@ -1152,13 +1174,18 @@ export default class MailView extends Mixins(NavigationMixin) {
 
             // Readd to recipients
             for (const recipient of paymentRecipients) {
-                recipient.replacements = recipient.replacements.filter(r => !["priceToPay", "paymentMethod", "transferDescription", "orderTable"].includes(r.token))
+                recipient.replacements = recipient.replacements.filter(r => !["priceToPay", "paymentMethod", "transferDescription", "orderTable", "paymentTable"].includes(r.token))
 
                 let webshop = payment.order ? (this.organization.webshops.find(w => w.id === payment.order!.webshopId) ?? null) : null
                 recipient.replacements.push(
                     ...[
                         Replacement.create({
                             token: "overviewTable",
+                            value: "",
+                            html: payment.getDetailsHTMLTable()
+                        }),
+                        Replacement.create({
+                            token: "paymentTable",
                             value: "",
                             html: payment.getHTMLTable()
                         }),

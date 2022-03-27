@@ -22,6 +22,10 @@ export { default as STFloatingFooter } from "./src/navigation/STFloatingFooter.v
 export { default as STNavigationBar } from "./src/navigation/STNavigationBar.vue"
 export { default as STNavigationTitle } from "./src/navigation/STNavigationTitle.vue"
 export { default as STToolbar } from "./src/navigation/STToolbar.vue"
+
+//
+export { default as EditEmailTemplateView } from "./src/editor/EditEmailTemplateView.vue"
+
 // Overlays
 export { CenteredMessage, CenteredMessageButton } from "./src/overlays/CenteredMessage"
 export { default as CenteredMessageView } from "./src/overlays/CenteredMessageView.vue"

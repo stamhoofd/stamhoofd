@@ -447,11 +447,17 @@ export class Order extends Model {
         to: string,
     }) {
         // First fetch template
-        const templates = await EmailTemplate.where({ type: data.type, webshopId: this.webshop.id }) ?? await EmailTemplate.where({ type: data.type, organizationId: null })
+        let templates = (await EmailTemplate.where({ type: data.type, webshopId: this.webshop.id }))
+
+        if (!templates || templates.length == 0) {
+            templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
+        }
+
         if (!templates || templates.length == 0) {
             console.error("Could not find email template for type "+data.type)
             return
         }
+
         const template = templates[0]
 
         const recipient = (await this.getStructure()).getRecipient(await this.webshop.organization.getStructure(), WebshopPreview.create(this.webshop))

@@ -10,7 +10,7 @@ type Query = undefined;
 
 type ResponseBody = EmailTemplateStruct[];
 
-export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = new PatchableArrayDecoder(EmailTemplateStruct as Decoder<EmailTemplateStruct>, EmailTemplateStruct.patchType() as Decoder<AutoEncoderPatchType<EmailTemplateStruct>>, StringDecoder)
 
     protected doesMatch(request: Request): [true, Params] | [false] {

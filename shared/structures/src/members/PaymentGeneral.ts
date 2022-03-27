@@ -26,11 +26,11 @@ export class PaymentGeneral extends PaymentDetailed {
         return false;
     }
 
-    getHTMLTable(): string {
+    getDetailsHTMLTable(): string {
         if (this.order) {
             return this.order.getHTMLTable()
         }
-        return super.getHTMLTable()
+        return super.getDetailsHTMLTable()
     }
 }
 

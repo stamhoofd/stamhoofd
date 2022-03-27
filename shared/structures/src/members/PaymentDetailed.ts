@@ -31,7 +31,7 @@ export class PaymentDetailed extends Payment {
         return false;
     }
 
-    getHTMLTable(): string {
+    getDetailsHTMLTable(): string {
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Naam</th><th>Ingeschreven voor</th></tr></thead><tbody>`
         
         for (const registration of this.registrations) {
