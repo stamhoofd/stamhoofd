@@ -161,7 +161,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                 },
                 {
                     name: "Overschrijving ontvangen",
-                    description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurt naar de klant.",
+                    description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurd naar de klant.",
                     definitions: [
                         {
                             type: EmailTemplateType.OrderReceivedTransfer,
@@ -215,7 +215,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
             },
             {
                 name: "Overschrijving ontvangen",
-                description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurt met de tickets.",
+                description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurd met de tickets.",
                 definitions: [
                     {
                         type: EmailTemplateType.TicketsReceivedTransfer,

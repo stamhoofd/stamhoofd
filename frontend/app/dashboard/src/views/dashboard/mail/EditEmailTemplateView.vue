@@ -34,6 +34,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, Dropdown, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { EmailTemplate, Group, Version, WebshopPreview } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -114,7 +115,7 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
     }
 
     get primaryColor() {
-        return OrganizationManager.organization.meta.color ?? "black"
+        return OrganizationManager.organization.meta.color ?? "#0053f"
     }
 
     async getHTML() {
@@ -130,7 +131,7 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
 
         const base: string = editor.getHTML();
         return {
-            ...await EmailStyler.format(base, this.subject, this.primaryColor),
+            ...await EmailStyler.format(base, this.subject),
             json: this.editor.getJSON()
         }
     }
@@ -161,15 +162,20 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
 
 
         // Replacements
-        /*const recipient = this.recipients[0]
-        if (recipient) {
-            for (const replacement of recipient.replacements) {
-                if (html) {
-                    html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
-                }
-                subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
+        for (const variable of this.smartVariables) {
+            if (html) {
+                html = html.replaceAll("{{"+variable.id+"}}", variable.html ?? Formatter.escapeHtml(variable.example))
             }
-        }*/
+            subject = subject.replaceAll("{{"+variable.id+"}}", variable.example)
+        }
+
+        const extra = this.organization.meta.getEmailReplacements()
+        for (const replacement of extra) {
+            if (html) {
+                html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
+            }
+            subject = subject.replaceAll("{{"+replacement.token+"}}", replacement.value)
+        }
 
         html = html.replace("<body>", "<body><p><strong>Onderwerp:</strong> "+subject+"</p><hr>")
 

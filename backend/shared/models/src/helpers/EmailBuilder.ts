@@ -21,6 +21,7 @@ export async function getEmailBuilder(organization: Organization, email: {
 }) {
     // Update recipients
     for (const recipient of email.recipients) {
+        recipient.replacements = recipient.replacements.slice()
         
         // Default signInUrl
         let signInUrl = "https://"+organization.getHost()+"/login?email="+encodeURIComponent(recipient.email)
@@ -37,6 +38,9 @@ export async function getEmailBuilder(organization: Organization, email: {
             token: "signInUrl",
             value: signInUrl
         }))
+
+        const extra = organization.meta.getEmailReplacements()
+        recipient.replacements.push(...extra)
     }
 
     const queue = email.recipients.slice()

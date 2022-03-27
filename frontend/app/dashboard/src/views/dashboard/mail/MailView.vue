@@ -1376,7 +1376,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get primaryColor() {
-        return OrganizationManager.organization.meta.color ?? "black"
+        return OrganizationManager.organization.meta.color ?? "#0053f"
     }
 
     async getHTML() {
@@ -1390,7 +1390,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         const base: string = editor.getHTML();
-        return await EmailStyler.format(base, this.subject, this.primaryColor)
+        return await EmailStyler.format(base, this.subject)
     }
 
     existingWindow: Window | null
@@ -1421,7 +1421,8 @@ export default class MailView extends Mixins(NavigationMixin) {
         // Replacements
         const recipient = this.recipients[0]
         if (recipient) {
-            for (const replacement of recipient.replacements) {
+            const extra = this.organization.meta.getEmailReplacements()
+            for (const replacement of [...recipient.replacements, ...extra]) {
                 if (html) {
                     html = html.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
                 }

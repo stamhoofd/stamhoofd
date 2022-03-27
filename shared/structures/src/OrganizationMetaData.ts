@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 
 import { Address } from './addresses/Address';
 import { STPackageStatus, STPackageType } from './billing/STPackage';
+import { Replacement } from './endpoints/EmailRequest';
 import { File } from './files/File';
 import { Image } from './files/Image';
 import { GroupCategory } from './GroupCategory';
@@ -262,5 +263,14 @@ export class OrganizationMetaData extends AutoEncoder {
      */
     get rootCategory(): GroupCategory | undefined {
         return this.categories.find(c => c.id === this.rootCategoryId)
+    }
+
+    getEmailReplacements() {
+        return [
+            Replacement.create({
+                token: "primaryColor",
+                value: this.color ?? "#0053f"
+            })
+        ]
     }
 }
