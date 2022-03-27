@@ -1,0 +1,20 @@
+CREATE TABLE `email_templates` (
+  `id` varchar(36) NOT NULL DEFAULT '',
+  `subject` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `groupId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  `webshopId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  `organizationId` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
+  `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `html` text NOT NULL,
+  `json` json NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `createdAt` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `organizationId` (`organizationId`),
+  KEY `webshopId` (`webshopId`),
+  KEY `groupId` (`groupId`),
+  CONSTRAINT `email_templates_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `email_templates_ibfk_2` FOREIGN KEY (`webshopId`) REFERENCES `webshops` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `email_templates_ibfk_3` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
