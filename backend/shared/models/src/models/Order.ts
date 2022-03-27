@@ -467,7 +467,7 @@ export class Order extends Model {
             recipients: [recipient],
             subject: template.subject,
             html: template.html,
-            text: template.text,
+            // text: template.text,
             from: data.from,
             replyTo: data.replyTo
         })

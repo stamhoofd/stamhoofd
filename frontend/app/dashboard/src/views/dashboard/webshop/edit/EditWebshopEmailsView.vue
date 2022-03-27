@@ -112,7 +112,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
             return [
                 {
                     name: "Bestelbevestiging",
-                    description: "Afhankelijk van de betaalmethode die de klant heeft gekozen, ontvangt de klant één van de volgende e-mails.",
+                    description: "Afhankelijk van de betaalmethode die de besteller heeft gekozen, ontvangt de besteller één van de volgende e-mails.",
                     definitions: [
                         {
                             type: EmailTemplateType.OrderConfirmationOnline,
@@ -133,7 +133,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                 },
                 {
                     name: "Overschrijving ontvangen",
-                    description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurd naar de klant.",
+                    description: "Als je in Stamhoofd een overschrijving als betaald markeert, wordt er ook een automatische e-mail verstuurd naar de besteller.",
                     definitions: [
                         {
                             type: EmailTemplateType.OrderReceivedTransfer,
@@ -148,7 +148,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
         return [
             {
                 name: "Bestelbevestiging",
-                description: "Afhankelijk van de betaalmethode die de klant heeft gekozen, ontvangt de klant één van de volgende e-mails.",
+                description: "Afhankelijk van de betaalmethode die de besteller heeft gekozen, ontvangt de besteller één van de volgende e-mails.",
                 definitions: [
                     {
                         type: EmailTemplateType.TicketsConfirmation,
@@ -160,7 +160,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                         type: EmailTemplateType.TicketsConfirmationTransfer,
                         illustration: transferIllustration,
                         name: "Overschrijving (geen tickets)",
-                        description: "De klant ontvangt de tickets pas na het betalen van de overschrijving.",
+                        description: "De besteller ontvangt de tickets pas na het betalen van de overschrijving.",
                     },
                     {
                         type: EmailTemplateType.TicketsConfirmationPOS,

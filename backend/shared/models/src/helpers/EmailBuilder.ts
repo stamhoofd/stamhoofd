@@ -10,7 +10,7 @@ export async function getEmailBuilder(organization: Organization, email: {
     from: string, 
     replyTo?: string, 
     subject: string, 
-    text: string | null, 
+    //text: string | null, 
     html: string | null,
     attachments?: {
         filename: string;
@@ -54,15 +54,15 @@ export async function getEmailBuilder(organization: Organization, email: {
 
         let replacedHtml = email.html
         let replacedSubject = email.subject
-        let replacedText = email.text
+        //let replacedText = email.text
 
         for (const replacement of recipient.replacements) {
             if (replacedHtml) {
                 replacedHtml = replacedHtml.replaceAll("{{"+replacement.token+"}}", replacement.html ?? Formatter.escapeHtml(replacement.value))
             }
-            if (replacedText) {
-                replacedText = replacedText.replaceAll("{{"+replacement.token+"}}", replacement.value)
-            }
+            //if (replacedText) {
+            //    replacedText = replacedText.replaceAll("{{"+replacement.token+"}}", replacement.value)
+            //}
             replacedSubject = replacedSubject.replaceAll("{{"+replacement.token+"}}", replacement.value)
         }
 
@@ -79,7 +79,6 @@ export async function getEmailBuilder(organization: Organization, email: {
             replyTo: email.replyTo,
             to,
             subject: replacedSubject,
-            text: replacedText ?? undefined,
             html: replacedHtml ?? undefined,
             attachments: email.attachments
         }
