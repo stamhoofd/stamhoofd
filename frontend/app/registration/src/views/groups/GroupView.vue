@@ -324,6 +324,15 @@ export default class GroupView extends Mixins(NavigationMixin){
                 who = prefix + "\n" + who
             }
         }
+        
+        if (this.group.settings.preventGroupIds.length > 0) {
+            const prefix = "Iedereen die niet ingeschreven is bij "+Formatter.joinLast(this.group.settings.preventGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
+            if (!who) {
+                who += prefix
+            } else {
+                who = prefix + "\n" + who
+            }
+        }
 
         if (this.group.settings.preventPreviousGroupIds.length > 0) {
             const prefix = "Iedereen die de vorige keer niet ingeschreven was bij "+Formatter.joinLast(this.group.settings.preventPreviousGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")
