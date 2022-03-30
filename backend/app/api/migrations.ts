@@ -3,7 +3,7 @@ import { Column, Migration } from "@simonbackx/simple-database";
 import { Version } from "@stamhoofd/structures";
 import path from "path";
 
-Column.jsonVersion = Version
+Column.setJSONVersion(Version);
 process.env.TZ = "UTC";
 
 const emailPath = require.resolve("@stamhoofd/email")

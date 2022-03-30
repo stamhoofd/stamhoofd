@@ -257,7 +257,7 @@ export class STPendingInvoice extends Model {
                     currency: 'EUR',
                     value: (price / 100).toFixed(2)
                 },
-                method: molliePaymentMethod.directdebit,
+                //method: molliePaymentMethod.directdebit,
                 description,
                 customerId: organization.serverMeta.mollieCustomerId,
                 sequenceType: SequenceType.recurring,
@@ -269,6 +269,11 @@ export class STPendingInvoice extends Model {
                 }
             });
             console.log(molliePayment)
+            if (molliePayment.method === 'creditcard') {
+                console.log("Corrected payment method to creditcard")
+                payment.method = PaymentMethod.CreditCard
+                await payment.save();
+            }
 
             // Save payment
             const dbPayment = new MolliePayment()
@@ -282,7 +287,7 @@ export class STPendingInvoice extends Model {
 
             const invoicingTo = await organization.getInvoicingToEmails()
 
-            if (invoicingTo) {
+            if (invoicingTo && payment.method === PaymentMethod.DirectDebit) {
                 // Generate a temporary PDF file
                 const builder = new InvoiceBuilder(invoice)
                 const pdf = await builder.build()

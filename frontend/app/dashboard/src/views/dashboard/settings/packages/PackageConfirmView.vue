@@ -116,14 +116,14 @@
 
             <template v-if="hasPerMember">
                 <hr>
-                <h2>Wijzigingen aantal leden en domiciliëring/automatische incasso</h2>
+                <h2>Wijzigingen aantal leden en automatische betalingen</h2>
                 
                 <p>
                     Aangezien één van de pakketten op basis van het aantal leden is, en dat aantal kan wijzigen tijdens de looptijd van jouw pakket wordt dit als volgt afgehandeld:
                 </p>
 
                 <p class="style-description-block">
-                    Wanneer het aantal leden dat tergelijkertijd is ingeschreven op een bepaald moment hoger wordt dan het reeds betaald aantal ingeschreven leden, zullen er automatisch extra plaatsen aangekocht worden. Dat bedrag wordt opgeslagen als 'openstaand bedrag' en zal later via domiciliëring/automatische incasso afgerekend worden. Het bedrag dat per lid wordt aangerekend is afhankelijk van het aantal resterende dagen van het pakket. De eerste 3 maanden betaal je sowieso de volledige prijs per lid, daarna zal het bedrag per nieuw lid stelselmatig afnemen tot 0, op de vervaldag van het pakket. Als het aantal leden dat is ingeschreven daalt, zal je geen terugbetaling ontvangen, maar als het aantal leden daarna weer stijgt tot het oorspronkelijke aangekocht aantal plaatsen hoef je niet meer te betalen.
+                    Wanneer het aantal leden dat tergelijkertijd is ingeschreven op een bepaald moment hoger wordt dan het reeds betaald aantal ingeschreven leden, zullen er automatisch extra plaatsen aangekocht worden. Dat bedrag wordt opgeslagen als 'openstaand bedrag' en zal later via domiciliëring/automatische incasso of kredietkaart afgerekend worden. Het bedrag dat per lid wordt aangerekend is afhankelijk van het aantal resterende dagen van het pakket. De eerste 3 maanden betaal je sowieso de volledige prijs per lid, daarna zal het bedrag per nieuw lid stelselmatig afnemen tot 0, op de vervaldag van het pakket. Als het aantal leden dat is ingeschreven daalt, zal je geen terugbetaling ontvangen, maar als het aantal leden daarna weer stijgt tot het oorspronkelijke aangekocht aantal plaatsen hoef je niet meer te betalen.
                 </p>
 
                 <p class="style-description-block">
@@ -149,7 +149,7 @@
         <STToolbar :sticky="false">
             <template slot="right">
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="checkout">
+                    <button class="button primary" type="button" @click="checkout">
                         Afrekenen
                     </button>
                 </LoadingButton>
@@ -426,7 +426,10 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 
     get paymentMethods() {
-        return [PaymentMethod.Bancontact, PaymentMethod.iDEAL]
+        if (this.country == Country.Netherlands) {
+            return [PaymentMethod.iDEAL, PaymentMethod.Bancontact, PaymentMethod.CreditCard]
+        }
+        return [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard]
     }
     
     async checkout() {

@@ -1,18 +1,16 @@
-import { column, Database,Model } from "@simonbackx/simple-database";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Address, DNSRecordStatus, DNSRecordType,Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
-import { v4 as uuidv4 } from "uuid";
-
+import { column, Database, Model } from "@simonbackx/simple-database";
+import { DecodedRequest } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { I18n } from "@stamhoofd/backend-i18n";
+import { Email } from "@stamhoofd/email";
+import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationKey, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
-
-import { Email } from "@stamhoofd/email";
+import { v4 as uuidv4 } from "uuid";
+import { validateDNSRecords } from "../helpers/DNSValidator";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
 import { Webshop } from './Webshop';
-import { DecodedRequest } from '@simonbackx/simple-endpoints';
-import { I18n } from "@stamhoofd/backend-i18n"
-import { validateDNSRecords } from "../helpers/DNSValidator";
 
 export class Organization extends Model {
     static table = "organizations";

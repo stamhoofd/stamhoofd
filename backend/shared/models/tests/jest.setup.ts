@@ -4,7 +4,7 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { Version } from '@stamhoofd/structures';
 
 // Set version of saved structures
-Column.jsonVersion = Version
+Column.setJSONVersion(Version);
 
 // Automatically set endpoint default version to latest one (only in tests!)
 Request.defaultVersion = Version

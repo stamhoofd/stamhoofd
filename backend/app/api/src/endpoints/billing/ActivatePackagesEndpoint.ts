@@ -1,4 +1,5 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
+import { Column, Database, Model } from '@simonbackx/simple-database';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
@@ -83,6 +84,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         if (request.body.organizationPatch) {
+            console.log("Received patch in activatePackagesEndpoint", request.body.organizationPatch)
             if (request.body.organizationPatch.address) {
                 user.organization.address.patchOrPut(request.body.organizationPatch.address)
             }
@@ -90,21 +92,10 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             if (request.body.organizationPatch.meta) {
                 user.organization.meta.patchOrPut(request.body.organizationPatch.meta)
             }
-
-            if (request.request.getVersion() < 113 && request.body.organizationPatch.privateMeta?.VATNumber !== undefined) {
-                user.organization.meta.VATNumber = request.body.organizationPatch.privateMeta?.VATNumber
-            }
-
-            if (request.request.getVersion() < 113 && request.body.organizationPatch.address) {
-                user.organization.meta.companyAddress = user.organization.address
-            }
-
-            if (request.request.getVersion() < 113 && request.body.organizationPatch.name) {
-                user.organization.meta.companyName = request.body.organizationPatch.name
-            }
         }
+
         if (!request.body.proForma) {
-            await user.organization.save()
+            await user.organization.save();
         }
 
         return await QueueHandler.schedule("billing/invoices-"+user.organizationId, async () => {
@@ -307,6 +298,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                             }
                         })
                         user.organization.serverMeta.mollieCustomerId = mollieCustomer.id
+                        console.log("Saving new mollie customer", mollieCustomer, "for organization", user.organization.id)
                         await user.organization.save()
                     }
 

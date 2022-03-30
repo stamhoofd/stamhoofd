@@ -17,12 +17,14 @@
     "peerDependencies": {
         "@stamhoofd/crypto": "*",
         "@stamhoofd/email": "*",
-        "@stamhoofd/queues": "*"
+        "@stamhoofd/queues": "*",
+        "@simonbackx/simple-database": "*"
     },
     "dependencies": {
         "pdfkit": "^0.13.0"
     },
     "devDependencies": {
-        "@types/pdfkit": "^0.12.3"
+        "@types/pdfkit": "^0.12.3",
+        "@simonbackx/simple-database": "^1.22.0"
     }
 }
