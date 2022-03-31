@@ -194,7 +194,7 @@ export class Order extends AutoEncoder {
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Prijs</th></tr></thead><tbody>`
         
         for (const item of this.data.cart.items) {
-            str += `<tr><td><h4>${item.amount} x ${Formatter.escapeHtml(item.product.name)}</h4>${item.description.length > 0 ? "<p>"+Formatter.escapeHtml(item.description)+"</p>" : ""}</td><td>${Formatter.escapeHtml(Formatter.price(item.getPrice(this.data.cart)))}</td></tr>`
+            str += `<tr><td><h4>${item.amount} x ${Formatter.escapeHtml(item.product.name)}</h4>${item.descriptionWithoutDate.length > 0 ? "<p>"+Formatter.escapeHtml(item.descriptionWithoutDate)+"</p>" : ""}</td><td>${Formatter.escapeHtml(Formatter.price(item.getPrice(this.data.cart)))}</td></tr>`
         }
         
         return str+"</tbody></table>";

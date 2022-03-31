@@ -9,7 +9,7 @@
                 {{ getDescription(paymentMethod) }}
             </p>
 
-            <div v-if="paymentMethod == 'Payconiq'" class="payment-app-banner">
+            <div v-if="paymentMethod == 'Payconiq' && !hasNonPayconiq" class="payment-app-banner">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
                 <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
@@ -82,13 +82,13 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq)
+        if (methods.includes(PaymentMethod.Bancontact)) {
+            r.push(PaymentMethod.Bancontact)
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Bancontact)) {
-            r.push(PaymentMethod.Bancontact)
+        if (methods.includes(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
         }
 
         // Force a given ordering
@@ -107,9 +107,15 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         return r
     }
 
+    get hasNonPayconiq() {
+        const hasTransfer = this.paymentMethods.includes(PaymentMethod.Transfer) ? 1 : 0
+        const hasPOS = this.paymentMethods.includes(PaymentMethod.PointOfSale) ? 1 : 0
+        return this.paymentMethods.length > 1 + hasTransfer + hasPOS
+    }
+
     getName(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return "Payconiq, KBC mobile of ING-app (snelst)"
+            case PaymentMethod.Payconiq: return this.hasNonPayconiq ? 'Payconiq' : "Payconiq, KBC mobile of ING-app (snelst)"
             case PaymentMethod.Transfer: return "Via overschrijving"
         }
         return PaymentMethodHelper.getNameCapitalized(paymentMethod, this.context)

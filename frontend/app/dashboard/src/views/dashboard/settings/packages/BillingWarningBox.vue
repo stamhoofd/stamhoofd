@@ -3,7 +3,7 @@
         <p v-if="isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
             Jouw betaling via domiciliëring/kredietkaart is mislukt. Breng de betaling zelf in orde via 'Facturen en betalingen' voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
 
-            <button class="button text">
+            <button class="button text" type="button">
                 Nakijken
             </button>
         </p>
@@ -11,7 +11,7 @@
         <p v-if="!shouldFilter('webshops') && isNearing(webshopDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
             Jouw webshops worden automatisch uitgeschakeld vanaf {{ webshopDeactivateDate | dateTime }}. Verleng jouw pakket om de webshop module langer in gebruik te houden.
 
-            <button class="button text">
+            <button class="button text" type="button">
                 Verlengen
             </button>
         </p>
@@ -19,7 +19,7 @@
         <p v-if="!shouldFilter('webshops') && isWebshopsTrial" class="warning-box selectable with-button" @click="openPackages">
             Je test momenteel de webshops functie. Activeer een pakket als je beslist om ze echt in gebruik te nemen.
 
-            <button class="button text">
+            <button class="button text" type="button">
                 Activeren
             </button>
         </p>
@@ -27,7 +27,7 @@
         <p v-if="!shouldFilter('members') && isMembersTrial" class="warning-box selectable with-button" @click="openPackages">
             Je test momenteel de ledenadministratie functie. Activeer een pakket als je beslist om ze echt in gebruik te nemen.
 
-            <button class="button text">
+            <button class="button text" type="button">
                 Activeren
             </button>
         </p>
@@ -35,7 +35,7 @@
         <p v-if="!shouldFilter('members') && isActivitiesTrial" class="warning-box selectable with-button" @click="openPackages">
             Je test momenteel inschrijvingen voor activiteiten. Activeer het 'ledenadministratie' pakket als je beslist om deze functie in gebruik te nemen.
 
-            <button class="button text">
+            <button class="button text" type="button">
                 Activeren
             </button>
         </p>
@@ -43,7 +43,7 @@
         <p v-if="!shouldFilter('members') && isNearing(membersDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
             De ledenadministratie wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.
 
-            <button class="button text">
+            <button class="button text" type="button">
                 Verlengen
             </button>
         </p>
@@ -51,7 +51,7 @@
         <p v-if="!shouldFilter('members') && isNearing(membersActivitiesDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
             De functionaliteiten 'Inschrijven voor activiteiten' worden uitgeschakeld vanaf {{ membersActivitiesDeactivateDate | dateTime }}. Verleng jouw pakket om de nieuwe functies te kunnen blijven gebruiken.
 
-            <button class="button text">
+            <button class="button text" type="button">
                 Verlengen
             </button>
         </p>
@@ -210,7 +210,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         if (date === null) {
             return false
         }
-        return (date.getTime() - new Date().getTime()) < 1000 * 60 *60 * 24 * 14
+        return (date.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 14
     }
 
     openPackages() {

@@ -111,9 +111,9 @@ export class STPackageBundleHelper {
                 const validUntil = new Date(date)
                 validUntil.setFullYear(validUntil.getFullYear() + 1)
 
-                // Remove (= not renewable) if not renewed after 3 months
+                // Remove (= not renewable) if not renewed after 1 month
                 const removeAt = new Date(validUntil)
-                removeAt.setMonth(removeAt.getMonth() + 3)
+                removeAt.setMonth(removeAt.getMonth() + 1)
 
                 return STPackage.create({
                     validUntil,
@@ -134,9 +134,9 @@ export class STPackageBundleHelper {
                 const validUntil = new Date(date)
                 validUntil.setFullYear(validUntil.getFullYear() + 1)
 
-                // Remove (= not renewable) if not renewed after 3 months
+                // Remove (= not renewable) if not renewed after 1 month
                 const removeAt = new Date(validUntil)
-                removeAt.setMonth(removeAt.getMonth() + 3)
+                removeAt.setMonth(removeAt.getMonth() + 1)
 
                 return STPackage.create({
                     validUntil,
