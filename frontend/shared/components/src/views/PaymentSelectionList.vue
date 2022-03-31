@@ -101,8 +101,13 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             r.push(PaymentMethod.CreditCard)
         }
 
+        // Force a given ordering
+        if (methods.includes(PaymentMethod.Transfer)) {
+            r.push(PaymentMethod.Transfer)
+        }
+
         // Others
-        r.push(...methods.filter(p => p != PaymentMethod.Payconiq && p != PaymentMethod.Bancontact && p != PaymentMethod.iDEAL && p != PaymentMethod.CreditCard))
+        r.push(...methods.filter(p => p != PaymentMethod.Payconiq && p != PaymentMethod.Bancontact && p != PaymentMethod.iDEAL && p != PaymentMethod.CreditCard && p != PaymentMethod.Transfer))
 
         return r
     }
