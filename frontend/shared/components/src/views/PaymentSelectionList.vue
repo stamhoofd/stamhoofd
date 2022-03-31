@@ -128,10 +128,10 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getDescription(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return "Betaal mobiel met de Payconiq by Bancontact app, de KBC-app of de ING-app."
+            case PaymentMethod.Payconiq: return this.hasNonPayconiq ? "" : "Betaal mobiel met de Payconiq by Bancontact app, de KBC-app of de ING-app."
             case PaymentMethod.Transfer: return ""
-            case PaymentMethod.Bancontact: return ""
-            case PaymentMethod.iDEAL: return ""
+            case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? "Meest gebruikte betaalmethode." : ""
+            case PaymentMethod.iDEAL: return this.organization.address.country === Country.Netherlands ? "Meest gebruikte betaalmethode." : ""
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
             case PaymentMethod.CreditCard: return ""
