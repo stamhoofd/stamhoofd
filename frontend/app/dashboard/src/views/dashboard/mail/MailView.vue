@@ -1403,7 +1403,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get primaryColor() {
-        return OrganizationManager.organization.meta.color ?? "#0053f"
+        return OrganizationManager.organization.meta.color ?? "#0053ff"
     }
 
     async getHTML() {

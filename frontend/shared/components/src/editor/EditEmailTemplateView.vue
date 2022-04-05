@@ -109,7 +109,7 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
     }
 
     get primaryColor() {
-        return this.defaultReplacements.find(r => r.token === 'primaryColor')?.value ?? "#0053f"
+        return this.defaultReplacements.find(r => r.token === 'primaryColor')?.value ?? "#0053ff"
     }
 
     async getHTML() {

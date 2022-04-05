@@ -269,7 +269,7 @@ export class OrganizationMetaData extends AutoEncoder {
         return [
             Replacement.create({
                 token: "primaryColor",
-                value: this.color ?? "#0053f"
+                value: this.color ? this.color : "#0053ff"
             })
         ]
     }
