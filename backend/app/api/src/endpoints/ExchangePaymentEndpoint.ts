@@ -2,7 +2,7 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Member, STPendingInvoice } from '@stamhoofd/models';
+import { Group, Member, STPendingInvoice } from '@stamhoofd/models';
 import { MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
@@ -10,7 +10,7 @@ import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct,PaymentMethod,PaymentMethodHelper,PaymentProvider,PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
+import { Payment as PaymentStruct, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../helpers/BuckarooHelper';
 import { GetPaymentRegistrations } from './GetPaymentRegistrations';
@@ -91,12 +91,24 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // if it has orders
             const order = registrations.length > 0 ? undefined : await Order.getForPayment(organization.id, payment.id)
+            let updateGroups = false;
 
             for (const registration of registrations) {
                 if (registration.registeredAt === null) {
                     registration.registeredAt = new Date()
                     registration.reservedUntil = null
                     await registration.save();
+                    updateGroups = true;
+                }
+            }
+
+            if (updateGroups) {
+                const groups = await Group.where({ organizationId: organization.id })
+                for (const group of groups) {
+                    if (registrations.find(p => p.groupId === group.id)) {
+                        await group.updateOccupancy()
+                        await group.save()
+                    }
                 }
             }
 
