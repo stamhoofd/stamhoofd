@@ -129,7 +129,7 @@ export class Organization extends AutoEncoder {
     getCategoryTreeWithDepth(maxDepth: number): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
-            const tree =  GroupCategoryTree.build(root, this.meta.categories, this.groups, null, maxDepth)
+            const tree = GroupCategoryTree.build(root, this.meta.categories, this.groups, null, maxDepth)
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {
                 tree.settings.name = "Inschrijvingsgroepen"

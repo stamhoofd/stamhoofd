@@ -162,14 +162,14 @@ export class GroupCategoryTree extends GroupCategory {
             categories: root.categoryIds.flatMap(id => {
                 const f = categories.find(c => c.id === id)
                 if (f) {
-                    const t = GroupCategoryTree.build(f, categories, groups, permissions)
+                    const t = GroupCategoryTree.build(f, categories, groups, permissions, maxDepth !== null ? maxDepth - 1 : null)
 
                     if (permissions !== null && t.categories.length == 0 && t.groups.length == 0 && !f.canCreate(permissions, categories)) {
                         // Hide empty categories where we cannot create new groups
                         return []
                     }
                     
-                    if (maxDepth !== null && t.depth >= maxDepth) {
+                    if (maxDepth !== null && t.depth >= maxDepth && t.categories.length > 0) {
                         for (const cat of t.categories) {
                             // Clone reference
                             cat.settings = GroupCategorySettings.create(cat.settings)

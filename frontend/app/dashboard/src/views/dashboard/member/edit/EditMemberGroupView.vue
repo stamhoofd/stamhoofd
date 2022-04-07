@@ -2,7 +2,7 @@
     <div id="parent-view" class="st-view">
         <STNavigationBar title="Inschrijvingen wijzigen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" @click="pop" />
+            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
         </STNavigationBar>
         
         <main>
@@ -12,12 +12,12 @@
             <p>Kies alle inschrijvingsgroepen waarvoor je dit lid wilt inschrijven. Kijk de betaalstatus na voor je iets wijzigt, want die kan Stamhoofd zelf niet automatisch wijzigen (en bij uitschrijven gaat die informatie verloren). Na de wijziging kan je het te betalen lidgeld eventueel manueel wijzigen.</p>
 
             <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
-                <button v-if="canGoBack" class="button text gray" @click="goBack">
+                <button v-if="canGoBack" class="button text gray" type="button" @click="goBack">
                     <span class="icon arrow-left" />
                     <span>Vorige inschrijvingsperiode</span>
                 </button>
 
-                <button v-if="canGoNext" class="button text gray" @click="goNext">
+                <button v-if="canGoNext" class="button text gray" type="button" @click="goNext">
                     <span>Volgende inschrijvingsperiode</span>
                     <span class="icon arrow-right" />
                 </button>
@@ -36,7 +36,7 @@
                             {{ group.settings.name }}
                         </h2>
 
-                        <button v-if="category.settings.maximumRegistrations === 1 && getSelectedGroupForCategory(category) && getSelectedGroupForCategory(category).id === group.id" slot="right" class="button text gray" @click.stop.prevent="setSelectedGroupForCategory(category, null)">
+                        <button v-if="category.settings.maximumRegistrations === 1 && getSelectedGroupForCategory(category) && getSelectedGroupForCategory(category).id === group.id" slot="right" type="button" class="button text gray" @click.stop.prevent="setSelectedGroupForCategory(category, null)">
                             <span class="icon trash" />
                             <span>Verwijderen</span>
                         </button>
@@ -50,7 +50,7 @@
                 {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'wijziging' : 'wijzigingen' }}
             </template>
             <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" @click="save">
+                <button class="button primary" type="button" @click="save">
                     Opslaan
                 </button>
             </LoadingButton>
