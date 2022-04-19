@@ -59,7 +59,7 @@
                 </STListItem>
 
                 <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
-                    Vervalt op
+                    Verlengbaar tot
 
                     <template slot="right">
                         {{ pack.removeAt | date }}
@@ -93,7 +93,7 @@
                 </STListItem>
 
                 <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
-                    Vervalt op
+                    Verlengbaar tot
 
                     <template slot="right">
                         {{ pack.removeAt | date }}
@@ -127,7 +127,7 @@
                 </STListItem>
 
                 <STListItem v-if="pack.removeAt && pack.meta.allowRenew && !isValid">
-                    Vervalt op
+                    Verlengbaar tot
 
                     <template slot="right">
                         {{ pack.removeAt | date }}

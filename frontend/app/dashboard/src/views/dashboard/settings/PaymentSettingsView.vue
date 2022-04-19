@@ -60,7 +60,7 @@
             </p>
         </template>
 
-        <template v-if="isBelgium || payconiqApiKey">
+        <template v-if="isStamhoofd || payconiqApiKey">
             <hr>
             <h2>Online betalingen via Payconiq</h2>
             <p class="st-list-description">
@@ -79,15 +79,11 @@
 
         <hr>
         <h2>
-            Online betalingen via Buckaroo
+            Online betalingen activeren
         </h2>
 
         <p v-if="isBuckarooActive" class="success-box">
-            Buckaroo betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethodsString }}
-        </p>
-
-        <p v-else-if="isBelgium" class="info-box">
-            Heb je een feitelijke vereniging? Dan kan je vanaf nu ook online betalingen accepteren via Buckaroo.
+            Online betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethodsString }}
         </p>
 
         <p class="st-list-description">
@@ -101,7 +97,7 @@
             </a>
         </p>
 
-        <template v-if="!enableBuckaroo || organization.privateMeta.mollieOnboarding">
+        <template v-if="!enableBuckaroo && organization.privateMeta.mollieOnboarding">
             <hr>
             <h2>
                 Online betalingen via Mollie

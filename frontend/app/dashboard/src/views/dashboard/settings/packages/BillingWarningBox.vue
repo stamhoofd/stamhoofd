@@ -8,6 +8,14 @@
             </button>
         </p>
 
+        <p v-if="!shouldFilter('webshops') && hasExpired(webshopDeactivateDate)" class="error-box selectable with-button" @click="openPackages">
+            Jouw webshops pakket is vervallen. Verleng jouw pakket om jouw webshops te heractiveren en te vermijden dat je gegevens verliest.
+
+            <button class="button text" type="button">
+                Verlengen
+            </button>
+        </p>
+
         <p v-if="!shouldFilter('webshops') && isNearing(webshopDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
             Jouw webshops worden automatisch uitgeschakeld vanaf {{ webshopDeactivateDate | dateTime }}. Verleng jouw pakket om de webshop module langer in gebruik te houden.
 
@@ -37,6 +45,14 @@
 
             <button class="button text" type="button">
                 Activeren
+            </button>
+        </p>
+
+        <p v-if="!shouldFilter('members') && hasExpired(membersDeactivateDate)" class="error-box selectable with-button" @click="openPackages">
+            Het ledenadministratie pakket is vervallen. Verleng jouw pakket om ervoor te zorgen dat leden terug kunnen inschrijven, en om te voorkomen dat gegevens verloren zullen gaan.
+
+            <button class="button text" type="button">
+                Verlengen
             </button>
         </p>
 
@@ -83,7 +99,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
 
     OrganizationManager = OrganizationManager
 
-    shouldFilter(type: "members" | "webshops") {
+    shouldFilter(type: "members" | "webshops") {
         if (this.filterTypes === null) {
             return false
         }
@@ -207,10 +223,21 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
      * Return if date is in less than 2 weeks
      */
     isNearing(date: Date | null) {
+        if (this.hasExpired(date)) {
+            return false
+        }
+
         if (date === null) {
             return false
         }
         return (date.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 14
+    }
+
+    hasExpired(date: Date | null) {
+        if (date === null) {
+            return false
+        }
+        return date <= new Date()
     }
 
     openPackages() {

@@ -97,17 +97,17 @@ export default class EditPaymentMethodsBox extends Vue {
             case PaymentMethod.Payconiq: 
                 return this.providerText(provider, {
                     [PaymentProvider.Payconiq]: "€ 0,20 / transactie via Payconiq zelf",
-                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
+                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie",
                 })
             case PaymentMethod.Bancontact: 
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
+                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie",
                     [PaymentProvider.Mollie]: "€ 0,31 / transactie via Mollie",
                 })
             
             case PaymentMethod.iDEAL:  
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
+                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie",
                     [PaymentProvider.Mollie]: "€ 0,29 / transactie via Mollie",
                 })
             case PaymentMethod.CreditCard: return "€ 0,25 + 1,8% voor persoonlijke kaarten (Europese Unie)\n€ 0,25 + 2,8% voor zakelijke of buiten-EU kaarten"

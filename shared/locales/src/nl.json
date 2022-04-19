@@ -40,7 +40,7 @@
           "description": "Je kan online betalingen gebruiken in Stamhoofd door te koppelen met Mollie via de ondertaande knop. Hiermee kan je betalingen via Bancontact, iDEAL en kredietkaart activeren."
         },
         "buckaroo": {
-          "description": "Je kan online betalingen gebruiken in Stamhoofd door de onderstaande instructies te volgen (knop hieronder). Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft."
+          "description": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft."
         }
       },
       "domain": {
