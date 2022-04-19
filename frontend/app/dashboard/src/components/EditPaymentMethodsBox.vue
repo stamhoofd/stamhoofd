@@ -90,7 +90,7 @@ export default class EditPaymentMethodsBox extends Vue {
     }
 
     getDescription(paymentMethod: PaymentMethod): string {
-        const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod) ?? null
+        const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod) ?? PaymentProvider.Buckaroo
 
         switch (paymentMethod) {
             case PaymentMethod.Transfer: return "Gratis, maar je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
