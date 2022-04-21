@@ -1,8 +1,12 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { Email } from "@stamhoofd/email";
+import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
+import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { GroupBuilder } from "../helpers/GroupBuilder";
+import { EmailTemplate } from "./EmailTemplate";
 
 import { Organization } from "./Organization";
 
@@ -56,6 +60,12 @@ export class STPackage extends Model {
 
     @column({ type: "datetime", nullable: true })
     removeAt: Date | null = null
+
+    @column({ type: "integer" })
+    emailCount = 0
+
+    @column({ type: "datetime", nullable: true })
+    lastEmailAt: Date | null = null
 
     static async getForOrganization(organizationId: string) {
         const pack1 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
@@ -170,5 +180,76 @@ export class STPackage extends Model {
             removeAt: this.removeAt,
             firstFailedPayment: this.meta.firstFailedPayment
         })
+    }
+
+    async sendExpiryEmail() {
+        await this.sendEmailTemplate({
+            type: EmailTemplateType.PackageExpirationReminder
+        })
+
+        this.emailCount += 1
+        this.lastEmailAt = new Date()
+        await this.save()
+    }
+
+    async sendEmailTemplate(data: {
+        type: EmailTemplateType,
+        replyTo?: string
+    }) {
+        // First fetch template
+        let templates = await EmailTemplate.where({ type: data.type, organizationId: null })
+
+        if (!templates || templates.length == 0) {
+            console.error("Could not find email template for type "+data.type)
+            return
+        }
+
+        const organization = await Organization.getByID(this.organizationId)
+
+        if (!organization) {
+            console.error("Could not find package organization "+this.id)
+            return
+        }
+
+        const template = templates[0]
+        const admins = await organization.getAdmins()
+
+        const recipients = admins.map(admin => 
+            Recipient.create({
+                firstName: admin.firstName,
+                lastName: admin.lastName,
+                email: admin.email,
+                replacements: [
+                    Replacement.create({
+                        token: "firstName",
+                        value: admin.firstName ?? ""
+                    }),
+                    Replacement.create({
+                        token: "organizationName",
+                        value: organization.name
+                    }),
+                    Replacement.create({
+                        token: "packageName",
+                        value: this.meta.name ?? ""
+                    }),
+                    Replacement.create({
+                        token: "validUntil",
+                        value: this.validUntil ? Formatter.dateTime(this.validUntil) : "nooit"
+                    })
+                ]
+            })
+        );
+
+        
+        // Create e-mail builder
+        const builder = await getEmailBuilder(organization, {
+            recipients,
+            subject: template.subject,
+            html: template.html,
+            from: Email.getInternalEmailFor(organization.i18n),
+            replyTo: data.replyTo
+        })
+
+        Email.schedule(builder)
     }
 }

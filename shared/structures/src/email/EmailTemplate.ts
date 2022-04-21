@@ -6,6 +6,7 @@ export enum EmailTemplateType {
      * Template created by the user to send manually
      */
     UserGenerated = "UserGenerated",
+    PackageExpirationReminder = "PackageExpirationReminder",
 
     RegistrationConfirmation = "RegistrationConfirmation",
 
@@ -70,6 +71,15 @@ export class EmailTemplate extends AutoEncoder {
     updatedAt: Date = new Date();
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+
+        if (type === EmailTemplateType.PackageExpirationReminder) {
+            return [
+                "firstName",
+                "organizationName",
+                "packageName",
+                "validUntil",
+            ]
+        }
         const sharedReplacements = [
             "firstName",
             "lastName",

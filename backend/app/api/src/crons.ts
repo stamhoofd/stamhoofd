@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { EmailAddress } from '@stamhoofd/email';
-import { Group, Webshop } from '@stamhoofd/models';
+import { Group, STPackage, Webshop } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
@@ -59,6 +59,36 @@ async function checkDNS() {
     lastDNSId = organizations[organizations.length - 1].id
     
 }
+
+let lastExpirationCheck: Date | null = null
+async function checkExpirationEmails() {
+    // Wait 1 hour between every complete check
+    if (lastExpirationCheck && lastExpirationCheck > new Date(new Date().getTime() - 1 * 60 * 60 * 1000)) {
+        console.log("Skip checkExpirationEmails")
+        return
+    }
+    
+    // Get all packages that expire between now and 31 days
+    const packages = await STPackage.where({ 
+        validUntil: [
+            { sign: '!=', value: null },
+            { sign: '>', value: new Date() },
+            { sign: '<', value: new Date(Date.now() + 1000 * 60 * 60 * 24 * 31) }
+        ],
+        emailCount: 0
+    })
+
+    console.log("Sending expiration emails...")
+
+    for (const pack of packages) {
+        if (STAMHOOFD.environment === "production") {
+            console.log("Sending expiration email for "+pack.id)
+        }
+        await pack.sendExpiryEmail()
+    }   
+    lastExpirationCheck = new Date() 
+}
+
 
 let lastWebshopDNSCheck: Date | null = null
 let lastWebshopDNSId = ""
@@ -512,7 +542,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkSettlements()/*.then(citySync)*/.then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
+        checkSettlements()/*.then(citySync)*/.then(checkExpirationEmails).then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false
