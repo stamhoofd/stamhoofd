@@ -115,6 +115,8 @@ public class QRScannerPlugin: CAPPlugin {
             // Make sure webview is transparent
             webView.isOpaque = false
             webView.backgroundColor = UIColor.clear
+            webView.scrollView.backgroundColor = UIColor.clear
+            webView.scrollView.isOpaque = false
             
             let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             self.previewLayer = previewLayer
