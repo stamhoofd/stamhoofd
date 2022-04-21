@@ -5,20 +5,20 @@ import { KeyboardResize } from '@capacitor/keyboard';
 // During syncing capacitor for production, capacitor.config.production.ts will temporarily be renamed to capacitor.config.ts
 
 const config: CapacitorConfig = {
-  appId: 'com.stamhoofd.stamhoofd',
-  appName: 'Stamhoofd',
-  webDir: 'dist',
-  bundledWebRuntime: false,
-  loggingBehavior: "none",
-  hideLogs: true,
-  plugins: {
-    Keyboard: {
-      resize: KeyboardResize.None,
-    },
-    PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"]
+    appId: 'com.stamhoofd.stamhoofd',
+    appName: 'Stamhoofd',
+    webDir: 'dist',
+    bundledWebRuntime: false,
+    loggingBehavior: "none",
+    hideLogs: true,
+    plugins: {
+        Keyboard: {
+            resize: KeyboardResize.None,
+        },
+        PushNotifications: {
+            presentationOptions: ["badge", "sound", "alert"]
+        }
     }
-  }
 };
 
 export default config;

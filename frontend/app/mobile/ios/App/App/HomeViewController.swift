@@ -43,6 +43,7 @@ class HomeViewController: CAPBridgeViewController {
         if #available(iOS 13.0, *) {
             self.webView?.backgroundColor = UIColor.systemBackground
             self.view?.backgroundColor = UIColor.systemBackground
+            self.modalPresentationStyle = .overCurrentContext
         } else {
             // Fallback on earlier versions
         }
