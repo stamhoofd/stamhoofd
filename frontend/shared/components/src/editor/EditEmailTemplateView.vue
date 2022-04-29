@@ -154,9 +154,6 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
         let { html } = await this.getHTML()
         let subject = this.subject
 
-        console.log(this.smartVariables);
-
-
         // Replacements
         for (const variable of this.smartVariables) {
             if (html) {
