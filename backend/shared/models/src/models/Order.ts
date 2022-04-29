@@ -449,11 +449,11 @@ export class Order extends Model {
         // First fetch template
         let templates = (await EmailTemplate.where({ type: data.type, webshopId: this.webshop.id }))
 
-        if (!templates || templates.length == 0) {
+        if (templates.length == 0) {
             templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
         }
 
-        if (!templates || templates.length == 0) {
+        if (templates.length == 0) {
             console.error("Could not find email template for type "+data.type)
             return
         }

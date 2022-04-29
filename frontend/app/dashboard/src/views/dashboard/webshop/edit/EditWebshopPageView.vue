@@ -146,10 +146,10 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
     get hs() {
         return [
             ResolutionRequest.create({
-                width: 1600
+                width: 1800
             }),
             ResolutionRequest.create({
-                width: 800
+                width: 900
             })
         ]
     }
