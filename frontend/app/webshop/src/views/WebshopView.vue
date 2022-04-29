@@ -224,7 +224,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     get bannerImage() {
-        return this.webshop.meta.coverPhoto?.getResolutionForSize(900, undefined)
+        return this.webshop.meta.coverPhoto?.getResolutionForSize(Math.min(document.documentElement.clientWidth - 30, 900), undefined)
     }
     
     get bannerImageWidth() {
