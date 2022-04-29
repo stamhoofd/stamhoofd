@@ -6,7 +6,11 @@ export enum EmailTemplateType {
      * Template created by the user to send manually
      */
     UserGenerated = "UserGenerated",
-    PackageExpirationReminder = "PackageExpirationReminder",
+    MembersExpirationReminder = "MembersExpirationReminder",
+    WebshopsExpirationReminder = "WebshopsExpirationReminder",
+    SingleWebshopExpirationReminder = "SingleWebshopExpirationReminder",
+    TrialWebshopsExpirationReminder = "TrialWebshopsExpirationReminder",
+    TrialMembersExpirationReminder = "TrialMembersExpirationReminder",
 
     RegistrationConfirmation = "RegistrationConfirmation",
 
@@ -72,12 +76,20 @@ export class EmailTemplate extends AutoEncoder {
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
 
-        if (type === EmailTemplateType.PackageExpirationReminder) {
+        if ([
+            EmailTemplateType.MembersExpirationReminder, 
+            EmailTemplateType.WebshopsExpirationReminder, 
+            EmailTemplateType.TrialMembersExpirationReminder, 
+            EmailTemplateType.TrialWebshopsExpirationReminder, 
+            EmailTemplateType.SingleWebshopExpirationReminder
+        ].includes(type)) {
             return [
                 "firstName",
                 "organizationName",
                 "packageName",
                 "validUntil",
+                "validUntilDate",
+                "renewUrl"
             ]
         }
         const sharedReplacements = [

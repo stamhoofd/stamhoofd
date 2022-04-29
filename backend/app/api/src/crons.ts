@@ -81,9 +81,6 @@ async function checkExpirationEmails() {
     console.log("Sending expiration emails...")
 
     for (const pack of packages) {
-        if (STAMHOOFD.environment === "production") {
-            console.log("Sending expiration email for "+pack.id)
-        }
         await pack.sendExpiryEmail()
     }   
     lastExpirationCheck = new Date() 

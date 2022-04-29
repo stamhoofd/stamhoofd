@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
  function pad(number) {
     if (number < 10) {
         return '0' + number;
@@ -6,6 +8,8 @@
 }
 
 export class Formatter {
+    static timezone = "Europe/Brussels"
+
     static removeAccents(name: string): string {
         name = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return name
@@ -34,8 +38,10 @@ export class Formatter {
             // Crash protection in case undefined get passed
             return "?"
         }
-        const monthNames = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"]
-        return monthNames[date.getDay()]
+        const monthNames = ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag", ]
+
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return monthNames[datetime.weekday - 1];
     }
 
     /**
@@ -46,9 +52,11 @@ export class Formatter {
             // Crash protection in case undefined get passed
             return "?"
         }
-        const currentYear = new Date().getFullYear()
-        const year = date.getFullYear()
-        return date.getDate() + " " + this.month(date.getMonth() + 1) + (currentYear != year || withYear === true ? (" "+year) : "")
+        const currentYear = DateTime.now().setZone(this.timezone).year;
+
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const year = datetime.year;
+        return datetime.day + " " + this.month(datetime.month) + (currentYear != year || withYear === true ? (" "+year) : "")
     }
 
     /**
@@ -82,7 +90,9 @@ export class Formatter {
             // Crash protection in case undefined get passed
             return "?"
         }
-        return (date.getDate()+"").padStart(2, "0") + "/" + ((date.getMonth() + 1)+"").padStart(2, "0") + (withYear ? "/"+date.getFullYear() : "")
+
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return (datetime.day+"").padStart(2, "0") + "/" + (datetime.month+"").padStart(2, "0") + (withYear ? "/"+datetime.year : "")
     }
 
     /**
@@ -93,8 +103,10 @@ export class Formatter {
             // Crash protection in case undefined get passed
             return "?"
         }
-        const year = date.getFullYear()
-        return year+"-"+((date.getMonth() + 1)+"").padStart(2, "0")+"-"+(date.getDate()+"").padStart(2, "0")
+
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const year = datetime.year
+        return year+"-"+(datetime.month+"").padStart(2, "0")+"-"+(datetime.day+"").padStart(2, "0")
     }
 
     /**
@@ -105,7 +117,8 @@ export class Formatter {
             // Crash protection in case undefined get passed
             return "?"
         }
-        return date.getHours()+":"+(date.getMinutes()+"").padStart(2, "0")
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return datetime.hour+":"+(datetime.minute+"").padStart(2, "0")
     }
 
     /**
@@ -116,7 +129,8 @@ export class Formatter {
             // Crash protection in case undefined get passed
             return "?"
         }
-        return (date.getHours()+"").padStart(2, "0")+":"+(date.getMinutes()+"").padStart(2, "0")
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return (datetime.hour+"").padStart(2, "0")+":"+(datetime.minute+"").padStart(2, "0")
     }
 
     static uniqueArray<T>(array: T[]): T[] {

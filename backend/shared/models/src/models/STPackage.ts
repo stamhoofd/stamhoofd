@@ -183,12 +183,50 @@ export class STPackage extends Model {
     }
 
     async sendExpiryEmail() {
-        await this.sendEmailTemplate({
-            type: EmailTemplateType.PackageExpirationReminder
-        })
+        if (this.removeAt && this.removeAt <= new Date()) {
+            this.emailCount += 1
+            await this.save()
+        }
 
+        let allowDays = 0;
+        let type: EmailTemplateType | null = null;
+
+        if (this.meta.type === STPackageType.Members) {
+            type = EmailTemplateType.MembersExpirationReminder;
+            allowDays = 32;
+        } else if (this.meta.type === STPackageType.Webshops) {
+            type = EmailTemplateType.WebshopsExpirationReminder;
+            allowDays = 32;
+        } else if (this.meta.type === STPackageType.SingleWebshop) {
+            type = EmailTemplateType.SingleWebshopExpirationReminder;
+            allowDays = 7;
+        } else if (this.meta.type === STPackageType.TrialMembers) {
+            type = EmailTemplateType.TrialMembersExpirationReminder;
+            allowDays = 3;
+        } else if (this.meta.type === STPackageType.TrialWebshops) {
+            type = EmailTemplateType.TrialWebshopsExpirationReminder;
+            allowDays = 3;
+        }
+
+        const allowFrom = new Date(Date.now() + 1000 * 60 * 60 * 24 * allowDays)
+        if (type && (this.validUntil === null || this.validUntil < new Date() || this.validUntil > allowFrom)) {
+            console.log('Skip sending expiration email for '+this.id)
+            return;
+        }
+
+        if (type) {
+            console.log('Sending expiration email for '+this.id, type)
+            if (STAMHOOFD.environment === "production") {
+                await this.sendEmailTemplate({
+                    type
+                })
+            }
+            this.lastEmailAt = new Date()
+        } else {
+            console.log('Skip sending expiration email for '+this.id+' (no type)')
+        }
+        
         this.emailCount += 1
-        this.lastEmailAt = new Date()
         await this.save()
     }
 
@@ -235,7 +273,15 @@ export class STPackage extends Model {
                     Replacement.create({
                         token: "validUntil",
                         value: this.validUntil ? Formatter.dateTime(this.validUntil) : "nooit"
-                    })
+                    }),
+                    Replacement.create({
+                        token: "validUntilDate",
+                        value: this.validUntil ? Formatter.date(this.validUntil) : "nooit"
+                    }),
+                    Replacement.create({
+                        token: "renewUrl",
+                        value: "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+organization.i18n.locale+"/settings/packages"
+                    }),
                 ]
             })
         );
