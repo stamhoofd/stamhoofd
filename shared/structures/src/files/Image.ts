@@ -32,6 +32,15 @@ export class Image extends AutoEncoder {
     getResolutionForSize(width: number | undefined, height: number | undefined): Resolution {
         let bestResolution: Resolution | undefined
 
+        const w: any = (window as any);
+        const ratio = (w ? w.devicePixelRatio : 1) ?? 1;
+        if (ratio >= 2 && width) {
+            width = ratio * width;
+        }
+        if (ratio >= 2 && height) {
+            height = ratio * height;
+        }
+
         // Search resolution bigger than width x height, but smaller than any other resolution that is bigger
         for(const resolution of this.resolutions) {
             if (
