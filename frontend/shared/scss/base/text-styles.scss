@@ -366,11 +366,7 @@
     @extend .style-description-small;
     color: $color-dark;
 
-    font-size: 16px;
-
-    @media (max-width: 550px) {
-        font-size: 15px;
-    }
+    font-size: 15px;
 }
 
 .style-with-button {
@@ -411,8 +407,8 @@
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;
+    grid-template-columns: fit-content(40%) 1fr;
     gap: 8px 25px;
-
 
     &.small {
         grid-template-columns: 150px 1fr;
