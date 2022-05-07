@@ -199,6 +199,9 @@ export class STInvoiceMeta extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     companyVATNumber: string | null = null
 
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    companyNumber: string | null = null
+
     @field({ decoder: StringDecoder, nullable: true, version: 133 })
     ipAddress: string | null = null
 

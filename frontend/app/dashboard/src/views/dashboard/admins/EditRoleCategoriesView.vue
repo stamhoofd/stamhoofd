@@ -96,7 +96,7 @@ export default class EditRoleCategoriesView extends Mixins(NavigationMixin) {
 
     /// Returns a flattened category tree with maximum 2 levels
     get categories() {
-        return this.patchedOrganization.meta.availableCategories
+        return this.patchedOrganization.availableCategories
     }
 
 
