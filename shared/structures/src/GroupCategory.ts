@@ -148,6 +148,10 @@ export class GroupCategoryTree extends GroupCategory {
         return [...this.groups, ...this.categories.flatMap(c => c.getAllGroups())]
     }
 
+    getAllCategories(): GroupCategoryTree[] {
+        return [...this.categories, ...this.categories.flatMap(c => c.getAllCategories())]
+    }
+
     /**
      * 
      * @param root 
