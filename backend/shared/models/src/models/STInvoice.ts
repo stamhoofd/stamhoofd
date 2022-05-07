@@ -93,6 +93,7 @@ export class STInvoice extends Model {
             companyContact: organization.privateMeta.billingContact ?? "",
             companyAddress: organization.meta.companyAddress ?? organization.address,
             companyVATNumber: organization.meta.VATNumber,
+            companyNumber: organization.meta.companyNumber,
             VATPercentage: calculateVATPercentage(organization.meta.companyAddress ?? organization.address, organization.meta.VATNumber)
         })
 

@@ -179,7 +179,19 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_GRAY_DARK);
         this.document.font('Metropolis-Medium')
 
-        this.document.text(this.invoice.meta.companyName + (this.invoice.meta.companyContact ? ("\n"+this.invoice.meta.companyContact) : "")+"\n"+this.invoice.meta.companyAddress.toString()+ (this.invoice.meta.companyVATNumber ? ("\n"+this.invoice.meta.companyVATNumber) : ""), x * MM,  this.document.y + 4*MM, { align: 'left', width: 72 * MM, lineGap: 2*MM })
+        const showNumber = this.invoice.meta.companyNumber && (!this.invoice.meta.companyVATNumber || (this.invoice.meta.companyNumber !== this.invoice.meta.companyVATNumber.substring(2) && this.invoice.meta.companyNumber !== this.invoice.meta.companyVATNumber));
+
+        this.document.text(
+                this.invoice.meta.companyName 
+                + (this.invoice.meta.companyContact ? ("\n"+this.invoice.meta.companyContact) : "")
+                + "\n"
+                + this.invoice.meta.companyAddress.toString()
+                + (showNumber ? ("\n"+this.invoice.meta.companyNumber) : "")
+                + (this.invoice.meta.companyVATNumber ? ("\n"+(showNumber ? "BTW: " : "")+this.invoice.meta.companyVATNumber) : "")
+            , x * MM
+            , this.document.y + 4*MM
+            , { align: 'left', width: 72 * MM, lineGap: 2*MM }
+        )
 
     }
 
