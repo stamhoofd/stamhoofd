@@ -41,6 +41,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import CategoryPermissionRow from './CategoryPermissionRow.vue';
 
 @Component({
@@ -95,7 +96,7 @@ export default class EditRoleCategoriesView extends Mixins(NavigationMixin) {
 
     /// Returns a flattened category tree with maximum 2 levels
     get categories() {
-        return this.patchedOrganization.meta.categories
+        return this.patchedOrganization.meta.availableCategories
     }
 
 
