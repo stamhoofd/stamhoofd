@@ -398,7 +398,8 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
                             if (!answer) {
                                 return
                             }
-                            return answer.stringValue && answer.stringValue != "/" ? answer.stringValue : undefined
+                            const value = answer.stringValue.trim();
+                            return value && value !== "/" && value.toLowerCase() !== 'nee' && value.toLowerCase() !== 'neen' && value.toLowerCase() !== 'nvt' && value.toLowerCase() !== 'n.v.t.' ? value : undefined
                         }
                     })
                 )
@@ -413,7 +414,8 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
                                 return null
                             }
                             
-                            return answer.stringValue
+                            const value = answer.stringValue.trim();
+                            return value && value !== "/" && value.toLowerCase() !== 'nee' && value.toLowerCase() !== 'neen' && value.toLowerCase() !== 'nvt' && value.toLowerCase() !== 'n.v.t.' ? value : null
                         }
                     })
                 )
@@ -721,9 +723,6 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
         if (hasValues) {
             for (const [title, text] of data.items) {
                 const w = Math.min(columnWidth / 2, doc.widthOfString(title, { align: 'left', lineGap: gap }))
-                if (w > columnWidth / 2) {
-                    console.log("Somehow is larger", w, columnWidth / 2)
-                }
                 if (w > maxWidth) {
                     maxWidth = w+1 // +1 to fix rounding error that causes text to wrap
                 }
