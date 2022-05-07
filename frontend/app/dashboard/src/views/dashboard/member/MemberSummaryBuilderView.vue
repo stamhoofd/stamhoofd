@@ -720,7 +720,10 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
         let maxWidth = hasValues ? Math.min(columnWidth / 5, 15*mm) : columnWidth; // Minimum width to keep differences between multiple columns comparable
         if (hasValues) {
             for (const [title, text] of data.items) {
-                const w = doc.widthOfString(title, { align: 'left', width: columnWidth / 2, lineGap: gap })
+                const w = Math.min(columnWidth / 2, doc.widthOfString(title, { align: 'left', lineGap: gap }))
+                if (w > columnWidth / 2) {
+                    console.log("Somehow is larger", w, columnWidth / 2)
+                }
                 if (w > maxWidth) {
                     maxWidth = w+1 // +1 to fix rounding error that causes text to wrap
                 }
