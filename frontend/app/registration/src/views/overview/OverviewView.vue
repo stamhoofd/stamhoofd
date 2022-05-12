@@ -38,12 +38,12 @@
                         </STListItem>
                     </STList>
 
-                    <p v-else class="info-box">
+                    <p v-else-if="!createMemberDisabled" class="info-box">
                         Je hebt nog geen leden ingeschreven op dit account. Voeg ze toe met de knop hieronder.
                     </p>
                 </main>
                 <STToolbar :sticky="false">
-                    <button slot="right" class="button secundary full" type="button" @click="addNewMember">
+                    <button v-if="!createMemberDisabled" slot="right" class="button secundary full" type="button" @click="addNewMember">
                         <span class="icon left add" />
                         <span>Nieuw lid inschrijven</span>
                     </button>
@@ -176,6 +176,10 @@ export default class OverviewView extends Mixins(NavigationMixin){
             return MemberManager.members
         }
         return []
+    }
+    
+    get createMemberDisabled() {  //vereniging c69512bc-ea0c-427a-ab90-08c3dcf1c856 biedt ouders geen knop om zelf een lid aan te maken
+        return this.organization.id === "c69512bc-ea0c-427a-ab90-08c3dcf1c856"
     }
     
     get invites() {
