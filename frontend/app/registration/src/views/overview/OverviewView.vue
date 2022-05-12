@@ -42,8 +42,8 @@
                         Je hebt nog geen leden ingeschreven op dit account. Voeg ze toe met de knop hieronder.
                     </p>
                 </main>
-                <STToolbar :sticky="false">
-                    <button v-if="!createMemberDisabled" slot="right" class="button secundary full" type="button" @click="addNewMember">
+                <STToolbar :sticky="false" v-if="!createMemberDisabled">
+                    <button slot="right" class="button secundary full" type="button" @click="addNewMember">
                         <span class="icon left add" />
                         <span>Nieuw lid inschrijven</span>
                     </button>
