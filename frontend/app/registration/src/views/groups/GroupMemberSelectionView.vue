@@ -13,6 +13,9 @@
             <p v-if="members.length === 0" class="info-box">
                 Je hebt nog geen leden aan jouw account toegevoegd. Voeg eerst een lid toe voor je ergens inschrijft.
             </p>
+            <p v-else-if="createMemberDisabled" class="info-box">
+                Geen leden uit jouw account kunnen hiervoor inschrijven.
+            </p>
             <p v-else-if="!canRegister" class="info-box">
                 Geen leden uit jouw account kunnen hiervoor inschrijven (zie onder). Voeg eventueel een nieuw lid toe.
             </p>
@@ -23,7 +26,7 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="secundary button" type="button" @click="addNewMember">
+            <button v-if="!createMemberDisabled" slot="right" class="secundary button" type="button" @click="addNewMember">
                 <span class="icon add" />
                 <span>Nieuw lid toevoegen</span>
             </button>
@@ -79,6 +82,10 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
 
     get canRegister() {
         return !!this.members.find(m => !m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items).closed)
+    }
+    
+    get createMemberDisabled() {  //vereniging c69512bc-ea0c-427a-ab90-08c3dcf1c856 biedt ouders geen knop om zelf een lid aan te maken
+        return this.organization.id === "c69512bc-ea0c-427a-ab90-08c3dcf1c856"
     }
 
     get hasItems() {
