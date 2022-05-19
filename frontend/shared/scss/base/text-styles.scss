@@ -351,6 +351,13 @@
     }
 }
 
+.style-context-menu-item-description {
+    font-size: 13px;
+    font-weight: $font-weight-default;
+    opacity: 0.5;
+    font-variation-settings: 'opsz' 19;
+}
+
 .style-definition-term {
     font-size: 14px;
     font-weight: $font-weight-default;

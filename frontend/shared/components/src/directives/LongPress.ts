@@ -83,6 +83,10 @@ export default {
                     return
                 }
 
+                if (event.target && event.target.classList.contains('drag')) {
+                    return;
+                }
+
                 // Register position of touch
                 firstTouch = {
                     x: event.touches[0].pageX,
@@ -108,6 +112,7 @@ export default {
                         cancelLongPress()
                         return
                     }
+                    console.log(el, el.getAttribute('draggable'))
 
                     el.$longPressTimer = null
 

@@ -50,7 +50,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         const members: MemberWithRegistrations[] = []
-        const groups = await Group.where({organizationId: user.organization.id})
+        const groups = await Group.getAll(user.organizationId)
         const updateGroups = new Map<string, Group>()
 
         // Loop all members one by one

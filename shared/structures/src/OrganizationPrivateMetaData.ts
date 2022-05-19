@@ -130,6 +130,9 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: BuckarooSettings, nullable: true, version: 152 })
     buckarooSettings: BuckarooSettings | null = null
 
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 161})
+    featureFlags: string[] = []
+
     /**
      * Null = use environment default
      */

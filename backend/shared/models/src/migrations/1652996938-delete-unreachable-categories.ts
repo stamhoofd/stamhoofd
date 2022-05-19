@@ -11,7 +11,9 @@ export default new Migration(async () => {
     const organizations = await Organization.all();
 
     for (const organization of organizations) {
-        await Group.deleteUnreachable(organization.id, organization.meta)
+        const allGroups = await Group.getAll(organization.id)
+        await organization.cleanCategories(allGroups)
+        await Group.deleteUnreachable(organization.id, organization.meta, allGroups)
     }
 });
 

@@ -60,7 +60,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = user.organization
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        const groups = await Group.where({ organizationId: user.organizationId })
+        const groups = await Group.getAll(user.organizationId)
         
         const registrations: RegistrationWithMember[] = []
         const payRegistrations: Registration[] = []

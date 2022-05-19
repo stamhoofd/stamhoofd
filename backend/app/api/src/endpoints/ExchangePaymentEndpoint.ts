@@ -103,7 +103,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             if (updateGroups) {
-                const groups = await Group.where({ organizationId: organization.id })
+                const groups = await Group.getAll(organization.id, false)
                 for (const group of groups) {
                     if (registrations.find(p => p.groupId === group.id)) {
                         await group.updateOccupancy()

@@ -12,7 +12,7 @@ export class GroupBuilder {
     }
 
     async build() {
-        const oldGroups = await Group.where({ organizationId: this.organization.id })
+        const oldGroups = await Group.getAll(this.organization.id)
 
         if (oldGroups.length === 0) {
             // Setup default groups if possible
@@ -24,7 +24,7 @@ export class GroupBuilder {
         }
 
         // Reload
-        const groups = await Group.where({ organizationId: this.organization.id })
+        const groups = await Group.getAll(this.organization.id)
         
         // Setup default root groups
         if (this.organization.meta.categories.length <= 2) {

@@ -7,6 +7,7 @@ export class ContextMenuItem {
     name: string
 
     leftIcon: string | null = null
+    rightText: string | null = null
     icon: string | null = null
 
     /**
@@ -14,6 +15,7 @@ export class ContextMenuItem {
      * You can  alter the selected value in action() to adjust it.
      */
     selected: boolean | null = null
+    disabled: boolean | string = false
 
     /**
      * Return true when the context menu should get closed.
@@ -39,7 +41,7 @@ export class ContextMenu {
     items: ContextMenuItem[][]
 
     constructor(items: ContextMenuItem[][]) {
-        this.items = items
+        this.items = items.filter(i => i.length > 0)
     }
 
     getComponent() {

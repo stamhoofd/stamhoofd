@@ -4,12 +4,12 @@ import { ModalStackEventBus } from "../..";
 import Tooltip from "../overlays/Tooltip.vue";
 
 export default {
-    inserted(el, binding, vnode) {
+    bind(el, binding, vnode) {
         let isMouseHover = false;
         const displayedComponent: ComponentWithProperties | null = el.$tooltipDisplayedComponent ?? null;
         el.$tooltipDisplayedComponent = displayedComponent;
 
-        if (!binding.value) {
+        if (!binding.value || typeof binding.value !== "string") {
             return;
         }
 
@@ -20,9 +20,8 @@ export default {
 
         // Add a hover listener
         el.addEventListener(
-            "mouseenter",
-            (_event) => {
-                
+            "mouseover",
+            (_event) => {                
                 if (!isMouseHover) {
                     isMouseHover = true;
 

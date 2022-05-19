@@ -12,7 +12,7 @@ export default new Migration(async () => {
 
     for (const organization of organizations) {
         // Loop groups
-        const groups = await Group.where({ organizationId: organization.id })
+        const groups = await Group.getAll(organization.id)
 
         for (const group of groups) {
             // Check if parent has minimum

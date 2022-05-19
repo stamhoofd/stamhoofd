@@ -330,6 +330,10 @@ export default class ContextMenuView extends Vue {
                         }
                         // Present child context menu + send close event to parent
                         const el = item.$el as HTMLElement;
+
+                        if (el.classList.contains('disabled')) {
+                            return
+                        }
                         const bounds = el.getBoundingClientRect()
 
                         item.childContextMenu.properties.x = bounds.right
@@ -799,12 +803,13 @@ export default class ContextMenuView extends Vue {
             padding-left: 20px;
         }
 
-        &:disabled {
+        /** Note we use a class, because :disabled also disables hover events */
+        &.disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
 
-        &:not(:disabled) {
+        &:not(.disabled) {
             &.isOpen {
                 background: $color-gray-2;
             }

@@ -42,7 +42,7 @@ export default new Migration(async () => {
         ]
         
         const map = new Map<string, PermissionRoleDetailed>()
-        const groups = (await Group.where({ organizationId: organization.id }))
+        const groups = await Group.getAll(organization.id)
 
         for (const user of users) {
             if (!user.permissions) {

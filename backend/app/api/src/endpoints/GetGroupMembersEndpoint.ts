@@ -57,7 +57,7 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
         const [group] = groups
 
-        if (group.privateSettings.permissions.getPermissionLevel(user.permissions) === PermissionLevel.None) {
+        if (group.deletedAt || group.privateSettings.permissions.getPermissionLevel(user.permissions) === PermissionLevel.None) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang tot deze groep"

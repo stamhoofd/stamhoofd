@@ -226,7 +226,7 @@ export class Organization extends Model {
 
     async getStructure(): Promise<OrganizationStruct> {
         const Group = (await import("./Group")).Group
-        const groups = await Group.where({organizationId: this.id})
+        const groups = await Group.getAll(this.id)
 
         const struct = OrganizationStruct.create({
             id: this.id,
@@ -251,7 +251,7 @@ export class Organization extends Model {
 
     async getPrivateStructure(permissions: Permissions): Promise<OrganizationStruct> {
         const Group = (await import("./Group")).Group
-        const groups = await Group.where({ organizationId: this.id })
+        const groups = await Group.getAll(this.id)
         const webshops = await Webshop.where({ organizationId: this.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
         return OrganizationStruct.create({
             id: this.id,
@@ -271,6 +271,55 @@ export class Organization extends Model {
                 return [WebshopPreview.create(w)]
             })
         })
+    }
+
+    async cleanCategories(groups: {id: string}[]) {
+        const reachable = new Map<string, boolean>()
+        const queue = [this.meta.rootCategoryId]
+        reachable.set(this.meta.rootCategoryId, true)
+        let shouldSave = false;
+
+        while (queue.length > 0) {
+            const id = queue.shift()
+            if (!id) {
+                break
+            }
+
+            const category = this.meta.categories.find(c => c.id === id)
+            if (!category) {
+                continue
+            }
+
+            for (const i of category.categoryIds) {
+                if (!reachable.get(i)) {
+                    reachable.set(i, true)
+                    queue.push(i)
+                }
+            }
+
+            // Remove groupIds that no longer exist
+            const filtered = category.groupIds.filter(id => groups.find(g => g.id === id))
+            if (filtered.length !== category.groupIds.length) {
+                shouldSave = true;
+                console.log("Deleted "+ (filtered.length -  category.groupIds.length) +" group ids from category " + category.id + ", in organization "+this.id)
+                category.groupIds = filtered
+            }
+        }
+
+        const reachableCategoryIds = [...reachable.keys()]
+
+        // Delete all categories that are not reachable anymore
+        const beforeCount = this.meta.categories.length;
+        this.meta.categories = this.meta.categories.filter(c => reachableCategoryIds.includes(c.id))
+
+        if (this.meta.categories.length !== beforeCount) {
+            console.log("Deleted "+ (beforeCount - this.meta.categories.length) +" categories from organization "+this.id)
+            await this.save()
+        } else {
+            if (shouldSave) {
+                await this.save()
+            }
+        }
     }
 
     async updateDNSRecords() {
