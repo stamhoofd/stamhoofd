@@ -250,8 +250,8 @@ export class Checkout extends AutoEncoder {
 
         // Check maximum
         if (timeSlot.remainingPersons !== null && this.cart.persons - this.reservedPersons > timeSlot.remainingPersons) {
-            const remaingPersons = timeSlot.remainingPersons
-            if (remaingPersons === 0) {
+            const remainingPersons = timeSlot.remainingPersons
+            if (remainingPersons === 0) {
                 throw new SimpleError({
                     code: "timeslot_full",
                     message: "Timeslot has reached maximum orders",
@@ -262,7 +262,7 @@ export class Checkout extends AutoEncoder {
             throw new SimpleError({
                 code: "timeslot_full",
                 message: "Timeslot has reached maximum persons",
-                human: "Er "+(remaingPersons != 1 ? "zijn" : "is")+" nog maar "+remaingPersons+" "+(remaingPersons != 1 ? "plaatsen" : "plaats")+" vrij "+(availableTimeslots !=1 ? "op het gekozen tijdstip" : "voor dit evenement")+". Jouw mandje is voor " + this.cart.persons + " "+(this.cart.persons != 1 ? "personen" : "persoon")+(availableTimeslots !=1 ? ". Kies een ander tijdstip indien mogelijk." : ""),
+                human: "Er "+(remainingPersons != 1 ? "zijn" : "is")+" nog maar "+remainingPersons+" "+(remainingPersons != 1 ? "plaatsen" : "plaats")+" vrij "+(availableTimeslots !=1 ? "op het gekozen tijdstip" : "voor dit evenement")+". Jouw mandje is voor " + this.cart.persons + " "+(this.cart.persons != 1 ? "personen" : "persoon")+(availableTimeslots !=1 ? ". Kies een ander tijdstip indien mogelijk." : ""),
                 field: "timeSlot"
             })
         }
