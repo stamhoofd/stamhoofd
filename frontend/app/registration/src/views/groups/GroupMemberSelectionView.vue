@@ -85,7 +85,7 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
     }
     
     get createMemberDisabled() {  //vereniging c69512bc-ea0c-427a-ab90-08c3dcf1c856 biedt ouders geen knop om zelf een lid aan te maken
-        return this.organization.id === "c69512bc-ea0c-427a-ab90-08c3dcf1c856"
+        return OrganizationManager.organization.id === "c69512bc-ea0c-427a-ab90-08c3dcf1c856"
     }
 
     get hasItems() {
