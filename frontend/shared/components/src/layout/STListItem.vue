@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="st-list-item" :class="{selectable}" @click="$emit('click', $event)">
+    <component :is="elementName" class="st-list-item" :class="{selectable}" @click="$emit('click', $event)" @contextmenu="$emit('contextmenu', $event)">
         <div class="left">
             <slot name="left" />
         </div>
@@ -231,7 +231,7 @@ a.st-list-item {
         }
     }
 
-    &.selectable {
+    &.selectable:not([draggable="true"]) {
         touch-action: manipulation;
         user-select: none;
         transition: background-color 0.2s 0.1s;

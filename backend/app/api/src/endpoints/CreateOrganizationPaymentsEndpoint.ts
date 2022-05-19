@@ -51,7 +51,7 @@ export class CreateOrganizationPaymentsEndpoint extends Endpoint<Params, Query, 
             })
         }
 
-        const groups = await Group.where({organizationId: user.organization.id})
+        const groups = await Group.getAll(user.organization.id)
 
         const payments: PaymentWithRegistrations[] = []
         const paymentRegistrationsRelation = new OneToManyRelation(Payment, Registration, "registrations", Registration.payment.foreignKey as keyof Registration)

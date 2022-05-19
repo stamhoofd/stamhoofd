@@ -51,18 +51,6 @@
                         </button>
 
                         <button
-                            v-for="group in category.groups"
-                            :key="group.id"
-                            class="menu-button button"
-                            :class="{ selected: currentlySelected == 'group-'+group.id }"
-                            type="button"
-                            @click="openGroup(group)"
-                        >
-                            <span>{{ group.settings.name }}</span>
-                            <span v-if="group.settings.registeredMembers" class="count">{{ group.settings.registeredMembers }}</span>
-                        </button>
-
-                        <button
                             v-for="c in category.categories"
                             :key="c.id"
                             class="menu-button button"
@@ -71,6 +59,18 @@
                             @click="openCategory(c)"
                         >
                             <span>{{ c.settings.name }}</span>
+                        </button>
+
+                        <button
+                            v-for="group in category.groups"
+                            :key="group.id"
+                            class="menu-button button"
+                            :class="{ selected: currentlySelected == 'group-'+group.id }"
+                            type="button"
+                            @click="openGroup(group)"
+                        >
+                            <span>{{ group.settings.name }}</span>
+                            <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
                         </button>
                     </div>
                     <hr>

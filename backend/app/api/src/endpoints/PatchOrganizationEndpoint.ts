@@ -1,14 +1,14 @@
 import { Database } from '@simonbackx/simple-database';
-import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Group } from '@stamhoofd/models';
+import { Group, Organization } from '@stamhoofd/models';
 import { Invite } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { BuckarooSettings, GroupPrivateSettings,Organization as OrganizationStruct, OrganizationMetaData, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../helpers/BuckarooHelper';
 
@@ -79,6 +79,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles)
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey
+                organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
 
                 if (request.body.privateMeta.useTestPayments !== undefined) {
                     organization.privateMeta.useTestPayments = request.body.privateMeta.useTestPayments
@@ -244,25 +245,19 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         // Check changes to groups
         const deleteGroups = request.body.groups.getDeletes()
         if (deleteGroups.length > 0) {
-            const validIds: string[] = []
             for (const id of deleteGroups) {
                 const model = await Group.getByID(id)
-                if (!model || model.organizationId != organization.id) {
-                    errors.addError(new SimpleError({
-                        code: "invalid_id",
-                        message: "No group found with id " + id
-                    }))
+                if (!model || model.organizationId !== organization.id) {
+                    // Silently ignore
                     continue;
                 }
 
                 if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
                     throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to delete this group", statusCode: 403 })
                 }
-                validIds.push(id)
-            }
-
-            if (validIds.length > 0) {
-                await Database.update("DELETE FROM `" + Group.table + "` WHERE id IN (?) and organizationId = ?", [validIds, organization.id]);
+                model.deletedAt = new Date()
+                await model.save()
+                deleteUnreachable = true
             }
         }
 
@@ -293,7 +288,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         for (const struct of request.body.groups.getPatches()) {
             const model = await Group.getByID(struct.id)
-            if (!model || model.organizationId != organization.id) {
+            if (!model || model.organizationId != organization.id || model.deletedAt) {
                 errors.addError(new SimpleError({
                     code: "invalid_id",
                     message: "No group found with id " + struct.id
@@ -357,10 +352,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         if (deleteUnreachable) {
-            await Group.deleteUnreachable(organization.id, organization.meta)
+            // Delete unreachable categories first
+            const allGroups = await Group.getAll(organization.id);
+            await organization.cleanCategories(allGroups);
+            await Group.deleteUnreachable(organization.id, organization.meta, allGroups)
         }
 
         errors.throwIfNotEmpty()
         return new Response(await user.getOrganizatonStructure(organization));
     }
 }
+

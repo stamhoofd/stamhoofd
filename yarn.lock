@@ -1813,10 +1813,10 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@^2.5.1":
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.5.1.tgz#f74a3f29571427306de238b0b2cc96ca86bdee10"
-  integrity sha512-+YKlmdaS96f3b5nIV0Q0d4ypBWnslZTxc6mcLB9Hm9vyXI0xgIObiaOO+AAkAGrCjTT5jze1Hpwlp/7BjxvKLA==
+"@simonbackx/simple-encoding@^2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.7.0.tgz#5c9bc926e8af11c1d348c9afee9aeaad8086ca3e"
+  integrity sha512-Owxxy6mvWitdMx7oOaBDzlCd/cHJ1tvntLD6Y0v2DLxOPnKC79URpEPFKdp2O3igfFeg/9hI8PgYuBhfbo1A2g==
 
 "@simonbackx/simple-endpoints@^1.10.1":
   version "1.10.1"
@@ -10180,6 +10180,11 @@ socks@^2.6.1:
     ip "^1.1.5"
     smart-buffer "^4.1.0"
 
+sortablejs@1.10.2, sortablejs@^1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/sortablejs/-/sortablejs-1.15.0.tgz#53230b8aa3502bb77a29e2005808ffdb4a5f7e2a"
+  integrity sha512-bv9qgVMjUMf89wAvM6AxVvS/4MX3sPeN0+agqShejLU5z5GX4C75ow1O2e5k4L6XItUyAK3gH6AxSbXrOM5e8w==
+
 "source-map-js@>=0.6.2 <2.0.0", source-map-js@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.0.1.tgz#a1741c131e3c77d048252adfa24e23b908670caf"
@@ -11256,6 +11261,13 @@ vue@^2.6.14:
   version "2.6.14"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.14.tgz#e51aa5250250d569a3fbad3a8a5a687d6036e235"
   integrity sha512-x2284lgYvjOMj3Za7kqzRcUSxBboHqtgRE2zlos1qWaOye5yUmHn42LB1250NJBLRwEcdrB0JRwyPTEPhfQjiQ==
+
+vuedraggable@^2.24.3:
+  version "2.24.3"
+  resolved "https://registry.yarnpkg.com/vuedraggable/-/vuedraggable-2.24.3.tgz#43c93849b746a24ce503e123d5b259c701ba0d19"
+  integrity sha512-6/HDXi92GzB+Hcs9fC6PAAozK1RLt1ewPTLjK0anTYguXLAeySDmcnqE8IC0xa7shvSzRjQXq3/+dsZ7ETGF3g==
+  dependencies:
+    sortablejs "1.10.2"
 
 w3c-hr-time@^1.0.2:
   version "1.0.2"

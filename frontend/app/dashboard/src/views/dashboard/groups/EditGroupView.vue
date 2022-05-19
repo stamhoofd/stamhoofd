@@ -297,7 +297,7 @@
             <div v-if="!isNew" class="container">
                 <hr>
                 <h2>
-                    Verwijder deze categorie
+                    Verwijder deze inschrijvingsgroep
                 </h2>
 
                 <button class="button secundary danger" type="button" @click="deleteMe">

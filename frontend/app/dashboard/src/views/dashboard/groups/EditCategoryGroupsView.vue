@@ -31,19 +31,19 @@
             </Checkbox>
         </template>
 
-        <template v-if="categories.length > 0 && enableActivities">
+        <template v-if="categories.length > 0">
             <hr>
             <h2>Categorieën</h2>
-            <STList>
-                <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
+            <STList v-model="draggableCategories" :draggable="true">
+                <GroupCategoryRow v-for="category in categories" :key="category.id" :category="category" :organization="patchedOrganization" @patch="addPatch" @delete="deleteCategory(category)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
             </STList>
         </template>
 
-        <template v-else>
+        <template v-if="groups.length > 0 || categories.length == 0">
             <hr>
             <h2>Groepen</h2>
-            <STList>
-                <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
+            <STList v-model="draggableGroups" :draggable="true">
+                <GroupRow v-for="group in groups" :key="group.id" :group="group" :organization="patchedOrganization" @patch="addPatch" @delete="deleteGroup(group)" @move-up="moveGroupUp(group)" @move-down="moveGroupDown(group)" />
             </STList>
         </template>
 
@@ -64,7 +64,7 @@
         <div class="container">
             <hr>
             <h2>Start nieuwe inschrijvingsperiode</h2>
-            <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je leden automatisch verplaatsen naar een vorige inschrijvingsperiode, zodat ze opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
+            <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je een nieuwe inschrijvinsgperiode starten, zodat leden opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
             <button type="button" class="button text" @click.left.exact="startNewRegistrationPeriod(false)" @click.alt.exact="startNewRegistrationPeriod(true)">
                 <span class="icon undo" /><span>Start nieuwe inschrijvingsperiode...</span>
             </button>
@@ -287,6 +287,42 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         this.patchOrganization = this.patchOrganization.patch(patch)
     }
 
+    get draggableCategories() {
+        return this.categories;
+    }
+
+    set draggableCategories(categories) {
+        if (categories.length != this.categories.length) {
+            return;
+        }
+
+        const p = GroupCategory.patch({
+            categoryIds: categories.map(c => c.id) as any
+        })
+        this.addCategoryPatch(p);
+    }
+
+    get draggableGroups() {
+        return this.groups;
+    }
+
+    set draggableGroups(groups) {
+        if (groups.length != this.groups.length) {
+            return;
+        }
+
+        const p = GroupCategory.patch({
+            groupIds: groups.map(g => g.id) as any
+        })
+        this.addCategoryPatch(p);
+    }
+
+    deleteCategory(category: GroupCategory) {
+        const p = GroupCategory.patch({})
+        p.categoryIds.addDelete(category.id)
+        this.addCategoryPatch(p)
+    }
+
     moveCategoryUp(category: GroupCategory) {
         const index = this.patchedCategory.categoryIds.findIndex(id => category.id === id)
         if (index == -1 || index == 0) {
@@ -308,6 +344,12 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
         const moveTo = index + 1
         const p = GroupCategory.patch({})
         p.categoryIds.addMove(category.id, this.patchedCategory.categoryIds[moveTo])
+        this.addCategoryPatch(p)
+    }
+
+    deleteGroup(group: Group) {
+        const p = GroupCategory.patch({})
+        p.groupIds.addDelete(group.id)
         this.addCategoryPatch(p)
     }
 

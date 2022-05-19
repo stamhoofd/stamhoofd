@@ -70,6 +70,19 @@ export class Group extends Model {
     })
     updatedAt: Date
 
+    @column({
+        type: "datetime",
+        nullable: true
+    })
+    deletedAt: Date | null = null
+
+    static async getAll(organizationId: string, active = true) {
+        if (active) {
+            return await Group.where({ organizationId, deletedAt: null })
+        }
+        return await Group.where({ organizationId })
+    }
+
     /**
      * Fetch all members with their corresponding (valid) registrations, users and payments
      */
@@ -178,7 +191,7 @@ export class Group extends Model {
         )
     }
 
-    static async deleteUnreachable(organizationId: string, organizationMetaData: OrganizationMetaData) {
+    static async deleteUnreachable(organizationId: string, organizationMetaData: OrganizationMetaData, allGroups: Group[]) {
         const reachable = new Map<string, boolean>()
 
         const visited = new Map<string, boolean>()
@@ -208,14 +221,13 @@ export class Group extends Model {
             }
         }
 
-        const reachableGroupIds = [...reachable.keys()]
-
-        // Delete all groups that are not reachable anymore
-        console.log("Deleting all groups from organization "+organizationId+" not in ("+reachableGroupIds.join(", ")+")")
-
-        const query = reachableGroupIds.length > 0 ? `DELETE FROM \`${Group.table}\` where organizationId = ? AND id NOT IN (?)` : `DELETE FROM \`${Group.table}\` where organizationId = ?`
-        const [result] = await Database.delete(query, [organizationId, reachableGroupIds])
-        console.log("Deleted "+result.affectedRows+" groups.")
+        for (const group of allGroups) {
+            if (!reachable.get(group.id)) {
+                console.log("Deleted unreachable group "+group.id+" from organization "+organizationId)
+                group.deletedAt = new Date()
+                await group.save()
+            }
+        }
     }
 
 }

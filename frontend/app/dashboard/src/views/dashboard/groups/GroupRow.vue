@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" class="right-stack" @click="editProduct()">
+    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
         <template slot="left">
             <img v-if="imageSrc" :src="imageSrc" class="group-row-image">
         </template>
@@ -9,8 +9,7 @@
         </h2>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" type="button" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" type="button" @click.stop="moveDown" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -19,8 +18,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STListItem } from "@stamhoofd/components";
-import { Group, Organization } from "@stamhoofd/structures"
+import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { Group, GroupCategory, Organization, OrganizationMetaData } from "@stamhoofd/structures"
+import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditGroupView from './EditGroupView.vue';
@@ -29,6 +29,9 @@ import EditGroupView from './EditGroupView.vue';
     components: {
         STListItem
     },
+    directives: {
+        LongPress: LongPressDirective
+    }
 })
 export default class GroupRow extends Mixins(NavigationMixin) {
     @Prop({})
@@ -60,6 +63,131 @@ export default class GroupRow extends Mixins(NavigationMixin) {
     moveDown() {
         this.$emit("move-down")
     }
+
+    get parentCategory() {
+        return this.group.getParentCategories(this.organization.meta.categories)[0]
+    }
+
+    get subGroups() {
+        return this.parentCategory.groupIds.map(id => this.organization.groups.find(g => g.id === id)!).filter(g => !!g)
+    }
+
+    get allCategories() {
+        const parentCategory = this.parentCategory;
+        return this.organization.availableCategories.filter(c => c.categories.length == 0 && c.id !== parentCategory?.id)
+    }
+
+    moveTo(category: GroupCategory) {
+        const p = GroupCategory.patch({id: category.id})
+        p.groupIds.addPut(this.group.id)
+
+        const meta = OrganizationMetaData.patch({})
+        meta.categories.addPatch(p)
+
+        this.$emit('patch', Organization.patch({
+            meta
+        }))
+        this.$emit("delete")
+    }
+
+    duplicate() {
+        const duplicated = this.group.clone()
+        duplicated.id = uuidv4();
+
+        // Remove suffix
+        duplicated.settings.name = duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, "")
+
+
+        const suffix = " (kopie)";
+
+        // Count the groups that already have a suffix, and add the numuber inside the suffix
+        // use this.subGroups
+        const suffixes = this.subGroups.map(g => g.settings.name.startsWith(duplicated.settings.name+" (kopie") && g.settings.name.match(/ \(kopie( \d+)?\)$/))
+        const suffixesWithNumber = suffixes.filter(s => !!s) as RegExpMatchArray[]
+        console.log(suffixesWithNumber);
+
+        const maxNumber = suffixesWithNumber.length > 0 ? Math.max(...suffixesWithNumber.map(s => parseInt(s[1] ?? "1"))) : 0
+
+        if (maxNumber > 0) {
+            duplicated.settings.name = duplicated.settings.name + " (kopie " + (maxNumber + 1) + ")";
+        } else {
+            duplicated.settings.name = duplicated.settings.name + suffix;
+        }
+        
+        const p = GroupCategory.patch({id: this.parentCategory.id})
+        p.groupIds.addPut(duplicated.id, this.group.id)
+
+        const meta = OrganizationMetaData.patch({})
+        meta.categories.addPatch(p)
+
+        const organizationPatch = Organization.patch({
+            meta,
+        });
+
+        organizationPatch.groups.addPut(duplicated)
+        this.$emit('patch', organizationPatch)
+    }
+
+    showContextMenu(event) {
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Verplaats omhoog",
+                    icon: "arrow-up",
+                    action: () => {
+                        this.moveUp()
+                        return true;
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Verplaats omlaag",
+                    icon: "arrow-down",
+                    action: () => {
+                        this.moveDown()
+                        return true;
+                    }
+                }),
+            ],
+
+            [
+                new ContextMenuItem({
+                    name: "Verplaats naar",
+                    disabled: this.allCategories.length == 0,
+                    childMenu: new ContextMenu([
+                        this.allCategories.map(cat => 
+                            new ContextMenuItem({
+                                name: cat.settings.name,
+                                rightText: cat.groupIds.length+"",
+                                action: () => {
+                                    this.moveTo(cat)
+                                    return true
+                                }
+                            })
+                        )
+                    ])
+                }),
+
+                new ContextMenuItem({
+                    name: "Dupliceren",
+                    icon: "copy",
+                    action: () => {
+                        this.duplicate()
+                        return true;
+                    }
+                }),
+
+                new ContextMenuItem({
+                    name: "Verwijderen",
+                    icon: "trash",
+                    action: () => {
+                        this.$emit("delete")
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ clickEvent: event }).catch(console.error)
+    }
 }
 </script>
 
@@ -73,3 +201,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
     border-radius: $border-radius;
 }
 </style>
+
+function uuidv4(): string {
+  throw new Error('Function not implemented.');
+}

@@ -38,7 +38,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        const groups = await Group.where({ organizationId: user.organizationId })
+        const groups = await Group.getAll(user.organizationId)
         const members = (await Member.getFamilyWithRegistrations(request.params.id))
 
         // You can access a family when you have access to one of the members

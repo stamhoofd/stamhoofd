@@ -60,23 +60,6 @@
             </p>
         </template>
 
-        <template v-if="isStamhoofd || payconiqApiKey">
-            <hr>
-            <h2>Online betalingen via Payconiq</h2>
-            <p class="st-list-description">
-                Wil je Payconiq gebruiken? Dat kan via Buckaroo (zie hierboven), of rechtstreeks via Payconiq (met een API-key). Volg voor dat laatste de stappen op deze pagina: <a :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-payconiq'" class="inline-link" target="_blank">Aansluiten bij Payconiq</a>. Daarna ontvang je van Stamhoofd of Payconiq een API-key die je hieronder moet ingeven. Heb je meerdere API-keys ontvangen? Vul dan degene bij App2app in.
-            </p>
-
-            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
-                <input
-                    v-model="payconiqApiKey"
-                    class="input"
-                    type="text"
-                    placeholder="API-key van Payconiq"
-                >
-            </STInputBox>
-        </template>
-
         <hr>
         <h2>
             Online betalingen activeren
@@ -97,7 +80,24 @@
             </a>
         </p>
 
-        <template v-if="!enableBuckaroo && organization.privateMeta.mollieOnboarding">
+        <template v-if="payconiqApiKey || forcePayconiq">
+            <hr>
+            <h2>Online betalingen via Payconiq</h2>
+            <p class="st-list-description">
+                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken.
+            </p>
+
+            <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
+                <input
+                    v-model="payconiqApiKey"
+                    class="input"
+                    type="text"
+                    placeholder="API-key van Payconiq"
+                >
+            </STInputBox>
+        </template>
+
+        <template v-if="!enableBuckaroo && (organization.privateMeta.mollieOnboarding || forceMollie)">
             <hr>
             <h2>
                 Online betalingen via Mollie
@@ -165,6 +165,14 @@
 
             <Checkbox v-model="enableBuckaroo">
                 Gebruik Buckaroo voor online betalingen
+            </Checkbox>
+
+            <Checkbox v-model="forcePayconiq">
+                Payconiq koppeling toestaan
+            </Checkbox>
+
+            <Checkbox v-if="!enableBuckaroo" v-model="forceMollie">
+                Mollie koppeling toestaan
             </Checkbox>
 
             <div v-if="enableBuckaroo" class="split-inputs">
@@ -361,6 +369,10 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     set payconiqApiKey(payconiqApiKey: string) {
+        if (this.payconiqApiKey && payconiqApiKey.length == 0) {
+            this.forcePayconiq = true;
+        }
+
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 payconiqApiKey: payconiqApiKey.length == 0 ? null : payconiqApiKey
@@ -404,6 +416,38 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 buckarooSettings: BuckarooSettings.patch({
                     secret
                 })
+            })
+        })
+    }
+
+    get forceMollie() {
+        return this.organization.privateMeta?.featureFlags.includes('forceMollie') ?? false
+    }
+
+    set forceMollie(forceMollie: boolean) {
+        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== 'forceMollie') ?? []
+        if (forceMollie) {
+            featureFlags.push('forceMollie')
+        }
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta:  OrganizationPrivateMetaData.patch({
+                featureFlags: featureFlags as any
+            })
+        })
+    }
+
+    get forcePayconiq() {
+        return this.organization.privateMeta?.featureFlags.includes('forcePayconiq') ?? false
+    }
+
+    set forcePayconiq(forcePayconiq: boolean) {
+        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== 'forcePayconiq') ?? []
+        if (forcePayconiq) {
+            featureFlags.push('forcePayconiq')
+        }
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta:  OrganizationPrivateMetaData.patch({
+                featureFlags: featureFlags as any
             })
         })
     }

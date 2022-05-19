@@ -17,7 +17,7 @@ export default new Migration(async () => {
         if (organization.meta.modules.useMembers && organization.meta.categories.length <= 1) {
             console.log(organization.name)
 
-            const groups = await Group.where({ organizationId: organization.id })
+            const groups = await Group.getAll(organization.id)
             const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id)
 
             const defaults = OrganizationTypeHelper.getDefaultGroupCategories(organization.meta.type, organization.meta.umbrellaOrganization ?? undefined)
