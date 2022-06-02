@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { EmailTemplateType, OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType, WebshopTimeSlot, Order as OrderStruct, WebshopPreview, Payment as PaymentStruct } from '@stamhoofd/structures';
+import { EmailTemplateType, OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType, WebshopTimeSlot, Order as OrderStruct, WebshopPreview, Payment as PaymentStruct, WebshopStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from '@stamhoofd/email';
@@ -446,6 +446,11 @@ export class Order extends Model {
         replyTo?: string,
         to: string,
     }) {
+        // Never send an email for archived webshops
+        if (this.webshop.meta.status === WebshopStatus.Archived) {
+            return
+        }
+
         // First fetch template
         let templates = (await EmailTemplate.where({ type: data.type, webshopId: this.webshop.id }))
 
