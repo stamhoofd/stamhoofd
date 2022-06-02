@@ -770,7 +770,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
         }
 
-        //document.body.removeChild(measureDiv)
+        document.body.removeChild(measureDiv)
     }
 
     canCollapse = false

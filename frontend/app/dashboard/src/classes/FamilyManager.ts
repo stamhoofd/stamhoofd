@@ -66,7 +66,7 @@ export class FamilyManager {
 
         // Patch other members
         const members = (this.members ?? []).filter(m => !m.details.isRecovered)
-        patch.merge(await MemberManager.getEncryptedMembersPatch(members))
+        patch.merge(MemberManager.getEncryptedMembersPatch(members))
         
         // Send the request
         const response = await session.authenticatedServer.request({
@@ -187,7 +187,7 @@ export class FamilyManager {
         // Search for duplicate addresses and duplicate parents
         this.removeDuplicates()
 
-        const patchArray = await MemberManager.getEncryptedMembersPatch(members)
+        const patchArray = MemberManager.getEncryptedMembersPatch(members)
         const session = SessionManager.currentSession!
 
         // Send the request

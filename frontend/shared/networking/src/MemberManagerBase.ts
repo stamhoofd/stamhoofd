@@ -34,7 +34,7 @@ export class MemberManagerBase {
         const version = data.field("version").integer
 
         if (version < 128) {
-            details.upgradeFromLegacy(organization)
+            details.upgradeFromLegacy(organization.meta)
         }
 
         return details
@@ -184,140 +184,19 @@ export class MemberManagerBase {
     }
 
     /// Prepare a patch of updated members
-    async getEncryptedMembers(members: MemberWithRegistrations[], organization: Organization, createPersonalKey = true, replaceMemberPublicKey: string | null = null): Promise<AutoEncoderPatchType<KeychainedMembers>> {
+    getEncryptedMembers(members: MemberWithRegistrations[]): AutoEncoderPatchType<KeychainedMembers> {
         const patch = KeychainedMembers.patch({})
-        const session = SessionManager.currentSession!
-        const organizationPublicKey = organization.publicKey
-
-        // For new organizations, that accepted the terms
-        if (organization.meta.didAcceptEndToEndEncryptionRemoval) {
-            for (const member of members) {
-                // Clean the member details
-                member.details.cleanData()
-
-                const memberPatch = EncryptedMember.patch({ id: member.id })
-                memberPatch.firstName = member.details.firstName
-                memberPatch.nonEncryptedDetails = member.details
-
-                patch.members.addPatch(memberPatch)
-            }
-            return patch
-        }
 
         for (const member of members) {
-            // Gather all public keys that we are going to encrypt for
-            const keys = new Map<string, boolean>()
-
-            // Add access for the organization
-            keys.set(organizationPublicKey, true)
-
-            // Check if we have at least one key where we have the private key for
-            let doWeHaveOne = false
-
-            if (Keychain.hasItem(organizationPublicKey)) {
-                doWeHaveOne = true
-            }
-
-            // Search for a public key that we have + add all other keys that we need to encrypt for
-            // Sort details from new to old
-            for (const encryptedDetails of member.encryptedDetails.sort((a, b) => Sorter.byDateValue(a.meta.date, b.meta.date))) {
-                if (encryptedDetails.forOrganization && (doWeHaveOne || createPersonalKey)) {
-                    // Only use the last one for an organization, unless we don't have the key and we are not planning to add one
-                    continue
-                }
-
-                if (!doWeHaveOne) {
-                    if (Keychain.hasItem(encryptedDetails.publicKey)) {
-                        // We could use this one
-                        doWeHaveOne = true
-
-                        // Always include this one
-                        keys.set(encryptedDetails.publicKey, encryptedDetails.forOrganization)
-                    }
-                }
-
-                // Keep appending until maximum 5 keys
-                // 5 most recently used keys
-                if (keys.size > 5) {
-                    if (doWeHaveOne) {
-                        break
-                    }
-                    // Keep going, we might find one that we have access to
-                    continue
-                }
-
-                if (encryptedDetails.forOrganization || !replaceMemberPublicKey) {
-                    // Only add organization keys and only members keys if we are not replacing all the member keys
-                    keys.set(encryptedDetails.publicKey, encryptedDetails.forOrganization)
-                }
-            }
-
-            if (replaceMemberPublicKey) {
-                // Add this key in the encrypted details
-                keys.set(replaceMemberPublicKey, false)
-            }
-
-            if (createPersonalKey && !doWeHaveOne) {
-                // Create a new one
-                const keyPair = await Sodium.generateEncryptionKeyPair()
-                const keychainItem = await session.createKeychainItem(keyPair)
-
-                // Add this key in the encrypted details
-                keys.set(keyPair.publicKey, false)
-                patch.keychainItems.addPut(keychainItem)
-            } else {
-                if (!doWeHaveOne) {
-                    throw new SimpleError({
-                        code: "missing_key",
-                        message: "Je kan deze leden niet bewerken omdat je geen sleutel hebt"
-                    })
-                }
-            }
-
             // Clean the member details
             member.details.cleanData()
 
             const memberPatch = EncryptedMember.patch({ id: member.id })
             memberPatch.firstName = member.details.firstName
-
-            for (const [publicKey, forOrganization] of keys) {
-                const encryptedDetails = await this.encryptDetails(
-                    member.details,
-                    publicKey,
-                    organizationPublicKey === publicKey || forOrganization,
-                    organization
-                )
-                
-                const keychainItem = Keychain.getItem(encryptedDetails.publicKey)
-                if (!keychainItem) {
-                    const oldKeys = member.encryptedDetails.filter(e => e.publicKey === publicKey)
-                    // If we don't have this key ourselves, don't update the date to today, because
-                    // we need to save which keys were last used
-                    // Save the date that someone with the private key encrypted a blob with the same public key
-                    if (oldKeys.length > 0) {
-                        encryptedDetails.meta.ownerDate = new Date(Math.max(...oldKeys.map(m => m.meta.date.getTime())))
-                    } else {
-                        // Was encrypted for the first time for this key (probably organization key), keep current date
-                    }
-                } else {
-                    // We have the owner date
-                }
-
-                memberPatch.encryptedDetails.addPut(
-                    encryptedDetails
-                )
-            }
-
-            if (doWeHaveOne && !member.details.isRecovered) {
-                // We have new and complete data, delete all older keys
-                for (const encryptedDetails of member.encryptedDetails) {
-                    memberPatch.encryptedDetails.addDelete(encryptedDetails.id)
-                }
-            }
+            memberPatch.nonEncryptedDetails = member.details
 
             patch.members.addPatch(memberPatch)
         }
-
         return patch
     }
 }

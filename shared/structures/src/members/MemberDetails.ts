@@ -10,6 +10,7 @@ import { StringFilterDefinition } from '../filters/StringFilter';
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
 import { Organization } from '../Organization';
+import { OrganizationMetaData } from '../OrganizationMetaData';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
 import { Parent } from './Parent';
@@ -548,9 +549,7 @@ export class MemberDetails extends AutoEncoder {
         ]
     }
 
-    upgradeFromLegacy(organization: Organization) {
-        console.log("Upgrading details")
-
+    upgradeFromLegacy(organizationMeta: OrganizationMetaData) {
         if (!this.requiresFinancialSupport) {
             this.requiresFinancialSupport = BooleanStatus.create({ 
                 value: !!this.records.find(r => r.type === LegacyRecordType.FinancialProblems),
@@ -629,7 +628,7 @@ export class MemberDetails extends AutoEncoder {
         // Complete with unselected properties
         const age = this.age ?? 18
 
-        for (const record of organization.meta.recordsConfiguration.recordCategories.flatMap(c => c.getAllRecords())) {
+        for (const record of organizationMeta.recordsConfiguration.recordCategories.flatMap(c => c.getAllRecords())) {
             const answer = this.recordAnswers.find(a => a.settings.id == record.id)
             if (answer) {
                 continue
@@ -701,29 +700,6 @@ export class MemberDetails extends AutoEncoder {
         this.doctor = null
         this.records = []
     }
-
-    /*static getAllSmartVariables() {
-        return [
-            new EditorSmartVariable({
-                id: "firstName", 
-                name: "Voornaam", 
-                example: "", 
-                deleteMessage: "De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald."
-            }),
-            new EditorSmartVariable({
-                id: "lastName", 
-                name: "Achternaam", 
-                example: "", 
-                deleteMessage: "De achternaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de achteraam is daarom weggehaald."
-            }),
-            new EditorSmartVariable({
-                id: "email", 
-                name: "E-mailadres", 
-                example: "", 
-            })
-        ]
-    }*/
-
 
     getEmailReplacements() {
         return [

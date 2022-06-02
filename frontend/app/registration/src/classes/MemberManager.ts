@@ -1,6 +1,7 @@
 
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox,VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Sodium } from '@stamhoofd/crypto'
 import { Keychain, LoginHelper, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
 import { Address, EmergencyContact, EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
@@ -90,16 +91,17 @@ export class MemberManagerStatic extends MemberManagerBase {
         if (session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
             encryptedMember.nonEncryptedDetails = memberDetails
         } else {
-            encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, keyPair.publicKey, false, OrganizationManager.organization))
-            encryptedMember.encryptedDetails.push(await this.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
-            patch.keychainItems.addPut(keychainItem)
+            throw new SimpleError({
+                code: "not_accepted_terms",
+                message: 'Deze vereniging lijkt inactief te zijn. Neem contact op met de vereniging.'
+            })
         }
 
         patch.members.addPut(encryptedMember)
 
         // Also update other members that might have been changed (e.g. when a shared address have been changed)
         const members = (this.members ?? []).filter(m => !m.details.isRecovered)
-        patch.patch(await this.getEncryptedMembers(members, OrganizationManager.organization, true))
+        patch.patch(this.getEncryptedMembers(members))
 
         // Send the request
         const response = await session.authenticatedServer.request({
@@ -132,7 +134,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     }
 
     async patchMembers(members: MemberWithRegistrations[]) {
-        const patch = await this.getEncryptedMembers(members, OrganizationManager.organization, true)
+        const patch = this.getEncryptedMembers(members)
         const session = SessionManager.currentSession!
 
         // Send the request

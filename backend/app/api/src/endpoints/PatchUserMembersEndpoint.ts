@@ -47,6 +47,15 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             member.encryptedDetails = struct.encryptedDetails
             member.details = struct.nonEncryptedDetails
 
+            if (!struct.nonEncryptedDetails) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "No nonEncryptedDetails provided",
+                    human: "Opgelet! Je gebruikt een oudere versie van de inschrijvinsgpagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
+                    field: "nonEncryptedDetails"
+                })
+            }
+
             await member.save()
             addedMembers.push(member)
         }
@@ -82,6 +91,15 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 if (!member.details.isRecovered) {
                     member.encryptedDetails = []
                 }
+            }
+
+            if (!member.details) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "No nonEncryptedDetails provided",
+                    human: "Opgelet! Je gebruikt een oudere versie van de inschrijvinsgpagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
+                    field: "nonEncryptedDetails"
+                })
             }
             await member.save();
         }

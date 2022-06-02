@@ -382,7 +382,7 @@ export default class App extends Vue {
             return
         }
 
-        if (this.didTryKey || !OrganizationManager.organization.meta.didAcceptEndToEndEncryptionRemoval) {
+        if (this.didTryKey) {
             // Inf loop stop
             return
         }
