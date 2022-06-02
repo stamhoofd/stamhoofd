@@ -167,12 +167,12 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
     }   
 
-    async getEncryptedMembersPatch(members: MemberWithRegistrations[]): Promise<PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>> {
+    getEncryptedMembersPatch(members: MemberWithRegistrations[]): PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> {
         // Update the users that are connected to these members
         const encryptedMembers: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = this.getMembersAccessPatch(members)
 
         // Aldo include encryption blobs
-        const p = await this.getEncryptedMembers(members, OrganizationManager.organization, false)
+        const p = this.getEncryptedMembers(members)
         encryptedMembers.merge(p.members as any) // we can merge since it's a subtype
         return encryptedMembers
     }   
@@ -214,7 +214,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         const chunked = this.chunkArray(members, 10)
 
         for (const group of chunked) {
-            await this.patchMembersAndSync(group, await this.getEncryptedMembersPatch(group), shouldRetry)
+            await this.patchMembersAndSync(group, this.getEncryptedMembersPatch(group), shouldRetry)
         }
     }
 

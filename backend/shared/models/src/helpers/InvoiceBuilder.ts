@@ -165,7 +165,7 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_GRAY_DARK);
         this.document.font('Metropolis-Medium')
 
-        this.document.text("Markt 14 bus 11, Wetteren, België\nBE0747.832.683", x * MM,  this.document.y + 4*MM, { align: 'left', width: 72 * MM, lineGap: 2*MM })
+        this.document.text("Collegiebaan 54, Wetteren, België\nBE0747.832.683", x * MM,  this.document.y + 4*MM, { align: 'left', width: 72 * MM, lineGap: 2*MM })
 
         // Write customer
 

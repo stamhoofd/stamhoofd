@@ -36,7 +36,7 @@
                             </button>
                         </STInputBox>
 
-                        <div>
+                        <div v-if="p.reducedPrice !== null || enableFinancialSupport">
                             <STInputBox title="Verlaagd tarief*" error-fields="reducedPrice" :error-box="errorBox">
                                 <PriceInput :value="p.reducedPrice" :placeholder="formatPrice(p.price)" :required="false" @input="setReducedPrice(priceGroup, index, $event)" />
                             </STInputBox>
@@ -58,7 +58,7 @@
             </button>
 
 
-            <p class="style-description-small">
+            <p v-if="enableFinancialSupport" class="style-description-small">
                 * Verlaagd tarief voor leden die financiële ondersteuning hebben aangevraagd. Laat leeg indien je die niet wilt gebruiken.
             </p>
 
@@ -144,6 +144,10 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
 
     @Prop({ default: null })
     patchedOrganization!: Organization | null
+
+    get enableFinancialSupport() {
+        return (this.patchedOrganization ?? OrganizationManager.organization).meta.recordsConfiguration.financialSupport !== null
+    }
 
     get canRegisterMultipleGroups() {
         if (!this.group) {
