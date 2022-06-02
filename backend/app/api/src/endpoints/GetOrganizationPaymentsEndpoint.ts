@@ -1,7 +1,7 @@
 import { Database, ManyToOneRelation,OneToManyRelation } from '@simonbackx/simple-database';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Member } from '@stamhoofd/models';
+import { Group, Member } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
@@ -137,8 +137,9 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
         
 
         query += `JOIN \`${Member.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
+        query += `JOIN \`${Group.table}\` ON \`${Registration.table}\`.\`groupId\` = \`${Group.table}\`.\`${Group.primary.name}\`\n`
 
-        query += `where \`${Member.table}\`.\`organizationId\` = ?`
+        query += `where \`${Member.table}\`.\`organizationId\` = ? AND \`${Group.table}\`.\`deletedAt\` is NULL`
 
         const params: any[] = [organizationId]
 
