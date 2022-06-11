@@ -28,6 +28,7 @@ export class RegistrationsFilterChoice extends AutoEncoder {
 export enum RegistrationsFilterMode {
     Or = "Or",
     And = "And",
+    Nor = "Nor",
 }
 
 /**
@@ -85,6 +86,9 @@ export class RegistrationsFilter<T> extends Filter<T> {
                 if (this.mode === RegistrationsFilterMode.And) {
                     return false
                 }
+                if (this.mode === RegistrationsFilterMode.Nor) {
+                    return false
+                }
             }
         }
         return this.mode === RegistrationsFilterMode.And
@@ -101,8 +105,10 @@ export class RegistrationsFilter<T> extends Filter<T> {
     toString() {
         if (this.mode === RegistrationsFilterMode.Or) {
             return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " of ")
-        } else {
+        } else if (this.mode === RegistrationsFilterMode.And){
             return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " en ")
+        } else {
+            return "Is niet ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " noch ")
         }
     }
 }

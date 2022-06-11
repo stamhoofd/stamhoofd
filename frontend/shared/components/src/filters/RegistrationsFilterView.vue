@@ -7,6 +7,9 @@
             <option :value="RegistrationsFilterMode.And">
                 Alle geselecteerde
             </option>
+            <option :value="RegistrationsFilterMode.Nor">
+               Geen geselecteerde
+            </option>
         </Dropdown>
         <STList>
             <STListItem v-for="choice of choices" :key="choice.id" :selectable="true" element-name="label">
