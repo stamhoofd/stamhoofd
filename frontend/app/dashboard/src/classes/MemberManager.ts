@@ -175,30 +175,8 @@ export class MemberManagerStatic extends MemberManagerBase {
         const p = this.getEncryptedMembers(members)
         encryptedMembers.merge(p.members as any) // we can merge since it's a subtype
         return encryptedMembers
-    }   
-
-    async checkInaccurateMetaData(members: MemberWithRegistrations[], organization: Organization) {
-        const inaccurate: MemberWithRegistrations[] = []
-        for (const member of members) {
-            if (!member.nonEncryptedDetails && organization.meta.didAcceptEndToEndEncryptionRemoval) {
-                inaccurate.push(member)
-                continue
-            }
-            
-            const meta = member.getDetailsMeta()
-
-            // Check if meta is wrong
-            if (!member.details.isRecovered && (!meta || !meta.isAccurateFor(member.details))) {
-                console.warn("Found inaccurate meta data!")
-                inaccurate.push(member)
-            }
-        }
-        if (inaccurate.length > 0) {
-            // Patch member with new details
-            await MemberManager.patchMembersDetails(inaccurate, false)
-        }
     }
-
+    
     private chunkArray<T>(array: T[], size = 10): T[][] {
         const chunked: T[][] = []
 

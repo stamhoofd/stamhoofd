@@ -65,7 +65,7 @@ export class FamilyManager {
         patch.addPut(encryptedMember)
 
         // Patch other members
-        const members = (this.members ?? []).filter(m => !m.details.isRecovered)
+        const members = (this.members ?? [])
         patch.merge(MemberManager.getEncryptedMembersPatch(members))
         
         // Send the request

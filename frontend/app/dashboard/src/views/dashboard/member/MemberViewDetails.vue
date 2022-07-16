@@ -220,21 +220,6 @@
                 </dl>
             </div>
 
-            <div v-if="!member.details || member.details.isRecovered" key="recovered" class="container">
-                <hr>
-                <p v-if="!hasLatestKey" class="error-box">
-                    Een deel van de gegevens van dit lid is versleuteld met een sleutel die je niet hebt — en is dus onleesbaar voor jou. Vraag een hoofdbeheerder - die deze sleutel wel heeft - om jou terug toegang te geven (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven).
-                </p>
-                <p v-else class="error-box">
-                    Een deel van de gegevens van dit lid is nog versleuteld met een oude sleutel die je niet hebt — en is dus onleesbaar voor jou. Je kan aan een hoofdbeheerder - die deze sleutel wel heeft - vragen om die ook met jou te delen (dat kan in instellingen > beheerders > jouw naam > encryptiesleutels > toegang geven). Of je kan de gegevens terug aanvullen (of laten aanvullen) en de oude onbereikbare gegevens verwijderen om deze melding weg te halen.
-                </p>
-                <hr v-if="hasLatestKey">
-                <button v-if="hasLatestKey" class="button destructive" @click="markAsComplete">
-                    <span class="icon trash" />
-                    <span>Verwijder versleutelde gegevens</span>
-                </button>
-            </div>
-
             <!-- Loop all records -->
             <div v-for="category in recordCategories" :key="'category-'+category.id" class="hover-box container">
                 <hr>
@@ -523,11 +508,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         }
         return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
     }
-
-    get hasLatestKey() {
-        return Keychain.hasItem(OrganizationManager.organization.publicKey)
-    }
-
+    
     get hasWrite(): boolean {
         if (!OrganizationManager.user.permissions) {
             return false
