@@ -196,7 +196,7 @@ export class SessionManagerStatic {
 
         this.callListeners("session")
 
-        this.currentSession.addListener(this, (changed: "userPrivateKey" | "user" | "organization" | "token") => {
+        this.currentSession.addListener(this, (changed: "user" | "organization" | "token") => {
             if (session.organization) {
                 this.addOrganizationToStorage(session.organization).catch(console.error)
             }

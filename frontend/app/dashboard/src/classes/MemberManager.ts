@@ -1,9 +1,8 @@
 
 
-import { ArrayDecoder,ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding'
-import { Sodium } from '@stamhoofd/crypto';
-import { Keychain, LoginHelper, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
-import {  EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, Organization, PermissionLevel, Registration, User } from '@stamhoofd/structures'
+import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
+import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures';
 
 import { OrganizationManager } from './OrganizationManager';
 
@@ -31,13 +30,13 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
     }
 
-    async decryptMembersWithRegistrations(data: EncryptedMemberWithRegistrations[]) {
+    decryptMembersWithRegistrations(data: EncryptedMemberWithRegistrations[]) {
         const members: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
 
         for (const member of data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
-                await this.decryptMember(member, OrganizationManager.organization),
+                this.decryptMember(member, OrganizationManager.organization),
                 member.registrations,
                 member.users,
                 groups
@@ -96,8 +95,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             owner
         })
 
-        Keychain.addItems(response.data.keychainItems)
-        return await this.decryptMembersWithRegistrations(response.data.data)
+        return this.decryptMembersWithRegistrations(response.data.data)
     }
 
     getRegistrationsPatchArray(): ConvertArrayToPatchableArray<Registration[]> {
@@ -131,7 +129,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
             // Delete users that never created an account and are not in managers
             for (const user of member.users) {
-                if (user.publicKey) {
+                if (user.hasAccount) {
                     continue
                 }
 

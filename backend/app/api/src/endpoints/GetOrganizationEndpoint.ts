@@ -30,18 +30,9 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
         const user = token?.user
         const organization = user?.organization ?? await Organization.fromApiHost(request.host);
 
-        let keychainItems: KeychainItem[] = []
-
-        // If the user has permission, we'll also search if he has access to the organization's key
-        if (user && user.permissions !== null) {
-            keychainItems = await KeychainItem.where({
-                userId: user.id,
-                publicKey: user.organization.publicKey
-            })
-        }
         return new Response(new KeychainedResponse({
             data: user ? await user.getOrganizatonStructure(user.organization) : await organization.getStructure(),
-            keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
+            keychainItems: []
         }));
     }
 }

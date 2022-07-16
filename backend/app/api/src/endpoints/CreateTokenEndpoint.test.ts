@@ -1,80 +1,18 @@
 import { Request } from "@simonbackx/simple-endpoints";
 import { KeyConstantsHelper,Sodium } from "@stamhoofd/crypto";
+import { OrganizationFactory } from '@stamhoofd/models';
+import { UserFactory } from '@stamhoofd/models';
+import { User } from '@stamhoofd/models';
 import { ChallengeResponseStruct, Token as TokenStruct } from '@stamhoofd/structures';
 import MockDate from "mockdate";
 
-import { OrganizationFactory } from '@stamhoofd/models';
-import { UserFactory } from '@stamhoofd/models';
-import { Challenge } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
 import { CreateTokenEndpoint } from './CreateTokenEndpoint';
 
 describe("Endpoint.CreateToken", () => {
     // Test endpoint
     const endpoint = new CreateTokenEndpoint();
 
-    test("Request a challenge for a non existing user", async () => {
-        const organization = await new OrganizationFactory({}).create()
-
-        const r = Request.buildJson("POST", "/v1/oauth/token", organization.getApiHost(), {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            grant_type: "request_challenge",
-            email: "nonexistinguser123@domaintest.be"
-        });
-
-        const response = await endpoint.test(r);
-        expect(response.body).toBeDefined();
-
-        if (!(response.body instanceof ChallengeResponseStruct)) {
-            throw new Error("Expected ChallengeResponseStruct")
-        }   
-
-        const response2 = await endpoint.test(r);
-        expect(response2.body).toBeDefined();
-
-        if (!(response2.body instanceof ChallengeResponseStruct)) {
-            throw new Error("Expected ChallengeResponseStruct")
-        }   
-
-        expect(response.body.keyConstants).toEqual(response2.body.keyConstants)
-        expect(response.body.challenge).not.toEqual(response2.body.challenge)
-    });
-
-    test("Request a challenge for an existing user", async () => {
-        const organization = await new OrganizationFactory({}).create()
-        const user = await new UserFactory({ organization }).create()
-
-        const r = Request.buildJson("POST", "/v1/oauth/token", organization.getApiHost(), {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            grant_type: "request_challenge",
-            email: user.email
-        });
-
-        const response = await endpoint.test(r);
-        expect(response.body).toBeDefined();
-
-        if (!(response.body instanceof ChallengeResponseStruct)) {
-            throw new Error("Expected ChallengeResponseStruct")
-        }
-
-        const response2 = await endpoint.test(r);
-        expect(response2.body).toBeDefined();
-
-        if (!(response2.body instanceof ChallengeResponseStruct)) {
-            throw new Error("Expected ChallengeResponseStruct")
-        }
-
-        const u = await User.getForAuthentication(organization.id, user.email)
-        if (!u) {
-            throw new Error("Unexpected check")
-        }
-
-        expect(response.body.keyConstants).toEqual(response2.body.keyConstants)
-        expect(response.body.keyConstants).toEqual(u.getAuthSignKeyConstants())
-        expect(response.body.challenge).not.toEqual(response2.body.challenge)
-    });
-
-    test("Challenge flow for an existing user", async () => {
+    /*test("Challenge flow for an existing user", async () => {
         const organization = await new OrganizationFactory({}).create()
         // Also check UTF8 passwords
         const password = "54😂test👌🏾86s&é"
@@ -282,7 +220,7 @@ describe("Endpoint.CreateToken", () => {
         });
 
         await expect(endpoint.test(challengeRequest)).rejects.toThrow(/invalid/i);
-    });
+    });*/
 
     afterAll(() => {
         MockDate.reset();

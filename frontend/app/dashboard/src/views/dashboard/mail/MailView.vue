@@ -1286,7 +1286,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                     ],
                     // Create sign-in replacement 'signInUrl'
                     userId: user.id,
-                    types: ["user", user.publicKey !== null ? "existing-user" : "pending-user"]
+                    types: ["user", user.hasAccount ? "existing-user" : "pending-user"]
                 })
 
                 if (existing) {

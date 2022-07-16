@@ -123,8 +123,8 @@ export class TradeInviteEndpoint extends Endpoint<Params, Query, Body, ResponseB
             Email.send(email)
         }
         return new Response(TradedInvite.create(Object.assign({}, invite, {
-            receiver: token ? UserStruct.create(token.user) : null,
-            sender: UserStruct.create(sender),
+            receiver: token ? UserStruct.create({...token.user, hasAccount: token.user.hasAccount()}) : null,
+            sender: UserStruct.create({...sender, hasAccount: sender.hasAccount()}),
             organization: OrganizationSimple.create(user.organization)
         })));
     }

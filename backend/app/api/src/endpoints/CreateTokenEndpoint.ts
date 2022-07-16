@@ -1,12 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Challenge } from '@stamhoofd/models';
 import { EmailVerificationCode } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { PasswordToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
-import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordGrantStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
+import { ChallengeGrantStruct, ChallengeResponseStruct, CreateTokenStruct,PasswordGrantStruct,PasswordTokenGrantStruct,RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -41,77 +40,6 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         
         switch (request.body.grantType) {
-        case "challenge": {
-            const challenge = await Challenge.getFor(organization.id, request.body.email)
-            const user = await User.getForAuthentication(organization.id, request.body.email)
-
-            const errBody = {
-                code: "invalid_signature",
-                message: "Invalid signature, challenge or email address",
-                statusCode: 400
-            };
-
-            if (!challenge || challenge.challenge !== request.body.challenge || !user || !challenge.challenge) {
-                throw new SimpleError(errBody);
-            }
-
-            // Check signature
-            if (!await user.verifyAuthSignature(request.body.signature, challenge.challenge)) {
-                // Clear challenge: need to generate a new challenge first
-                challenge.challenge = null;
-                await challenge.save();
-
-                throw new SimpleError(errBody);
-            }
-
-            // Clear challenge (can delete, since we need to reset the tries)
-            await challenge.delete()
-
-            // Yay! Valid password
-            // Now check if e-mail is already validated
-            // if not: throw a validation error (e-mail validation is required)
-            if (!user.verified) {
-                const code = await EmailVerificationCode.createFor(user, user.email)
-                code.send(user.setRelation(User.organization, organization), request.i18n)
-                
-                throw new SimpleError({
-                    code: "verify_email",
-                    message: "Your email address needs verification",
-                    human: "Jouw e-mailadres is nog niet geverifieerd. Verifieer jouw e-mailadres via de link in de e-mail.",
-                    meta: SignupResponse.create({
-                        token: code.token,
-                        authEncryptionKeyConstants: user.authEncryptionKeyConstants
-                    }).encode({ version: request.request.getVersion() }),
-                    statusCode: 403
-                });
-            }
-
-            const token = await Token.createToken(user);
-            
-            if (!token) {
-                throw new SimpleError({
-                    code: "error",
-                    message: "Could not generate token",
-                    human: "Er ging iets mis bij het aanmelden",
-                    statusCode: 500
-                });
-            }
-
-            const st = new TokenStruct(token);
-            return new Response(st);
-        }
-
-        case "request_challenge": {
-                // Create a challenge
-                const challenge = await Challenge.createFor(organization.id, request.body.email)
-
-                const st = ChallengeResponseStruct.create({
-                    challenge: challenge.challenge,
-                    keyConstants: challenge.authSignKeyConstants,
-                });
-                return new Response(st);
-            }
-
         case "refresh_token": {
             const oldToken = await Token.getByRefreshToken(request.body.refreshToken)
             if (!oldToken) {
@@ -144,6 +72,53 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             const st = new TokenStruct(token);
             return new Response(st);            
+        }
+
+        case "password": {
+            const user = await User.login(organization.id, request.body.username, request.body.password)
+
+            const errBody = {
+                code: "invalid_username_or_password",
+                message: "Invalid username or password",
+                statusCode: 400
+            };
+
+            if (!user) {
+                // todo: increase counter
+                throw new SimpleError(errBody);
+            }
+
+            // Yay! Valid password
+            // Now check if e-mail is already validated
+            // if not: throw a validation error (e-mail validation is required)
+            if (!user.verified) {
+                const code = await EmailVerificationCode.createFor(user, user.email)
+                code.send(user.setRelation(User.organization, organization), request.i18n)
+                
+                throw new SimpleError({
+                    code: "verify_email",
+                    message: "Your email address needs verification",
+                    human: "Jouw e-mailadres is nog niet geverifieerd. Verifieer jouw e-mailadres via de link in de e-mail.",
+                    meta: SignupResponse.create({
+                        token: code.token
+                    }).encode({ version: request.request.getVersion() }),
+                    statusCode: 403
+                });
+            }
+
+            const token = await Token.createToken(user);
+            
+            if (!token) {
+                throw new SimpleError({
+                    code: "error",
+                    message: "Could not generate token",
+                    human: "Er ging iets mis bij het aanmelden",
+                    statusCode: 500
+                });
+            }
+
+            const st = new TokenStruct(token);
+            return new Response(st);      
         }
 
         case "password_token": {

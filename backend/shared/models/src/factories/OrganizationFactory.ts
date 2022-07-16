@@ -15,8 +15,6 @@ class Options {
 }
 
 export class OrganizationFactory extends Factory<Options, Organization> {
-    lastPrivateKey!: string
-
     async create(): Promise<Organization> {
         const organization = new Organization();
         organization.name = this.options.name ?? "Organization " + (new Date().getTime() + Math.floor(Math.random() * 999999));
@@ -37,14 +35,6 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             postalCode: "9000",
             country: Country.Belgium
         })
-
-        if (this.options.publicKey) {
-            organization.publicKey = this.options.publicKey;
-        } else {
-            const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
-            organization.publicKey = organizationKeyPair.publicKey;
-            this.lastPrivateKey = organizationKeyPair.privateKey
-        }
 
         await organization.save();
         return organization;

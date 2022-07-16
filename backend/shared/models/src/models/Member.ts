@@ -233,22 +233,6 @@ export class Member extends Model {
         return await this.getAllWithRegistrations(...ids)
     }
 
-    /**
-     * Fetch all members that are linked to users that requested new keys
-     */
-    static async getMembersWithRegistrationForKeyRequests(organizationId: string): Promise<MemberWithRegistrations[]> {
-        let query = `SELECT l2.membersId as id from users u\n`;
-        query += `JOIN _members_users l2 on l2.usersId = u.id \n`
-        query += `where u.organizationId = ? AND u.requestKeys = 1 group by l2.membersId`
-
-        const [results] = await Database.select(query, [organizationId])
-        const ids: string[] = []
-        for (const row of results) {
-            ids.push(row["l2"]["id"])
-        }
-        return await this.getAllWithRegistrations(...ids)
-    }
-
      /**
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
@@ -310,7 +294,7 @@ export class Member extends Model {
             }),
             registrations: this.registrations.map(r => r.getStructure()),
             nonEncryptedDetails: this.details,
-            users: this.users.map(u => UserStruct.create(u)),
+            users: this.users.map(u => UserStruct.create({...u, hasAccount: u.hasAccount()})),
         })
     }
 

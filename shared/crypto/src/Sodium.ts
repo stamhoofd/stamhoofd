@@ -1,8 +1,8 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { sleep } from "@stamhoofd/utility"
 
-type Sodium = typeof import("libsodium-wrappers")
-type StringKeyPair = import("libsodium-wrappers").StringKeyPair
+type Sodium = typeof import("libsodium-wrappers-sumo")
+type StringKeyPair = import("libsodium-wrappers-sumo").StringKeyPair
 
 class SodiumStatic {
     loaded = false;
@@ -53,7 +53,7 @@ class SodiumStatic {
     private async importSodium() {
         // We try once again if it fails
         try {
-            const d = await import(/* webpackChunkName: "libsodium-wrappers"*/ "libsodium-wrappers");
+            const d = await import(/* webpackChunkName: "libsodium-wrappers"*/ "libsodium-wrappers-sumo");
             this.sodium = d.default;
         } catch (e) {
             this.retriedLoading++
@@ -138,6 +138,17 @@ class SodiumStatic {
             privateKey: Buffer.from(keypair.privateKey).toString("base64"),
             keyType: keypair.keyType,
         };
+    }
+
+
+    async isMatchingSignPublicPrivate(publicKey: string, privateKey: string): Promise<boolean> {
+        await this.loadIfNeeded();
+        return await this.getSignPublicKey(privateKey) === publicKey
+    }
+
+    async getSignPublicKey(privateKey: string): Promise<string> {
+        await this.loadIfNeeded();
+        return Buffer.from(this.sodium.crypto_sign_ed25519_sk_to_pk(Buffer.from(privateKey, "base64"))).toString("base64")
     }
 
     async verifySignature(signature: string, message: string, publicKey: string): Promise<boolean> {

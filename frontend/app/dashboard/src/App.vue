@@ -7,16 +7,14 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController,PushOptions,SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, GlobalEventBus, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
-import { Sodium } from '@stamhoofd/crypto';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions, SplitViewController } from "@simonbackx/vue-app-navigation";
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Logger } from "@stamhoofd/logger"
-import { Keychain, LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Country, EmailAddressSettings, Invite, Organization, OrganizationPrivateMetaData, Token } from '@stamhoofd/structures';
+import { Logger } from "@stamhoofd/logger";
+import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { Country, EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
-import { OrganizationManager } from './classes/OrganizationManager';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
 
 @Component({
@@ -106,13 +104,12 @@ export default class App extends Vue {
             });
         }
 
-        if (parts.length >= 1 && parts[0] == 'login' && queryString.get("refresh_token") && queryString.get("organization_id") && queryString.get("auth_encryption_key")) {
+        if (parts.length >= 1 && parts[0] == 'login' && queryString.get("refresh_token") && queryString.get("organization_id")) {
             UrlHelper.shared.clear()
             const organizationId = queryString.get("organization_id")!
             const refreshToken = queryString.get("refresh_token")!
-            const authEncryptionKey = queryString.get("auth_encryption_key")!
             
-            this.loginWithToken(organizationId, refreshToken, authEncryptionKey).catch(console.error)
+            this.loginWithToken(organizationId, refreshToken).catch(console.error)
         }
 
         if (parts.length == 1 && parts[0] == 'unsubscribe') {
@@ -302,7 +299,7 @@ export default class App extends Vue {
     /**
      * Login at a given organization, with the given refresh token
      */
-    async loginWithToken(organizationId: string, refreshToken: string, authEncryptionKey: string) {
+    async loginWithToken(organizationId: string, refreshToken: string) {
         // todo: add security toggle in system configuration to disable this feature
         if (!await CenteredMessage.confirm("Ben je zeker dat je wilt inloggen via deze link?", "Inloggen", "Klik op annuleren als je niet weet waar dit over gaat.")) {
             return
@@ -319,15 +316,11 @@ export default class App extends Vue {
                 session.user = null;
             }
 
-            // Clear all known keys
-            session.clearKeys()
-
             session.setToken(new Token({
                 accessToken: "",
                 refreshToken,
                 accessTokenValidUntil: new Date(0)
             }))
-            await session.setEncryptionKey(authEncryptionKey)
             await SessionManager.setCurrentSession(session, false)           
         } catch (e) {
             console.error(e)

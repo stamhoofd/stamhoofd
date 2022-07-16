@@ -47,40 +47,29 @@ describe("Model.User", () => {
         expect(user.savedProperties.get("encryptedPrivateKey")).toBeUndefined();
         expect(user.savedProperties.get("authSignKeyConstants")).toBeUndefined();
         expect(user.savedProperties.get("authEncryptionKeyConstants")).toBeUndefined();
+
+        expect(user.password).toBeUndefined();
+        expect(user.savedProperties.get("password")).toBeUndefined();
         expect(user.id).toEqual(existingUserId)
     });
 
     test("Create a user", async () => {
         const user: any = await User.register(organization, NewUser.create({
             email: "test@domain.com",
-            publicKey: userKeyPair.publicKey, 
-            publicAuthSignKey: authSignKeyPair.publicKey, 
-            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey),
-            authSignKeyConstants, 
-            authEncryptionKeyConstants
+            password: 'testtest'
         }));
             
         expect(user).toBeDefined();
         expect(user).toBeInstanceOf(User);
-        expect(user.publicAuthSignKey).toBeUndefined();
-        expect(user.encryptedPrivateKey).toBeUndefined();
-        expect(user.authSignKeyConstants).toBeUndefined();
-        expect(user.authEncryptionKeyConstants).toBeUndefined();
-        expect(user.savedProperties.get("publicAuthSignKey")).toBeUndefined();
-        expect(user.savedProperties.get("encryptedPrivateKey")).toBeUndefined();
-        expect(user.savedProperties.get("authSignKeyConstants")).toBeUndefined();
-        expect(user.savedProperties.get("authEncryptionKeyConstants")).toBeUndefined();
+        expect(user.password).toBeUndefined();
+        expect(user.savedProperties.get("password")).toBeUndefined();
         expect(user.id).not.toBeEmpty()
     });
 
     test("Create a user with an email that already exists", async () => {
         const user: any = await User.register(organization, NewUser.create({
             email: "existing@domain.com",
-            publicKey: userKeyPair.publicKey, 
-            publicAuthSignKey: authSignKeyPair.publicKey, 
-            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, authEncryptionSecretKey),
-            authSignKeyConstants, 
-            authEncryptionKeyConstants
+            password: 'testtest'
         }));
         expect(user).toBeUndefined();
     });

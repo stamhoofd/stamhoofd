@@ -1,7 +1,4 @@
 import { Request } from "@simonbackx/simple-endpoints";
-import { EncryptedMember, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
-
 import { GroupFactory } from '@stamhoofd/models';
 import { MemberFactory } from '@stamhoofd/models';
 import { OrganizationFactory } from '@stamhoofd/models';
@@ -9,6 +6,9 @@ import { RegistrationFactory } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
+import { EncryptedMember, KeychainedResponse, User as UserStruct } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
+
 import { GetUserMembersEndpoint } from './GetUserMembersEndpoint';
 
 
@@ -52,7 +52,7 @@ describe("Endpoint.GetUserMembers", () => {
                 m => 
                 Object.assign({ 
                     registrations: m.id === members[0].id ? [registration.getStructure()] : [], 
-                    users: [UserStruct.create(user)] 
+                    users: [UserStruct.create({...user, hasAccount: user.hasAccount()})] 
                 }, EncryptedMember.create(m), { 
                     updatedAt: undefined, 
                     createdAt: undefined 
@@ -139,7 +139,7 @@ describe("Endpoint.GetUserMembers", () => {
                 m => 
                 Object.assign({ 
                     registrations: [], 
-                    users: [UserStruct.create(user)] 
+                    users: [UserStruct.create({...user})] 
                 }, EncryptedMember.create(m), { 
                     updatedAt: undefined, 
                     createdAt: undefined 
@@ -189,7 +189,7 @@ describe("Endpoint.GetUserMembers", () => {
                 Object.assign({ 
                     registrations: [], 
                     // todo: this will return two users as soon as we fix this issue (currenlty only returning currently signed in user)
-                    users: [UserStruct.create(userB)] 
+                    users: [UserStruct.create({...userB})] 
                 }, EncryptedMember.create(m), { 
                     updatedAt: undefined, 
                     createdAt: undefined 

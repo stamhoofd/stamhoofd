@@ -55,14 +55,30 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
                     console.error("Request with error in response:\n"+IP+": "+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
 
                     request.body.then((body) => {
-                        console.error(IP+": Request body was\n"+body)
+                        try {
+                            const json = JSON.parse(body)
+                            if (json && json.password) {
+                                json.password = '*******'
+                            }
+                            console.error(IP+": Request body was", json)
+                        } catch (e) {
+                            console.error(IP+": Request body was\n"+body)
+                        }
                     }).catch(console.error)
                 }
             } else {
                 console.error("Request with internal error:\n"+IP+": "+request.method+" "+request.host+request.url)
                 console.error(error)
                 request.body.then((body) => {
-                    console.error(IP+": Request body was\n"+body)
+                    try {
+                        const json = JSON.parse(body)
+                        if (json && json.password) {
+                            json.password = '*******'
+                        }
+                        console.error(IP+": Request body was", json)
+                    } catch (e) {
+                        console.error(IP+": Request body was\n"+body)
+                    }
                 }).catch(console.error)
             }
         }

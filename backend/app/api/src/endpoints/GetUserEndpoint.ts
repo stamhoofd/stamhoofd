@@ -31,7 +31,7 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
         // Get user unrestriced
         const user = await User.getFull(token.user.id)
 
-        if (!user || !user.publicKey) {
+        if (!user) {
             throw new Error("Unexpected error")
         }
 
@@ -54,18 +54,13 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             lastName: user.lastName,
             id: user.id,
             email: user.email,
-            publicKey: user.publicKey,
             verified: user.verified,
-            requestKeys: user.requestKeys,
-            publicAuthSignKey: user.publicAuthSignKey,
-            authSignKeyConstants: user.authSignKeyConstants,
-            authEncryptionKeyConstants: user.authEncryptionKeyConstants,
-            encryptedPrivateKey: user.encryptedPrivateKey,
             permissions: user.permissions,
+            hasAccount: user.hasAccount(),
             incomingInvites: loadedInvites.map(invite => TradedInvite.create(
                 TradedInvite.create(Object.assign({}, invite, {
-                    receiver: UserStruct.create(user),
-                    sender: UserStruct.create(invite.sender),
+                    receiver: UserStruct.create({...user, hasAccount: user.hasAccount()}),
+                    sender: UserStruct.create({...invite.sender, hasAccount: invite.sender.hasAccount()}),
                     organization: OrganizationSimple.create(token.user.organization)
                 })))
             )

@@ -1,4 +1,5 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { SessionManager } from '@stamhoofd/networking';
 import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDetails, MemberWithRegistrations, Parent, Registration,User } from '@stamhoofd/structures';
 
@@ -57,7 +58,10 @@ export class FamilyManager {
         if (session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
             encryptedMember.nonEncryptedDetails = memberDetails
         } else {
-            encryptedMember.encryptedDetails.push(await MemberManager.encryptDetails(memberDetails, OrganizationManager.organization.publicKey, true, OrganizationManager.organization))
+            throw new SimpleError({
+                code: "not_accepted_terms",
+                message: 'Het toevoegen van leden is geblokkeerd tot de nieuwe verwerkersovereenkomst en privacyvoorwaarden worden geaccepteerd door een hoofdbeheerder.'
+            })
         }
 
         // Prepare patch

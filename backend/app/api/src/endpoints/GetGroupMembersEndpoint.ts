@@ -65,36 +65,6 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         const members = await group.getMembersWithRegistration(request.query.waitingList, request.query.cycleOffset)
-
-        if (request.request.getVersion() <= 35) {
-            // Old
-            return new Response(members.map(m => m.getStructureWithRegistrations(true)));
-        }
-
-        // New
-        const otherKeys: Set<string> = new Set();
-        for (const member of members) {
-            for (const details of member.encryptedDetails) {
-                if (details.publicKey != user.organization.publicKey && details.forOrganization === true) {
-                    // Only keys for organization, because else this might be too big
-                    otherKeys.add(details.publicKey)
-                }
-            }
-        }
-
-        if (otherKeys.size > 0) {
-            // Load the needed keychains the user has access to
-            const keychainItems = await KeychainItem.where({
-                userId: user.id,
-                publicKey: {
-                    sign: "IN",
-                    value: [...otherKeys.values()]
-                }
-            }) 
-
-            return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations(true)), keychainItems: keychainItems.map(m => KeychainItemStruct.create(m)) }));
-        }
-        
         return new Response(new KeychainedResponse({ data: members.map(m => m.getStructureWithRegistrations(true)), keychainItems: [] }));
     }
 }

@@ -104,59 +104,6 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             await member.save();
         }
 
-        const addedKeychainItems: KeychainItem[] = []
-
-        // Create keychains (adjusting is not allowed atm)
-        for (const put of request.body.keychainItems.getPuts()) {
-            const keychainItem = put.put
-            if (!members.find(m => m.encryptedDetails.find(k => k.publicKey === keychainItem.publicKey))) {
-                throw new SimpleError({
-                    code: "invalid_public_key",
-                    message: "Could not find the member for which you are trying to create a keychain item",
-                    field: "keychainItems"
-                })
-            }
-            const model = new KeychainItem()
-            addedKeychainItems.push(model)
-
-            model.encryptedPrivateKey = keychainItem.encryptedPrivateKey
-            model.userId = user.id
-            model.publicKey = keychainItem.publicKey
-
-            await model.save()
-        }
-
-        if (members.length == 0) {
-            return new Response(new KeychainedResponse({
-                data: [],
-                keychainItems: []
-            }));
-        }
-
-        // Query all the keys needed
-        const otherKeys: Set<string> = new Set();
-        for (const member of members) {
-            for (const details of member.encryptedDetails) {
-                // Only keys for organization, because else this might be too big
-                otherKeys.add(details.publicKey)
-            }
-        }
-
-        // Load the needed keychains the user has access to
-        if (otherKeys.size > 0) {
-            const keychainItems = await KeychainItem.where({
-                userId: user.id,
-                publicKey: {
-                    sign: "IN",
-                    value: [...otherKeys.values()]
-                }
-            })
-            return new Response(new KeychainedResponse({
-                data: members.map(m => m.getStructureWithRegistrations()),
-                keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
-            }));
-        }
-
         return new Response(new KeychainedResponse({
             data: members.map(m => m.getStructureWithRegistrations()),
             keychainItems: []

@@ -69,31 +69,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             });
         }
 
-        // Validate keychain
-        if (request.body.keychainItems.length != 1) {
-            throw new SimpleError({
-                code: "missing_items",
-                message: "You'll need to specify at exactly one keychain item to provide the user with access to the organization private key using his own keys",
-                field: "keychainItems",
-            });
-        }
-
-        for (const item of request.body.keychainItems) {
-            await KeychainItemHelper.validate(item)
-
-            // Validate if the key's public key corresponds with the organization key
-            if (item.publicKey != request.body.organization.publicKey) {
-                throw new SimpleError({
-                    code: "invalid_field",
-                    message: "You can only add the organization's keypair to the keychain",
-                    field: "keychainItems.0.publicKey",
-                });
-            }
-
-            // Yay, we can add the keychain items (after creating the organization and user)
-        }
-
-         // First create the organization
+        // First create the organization
         // todo: add some duplicate validation
         const organization = new Organization();
         organization.id = request.body.organization.id;
@@ -153,18 +129,10 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             // Save later
         }
 
-        organization.publicKey = request.body.organization.publicKey;
         organization.uri = uri;
         organization.meta = request.body.organization.meta
         organization.address = request.body.organization.address
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? []
-        organization.privateMeta.privateKey = request.body.organization.privateMeta?.privateKey ?? null
-
-        // call CompleteRegistration
-        // content_name, currency, status, value
-        // InitiateCheckout
-        // Purchase
-        // StartTrial
 
         try {
             await organization.save();
@@ -194,15 +162,6 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         user.permissions = Permissions.create({ level: PermissionLevel.Full })
         await user.save()
 
-        for (const item of request.body.keychainItems) {
-            const keychainItem = new KeychainItem()
-            keychainItem.userId = user.id
-            keychainItem.encryptedPrivateKey = item.encryptedPrivateKey
-            keychainItem.publicKey = item.publicKey
-
-            await keychainItem.save()
-        }
-
         if (credit) {
             await credit.save()
         }
@@ -219,10 +178,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         return new Response(SignupResponse.create({
-            token: code.token,
-
-            // always return the same encryption constants
-            authEncryptionKeyConstants: request.body.user.authEncryptionKeyConstants
+            token: code.token
         }));
     }
 

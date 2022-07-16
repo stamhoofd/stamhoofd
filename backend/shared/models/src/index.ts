@@ -1,4 +1,3 @@
-export * from "./models/Challenge"
 export * from "./models/EmailVerificationCode"
 export * from "./models/Group"
 export * from "./models/Image"

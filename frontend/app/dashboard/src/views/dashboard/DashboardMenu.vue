@@ -21,13 +21,7 @@
                 <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
             </button>
 
-            <button v-if="fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'keys' }" @click="manageKeys()">
-                <span class="icon key" />
-                <span>Gebruikers goedkeuren</span>
-                <span class="bubble">{{ organization.privateMeta.requestKeysCount }}</span>
-            </button>
-
-            <hr v-if="whatsNewBadge || (fullAccess && organization.privateMeta && organization.privateMeta.requestKeysCount > 0)">
+            <hr v-if="whatsNewBadge || (fullAccess && organization.privateMeta)">
 
             <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" type="button" class="menu-button button heading cta" @click="addWebshop()">
                 <span class="icon add" />
@@ -333,19 +327,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, { 
                     root: await LoadComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */  "./groups/GroupMembersView.vue"), { group }, { instant: !animated })
-                })
-            ]}
-        );
-    }
-
-    async manageKeys(animated = true) {
-        this.currentlySelected = "keys"
-        this.showDetail({
-            adjustHistory: animated,
-            animated,
-            components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "KeysView" */ "./keys/KeysView.vue"), {}, { instant: !animated })
                 })
             ]}
         );
