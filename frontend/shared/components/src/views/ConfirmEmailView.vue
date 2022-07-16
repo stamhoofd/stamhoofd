@@ -16,7 +16,7 @@
                     Vul de code in uit de e-mail die we hebben gestuurd
                 </h1>
                 <h1 v-else>
-                    Verifieer jouw e-mailadres. Vul de code in uit de e-mail die we hebben gestuurd
+                    Verifieer jouw e-mailadres
                 </h1>
 
                 <p>Er werd een e-mail verstuurd naar '{{ email }}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
