@@ -184,15 +184,12 @@ export default new Migration(async () => {
 
     for (const organization of organizations) {
         const lastActive = dates.get(organization.id) ?? null
-        if (!lastActive || lastActive < new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 3)) {
+        if (!lastActive || lastActive < new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 5)) {
             if (!organization.meta.packages.useActivities && !organization.meta.packages.useWebshops) {
                 console.log(`Deleting organization ${organization.name} ${organization.id}, last active`, lastActive)
-                //await organization.delete()
+                await organization.delete()
                 deletedOrganizations.add(organization.id)
             }
-            
-        } else {
-            console.log(`Keeping organization ${organization.name} ${organization.id}, last active`, lastActive)
         }
     }
 
@@ -212,7 +209,6 @@ export default new Migration(async () => {
             break;
         }
 
-
         for (const member of members) {
             if (deletedOrganizations.has(member.organizationId)) {
                 continue
@@ -225,10 +221,18 @@ export default new Migration(async () => {
                     //console.log('OK  ', member.id, organization.id)
                     stats.ok++
                 } else {
-                    //console.log('FAIL', member.id)
+                    console.log('FAIL', member.id)
                     stats.fail++
                     failedOrganizations.set(organization.id, organization)
                 }
+                member.details = details;
+
+                if (!member.details.isRecovered) {
+                    member.encryptedDetails = []
+                }
+                await member.save();
+            } else {
+                console.warn('Could not find organization', member.organizationId)
             }
         }
         lastId = members[members.length - 1].id
@@ -240,14 +244,6 @@ export default new Migration(async () => {
     for (const [id, organization] of failedOrganizations) {
         console.log(`Failed to decrypt member data for ${organization.name} (${organization.id})`)
     }
-
-    /*const organizations = await Organization.all();
-
-    for (const organization of organizations) {
-        const allGroups = await Group.getAll(organization.id)
-        await organization.cleanCategories(allGroups)
-        await Group.deleteUnreachable(organization.id, organization.meta, allGroups)
-    }*/
 
     throw new Error("WIP");
 });

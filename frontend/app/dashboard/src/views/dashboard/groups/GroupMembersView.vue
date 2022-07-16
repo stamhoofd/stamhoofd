@@ -559,23 +559,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         Request.cancelAll(this)
     }
 
-    checkingInaccurate = false
-
-    async checkInaccurateMetaData() {
-        if (this.checkingInaccurate) {
-            return
-        }
-        this.checkingInaccurate = true
-        try {
-            // Patch member with new details
-            await MemberManager.checkInaccurateMetaData(this.allValues,  this.organization)
-        } catch (e) {
-            console.error(e)
-            Toast.fromError(e).show()
-        }
-        this.checkingInaccurate = false
-    }
-
     get groups() {
         if (this.group) {
             return [this.group]
@@ -603,9 +586,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             // Make sure we keep as many references as possible
             MemberManager.sync(this.allValues, members)
             this.allValues = members
-            this.checkInaccurateMetaData().catch(e => {
-                console.error(e)
-            })
         }).catch((e) => {
             console.error(e)
 

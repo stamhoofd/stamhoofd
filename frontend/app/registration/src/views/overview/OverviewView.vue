@@ -42,7 +42,7 @@
                         Je hebt nog geen leden ingeschreven op dit account. Voeg ze toe met de knop hieronder.
                     </p>
                 </main>
-                <STToolbar :sticky="false" v-if="!createMemberDisabled">
+                <STToolbar v-if="!createMemberDisabled" :sticky="false">
                     <button slot="right" class="button secundary full" type="button" @click="addNewMember">
                         <span class="icon left add" />
                         <span>Nieuw lid inschrijven</span>
@@ -82,8 +82,6 @@ import GroupTree from '../../components/GroupTree.vue';
 import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "../members/details/EditMemberStepsManager";
 import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import MemberView from "../members/MemberView.vue";
-import MissingKeyView from "./MissingKeyView.vue";
-
 
 @Component({
     components: {
@@ -249,11 +247,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
                 })
             })
             this.present(component.setAnimated(false))
-        }
-
-        if (!didShow && this.members.find(m => m.details.isRecovered && !m.nonEncryptedDetails)) {
-            // Show error message
-            this.present(new ComponentWithProperties(MissingKeyView).setDisplayStyle("sheet"))
         }
     }
 

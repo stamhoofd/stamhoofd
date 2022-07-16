@@ -213,12 +213,6 @@ export default class App extends Vue {
     }
 
     mounted() {
-        SessionManager.addListener(this, (changed) => {
-            if (changed == "organization") {
-                this.checkKey().catch(console.error)
-            }
-        })
-
         // Update organization when opening an old tab again
         SessionManager.listenForOrganizationUpdates()
 
@@ -245,8 +239,6 @@ export default class App extends Vue {
                 ]
             })
         })
-
-       
     }
 
     async unsubscribe(id: string, token: string) {
@@ -340,74 +332,6 @@ export default class App extends Vue {
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()
-        }
-    }
-
-    didTryKey = false
-
-    async checkKey() {
-        console.log("Checking key...")
-
-        // Check if public and private key matches
-        if (!SessionManager.currentSession) {
-            return
-        }
-
-        const session = SessionManager.currentSession
-
-        const user = session.user
-
-        if (!user || !user.permissions) {
-            return
-        }
-        
-        const privateKey = session.getUserPrivateKey()
-
-        if (!privateKey) {
-            return
-        }
-        const publicKey = user.publicKey
-
-        if (!await Sodium.isMatchingEncryptionPublicPrivate(publicKey, privateKey)) {
-
-            // Gather all keychain items, and check which ones are still valid
-            // Oops! Error with public private key
-            await LoginHelper.fixPublicKey(session)
-            new Toast("We hebben jouw persoonlijke encryptiesleutel gecorrigeerd. Er was iets fout gegaan toen je je wachtwoord had gewijzigd.", "success green").setHide(15*1000).show()
-            GlobalEventBus.sendEvent("encryption", null).catch(console.error)
-        }
-
-        if (OrganizationManager.organization.privateMeta?.privateKey) {
-            console.info("Private key successfully stored on the server")
-            return
-        }
-
-        if (this.didTryKey) {
-            // Inf loop stop
-            return
-        }
-
-        try {
-            const keychainItem = Keychain.getItem(session.organization!.publicKey)
-            if (!keychainItem) {
-                throw new Error("Missing organization keychain")
-            }
-
-            const organizationKey = await session.decryptKeychainItem(keychainItem)
-
-            console.log("We have access to the current organization private key")
-            this.didTryKey = true
-
-            // Publish the key to the server as a backup mechanism
-            await OrganizationManager.patch(Organization.patch({
-                id: OrganizationManager.organization!.id,
-                privateMeta: OrganizationPrivateMetaData.patch({
-                    privateKey: organizationKey.privateKey
-                })
-            }), false)
-
-        } catch (e) {
-            console.error(e)
         }
     }
 }
