@@ -174,7 +174,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     code: "read_privacy",
                     message: "Je moet kennis hebben genomen van het privacybeleid voor je een account kan aanmaken."
                 })
-                return;
             }
 
             if (!this.acceptTerms) {
@@ -182,7 +181,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     code: "read_privacy",
                     message: "Je moet akkoord gaan met de algemene voorwaarden voor je een account kan aanmaken."
                 })
-                return;
             }
 
             if (!this.acceptDataAgreement) {
@@ -190,7 +188,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     code: "read_privacy",
                     message: "Je moet akkoord gaan met de verwerkersovereenkomst voor je een account kan aanmaken."
                 })
-                return;
             }
             this.organization.meta.lastSignedTerms = new Date()
 
@@ -200,7 +197,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 return;
             }
         
-            const component = new CenteredMessage("Sleutels aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
             plausible('signupKeys');
             try {
 
@@ -208,14 +204,12 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 plausible('signup');
 
                 this.loading = false;
-                component.hide()
 
                 const session = new Session(this.organization.id)
                 this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
                 
             } catch (e) {
                 this.loading = false;
-                component.hide()
 
                 if (isSimpleError(e) || isSimpleErrors(e)) {
                     // Show normal errors
@@ -224,7 +218,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 
                 plausible('signupAccountKeyError');
 
-                new CenteredMessage("Er ging iets mis", "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
+                new CenteredMessage("Er ging iets mis", "Het is niet gelukt om een account aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
                 return;
             }
         } catch (e) {

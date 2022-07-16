@@ -34,9 +34,8 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ConfirmEmailView, EmailInput,ErrorBox, ForgotPasswordView,LoadingButton, OrganizationLogo,STErrorsDefault,STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components"
+import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, OrganizationLogo, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
 import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
@@ -117,8 +116,6 @@ export default class LoginView extends Mixins(NavigationMixin){
 
         this.loading = true
         
-        // Request the key constants
-        const component = new CenteredMessage("Inloggen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
         try {
             const result = await LoginHelper.login(this.session, this.email, this.password)
 
@@ -136,7 +133,6 @@ export default class LoginView extends Mixins(NavigationMixin){
             }
         } finally {
             this.loading = false;
-            component.hide()
         }
     }
 

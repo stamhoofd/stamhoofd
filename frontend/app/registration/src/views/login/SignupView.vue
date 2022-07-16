@@ -141,10 +141,8 @@ export default class SignupView extends Mixins(NavigationMixin){
 
         this.loading = true
         this.errorBox = null
-        // Request the key constants
         
-        const component = new CenteredMessage("Account aanmaken...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit kan even duren.", "loading").show()
-
+        // Request the key constants
         try {
             const session = new Session(OrganizationManager.organization.id)
             await session.loadFromStorage()
@@ -153,7 +151,6 @@ export default class SignupView extends Mixins(NavigationMixin){
             const token = await LoginHelper.signUp(session, this.email, this.password)
             
             this.loading = false;
-            component.hide()
 
             this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))
             return
@@ -161,14 +158,13 @@ export default class SignupView extends Mixins(NavigationMixin){
         } catch (e) {
             console.log(e)
             this.loading = false;
-            component.hide()
 
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 this.errorBox = new ErrorBox(e)
                 return;
             }
 
-            new CenteredMessage("Er ging iets mis", "Het is niet gelukt om de sleutels aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
+            new CenteredMessage("Er ging iets mis", "Het is niet gelukt om een account aan te maken. Probeer het op een ander toestel of browser opnieuw uit of neem contact met ons op.", "error").addCloseButton().show()
             return;
         }
         

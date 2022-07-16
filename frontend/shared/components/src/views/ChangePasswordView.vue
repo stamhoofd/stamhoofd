@@ -67,9 +67,6 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
         }
         this.loading = true
 
-
-        const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die alle gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
-
         try {
             await LoginHelper.changePassword(SessionManager.currentSession!, this.password)
             this.dismiss({ force: true });
@@ -79,8 +76,6 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
             this.loading = false;
             this.errorBox = new ErrorBox(e)
             return;
-        } finally {
-            component.hide()
         }
     }
 }

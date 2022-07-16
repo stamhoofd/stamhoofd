@@ -64,14 +64,6 @@ module.exports = {
         alias: {
             vue$: "vue/dist/vue.runtime.esm.js", // we only need vue runtime, no compilation
             // ...
-        },
-
-        // Needed for libsodium
-        // It automatically detects if node is used or not, so stop webpack from complaining about this:
-        fallback: { 
-            "path": false,
-            "crypto": false,
-            "stream": false,
         }
     },
     output: {
@@ -322,10 +314,6 @@ module.exports = {
             ],
         }),
     ],
-    experiments: {
-        //syncWebAssembly: true // temporary, until fixed
-        asyncWebAssembly: true
-    },
     //cache: false,
     /*cache: {
         type: 'filesystem',
