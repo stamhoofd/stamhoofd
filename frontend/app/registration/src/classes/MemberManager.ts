@@ -1,11 +1,9 @@
 
 
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, ObjectData, VersionBox,VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Sodium } from '@stamhoofd/crypto'
-import { Keychain, LoginHelper, MemberManagerBase, SessionManager } from '@stamhoofd/networking'
-import { Address, EmergencyContact, EncryptedMember, EncryptedMemberDetails, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, KeychainItem,Member, MemberDetails, MemberDetailsMeta, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithEncryptedMember, RegistrationWithMember, User, Version } from '@stamhoofd/structures'
-import { Sorter } from '@stamhoofd/utility';
+import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking';
+import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
 import { Vue } from "vue-property-decorator";
 
 import { OrganizationManager } from './OrganizationManager';
@@ -20,7 +18,7 @@ export class MemberManagerStatic extends MemberManagerBase {
     /**
      * Set the members, but keep all the existing member references
      */
-    async setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
+    setMembers(data: KeychainedResponse<EncryptedMemberWithRegistrations[]>) {
         // Save keychain items
         Keychain.addItems(data.keychainItems)
 
@@ -29,7 +27,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         for (const member of data.data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
-                await this.decryptMember(member, OrganizationManager.organization),
+                this.decryptMember(member, OrganizationManager.organization),
                 member.registrations,
                 member.users,
                 groups
@@ -46,19 +44,6 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
 
         Vue.set(this, "members", s)
-
-        // Check if data is no longer recovered
-        const session = SessionManager.currentSession
-        const user = SessionManager.currentSession?.user
-        if (session && user) {
-            if (user.requestKeys && !s.find(m => m.details.isRecovered)) {
-                // Fully recovered!
-                await LoginHelper.patchUser(session, User.patch({
-                    id: user.id,
-                    requestKeys: false
-                }))
-            }
-        }
     }
 
     async loadMembers() {
@@ -68,15 +53,11 @@ export class MemberManagerStatic extends MemberManagerBase {
             path: "/members",
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
-        await this.setMembers(response.data)
+        this.setMembers(response.data)
     }
 
     async addMember(memberDetails: MemberDetails): Promise<MemberWithRegistrations | null> {
         const session = SessionManager.currentSession!
-
-        // Create a keypair
-        const keyPair = await Sodium.generateEncryptionKeyPair()
-        const keychainItem = await session.createKeychainItem(keyPair)
 
         // Create member
         const encryptedMember = EncryptedMember.create({
@@ -111,7 +92,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
 
-        await MemberManager.setMembers(response.data)
+        MemberManager.setMembers(response.data)
         return this.members?.find(m => m.id == encryptedMember.id) ?? null
     }
 
@@ -144,7 +125,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             body: patch,
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
-        await this.setMembers(response.data)
+        this.setMembers(response.data)
     }
 
     /**

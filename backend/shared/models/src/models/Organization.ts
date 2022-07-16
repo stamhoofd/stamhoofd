@@ -60,8 +60,11 @@ export class Organization extends Model {
     @column({ type: "json", decoder: Address })
     address: Address;
 
+    /**
+     * @deprecated
+     */
     @column({ type: "string" })
-    publicKey: string;
+    publicKey: string = '';
 
     @column({
         type: "string", beforeSave: function (this: Organization) {
@@ -678,23 +681,7 @@ export class Organization extends Model {
 
         return undefined
     }
-
-    async updateRequestKeysCount() {
-        // Circular reference fix
-        const User = (await import('./User')).User;
-        const query = `select count(distinct \`${User.table}\`.id) as c from \`${User.table}\` join _members_users on _members_users.usersId = \`${User.table}\`.id where \`${User.table}\`.organizationId = ? AND \`${User.table}\`.requestKeys = 1 AND \`${User.table}\`.publicKey is not null AND \`${User.table}\`.permissions is null`
-        
-        const [results] = await Database.select(query, [this.id])
-        const count = results[0]['']['c'];
-
-        if (Number.isInteger(count)) {
-            this.privateMeta.requestKeysCount = count
-            await this.save()
-        } else {
-            console.error("Unexpected result for updateRequestKeysCount", results)
-        }
-    }
-
+    
     /**
      * Return default e-mail address for important e-mails that should have the highest deliverability
      */

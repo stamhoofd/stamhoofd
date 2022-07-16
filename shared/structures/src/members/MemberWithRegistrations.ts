@@ -399,7 +399,7 @@ export class MemberWithRegistrations extends Member {
                 ], 
                 getValue: (member) => {
                     const missing: string[] = []
-                    if (member.users.find(u => u.publicKey !== null)) {
+                    if (member.users.find(u => u.hasAccount)) {
                         missing.push("has_account")
                     } else {
                         missing.push("no_account")

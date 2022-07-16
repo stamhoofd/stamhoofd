@@ -1,9 +1,9 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { Sodium } from '@stamhoofd/crypto';
+import { KeyConstantsHelper, Sodium } from '@stamhoofd/crypto';
 import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
+import argon2 from "argon2"
 
-import { KeychainItem } from './KeychainItem';
 import { Organization } from "./Organization";
 
 export type UserWithOrganization = User & { organization: Organization };
@@ -33,21 +33,11 @@ export class User extends Model {
     @column({ type: "string" })
     email: string;
 
+    @column({ type: "string", nullable: true })
+    password: string | null = null;
+
     @column({ type: "boolean" })
     verified = false
-
-    /**
-     * Set to true when the user forgot (and reset!) its password or when a new user is created in a family
-     * When this is true, the organization will be able to reprovide the user with new keys in the UI
-     */
-    @column({ type: "boolean" })
-    requestKeys = false
-
-    /**
-     * Public key used for encryption
-     */
-    @column({ type: "string", nullable: true })
-    publicKey: string | null = null;
 
     /**
      * Public key used for encryption
@@ -56,6 +46,14 @@ export class User extends Model {
     permissions: Permissions | null = null
 
     /**
+     * @deprecated
+     * Public key used for encryption
+     */
+    @column({ type: "string", nullable: true })
+    publicKey: string | null = null;
+
+    /**
+     * @deprecated
      * public key that is used to verify during login (using a challenge) and for getting a token
      * SHOULD NEVER BE PUBLIC!
      */
@@ -63,23 +61,25 @@ export class User extends Model {
     protected publicAuthSignKey?: string | null = null // if not selected will be undefined
 
     /**
+     * @deprecated
      * Encrypted private key, used for authenticated encrytion and decryption
      */
     @column({ type: "string", nullable: true })
     protected encryptedPrivateKey: string | null = null // if not selected will be undefined
 
     /**
+     * @deprecated
      * Constants that are used to get the authSignKeyPair from the user password. Using
      */
     @column({ type: "json", decoder: KeyConstants, nullable: true })
     protected authSignKeyConstants?: KeyConstants | null = null // if not selected will be undefined
 
     /**
+     * @deprecated
      * Constants that are used to get the authEncryptionKey from the user password. Only accessible for the user using his token (= after login)
      */
     @column({ type: "json", decoder: KeyConstants, nullable: true })
     protected authEncryptionKeyConstants: KeyConstants | null = null // if not selected will be undefined
-
 
     @column({
         type: "datetime", beforeSave(old?: any) {
@@ -104,6 +104,58 @@ export class User extends Model {
     updatedAt: Date
 
     static organization = new ManyToOneRelation(Organization, "organization");
+
+    static async login(organizationId: string, email: string, password: string): Promise<UserForAuthentication | undefined> {
+        const user = await User.getForAuthentication(organizationId, email)
+        if (!user || !user.hasKeys()) {
+            return undefined
+        }
+
+        if (!user.password) {
+            if (!user.authSignKeyConstants) {
+                console.error('Tried to login to a user with no password or authSignKeyConstants');
+                return undefined;
+            }
+            if (!user.publicAuthSignKey) {
+                console.error('Tried to login to a user with no password or publicAuthSignKey');
+                return undefined;
+            }
+
+            console.log('Logging in via the old E2E way...', email)
+
+            // Old e2e login system: we need to generate the keys locally to check if they match
+            try {
+                const authSignKeys = await KeyConstantsHelper.getSignKeyPair(user.authSignKeyConstants, password)
+                
+                // Check if generated private key matches the stored public key
+                console.log('Got keys for password', email, authSignKeys)
+
+                if (await Sodium.isMatchingSignPublicPrivate(user.publicAuthSignKey, authSignKeys.privateKey)) {
+                    console.log('Login succeeded for', email, '. Updating password...')
+
+                    await user.changePassword(password)
+                    await user.save();
+                    console.log('Successfully stored hashed password for', email)
+
+                    return user
+                }
+                console.log('Login failed for', email)
+
+            } catch (e) {
+                console.error(e)
+            }
+            return
+        }
+
+        try {
+            if (await argon2.verify(user.password, password)) {
+                return user
+            }
+        } catch (e) {
+            // internal failure
+            console.error(e)
+        }
+    }
 
     /// Delete users when we delete a member
     static async deleteForDeletedMember(memberId: string) {
@@ -137,6 +189,10 @@ export class User extends Model {
     }
 
     hasAccount() {
+        if (this.password) {
+            return true;
+        }
+        
         if (this.publicKey === null) {
             // This is a placeholder user
             return false
@@ -145,8 +201,14 @@ export class User extends Model {
     }
 
     protected hasKeys() {
+        if (this.password) {
+            // Users with a password are 'real' users. Always.
+            return true;
+        }
+
         if (this.publicKey === null) {
             // This is a placeholder user
+
             return false
         }
 
@@ -208,34 +270,52 @@ export class User extends Model {
         return user as UserForAuthentication;
     }
 
+    /*static async register(email: string, password: string): Promise<Admin | undefined> {
+
+        const user = new Admin();
+        user.email = email;
+        user.password = await this.hash(password)
+
+        try {
+            await user.save();
+        } catch (e) {
+            // Duplicate key probably
+            if (e.code && e.code == "ER_DUP_ENTRY") {
+                return;
+            }
+            throw e;
+        }
+
+        // Remove from memory and avoid accidental leaking
+        user.eraseProperty("password");
+        return user;
+    }*/
+
+    static async hash(password: string) {
+        const hash = await argon2.hash(password, { type: argon2.argon2id })
+        return hash
+    }
+
     static async register(
         organization: Organization,
         data: NewUser
     ): Promise<UserWithOrganization | undefined> {
         const {
             email,
-            publicKey,
-            publicAuthSignKey,
-            encryptedPrivateKey,
-            authSignKeyConstants,
-            authEncryptionKeyConstants,
+            password,
             id,
             firstName,
             lastName
         } = data;
 
-        if (publicKey === null) {
-            throw new Error("A publicKey is required for new users")
+        if (!password) {
+            throw new Error("A password is required for new users")
         }
 
         const user = new User().setRelation(User.organization, organization);
         user.id = id ?? uuidv4()
         user.email = email;
-        user.publicKey = publicKey;
-        user.publicAuthSignKey = publicAuthSignKey
-        user.encryptedPrivateKey = encryptedPrivateKey
-        user.authSignKeyConstants = authSignKeyConstants
-        user.authEncryptionKeyConstants = authEncryptionKeyConstants
+        user.password = await this.hash(password)
         user.verified = false;
         user.firstName = firstName
         user.lastName = lastName
@@ -250,50 +330,19 @@ export class User extends Model {
             throw e;
         }
 
-        // Remove from memory and avoid accidental leaking
-        user.eraseProperty("publicAuthSignKey");
-        user.eraseProperty("encryptedPrivateKey");
-        user.eraseProperty("authSignKeyConstants");
-        user.eraseProperty("authEncryptionKeyConstants");
+        user.eraseProperty('password');
         return user;
     }
 
-    async changePassword(data: { publicKey?: string; publicAuthSignKey: string; encryptedPrivateKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants }) {
-        const {
-            publicKey,
-            publicAuthSignKey,
-            encryptedPrivateKey,
-            authSignKeyConstants,
-            authEncryptionKeyConstants
-        } = data;
+    async changePassword(password) {
+        this.password = await User.hash(password)
 
-        if (publicKey && this.publicKey != publicKey) {
-            // Delete keychain!
-            // First print it to console.error as a temporary backup
-            const keychainItems = await KeychainItem.where({ userId: this.id })
-            console.error("Backup keychain items because publicKey was changed:")
-            console.error("old: "+this.publicKey)
-            console.error("new: "+publicKey)
-            console.error(JSON.stringify(keychainItems, undefined, 4))
-            const query = "DELETE FROM `"+KeychainItem.table+"` where userId = ?"
-            await Database.delete(query, [this.id])
-        }
-
-        this.publicKey = publicKey ?? this.publicKey
-        this.publicAuthSignKey = publicAuthSignKey
-        this.encryptedPrivateKey = encryptedPrivateKey
-        this.authSignKeyConstants = authSignKeyConstants
-        this.authEncryptionKeyConstants = authEncryptionKeyConstants
-
-        // todo: Send a security e-mail
-    }
-
-    getAuthSignKeyConstants(this: UserForAuthentication): KeyConstants {
-        return this.authSignKeyConstants
-    }
-
-    async verifyAuthSignature(this: UserForAuthentication, signature: string, message: string) {
-        return await Sodium.verifySignature(signature, message, this.publicAuthSignKey)
+        // Clear old fields
+        this.publicKey = null;
+        this.publicAuthSignKey = null;
+        this.encryptedPrivateKey = null;
+        this.authSignKeyConstants = null;
+        this.authEncryptionKeyConstants = null;
     }
 
     async getOrganizatonStructure(organization: Organization): Promise<OrganizationStruct> {

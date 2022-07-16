@@ -52,8 +52,6 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         editUser.firstName = request.body.firstName ?? editUser.firstName
         editUser.lastName = request.body.lastName ?? editUser.lastName
 
-        editUser.requestKeys = request.body.requestKeys ?? editUser.requestKeys
-
         if (request.body.permissions) {
             if (!user.permissions || !user.permissions.hasFullAccess()) {
                 throw new SimpleError({
@@ -69,24 +67,12 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        if (editUser.id == user.id && request.body.publicAuthSignKey && request.body.authSignKeyConstants && request.body.authEncryptionKeyConstants && request.body.encryptedPrivateKey && request.body.publicKey !== null && request.body.authEncryptionKeyConstants.isPut() && request.body.authSignKeyConstants.isPut()) {
+        if (editUser.id == user.id && request.body.password) {
             // password changes
-            await editUser.changePassword({
-                publicKey: request.body.publicKey, 
-                publicAuthSignKey: request.body.publicAuthSignKey, 
-                encryptedPrivateKey: request.body.encryptedPrivateKey, 
-                authSignKeyConstants: request.body.authSignKeyConstants, 
-                authEncryptionKeyConstants: request.body.authEncryptionKeyConstants
-            })
+            await editUser.changePassword(request.body.password)
         }
 
         await editUser.save();
-
-
-        if (request.body.requestKeys !== undefined) {
-            // Update request keys of this organization
-            await user.organization.updateRequestKeysCount()
-        }
 
         if (request.body.email && request.body.email !== editUser.email) {
             const fullUser = await User.getFull(user.id)
@@ -109,12 +95,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 human: editUser.id === user.id ? "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan." : "Er is een verificatie e-mail verstuurd naar "+request.body.email+" om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.",
                 meta: SignupResponse.create({
                     token: code.token,
-                    authEncryptionKeyConstants: fullUser.authEncryptionKeyConstants
                 }).encode({ version: request.request.getVersion() }),
                 statusCode: 403
             });
         }
 
-        return new Response(UserStruct.create(editUser));      
+        return new Response(UserStruct.create({...editUser, hasAccount: editUser.hasAccount()}));      
     }
 }

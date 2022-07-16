@@ -6,23 +6,15 @@
         </STNavigationBar>
         <main>
             <h1>Wachtwoord vergeten</h1>
-
-            <p v-if="!isAdmin" class="warning-box">
-                Als je jouw wachtwoord vergeten bent kan je tijdelijk niet meer aan de gegevens van de leden die je hebt ingeschreven als je een nieuw wachtwoord instelt tot we jou terug hebben goedgekeurd. Maar dat is niet echt een probleem, aangezien je ook alles opnieuw kan ingeven.
-            </p>
-            <p v-else class="error-box">
-                Opgelet! Gebruik je de ledenadministratie? Als je jouw wachtwoord vergeten bent, verlies je toegang tot alle data van je leden. Er is geen mogelijkheid om deze hierna nog te herstellen TENZIJ een andere beheerder van jouw vereniging nog toegang heeft tot zijn account.
-            </p>
-
+            <p>Vul jouw e-mailadres in, en we sturen jou een e-mail waarmee je een nieuw wachtwoord kan kiezen.</p>
+            
             <STErrorsDefault :error-box="errorBox" />
-
-
             <EmailInput v-model="email" title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :validator="validator" />
         </main>
 
         <STFloatingFooter>
             <LoadingButton :loading="loading">
-                <button class="button primary full">
+                <button class="button primary full" type="submit">
                     Opnieuw instellen
                 </button>
             </LoadingButton>
@@ -80,6 +72,7 @@ export default class ForgotPasswordView extends Mixins(NavigationMixin){
                 method: "POST",
                 path: "/forgot-password",
                 body: ForgotPasswordRequest.create({ email: this.email }),
+                shouldRetry: false
             })
 
             this.dismiss({ force: true })

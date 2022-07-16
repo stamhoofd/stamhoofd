@@ -1,10 +1,9 @@
-import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
-import { GlobalEventBus, Toast } from '@stamhoofd/components'
-import { Sodium } from '@stamhoofd/crypto'
-import { InviteKeychainItem, KeychainedResponseDecoder, KeychainItem, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
-import { Vue } from "vue-property-decorator";
+import { GlobalEventBus } from '@stamhoofd/components'
+import { KeychainedResponseDecoder, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
+import { Vue } from "vue-property-decorator"
 
 import { AppManager } from '..'
 import { Keychain } from './Keychain'
@@ -28,78 +27,15 @@ export class Session implements RequestMiddleware {
 
     // Stored: encryption key to obtain the private keys (valid token needed in order to have any meaning => revokable in case of leakage, lost device, theft)
     // Storage is required since otherwise you would have to enter your password again every time you reload the page
-    protected authEncryptionKey: string | null = null
+    // protected authEncryptionKey: string | null = null
 
     // We can store the private key in the browser, because on password change it will get changed
-    protected userPrivateKey: string | null = null // Used to decrypt messages for this user
+    // protected userPrivateKey: string | null = null // Used to decrypt messages for this user
 
     protected listeners: Map<any, AuthenticationStateListener> = new Map()
 
     constructor(organizationId: string) {
         this.organizationId = organizationId
-    }
-
-    /**
-     * Add a (previously encrypted) blob of keychain items to this session / user and store it (encrypted) on the server and in memory
-     */
-    async addToKeychain(decryptedKeychainItems: string) {
-        // unbox
-        const keychainItems = new ObjectData(JSON.parse(decryptedKeychainItems), { version: Version }).decode(new VersionBoxDecoder(new ArrayDecoder(InviteKeychainItem as Decoder<InviteKeychainItem>))).data
-
-        // Add the keys to the keychain (if not already present)
-        const encryptedItems: KeychainItem[] = []
-        for (const item of keychainItems) {
-            const encryptedItem = await this.createKeychainItem(item)
-            encryptedItems.push(encryptedItem)
-        }
-
-        if (encryptedItems.length > 0) {
-            const response = await this.authenticatedServer.request({
-                method: "POST",
-                path: "/keychain",
-                body: encryptedItems
-            })
-        }
-    }
-
-    async decryptKeychainItem(item: KeychainItem): Promise<{ publicKey: string; privateKey: string }> {
-        // todo: if no keys load them
-        if (!this.userPrivateKey) {
-            throw new Error("User private key not found!")
-        }
-
-        if (!this.user) {
-            throw new Error("User not found!")
-        }
-
-        const privateKey = await Sodium.unsealMessageAuthenticated(item.encryptedPrivateKey, this.user.publicKey, this.userPrivateKey)
-
-        return {
-            publicKey: item.publicKey,
-            privateKey
-        }
-    }
-
-    /**
-     * Create a keychain item for a public/private key set
-     */
-    async createKeychainItem(keyPair: { publicKey: string; privateKey: string }): Promise<KeychainItem> {
-        // todo: if no keys load them
-        if (!this.userPrivateKey) {
-            throw new Error("User private key not found!")
-        }
-
-        if (!this.user) {
-            throw new Error("User not found!")
-        }
-
-        const item = KeychainItem.create({
-            publicKey: keyPair.publicKey,
-            encryptedPrivateKey: await Sodium.sealMessageAuthenticated(keyPair.privateKey, this.user.publicKey, this.userPrivateKey)
-        })
-
-        Keychain.addItem(item)
-        return item
     }
 
     async loadFromStorage() {
@@ -112,22 +48,13 @@ export class Session implements RequestMiddleware {
                     this.token = new ManagedToken(Token.decode(new ObjectData(parsed, { version: Version })), () => {
                         this.onTokenChanged()
                     })
-
-                    const key = await Storage.secure.getItem('key-' + this.organizationId)
-                    if (key) {
-                        this.authEncryptionKey = key
-                        // console.log('Successfully loaded token from storage')
-                    } else {
-                        // Sign out
-                        this.token = null
-                    }
                 } catch (e) {
                     console.error(e)
                 }
             }
 
-            if (this.token && this.authEncryptionKey) {
-                // Also check if we have the user
+            if (this.token) {
+                // Also check if we have the user (optional)
                 const json = await Storage.secure.getItem('user-' + this.organizationId)
                 if (json) {
                     try {
@@ -147,9 +74,11 @@ export class Session implements RequestMiddleware {
     saveToStorage() {
         try {
             // Save token to localStorage
-            if (this.token && this.authEncryptionKey) {
+            if (this.token) {
                 void Storage.secure.setItem('token-' + this.organizationId, JSON.stringify(this.token.token.encode({ version: Version })))
-                void Storage.secure.setItem('key-' + this.organizationId, this.authEncryptionKey)
+                
+                // Delete old deprecated stored keys
+                void Storage.secure.removeItem('key-' + this.organizationId)
 
                 if (this.user) {
                     void Storage.secure.setItem('user-' + this.organizationId, JSON.stringify(new VersionBox(this.user).encode({ version: Version })))
@@ -158,7 +87,10 @@ export class Session implements RequestMiddleware {
                 }
             } else {
                 void Storage.secure.removeItem('token-' + this.organizationId)
+
+                // Deprecated: but best to delete it for now
                 void Storage.secure.removeItem('key-' + this.organizationId)
+
                 void Storage.secure.removeItem('user-' + this.organizationId)
             }
         } catch (e) {
@@ -177,7 +109,7 @@ export class Session implements RequestMiddleware {
         this.listeners.delete(owner)
     }
 
-    callListeners(changed: "userPrivateKey" | "user" | "organization" | "token") {
+    callListeners(changed: "user" | "organization" | "token") {
         for (const listener of this.listeners.values()) {
             listener(changed)
         }
@@ -188,11 +120,11 @@ export class Session implements RequestMiddleware {
     }
 
     canGetCompleted(): boolean {
-        return !!this.token && !!this.authEncryptionKey
+        return !!this.token
     }
 
     isComplete(): boolean {
-        return !!this.token && !!this.user && !!this.organization && !!this.userPrivateKey && !this.preventComplete
+        return !!this.token && !!this.user && !!this.organization && !this.preventComplete
     }
 
     /**
@@ -238,25 +170,6 @@ export class Session implements RequestMiddleware {
         this.token = new ManagedToken(token, () => {
             this.onTokenChanged()
         });
-    }
-
-    async setEncryptionKey(authEncryptionKey: string, preload: { user: MyUser; userPrivateKey: string } | null = null) {
-        if (!this.token) {
-            throw new Error("You can only set the encryption key after setting the token")
-        }
-        this.authEncryptionKey = authEncryptionKey
-
-        if (preload) {
-            this.user = preload.user
-            this.userPrivateKey = preload.userPrivateKey
-        }
-
-        this.onTokenChanged();
-
-        // Start loading the user and encryption keys
-        if (!preload) {
-            await this.updateData()
-        }
     }
 
     async fetchUser(shouldRetry = true): Promise<MyUser> {
@@ -361,7 +274,7 @@ export class Session implements RequestMiddleware {
      * 
      * @param force Always fetch new information, even when it is available
      * @param shouldRetry Keep retrying on network or server issues
-     * @param background If we don't need to update the data right away, initiate a background update
+     * @param background If we don't need to update the data right away, initiate a forced background update
      */
     async updateData(force = false, shouldRetry = true, background = false) {
         if (force) {
@@ -380,7 +293,6 @@ export class Session implements RequestMiddleware {
                 fetched++
                 await this.fetchOrganization(shouldRetry)
             }
-            await this.updateKeys()
 
             if (fetched < 2 && background) {
                 // Initiate a slow background update without retry
@@ -398,27 +310,6 @@ export class Session implements RequestMiddleware {
         }
     }
 
-    getUserPrivateKey() {
-        return this.userPrivateKey
-    }
-
-    getAuthEncryptionKey() {
-        return this.authEncryptionKey
-    }
-
-    async updateKeys() {
-        console.log("Decrypting session keys...")
-        if (!this.user) {
-            throw new Error("Can't update keys if user is not set")
-        }
-
-        if (!this.authEncryptionKey) {
-            throw new Error("Can't update keys if authEncryptionKey is not set")
-        }
-        this.userPrivateKey = await Sodium.decryptMessage(this.user.encryptedPrivateKey, this.authEncryptionKey)
-        this.callListeners("userPrivateKey")
-    }
-
     // Logout without clearing this token
     temporaryLogout() {
         // We do not call ontoken changed -> prevent saving!!!!
@@ -432,19 +323,12 @@ export class Session implements RequestMiddleware {
         }
     }
 
-    clearKeys() {
-        this.authEncryptionKey = null;
-        this.userPrivateKey = null
-        this.callListeners("userPrivateKey")
-    }
-
     logout() {
         if (this.token) {
             this.token.onChange = () => {
                 // emtpy
             }
             this.token = null;
-            this.clearKeys()
             this.user = null; // force refetch in the future
             this.onTokenChanged();
             //LoginHelper.clearAwaitingKeys()

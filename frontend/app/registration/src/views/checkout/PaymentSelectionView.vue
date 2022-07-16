@@ -118,8 +118,8 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             })
 
             const payment = response.data.payment
-            const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups, OrganizationManager.organization)
-            await MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
+            const registrations = MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups, OrganizationManager.organization)
+            MemberManager.setMembers(new KeychainedResponse({ data: response.data.members, keychainItems: []}))
 
             if (payment && payment.status !== PaymentStatus.Succeeded) {
                 PaymentHandler.handlePayment({

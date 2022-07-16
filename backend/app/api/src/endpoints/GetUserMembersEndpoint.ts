@@ -1,9 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { KeychainItem } from '@stamhoofd/models';
 import { Member } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations, KeychainedResponse, KeychainItem as KeychainItemStruct } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, KeychainedResponse } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
@@ -47,41 +46,10 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         const user = token.user
 
         const members = await Member.getMembersWithRegistrationForUser(user)
-        if (members.length == 0) {
-            return new Response(new KeychainedResponse({
-                data: [],
-                keychainItems: []
-            }));
-        }
-
-        // Query all the keys needed
-        const otherKeys: Set<string> = new Set();
-        for (const member of members) {
-            for (const details of member.encryptedDetails) {
-                // Only keys for organization, because else this might be too big
-                otherKeys.add(details.publicKey)
-            }
-        }
-
-        // Load the needed keychains the user has access to
-        if (otherKeys.size > 0) {
-            const keychainItems = await KeychainItem.where({
-                userId: user.id,
-                publicKey: {
-                    sign: "IN",
-                    value: [...otherKeys.values()]
-                }
-            })
-            return new Response(new KeychainedResponse({
-                data: members.map(m => m.getStructureWithRegistrations()),
-                keychainItems: keychainItems.map(m => KeychainItemStruct.create(m))
-            }));
-        }
-
+        
         return new Response(new KeychainedResponse({
             data: members.map(m => m.getStructureWithRegistrations()),
             keychainItems: []
         }));
-        
     }
 }

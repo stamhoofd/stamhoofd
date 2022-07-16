@@ -1,28 +1,11 @@
-import * as Sentry from '@sentry/browser';
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, MapDecoder, ObjectData, StringDecoder, VersionBox } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, ObjectData } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
-import { Sodium } from '@stamhoofd/crypto';
-import { ChallengeResponseStruct, ChangeOrganizationKeyRequest, CreateOrganization, EncryptedMemberWithRegistrations, Invite, InviteKeychainItem, KeychainedResponseDecoder, KeychainItem, KeyConstants, NewInvite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { CreateOrganization, Invite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
-import { Keychain } from './Keychain';
 import { NetworkManager } from './NetworkManager';
 import { Session } from './Session';
 import { SessionManager } from './SessionManager';
-
-class StoredKeys extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    authEncryptionKey: string
-
-    /**
-     * In case we don't have a token after validation (validatoin happened on other browser or device)
-     */
-    @field({ decoder: StringDecoder })
-    authSignPrivateKey: string
-
-    @field({ decoder: StringDecoder })
-    email: string
-}
 
 class StoredInvite extends AutoEncoder {
     @field({ decoder: Invite })
@@ -30,58 +13,7 @@ class StoredInvite extends AutoEncoder {
 }
 
 export class LoginHelper {
-    /**
-     * When email verification is needed (signup, login), we temporary need to
-     * store the password in memory + session storage for every token we have to allow a smooth login after validation
-     * We use the password to set the encryption key after successful validation
-     */
-    private static AWAITING_KEYS = new Map<string, StoredKeys>()
     private static STORED_INVITES: StoredInvite[] = []
-
-    static addTemporaryKey(token: string, keys: StoredKeys) {
-        this.AWAITING_KEYS.set(token, keys)
-        this.saveAwaitingKeys()
-    }
-
-    static clearAwaitingKeys() {
-        this.AWAITING_KEYS = new Map<string, StoredKeys>()
-        localStorage.removeItem("AWAITING_KEYS")
-    }
-
-    private static saveAwaitingKeys() {
-        // We cannot use sessionStorage, because links in e-mails will start a new session
-        localStorage.setItem("AWAITING_KEYS", JSON.stringify(
-            Object.fromEntries(
-                Array.from(this.AWAITING_KEYS).map(
-                    ([str, keys]) => [str, keys.encode({ version: Version })]
-                )
-            )
-        ))
-    }
-
-    static deleteTemporaryKey(token: string) {
-        this.AWAITING_KEYS.delete(token)
-        this.saveAwaitingKeys()
-    }
-
-    static getTemporaryKey(token: string): StoredKeys | null {
-        // Never get awaiting keys from memory, because a different tab might have already changed it
-        const stored = localStorage.getItem("AWAITING_KEYS")
-        if (!stored) {
-            return null
-        }
-
-        try {
-            const decoded = JSON.parse(stored)
-            const ob = new ObjectData(decoded, { version: Version })
-            this.AWAITING_KEYS = ob.decode(new MapDecoder(StringDecoder, StoredKeys as Decoder<StoredKeys>))
-            return this.AWAITING_KEYS.get(token) ?? null
-        } catch(e) {
-            console.error(e)
-        }
-        return null
-    }
-
 
     static addStoredInvite(invite: StoredInvite) {
         this.getStoredInvites()
@@ -114,187 +46,6 @@ export class LoginHelper {
             console.error(e)
         }
         return []
-    }
-
-    static async createSignKeys(password: string, authSignKeyConstants: KeyConstants): Promise<{ publicKey: string; privateKey: string }> {
-        return new Promise((resolve, reject) => {
-            const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
-            let statusPoller: number | null = null
-
-            myWorker.onmessage = (e) => {
-                const authSignKeys = e.data
-
-                // Requset challenge
-                myWorker.terminate()
-
-                if (statusPoller !== null) {
-                    clearInterval(statusPoller)
-                    statusPoller = null
-                }
-                resolve(authSignKeys)
-            }
-
-            myWorker.onerror = (e) => {
-                // todo
-                console.error(e);
-                myWorker.terminate();
-
-                if (statusPoller !== null) {
-                    clearInterval(statusPoller)
-                    statusPoller = null
-                }
-                reject(e);
-                Sentry.captureException(e);
-            }
-
-            myWorker.postMessage({
-                type: "signKeys",
-                password,
-                authSignKeyConstants: authSignKeyConstants.encode({ version: Version })
-            });
-
-            // This might sound crazy, but we tested this a lot.
-            // We need to create a useless poller interval. Don't even need to communicate with the web worker.
-            // This solves an issue on Firefox
-            // where the browser decides to kill the web worker without any feedback (no error / messages...)
-            // If we somehow keep the browser busy, it keeps working
-            // You can inspect the running workers via about:debugging#/runtime/this-firefox
-            statusPoller = window.setInterval(() => {
-                console.log("Polling worker status...")
-                //myWorker.postMessage({
-                //   "type": "status",
-                //})
-            }, 1000)
-        })
-    }
-
-    static async createEncryptionKey(password: string, authEncryptionKeyConstants: KeyConstants): Promise<string> {
-        return new Promise((resolve, reject) => {
-            console.log("starting encryption key worker")
-            const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
-            let statusPoller: number | null = null
-
-            myWorker.onmessage = (e) => {
-                const key = e.data
-
-                // Requset challenge
-                myWorker.terminate()
-
-                if (statusPoller !== null) {
-                    clearInterval(statusPoller)
-                    statusPoller = null
-                }
-                resolve(key)
-            }
-
-            myWorker.onerror = (e) => {
-                // todo
-                console.error(e);
-                myWorker.terminate();
-
-                if (statusPoller !== null) {
-                    clearInterval(statusPoller)
-                    statusPoller = null
-                }
-                reject(e);
-                Sentry.captureException(e);
-                
-            }
-
-            myWorker.postMessage({
-                type: "encryptionKey",
-                password,
-                authEncryptionKeyConstants: authEncryptionKeyConstants.encode({ version: Version })
-            });
-
-            // This might sound crazy, but we tested this a lot.
-            // We need to create a useless poller interval. Don't even need to communicate with the web worker.
-            // This solves an issue on Firefox
-            // where the browser decides to kill the web worker without any feedback (no error / messages...)
-            // If we somehow keep the browser busy, it keeps working
-            // You can inspect the running workers via about:debugging#/runtime/this-firefox
-            statusPoller = window.setInterval(() => {
-                console.log("Polling worker status...")
-                //myWorker.postMessage({
-                //   "type": "status",
-                //})
-            }, 1000)
-        })
-    }
-
-    static async createKeys(password: string): Promise<{ authSignKeyPair; authEncryptionSecretKey; authSignKeyConstants; authEncryptionKeyConstants }> {
-        return new Promise((resolve, reject) => {
-            //const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url))
-            console.log("Creating a new key worker...")
-            const myWorker = new Worker(new URL("@stamhoofd/workers/KeyWorker.ts", import.meta.url));
-
-            let statusPoller: number | null = null
-            
-            // new KeyWorker();
-
-            myWorker.onmessage = (e) => {
-                myWorker.terminate()
-
-                if (statusPoller !== null) {
-                    clearInterval(statusPoller)
-                    statusPoller = null
-                }
-                
-                try {
-                    const {
-                        authSignKeyPair,
-                        authEncryptionSecretKey
-                    } = e.data;
-
-                    const authSignKeyConstantsEncoded = e.data.authSignKeyConstants;
-                    const authEncryptionKeyConstantsEncoded = e.data.authEncryptionKeyConstants;
-
-                    const authSignKeyConstants = KeyConstants.decode(new ObjectData(authSignKeyConstantsEncoded, { version: Version }))
-                    const authEncryptionKeyConstants = KeyConstants.decode(new ObjectData(authEncryptionKeyConstantsEncoded, { version: Version }))
-
-                    // Requset challenge
-                    resolve({
-                        authSignKeyPair,
-                        authEncryptionSecretKey,
-                        authSignKeyConstants,
-                        authEncryptionKeyConstants
-                    })
-                } catch (e) {
-                    reject(e)
-                }
-            }
-
-            myWorker.onmessageerror
-
-            myWorker.onerror = (e) => {
-                console.error(e);
-                if (statusPoller !== null) {
-                    clearInterval(statusPoller)
-                    statusPoller = null
-                }
-                myWorker.terminate();
-                reject(e);
-                Sentry.captureException(e);
-            }
-
-            myWorker.postMessage({
-                "type": "keys",
-                "password": password
-            });
-
-            // This might sound crazy, but we tested this a lot.
-            // We need to create a useless poller interval. Don't even need to communicate with the web worker.
-            // This solves an issue on Firefox
-            // where the browser decides to kill the web worker without any feedback (no error / messages...)
-            // If we somehow keep the browser busy, it keeps working
-            // You can inspect the running workers via about:debugging#/runtime/this-firefox
-            statusPoller = window.setInterval(() => {
-                console.log("Polling worker status...")
-                //myWorker.postMessage({
-                //   "type": "status",
-                //})
-            }, 1000)
-        })
     }
 
     /**
@@ -348,6 +99,10 @@ export class LoginHelper {
         //await SessionManager.setCurrentSession(session)
     }
 
+    /**
+     * Resend the email verification email (if it is still valid)
+     * @returns stop: close the modal - the token is expired and you need to login again
+     */
     static async retryEmail(session: Session, token: string): Promise<boolean> {
         const response = await session.server.request({
             method: "POST",
@@ -360,27 +115,15 @@ export class LoginHelper {
 
         if (!response.data.valid) {
             // the code has been used or is expired
-            session.loadFromStorage()
+
+            // Check if we are now logged in (link might have been opened in a new tab)
+            await session.loadFromStorage()
             if (session.canGetCompleted()) {
                 // yay! We are signed in
                 await session.updateData(true)
                 return true
             }
 
-            const savedKeys = this.getTemporaryKey(token)
-            if (!savedKeys) {
-                return true
-            }
-
-            // Try to login with stored key
-            try {
-                console.log("Trying to login with a saved key...")
-                await this.login(session, savedKeys.email, savedKeys)
-            } catch (e) {
-                // If it fails: just dismiss. The token is invalid
-                console.error(e)
-                return true
-            }
             return true
         }
         return false
@@ -401,27 +144,15 @@ export class LoginHelper {
 
         if (!response.data.valid) {
             // the code has been used or is expired
-            session.loadFromStorage()
+
+            // Check if we are now logged in (link might have been opened in a new tab)
+            await session.loadFromStorage()
             if (session.canGetCompleted()) {
                 // yay! We are signed in
                 await session.updateData(true)
                 return true
             }
 
-            const savedKeys = this.getTemporaryKey(token)
-            if (!savedKeys) {
-                return true
-            }
-
-            // Try to login with stored key
-            try {
-                console.log("Trying to login with a saved key...")
-                await this.login(session, savedKeys.email, savedKeys)
-            } catch (e) {
-                // If it fails: just dismiss. The token is invalid
-                console.error(e)
-                return true
-            }
             return true
         }
         return false
@@ -437,31 +168,6 @@ export class LoginHelper {
             }),
             decoder: Token as Decoder<Token>
         })
-
-        // Yay, we have a token!
-        // But only use this token if we still have the encryptionKey stored in our cache
-        // else, just return  and let the view return to home and sign in again
-        const storedKeys = this.getTemporaryKey(token)
-
-        if (!storedKeys) {
-            // Warning: it is possible that this code + token is from a different user
-            // than the current user in session.
-            // So never set the token here, since we cannot swap the encryption key too
-
-            // We are verified, but can't use the token without password.
-            // Could be that we are already signed in (but doesn't matter)
-
-            // Update the user for sure (could have changed)
-            // e.g. when changing password
-            if (session.canGetCompleted()) {
-                await session.fetchUser()
-            }
-            
-            console.warn("Email verified, but no encryptionKey found")
-            return;
-        }
-        this.deleteTemporaryKey(token)
-        session.clearKeys()
         
         try {
             session.preventComplete = true
@@ -473,8 +179,6 @@ export class LoginHelper {
             // Request additional data
             console.log("Fetching user")
             await session.fetchUser()
-
-            await session.setEncryptionKey(storedKeys.authEncryptionKey)
 
             // if user / organization got cleared due to an invite
             if (!session.isComplete()) {
@@ -488,8 +192,60 @@ export class LoginHelper {
         await SessionManager.setCurrentSession(session)
     }
 
-
     static async login(
+        session: Session, 
+        email: string, 
+        password: string
+    ): Promise<{ verificationToken?: string }> {
+        let tokenResponse: RequestResult<Token>
+        try {
+            tokenResponse = await session.server.request({
+                method: "POST",
+                path: "/oauth/token",
+                body: { grant_type: "password", username: email, password },
+                decoder: Token as Decoder<Token>,
+                shouldRetry: false
+            })
+        } catch (e) {
+            if ((isSimpleError(e) || isSimpleErrors(e))) {
+                const error = e.getCode("verify_email")
+                if (error) {
+                    const meta = SignupResponse.decode(new ObjectData(error.meta, { version: Version }))
+
+                    return {
+                        verificationToken: meta.token
+                    }
+                }
+                
+            }
+            throw e
+        }
+
+        // No need to keep awaiting keys now
+        //this.clearAwaitingKeys()
+
+        console.log("Set token")
+        session.setToken(tokenResponse.data)
+
+        // Request additional data
+        console.log("Fetching user")
+        await session.fetchUser()
+        console.log("ok")
+
+        await this.tradeInvitesIfNeeded(session)
+
+        // if user / orgaznization got cleared due to an invite
+        if (!session.isComplete()) {
+            await session.updateData(false, false)
+            // need to wait on this because it changes the permissions
+        }
+
+        await SessionManager.setCurrentSession(session)
+        return {}
+    }
+
+
+    /*static async loginOld(
         session: Session, 
         email: string, 
         password: string | ({ authSignPrivateKey: string; authEncryptionKey: string })
@@ -616,32 +372,15 @@ export class LoginHelper {
         await SessionManager.setCurrentSession(session)
         
         return {}
-    }
+    }*/
 
     static async signUpOrganization(organization: Organization, email: string, password: string, firstName: string | null = null, lastName: string | null = null, registerCode: string | null = null): Promise<string> {
-        const keys = await this.createKeys(password)
-
-        const userKeyPair = await Sodium.generateEncryptionKeyPair();
-        const organizationKeyPair = await Sodium.generateEncryptionKeyPair();
-
         const user = NewUser.create({
             email,
             firstName,
             lastName,
-            publicKey: userKeyPair.publicKey,
-            publicAuthSignKey: keys.authSignKeyPair.publicKey,
-            authSignKeyConstants: keys.authSignKeyConstants,
-            authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, keys.authEncryptionSecretKey)
+            password
         });
-
-        organization.publicKey = organizationKeyPair.publicKey
-        organization.privateMeta!.privateKey = organizationKeyPair.privateKey
-
-        const item = KeychainItem.create({
-            publicKey: organization.publicKey,
-            encryptedPrivateKey: await Sodium.sealMessageAuthenticated(organizationKeyPair.privateKey, userKeyPair.publicKey, userKeyPair.privateKey),
-        })
 
         // Do netwowrk request to create organization
         const response = await NetworkManager.server.request({
@@ -650,21 +389,11 @@ export class LoginHelper {
             body: CreateOrganization.create({
                 organization,
                 user,
-                keychainItems: [
-                    item
-                ],
                 registerCode
             }),
             decoder: SignupResponse as Decoder<SignupResponse>
         })
-
-        // Save encryption key until verified
-        this.clearAwaitingKeys()
-        this.addTemporaryKey(response.data.token, StoredKeys.create({
-            email,
-            authEncryptionKey: keys.authEncryptionSecretKey,
-            authSignPrivateKey: keys.authSignKeyPair.privateKey
-        }))
+       
         return response.data.token
 
         // Auomatically assign all prmissions (frontend side)
@@ -695,52 +424,12 @@ export class LoginHelper {
         return response.data
     }
 
-    static async changePassword(session: Session, password: string, force = false) {
+    static async changePassword(session: Session, password: string) {
         console.log("Change password. Start.")
-        const keys = await this.createKeys(password)
-
-        let userPrivateKey = session.getUserPrivateKey();
-        let publicKey: string | undefined = undefined
-        let requestKeys = session.user!.requestKeys
-        if (!userPrivateKey) {
-            if (!force) {
-                throw new SimpleError({
-                    code: "missing_key",
-                    message: "Je kan je wachtwoord niet veranderen als je geen toegang hebt tot je encryptie-sleutel."
-                })
-            }
-            const userKeyPair = await Sodium.generateEncryptionKeyPair();
-            userPrivateKey = userKeyPair.privateKey
-            publicKey = userKeyPair.publicKey
-
-            // Check if this user has memebrs or was an administrator
-            if (session.user?.permissions ?? null !== null) {
-                requestKeys = true
-            } else {
-                try {
-                    const response = await session.authenticatedServer.request({
-                        method: "GET",
-                        path: "/members",
-                        decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
-                    })
-                    if (response.data.data.length > 0) {
-                        // We'll lose access to these members data
-                        requestKeys = true
-                    }
-                } catch (e) {
-                    console.error(e)
-                }
-            }
-        }
 
         const patch = NewUser.patch({
             id: session.user!.id,
-            publicKey,
-            requestKeys: requestKeys ? true : undefined,
-            publicAuthSignKey: keys.authSignKeyPair.publicKey,
-            authSignKeyConstants: keys.authSignKeyConstants,
-            authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey, keys.authEncryptionSecretKey)
+            password
         })
 
         // Do netwowrk request to create organization
@@ -751,81 +440,7 @@ export class LoginHelper {
             decoder: User
         })
 
-        if (session.user) {
-            // Clear user
-            session.user = null;
-        }
-
-        // Clear all known keys
-        // -> initiate loading screen
-        session.clearKeys()
-
-        await session.setEncryptionKey(keys.authEncryptionSecretKey)
-    }
-
-    static async fixPublicKey(session: Session) {
-        const userPrivateKey = session.getUserPrivateKey();
-        const authEncryptionKey = session.getAuthEncryptionKey()
-        if (!userPrivateKey || !authEncryptionKey) {
-            throw new Error("Encryption key not set")
-        }
-
-        const patch = NewUser.patch({
-            id: session.user!.id,
-            publicKey: await Sodium.getEncryptionPublicKey(userPrivateKey),
-            publicAuthSignKey: session.user!.publicAuthSignKey,
-            authSignKeyConstants: session.user!.authSignKeyConstants,
-            authEncryptionKeyConstants: session.user!.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(userPrivateKey, authEncryptionKey)
-        })
-
-        // Gather all keychain items, and check which ones are still valid
-        const keychain = Keychain.items
-
-        // Add the keys to the keychain (if not already present)
-        const decryptedItems: { publicKey: string; privateKey: string }[] = []
-        for (const [_, item] of keychain) {
-            try {
-                const decrypted = await session.decryptKeychainItem(item)
-                decryptedItems.push(decrypted)
-            } catch (e) {
-                console.error(e)
-            }
-        }
-
-        // Do netwowrk request to create organization
-        const response = await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/user/"+session.user!.id,
-            body: patch,
-            decoder: User
-        })
-
-        if (session.user) {
-            // Clear user
-            session.user = null;
-        }
-
-        await session.setEncryptionKey(authEncryptionKey)
-
-        // Readd keychains
-        const encryptedItems: KeychainItem[] = []
-        for (const item of decryptedItems) {
-            try {
-                const encryptedItem = await session.createKeychainItem(item)
-                encryptedItems.push(encryptedItem)
-            } catch (e) {
-                console.error(e)
-            }
-        }
-
-        if (encryptedItems.length > 0) {
-            const response = await session.authenticatedServer.request({
-                method: "POST",
-                path: "/keychain",
-                body: encryptedItems
-            })
-        }
+        await session.updateData(true, false)
     }
 
     static async patchUser(session: Session, patch: AutoEncoderPatchType<User>): Promise<{ verificationToken?: string }> {
@@ -858,19 +473,11 @@ export class LoginHelper {
     }
 
     static async signUp(session: Session, email: string, password: string, firstName: string | null = null, lastName: string | null = null): Promise<string> {
-        const keys = await this.createKeys(password)
-
-        const userKeyPair = await Sodium.generateEncryptionKeyPair();
-
         const user = NewUser.create({
             email,
             firstName,
             lastName,
-            publicKey: userKeyPair.publicKey,
-            publicAuthSignKey: keys.authSignKeyPair.publicKey,
-            authSignKeyConstants: keys.authSignKeyConstants,
-            authEncryptionKeyConstants: keys.authEncryptionKeyConstants,
-            encryptedPrivateKey: await Sodium.encryptMessage(userKeyPair.privateKey, keys.authEncryptionSecretKey)
+            password
         });
 
         // Do netwowrk request to create organization
@@ -886,13 +493,6 @@ export class LoginHelper {
             session.user = null;
         }
 
-        // Save encryption key until verified
-        this.clearAwaitingKeys()
-        this.addTemporaryKey(response.data.token, StoredKeys.create({
-            email,
-            authEncryptionKey: keys.authEncryptionSecretKey,
-            authSignPrivateKey: keys.authSignKeyPair.privateKey
-        }))
         return response.data.token
     }
 }

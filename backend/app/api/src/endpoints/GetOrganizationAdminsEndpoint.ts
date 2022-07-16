@@ -54,14 +54,14 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
                 continue;
             }
             inviteStructs.push(InviteStruct.create(Object.assign({}, i, {
-                receiver: receiver ? UserStruct.create(receiver) : null,
-                sender: UserStruct.create(sender),
+                receiver: receiver ? UserStruct.create({...receiver, hasAccount: receiver.hasAccount()}) : null,
+                sender: UserStruct.create({...sender, hasAccount: sender.hasAccount()}),
                 organization: OrganizationSimple.create(user.organization)
             })))
         }
 
         return new Response(OrganizationAdmins.create({
-            users: admins.map(a => UserStruct.create(a)),
+            users: admins.map(a => UserStruct.create({...a, hasAccount: a.hasAccount()})),
             invites: inviteStructs
         }));
     }

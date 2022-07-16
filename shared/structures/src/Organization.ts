@@ -52,8 +52,11 @@ export class Organization extends AutoEncoder {
     @field({ decoder: Address })
     address: Address;
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: StringDecoder })
-    publicKey: string;
+    publicKey = '';
 
     /**
      * All the available groups are listed here. They are only 'active' and visible when inside a category. Please remove them here if they are inactive.

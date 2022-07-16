@@ -529,11 +529,11 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get activeAccounts() {
-        return this.member.users.filter(u => u.publicKey !== null)
+        return this.member.users.filter(u => u.hasAccount)
     }
 
     get placeholderAccounts() {
-        return this.member.users.filter(u => u.publicKey === null)
+        return this.member.users.filter(u => !u.hasAccount)
     }
 
     getInvalidEmailDescription(email: string) {

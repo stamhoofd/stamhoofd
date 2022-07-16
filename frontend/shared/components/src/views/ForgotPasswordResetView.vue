@@ -8,13 +8,6 @@
 
             <p>Stel een nieuw wachtwoord in voor jouw account.</p>
 
-            <p v-if="hasPermissions" class="error-box">
-                Opgelet! Als je je wachtwoord opnieuw instelt verlies je toegang tot alle data van je leden. Er is geen mogelijkheid om deze hierna nog te herstellen TENZIJ een andere beheerder van jouw vereniging nog toegang heeft tot zijn account.
-            </p>
-            <p v-else class="warning-box">
-                Hou er rekening mee dat we jouw account terug moeten goedkeuren als je jouw wachtwoord bent vergeten.
-            </p>
-
             <STErrorsDefault :error-box="errorBox" />
             
             <EmailInput v-if="!loadingToken" v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" disabled />
@@ -41,7 +34,7 @@
 
         <STFloatingFooter>
             <LoadingButton :loading="loading">
-                <button class="button primary full">
+                <button class="button primary full" type="submit">
                     <span class="icon lock" />
                     <span>Wachtwoord wijzigen</span>
                 </button>
@@ -173,12 +166,12 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
         const component = new CenteredMessage("Wachtwoord wijzigen...", "We maken gebruik van lange wiskundige berekeningen die jouw gegevens beveiligen. Dit duurt maar heel even.", "loading").show()
 
         try {
-            await LoginHelper.changePassword(this.session, this.password, true)
+            await LoginHelper.changePassword(this.session, this.password)
             
             this.loading = false;
             component.hide()
 
-            SessionManager.setCurrentSession(this.session)
+            await SessionManager.setCurrentSession(this.session)
             this.dismiss({ force: true })
             
         } catch (e) {

@@ -244,8 +244,6 @@ export default new Migration(async () => {
     for (const [id, organization] of failedOrganizations) {
         console.log(`Failed to decrypt member data for ${organization.name} (${organization.id})`)
     }
-
-    throw new Error("WIP");
 });
 
 

@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { EmailVerificationCode } from '@stamhoofd/models';
 import { Organization } from "@stamhoofd/models";
@@ -32,21 +32,6 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Organization.fromApiHost(request.host);
 
-        if (request.request.getVersion() < 52) {
-            // this allows a user enumeration attack, but we will support this for a couple of days
-            // because we need this fallback for older clients
-            // Automatically disabled after 15th February 2021
-
-            throw new SimpleErrors(
-                new SimpleError({
-                    code: "outdated_client",
-                    message: "Client is out of date.",
-                    human: "Er is ondertussen een nieuwe versie beschikbaar van onze inschrijvingspagina. Herlaad de pagina en wis indien nodig je browsercache. ",
-                    statusCode: 400
-                })
-            );
-        }
-
         const u = await User.getForRegister(organization, request.body.email)
 
         // Don't optimize. Always run two queries atm.
@@ -71,8 +56,6 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             }
 
             user = u
-
-
 
             if (u.hasAccount()) {
                 // Send an e-mail to say you already have an account + follow password forgot flow
@@ -117,10 +100,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         }
 
         return new Response(SignupResponse.create({
-            token: code.token,
-
-            // To avoid user enumeration attack, always return the same encryption constants
-            authEncryptionKeyConstants: request.body.authEncryptionKeyConstants
+            token: code.token
         }));
     }
 }

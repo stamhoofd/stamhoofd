@@ -120,7 +120,7 @@ export class Token extends Model {
             throw new Error("Unexpected error when setting a relationship")
         }
 
-        if (!token.user.publicKey) {
+        if (!token.user.hasAccount()) {
             throw new SimpleError({
                 code: "not_activated",
                 message: "This user is not yet activated",
@@ -128,6 +128,9 @@ export class Token extends Model {
                 statusCode: 401
             })
         }
+
+        // Do not leak the password property
+        token.user.eraseProperty('password');
 
         return token as UserWithOrganizationAndUser
     }
@@ -141,7 +144,7 @@ export class Token extends Model {
      */
     static async getByAccessToken(accessToken: string, ignoreExpireDate = false): Promise<TokenWithUser | undefined> {
         const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect("user")}  FROM ${
+            `SELECT ${this.getDefaultSelect()}, user.*  FROM ${
                 this.table
             } ${Token.user.joinQuery(this.table, "user")} WHERE ${this.primary.name} = ? LIMIT 1 `,
             [accessToken]

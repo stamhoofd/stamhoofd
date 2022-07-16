@@ -106,8 +106,8 @@ export class CreateInviteEndpoint extends Endpoint<Params, Query, Body, Response
         await invite.save()
 
         return new Response(InviteStruct.create(Object.assign({}, invite, {
-            receiver: receiver ? UserStruct.create(receiver) : null,
-            sender: UserStruct.create(user),
+            receiver: receiver ? UserStruct.create({...receiver, hasAccount: receiver.hasAccount()}) : null,
+            sender: UserStruct.create({...user, hasAccount: user.hasAccount()}),
             organization: OrganizationSimple.create(user.organization)
         })));
     }
