@@ -197,7 +197,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         const parts =  UrlHelper.shared.getParts()
         const searchParams = UrlHelper.shared.getSearchParams()
         UrlHelper.setUrl("/")
-
+        document.title = "Ledenportaal - " + this.organization.name
         
         let didShow = false
 

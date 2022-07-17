@@ -93,11 +93,6 @@ export class RecordCategoryStep implements EditMemberStep {
             return records.length > 0
         }
 
-        if (details.isRecovered) {
-            // Only review if theses questions were never reviewed
-            return records.length > 0
-        }
-
         // Check all the properties in this category and check their last review times
         for (const record of records) {
             const answer = details.recordAnswers.find(a => a.settings.id === record.id)
@@ -149,11 +144,6 @@ export class BuiltInEditMemberStep implements EditMemberStep {
 
         switch (this.type) {
             case EditMemberStepType.Details: {
-                if (member.details.isRecovered) {
-                    const meta = member.getDetailsMeta()
-                    // Review if never entered or saved
-                    return !meta || !meta.hasMemberGeneral
-                }
                 // We still have all the data. Ask everything that is older than 3 months
                 if (member.details.reviewTimes.isOutdated("details", this.outdatedTime)) {
                     return true
@@ -180,11 +170,6 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             }
 
             case EditMemberStepType.Parents: {
-                if (member.details.isRecovered) {
-                    const meta = member.getDetailsMeta()
-                    // Review if never entered or saved
-                    return !meta || !meta.hasParents
-                }
                 // We still have all the data. Ask everything that is older than 3 months
                 return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
@@ -196,12 +181,6 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     return false
                 }
 
-                if (member.details.isRecovered) {
-                    
-                    const meta = member.getDetailsMeta()
-                    // Review if never entered or saved
-                    return !meta || !meta.hasEmergency
-                }
                 return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
 
