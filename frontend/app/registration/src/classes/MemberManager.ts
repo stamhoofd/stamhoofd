@@ -81,7 +81,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         patch.members.addPut(encryptedMember)
 
         // Also update other members that might have been changed (e.g. when a shared address have been changed)
-        const members = (this.members ?? []).filter(m => !m.details.isRecovered)
+        const members = this.members ?? []
         patch.patch(this.getEncryptedMembers(members))
 
         // Send the request
@@ -100,7 +100,7 @@ export class MemberManagerStatic extends MemberManagerBase {
      * Patch all members that are not placeholders, and force a save for the given members (even when they are placeholders)
      */
     async patchAllMembersWith(...patchMembers: MemberWithRegistrations[]) {
-        const members = (this.members ?? []).filter(m => !m.details.isRecovered)
+        const members = this.members ?? []
 
         for (const member of patchMembers) {
             const ex = members.findIndex(m => m.id == member.id)

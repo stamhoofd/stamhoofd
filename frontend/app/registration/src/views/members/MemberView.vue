@@ -17,10 +17,6 @@
                 Ga naar het mandje om de inschrijving af te ronden.
             </p>
 
-            <p v-if="member.details.isRecovered" class="warning-box">
-                Een deel van de gegevens van dit lid zijn versleuteld (zie uitleg onderaan) en momenteel (voor jou) onleesbaar. Dit komt omdat je een nieuw account hebt aangemaakt of omdat je jouw wachtwoord was vergeten. Je kan de gegevens momenteel niet allemaal bekijken tot we jou terug toegang hebben gegeven of tot je zelf alles terug ingeeft.
-            </p>
-
             <div v-if="member.activeRegistrations.length > 0" class="container">
                 <h2 class="style-with-button with-list">
                     <div>Ingeschreven voor</div>
@@ -214,10 +210,8 @@
 
         <STToolbar>
             <button slot="right" class="secundary button" type="button" @click="fullCheck">
-                <span v-if="member.details.isRecovered" class="icon edit" />
-                <span v-else class="icon search" />
-                <span v-if="member.details.isRecovered">Opnieuw invullen</span>
-                <span v-else>Nakijken</span>
+                <span class="icon edit" />
+                <span>Nakijken</span>
             </button>
             <button slot="right" class="primary button" type="button" @click="chooseGroups">
                 <span class="icon add" />

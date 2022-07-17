@@ -75,7 +75,9 @@ export default class App extends Vue {
             // Set organization and session
             const session = new Session(response.data.id)
             await session.loadFromStorage()       
-            session.setOrganization(response.data)         
+            session.setOrganization(response.data)        
+            
+            document.title = "Schrijf je in bij "+response.data.name
 
             // Set color
             if (response.data.meta.color) {

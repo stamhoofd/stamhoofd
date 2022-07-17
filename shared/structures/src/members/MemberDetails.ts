@@ -5,11 +5,9 @@ import { Address } from '../addresses/Address';
 import { Replacement } from '../endpoints/EmailRequest';
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
 import { NumberFilterDefinition } from '../filters/NumberFilter';
-import { StringFilterDefinition } from '../filters/StringFilter';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../Group';
 import { GroupGenderType } from '../GroupGenderType';
-import { Organization } from '../Organization';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { EmergencyContact } from './EmergencyContact';
 import { Gender } from './Gender';
@@ -170,20 +168,6 @@ export class MemberDetails extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 69 })
     isRecovered = false
-
-    /**
-     * @deprecated
-     */
-    get isPlaceholder() {
-        return this.isRecovered
-    }
-
-    /**
-     * @deprecated
-     */
-    setPlaceholder() {
-        this.isRecovered = true
-    }
 
     /**
      * Call this to clean up capitals in all the available data

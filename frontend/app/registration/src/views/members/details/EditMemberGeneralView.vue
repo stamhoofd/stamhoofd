@@ -3,9 +3,6 @@
         <h1 v-if="isNew">
             Wie ga je inschrijven?
         </h1>
-        <h1 v-else-if="details.isRecovered">
-            Gegevens aanvullen van {{ details.firstName }}
-        </h1>
         <h1 v-else>
             Gegevens nakijken van {{ details.firstName }}
         </h1>
