@@ -90,6 +90,10 @@
     > .button {
         &.text.button {
             color: inherit;
+
+            &:disabled, &.disabled {
+                opacity: 0.4;
+            }
         }
     }
 

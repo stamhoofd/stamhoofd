@@ -26,7 +26,7 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
+        const token = await Token.authenticate(request, {allowWithoutAccount: true});
 
         // Get user unrestriced
         const user = await User.getFull(token.user.id)
@@ -65,7 +65,6 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
                 })))
             )
         })
-        return new Response(st);      
-    
+        return new Response(st);
     }
 }

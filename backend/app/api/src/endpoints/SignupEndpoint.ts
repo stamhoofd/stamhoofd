@@ -88,6 +88,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 // user clicks on second e-mail -> this sets the hackers password instead 
                 user.verified = false
                 await user.changePassword(request.body)
+                await PasswordToken.clearFor(user.id)
                 await user.save()
             }
         }

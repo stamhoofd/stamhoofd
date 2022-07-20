@@ -1,12 +1,12 @@
 <template>
     <STInputBox :title="title" error-fields="address" :error-box="errorBox">
-        <input v-model="addressLine1" class="input" type="text" placeholder="Straat en nummer" name="street-address" autocomplete="street-address" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+        <input v-model="addressLine1" class="input" type="text" placeholder="Straat en nummer" name="street-address" autocomplete="street-address" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
         <div class="input-group">
             <div>
-                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @focus="onFocus" @blur="onBlur">
+                <input v-model="postalCode" class="input" type="text" placeholder="Postcode" name="postal-code" autocomplete="postal-code" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
             </div>
             <div>
-                <input v-model="city" class="input" type="text" placeholder="Gemeente" name="city" autocomplete="address-level2" @change="updateAddress" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
+                <input v-model="city" class="input" type="text" placeholder="Gemeente" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"> <!-- name needs to be city for safari autocomplete -->
             </div>
         </div>
 
@@ -132,9 +132,11 @@ export default class AddressInput extends Vue {
         }
     }
 
-    async isValid(isFinal: boolean): Promise<boolean> {
+    async isValid(isFinal: boolean, silent = false): Promise<boolean> {
         if (!this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
-            this.errorBox = null
+            if (!silent) {
+                this.errorBox = null
+            }
 
             if (this.value !== null) {
                 this.$emit("input", null)
@@ -144,14 +146,15 @@ export default class AddressInput extends Vue {
 
         if (this.required && this.addressLine1.length == 0 && this.postalCode.length == 0 && this.city.length == 0) {
             if (!isFinal) {
-                this.errorBox = null
+                if (!silent) {
+                    this.errorBox = null
+                }
 
                 if (this.nullable && this.value !== null) {
                     this.$emit("input", null)
                 }
                 return false
             }
-            
         }
 
         let address: Address
@@ -159,14 +162,15 @@ export default class AddressInput extends Vue {
         try {
             address = Address.createFromFields(this.addressLine1, this.postalCode, this.city, this.country)
 
-            if (!this.value || (this.validateServer && !(this.value instanceof ValidatedAddress)) || address.toString() != this.value.toString()) {
+            if (!this.value || (this.validateServer && !(this.value instanceof ValidatedAddress) && !silent && isFinal) || address.toString() != this.value.toString()) {
                 // Do we need to validate on the server?
-                if (this.validateServer) {
+                if (this.validateServer && !silent && isFinal) {
                     const response = await this.validateServer.request({
                         method: "POST",
                         path: "/address/validate",
                         body: address,
-                        decoder: ValidatedAddress as Decoder<ValidatedAddress>
+                        decoder: ValidatedAddress as Decoder<ValidatedAddress>,
+                        shouldRetry: false
                     })
                     this.$emit("input", response.data)
                 } else {
@@ -174,22 +178,27 @@ export default class AddressInput extends Vue {
                 }
             }
             
-            this.errorBox = null
-            this.pendingErrorBox = null
+            if (!silent) {
+                this.errorBox = null
+                this.pendingErrorBox = null
+            }
             return true
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace("address")
-                this.pendingErrorBox = new ErrorBox(e)
 
-                setTimeout( () => {
-                    if (!this.hasFocus) {
-                        this.errorBox = this.pendingErrorBox
-                    }
-                }, 200);
+                if (!silent) {
+                    this.pendingErrorBox = new ErrorBox(e)
+
+                    setTimeout( () => {
+                        if (!this.hasFocus) {
+                            this.errorBox = this.pendingErrorBox
+                        }
+                    }, 200);
+                }
             }
 
-            if (!this.required) {
+            if (!this.required && !silent) {
                 this.$emit("input", null)
             }
             return false
@@ -201,6 +210,16 @@ export default class AddressInput extends Vue {
             I18nController.shared.switchToLocale({ country: this.country }).catch(console.error)
         }
         this.isValid(false).catch(console.error)
+    }
+
+    /**
+     * Send real time input updates, but don't update error messages
+     */
+    updateAddressRealTime() {
+        if (this.country && this.linkCountryToLocale && I18nController.shared && I18nController.isValidCountry(this.country)) {
+            I18nController.shared.switchToLocale({ country: this.country }).catch(console.error)
+        }
+        this.isValid(false, true).catch(console.error)
     }
 }
 </script>

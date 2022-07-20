@@ -202,6 +202,10 @@ export class SessionManagerStatic {
             }
             this.setUserId();
             this.callListeners(changed)
+
+            if (changed === 'token' || changed === 'user') {
+                this.currentSession?.saveToStorage()
+            }
         })
 
         this.setUserId();

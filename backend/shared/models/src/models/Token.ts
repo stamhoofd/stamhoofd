@@ -65,18 +65,19 @@ export class Token extends Model {
 
     static user = new ManyToOneRelation(User, "user");
 
-    static async optionalAuthenticate(request: DecodedRequest<any, any, any>): Promise<UserWithOrganizationAndUser | undefined> {
+    static async optionalAuthenticate(request: DecodedRequest<any, any, any>, options?: {allowWithoutAccount: boolean}): Promise<UserWithOrganizationAndUser | undefined> {
         const header = request.headers.authorization
         if (!header) {
             return
         }
-        return this.authenticate(request)
+        return this.authenticate(request, options)
     }
 
     /**
      * Throws instead of returning undefined
+     * allowWithoutAccount: allow users who don't have a password yet to authenticate (required for users who want to set a password)
      */
-    static async authenticate(request: DecodedRequest<any, any, any>): Promise<UserWithOrganizationAndUser> {
+    static async authenticate(request: DecodedRequest<any, any, any>, {allowWithoutAccount} = {allowWithoutAccount: false}): Promise<UserWithOrganizationAndUser> {
         const organization = await Organization.getFromRequest(request);
         const header = request.headers.authorization
         if (!header) {
@@ -120,7 +121,7 @@ export class Token extends Model {
             throw new Error("Unexpected error when setting a relationship")
         }
 
-        if (!token.user.hasAccount()) {
+        if (!token.user.hasAccount() && !allowWithoutAccount) {
             throw new SimpleError({
                 code: "not_activated",
                 message: "This user is not yet activated",

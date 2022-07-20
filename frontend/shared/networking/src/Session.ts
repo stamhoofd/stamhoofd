@@ -156,7 +156,6 @@ export class Session implements RequestMiddleware {
     }
 
     protected onTokenChanged() {
-        this.saveToStorage()
         this.callListeners("token")
     }
 
@@ -186,7 +185,6 @@ export class Session implements RequestMiddleware {
             this.user = response.data
         }
         await this.checkUserInvites(this.user)
-        this.saveToStorage()
         this.callListeners("user")
         return response.data
     }

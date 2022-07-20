@@ -170,9 +170,6 @@ export default new Migration(async () => {
     const [result] = await Database.delete(q, [new Date(Date.now() - 1000 * 60 * 60 * 24 * 30)]);
     console.log(`Deleted ${result.affectedRows} inactive members`);
 
-    // Loop all organizations, and delete inactive ones
-    const admins = await User.where({ permissions: { sign: "!=", value: null }})
-
     const start = new Date()
     start.setDate(start.getDate() - 60)
 

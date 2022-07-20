@@ -89,17 +89,13 @@ export default class App extends Vue {
             // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
 
             const token = queryString.get('token');
+            const session = new Session(parts[1]);
+
             (this.$refs.modalStack as any).present({
                 url: currentPath,
                 adjustHistory: false,
                 components: [
-                    new ComponentWithProperties(PromiseView, {
-                        promise: async () => {
-                            const session = new Session(parts[1]);
-                            await session.loadFromStorage()
-                            return new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token })
-                        }
-                    }).setDisplayStyle("popup").setAnimated(false)
+                    new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false)
                 ]
             });
         }
@@ -308,7 +304,6 @@ export default class App extends Vue {
             let session = await SessionManager.getSessionForOrganization(organizationId)
             if (!session) {
                 session = new Session(organizationId)
-                await session.loadFromStorage()
             }
 
             if (session.user) {

@@ -149,7 +149,7 @@ export class LoginHelper {
             await session.loadFromStorage()
             if (session.canGetCompleted()) {
                 // yay! We are signed in
-                await session.updateData(true)
+                await SessionManager.setCurrentSession(session)
                 return true
             }
 
@@ -294,33 +294,27 @@ export class LoginHelper {
         return response.data
     }
 
-    static async changePassword(session: Session, password: string) {
+    static async changePassword(session: Session, password: string, email?: string) {
         console.log("Change password. Start.")
 
         const patch = NewUser.patch({
             id: session.user!.id,
-            password
+            password,
+            email
         })
 
-        // Do netwowrk request to create organization
-        const response = await session.authenticatedServer.request({
-            method: "PATCH",
-            path: "/user/"+session.user!.id,
-            body: patch,
-            decoder: User
-        })
-
-        await session.updateData(true, false)
+        return await this.patchUser(session, patch)
     }
 
-    static async patchUser(session: Session, patch: AutoEncoderPatchType<User>): Promise<{ verificationToken?: string }> {
+    static async patchUser(session: Session, patch: AutoEncoderPatchType<NewUser | User>): Promise<{ verificationToken?: string }> {
         // Do netwowrk request to create organization
         try {
             await session.authenticatedServer.request({
                 method: "PATCH",
                 path: "/user/"+patch.id,
                 body: patch,
-                decoder: User
+                decoder: User,
+                shouldRetry: false
             })
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e))) {
@@ -337,7 +331,7 @@ export class LoginHelper {
         }
 
         if (session.user!.id === patch.id) {
-            await session.updateData(true)
+            await session.updateData(true, false)
         }
         return {}
     }

@@ -74,7 +74,7 @@
             transform: scale(0.95, 0.95);
         }
 
-        &:disabled {
+        &:disabled, &.disabled {
             color: $color-gray-2;
             background: $color-background-shade;
             box-shadow: none;
@@ -347,7 +347,7 @@
             }
         }
 
-        &:disabled {
+        &:disabled, &.disabled {
             color: $color-gray-2;
             box-shadow: none;
             cursor: not-allowed;
@@ -467,7 +467,7 @@
         font-weight: $font-weight-semibold;
     }
 
-    &:disabled {
+    &:disabled, &.disabled {
         color: $color-gray-2 !important;
         box-shadow: none;
         cursor: not-allowed;
