@@ -41,33 +41,7 @@
                             <span v-if="admin.id === me.id" class="style-tag">
                                 Ik
                             </span>
-                            <span><span class="icon gray edit" /></span>
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-for="invite in getInviteAdmins()" :key="invite.id" :selectable="true" class="right-stack" @click="editInvite(invite)">
-                        <h2 class="style-title-list">
-                            {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
-                        </h2>
-                        <p class="style-description-small">
-                            {{ invite.userDetails.email }}
-                        </p>
-                        <p class="style-description-small">
-                            {{ permissionList(invite) }}
-                        </p>
-
-                        <span v-if="isExpired(invite)" class="style-tag warn only-smartphone">
-                            Vervallen
-                        </span>
-                        <span v-else class="style-tag warn only-smartphone">
-                            Niet geaccepteerd
-                        </span>
-
-                        <template slot="right">
-                            <span v-if="isExpired(invite)" class="style-tag warn hide-smartphone">
-                                Vervallen
-                            </span>
-                            <span v-else class="style-tag warn hide-smartphone">
+                            <span v-else-if="!admin.hasAccount" class="style-tag warn">
                                 Niet geaccepteerd
                             </span>
                             <span><span class="icon gray edit" /></span>
@@ -108,33 +82,7 @@
                                 <span v-if="admin.id === me.id" class="style-tag">
                                     Ik
                                 </span>
-                                <span><span class="icon gray edit" /></span>
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-for="invite in getInvitesForRole(role)" :key="invite.id" :selectable="true" class="right-stack" @click="editInvite(invite)">
-                            <h2 class="style-title-list">
-                                {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ invite.userDetails.email }}
-                            </p>
-                            <p class="style-description-small">
-                                {{ permissionList(invite) }}
-                            </p>
-
-                            <span v-if="isExpired(invite)" class="style-tag warn only-smartphone">
-                                Vervallen
-                            </span>
-                            <span v-else class="style-tag warn only-smartphone">
-                                Niet geaccepteerd
-                            </span>
-
-                            <template slot="right">
-                                <span v-if="isExpired(invite)" class="style-tag warn hide-smartphone">
-                                    Vervallen
-                                </span>
-                                <span v-else class="style-tag warn hide-smartphone">
+                                <span v-else-if="!admin.hasAccount" class="style-tag warn">
                                     Niet geaccepteerd
                                 </span>
                                 <span><span class="icon gray edit" /></span>
@@ -142,12 +90,12 @@
                         </STListItem>
                     </STList>
 
-                    <p v-if="getAdminsForRole(role).length + getInvitesForRole(role).length == 0" class="info-box">
+                    <p v-if="getAdminsForRole(role).length == 0" class="info-box">
                         Geen beheerders in deze groep
                     </p>
                 </div>
 
-                <div v-if="getAdminsWithoutRole().length > 0 || getInvitesWithoutRole().length > 0" class="container">
+                <div v-if="getAdminsWithoutRole().length > 0" class="container">
                     <hr>
                     <h2>
                         Beheerders die niet in een groep zitten
@@ -167,28 +115,12 @@
                             </p>
 
                             <template slot="right">
-                                <span><span class="icon gray edit" /></span>
-                            </template>
-                        </STListItem>
-
-                        <STListItem v-for="invite in getInvitesWithoutRole()" :key="invite.id" :selectable="true" class="right-stack" @click="editInvite(invite)">
-                            <h2 class="style-title-list">
-                                {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ invite.userDetails.email }}
-                            </p>
-                            <p class="style-description-small">
-                                {{ permissionList(invite) }}
-                            </p>
-
-                            <template slot="right">
-                                <p v-if="isExpired(invite)">
-                                    Uitnodiging vervallen
-                                </p>
-                                <p v-else>
-                                    Uitnodiging nog niet geaccepteerd
-                                </p>
+                                <span v-if="admin.id === me.id" class="style-tag">
+                                    Ik
+                                </span>
+                                <span v-else-if="!admin.hasAccount" class="style-tag warn">
+                                    Niet geaccepteerd
+                                </span>
                                 <span><span class="icon gray edit" /></span>
                             </template>
                         </STListItem>
@@ -198,13 +130,13 @@
                 <hr>
 
                 <p>
-                    <button class="button text" @click="addRole">
+                    <button class="button text" type="button" @click="addRole">
                         <span class="icon add" />
                         <span>Nieuwe beheerdersgroep toevoegen</span>
                     </button>
                 </p>
                 <p>
-                    <button class="button text" @click="createAdmin">
+                    <button class="button text" type="button" @click="createAdmin">
                         <span class="icon add" />
                         <span>Nieuwe beheerder toevoegen</span>
                     </button>
@@ -221,12 +153,13 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Invite, Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed, User } from '@stamhoofd/structures';
+import { Invite, Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import AdminInviteView from './AdminInviteView.vue';
+import AdminView from './AdminView.vue';
 import EditRoleView from "./EditRoleView.vue";
 
 @Component({
@@ -305,12 +238,12 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     createAdmin() {
         this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(AdminInviteView, {
-                onUpdateInvite: (patched: Invite | null) => {
-                    if (patched) {
-                        this.invites.push(patched)
-                    }
-                }
+            root: new ComponentWithProperties(AdminView, {
+                user: User.create({
+                    email: '',
+                    permissions: Permissions.create({ level: PermissionLevel.None })
+                }),
+                isNew: true
             }) 
         }).setDisplayStyle("popup"))
     }
@@ -349,18 +282,10 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     editAdmin(admin: User) {
         this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(AdminInviteView, { 
-                editUser: admin,
-                onUpdateUser: (patched: User | null) => {
-                    const i = this.admins.findIndex(a => a.id === admin.id)
-
-                    if (i != -1) {
-                        this.admins.splice(i, 1, ...patched ? [patched] : [])
-                    }
-                    
-                }
-            }) ,
-            
+            root: new ComponentWithProperties(AdminView, { 
+                user: admin,
+                isNew: false
+            })
         }).setDisplayStyle("popup"))
     }
 

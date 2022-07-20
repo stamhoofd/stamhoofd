@@ -26,7 +26,7 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.optionalAuthenticate(request);
+        const token = await Token.optionalAuthenticate(request, {allowWithoutAccount: true});
         const user = token?.user
         const organization = user?.organization ?? await Organization.fromApiHost(request.host);
 

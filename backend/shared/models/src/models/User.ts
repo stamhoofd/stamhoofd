@@ -181,7 +181,7 @@ export class User extends Model {
         // Read member + address from first row
         const user = this.fromRow(rows[0][this.table]) 
 
-        if (!user || !user.hasKeys()) {
+        if (!user) {
             return undefined
         }
         

@@ -116,6 +116,5 @@ export class CenteredMessage {
                 type: "secundary"
             })).show()
         })
-        
     }
 }

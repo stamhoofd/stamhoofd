@@ -94,20 +94,24 @@ export class PasswordToken extends Model {
     /***
      * Create a token without saving it
      */
-    static async createToken<U extends User>(user: U): Promise<PasswordTokenWithUser> {
+    static async createToken<U extends User>(user: U, validUntil?: Date): Promise<PasswordTokenWithUser> {
         const token = new PasswordToken().setRelation(PasswordToken.user, user);
-        token.validUntil = new Date();
-        token.validUntil.setTime(token.validUntil.getTime() + 3600 * 1000);
+
+        if (validUntil) {
+            token.validUntil = new Date(validUntil)
+        } else {
+            token.validUntil = new Date();
+            token.validUntil.setTime(token.validUntil.getTime() + 3 * 3600 * 1000);
+        }
         token.validUntil.setMilliseconds(0);
-     
         token.token = bs58.encode(await randomBytes(100)).toLowerCase();
         await token.save();
         return token;
     }
 
-    static async getPasswordRecoveryUrl(user: UserWithOrganization, i18n: I18n) {
+    static async getPasswordRecoveryUrl(user: UserWithOrganization, i18n: I18n, validUntil?: Date) {
         // Send an e-mail to say you already have an account + follow password forgot flow
-        const token = await PasswordToken.createToken(user)
+        const token = await PasswordToken.createToken(user, validUntil)
 
         let host: string;
         if (user.permissions) {
@@ -127,5 +131,10 @@ export class PasswordToken extends Model {
         // For now we don't add a token yet for security. We might add some sort of email validation thing later on
         const host = "https://"+user.organization.getHost()
         return Promise.resolve(host+"/login"+"?email="+encodeURIComponent(user.email)+"&hasAccount="+(user.hasAccount() ? 1 : 0));
+    }
+
+    static async clearFor(userId: string) {
+        const query = `DELETE from ${this.table} where userId = ?`;
+        await Database.delete(query, [userId])
     }
 }

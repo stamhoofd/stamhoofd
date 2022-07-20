@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EmailVerificationCode } from '@stamhoofd/models';
+import { EmailVerificationCode, PasswordToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { User } from '@stamhoofd/models';
 import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
@@ -31,7 +31,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const token = await Token.authenticate(request);
+        const token = await Token.authenticate(request, {allowWithoutAccount: true});
         const user = token.user
 
         if (((!user.permissions || !user.permissions.hasFullAccess()) && user.id != request.body.id) || request.params.id != request.body.id) {
@@ -52,7 +52,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         editUser.firstName = request.body.firstName ?? editUser.firstName
         editUser.lastName = request.body.lastName ?? editUser.lastName
 
-        if (request.body.permissions) {
+        if (request.body.permissions !== undefined) {
             if (!user.permissions || !user.permissions.hasFullAccess()) {
                 throw new SimpleError({
                     code: "permission_denied",
@@ -60,7 +60,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 })
             }
 
-            if (request.body.permissions.isPatch()) {
+            if (request.body.permissions && request.body.permissions.isPatch()) {
                 editUser.permissions = editUser.permissions ? editUser.permissions.patch(request.body.permissions) : Permissions.create({}).patch(request.body.permissions)
             } else {
                 editUser.permissions = request.body.permissions
@@ -70,6 +70,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         if (editUser.id == user.id && request.body.password) {
             // password changes
             await editUser.changePassword(request.body.password)
+            await PasswordToken.clearFor(editUser.id)
         }
 
         await editUser.save();

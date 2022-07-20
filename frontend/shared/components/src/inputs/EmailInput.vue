@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox">
-        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="emailRaw = $event.target.value; onTyping();">
     </STInputBox>
 </template>
 
@@ -54,6 +54,11 @@ export default class EmailInput extends Vue {
         this.emailRaw = val
     }
 
+    onTyping() {
+        // Silently send value to parents, but don't show visible errors yet
+        this.validate(false, true)
+    }
+
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
@@ -70,11 +75,13 @@ export default class EmailInput extends Vue {
         }
     }
 
-    validate(final = true) {
+    validate(final = true, silent = false) {
         this.emailRaw = this.emailRaw.trim().toLowerCase()
 
         if (!this.required && this.emailRaw.length == 0) {
-            this.errorBox = null
+            if (!silent) {
+                this.errorBox = null
+            }
 
             if (this.value !== null) {
                 this.$emit("input", null)
@@ -84,7 +91,9 @@ export default class EmailInput extends Vue {
 
         if (this.required && this.emailRaw.length == 0 && !final) {
             // Ignore empty email if not final
-            this.errorBox = null
+            if (!silent) {
+                this.errorBox = null
+            }
 
             if (this.nullable && this.value !== null) {
                 this.$emit("input", null)
@@ -95,18 +104,22 @@ export default class EmailInput extends Vue {
         }
         
         if (!DataValidator.isEmailValid(this.emailRaw)) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": "Ongeldig e-mailadres",
-                "field": "email"
-            }))
+            if (!silent) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    "code": "invalid_field",
+                    "message": "Ongeldig e-mailadres",
+                    "field": "email"
+                }))
+            }
             return false
 
         } else {
             if (this.emailRaw !== this.value) {
                 this.$emit("input", this.emailRaw)
             }
-            this.errorBox = null
+            if (!silent) {
+                this.errorBox = null
+            }
             return true
         }
     }

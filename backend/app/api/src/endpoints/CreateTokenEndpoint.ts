@@ -149,8 +149,11 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             // For now we keep the password token because the user might want to reload the page or load it on a different device/browser
             //await passwordToken.delete();
 
-            // TODO: verify user current e-mail, since the password token is always send via e-mail
-            // BUT first check if the e-mail wasn't changed since creating the password token -> need to assign an e-mail to the password token to fix this!
+            // Verify this email address, since the user can't change its email address without being verified
+            if (!token.user.verified) {
+                token.user.verified = true
+                await token.user.save()
+            }
 
             const st = new TokenStruct(token);
             return new Response(st);           

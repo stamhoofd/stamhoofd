@@ -151,7 +151,7 @@ export class PatchOrganizationPaymentsEndpoint extends Endpoint<Params, Query, B
             }
 
             if (patch.method) {
-                if (![PaymentMethod.Unknown, PaymentMethod.Transfer].includes(patch.method)) {
+                if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(patch.method)) {
                     throw new SimpleError({
                         code: "invalid_field",
                         message: "Invalid payment method",

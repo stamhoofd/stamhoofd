@@ -196,4 +196,16 @@ export class Permissions extends AutoEncoder {
 
         return false
     }
+
+    add(other: Permissions) {
+        if (getPermissionLevelNumber(this.level) < getPermissionLevelNumber(other.level)) {
+            this.level = other.level;
+        }
+
+        for (const role of other.roles) {
+            if (!this.roles.find(r => r.id === role.id)) {
+                this.roles.push(role.clone());
+            }
+        }
+    }
 }
