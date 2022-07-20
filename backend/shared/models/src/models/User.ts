@@ -239,7 +239,18 @@ export class User extends Model {
     }
 
     static async getForRegister(organization: Organization, email: string): Promise<UserWithOrganization | undefined> {
-        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organization.id]);
+        const user = await this.getForRegisterWithoutOrg(organization.id, email)
+
+        if (!user) {
+            return undefined
+        }
+
+        // Read member + address from first row
+        return user.setRelation(User.organization, organization);
+    }
+
+    static async getForRegisterWithoutOrg(organizationId: string, email: string): Promise<User | undefined> {
+        const [rows] = await Database.select(`SELECT * FROM ${this.table} WHERE \`email\` = ? AND organizationId = ? LIMIT 1`, [email, organizationId]);
 
         if (rows.length == 0) {
             return undefined;
@@ -250,8 +261,7 @@ export class User extends Model {
             return undefined
         }
 
-        // Read member + address from first row
-        return user.setRelation(User.organization, organization);
+        return user;
     }
 
     static async getForAuthentication(organizationId: string, email: string): Promise<UserForAuthentication | undefined> {
@@ -334,7 +344,7 @@ export class User extends Model {
         return user;
     }
 
-    async changePassword(password) {
+    async changePassword(password: string) {
         this.password = await User.hash(password)
 
         // Clear old fields
