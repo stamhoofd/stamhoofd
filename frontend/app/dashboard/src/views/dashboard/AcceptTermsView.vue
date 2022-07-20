@@ -27,6 +27,7 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
 import { Organization, OrganizationMetaData } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -98,11 +99,9 @@ export default class AcceptTermsView extends Mixins(NavigationMixin) {
     }
 
     shouldNavigateAway() {
-        if (STAMHOOFD.environment === "development") {
-            return true
-        }
-        new CenteredMessage("Je moet de nieuwe overeenkomsten eerst accepteren.").addCloseButton().show()
-        return false
+        // Force session logout
+        SessionManager.deactivateSession();
+        return true;
     }
 }
 </script>
