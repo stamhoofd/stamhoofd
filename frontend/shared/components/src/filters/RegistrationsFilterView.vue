@@ -2,10 +2,16 @@
     <div>
         <Dropdown v-model="mode">
             <option :value="RegistrationsFilterMode.Or">
-                Minstens één van de geselecteerde
+                Minstens één van de geselecteerden
             </option>
             <option :value="RegistrationsFilterMode.And">
-                Alle geselecteerde
+                Alle geselecteerden
+            </option>
+            <option :value="RegistrationsFilterMode.Nor">
+                Niet ingeschreven voor minstens één van de geselecteerden
+            </option>
+            <option :value="RegistrationsFilterMode.Nand">
+                Niet ingeschreven voor alle geselecteerden tegelijk
             </option>
         </Dropdown>
         <STList>

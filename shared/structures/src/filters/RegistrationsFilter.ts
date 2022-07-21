@@ -28,6 +28,14 @@ export class RegistrationsFilterChoice extends AutoEncoder {
 export enum RegistrationsFilterMode {
     Or = "Or",
     And = "And",
+    /**
+     * Not registered for at least one of the selection
+     */
+    Nor = "Nor",
+    /**
+     * Not registered for all of the selection
+     */
+    Nand = "Nand",
 }
 
 /**
@@ -81,13 +89,22 @@ export class RegistrationsFilter<T> extends Filter<T> {
                 if (this.mode === RegistrationsFilterMode.Or) {
                     return true
                 }
+
+                if (this.mode === RegistrationsFilterMode.Nor) {
+                    return false
+                }
             } else {
+                if (this.mode === RegistrationsFilterMode.Nand) {
+                    return true
+                }
+
                 if (this.mode === RegistrationsFilterMode.And) {
                     return false
                 }
             }
         }
-        return this.mode === RegistrationsFilterMode.And
+
+        return this.mode === RegistrationsFilterMode.And || this.mode === RegistrationsFilterMode.Nor
     }
 
     encode(context: EncodeContext): PlainObject {
@@ -99,10 +116,15 @@ export class RegistrationsFilter<T> extends Filter<T> {
     }
 
     toString() {
-        if (this.mode === RegistrationsFilterMode.Or) {
-            return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " of ")
-        } else {
-            return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " en ")
+        switch(this.mode) {
+            case RegistrationsFilterMode.Or:
+                return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " of ")
+            case RegistrationsFilterMode.And:
+                return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " en ")
+            case RegistrationsFilterMode.Nor:
+                return "Niet ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " of ")
+            case RegistrationsFilterMode.Nand:
+                return "Niet ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " en ")+(this.choices.length > 0 ? ' (samen)' : '')
         }
     }
 }
