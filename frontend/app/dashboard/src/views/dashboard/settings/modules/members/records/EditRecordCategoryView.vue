@@ -95,7 +95,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { MemberDetails, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures";
+import { MemberDetails, MemberDetailsWithGroups, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
@@ -167,7 +167,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     get filter() {
-        return this.patchedCategory.filter ?? PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+        return this.patchedCategory.filter ?? PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
     }
 
     set filter(filter: PropertyFilter<MemberDetails> | null) {
