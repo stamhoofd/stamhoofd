@@ -2,6 +2,7 @@ export class Column<T, ValueType> {
     name: string
     enabled = true
     index = 0
+    id: string
     align?: "left" | "right" | "center"
 
     /**
@@ -45,6 +46,7 @@ export class Column<T, ValueType> {
 
     constructor(settings: {
         name: string, 
+        id?: string,
         index?: number,
         align?: "left" | "right" | "center",
         enabled?: boolean,
@@ -61,6 +63,7 @@ export class Column<T, ValueType> {
         this.enabled = settings.enabled ?? true
         this.index = settings.index ?? 0
         this.name = settings.name
+        this.id = settings.id ?? settings.name;
 
         this.getValue = settings.getValue
         this.format = settings.format ?? (val => val+"")
@@ -99,13 +102,7 @@ export class Column<T, ValueType> {
         return this.getStyleForObject ? this.getStyleForObject(val, isPrefix) : this.getStyle ? this.getStyle(this.getValue(val), isPrefix) : ""
     }
 
-    get id() {
-        return this.name
-    }
-
     didReachMinimum() {
         return this.width && this.width <= this.minimumWidth
     }
-
-    
 }

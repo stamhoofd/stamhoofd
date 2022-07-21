@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : 'members'" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openMember">
+    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : (category ? 'category-' + category.id : 'members')" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openMember">
         <button v-if="titleDescription" class="info-box selectable" type="button" @click="resetCycle">
             {{ titleDescription }}
 
@@ -293,6 +293,63 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                     minimumWidth: 70,
                     recommendedWidth: 80,
                     align: "right"
+                })
+            )
+        }
+
+        if (this.category) {
+            cols.push(
+                new Column<MemberWithRegistrations, Group[]>({
+                    id: 'category',
+                    name: this.category.settings.name, 
+                    getValue: (member) => {
+                        if (!this.category) {
+                            return [];
+                        }
+                        const groups = this.category.getAllGroups()
+                        const memberGroups = member.registrations.flatMap(r => {
+                            const group = groups.find(g => g.id == r.groupId)
+                            if (!group) {
+                                return []
+                            }
+                            if (r.cycle == group.cycle - this.cycleOffset) {
+                                return [group]
+                            }
+                            return []
+                        })
+                        const getIndex = (g) => groups.findIndex(_g => _g.id === g.id)
+                        return memberGroups.sort((a,b) => Sorter.byNumberValue(getIndex(b), getIndex(a)))
+                    },
+                    format: (groups) => {
+                        if (groups.length == 0) {
+                            return 'Geen'
+                        }
+                        return groups.map(g => g.settings.name).join(', ')
+                    }, 
+                    getStyle: (groups) => groups.length == 0 ? "gray" : "",
+                    compare: (a, b) => {
+                        if (!this.category) {
+                            return 0;
+                        }
+                        const groups = this.category.getAllGroups()
+                        const getIndex = (g) => groups.findIndex(_g => _g.id === g.id)
+                        
+                        for (let index = 0; index < Math.min(a.length, b.length); index++) {
+                            const indexA = getIndex(a[index]);
+                            const indexB = getIndex(b[index]);
+                            if (indexA < indexB) {
+                                return -1;
+                            }
+                            if (indexA > indexB) {
+                                return 1;
+                            }
+                        }
+
+                        // Equal
+                        return b.length - a.length;
+                    },
+                    minimumWidth: 100,
+                    recommendedWidth: 150
                 })
             )
         }
