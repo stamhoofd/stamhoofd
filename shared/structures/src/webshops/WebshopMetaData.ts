@@ -407,6 +407,9 @@ export class WebshopPrivateMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 145 })
     defaultEmailId: string | null = null
 
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 163 })
+    notificationEmails: string[] = []
+
     static buildDNSRecords(domain: string): DNSRecord[] {
         return [
             DNSRecord.create({

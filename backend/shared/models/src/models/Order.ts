@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { EmailTemplateType, OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType, WebshopTimeSlot, Order as OrderStruct, WebshopPreview, Payment as PaymentStruct, WebshopStatus } from '@stamhoofd/structures';
+import { EmailTemplateType, OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType, WebshopTimeSlot, Order as OrderStruct, WebshopPreview, Payment as PaymentStruct, WebshopStatus, Recipient, Replacement } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from '@stamhoofd/email';
@@ -12,6 +12,7 @@ import { Ticket } from "./Ticket";
 import { I18n } from "@stamhoofd/backend-i18n";
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { EmailTemplate } from "./EmailTemplate";
+import { Formatter } from "@stamhoofd/utility";
 
 
 export class Order extends Model {
@@ -368,29 +369,10 @@ export class Order extends Model {
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
 
-        const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
-    
-        const customer = this.data.customer
-
-        const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
-
-        // Also send a copy
-        /*Email.send({
-            from,
-            replyTo,
-            to: toStr,
-            subject: "["+this.webshop.meta.name+"] Betaling ontvangen (bestelling "+this.number+")",
-            text: "Dag "+customer.firstName+", \n\nWe hebben jouw bestelling (#"+ this.number +") in onze administratie gemarkeerd als betaald. Je kan jouw bestelling nakijken via de volgende link:"
-            + "\n"
-            + this.getUrl()
-            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",
-        })*/
-
         this.sendEmailTemplate({
             type: EmailTemplateType.OrderReceivedTransfer,
             from,
-            replyTo,
-            to: toStr
+            replyTo
         })
     }
 
@@ -398,30 +380,11 @@ export class Order extends Model {
         const organization = this.webshop.organization
         const { from, replyTo } = organization.getEmail(this.webshop.privateMeta.defaultEmailId)
 
-        const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
-    
-        const customer = this.data.customer
-
-        const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
-
         this.sendEmailTemplate({
             type: EmailTemplateType.TicketsReceivedTransfer,
             from,
-            replyTo,
-            to: toStr
+            replyTo
         })
-
-        // Also send a copy
-        /*Email.send({
-            from,
-            replyTo,
-            to: toStr,
-            subject: "["+this.webshop.meta.name+"] Jouw tickets zijn beschikbaar (bestelling "+this.number+")",
-            text: "Dag "+customer.firstName+", \n\nWe hebben de betaling van bestelling "+ this.number +" ontvangen en jouw tickets kan je nu downloaden via de link hieronder:"
-            + "\n"
-            + this.getUrl()
-            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
-        })*/
     }
 
     async getStructure()  {
@@ -444,7 +407,7 @@ export class Order extends Model {
         type: EmailTemplateType,
         from: string,
         replyTo?: string,
-        to: string,
+        to?: Recipient,
     }) {
         // Never send an email for archived webshops
         if (this.webshop.meta.status === WebshopStatus.Archived) {
@@ -465,7 +428,16 @@ export class Order extends Model {
 
         const template = templates[0]
 
-        const recipient = (await this.getStructure()).getRecipient(await this.webshop.organization.getStructure(), WebshopPreview.create(this.webshop))
+        let recipient = (await this.getStructure()).getRecipient(await this.webshop.organization.getStructure(), WebshopPreview.create(this.webshop))
+
+        if (data.to) {
+            // Clear first and last name
+            recipient.firstName = null;
+            recipient.lastName = null;
+            recipient.replacements = recipient.replacements.filter(r => !['firstName', 'lastName'].includes(r.token))
+            data.to.merge(recipient);
+            recipient = data.to
+        }
 
         // Create e-mail builder
         const builder = await getEmailBuilder(this.webshop.organization, {
@@ -502,38 +474,20 @@ export class Order extends Model {
             const organization = webshop.organization
             
             const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId)
-            
-            const i18n = new I18n(this.data.consumerLanguage, organization.address.country)
-            const customer = this.data.customer
-
-            const toStr = this.data.customer.name ? ('"'+this.data.customer.name.replace("\"", "\\\"")+"\" <"+this.data.customer.email+">") : this.data.customer.email
-
+        
             if (tickets.length > 0) {
                 // Also send a copy
-                /*Email.send({
-                    from,
-                    replyTo,
-                    to: toStr,
-                    subject: "["+webshop.meta.name+"] Jouw tickets (bestelling "+this.number+")",
-                    text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                        "Je kan jouw tickets downloaden en jouw bestelling nakijken via deze link:"
-                    + "\n"
-                    + this.setRelation(Order.webshop, webshop).getUrl()
-                    +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
-                })*/
                 if (payment && payment.method === PaymentMethod.PointOfSale) {
                     this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmationPOS,
                         from,
-                        replyTo,
-                        to: toStr
+                        replyTo
                     })
                 } else {
                     this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmation,
                         from,
-                        replyTo,
-                        to: toStr
+                        replyTo
                     })
                 }
             } else {
@@ -544,29 +498,20 @@ export class Order extends Model {
                         this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationTransfer,
                             from,
-                            replyTo,
-                            to: toStr
+                            replyTo
                         })
                     } else if (payment && payment.method === PaymentMethod.PointOfSale) {
                         this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationPOS,
                             from,
-                            replyTo,
-                            to: toStr
+                            replyTo
                         })
                     } else {
                         // Also send a copy
                         this.sendEmailTemplate({
                             type: EmailTemplateType.OrderConfirmationOnline,
                             from,
-                            replyTo,
-                            to: toStr,
-                            /*subject: "["+webshop.meta.name+"] Bestelling "+this.number,
-                            text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                                ((payment && payment.method === PaymentMethod.Transfer) ? "Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
-                            + "\n"
-                            + this.setRelation(Order.webshop, webshop).getUrl()
-                            +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze webshop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/webshops\n\n",*/
+                            replyTo
                         })
                     }
                     
@@ -574,22 +519,36 @@ export class Order extends Model {
                     this.sendEmailTemplate({
                         type: EmailTemplateType.TicketsConfirmationTransfer,
                         from,
-                        replyTo,
-                        to: toStr
+                        replyTo
                     })
-
-                    /*Email.send({
-                        from,
-                        replyTo,
-                        to: toStr,
-                        subject: "["+webshop.meta.name+"] Bestelling "+this.number,
-                        text: "Dag "+customer.firstName+", \n\nBedankt voor jouw bestelling! We hebben deze goed ontvangen. "+
-                            ((payment && payment.method === PaymentMethod.Transfer) ? "Zodra jouw overschrijving op onze rekening aankomt, ontvang je jouw tickets via e-mail. Je kan de betaalinstructies en bestelling nakijken via deze link:" :  "Je kan jouw bestelling nakijken via deze link:")
-                        + "\n"
-                        + this.setRelation(Order.webshop, webshop).getUrl()
-                        +"\n\nMet vriendelijke groeten,\n"+organization.name+"\n\n—\n\nOnze ticketverkoop werkt via het Stamhoofd platform, op maat van verenigingen. Probeer het ook via https://"+i18n.$t("shared.domains.marketing")+"/ticketverkoop\n\n",
-                    })*/
                 }
+            }
+        }
+
+        if (this.webshop.privateMeta.notificationEmails) {
+            const webshop = this.webshop
+            const organization = webshop.organization
+            const { from, replyTo } = organization.getEmail(webshop.privateMeta.defaultEmailId)
+            const i18n = organization.i18n;
+
+            const webshopDashboardUrl = "https://"+(STAMHOOFD.domains.dashboard ?? "stamhoofd.app")+"/"+i18n.locale + '/webshops/'+Formatter.slug(webshop.meta.name)+'/orders';
+
+            // Send an email to all these notification emails
+            for (const email of this.webshop.privateMeta.notificationEmails) {
+                this.sendEmailTemplate({
+                    type: EmailTemplateType.OrderNotification,
+                    from,
+                    replyTo,
+                    to: Recipient.create({
+                        email,
+                        replacements: [
+                            Replacement.create({
+                                token: 'orderUrl',
+                                value: webshopDashboardUrl
+                            })
+                        ]
+                    })
+                })
             }
         }
     }

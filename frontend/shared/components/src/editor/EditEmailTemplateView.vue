@@ -31,7 +31,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, Dropdown, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, TooltipDirective } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, TooltipDirective } from "@stamhoofd/components";
 import { Replacement } from '@stamhoofd/structures';
 import { EmailTemplate, Group, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -62,7 +62,7 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
     smartVariables: EditorSmartVariable[]
 
     @Prop({ required: false, default: () => [] })
-    smartButtons: EditorSmartVariable[]
+    smartButtons: EditorSmartButton[]
 
     @Prop({ required: false, default: () => [] })
     defaultReplacements: Replacement[]
@@ -160,6 +160,11 @@ export default class EditEmailTemplateView extends Mixins(NavigationMixin) {
                 html = html.replaceAll("{{"+variable.id+"}}", variable.html ?? Formatter.escapeHtml(variable.example))
             }
             subject = subject.replaceAll("{{"+variable.id+"}}", variable.example)
+        }
+
+        // Replacements
+        for (const variable of this.smartButtons) {
+            html = html.replaceAll("{{"+variable.id+"}}", '#')
         }
 
         const extra = this.defaultReplacements ?? []

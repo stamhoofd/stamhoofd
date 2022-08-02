@@ -1,6 +1,7 @@
 import { column, Database, Model } from '@simonbackx/simple-database';
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
+import { QueueHandler } from '@stamhoofd/queues';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -68,19 +69,22 @@ export class EmailAddress extends Model {
     updatedAt: Date
 
     static async getOrCreate(email: string, organizationId: string | null): Promise<EmailAddress> {
-        const existing = await this.getByEmail(email, organizationId)
-        if (existing) {
-            return existing
-        }
+        // Prevent race conditions when checking the same email address at the same time, and creating a new one
+        return await QueueHandler.schedule("email-address/create-"+email+'-'+organizationId, async () => {
+            const existing = await this.getByEmail(email, organizationId)
+            if (existing) {
+                return existing
+            }
 
-        const n = new EmailAddress()
-        n.organizationId = organizationId
-        n.email = email
-        n.token = (await randomBytes(64)).toString("base64").toUpperCase();
+            const n = new EmailAddress()
+            n.organizationId = organizationId
+            n.email = email
+            n.token = (await randomBytes(64)).toString("base64").toUpperCase();
 
-        await n.save()
+            await n.save()
 
-        return n
+            return n
+        });
     }
 
     // Methods
@@ -114,7 +118,7 @@ export class EmailAddress extends Model {
 
     // Methods
     static async getByEmail(email: string, organizationId: string | null): Promise<EmailAddress | undefined> {
-        return (await this.where({ email, organizationId }, { limit: 1 }))[0] ?? undefined
+        return (await this.where({ email, organizationId }, { limit: 1 }))[0]
     }
 
     // Methods

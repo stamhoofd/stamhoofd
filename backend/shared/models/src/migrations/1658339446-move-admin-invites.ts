@@ -51,8 +51,6 @@ export default new Migration(async () => {
         await admin.save();
         console.log('CREATED', admin.id)
     }
-
-    throw new Error('WIP');
 });
 
 

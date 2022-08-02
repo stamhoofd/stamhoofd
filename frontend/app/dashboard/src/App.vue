@@ -112,9 +112,10 @@ export default class App extends Vue {
             UrlHelper.shared.clear()
             const id = queryString.get('id')
             const token = queryString.get('token')
+            const type = queryString.get('type') ?? 'all'
 
-            if (id && token) {
-                this.unsubscribe(id, token).catch(console.error)
+            if (id && token && ['all', 'marketing'].includes(type)) {
+                this.unsubscribe(id, token, type as 'all'|'marketing').catch(console.error)
             }
         }
 
@@ -234,7 +235,7 @@ export default class App extends Vue {
         })
     }
 
-    async unsubscribe(id: string, token: string) {
+    async unsubscribe(id: string, token: string, type: 'all' | 'marketing') {
         const toast = new Toast("Bezig met uitschrijven...", "spinner").setHide(null).show()
 
         try {
@@ -252,8 +253,9 @@ export default class App extends Vue {
             toast.hide()
 
             let unsubscribe = true
+            const fieldName = type === 'all' ? 'unsubscribedAll' : 'unsubscribedMarketing'
 
-            if (details.unsubscribedMarketing) {
+            if (details[fieldName]) {
                 if (!await CenteredMessage.confirm("Je bent al uitgeschreven", "Terug inschrijven op e-mails", "Je ontvangt momenteel geen e-mails van "+(details.organization?.name ?? "Stamhoofd")+" op "+details.email+". Toch een e-mail ontvangen? Stuur hem door naar "+this.$t("shared.emails.complaints"))) {
                     return
                 }
@@ -266,15 +268,13 @@ export default class App extends Vue {
                 toast.show()
             }
 
-            
-
             await NetworkManager.server.request({
                 method: "POST",
                 path: "/email/manage",
                 body: {
                     id,
                     token,
-                    unsubscribedMarketing: unsubscribe
+                    [fieldName]: unsubscribe
                 }
             })
             toast.hide()

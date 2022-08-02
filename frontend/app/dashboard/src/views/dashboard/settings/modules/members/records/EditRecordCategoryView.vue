@@ -170,7 +170,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
         return this.patchedCategory.filter ?? PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
     }
 
-    set filter(filter: PropertyFilter<MemberDetails> | null) {
+    set filter(filter: PropertyFilter<MemberDetailsWithGroups> | null) {
         this.patchCategory = this.patchCategory.patch({ filter })
     }
 

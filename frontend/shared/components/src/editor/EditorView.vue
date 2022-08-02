@@ -112,7 +112,7 @@ import STToolbar from "../navigation/STToolbar.vue";
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { DescriptiveText } from "./EditorDescriptiveText";
-import { EditorSmartButton, SmartButtonNode } from './EditorSmartButton';
+import { EditorSmartButton, SmartButtonInlineNode,SmartButtonNode } from './EditorSmartButton';
 import { EditorSmartVariable, SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
 
@@ -387,6 +387,9 @@ export default class EditorView extends Vue {
                 SmartButtonNode.configure({
                     smartButtons: this.smartButtons,
                 }),
+                SmartButtonInlineNode.configure({
+                    smartButtons: this.smartButtons,
+                }),
                 Link.configure({
                     openOnClick: false,
                 }),
@@ -634,6 +637,10 @@ export default class EditorView extends Vue {
                         background: $color-primary;
                     }
                 }
+            }
+
+            span[data-type="smartButtonInline"] {
+                text-decoration: underline;
             }
 
             div[data-type="smartVariableBlock"] {

@@ -171,7 +171,18 @@
                             E-mails
                         </h2>
                         <p class="style-description">
-                            Wijzig de inhoud van automatische e-mails.
+                            Wijzig de inhoud van automatische e-mails naar bestellers.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editNotifications(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/notifications.svg">
+                        <h2 class="style-title-list">
+                            Meldingen
+                        </h2>
+                        <p class="style-description">
+                            Blijf zelf op de hoogte van nieuwe bestellingen.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
@@ -272,6 +283,7 @@ import EditWebshopEmailsView from './edit/EditWebshopEmailsView.vue';
 import EditWebshopGeneralView from './edit/EditWebshopGeneralView.vue';
 import EditWebshopInputFieldsView from './edit/EditWebshopInputFieldsView.vue';
 import EditWebshopLinkView from './edit/EditWebshopLinkView.vue';
+import EditWebshopNotificationsView from './edit/EditWebshopNotificationsView.vue';
 import EditWebshopPageView from './edit/EditWebshopPageView.vue';
 import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
 import EditWebshopPermissionsView from './edit/EditWebshopPermissionsView.vue';
@@ -415,6 +427,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     editEmails(animated = true) {
         this.displayEditComponent(EditWebshopEmailsView, animated)
+    }
+
+    editNotifications(animated = true) {
+        this.displayEditComponent(EditWebshopNotificationsView, animated)
     }
 
     displayEditComponent(component, animated = true) {

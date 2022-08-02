@@ -13,6 +13,9 @@ export class EmailStyler {
         const buttonCSS = "margin: 0; text-decoration: none; font-size: 16px; font-weight: bold; color: white; padding: 0 27px; line-height: 42px; background: "+primaryColor+"; text-align: center; border-radius: 7px; touch-action: manipulation; display: inline-block; transition: 0.2s transform, 0.2s opacity;";
         styles += " .button.primary { "+buttonCSS+" } .button.primary:active { transform: scale(0.95, 0.95); } ";
 
+        const inlineLinkCSS = "margin: 0; text-decoration: underline; font-size: inherit; font-weight: inherit; color: inherit; touch-action: manipulation;";
+        styles += " .inline-link, .inline-link:link, .inline-link:visited, .inline-link:active, .inline-link:hover { "+inlineLinkCSS+" } .inline-link:active { opacity: 0.5; } ";
+
         const descriptionCSS = "color: #5e5e5e;"
         styles += " .button { "+descriptionCSS+" } "
 
@@ -43,6 +46,17 @@ export class EmailStyler {
             el.parentElement!.replaceChild(button, el)
         }
 
+        const inlineButtons = element.querySelectorAll("span[data-type=\"smartButtonInline\"]")
+        for (const el of inlineButtons) {
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+            const button = document.createElement("a");
+            button.innerHTML = (el as HTMLElement).innerHTML;
+            button.className = 'inline-link';
+            button.setAttribute("href", el.getAttribute("href") ?? "");
+            button.setAttribute("target", el.getAttribute("target") ?? "");
+            el.parentElement!.replaceChild(button, el)
+        }
+
         // add force add padding and margin inline
         const blocks = element.querySelectorAll("h1,h2,h3,h4,p")
         for (const el of blocks) {
@@ -53,6 +67,12 @@ export class EmailStyler {
         const hrElements = element.querySelectorAll("hr")
         for (const el of hrElements) {
             (el as any).style.cssText = hrCSS
+        }
+
+        // Force HR
+        const inlineLinkElements = element.querySelectorAll(".inline-link")
+        for (const el of inlineLinkElements) {
+            (el as any).style.cssText = inlineLinkCSS
         }
 
         // Replace all buttons with tables
