@@ -1,4 +1,4 @@
-import { EmailBuilder } from "@stamhoofd/email";
+import { EmailAddress, EmailBuilder } from "@stamhoofd/email";
 import { Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Organization } from "../models/Organization";
@@ -19,6 +19,27 @@ export async function getEmailBuilder(organization: Organization, email: {
         encoding: string;
     }[]
 }) {
+    // Update recipients
+    const cleaned: Recipient[] = []
+    for (const recipient of email.recipients) {
+        try {
+            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, organization.id)
+
+            if (unsubscribe.unsubscribedAll || unsubscribe.hardBounce || unsubscribe.markedAsSpam || !unsubscribe.token) {
+                // Ignore
+                continue
+            }
+            recipient.replacements.push(Replacement.create({
+                token: "unsubscribeUrl",
+                value: "https://"+STAMHOOFD.domains.dashboard+"/"+organization.i18n.locale+"/unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type=all"
+            }))
+            cleaned.push(recipient)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+    email.recipients = cleaned
+
     // Update recipients
     for (const recipient of email.recipients) {
         recipient.replacements = recipient.replacements.slice()

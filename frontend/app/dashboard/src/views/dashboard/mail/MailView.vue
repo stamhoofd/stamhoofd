@@ -1133,6 +1133,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             const recipient = order.getRecipient(this.organization, webshop, payment)
             if (existing) {
                 existing.merge(recipient)
+                existing.email = recipient.email
                 return
             }
             recipients.set(id, recipient)

@@ -233,7 +233,7 @@ class EmailStatic {
             from: data.from, // sender address
             bcc: (STAMHOOFD.environment === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
             replyTo: data.replyTo,
-            to: STAMHOOFD.environment === "production" || to.endsWith("@bounce-testing.postmarkapp.com") ? to : "hallo@stamhoofd.be",
+            to: STAMHOOFD.environment === "production" || to.endsWith("@bounce-testing.postmarkapp.com") ? to : "hallo@stamhoofd.be",
             subject: data.subject, // Subject line
             text: data.text, // plain text body
         };

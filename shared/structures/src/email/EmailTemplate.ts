@@ -12,6 +12,8 @@ export enum EmailTemplateType {
     TrialWebshopsExpirationReminder = "TrialWebshopsExpirationReminder",
     TrialMembersExpirationReminder = "TrialMembersExpirationReminder",
 
+    OrderNotification = "OrderNotification",
+
     RegistrationConfirmation = "RegistrationConfirmation",
 
     OrderConfirmationOnline = "OrderConfirmationOnline",
@@ -89,12 +91,11 @@ export class EmailTemplate extends AutoEncoder {
                 "packageName",
                 "validUntil",
                 "validUntilDate",
-                "renewUrl"
+                "renewUrl",
+                "unsubscribeUrl"
             ]
         }
         const sharedReplacements = [
-            "firstName",
-            "lastName",
             "nr",
             "orderPrice",
             "orderStatus",
@@ -104,8 +105,16 @@ export class EmailTemplate extends AutoEncoder {
             "orderUrl",
             "paymentMethod",
             "organizationName",
-            "webshopName"
+            "webshopName",
+            "unsubscribeUrl"
         ]
+
+        if (type !== EmailTemplateType.OrderNotification) {
+            sharedReplacements.push(
+                "firstName",
+                "lastName"
+            )
+        }
 
         if (type === EmailTemplateType.OrderConfirmationTransfer || type === EmailTemplateType.TicketsConfirmationTransfer) {
             return [
