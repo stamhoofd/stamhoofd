@@ -1,16 +1,10 @@
-import { Database } from '@simonbackx/simple-database';
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Group, Organization } from '@stamhoofd/models';
-import { Invite } from '@stamhoofd/models';
-import { PayconiqPayment } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings,Organization as OrganizationStruct, OrganizationMetaData, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { Group, Invite, PayconiqPayment, Token, User, Webshop } from '@stamhoofd/models';
+import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
-import { BuckarooHelper } from '../helpers/BuckarooHelper';
+import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;

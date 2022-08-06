@@ -6,7 +6,7 @@ import { MollieToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
 
-import { checkSettlementsFor } from '../helpers/CheckSettlements';
+import { checkSettlementsFor } from '../../helpers/CheckSettlements';
 
 type Params = Record<string, never>;
 

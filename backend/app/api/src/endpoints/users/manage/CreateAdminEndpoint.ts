@@ -2,31 +2,13 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from '@stamhoofd/email';
-import { Invite, PasswordToken } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
-import { Invite as InviteStruct, NewInvite, OrganizationSimple,User as UserStruct } from "@stamhoofd/structures";
+import { PasswordToken, Token, User } from '@stamhoofd/models';
+import { User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
-import basex from "base-x";
-import crypto from "crypto";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UserStruct
 type ResponseBody = UserStruct
-const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-const bs58 = basex(ALPHABET)
-
-async function randomBytes(size: number): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        crypto.randomBytes(size, (err: Error | null, buf: Buffer) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-            resolve(buf);
-        });
-    });
-}
 
 /**
  * Return a list of users and invites for the given organization with admin permissions
@@ -118,8 +100,6 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je uitgenodigd als beheerder van de vereniging ${user.organization.name} op Stamhoofd. Je kan een account aanmaken door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\nStamhoofd\n\n"+(STAMHOOFD.domains.marketing[user.organization.address.country] ?? "")
             });
         }
-
-        
 
         return new Response(UserStruct.create({...admin, hasAccount: admin.hasAccount()}));
     }

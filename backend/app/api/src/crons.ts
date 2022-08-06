@@ -15,8 +15,7 @@ import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
 import { ExchangeSTPaymentEndpoint } from './endpoints/billing/ExchangeSTPaymentEndpoint';
-import { ExchangePaymentEndpoint } from './endpoints/ExchangePaymentEndpoint';
-import { AddressValidator } from './helpers/AddressValidator';
+import { ExchangePaymentEndpoint } from './endpoints/payments/ExchangePaymentEndpoint';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { ForwardHandler } from './helpers/ForwardHandler';
 

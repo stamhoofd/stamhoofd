@@ -12,7 +12,7 @@ import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 
-import { BuckarooHelper } from '../helpers/BuckarooHelper';
+import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData
