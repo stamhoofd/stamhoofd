@@ -14,7 +14,7 @@ import { Token } from '@stamhoofd/models';
 import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentMethodHelper,PaymentProvider,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
-import { BuckarooHelper } from '../helpers/BuckarooHelper';
+import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout

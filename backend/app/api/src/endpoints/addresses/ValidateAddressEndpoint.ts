@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Address, ValidatedAddress } from "@stamhoofd/structures";
 
-import { AddressValidator } from '../helpers/AddressValidator';
+import { AddressValidator } from '../../helpers/AddressValidator';
 
 type Params = Record<string, never>;
 type Query = undefined;

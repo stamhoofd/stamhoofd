@@ -12,8 +12,9 @@ import { Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Payment as PaymentStruct, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 
-import { BuckarooHelper } from '../helpers/BuckarooHelper';
+import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 import { GetPaymentRegistrations } from './GetPaymentRegistrations';
+
 type Params = {id: string};
 class Query extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })

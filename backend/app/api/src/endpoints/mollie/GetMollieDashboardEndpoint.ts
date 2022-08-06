@@ -1,10 +1,7 @@
 
-import { AutoEncoder, Decoder,field, StringDecoder } from '@simonbackx/simple-encoding';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors'
-import { MollieToken } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { MollieToken, Token } from '@stamhoofd/models';
 
 type Params = Record<string, never>;
 type Body = undefined

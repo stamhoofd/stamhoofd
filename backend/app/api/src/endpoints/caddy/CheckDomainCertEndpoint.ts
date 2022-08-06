@@ -1,9 +1,7 @@
-import { AutoEncoder, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, Decoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
-import { WebshopStatus } from "@stamhoofd/structures";
+import { Organization, Webshop } from '@stamhoofd/models';
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {
@@ -13,10 +11,6 @@ class Query extends AutoEncoder {
 
 type Body = undefined
 type ResponseBody = undefined;
-
-/**
- * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
- */
 
 export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;

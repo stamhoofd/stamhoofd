@@ -35,8 +35,8 @@ const start = async () => {
 
     console.log("Initialising server...")
     const router = new Router();
-    await router.loadAllEndpoints(__dirname + "/src/endpoints");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/*");
+    await router.loadAllEndpoints(__dirname + "/src/endpoints/*/manage");
     router.endpoints.push(new CORSPreflightEndpoint())
 
     const routerServer = new RouterServer(router);
@@ -46,13 +46,6 @@ const start = async () => {
     routerServer.addResponseMiddleware(AppVersionMiddleware)
     routerServer.addResponseMiddleware(CORSMiddleware)
     routerServer.addRequestMiddleware(AppVersionMiddleware)
-    /*routerServer.defaultHeaders = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PATCH, PUT, DELETE",
-        "Access-Control-Expose-Headers": "*",
-        "Access-Control-Max-Age": "86400"
-    };*/
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
