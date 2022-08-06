@@ -1,8 +1,7 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Sorter } from '@stamhoofd/utility';
+import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { EncryptedMemberDetails, MemberDetailsMeta } from './EncryptedMemberDetails';
+import { EncryptedMemberDetails } from './EncryptedMemberDetails';
 import { MemberDetails } from './MemberDetails';
 
 export class EncryptedMember extends AutoEncoder {

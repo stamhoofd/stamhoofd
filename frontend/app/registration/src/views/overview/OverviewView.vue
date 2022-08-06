@@ -250,17 +250,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
         }
     }
 
-    activated() {
-        GlobalEventBus.addListener(this, "encryption", async () => {
-            // Reload members if encryption key changed
-            await MemberManager.loadMembers()
-        })
-    }
-
-    deactivated() {
-        GlobalEventBus.removeListener(this)
-    }
-
     async addNewMember() {
         // Only ask details + parents for new members
         // We'll ask the other things when selecting the details

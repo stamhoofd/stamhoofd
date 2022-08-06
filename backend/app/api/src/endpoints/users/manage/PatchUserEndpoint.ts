@@ -1,9 +1,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EmailVerificationCode, PasswordToken } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
+import { EmailVerificationCode, PasswordToken, Token, User } from '@stamhoofd/models';
 import { NewUser, Permissions, SignupResponse, User as UserStruct } from "@stamhoofd/structures";
 
 type Params = { id: string };
@@ -11,9 +9,6 @@ type Query = undefined;
 type Body = AutoEncoderPatchType<NewUser>
 type ResponseBody = UserStruct
 
-/**
- * Return a list of users and invites for the given organization with admin permissions
- */
 export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = NewUser.patchType() as Decoder<AutoEncoderPatchType<NewUser>>
 

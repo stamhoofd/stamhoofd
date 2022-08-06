@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Group, Invite, PayconiqPayment, Token, User, Webshop } from '@stamhoofd/models';
+import { Group, PayconiqPayment, Token, User, Webshop } from '@stamhoofd/models';
 import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
@@ -135,29 +135,6 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             admin.permissions = patch.permissions
                         }
                         await admin.save()
-                    }
-                }
-            }
-
-            // Allow admin patches (permissions only atm). No put atm
-            if (request.body.invites) {
-                for (const patch of request.body.invites.getPatches()) {
-                    if (patch.permissions) {
-                        const invite = await Invite.getByID(patch.id)
-                        if (!invite || invite.organizationId !== invite.organizationId) {
-                            throw new SimpleError({
-                                code: "invalid_field",
-                                message: "De beheerder die je wilt wijzigen bestaat niet (meer)",
-                                field: "invites"
-                            })
-                        }
-
-                        if (patch.permissions.isPatch()) {
-                            invite.permissions = invite.permissions ? invite.permissions.patch(patch.permissions) : Permissions.create({}).patch(patch.permissions)
-                        } else {
-                            invite.permissions = patch.permissions
-                        }
-                        await invite.save()
                     }
                 }
             }

@@ -153,12 +153,11 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Invite, Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User } from '@stamhoofd/structures';
+import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import AdminInviteView from './AdminInviteView.vue';
 import AdminView from './AdminView.vue';
 import EditRoleView from "./EditRoleView.vue";
 
@@ -200,10 +199,6 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         return this.organization.admins ?? []
     }
 
-    get invites() {
-        return this.organization.invites ?? []
-    }
-
     get organization() {
         return OrganizationManager.organization
     }
@@ -216,7 +211,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         return this.SessionManager.currentSession!.user
     }
 
-    permissionList(user: User | Invite) {
+    permissionList(user: User) {
         const list: string[] = []
         if (user.permissions?.hasFullAccess()) {
             list.push("Hoofdbeheerders")
@@ -246,10 +241,6 @@ export default class AdminsView extends Mixins(NavigationMixin) {
                 isNew: true
             }) 
         }).setDisplayStyle("popup"))
-    }
-
-    isExpired(invite: Invite) {
-        return invite.validUntil.getTime() < new Date().getTime()+10*1000
     }
 
     moveRoleUp(index: number, role: PermissionRoleDetailed) {
@@ -293,30 +284,15 @@ export default class AdminsView extends Mixins(NavigationMixin) {
         return this.sortedAdmins.filter(a => !!a.permissions?.roles.find(r => r.id === role.id))
     }
 
-    getInvitesForRole(role: PermissionRole) {
-        return this.invites.filter(a => !!a.permissions?.roles.find(r => r.id === role.id))
-    }
-
     getAdminsWithoutRole() {
         // We still do a check on ID because users might have a role that is deleted
         const ids = this.roles.map(r => r.id)
         return this.sortedAdmins.filter(a => !a.permissions?.hasFullAccess() && !a.permissions?.roles.find(r => ids.includes(r.id)))
     }
 
-    getInvitesWithoutRole() {
-        // We still do a check on ID because users might have a role that is deleted
-        const ids = this.roles.map(r => r.id)
-        return this.invites.filter(a => !a.permissions?.hasFullAccess() && !a.permissions?.roles.find(r => ids.includes(r.id)))
-    }
-
     getAdmins() {
         // We still do a check on ID because users might have a role that is deleted
         return this.sortedAdmins.filter(a => !!a.permissions?.hasFullAccess())
-    }
-
-    getInviteAdmins() {
-        // We still do a check on ID because users might have a role that is deleted
-        return this.invites.filter(a => !!a.permissions?.hasFullAccess())
     }
 
     addRole() {
@@ -336,7 +312,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
                 saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
                     const doSave = patch.patch(p)
                     await OrganizationManager.patch(doSave)
-                    if (doSave.admins || doSave.invites) {
+                    if (doSave.admins) {
                         await this.load(true)
                     }
                 }
@@ -356,28 +332,8 @@ export default class AdminsView extends Mixins(NavigationMixin) {
                 saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
                     const doSave = patch.patch(p)
                     await OrganizationManager.patch(doSave)
-                    if (doSave.admins || doSave.invites) {
+                    if (doSave.admins) {
                         await this.load(true)
-                    }
-                }
-            }),
-        }).setDisplayStyle("popup"))
-    }
-
-    editInvite(invite: Invite) {
-        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(AdminInviteView, { 
-                editInvite: invite,
-                onUpdateInvite: (patched: Invite | null) => {
-                    const i = this.invites.findIndex(a => a.id === invite.id)
-
-                    if (i != -1) {
-                        this.invites.splice(i, 1, ...patched ? [patched] : [])
-                    } else {
-                        // Create the invite (it has been regenerated)
-                        if (patched) {
-                            this.invites.push(patched)
-                        }
                     }
                 }
             }),

@@ -34,17 +34,12 @@ export class OrganizationManagerStatic {
             shouldRetry
         })
 
-        // Keep admins + invites loaded
+        // Keep admins
         const admins = this.organization.admins
-        const invites = this.organization.invites
         this.organization = response.data
 
         if (admins && !this.organization.admins && patch.admins) {
             this.organization.admins = patch.admins.applyTo(admins)
-        }
-
-        if (invites && !this.organization.invites && patch.invites) {
-            this.organization.invites = patch.invites.applyTo(invites)
         }
 
         // Call handlers: also update the stored organization in localstorage
@@ -56,13 +51,12 @@ export class OrganizationManagerStatic {
     }
 
     async loadAdmins(force = false, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
-        if (!force && this.organization.admins && this.organization.invites) {
+        if (!force && this.organization.admins) {
             return this.organization as any
         }
 
         const loaded = await LoginHelper.loadAdmins(shouldRetry, owner)
         this.organization.admins = loaded.users
-        this.organization.invites = loaded.invites
 
         // Save organization in localstorage
         this.save().catch(console.error)

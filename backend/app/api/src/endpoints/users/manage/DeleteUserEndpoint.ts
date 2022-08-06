@@ -1,18 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group } from "@stamhoofd/models";
-import { Member } from "@stamhoofd/models";
-
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
+import { Token, User } from '@stamhoofd/models';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined
 type ResponseBody = undefined
 
-/**
- * Return a list of users and invites for the given organization with admin permissions
- */
 export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "DELETE") {

@@ -1,7 +1,6 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
-import { GlobalEventBus } from '@stamhoofd/components'
 import { KeychainedResponseDecoder, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator"
 
@@ -184,25 +183,8 @@ export class Session implements RequestMiddleware {
         } else {
             this.user = response.data
         }
-        await this.checkUserInvites(this.user)
         this.callListeners("user")
         return response.data
-    }
-
-    async checkUserInvites(user: MyUser) {
-        if (user.incomingInvites.length > 0) {
-            for (const invite of user.incomingInvites) {
-                // Remove invite if succeeded
-                await this.authenticatedServer.request({
-                    method: "POST",
-                    path: "/invite/"+encodeURIComponent(invite.key)+"/trade"
-                })
-            }
-
-            // Send a global event that the available encryption keys have changed
-            // So we can reload some views if needed / possible
-            GlobalEventBus.sendEvent("encryption", null).catch(console.error)
-        }
     }
 
     /**

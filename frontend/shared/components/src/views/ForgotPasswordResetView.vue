@@ -112,13 +112,10 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
     acceptPrivacy = false
     acceptTerms = false
     acceptDataAgreement = false
-
-    get hasAccount() {
-        return this.session?.user?.hasAccount
-    }
+    hasAccount = false;
 
     get loadingSession() {
-        return !this.session || !this.session.user
+        return !this.session || !this.session.user || this.loadingToken
     }
 
     get title() {
@@ -163,6 +160,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin){
                     this.email = session.user?.email ?? ''
                     this.firstName = session.user?.firstName ?? ''
                     this.lastName = session.user?.lastName ?? ''
+                    this.hasAccount = session.user?.hasAccount ?? false
                     localStorage.setItem("email", this.email)
                     this.loadingToken = false;
                 }).catch(e => {

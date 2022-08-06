@@ -1,9 +1,6 @@
-import { Database } from '@simonbackx/simple-database';
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { Invite } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
-import { MyUser, OrganizationSimple, TradedInvite, User as UserStruct } from '@stamhoofd/structures';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { Token, User } from '@stamhoofd/models';
+import { MyUser } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -35,20 +32,6 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             throw new Error("Unexpected error")
         }
 
-        // Search incoming invites that are valid
-        let invites = await Invite.where({ receiverId: user.id, organizationId: user.organizationId }, { limit: 20 })
-        const d = new Date()
-        d.setTime(d.getTime() - 60*1000) // 1 minute timespan
-        const deleteInvites = invites.filter(i => i.validUntil < d).map(i => i.id)
-        if (deleteInvites.length > 0) {
-            Database.delete("delete from `"+Invite.table+"` where id IN (?)", [deleteInvites]).catch(e => {
-                // No need to wait to delete these invites before returning a response
-                console.error(e)
-            })
-            invites = invites.filter(i => i.validUntil >= d)
-        }
-        const loadedInvites = await Invite.sender.load(invites)
-
         const st = MyUser.create({
             firstName: user.firstName,
             lastName: user.lastName,
@@ -56,14 +39,7 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             email: user.email,
             verified: user.verified,
             permissions: user.permissions,
-            hasAccount: user.hasAccount(),
-            incomingInvites: loadedInvites.map(invite => TradedInvite.create(
-                TradedInvite.create(Object.assign({}, invite, {
-                    receiver: UserStruct.create({...user, hasAccount: user.hasAccount()}),
-                    sender: UserStruct.create({...invite.sender, hasAccount: invite.sender.hasAccount()}),
-                    organization: OrganizationSimple.create(token.user.organization)
-                })))
-            )
+            hasAccount: user.hasAccount()
         })
         return new Response(st);
     }
