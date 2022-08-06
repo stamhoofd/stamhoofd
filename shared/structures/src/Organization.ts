@@ -1,10 +1,9 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder,AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from './addresses/Address';
 import { Group } from './Group';
 import { GroupCategorySettings, GroupCategoryTree } from './GroupCategory';
-import { Invite } from './Invite';
 import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
 import { Permissions } from './Permissions';
@@ -191,12 +190,6 @@ export class Organization extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(User), optional: true, version: 60 })
     admins?: User[]
-
-    /**
-     * Only available for patching. Also available with lazy loading OrganizationAdmins
-     */
-    @field({ decoder: new ArrayDecoder(Invite), optional: true, version: 60 })
-    invites?: Invite[]
 
     get resolvedRegisterDomain() {
         if (this.registerDomain) {

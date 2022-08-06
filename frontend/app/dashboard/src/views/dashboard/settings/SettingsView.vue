@@ -73,7 +73,6 @@
                         Geef anderen ook toegang tot deze vereniging
                     </p>
                     <template slot="right">
-                        <span v-if="!hasOtherAdmins && enableMemberModule" v-tooltip="'Voeg zeker één andere beheerder toe, om de toegang tot jouw gegevens nooit te verliezen'" class="icon error red" />
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -277,12 +276,12 @@
 <script lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, BackButton, CenteredMessage, ErrorBox, STList, STListItem, STNavigationBar, TooltipDirective,Validator} from "@stamhoofd/components";
+import { AsyncComponent, BackButton, CenteredMessage, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
-import { Invite, PaymentMethod, User } from "@stamhoofd/structures"
+import { PaymentMethod } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import AdminsView from '../admins/AdminsView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
@@ -302,6 +301,10 @@ import PrivacySettingsView from './PrivacySettingsView.vue';
 import ReferralView from './ReferralView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 
+
+
+
+
 @Component({
     components: {
         STNavigationBar,
@@ -316,15 +319,7 @@ import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
     }
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
-    errorBox: ErrorBox | null = null
-    validator = new Validator()
-    saving = false
     temp_organization = OrganizationManager.organization
-    showDomainSettings = true
-    loadingMollie = false
-
-    admins: User[] = []
-    invites: Invite[] = []
 
     get organization() {
         return OrganizationManager.organization
@@ -332,10 +327,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get areSalesDisabled() {
         return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
-    }
-
-    async loadAdmins() {
-        await OrganizationManager.loadAdmins(false, false, this)
     }
 
     openReferrals(animated = true) {
@@ -555,10 +546,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         return this.organization.meta.privacyPolicyUrl !== null || this.organization.meta.privacyPolicyFile !== null
     }
 
-    get hasOtherAdmins() {
-        return this.admins.length == 0 || this.admins.length > 1
-    }
-
     get hasPaymentMethod() {
         return (this.organization.meta.transferSettings.iban && this.organization.meta.transferSettings.iban.length > 0) || !this.organization.meta.paymentMethods.includes(PaymentMethod.Transfer)
     } 
@@ -667,10 +654,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                     })
                 ]})
         }
-
-        this.loadAdmins().catch(e => {
-            console.error(e)
-        })
     }
 
     beforeDestroy() {

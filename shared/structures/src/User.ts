@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Permissions } from './Permissions';
@@ -35,4 +35,12 @@ export class NewUser extends User {
      */
     @field({ decoder: StringDecoder, version: 162 })
     password = '';
+}
+
+export class MyUser extends NewUser {
+    /**
+     * @deprecated
+     */
+    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true })
+    incomingInvites: never[] = []
 }

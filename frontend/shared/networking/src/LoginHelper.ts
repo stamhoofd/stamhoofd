@@ -1,104 +1,13 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, ObjectData } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
-import { CreateOrganization, Invite, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, TradedInvite, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { CreateOrganization, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
 import { Session } from './Session';
 import { SessionManager } from './SessionManager';
 
-class StoredInvite extends AutoEncoder {
-    @field({ decoder: Invite })
-    invite: Invite
-}
-
 export class LoginHelper {
-    private static STORED_INVITES: StoredInvite[] = []
-
-    static addStoredInvite(invite: StoredInvite) {
-        this.getStoredInvites()
-        this.STORED_INVITES.push(invite)
-        this.saveStoredInvites()
-    }
-
-    static clearStoredInvites() {
-        this.STORED_INVITES = []
-        localStorage.removeItem("STORED_INVITES")
-    }
-
-    private static saveStoredInvites() {
-        // We cannot use sessionStorage, because links in e-mails will start a new session
-        localStorage.setItem("STORED_INVITES", JSON.stringify(this.STORED_INVITES.map(v => v.encode({ version: Version }))))
-    }
-
-    static getStoredInvites(): StoredInvite[] {
-        const stored = localStorage.getItem("STORED_INVITES")
-        if (!stored) {
-            return this.STORED_INVITES
-        }
-
-        try {
-            const decoded = JSON.parse(stored)
-            const ob = new ObjectData(decoded, { version: Version })
-            this.STORED_INVITES = ob.decode(new ArrayDecoder(StoredInvite as Decoder<StoredInvite>))
-            return this.STORED_INVITES
-        } catch(e) {
-            console.error(e)
-        }
-        return []
-    }
-
-    /**
-     * Save an invite until the e-mail address we have is valid
-     */
-    static saveInvite(invite: Invite) {
-        this.addStoredInvite(StoredInvite.create({
-            invite
-        }))
-    }
-
-    static async tradeInvitesIfNeeded(session: Session) {
-        const invites = this.getStoredInvites()
-        let traded = false
-
-        for (const invite of invites) {
-            if (invite.invite.isValid() && invite.invite.organization.id === session.organizationId) {
-                try {
-                    await this.tradeInvite(session, invite.invite.key, true)
-                    traded = true
-                } catch(e) {
-                    console.error(e)
-                }
-            }
-        }
-
-        if (traded) {
-            // We need the user for decrypting the next invite
-            session.user = null
-
-            // Need to clear organization, because we might have more access now (to new groups)
-            session.organization = null
-        }
-
-        this.clearStoredInvites()
-    }
-
-    static async tradeInvite(session: Session, key: string, multiple = false) {
-        await session.authenticatedServer.request({
-            method: "POST",
-            path: "/invite/"+encodeURIComponent(key)+"/trade",
-            decoder: TradedInvite as Decoder<TradedInvite>
-        })
-
-        // Clear user since permissions have changed
-        if (!multiple) {
-            // We need the user for decrypting the next invite
-            session.user = null
-        }
-        //SessionManager.clearCurrentSession()
-        //await SessionManager.setCurrentSession(session)
-    }
-
     /**
      * Resend the email verification email (if it is still valid)
      * @returns stop: close the modal - the token is expired and you need to login again
@@ -174,7 +83,6 @@ export class LoginHelper {
 
             console.log("Set token")
             session.setToken(response.data)
-            await this.tradeInvitesIfNeeded(session)
 
             // Request additional data
             console.log("Fetching user")
@@ -221,18 +129,8 @@ export class LoginHelper {
             throw e
         }
 
-        // No need to keep awaiting keys now
-        //this.clearAwaitingKeys()
-
-        console.log("Set token")
         session.setToken(tokenResponse.data)
-
-        // Request additional data
-        console.log("Fetching user")
         await session.fetchUser()
-        console.log("ok")
-
-        await this.tradeInvitesIfNeeded(session)
 
         // if user / orgaznization got cleared due to an invite
         if (!session.isComplete()) {

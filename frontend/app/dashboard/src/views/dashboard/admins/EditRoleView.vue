@@ -3,11 +3,11 @@
         <STNavigationBar title="Beheerders">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <template slot="right">
-                <button v-if="!isNew" class="button text" @click="deleteMe">
+                <button v-if="!isNew" class="button text" type="button" @click="deleteMe">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
-                <button class="button icon close gray" @click="pop" />
+                <button class="button icon close gray" type="button" @click="pop" />
             </template>
         </STNavigationBar>
 
@@ -123,27 +123,16 @@
                         {{ admin.email }}
                     </p>
                 </STListItem>
-
-                <STListItem v-for="invite in invites" :key="invite.id" element-name="label" :selectable="true">
-                    <Checkbox slot="left" :checked="hasAdminRole(invite)" @change="setInviteRole(invite, $event)" />
-
-                    <h2 class="style-title-list">
-                        {{ invite.userDetails.firstName || "?" }} {{ invite.userDetails.lastName || "" }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ invite.userDetails.email }}
-                    </p>
-                </STListItem>
             </STList>
         </main>
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" @click="cancel">
+                <button class="button secundary" type="button" @click="cancel">
                     Annuleren
                 </button>
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
+                    <button class="button primary" type="button" @click="save">
                         Opslaan
                     </button>
                 </LoadingButton>
@@ -154,12 +143,12 @@
 
 
 <script lang="ts">
-import { AutoEncoderPatchType, Decoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, Invite, Organization, OrganizationAdmins, OrganizationPrivateMetaData, PermissionRole,PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
+import { Group, GroupCategory, Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -450,10 +439,6 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         return (this.patchedOrganization.admins ?? [])
     }
 
-    get invites() {
-        return this.patchedOrganization.invites ?? []
-    }
-
     get enableMemberModule() {
         return this.organization.meta.modules.useMembers
     }
@@ -470,7 +455,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         return this.admins.slice().sort((a, b) => Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName))
     }
 
-    hasAdminRole(admin: User | Invite) {
+    hasAdminRole(admin: User) {
         return admin.permissions?.roles.find(f => f.id === this.role.id) ?? false
     }
 
@@ -494,26 +479,6 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         p.admins!.addPatch(userPatch)
         this.addPatch(p)
         console.log(p)
-    }
-
-    setInviteRole(admin: Invite, enable: boolean) {
-        const permissionPatch = Permissions.patch({})
-
-        if (enable) {
-            if (this.hasAdminRole(admin)) {
-                return
-            }
-            permissionPatch.roles.addPut(PermissionRole.create(this.role))
-        } else {
-            permissionPatch.roles.addDelete(this.role.id)
-        }
-        const userPatch = Invite.patch({
-            id: admin.id,
-            permissions: permissionPatch
-        })
-        const p = Organization.patch({})
-        p.invites!.addPatch(userPatch)
-        this.addPatch(p)
     }
 
     async save() {

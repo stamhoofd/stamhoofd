@@ -1,7 +1,6 @@
 export * from "./models/EmailVerificationCode"
 export * from "./models/Group"
 export * from "./models/Image"
-export * from "./models/Invite"
 export * from "./models/KeychainItem"
 export * from "./models/Member"
 export * from "./models/MolliePayment"

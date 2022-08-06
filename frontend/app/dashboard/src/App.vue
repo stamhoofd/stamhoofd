@@ -7,12 +7,11 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions, SplitViewController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Logger } from "@stamhoofd/logger";
 import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Country, EmailAddressSettings, Invite, Token } from '@stamhoofd/structures';
+import { Country, EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
@@ -139,66 +138,7 @@ export default class App extends Vue {
                     })
             }
         }
-
-        if (parts.length == 3 && parts[0] == 'invite') {
-            UrlHelper.shared.clear()
-            // out of date
-            new CenteredMessage("Deze link is niet meer geldig", "De uitnodiging die je hebt gekregen is niet langer geldig. Vraag om een nieuwe uitnodiging te versturen.", "error").addCloseButton().show()
-        }
-
-        if (parts.length == 1 && parts[0] == 'invite') {
-            UrlHelper.shared.clear()
-            const key = queryString.get('key');
-
-            if (key) {
-                // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
-
-                (this.$refs.modalStack as any).present({
-                    url: currentPath,
-                    adjustHistory: false,
-                    components: [
-                        new ComponentWithProperties(NavigationController, { 
-                            root: new ComponentWithProperties(PromiseView, {
-                                promise: async () => {
-                                    try {
-                                        const response = await NetworkManager.server.request({
-                                            method: "GET",
-                                            path: "/invite/"+key,
-                                            decoder: Invite as Decoder<Invite>
-                                        })
-
-                                        if (response.data.validUntil < new Date(new Date().getTime() + 1000 * 10)) {
-                                            // Invalid or almost invalid
-                                            const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                                            return new ComponentWithProperties(InvalidInviteView, {
-                                                invite: response.data
-                                            })
-                                        }
-                                        let session = await SessionManager.getSessionForOrganization(response.data.organization.id)
-                                        if (!session) {
-                                            session = new Session(response.data.organization.id)
-                                            await session.loadFromStorage()
-                                        }
-                                        const AcceptInviteView = (await import(/* webpackChunkName: "AcceptInviteView" */ './views/invite/AcceptInviteView.vue')).default;
-                                        return new ComponentWithProperties(AcceptInviteView, {
-                                            session,
-                                            invite: response.data
-                                        })
-                                    } catch (e) {
-                                        Logger.error(e)
-                                        // Probably invalid invite
-                                        const InvalidInviteView = (await import(/* webpackChunkName: "InvalidInviteView" */ './views/invite/InvalidInviteView.vue')).default;
-                                        return new ComponentWithProperties(InvalidInviteView, {})
-                                    }
-                                    
-                                }
-                            })
-                        }).setDisplayStyle("popup").setAnimated(false)
-                    ]
-                });
-            }
-        }
-
+        
         const ua = navigator.userAgent;
 
         if (ua.indexOf("FBAN") != -1 || ua.indexOf("FBAV") != -1) {

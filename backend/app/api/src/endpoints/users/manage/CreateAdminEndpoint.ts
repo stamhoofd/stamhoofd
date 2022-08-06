@@ -10,9 +10,6 @@ type Query = undefined;
 type Body = UserStruct
 type ResponseBody = UserStruct
 
-/**
- * Return a list of users and invites for the given organization with admin permissions
- */
 export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = UserStruct as Decoder<UserStruct>
 
@@ -97,7 +94,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 to: user.email,
                 subject: "✉️ Uitnodiging beheerder van "+user.organization.name,
                 type: "transactional",
-                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je uitgenodigd als beheerder van de vereniging ${user.organization.name} op Stamhoofd. Je kan een account aanmaken door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\nStamhoofd\n\n"+(STAMHOOFD.domains.marketing[user.organization.address.country] ?? "")
+                text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je uitgenodigd om beheerder te worden van de vereniging ${user.organization.name} op Stamhoofd. Je kan een account aanmaken door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\nStamhoofd\n\n"+(STAMHOOFD.domains.marketing[user.organization.address.country] ?? "")
             });
         }
 
