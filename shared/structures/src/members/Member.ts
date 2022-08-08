@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { MemberDetails } from './MemberDetails';
@@ -8,8 +8,21 @@ export class Member extends AutoEncoder {
     id: string;
 
     /**
-     * Non encrypted information
+     * @deprecated Marked for removal
+     * Slowly migrate towards a non-encrypted member in the future
      */
+    @field({ decoder: StringDecoder, optional: true, field: 'firstName' })
+    @field({ decoder: StringDecoder, optional: true, version: 165 })
+    _f = ""
+
+    /**
+     * @deprecated Marked for removal
+     * Slowly migrate towards a non-encrypted member in the future
+     */
+    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true, field: 'encryptedDetails' })
+    @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true, version: 165 })
+    _ed = []
+
     @field({ decoder: MemberDetails, field: 'nonEncryptedDetails' })
     @field({ decoder: MemberDetails, version: 165 })
     details: MemberDetails
