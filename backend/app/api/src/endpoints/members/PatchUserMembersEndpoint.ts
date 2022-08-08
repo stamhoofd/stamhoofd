@@ -43,16 +43,14 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             const member = new Member()
             member.id = struct.id
             member.organizationId = user.organizationId
-            member.firstName = struct.firstName
-            member.encryptedDetails = struct.encryptedDetails
-            member.details = struct.nonEncryptedDetails
+            member.details = struct.details
 
-            if (!struct.nonEncryptedDetails) {
+            if (!struct.details) {
                 throw new SimpleError({
                     code: "invalid_data",
-                    message: "No nonEncryptedDetails provided",
+                    message: "No details provided",
                     human: "Opgelet! Je gebruikt een oudere versie van de inschrijvinsgpagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
-                    field: "nonEncryptedDetails"
+                    field: "details"
                 })
             }
 
@@ -77,28 +75,16 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 })
             }
 
-            member.firstName = struct.firstName ?? member.firstName
-            if (struct.encryptedDetails) {
-                member.encryptedDetails = struct.encryptedDetails.applyTo(member.encryptedDetails)
-            }
-            if (struct.nonEncryptedDetails) {
-                if (member.details) {
-                    member.details.patchOrPut(struct.nonEncryptedDetails)
-                } else {
-                    member.details = MemberDetails.create({})
-                    member.details.patchOrPut(struct.nonEncryptedDetails)
-                }
-                if (!member.details.isRecovered) {
-                    member.encryptedDetails = []
-                }
+            if (struct.details) {
+                member.details.patchOrPut(struct.details)
             }
 
             if (!member.details) {
                 throw new SimpleError({
                     code: "invalid_data",
-                    message: "No nonEncryptedDetails provided",
+                    message: "No details provided",
                     human: "Opgelet! Je gebruikt een oudere versie van de inschrijvinsgpagina die niet langer wordt ondersteund. Herlaad de website grondig en wis je browser cache.",
-                    field: "nonEncryptedDetails"
+                    field: "details"
                 })
             }
             await member.save();

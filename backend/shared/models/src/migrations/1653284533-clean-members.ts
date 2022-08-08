@@ -3,9 +3,61 @@ import { Decoder, ObjectData, VersionBoxDecoder } from '@simonbackx/simple-encod
 import { Sodium } from '@stamhoofd/crypto';
 import { EncryptedMemberDetails, MemberDetails, Version } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { Member } from '../models/Member';
 import { Organization } from '../models/Organization';
-import { User } from '../models/User';
+
+import { column, Model } from '@simonbackx/simple-database';
+import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { v4 as uuidv4 } from "uuid";
+
+export class Member extends Model {
+    static table = "members"
+
+    // Columns
+    @column({
+        primary: true, type: "string", beforeSave(value) {
+            return value ?? uuidv4();
+        }
+    })
+    id!: string;
+
+    /**
+     * @deprecated
+     * Could get removed as soon as we removed the encryptedDetails field, since we now also store the details.
+     */
+    @column({ type: "string" })
+    firstName: string = "";
+
+    @column({ type: "string" })
+    organizationId: string;
+
+    @column({ type: "json", decoder: new ArrayDecoder(EncryptedMemberDetails) })
+    encryptedDetails: EncryptedMemberDetails[] = []
+
+    @column({ type: "json", decoder: MemberDetails, nullable: true })
+    details: MemberDetails | null = null
+
+    @column({
+        type: "datetime", beforeSave(old?: any) {
+            if (old !== undefined) {
+                return old;
+            }
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        }
+    })
+    createdAt: Date
+
+    @column({
+        type: "datetime", beforeSave() {
+            const date = new Date()
+            date.setMilliseconds(0)
+            return date
+        },
+        skipUpdate: true
+    })
+    updatedAt: Date
+}
 
 class Helper {
     static async getKeyPair(encrypted: EncryptedMemberDetails, organization: Organization) {

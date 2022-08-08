@@ -224,7 +224,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
                                         path: "/payments/"+payment.id+"/registrations",
                                         decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
                                     })
-                                    const registrations = await MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups, OrganizationManager.organization)
+                                    const registrations = MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
 
                                     this.show({
                                         components: [

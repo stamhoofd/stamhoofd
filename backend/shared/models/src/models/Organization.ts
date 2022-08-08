@@ -581,42 +581,6 @@ export class Organization extends Model {
         }
     }
 
-
-    async getKeyHistory(): Promise<OrganizationKey[]> {
-        // Todo: we need some performance improvements here, or save the key history separately
-        const Member = (await import('./Member')).Member;
-        const members = await Member.where({
-            organizationId: this.id
-        })
-
-        const keys = new Map<string, OrganizationKey>();
-        keys.set(
-            this.publicKey,
-            OrganizationKey.create({
-                publicKey: this.publicKey,
-                start: new Date()
-            })
-        )
-
-        for (const member of members) {
-            for (const d of member.encryptedDetails) {
-                if (d.forOrganization) {
-                    const existing = keys.get(d.publicKey)
-                    keys.set(
-                        d.publicKey,
-                        OrganizationKey.create({
-                            publicKey: d.publicKey,
-                            start: existing && existing.start < d.meta.ownerDate ? existing.start : d.meta.ownerDate,
-                            end: existing && !existing.end ? null : (existing && existing.end && existing.end > d.meta.date ? existing.end : d.meta.date)
-                        })
-                    )
-                }
-            }
-        }
-
-        return [...keys.values()]
-    }
-
     /**
      * E-mail address when we receive replies for organization@stamhoofd.email.
      * Note that this sould be private because it can contain personal e-mail addresses if the organization is not configured correctly

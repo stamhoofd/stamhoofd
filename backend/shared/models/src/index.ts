@@ -33,7 +33,6 @@ export * from "./structures/OrganizationServerMetaData"
 
 export * from "./factories/AddressFactory"
 export * from "./factories/EmergencyContactFactory"
-export * from "./factories/EncryptedMemberFactory"
 export * from "./factories/GroupFactory"
 export * from "./factories/MemberFactory"
 export * from "./factories/OrganizationFactory"

@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { Address, EmergencyContact, EncryptedMember, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
+import { Address, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
 import { Vue } from "vue-property-decorator";
 
 import { OrganizationManager } from './OrganizationManager';
@@ -27,9 +27,7 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         for (const member of data.data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
-                this.decryptMember(member, OrganizationManager.organization),
-                member.registrations,
-                member.users,
+                member,
                 groups
             )
 
@@ -59,26 +57,24 @@ export class MemberManagerStatic extends MemberManagerBase {
     async addMember(memberDetails: MemberDetails): Promise<MemberWithRegistrations | null> {
         const session = SessionManager.currentSession!
 
-        // Create member
-        const encryptedMember = EncryptedMember.create({
-            firstName: memberDetails.firstName
-        })
-
-        // Prepare patch
-        const patch = KeychainedMembers.patch({})
-
         // Add encryption blobs
         // Add encryption blob (only one)
-        if (session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
-            encryptedMember.nonEncryptedDetails = memberDetails
-        } else {
+        if (!session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
             throw new SimpleError({
                 code: "not_accepted_terms",
                 message: 'Deze vereniging lijkt inactief te zijn. Neem contact op met de vereniging.'
             })
         }
 
-        patch.members.addPut(encryptedMember)
+        // Create member
+        const member = Member.create({
+            details: memberDetails
+        })
+
+        // Prepare patch
+        const patch = KeychainedMembers.patch({})
+
+        patch.members.addPut(member)
 
         // Also update other members that might have been changed (e.g. when a shared address have been changed)
         const members = this.members ?? []
@@ -93,7 +89,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         })
 
         MemberManager.setMembers(response.data)
-        return this.members?.find(m => m.id == encryptedMember.id) ?? null
+        return this.members?.find(m => m.id == member.id) ?? null
     }
 
     /**

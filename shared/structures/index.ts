@@ -1,5 +1,5 @@
 // Latest version of the structures
-export const Version = 164
+export const Version = 165
 
 // General
 export * from "./src/addresses/Address"
@@ -65,7 +65,6 @@ export * from "./src/files/Image"
 export * from "./src/files/Resolution"
 export * from "./src/files/ResolutionRequest"
 export * from "./src/members/EmergencyContact"
-export * from "./src/members/EncryptedMember"
 export * from "./src/members/EncryptedMemberDetails"
 export * from "./src/members/EncryptedMemberWithRegistrations"
 export * from "./src/members/EncryptedPaymentDetailed"

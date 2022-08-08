@@ -7,7 +7,9 @@ import { Organization } from "../Organization";
 import { MemberDetails } from "./MemberDetails";
 import { ReviewTimes } from "./ReviewTime";
 
-
+/**
+ * @deprecated
+ */
 export class MemberDetailsMeta extends AutoEncoder {
     /// Date of encryption
     @field({ decoder: DateDecoder })
@@ -159,7 +161,9 @@ export class MemberDetailsMeta extends AutoEncoder {
     }
 }
 
-
+/**
+ * @deprecated
+ */
 export class EncryptedMemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
