@@ -162,6 +162,7 @@ export class MemberDetails extends AutoEncoder {
     reviewTimes = ReviewTimes.create({})
 
     /**
+     * @deprecated
      * Keep track whether this are recovered member details. Only set this back to false when:
      * - The data is entered manually again (by member / parents)
      * - Warning message is dismissed / removed in the dashboard by organization

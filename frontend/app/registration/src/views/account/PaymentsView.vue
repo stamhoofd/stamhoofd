@@ -87,16 +87,6 @@ export default class PaymentsView extends Mixins(NavigationMixin){
         }
     }
 
-    /**
-     * Return members that are currently registered in
-     */
-    get waitingMembers() {
-        if (!this.members) {
-            return []
-        }
-        return this.members.filter(m => m.waitingGroups.length > 0 || m.acceptedWaitingGroups.length > 0)
-    }
-
     getPaymentPeriod(payment: Payment) {
         return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
     }

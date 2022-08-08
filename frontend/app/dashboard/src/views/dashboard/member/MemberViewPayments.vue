@@ -184,7 +184,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             }),
             isNew: true,
             callback: async (payments: EncryptedPaymentGeneral[]) => {
-                await this.appendPayments(payments).catch(console.error)
+                this.appendPayments(payments)
                 MemberManager.callListeners("payment", this.member)
             }
         }).setDisplayStyle("popup"))
@@ -196,7 +196,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 payment,
                 isNew: false,
                 callback: async (payments: EncryptedPaymentGeneral[]) => {
-                    await this.appendPayments(payments).catch(console.error)
+                    this.appendPayments(payments)
                     MemberManager.callListeners("payment", this.member)
                 }
             })
@@ -212,14 +212,14 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 path: "/organization/members/"+this.member.id+"/payments",
                 decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
             })
-            await this.setPayments(response.data)
+            this.setPayments(response.data)
         } catch (e) {
             Toast.fromError(e).show()
         }
         this.loadingPayments = false
     }
 
-    async appendPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
+    appendPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
         const organization = OrganizationManager.organization
 
         // Decrypt data
@@ -233,7 +233,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             // Create a detailed payment without registrations
             const payment = PaymentGeneral.create({
                 ...encryptedPayment, 
-                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups, organization)
+                registrations: MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
             })
 
             // Set payment reference
@@ -255,7 +255,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         this.payments = arr
     }
 
-    async setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
+    setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
         const organization = OrganizationManager.organization
 
         // Decrypt data
@@ -264,7 +264,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             // Create a detailed payment without registrations
             const payment = PaymentGeneral.create({
                 ...encryptedPayment, 
-                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups, organization)
+                registrations: MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
             })
 
             // Set payment reference
@@ -310,7 +310,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                     body: data,
                     decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
-                await this.appendPayments(response.data)
+                this.appendPayments(response.data)
                 MemberManager.callListeners("payment", this.member)
             } catch (e) {
                 Toast.fromError(e).show()
@@ -349,7 +349,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                     decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
                 })
 
-                await this.appendPayments(response.data)
+                this.appendPayments(response.data)
                 MemberManager.callListeners("payment", this.member)
             } catch (e) {
                 Toast.fromError(e).show()

@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageButton, LoadComponent, TableAction, Toast } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrationsPatch, Group, MemberWithRegistrations, Registration } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, Group, MemberWithRegistrations, Registration } from "@stamhoofd/structures";
 
 import { MemberManager } from "../../../classes/MemberManager";
 import MailView from "../mail/MailView.vue";
@@ -318,12 +318,12 @@ export class MemberActionBuilder {
                 if (!registration) {
                     throw new Error("Not found")
                 }
-                registrationsPatch.addPatch(Registration.patchType().create({
+                registrationsPatch.addPatch(Registration.patch({
                     id: registration.id,
                     canRegister: allow
                 }))
 
-                patches.addPatch(EncryptedMemberWithRegistrationsPatch.create({
+                patches.addPatch(EncryptedMemberWithRegistrations.patch({
                     id: member.id,
                     registrations: registrationsPatch
                 }))

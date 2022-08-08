@@ -301,14 +301,14 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             owner: this,
         })
 
-        await this.setPayments(response.data)
+        this.setPayments(response.data)
     }
 
     beforeDestroy() {
         Request.cancelAll(this)
     }
 
-    async setPayments(encryptedPayments: EncryptedPaymentGeneral[], add = false) {
+    setPayments(encryptedPayments: EncryptedPaymentGeneral[], add = false) {
         encryptedPayments = encryptedPayments.filter(p => p.method == PaymentMethod.Transfer)
         const organization = OrganizationManager.organization
 
@@ -318,7 +318,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             // Create a detailed payment without registrations
             const payment = PaymentGeneral.create({
                 ...encryptedPayment, 
-                registrations: await MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups, organization)
+                registrations: MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
             })
 
             // Set payment reference
@@ -389,7 +389,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                     shouldRetry: false
                 })
 
-                await this.setPayments(response.data, true)
+                this.setPayments(response.data, true)
                 new Toast("Betaalstatus gewijzigd", "success").setHide(1000).show()
             } catch (e) {
                 Toast.fromError(e).show()

@@ -32,7 +32,7 @@ export class FamilyManager {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
             shouldRetry: false
         })
-        this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
+        this.setMembers(MemberManager.decryptMembersWithRegistrations(response.data))
     }
 
     async addMember(memberDetails: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {
@@ -47,22 +47,19 @@ export class FamilyManager {
             }))
         }
 
-        // Create member
-        const encryptedMember = EncryptedMemberWithRegistrations.create({
-            firstName: memberDetails.firstName,
-            registrations,
-            users
-        })
-
-        // Add encryption blob (only one)
-        if (session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
-            encryptedMember.nonEncryptedDetails = memberDetails
-        } else {
+        if (!session.organization?.meta.didAcceptEndToEndEncryptionRemoval) {
             throw new SimpleError({
                 code: "not_accepted_terms",
                 message: 'Het toevoegen van leden is geblokkeerd tot de nieuwe verwerkersovereenkomst en privacyvoorwaarden worden geaccepteerd door een hoofdbeheerder.'
             })
         }
+
+        // Create member
+        const encryptedMember = EncryptedMemberWithRegistrations.create({
+            details: memberDetails,
+            registrations,
+            users
+        })
 
         // Prepare patch
         const patch: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
@@ -81,7 +78,7 @@ export class FamilyManager {
             shouldRetry: false
         })
 
-        this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
+        this.setMembers(MemberManager.decryptMembersWithRegistrations(response.data))
         const m = this.members?.find(m => m.id == encryptedMember.id) ?? null
 
         // Update group counts only when succesfully adjusted
@@ -129,7 +126,7 @@ export class FamilyManager {
             decoder: new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>),
             shouldRetry: false
         })
-        const m = (await MemberManager.decryptMembersWithRegistrations(response.data))[0]
+        const m = (MemberManager.decryptMembersWithRegistrations(response.data))[0]
 
         const i = this.members.findIndex(_m => _m.id === m.id)
         if (i != -1) {
@@ -203,7 +200,7 @@ export class FamilyManager {
             shouldRetry: false
         })
 
-        this.setMembers(await MemberManager.decryptMembersWithRegistrations(response.data))
+        this.setMembers(MemberManager.decryptMembersWithRegistrations(response.data))
     }
 
     setMembers(newMembers: MemberWithRegistrations[]) {

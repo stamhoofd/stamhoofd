@@ -115,7 +115,10 @@ export class MollieToken extends Model {
                     hostname: "api.mollie.com",
                     path: path,
                     method: method,
-                    headers: {
+                    headers: method === 'GET' ? 
+                    {
+                        "Authorization": auth ? "Bearer "+auth : "Basic "+Buffer.from((STAMHOOFD.MOLLIE_CLIENT_ID ?? "")+":"+(STAMHOOFD.MOLLIE_SECRET ?? ""), "ascii").toString("base64")
+                    } : {
                         "Content-Type": type == "json" ? "application/json" : "application/x-www-form-urlencoded",
                         "Content-Length": Buffer.byteLength(jsonData),
                         "Authorization": auth ? "Bearer "+auth : "Basic "+Buffer.from((STAMHOOFD.MOLLIE_CLIENT_ID ?? "")+":"+(STAMHOOFD.MOLLIE_SECRET ?? ""), "ascii").toString("base64")

@@ -13,21 +13,14 @@ import { UmbrellaOrganization } from '../UmbrellaOrganization';
 import { User } from '../User';
 import { RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
+import { EncryptedMemberWithRegistrations } from './EncryptedMemberWithRegistrations';
 import { Gender } from './Gender';
 import { Member } from './Member';
 import { MemberDetailsWithGroups } from './OrganizationRecordsConfiguration';
-import { RecordCategory } from './records/RecordCategory';
 import { RecordType } from './records/RecordSettings';
 import { Registration } from './Registration';
 
-
-export class MemberWithRegistrations extends Member {
-    @field({ decoder: new ArrayDecoder(Registration) })
-    registrations: Registration[]
-
-    @field({ decoder: new ArrayDecoder(User), version: 32 })
-    users: User[]
-
+export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
     // Calculated properties for convenience
     @field({ decoder: new ArrayDecoder(Registration), optional: true })
     activeRegistrations: Registration[] = []
@@ -71,12 +64,8 @@ export class MemberWithRegistrations extends Member {
         return RegisterCartValidator.isExistingMember(this, this.allGroups)
     }
 
-    static fromMember(member: Member, registrations: Registration[], users: User[], groups: Group[]) {
-        const m = MemberWithRegistrations.create({
-            ...member,
-            registrations,
-            users
-        })
+    static fromMember(member: EncryptedMemberWithRegistrations, groups: Group[]) {
+        const m = MemberWithRegistrations.create(member)
         m.fillGroups(groups)
         return m
     }
@@ -245,13 +234,10 @@ export class MemberWithRegistrations extends Member {
      * Instead of listening for changes to a member, editing components can push changes to existing instances
      */
     copyFrom(member: MemberWithRegistrations) {
-        this.firstName = member.firstName
         this.details = member.details
         this.activeRegistrations = member.activeRegistrations
         this.waitingGroups = member.waitingGroups
         this.acceptedWaitingGroups = member.acceptedWaitingGroups
-        this.encryptedDetails = member.encryptedDetails
-        this.nonEncryptedDetails = member.nonEncryptedDetails
         this.allGroups = member.allGroups
         
         if (member.groups !== this.groups) {

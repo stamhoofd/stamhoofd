@@ -1,16 +1,8 @@
-import { AutoEncoder, BooleanDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-// eslint bug marks types as "unused"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Group } from '../../Group';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { GroupCategory } from '../../GroupCategory';
-import { GroupPrices } from '../../GroupPrices';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from '../../Organization';
-import { EncryptedMemberWithRegistrations } from '../EncryptedMemberWithRegistrations';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from '../MemberWithRegistrations';
 import { RegisterCartValidator } from './RegisterCartValidator';
 import { UnknownMemberWithRegistrations } from './UnknownMemberWithRegistrations';

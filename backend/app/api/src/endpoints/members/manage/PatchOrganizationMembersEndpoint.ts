@@ -1,16 +1,9 @@
 import { OneToManyRelation } from '@simonbackx/simple-database';
-import {  ConvertArrayToPatchableArray,Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { EncryptedMemberFactory } from '@stamhoofd/models';
-import { Group } from '@stamhoofd/models';
-import { Member, MemberWithRegistrations } from '@stamhoofd/models';
-import { Organization } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
-import { Registration, RegistrationWithPayment } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { User } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations,EncryptedMemberWithRegistrationsPatch, getPermissionLevelNumber, MemberDetails, PaymentMethod, PaymentStatus, PermissionLevel,Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, RegistrationWithPayment, Token, User } from '@stamhoofd/models';
+import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
@@ -21,7 +14,7 @@ type ResponseBody = EncryptedMemberWithRegistrations[]
  */
 
 export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(EncryptedMemberWithRegistrations as any, EncryptedMemberWithRegistrationsPatch, StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]>>
+    bodyDecoder = new PatchableArrayDecoder(EncryptedMemberWithRegistrations as any, EncryptedMemberWithRegistrations.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<EncryptedMemberWithRegistrations[]>>
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
@@ -59,9 +52,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
             member.id = struct.id
             member.organizationId = user.organizationId
-            member.encryptedDetails = struct.encryptedDetails
-            member.firstName = struct.firstName
-            member.details = struct.nonEncryptedDetails
+            member.details = struct.details
 
             for (const registrationStruct of struct.registrations) {
                 const group = groups.find(g => g.id === registrationStruct.groupId)
@@ -91,7 +82,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
              * In development mode, we allow some secret usernames to create fake data
              */
             if (STAMHOOFD.environment == "development") {
-                if (member.firstName == "create" || member.firstName == "Create") {
+                if (member.details.firstName == "create" || member.details.firstName == "Create") {
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
@@ -107,7 +98,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     continue;
                 }
 
-                if (member.firstName == "clear" || member.firstName == "Clear") {
+                if (member.details.firstName == "clear" || member.details.firstName == "Clear") {
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
@@ -163,21 +154,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 })
             }
             
-            member.firstName = patch.firstName ?? member.firstName
-            if (patch.encryptedDetails) {
-                member.encryptedDetails = patch.encryptedDetails.applyTo(member.encryptedDetails)
-            }
-            if (patch.nonEncryptedDetails) {
-                if (member.details) {
-                    member.details.patchOrPut(patch.nonEncryptedDetails)
-                } else {
-                    member.details = MemberDetails.create({})
-                    member.details.patchOrPut(patch.nonEncryptedDetails)
-                }
-
-                if (!member.details.isRecovered) {
-                    member.encryptedDetails = []
-                }
+            if (patch.details) {
+                member.details.patchOrPut(patch.details)
             }
             
             await member.save();
@@ -405,19 +383,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     async createDummyMembers(organization: Organization, group: Group) {
-        const m = await new EncryptedMemberFactory({ 
+        const members = await new MemberFactory({ 
             organization,
             minAge: group.settings.minAge ?? undefined,
             maxAge: group.settings.maxAge ?? undefined
         }).createMultiple(25)
-        for (const [enc, keychain] of m) {
-            const member = new Member().setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
-            Object.assign(member, enc)
-            member.organizationId = organization.id
 
-            // if debug enabled: save them
-            await member.save()
-
+        for (const m of members) {
+            const member = m.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
             const d = new Date(new Date().getTime() - Math.random() * 60 * 1000 * 60 * 24 * 60)
 
             const payment = new Payment()
@@ -451,8 +424,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             member.registrations.push(registration)
             await registration.save()
-
-            // Create fake users
         }
     }
 

@@ -30,15 +30,13 @@ export class MemberManagerStatic extends MemberManagerBase {
         }
     }
 
-    decryptMembersWithRegistrations(data: EncryptedMemberWithRegistrations[]) {
+    decryptMembersWithRegistrations(data: EncryptedMemberWithRegistrations[]): MemberWithRegistrations[] {
         const members: MemberWithRegistrations[] = []
         const groups = OrganizationManager.organization.groups
 
         for (const member of data) {
             const decryptedMember = MemberWithRegistrations.fromMember(
-                this.decryptMember(member, OrganizationManager.organization),
-                member.registrations,
-                member.users,
+                member,
                 groups
             )
             members.push(decryptedMember)
@@ -203,7 +201,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             body: patch,
             shouldRetry
         })
-        return await this.decryptMembersWithRegistrations(response.data)
+        return this.decryptMembersWithRegistrations(response.data)
     }
 
     /**
