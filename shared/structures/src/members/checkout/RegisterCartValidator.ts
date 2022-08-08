@@ -21,7 +21,7 @@ export class RegisterCartValidator {
                 closed: true,
                 waitingList: false,
                 message: "Al ingeschreven",
-                description: "Je kan "+member.firstName+" maar één keer inschrijven voor "+group.settings.name
+                description: "Je kan "+member.details.firstName+" maar één keer inschrijven voor "+group.settings.name
             }
         }
 
@@ -117,7 +117,7 @@ export class RegisterCartValidator {
                 closed: false,
                 waitingList: false,
                 message: "Uitnodiging",
-                description: "Je bent uitgenodigd om "+member.firstName+" in te schrijven voor "+group.settings.name
+                description: "Je bent uitgenodigd om "+member.details.firstName+" in te schrijven voor "+group.settings.name
             }
         }
 
@@ -178,7 +178,7 @@ export class RegisterCartValidator {
                             closed: true,
                             waitingList: false,
                             message: "Volzet",
-                            description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.") : ("Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.")
+                            description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.") : ("Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.")
                         }
                     }
 
@@ -196,7 +196,7 @@ export class RegisterCartValidator {
                         closed: false,
                         waitingList: true,
                         message: "Wachtlijst (volzet)",
-                        description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."
+                        description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."
                     }
                 } else {
                     return {
@@ -291,7 +291,7 @@ export class RegisterCartValidator {
                 code: "invalid_registration",
                 message: "Registration not possible anymore",
                 // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                human: canRegister.description ? canRegister.description : ("Je kan "+member.firstName+" niet meer inschrijven voor "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
+                human: canRegister.description ? canRegister.description : ("Je kan "+member.details.firstName+" niet meer inschrijven voor "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
             })
         }
 
@@ -299,7 +299,7 @@ export class RegisterCartValidator {
             throw new SimpleError({
                 code: "invalid_registration",
                 message: "Registration not possible anymore, waiting list required",
-                human: canRegister.description ? canRegister.description : ("Je kan "+member.firstName+" enkel nog inschrijven voor de wachtlijst van "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
+                human: canRegister.description ? canRegister.description : ("Je kan "+member.details.firstName+" enkel nog inschrijven voor de wachtlijst van "+group.settings.name+ (canRegister.message ? (' ('+canRegister.message+')') : ''))
             })
         }
 
@@ -307,7 +307,7 @@ export class RegisterCartValidator {
             throw new SimpleError({
                 code: "invalid_registration",
                 message: "Waiting list not possible",
-                human: "Je hoeft "+member.firstName+" niet langer op de wachtlijst van "+group.settings.name+" in te schrijven. We hebben het uit je winkelmandje verwijderd, voeg het opnieuw toe zonder wachtlijst."
+                human: "Je hoeft "+member.details.firstName+" niet langer op de wachtlijst van "+group.settings.name+" in te schrijven. We hebben het uit je winkelmandje verwijderd, voeg het opnieuw toe zonder wachtlijst."
             })
         }
     }

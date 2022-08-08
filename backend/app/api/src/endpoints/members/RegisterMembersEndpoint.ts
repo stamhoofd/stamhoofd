@@ -162,7 +162,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registration.waitingList = false
                 registration.canRegister = false
                 payRegistrations.push(registration)
-                payNames.push(member.firstName)
+                payNames.push(member.details.firstName)
             }
             registrations.push(registration)
         }

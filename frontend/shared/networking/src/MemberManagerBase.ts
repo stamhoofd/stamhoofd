@@ -1,36 +1,31 @@
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding"
-import { EncryptedMember, Group, KeychainedMembers, Member, MemberWithRegistrations, Organization, RegistrationWithEncryptedMember, RegistrationWithMember } from "@stamhoofd/structures"
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { Group, KeychainedMembers, Member, MemberWithRegistrations, RegistrationWithEncryptedMember, RegistrationWithMember } from "@stamhoofd/structures";
 
 export class MemberManagerBase {
-    decryptMember(member: EncryptedMember, organization: Organization): Member {
-        if (member.nonEncryptedDetails) {
-            const details = member.nonEncryptedDetails
-            return Member.create({ ...member, details })
-        }
-
-        // This can get removed and should trigger atm
-        throw new Error('Found a member that was missing the now required nonEncryptedDetails property');
+    /**
+     * @deprecated
+     */
+    decryptMember(member: Member): Member {
+        return member;
     }
 
-    decryptRegistrationWithMember(registration: RegistrationWithEncryptedMember, groups: Group[], organization: Organization): RegistrationWithMember {
+    decryptRegistrationWithMember(registration: RegistrationWithEncryptedMember, groups: Group[]): RegistrationWithMember {
         const member = registration.member
-        const decryptedMember = this.decryptMember(member, organization)
 
         const decryptedRegistration = RegistrationWithMember.create(Object.assign({}, registration, {
-            member: decryptedMember,
+            member,
             group: groups.find(g => g.id === registration.groupId)
         }))
 
         return decryptedRegistration
     }
 
-    decryptRegistrationsWithMember(data: RegistrationWithEncryptedMember[], groups: Group[], organization: Organization): RegistrationWithMember[] {
+    decryptRegistrationsWithMember(data: RegistrationWithEncryptedMember[], groups: Group[]): RegistrationWithMember[] {
         const registrations: RegistrationWithMember[] = []
 
         for (const registration of data) {
-            registrations.push(this.decryptRegistrationWithMember(registration, groups, organization))
+            registrations.push(this.decryptRegistrationWithMember(registration, groups))
         }
-
         return registrations
     }
 
@@ -42,9 +37,8 @@ export class MemberManagerBase {
             // Clean the member details
             member.details.cleanData()
 
-            const memberPatch = EncryptedMember.patch({ id: member.id })
-            memberPatch.firstName = member.details.firstName
-            memberPatch.nonEncryptedDetails = member.details
+            const memberPatch = Member.patch({ id: member.id })
+            memberPatch.details = member.details
 
             patch.members.addPatch(memberPatch)
         }

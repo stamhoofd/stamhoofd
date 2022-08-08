@@ -1,6 +1,6 @@
 import { AutoEncoder,BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
-import { EncryptedMember } from "./EncryptedMember"
+import { Member } from "./Member"
 
 export class RegistrationWithEncryptedMember extends AutoEncoder  {
     @field({ decoder: StringDecoder })
@@ -31,6 +31,6 @@ export class RegistrationWithEncryptedMember extends AutoEncoder  {
     @field({ decoder: BooleanDecoder, version: 20 })
     canRegister = false
 
-    @field({ decoder: EncryptedMember })
-    member: EncryptedMember
+    @field({ decoder: Member })
+    member: Member
 }

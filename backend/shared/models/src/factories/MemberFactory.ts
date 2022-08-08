@@ -1,7 +1,6 @@
 import { Factory } from "@simonbackx/simple-database";
-import { VersionBox } from '@simonbackx/simple-encoding';
 import { Sodium } from '@stamhoofd/crypto';
-import { EncryptedMemberDetails, Gender, MemberDetails, MemberDetailsMeta, ParentType, Version } from '@stamhoofd/structures';
+import { Gender, MemberDetails, ParentType } from '@stamhoofd/structures';
 
 import { KeychainItem } from '../models/KeychainItem';
 import { Member } from "../models/Member";
@@ -10,7 +9,6 @@ import { UserWithOrganization } from "../models/User";
 import { EmergencyContactFactory } from './EmergencyContactFactory';
 import { OrganizationFactory } from './OrganizationFactory';
 import { ParentFactory } from './ParentFactory';
-import { RecordFactory } from './RecordFactory';
 
 class Options {
     organization?: Organization;
@@ -156,29 +154,8 @@ export class MemberFactory extends Factory<Options, Member> {
         memberDetails.doctor.name = "Dr. " + memberDetails.doctor.name;
 
         const member = new Member()
-        member.firstName = memberDetails.firstName
         member.organizationId = organization.id
-
-        // Encrypt the details
-        const data = JSON.stringify(new VersionBox(memberDetails).encode({ version: Version }))
-        member.encryptedDetails.push(EncryptedMemberDetails.create({
-            publicKey: memberKeyPair.publicKey,
-            ciphertext: await Sodium.sealMessage(data, memberKeyPair.publicKey),
-            forOrganization: false,
-            authorId: "factory",
-            publicData: EncryptedMemberDetails.getPublicData(memberDetails, await organization.getStructure()),
-            meta: MemberDetailsMeta.createFor(memberDetails)
-        }))
-
-        member.encryptedDetails.push(EncryptedMemberDetails.create({
-            publicKey: organization.publicKey,
-            ciphertext: await Sodium.sealMessage(data, organization.publicKey),
-            forOrganization: true,
-            authorId: "factory",
-            publicData: EncryptedMemberDetails.getPublicData(memberDetails, await organization.getStructure()),
-            meta: MemberDetailsMeta.createFor(memberDetails)
-        }))
-
+        member.details = memberDetails
         await member.save()
 
         // Give user access to the encrypted data
