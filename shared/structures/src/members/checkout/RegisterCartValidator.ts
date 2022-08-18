@@ -55,6 +55,22 @@ export class RegisterCartValidator {
         }
 
         // Check if registrations are limited
+        if (group.settings.preventGroupIds.length > 0) {
+            if (member.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.preventGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
+            })) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Niet toegelaten",
+                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je niet al bent ingeschreven voor "+Formatter.joinLast(group.settings.preventGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")
+                }
+            }
+        }
         if (group.settings.preventPreviousGroupIds.length > 0) {
             if (member.registrations.find(r => {
                 const registrationGroup = groups.find(g => g.id === r.groupId)

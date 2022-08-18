@@ -182,6 +182,9 @@ export class GroupSettings extends AutoEncoder {
      */
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 100 })
     requirePreviousGroupIds: string[] = []
+    
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 102 })  //geen idee wat dat versienummer doet
+    preventGroupIds: string[] = []
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 102 })
     preventPreviousGroupIds: string[] = []

@@ -191,6 +191,19 @@ export class MemberWithRegistrations extends Member {
                 return "Niet toegelaten"
             }
         }
+        
+        // Check if registrations are limited
+        if (group.settings.preventGroupIds.length > 0) {
+            if (this.registrations.find(r => {
+                const registrationGroup = groups.find(g => g.id === r.groupId)
+                if (!registrationGroup) {
+                    return false
+                }
+                return group.settings.preventGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle - 1
+            })) {
+                return "Niet toegelaten"
+            }
+        }
 
         // Check if registrations are limited
         if (group.settings.preventPreviousGroupIds.length > 0) {
