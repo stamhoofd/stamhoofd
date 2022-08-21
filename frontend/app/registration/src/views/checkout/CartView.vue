@@ -117,7 +117,7 @@ export default class CartView extends Mixins(NavigationMixin){
 
         try {
             // todo: go to checkout ;)
-            if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport) {
+            if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport && cart.price > 0) {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FinancialSupportView.vue')).default;
                 this.present(
