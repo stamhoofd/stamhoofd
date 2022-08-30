@@ -53,7 +53,6 @@ async function setAWSConfigurationSet(this: Organization) {
         } catch (e) {
             console.error("Missing identity @"+this.id+" for "+this.privateMeta.mailDomain)
             console.error(e)
-            // todo
         }
 
         // Prevent rate limit hitting

@@ -302,12 +302,12 @@ export class InvoiceBuilder {
             this.posY += this.drawInvoiceItem(item, this.posY, false)
             this.posY += ITEM_MARGIN
 
-            // Todo: print line
+            // TODO: print line
         }
 
         this.endPage()
 
-        // Todo: print pricing footer
+        // TODO: print pricing footer
     }
 
     endPage() {

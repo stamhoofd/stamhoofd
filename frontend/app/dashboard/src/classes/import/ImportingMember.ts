@@ -49,8 +49,8 @@ export class ImportingMember {
     /// Set to true to prevent syncing multiple times on internet issues
     synced = false
 
-    // todo: also add registration data (groups, cycle, registered at, paid...)
-    // todo: also add possible existing member
+    // TODO: also add registration data (groups, cycle, registered at, paid...)
+    // TODO: also add possible existing member
 
     constructor(row: number, organization: Organization) {
         this.row = row

@@ -156,7 +156,7 @@ export class WebshopManager {
                     } else {
                         this.webshop = webshop
                     }
-                    // todo: if too long ago, also initiate a background update
+                    // TODO: if too long ago, also initiate a background update
 
                     if (!this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
                         // Do a background update if not yet already doing this
@@ -530,7 +530,7 @@ export class WebshopManager {
             request.onsuccess = () => {
                 const rawOrders = request.result
 
-                // Todo: need version fix here
+                // TODO: need version fix here
                 const orders = new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>).decode(new ObjectData(rawOrders, { version: Version }))
                 resolve(orders)
             }
@@ -556,7 +556,7 @@ export class WebshopManager {
             request.onsuccess = () => {
                 const rawOrders = request.result
 
-                // Todo: need version fix here
+                // TODO: need version fix here
                 const patches = new ArrayDecoder(TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawOrders, { version: Version }))
                 resolve(patches)
             }
@@ -667,7 +667,7 @@ export class WebshopManager {
      * Try to avoid this if needed and use the cache first + fetch changes
      */
     async fetchNewOrders(retry = false, reset = false) {
-        // Todo: clear local database if resetting
+        // TODO: clear local database if resetting
         if (this.isLoadingOrders) {
             return
         }
@@ -918,7 +918,7 @@ export class WebshopManager {
      * Try to avoid this if needed and use the cache first + fetch changes
      */
     async fetchNewTickets(retry = false, reset = false, callback?: (tickets: TicketPrivate[]) => void) {
-        // Todo: clear local database if resetting
+        // TODO: clear local database if resetting
         if (this.isLoadingTickets) {
             return
         }

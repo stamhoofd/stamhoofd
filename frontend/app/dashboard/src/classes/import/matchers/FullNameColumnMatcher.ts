@@ -75,7 +75,7 @@ export class FullNameColumnMatcher extends SharedMatcher implements ColumnMatche
 
         const v = cell.v
 
-        // todo: improve splitting
+        // TODO: improve splitting
         let firstName = v.split(" ")[0]
         let lastName = v.substr(firstName.length+1)
 

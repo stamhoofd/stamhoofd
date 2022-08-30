@@ -142,7 +142,6 @@ class Helper {
         }
 
         if (!latest || !latestEncryptedDetails) {
-            // todo: return placeholder
             const details = new MemberDetails()
             details.firstName = member.firstName
 
