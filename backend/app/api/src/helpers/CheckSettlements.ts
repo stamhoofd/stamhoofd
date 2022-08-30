@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { MolliePayment, MollieToken, Payment } from '@stamhoofd/models';
+import { MolliePayment, MollieToken, Order, Payment } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/structures'
 import axios from 'axios';
 
@@ -90,7 +90,17 @@ export async function checkSettlementsFor(token: string, checkAll = false) {
                     const settlements = data._embedded.settlements as MollieSettlement[];
 
                     for (const settlement of settlements) {
+                        if (settlement.settledAt === null) {
+                            // Skip: this is the open settlement
+                            continue;
+                        }
+
                         const settledAt = new Date(settlement.settledAt)
+                        
+                        if (isNaN(settledAt.getTime())) {
+                            console.error('Received an invalid settledAt from Mollie', settlement, 'for token', token);
+                            continue;
+                        }
 
                         if (checkAll || settledAt > d) {
                             await updateSettlement(token, settlement)
@@ -140,7 +150,20 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
                         settledAt: new Date(settlement.settledAt),
                         amount: Math.round(parseFloat(settlement.amount.value)*100)
                     })
-                    await payment.save()
+                    const saved = await payment.save()
+
+                    if (saved) {
+                        // Mark order as 'updated', or the frontend won't pull in the updates
+                        const order = await Order.getForPayment(null, payment.id)
+                        if (order) {
+                            order.updatedAt = new Date();
+                            order.forceSaveProperty('updatedAt');
+                            await order.save();
+                        }
+
+                        // TODO: Mark registrations as 'saved'
+                    }
+                    
 
                     if (STAMHOOFD.environment === "development") {
                         console.log("Updated settlement of payment "+payment.id)

@@ -330,10 +330,5 @@ export class MollieToken extends Model {
                 }
             })
         }
-       
-
-        //const response = await this.authRequest("POST", "/v2/profiles/me/methods/bancontact")
-    }
-
-    // Todo: check onboarding status
+           }
 }

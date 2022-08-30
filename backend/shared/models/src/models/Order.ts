@@ -86,12 +86,12 @@ export class Order extends Model {
     /**
      * Fetch an order
      */
-    static async getForPayment(organizationId: string, paymentId: string): Promise<Order | undefined> {
+    static async getForPayment(organizationId: string | null, paymentId: string): Promise<Order | undefined> {
         const order = (await this.where({ paymentId }, { limit: 1 }))[0]
         if (!order) {
             return
         }
-        if (order.organizationId !== organizationId) {
+        if (organizationId !== null && order.organizationId !== organizationId) {
             // Security check
             return
         }
@@ -153,6 +153,7 @@ export class Order extends Model {
             if (previousData !== null) {
                 // If we have previousData, we already removed the stock from the old items, so reservedAmount is always zero
                 item.reservedAmount = 0
+                changed = true
             }
             const difference = add ? (item.amount - item.reservedAmount) : -item.reservedAmount
             if (difference !== 0) {
@@ -189,7 +190,7 @@ export class Order extends Model {
             const timeSlot = this.webshop.meta.checkoutMethods.flatMap(m => m.timeSlots).flatMap(t => t.timeSlots).find(t => t.id === s.id)
 
             if (timeSlot) {
-                Order.updateTimeSlotStock(timeSlot, this.data, add)
+                changed = changed || Order.updateTimeSlotStock(timeSlot, this.data, add)
             }
         }
 
