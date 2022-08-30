@@ -44,13 +44,6 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        // Return registrations for old versions (this endpoint has been moved)
-        // Not for exchange, since payment processing needs to happen still
-        if (request.request.getVersion() < 19 && !request.query.exchange) {
-            // todo: also process payments in frontend
-            return new GetPaymentRegistrations().handle(request as any)
-        }
-
         const organization = await Organization.fromApiHost(request.host);
         
         // Not method on payment because circular references (not supprted in ts)
@@ -81,11 +74,15 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         );
     }
 
-    private static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
+    static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
+        if (payment.status === status) {
+            return;
+        }
         const wasPaid = payment.paidAt !== null
         if (status == PaymentStatus.Succeeded) {
             payment.status = PaymentStatus.Succeeded
             payment.paidAt = new Date()
+            await payment.save();
 
             // if it has registrations
             const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
@@ -139,9 +136,13 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             const order = await Order.getForPayment(organization.id, payment.id)
             await order?.onPaymentFailed()
             payment.status = PaymentStatus.Failed
+            payment.paidAt = null
             await payment.save();
         } else {
+            // Prevent concurrency issues
             payment.status = status
+            payment.paidAt = null
+
             await payment.save();
         }
     }
@@ -194,6 +195,10 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
                             } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
                                 await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                            } else if (this.isManualExpired(payment.status, payment)) {
+                                // Mollie still returning pending after 1 day: mark as failed
+                                console.error('Manually marking Mollie payment as expired', payment.id)
+                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
                             }
                         } else {
                             console.warn("Mollie payment is missing for organization "+organization.id+" while checking payment status...")
@@ -201,7 +206,13 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     }
                 } else if (payment.provider == PaymentProvider.Buckaroo) {
                     const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? "", organization.privateMeta.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
-                    const status = await helper.getStatus(payment)
+                    let status = await helper.getStatus(payment)
+
+                    if (this.isManualExpired(status, payment)) {
+                        console.error('Manually marking Buckaroo payment as expired', payment.id)
+                        status = PaymentStatus.Failed
+                    }
+
                     await this.handlePaymentStatusUpdate(payment, organization, status)
                 } else if (payment.provider == PaymentProvider.Payconiq) {
                     // Check status
@@ -210,15 +221,42 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     if (payconiqPayments.length == 1) {
                         const payconiqPayment = payconiqPayments[0]
 
-                        const status = await payconiqPayment.getStatus(organization)
+                        let status = await payconiqPayment.getStatus(organization)
+
+                        if (this.isManualExpired(status, payment)) {
+                            console.error('Manually marking Payconiq payment as expired', payment.id)
+                            status = PaymentStatus.Failed
+                        }
+
                         await this.handlePaymentStatusUpdate(payment, organization, status)
                         
                     } else {
                         console.warn("Payconiq payment is missing for organization "+organization.id+" while checking payment status...")
+
+                        if (this.isManualExpired(payment.status, payment)) {
+                            console.error('Manually marking Payconiq payment as expired because not found', payment.id)
+                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                        }
+                    }
+                } else {
+                    console.error('Invalid payment provider', payment.provider, 'for payment', payment.id);
+                    if (this.isManualExpired(payment.status, payment)) {
+                        console.error('Manually marking unknown payment as expired', payment.id)
+                        await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
                     }
                 }
             }
             return payment
         })
+    }
+
+    static isManualExpired(status: PaymentStatus, payment: Payment) {
+        if ((status == PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
+            // If payment is not succeeded after one day, mark as failed
+            if (payment.createdAt < new Date(new Date().getTime() - 60*1000*60*24)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -83,7 +83,7 @@ declare global {
         // Mapped to process.env for dependencies
         readonly AWS_ACCESS_KEY_ID: string,
         readonly AWS_SECRET_ACCESS_KEY: string,
-        readonly AWS_REGION: "eu-west-1" | string, // todo: add others
+        readonly AWS_REGION: "eu-west-1" | string, // TODO: add others
  
          // DO spaces
         readonly SPACES_ENDPOINT: string,
