@@ -107,7 +107,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
             const organization = token.user.organization
 
-            // Todo: handle order creation here
+            // TODO: handle order creation here
             for (const put of body.getPuts()) {
                 const struct = put.put
                 const model = new Order()
@@ -127,7 +127,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, token.user.organization))
 
-                // todo: validate before updating stock
+                // TODO: validate before updating stock
                 await order.updateStock()
                 const totalPrice = order.data.totalPrice
 

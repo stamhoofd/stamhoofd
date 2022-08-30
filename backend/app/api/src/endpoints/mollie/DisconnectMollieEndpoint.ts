@@ -41,7 +41,7 @@ export class DisonnectMollieEndpoint extends Endpoint<Params, Query, Body, Respo
         user.organization.privateMeta.mollieOnboarding = null;
         await user.organization.save()
 
-        // Todo: disable all payment methods that use this method
+        // TODO: disable all payment methods that use this method
         
         return new Response(await user.getOrganizatonStructure(user.organization));
     }
