@@ -43,33 +43,35 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
             })
         }
 
-        // Halt all order placement and validation + pause stock updates
-        const webshop = await Webshop.getByID(request.params.id)
-        if (!webshop || webshop.organizationId != user.organizationId) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Webshop not found",
-                human: "De webshop die je wilt aanpassen bestaat niet (meer)"
-            })
-        }
+        return await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
+            // Halt all order placement and validation + pause stock updates
+            const webshop = await Webshop.getByID(request.params.id)
+            if (!webshop || webshop.organizationId != user.organizationId) {
+                throw new SimpleError({
+                    code: "not_found",
+                    message: "Webshop not found",
+                    human: "De webshop die je wilt aanpassen bestaat niet (meer)"
+                })
+            }
 
-        if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "You do not have permissions for this endpoint",
-                statusCode: 403
-            })
-        }
-     
-        if (webshop.domain !== null) {
-            webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(webshop.domain)
-            await webshop.updateDNSRecords()
-        } else {
-            webshop.privateMeta.dnsRecords = []
-            webshop.meta.domainActive = false
-        }
+            if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions!) !== PermissionLevel.Full) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "You do not have permissions for this endpoint",
+                    statusCode: 403
+                })
+            }
+        
+            if (webshop.domain !== null) {
+                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(webshop.domain)
+                await webshop.updateDNSRecords()
+            } else {
+                webshop.privateMeta.dnsRecords = []
+                webshop.meta.domainActive = false
+            }
 
-        await webshop.save()
-        return new Response(PrivateWebshop.create(webshop));
+            await webshop.save()
+            return new Response(PrivateWebshop.create(webshop));
+        });
     }
 }
