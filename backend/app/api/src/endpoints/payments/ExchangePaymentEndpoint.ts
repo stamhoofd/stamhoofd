@@ -10,10 +10,9 @@ import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
+import { Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
-import { GetPaymentRegistrations } from './GetPaymentRegistrations';
 
 type Params = {id: string};
 class Query extends AutoEncoder {
@@ -92,10 +91,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             let updateGroups = false;
 
             for (const registration of registrations) {
-                if (registration.registeredAt === null) {
-                    registration.registeredAt = new Date()
-                    registration.reservedUntil = null
-                    await registration.save();
+                if (await registration.markValid()) {
                     updateGroups = true;
                 }
             }
