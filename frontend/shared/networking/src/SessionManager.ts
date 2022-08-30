@@ -286,7 +286,7 @@ export class SessionManagerStatic {
     listenForOrganizationUpdates() {
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === 'visible') {
-                // todo
+                // TODO
                 console.info("Window became visible again")
 
                 if (!this.currentSession || !this.currentSession.isComplete()) {

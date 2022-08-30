@@ -568,7 +568,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     doRefresh() {
         if (document.visibilityState === 'visible') {
-            // todo
+            // TODO
             console.info("Window became visible again")
 
             if (this.lastRefresh.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
@@ -1194,7 +1194,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             return this.sortedValues
         }
 
-        // todo: fix sorting
+        // TODO: fix sorting
 
         if (this.markedRowsAreSelected) {
             return Array.from(this.markedRows.values())

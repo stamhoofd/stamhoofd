@@ -345,7 +345,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             }
 
             if (!this.autoAssign) {
-                // todo: use default group for all
+                // TODO: use default group for all
                 member.registration.autoAssignedGroup = this.defaultGroup
                 continue
             }
@@ -493,7 +493,10 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             groupId: group.id,
             cycle: group.cycle + (this.needRegistration ? -1 : 0),
             waitingList: this.waitingList,
-            payment: payment,
+            
+            // TODO: we need to set how much is already paid etc
+            //payment: payment,
+
             registeredAt: this.waitingList ? null : (member.registration.date ?? new Date()),
             createdAt: member.registration.date ?? new Date(),
         })
@@ -513,7 +516,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             // Add all members that do not yet exist
             this.autoAssignMembers(this.members)
 
-            // todo: group family
+            // TODO: group family
             for (const member of this.members) {
                 if (member.synced) {
                     // Already synced: prevent doing it twice

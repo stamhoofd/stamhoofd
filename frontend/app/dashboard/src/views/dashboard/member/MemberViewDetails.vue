@@ -339,13 +339,14 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CopyableDirective, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { Request } from "@simonbackx/simple-networking";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CopyableDirective, ErrorBox, FillRecordCategoryView, RecordCategoryAnswersBox, STList, STListItem, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
+import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { CountryHelper } from "@stamhoofd/structures/esm/dist";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from "../../../classes/MemberManager";
@@ -382,6 +383,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         this.checkBounces().catch(e => console.error(e))
+    }
+
+    beforeDestroy() {
+        Request.cancelAll(this)
     }
 
     get currentCountry() {
@@ -563,7 +568,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
                     method: "POST",
                     path: "/email/check-bounces",
                     body: emails,
-                    decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
+                    decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>),
+                    owner: this
                 })
                 this.emailInformation = response.data
             } catch (e) {

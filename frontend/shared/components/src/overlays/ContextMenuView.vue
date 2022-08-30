@@ -385,7 +385,7 @@ export default class ContextMenuView extends Vue {
                     const el = item.$el as HTMLElement;
                     const bounds = el.getBoundingClientRect()
 
-                    // todo: calculate better position
+                    // TODO: calculate better position
                     item.childContextMenu.properties.x = bounds.left
                     item.childContextMenu.properties.y = bounds.top
                     item.childContextMenu.properties.xPlacement = "right"
@@ -521,7 +521,7 @@ export default class ContextMenuView extends Vue {
 
         this.delayHover(50)
 
-        // Todo: adjust triangle
+        // TODO: adjust triangle
 
         // if X position got closer, then we'll adjust the triangle again
         const triangle = this.calculateHoverTriangle(mouseX, mouseY)

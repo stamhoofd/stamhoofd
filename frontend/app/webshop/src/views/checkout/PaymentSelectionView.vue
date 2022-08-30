@@ -146,7 +146,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             const response = await WebshopManager.server.request({
                 method: "POST",
                 path: "/webshop/"+this.webshop.id+"/order",
-                body: data, // todo: add some manual casting here
+                body: data, // TODO: add some manual casting here
                 decoder: OrderResponse as Decoder<OrderResponse>,
                 shouldRetry: false,
                 timeout: 30000 // Longer because some payment providers are slow in development mode

@@ -467,7 +467,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get recordCategories(): RecordCategory[] {
-        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
+        // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
         return OrganizationManager.organization.meta.recordsConfiguration.recordCategories.flatMap(category => {
             if (category.childCategories.length > 0) {
                 return category.childCategories
@@ -477,7 +477,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     get records(): RecordSettings[] {
-        // todo: only show the record categories that are relevant for the given member (as soon as we implement filters)
+        // TODO: only show the record categories that are relevant for the given member (as soon as we implement filters)
         return this.recordCategories.flatMap(c => c.records)
     }
 

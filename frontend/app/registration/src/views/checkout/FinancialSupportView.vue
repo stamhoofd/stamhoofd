@@ -138,7 +138,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
             
             this.loading = false
 
-            // todo: check if free contribution is enabled
+            // TODO: check if free contribution is enabled
             if (!this.reduced && OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null) {
                 this.show(new ComponentWithProperties(FreeContributionView, {}))
             } else {

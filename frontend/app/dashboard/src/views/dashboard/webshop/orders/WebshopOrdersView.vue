@@ -101,7 +101,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 compare: (a, b) => Sorter.byEnumValue(a, b, OrderStatus), 
                 getStyle: (status) => {
                     return OrderStatusHelper.getColor(status)
-                }, // todo: based on status
+                }, // TODO: based on status
                 minimumWidth: 70,
                 recommendedWidth: 120,
                 index: (this as any).$isMobile ? 1 : 0
@@ -454,7 +454,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             id: "order_checkoutMethod",
             name: "Afhaal/leveringsmethode",
             choices: (this.webshop?.meta.checkoutMethods ?? []).flatMap(method => {
-                // todo: also add checkout methods that are not valid anymore from existing orders
+                // TODO: also add checkout methods that are not valid anymore from existing orders
                 const choices: ChoicesFilterChoice[] = []
 
                 if (method.timeSlots.timeSlots.length == 0) {
@@ -595,7 +595,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             )
         }
 
-        // todo: products
+        // TODO: products
         definitions.push(
             new ChoicesFilterDefinition<PrivateOrder>({
                 id: "order_products",

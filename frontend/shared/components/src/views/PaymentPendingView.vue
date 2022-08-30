@@ -54,7 +54,7 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
     payment: Payment | null = null
     loading = false
 
-    //step = 4 // todo?
+    //step = 4 // TODO?
     isStepsPoppable = false
 
     pollCount = 0

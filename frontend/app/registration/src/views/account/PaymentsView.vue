@@ -4,7 +4,9 @@
             <h1>Afrekeningen</h1>
             <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
 
-            <p v-if="payments.length === 0" class="info-box">
+            <STErrorsDefault :error-box="errorBox" />
+
+            <p v-if="payments.length === 0 && !loading" class="info-box">
                 Er zijn momenteel nog geen afrekeningen beschikbaar voor jouw account
             </p>
 
@@ -15,9 +17,7 @@
                     <h2 class="style-title-list">
                         {{ getPaymentPeriod(payment) }}
                     </h2>
-                    <p class="style-description-small">
-                        {{ payment.getMemberNames() }}
-                    </p>
+                    <p class="style-description-small pre-wrap" v-text="getPaymentDescription(payment)" />
                     <p class="style-description-small">
                         {{ paymentMethodName(payment) }}
                     </p>
@@ -34,11 +34,12 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, LoadingView, OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components";
+import { ErrorBox, STErrorsDefault, STList, STListItem, TransferPaymentView } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
-import { Payment, PaymentDetailed, PaymentMethod, RegistrationWithMember } from '@stamhoofd/structures';
+import { Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
+import { MemberBalanceItem } from "@stamhoofd/structures/esm/dist";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -47,13 +48,9 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
-        LoadingView,
-        Checkbox,
-        OrganizationLogo
+        STErrorsDefault
     },
     filters: {
         price: Formatter.price
@@ -61,6 +58,24 @@ import { OrganizationManager } from '../../classes/OrganizationManager';
 })
 export default class PaymentsView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+    loading = true
+    balanceItems: MemberBalanceItem[] = []
+    errorBox: ErrorBox | null = null
+
+    async load() {
+        this.loading = true;
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: 'GET',
+                path: '/balance',
+                decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>)
+            })
+            this.balanceItems = response.data
+        } catch (e) {
+            this.errorBox = new ErrorBox(e);
+        }
+        this.loading = false;
+    }
 
     /**
      * Return members that are currently registered in
@@ -114,35 +129,18 @@ export default class PaymentsView extends Mixins(NavigationMixin){
         return "Betaald via "+PaymentMethodHelper.getName(method)
     }
 
-    get payments() {
-        if (!this.members) {
-            return []
-        }
+    getPaymentDescription(payment: Payment) {
+        const balanceItems = this.balanceItems.filter(i => !!i.payments.find(p => p => p.payment.id === payment.id))
+        return balanceItems.map(b => b.description).join("\n");
+    }
 
-        const payments: Map<string, PaymentDetailed> = new Map()
-        const groups = OrganizationManager.organization.groups
-        for (const member of this.members) {
-            for (const registration of member.registrations) {
-                if (!registration.payment) {
-                    continue;
-                }
-                const existing = payments.get(registration.payment.id)
-                const group = groups.find(g => g.id == registration.groupId)
-                if (!group) {
-                    continue;
-                }
-                const reg = RegistrationWithMember.create(
-                    Object.assign({
-                        member,
-                        group
-                    }, registration)
-                );
-                if (existing) {
-                    existing.registrations.push(reg)
-                } else {
-                    payments.set(registration.payment.id, PaymentDetailed.create(Object.assign({
-                        registrations: [reg]
-                    }, registration.payment)))
+    get payments() {
+        const payments: Map<string, Payment> = new Map()
+        for (const balanceItem of this.balanceItems) {
+            for (const balanceItemPayment of balanceItem.payments) {
+                const existing = payments.get(balanceItemPayment.payment.id)
+                if (!existing) {
+                    payments.set(balanceItemPayment.payment.id, balanceItemPayment.payment)
                 }
             }
         }
@@ -158,13 +156,14 @@ export default class PaymentsView extends Mixins(NavigationMixin){
 
     mounted() {
         UrlHelper.setUrl("/")
+        this.load().catch(console.error)
     }
 
-    canOpenPayment(payment: PaymentDetailed) {
+    canOpenPayment(payment: Payment) {
         return payment.method == PaymentMethod.Transfer
     }
 
-    openPayment(payment: PaymentDetailed) {
+    openPayment(payment: Payment) {
         if (!this.canOpenPayment(payment)) {
             return;
         }
@@ -174,7 +173,6 @@ export default class PaymentsView extends Mixins(NavigationMixin){
                 organization: OrganizationManager.organization,
                 payment,
                 settings: OrganizationManager.organization.meta.transferSettings,
-                additionalReference: payment.getMemberLastNames(),
                 isPopup: true
             })
         }).setDisplayStyle("popup"))

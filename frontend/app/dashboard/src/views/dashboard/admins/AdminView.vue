@@ -217,7 +217,7 @@ export default class AdminView extends Mixins(NavigationMixin) {
         }
         valid = valid && await this.validator.validate()
 
-        // todo: validate if at least email or name is filled in
+        // TODO: validate if at least email or name is filled in
 
         if (!valid) {
             this.saving = false

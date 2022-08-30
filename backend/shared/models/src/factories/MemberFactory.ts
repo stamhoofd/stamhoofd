@@ -2,8 +2,7 @@ import { Factory } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
 import { Gender, MemberDetails, ParentType } from '@stamhoofd/structures';
 
-import { KeychainItem } from '../models/KeychainItem';
-import { Member } from "../models/Member";
+import { Member, MemberWithRegistrations } from "../models/Member";
 import { Organization } from "../models/Organization";
 import { UserWithOrganization } from "../models/User";
 import { EmergencyContactFactory } from './EmergencyContactFactory';
@@ -21,8 +20,8 @@ class Options {
     maxAge?: number
 }
 
-export class MemberFactory extends Factory<Options, Member> {
-    async create(): Promise<Member> {
+export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
+    async create(): Promise<MemberWithRegistrations> {
         const organization = this.options.organization
             ?? this.options.user?.organization
             ?? await new OrganizationFactory({}).create()
@@ -154,6 +153,9 @@ export class MemberFactory extends Factory<Options, Member> {
         memberDetails.doctor.name = "Dr. " + memberDetails.doctor.name;
 
         const member = new Member()
+            .setManyRelation(Member.registrations, [])
+            .setManyRelation(Member.users, this.options.user ? [this.options.user] : [])
+
         member.organizationId = organization.id
         member.details = memberDetails
         await member.save()
@@ -163,19 +165,6 @@ export class MemberFactory extends Factory<Options, Member> {
             await Member.users.link(member, [this.options.user])
         }
 
-        if (this.options.user && this.options.userPrivateKey && this.options.user.publicKey) {
-            // Add the private key to the keychain for this user (if possible)
-            const keychainItem = new KeychainItem()
-            keychainItem.userId = this.options.user.id
-            keychainItem.publicKey = memberKeyPair.publicKey
-            keychainItem.encryptedPrivateKey = await Sodium.sealMessageAuthenticated(
-                memberKeyPair.privateKey,
-                this.options.user.publicKey,
-                this.options.userPrivateKey
-            )
-            await keychainItem.save()
-        }
-
-        return member;
+        return member as any;
     }
 }

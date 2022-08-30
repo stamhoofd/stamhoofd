@@ -100,7 +100,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
                 }
 
                 if (payment.status == PaymentStatus.Failed) {
-                    // todo: temporary message
+                    // TODO: temporary message
                     this.finishedHandler(payment)
                     this.dismiss({ force: true })
                 }

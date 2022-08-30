@@ -43,7 +43,7 @@
                 <h2>Tickets</h2>
 
                 <div class="stats-grid">
-                    <STInputBox title="Verkocht">
+                    <STInputBox title="Aangemaakt">
                         <p class="style-price-big">
                             <span>
                                 {{ loading ? '-' : totalTickets }}

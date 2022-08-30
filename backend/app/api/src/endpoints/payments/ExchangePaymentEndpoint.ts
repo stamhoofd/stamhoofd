@@ -2,7 +2,7 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Member, STPendingInvoice } from '@stamhoofd/models';
+import { BalanceItemPayment, Group, Member, STPendingInvoice } from '@stamhoofd/models';
 import { MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
@@ -10,7 +10,7 @@ import { Organization } from '@stamhoofd/models';
 import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
+import { MollieStatus, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 import { GetPaymentRegistrations } from './GetPaymentRegistrations';
@@ -84,37 +84,17 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             payment.paidAt = new Date()
             await payment.save();
 
-            // if it has registrations
-            const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
+            // Prevent concurrency issues
+            // TODO: need to optimize this
+            await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
+                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                    (await BalanceItemPayment.where({paymentId: payment.id})).map(r => r.setRelation(BalanceItemPayment.payment, payment))
+                );
 
-            // if it has orders
-            const order = registrations.length > 0 ? undefined : await Order.getForPayment(organization.id, payment.id)
-            let updateGroups = false;
-
-            for (const registration of registrations) {
-                if (registration.registeredAt === null) {
-                    registration.registeredAt = new Date()
-                    registration.reservedUntil = null
-                    await registration.save();
-                    updateGroups = true;
+                for (const balanceItemPayment of balanceItemPayments) {
+                    await balanceItemPayment.markPaid(organization);
                 }
-            }
-
-            if (updateGroups) {
-                const groups = await Group.getAll(organization.id, false)
-                for (const group of groups) {
-                    if (registrations.find(p => p.groupId === group.id)) {
-                        await group.updateOccupancy()
-                        await group.save()
-                    }
-                }
-            }
-
-            if (order) {
-                await order.markPaid(payment, organization)
-            }
-
-            await payment.save();
+            })
 
             if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
                 // Charge transaction fees
@@ -132,7 +112,23 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await STPendingInvoice.addItems(organization, [item])
                 });
             }
-        } else if (status == PaymentStatus.Failed) {
+            return;
+        }
+
+        if (payment.status == PaymentStatus.Pending) {
+            await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
+                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                    (await BalanceItemPayment.where({paymentId: payment.id})).map(r => r.setRelation(BalanceItemPayment.payment, payment))
+                );
+
+                for (const balanceItemPayment of balanceItemPayments) {
+                    await balanceItemPayment.markPending(organization);
+                }
+            })
+        }
+        
+        if (status == PaymentStatus.Failed) {
+            // TODO: update for payment balances!
             const order = await Order.getForPayment(organization.id, payment.id)
             await order?.onPaymentFailed()
             payment.status = PaymentStatus.Failed

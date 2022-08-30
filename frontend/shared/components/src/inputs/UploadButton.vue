@@ -74,7 +74,7 @@ export default class UploadButton extends Mixins(NavigationMixin) {
             .catch(e => {
                 console.error(e);
                 //this.errorBox = new ErrorBox(e)
-                // todo!
+                // TODO!
             })
             .finally(() => {
                 this.uploading = false;

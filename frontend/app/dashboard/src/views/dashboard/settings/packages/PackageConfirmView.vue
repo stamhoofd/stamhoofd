@@ -490,7 +490,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
   
     shouldNavigateAway() {
-        // todo
+        // TODO
         if (this.loading) {
             return false
         }

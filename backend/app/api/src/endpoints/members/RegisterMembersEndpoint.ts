@@ -3,7 +3,7 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Group } from '@stamhoofd/models';
 import { Member, RegistrationWithMember } from '@stamhoofd/models';
 import { MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
@@ -11,7 +11,7 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Registration } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { IDRegisterCheckout, Payment as PaymentStruct, PaymentMethod,PaymentMethodHelper,PaymentProvider,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
+import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, Payment as PaymentStruct, PaymentMethod,PaymentMethodHelper,PaymentProvider,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
@@ -19,6 +19,8 @@ type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout
 type ResponseBody = RegisterResponse
+
+export type RegistrationWithMemberAndGroup = Registration & { member: Member } & { group: Group }
 
 /**
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
@@ -62,9 +64,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const members = await Member.getMembersWithRegistrationForUser(user)
         const groups = await Group.getAll(user.organizationId)
         
-        const registrations: RegistrationWithMember[] = []
-        const payRegistrations: Registration[] = []
-        const payNames: string[] = []
+        const registrations: RegistrationWithMemberAndGroup[] = []
+        const payRegistrations: {registration: RegistrationWithMemberAndGroup, item: IDRegisterItem}[] = []
 
         if (request.body.cart.items.length == 0) {
             throw new SimpleError({
@@ -103,10 +104,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        
+        const registrationGroupRelation = new ManyToOneRelation(Group, "group")
+        registrationGroupRelation.foreignKey = "groupId"
+
         const registrationMemberRelation = new ManyToOneRelation(Member, "member")
         registrationMemberRelation.foreignKey = "memberId"
-
 
         mainLoop: for (const item of request.body.cart.items) {
             const member = members.find(m => m.id == item.memberId)
@@ -127,10 +129,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // Check if this member is already registered in this group?
             const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle })
-            let registration: RegistrationWithMember | undefined = undefined;
+            let registration: RegistrationWithMemberAndGroup | undefined = undefined;
 
             for (const existingRegistration of existingRegistrations) {
-                registration = existingRegistration.setRelation(registrationMemberRelation, member as Member)
+                registration = existingRegistration
+                    .setRelation(registrationMemberRelation, member as Member)
+                    .setRelation(registrationGroupRelation, group)
 
                 if (existingRegistration.waitingList && item.waitingList) {
                     // already on waiting list, no need to repeat it
@@ -147,7 +151,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             if (!registration) {
-                registration = new Registration().setRelation(registrationMemberRelation, member as Member)
+                registration = new Registration()
+                    .setRelation(registrationMemberRelation, member as Member)
+                    .setRelation(registrationGroupRelation, group)
             }
 
             registration.memberId = member.id
@@ -161,8 +167,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             } else {
                 registration.waitingList = false
                 registration.canRegister = false
-                payRegistrations.push(registration)
-                payNames.push(member.details.firstName)
+                payRegistrations.push({
+                    registration,
+                    item
+                });
             }
             registrations.push(registration)
         }
@@ -181,7 +189,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (payment.method == PaymentMethod.Transfer) {
                 // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
                 payment.transferSettings = user.organization.meta.transferSettings
-                payment.generateDescription(user.organization, payNames.join(", "))
+                payment.generateDescription(user.organization, payRegistrations.map(r => r.registration.member.details.name).join(", "))
             }
             payment.paidAt = null
 
@@ -198,9 +206,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await payment.save()
 
             // Save registrations and add extra data if needed
-            for (const registration of payRegistrations) {
+            for (const bundle of payRegistrations) {
+                const registration = bundle.registration;
+
                 if (!registration.waitingList) {
-                    registration.paymentId = payment.id
+                    // Replaced with balance items
+                    // registration.paymentId = payment.id
+
                     registration.reservedUntil = null
 
                     if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
@@ -216,6 +228,46 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 }
                 
                 await registration.save()
+
+                // Create balance item
+                const balanceItem = new BalanceItem();
+                balanceItem.registrationId = registration.id;
+                balanceItem.price = bundle.item.calculatedPrice
+                balanceItem.description = `Inschrijving van ${registration.member.details.name} voor ${registration.group.settings.name}`
+                balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? bundle.item.calculatedPrice : 0;
+                balanceItem.memberId = registration.memberId;
+                balanceItem.userId = user.id
+                balanceItem.organizationId = organization.id;
+                balanceItem.status = payment.status == PaymentStatus.Succeeded ? BalanceItemStatus.Paid : (registration.registeredAt ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
+                await balanceItem.save();
+
+                // Create one balance item payment to pay it in one payment
+                const balanceItemPayment = new BalanceItemPayment()
+                balanceItemPayment.balanceItemId = balanceItem.id;
+                balanceItemPayment.paymentId = payment.id;
+                balanceItemPayment.organizationId = organization.id;
+                balanceItemPayment.price = balanceItem.price;
+                await balanceItemPayment.save();
+            }
+
+            if (request.body.cart.freeContribution) {
+                // Create balance item
+                const balanceItem = new BalanceItem();
+                balanceItem.price = request.body.cart.freeContribution
+                balanceItem.description = `Vrije bijdrage bij inschrijven`
+                balanceItem.pricePaid = 0;
+                balanceItem.userId = user.id
+                balanceItem.organizationId = organization.id;
+                balanceItem.status = (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
+                await balanceItem.save();
+
+                // Create one balance item payment to pay it in one payment
+                const balanceItemPayment = new BalanceItemPayment()
+                balanceItemPayment.balanceItemId = balanceItem.id;
+                balanceItemPayment.paymentId = payment.id;
+                balanceItemPayment.organizationId = organization.id;
+                balanceItemPayment.price = balanceItem.price;
+                await balanceItemPayment.save();
             }
 
             // Update occupancy
@@ -295,7 +347,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             return new Response(RegisterResponse.create({
                 payment: PaymentStruct.create(payment),
                 members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r, false)),
+                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
                 paymentUrl
             }));
         }
@@ -311,7 +363,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         return new Response(RegisterResponse.create({
             payment: null,
             members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
-            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r, false))
+            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
         }));
     }
 }

@@ -274,7 +274,7 @@ export class MemberActionBuilder {
         new CenteredMessage(`Wil je alle data van ${member} verwijderen?`, "Dit verwijdert alle data van de geselecteerde leden, inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.")
             .addButton(new CenteredMessageButton("Verwijderen", {
                 action: async () => {
-                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, definitief verwijderen")) {
+                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, leden definitief verwijderen", "Ook andere inschrijvingen en accounts worden verwijderd van deze leden")) {
                         await MemberManager.deleteMembers(members)
                         new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} verwijderd`, "success green").show()
                     }

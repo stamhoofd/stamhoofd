@@ -176,11 +176,11 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox,CopyableDirective,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components"
-import { Country, Organization,Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, CopyableDirective, LoadingView, STList, STListItem, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
+import { Country, Organization, Payment, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins,  Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CenteredMessage } from '../overlays/CenteredMessage';
 
@@ -218,9 +218,6 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
     @Prop({ default: null }) 
     settings: TransferSettings | null
-
-    @Prop({ default: null }) 
-    additionalReference: string | null
 
     @Prop({ default: false })
     isPopup: boolean
@@ -319,9 +316,6 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     get transferDescription() {
-        if (this.additionalReference && this.settings?.type === TransferDescriptionType.Reference) {
-            return this.payment.transferDescription + " " + this.additionalReference
-        }
         return this.payment.transferDescription
     }
 

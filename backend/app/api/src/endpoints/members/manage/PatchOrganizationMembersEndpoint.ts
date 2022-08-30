@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, RegistrationWithPayment, Token, User } from '@stamhoofd/models';
+import { Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
 import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
@@ -49,7 +49,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
             const struct = put.put
-            const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
+            const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
             member.id = struct.id
             member.organizationId = user.organizationId
             member.details = struct.details
@@ -228,8 +228,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
             }
 
-            let shouldUsePayment: Payment | null = null
-
             for (const deleteId of patch.registrations.getDeletes()) {
                 const registration = member.registrations.find(r => r.id === deleteId)
                 if (!registration || registration.memberId != member.id) {
@@ -246,10 +244,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (oldGroup) {
                     // We need to update this group occupancy because we moved one member away from it
                     updateGroups.set(oldGroup.id, oldGroup)
-                }
-
-                if (registration.payment) {
-                    shouldUsePayment = registration.payment
                 }
             }
 
@@ -274,11 +268,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                const reg = await this.addRegistration(user, member, struct)
-                if (!reg.payment && shouldUsePayment) {
-                    reg.setRelation(Registration.payment, shouldUsePayment)
-                    await reg.save()
-                }
+                await this.addRegistration(user, member, struct)
 
                 // We need to update this group occupancy because we moved one member away from it
                 updateGroups.set(group.id, group)
@@ -342,8 +332,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return new Response(members.map(m => m.getStructureWithRegistrations(true)));
     }
 
-    async addRegistration(user: User, member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
-        const registration = new Registration().setOptionalRelation(Registration.payment, null)
+    async addRegistration(user: User, member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
+        const registration = new Registration()
         registration.groupId = registrationStruct.groupId
         registration.cycle = registrationStruct.cycle
         registration.memberId = member.id
@@ -360,21 +350,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             registration.canRegister = false
         }
         registration.deactivatedAt = registrationStruct.deactivatedAt
-        
-        // Check payment
-        if (registrationStruct.payment) {
-            const payment = new Payment()
-            payment.organizationId = member.organizationId
-            payment.userId = user.id
-            payment.method = registrationStruct.payment.method
-            payment.paidAt = registrationStruct.payment.paidAt
-            payment.price = registrationStruct.payment.price
-            payment.status = registrationStruct.payment.status
-            payment.transferDescription = registrationStruct.payment.transferDescription
-            await payment.save()
-
-            registration.setOptionalRelation(Registration.payment, payment)
-        }
 
         await registration.save()
         member.registrations.push(registration)
@@ -390,36 +365,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }).createMultiple(25)
 
         for (const m of members) {
-            const member = m.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
+            const member = m.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
             const d = new Date(new Date().getTime() - Math.random() * 60 * 1000 * 60 * 24 * 60)
 
-            const payment = new Payment()
-            payment.organizationId = organization.id
-            payment.method = Math.random() < 0.3 ? PaymentMethod.Payconiq : (Math.random()  < 0.5 ? PaymentMethod.Bancontact : PaymentMethod.Transfer )
-            if (payment.method == PaymentMethod.Transfer) {
-                payment.transferSettings = organization.meta.transferSettings
-                payment.generateDescription(organization, "")
-
-                if (payment.method == PaymentMethod.Transfer && Math.random() < 0.6) {
-                    payment.status = PaymentStatus.Succeeded
-                    payment.paidAt = d
-                } else {
-                    payment.status = PaymentStatus.Pending
-                }
-            } else {
-                payment.status = PaymentStatus.Succeeded
-                payment.paidAt = d
-            }
-
-            payment.price = group.settings.getGroupPrices(d)?.getPriceFor(false, 0) ?? 0
-            await payment.save()
-
             // Create a registration for this member for thisg roup
-            const registration = new Registration().setRelation(Registration.payment, payment)
+            const registration = new Registration()
             registration.memberId = member.id
             registration.groupId = group.id
             registration.cycle = group.cycle
-            registration.paymentId = payment.id
             registration.registeredAt = d
 
             member.registrations.push(registration)

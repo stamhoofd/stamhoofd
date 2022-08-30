@@ -168,7 +168,7 @@ export default class RecordAnswerInput extends Vue {
         }
 
         // Create a new one
-        // todo: try to migrate old values if possible
+        // TODO: try to migrate old values if possible
         const a = type.create({
             settings: this.recordSettings
         })

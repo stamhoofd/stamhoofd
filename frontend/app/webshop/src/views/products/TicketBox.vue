@@ -85,7 +85,7 @@ export default class TicketBox extends Mixins(NavigationMixin){
     QRCodeUrl: string | null = null
 
     get cartItem() {
-        // todo: multiple item support needed!
+        // TODO: multiple item support needed!
         return this.ticket.items[0]
     }
 

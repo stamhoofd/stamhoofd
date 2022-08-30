@@ -411,6 +411,59 @@
     @extend .style-description-small;
 }
 
+.style-copyable {
+    position: relative;
+    width: max-content;
+    cursor: pointer;
+    
+    &:before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        right: -6px;
+        bottom: -6px;
+        border-radius: $border-radius;
+        background: transparent;
+        border: 2px solid $color-primary-background;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    @media (hover: hover) {
+        &:after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -6px;
+            right: -6px;
+            bottom: -3px;
+            border-radius: $border-radius;
+            background: black;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        &:hover:after {
+            opacity: 0.05;
+        }
+    }
+
+    &.copied {
+        color: $color-primary;
+
+        &:before {
+            opacity: 1;
+        }
+
+        &:after {
+            opacity: 0;
+        }
+    }
+}
+
 .details-grid {
     display: grid;
     grid-template-columns: auto 1fr;

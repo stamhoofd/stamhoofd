@@ -1,25 +1,26 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, field } from '@simonbackx/simple-encoding'
+import { Formatter } from '@stamhoofd/utility'
 
-import { PaymentMethod } from '../PaymentMethod'
-import { PaymentStatus } from '../PaymentStatus'
-import { User } from '../User'
-import { Order } from '../webshops/Order'
-import { EncryptedPaymentDetailed } from './EncryptedPaymentDetailed'
-import { PaymentDetailed } from './PaymentDetailed'
+import { BalanceItemPaymentDetailed } from '../BalanceItem'
+import { Payment } from './Payment'
 
-export class EncryptedPaymentGeneral extends EncryptedPaymentDetailed {
-    @field({ decoder: Order, nullable: true })
-    order: Order | null = null
-}
+export class PaymentGeneral extends Payment {
+    @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
+    balanceItemPayments: BalanceItemPaymentDetailed[]
 
-export class PaymentGeneral extends PaymentDetailed {
-    @field({ decoder: Order, nullable: true })
-    order: Order | null = null
+    get registrations() {
+        return this.balanceItemPayments.flatMap(p => p.balanceItem.registration ? [p.balanceItem.registration] : [])
+    }
+
+    get orders() {
+        return this.balanceItemPayments.flatMap(p => p.balanceItem.order ? [p.balanceItem.order] : [])
+    }
 
     override matchQuery(query: string): boolean {
         if (
-            super.matchQuery(query) ||
-            this.order?.matchQuery(query)
+            super.matchQuery(query) 
+            || !!this.registrations.find(r => r.member.details.matchQuery(query))
+            || !!this.orders.find(o => o.matchQuery(query))
         ) {
             return true;
         }
@@ -27,37 +28,22 @@ export class PaymentGeneral extends PaymentDetailed {
     }
 
     getDetailsHTMLTable(): string {
-        if (this.order) {
-            return this.order.getHTMLTable()
+        const filtered = this.balanceItemPayments.filter(p => !p.balanceItem.order)
+        let str = '';
+        if (filtered.length > 0) {
+            str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Beschrijving</th><th>Prijs</th></tr></thead><tbody>`
+    
+            for (const balanceItemPayment of filtered) {
+                str += `<tr><td><h4>${Formatter.escapeHtml(balanceItemPayment.balanceItem.description)}</h4></td><td>${Formatter.escapeHtml(Formatter.price(balanceItemPayment.price))}</td></tr>`
+            }
+            
+            return str+"</tbody></table>";
         }
-        return super.getDetailsHTMLTable()
+
+        for (const order of this.orders) {
+            str += order.getHTMLTable()
+        }
+
+        return str;
     }
-}
-
-export class CreatePaymentGeneral extends AutoEncoder {
-    /// Last selected payment method. Nullable if none has been selected
-    @field({ decoder: new EnumDecoder(PaymentMethod) })
-    method: PaymentMethod = PaymentMethod.Unknown
-
-    @field({ decoder: new EnumDecoder(PaymentStatus) })
-    status: PaymentStatus = PaymentStatus.Created
-
-    @field({ decoder: IntegerDecoder })
-    price = 0
-
-    @field({ decoder: IntegerDecoder, nullable: true })
-    freeContribution: number | null = null
-
-    // Transfer description if paid via transfer
-    @field({ decoder: StringDecoder, nullable: true })
-    transferDescription: string | null = null
-
-    @field({ decoder: DateDecoder, nullable: true })
-    paidAt: Date | null = null
-
-    @field({ decoder: new ArrayDecoder(StringDecoder)})
-    registrationIds: string[] = []
-
-    @field({ decoder: StringDecoder, nullable: true })
-    orderId: string | null = null
 }

@@ -1,11 +1,10 @@
 import { column,Database,ManyToOneRelation,Model } from '@simonbackx/simple-database';
-import { MemberWithRegistrations, Payment as PaymentStructure, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, MemberWithRegistrations, Payment as PaymentStructure, PermissionLevel, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';
 import { User } from './User';
 
-export type RegistrationWithPayment = Registration & { payment: Payment | null }
 export class Registration extends Model {
     static table = "registrations"
 
@@ -22,7 +21,10 @@ export class Registration extends Model {
     @column({ type: "string" })
     groupId: string;
 
-    @column({ type: "string", nullable: true, foreignKey: Registration.payment })
+    /**
+     * @deprecated
+     */
+    @column({ type: "string", nullable: true })
     paymentId: string | null = null
 
     @column({ type: "integer" })
@@ -69,14 +71,39 @@ export class Registration extends Model {
     @column({ type: "datetime", nullable: true})
     deactivatedAt: Date | null = null
 
-    static payment = new ManyToOneRelation(Payment, "payment")
+    /*@column({ type: "integer", nullable: true})
+    cachedPrice: number | null = null
 
-    getStructure(this: RegistrationWithPayment) {
-        return RegistrationStructure.create(
-            Object.assign(Object.assign({}, this), {
-                payment: this.payment ? PaymentStructure.create(this.payment) : null
-            })
-        )
+    @column({ type: "integer", nullable: true})
+    cachedPricePaid: number | null = null*/
+
+    getStructure() {
+        return RegistrationStructure.create(this)
+    }
+
+    hasAccess(user: User, groups: import('./Group').Group[], permissionLevel: PermissionLevel) {
+        if (!user.permissions) {
+            return false
+        }
+
+        const group = groups.find(g => g.id === this.groupId)
+        if (!group) {
+            return false;
+        }
+
+        if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(permissionLevel)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    hasReadAccess(user: User, groups: import('./Group').Group[]) {
+        return this.hasAccess(user, groups, PermissionLevel.Read)
+    }
+
+    hasWriteAccess(user: User, groups: import('./Group').Group[]) {
+        return this.hasAccess(user, groups, PermissionLevel.Write)
     }
 
     /**

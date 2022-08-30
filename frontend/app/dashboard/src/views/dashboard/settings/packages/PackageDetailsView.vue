@@ -225,7 +225,7 @@ export default class PackageDetailsView extends Mixins(NavigationMixin) {
     }
   
     shouldNavigateAway() {
-        // todo
+        // TODO
         if (this.loading) {
             return false
         }

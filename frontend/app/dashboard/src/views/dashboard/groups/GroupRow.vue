@@ -51,7 +51,7 @@ export default class GroupRow extends Mixins(NavigationMixin) {
             saveHandler: (patch: AutoEncoderPatchType<Organization>) => {
                 this.$emit("patch", patch)
 
-                // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
             }
         }).setDisplayStyle("popup"))
     }
