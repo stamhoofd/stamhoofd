@@ -8,7 +8,7 @@ import axios from "axios"
 import { v4 as uuidv4 } from "uuid";
 
 export class AddressValidatorStatic {
-    // Todo: hold street cache
+    // TODO: hold street cache
     
     async validate(address: Address): Promise<ValidatedAddress> {
         address = address.clone()
