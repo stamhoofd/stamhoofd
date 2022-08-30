@@ -236,7 +236,7 @@ export default class App extends Vue {
      * Login at a given organization, with the given refresh token
      */
     async loginWithToken(organizationId: string, refreshToken: string) {
-        // todo: add security toggle in system configuration to disable this feature
+        // TODO: add security toggle in system configuration to disable this feature
         if (!await CenteredMessage.confirm("Ben je zeker dat je wilt inloggen via deze link?", "Inloggen", "Klik op annuleren als je niet weet waar dit over gaat.")) {
             return
         }
