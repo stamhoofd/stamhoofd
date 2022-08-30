@@ -39,7 +39,7 @@ export class KeyConstantsHelper {
         if (constants.memlimit < 64 * 1000 * 1000 && STAMHOOFD.environment != "test") {
             throw new Error("These memory constants are too weak. We are not going to use these.")
         }
-        // Todo: validate salt, to check if it is not forged somehow
+        // TODO: validate salt, to check if it is not forged somehow
         const sodium = await Sodium.getSodium()
 
         const salt = Buffer.from(constants.salt, "base64")
@@ -66,7 +66,7 @@ export class KeyConstantsHelper {
         if (constants.memlimit < 64 * 1000 * 1000 && STAMHOOFD.environment != "test") {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
-        // Todo: validate salt, to check if it is not forged somehow
+        // TODO: validate salt, to check if it is not forged somehow
 
         const sodium = await Sodium.getSodium()
 
@@ -94,7 +94,7 @@ export class KeyConstantsHelper {
         if (constants.memlimit < 64 * 1000 * 1000 && STAMHOOFD.environment != "test") {
             throw new Error("These constants are too weak. We are not going to use these.")
         }
-        // Todo: validate salt, to check if it is not forged somehow
+        // TODO: validate salt, to check if it is not forged somehow
 
         const sodium = await Sodium.getSodium()
 

@@ -206,7 +206,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                // todo: allow group changes
+                // TODO: allow group changes
                 registration.waitingList = patchRegistration.waitingList ?? registration.waitingList
 
                 if (!registration.waitingList && registration.registeredAt === null) {
@@ -435,7 +435,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             u = existing[0]
             console.log("Giving an existing user access to a member: "+u.id)
 
-            // todo: read firstname and lastname if public key is not yet set (use a method instead of chekcign public key directly)
+            // TODO: read firstname and lastname if public key is not yet set (use a method instead of chekcign public key directly)
 
         } else {
             u = new User()

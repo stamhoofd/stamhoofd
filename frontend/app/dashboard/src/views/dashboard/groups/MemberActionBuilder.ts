@@ -76,7 +76,7 @@ export class MemberActionBuilder {
                         priority: 0,
                         groupIndex: 0,
                         handler: async (members: MemberWithRegistrations[]) => {
-                        // todo: vervangen door een context menu
+                        // TODO: vervangen door een context menu
                             await this.exportToExcel(members)
                         }
                     }),
@@ -85,7 +85,7 @@ export class MemberActionBuilder {
                         priority: 0,
                         groupIndex: 0,
                         handler: async (members: MemberWithRegistrations[]) => {
-                        // todo: vervangen door een context menu
+                        // TODO: vervangen door een context menu
                             await this.exportToPDF(members)
                         }
                     }),

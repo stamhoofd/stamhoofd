@@ -80,7 +80,7 @@ export class SessionManagerStatic {
         const storage = await this.getSessionStorage()
         const index = storage.organizations.map(o => o.id).indexOf(organization.id)
 
-        // todo: improve this a lot
+        // TODO: improve this a lot
         if (index !== -1) {
             storage.organizations.splice(index, 1)
         }
@@ -92,7 +92,7 @@ export class SessionManagerStatic {
         const storage = await this.getSessionStorage()
         const index = storage.organizations.map(o => o.id).indexOf(organizationId)
 
-        // todo: improve this a lot
+        // TODO: improve this a lot
         if (index !== -1) {
             storage.organizations.splice(index, 1)
         }

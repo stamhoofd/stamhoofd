@@ -74,7 +74,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Update occupancies
-        // todo: might not be needed in the future (for performance)
+        // TODO: might not be needed in the future (for performance)
         for (const group of groups) {
             if (request.body.cart.items.find(i => i.groupId == group.id)) {
                 await group.updateOccupancy()
@@ -167,7 +167,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registrations.push(registration)
         }
 
-        // todo: validate payment method
+        // TODO: validate payment method
         
         if (payRegistrations.length > 0) {
             const payment = new Payment()

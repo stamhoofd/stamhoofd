@@ -84,7 +84,7 @@ export class ProductLocation extends AutoEncoder {
     } })
     address: Address | null = null
 
-    // todo: coordinates here (only filled in by backend)
+    // TODO: coordinates here (only filled in by backend)
 }
 
 /**

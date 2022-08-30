@@ -234,7 +234,7 @@ export class STPackageStatus extends AutoEncoder {
     merge(status: STPackageStatus) {
         if (status.startDate < this.startDate) {
             this.startDate = status.startDate
-            // Todo: fix behaviour with gaps if we allow that in the future
+            // TODO: fix behaviour with gaps if we allow that in the future
         }
 
         if (status.validUntil === null) {

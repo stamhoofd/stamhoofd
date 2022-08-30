@@ -38,7 +38,7 @@ export class KeychainStatic {
 
     /// In the app we store the keychain to allow better offline usage and to allow faster startup speeds
     async save() {
-        // todo: use other storage mechanism
+        // TODO: use other storage mechanism
         try {
             await Storage.keychain.setItem("keychain", JSON.stringify(new VersionBox(this.items).encode({ version: Version })))
         } catch (e) {

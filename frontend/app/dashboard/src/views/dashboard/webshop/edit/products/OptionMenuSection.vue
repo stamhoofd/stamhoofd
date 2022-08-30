@@ -58,7 +58,7 @@ export default class OptionMenuSection extends Mixins(NavigationMixin) {
             product.optionMenus.addPatch(p.patch(patch))
             this.$emit("patch", product)
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("sheet"))
     }
 
@@ -66,7 +66,7 @@ export default class OptionMenuSection extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditOptionMenuView, { product: this.product, optionMenu: this.optionMenu, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
             this.$emit("patch", patch)
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("popup"))
     }
 

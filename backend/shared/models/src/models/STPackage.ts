@@ -172,7 +172,7 @@ export class STPackage extends Model {
     }
 
     createStatus(): STPackageStatus {
-        // Todo: if payment failed: temporary set valid until to 2 weeks after last/first failed payment
+        // TODO: if payment failed: temporary set valid until to 2 weeks after last/first failed payment
 
         return STPackageStatus.create({
             startDate: this.meta.startDate,

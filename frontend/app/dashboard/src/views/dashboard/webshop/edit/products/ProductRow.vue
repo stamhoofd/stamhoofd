@@ -51,7 +51,7 @@ export default class ProductRow extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditProductView, { product: this.product, webshop: this.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             this.$emit("patch", patch)
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("popup"))
     }
 

@@ -404,7 +404,7 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
                     new ChoicesFilterChoice("not_checked", "Niet betaald"),
                 ], 
                 getValue: (member) => {
-                    // todo: remove spaces
+                    // TODO: remove spaces
                     if (member.paid) {
                         return ["checked"]
                     }
@@ -420,7 +420,7 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
                     new ChoicesFilterChoice("not_checked", "Geen financiële ondersteuning"),
                 ], 
                 getValue: (member) => {
-                    // todo: remove spaces
+                    // TODO: remove spaces
                     if (member.details.requiresFinancialSupport?.value) {
                         return ["checked"]
                     }
@@ -435,7 +435,7 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
                     new ChoicesFilterChoice("not_checked", "Gaf geen toestemming"),
                 ], 
                 getValue: (member) => {
-                    // todo: remove spaces
+                    // TODO: remove spaces
                     if (member.details.dataPermissions?.value) {
                         return ["checked"]
                     }

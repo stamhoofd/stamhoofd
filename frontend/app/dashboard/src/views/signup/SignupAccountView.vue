@@ -127,7 +127,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
         }
 
         try {
-            // todo: validate details
+            // TODO: validate details
 
             // Generate keys
             this.loading = true

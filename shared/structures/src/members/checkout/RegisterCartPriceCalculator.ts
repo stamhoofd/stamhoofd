@@ -143,7 +143,7 @@ export class RegisterCartPriceCalculator {
 
         // All items that are not affected by ordering calculate first
         for (const item of groupedItems[0]) {
-            // Todo: cache this information
+            // TODO: cache this information
             const group = item._group
             const category = item._category
 
@@ -301,7 +301,7 @@ export class RegisterCartPriceCalculator {
                 }
             }
 
-            // todo: move those without discounts to the start and remove them from the combinations that need to get calculated. They always need to be added first because they don't give discount
+            // TODO: move those without discounts to the start and remove them from the combinations that need to get calculated. They always need to be added first because they don't give discount
  
             const maxFamilyMembersDiscount = 3 // discount for third + more members
 
