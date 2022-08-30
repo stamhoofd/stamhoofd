@@ -445,7 +445,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 }
             }
         } else if (action == "import") {
-            // todo: import
+            // TODO: import
             //importedMembers.push(...oldMembers)
 
             for (const mem of oldMembers) {

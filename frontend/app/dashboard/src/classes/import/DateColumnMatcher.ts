@@ -92,7 +92,7 @@ export abstract class DateColumnMatcher implements ColumnMatcher {
         }
 
         // now get the order
-        // todo: for USA, alwasy switch month and day
+        // TODO: for USA, alwasy switch month and day
 
         if (numbersClean.length != 3) {
             throw new SimpleError({

@@ -70,7 +70,7 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         // First create the organization
-        // todo: add some duplicate validation
+        // TODO: add some duplicate validation
         const organization = new Organization();
         organization.id = request.body.organization.id;
         organization.name = request.body.organization.name;

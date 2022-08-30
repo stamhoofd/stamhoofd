@@ -220,7 +220,6 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
     }
 
     if (!hasActiveFunctie) {
-        // todo: mark somehow...
         report?.addWarning(details.firstName+" "+details.lastName+" moet nog een functie toegekend krijgen in de groepsadministratie, we konden niet automatisch bepalen welke functies we moeten toekennen.")
     }
 
