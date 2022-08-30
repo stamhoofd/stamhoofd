@@ -122,7 +122,7 @@ export class Image extends Model {
         const params = {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
-            Body: fileContent, // todo
+            Body: fileContent,
             ContentType: type ?? "image/jpeg",
             ACL: "private"
         };

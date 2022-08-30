@@ -29,7 +29,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        // Todo: add some extra brute force measurements here
+        // TODO: add some extra brute force measurements here
         // - add random delay here, increased by the amount of failed attempts (used to slow down). Also on a successfull comparison!
         // - add required CAPTCHA after x failed attempts for a given username (no matter if the username exists or not)
         // - if, even after the CAPTCHAs, the account reaches a given count of failed attempts, the account should be locked out for an hour or even a day (only login endpoint)
@@ -84,7 +84,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             };
 
             if (!user) {
-                // todo: increase counter
+                // TODO: increase counter
                 throw new SimpleError(errBody);
             }
 
@@ -135,7 +135,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             // Important to create a new token before adjusting the old token
             const token = await Token.createToken(passwordToken.user);
 
-            // todo: make token short lived until renewal
+            // TODO: make token short lived until renewal
    
             if (!token) {
                 throw new SimpleError({

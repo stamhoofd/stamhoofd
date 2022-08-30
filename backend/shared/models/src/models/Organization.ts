@@ -518,7 +518,6 @@ export class Organization extends Model {
 
             this.privateMeta.mailDomainActive = existing.VerifiedForSendingStatus ?? false
 
-            // todo: check result
             if (existing.VerifiedForSendingStatus !== true) {
                 console.error("Not validated @"+this.id)
             }
@@ -534,7 +533,6 @@ export class Organization extends Model {
             }
         } catch (e) {
             console.error(e)
-            // todo
         }
 
         if (!exists) {

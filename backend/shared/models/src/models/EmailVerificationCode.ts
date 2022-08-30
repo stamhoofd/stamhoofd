@@ -105,7 +105,7 @@ export class EmailVerificationCode extends Model {
     static user = new ManyToOneRelation(User, "user");
 
     static async getFor(organizationId: string, email: string): Promise<EmailVerificationCode | undefined> {
-        // todo: make this constant time to avoid complex timing attacks (especially when under load)
+        // TODO: make this constant time to avoid complex timing attacks (especially when under load)
         // Do we already have a verificationCode for this email?
         const verificationCodes = await this.where({ email, organizationId }, { limit: 1 })
 
@@ -289,7 +289,7 @@ export class EmailVerificationCode extends Model {
 
         if (verificationCodes.length == 0) {
             console.log("Can't resend code, no coded found for token", token)
-            // Todo: maybe send a note via email
+            // TODO: maybe send a note via email
             return
         }
 
@@ -314,7 +314,7 @@ export class EmailVerificationCode extends Model {
      * Use this method for sending only, not for verification!
      */
     static async createFor(user: User, email: string): Promise<EmailVerificationCode> {
-        // todo: make this constant time to avoid complex timing attacks (especially when under load)
+        // TODO: make this constant time to avoid complex timing attacks (especially when under load)
         // Do we already have a verificationCode for this email?
 
         // Only user <-> organization binding is unique

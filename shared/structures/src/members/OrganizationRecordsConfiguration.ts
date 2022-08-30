@@ -126,7 +126,7 @@ export class MemberDetailsWithGroups {
 
     static getBaseFilterDefinitions() {
         return [
-            // todo: map member filters instead of redefining them
+            // TODO: map member filters instead of redefining them
             new NumberFilterDefinition<MemberDetailsWithGroups>({
                 id: "member_age", 
                 name: "Leeftijd", 

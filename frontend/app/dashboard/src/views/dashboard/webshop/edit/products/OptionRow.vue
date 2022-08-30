@@ -64,7 +64,7 @@ export default class OptionRow extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditOptionView, { option: this.option, optionMenu: this.optionMenu, isNew: false,  saveHandler: (patch: AutoEncoderPatchType<OptionMenu>) => {
             this.$emit("patch", patch)
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("sheet"))
     }
 

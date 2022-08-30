@@ -338,7 +338,7 @@ export class TicketBuilder {
             this.document.fillColor(COLOR_GRAY);
             this.document.text(". Software voor verenigingen.")
 
-            // Todo:
+            // TODO:
             /*const appleWallet = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/apple-wallet-nl.png')).default
             const googlePayPass = (await import('!!arraybuffer-loader!@stamhoofd/assets/images/badges/google-pay-pass-nl.png')).default
 

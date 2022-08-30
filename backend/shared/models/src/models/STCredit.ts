@@ -66,7 +66,7 @@ export class STCredit extends Model {
             if (credit.expireAt !== null && credit.expireAt <= now) {
                 continue
             }
-            // Todo: we can expire credits here
+            // TODO: we can expire credits here
             balance += credit.change
             if (balance < 0) {
                 // This is needed to make deleting credit and expiring credit work.

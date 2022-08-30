@@ -434,7 +434,7 @@ export class Cart extends AutoEncoder {
             }
         }
 
-        // todo: validate stock
+        // TODO: validate stock
 
         this.items = newItems
         errors.throwIfNotEmpty()
