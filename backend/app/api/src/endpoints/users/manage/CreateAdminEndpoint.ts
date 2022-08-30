@@ -81,7 +81,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             Email.send({
                 from,
                 replyTo,
-                to: user.email,
+                to: admin.email,
                 subject: "✉️ Beheerder van "+user.organization.name,
                 type: "transactional",
                 text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je toegevoegd als beheerder van de vereniging ${user.organization.name} op Stamhoofd. Je kan inloggen met je bestaande account (${admin.email}) door te surfen naar:\n${url}\n\nDaar kan je jouw vereniging zoeken en aanklikken.\n\n----\n\nWeet je jouw wachtwoord niet meer? Dan kan je een nieuw wachtwoord instellen via de onderstaande link:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\nStamhoofd\n\n"+(STAMHOOFD.domains.marketing[user.organization.address.country] ?? "")
@@ -91,7 +91,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             Email.send({
                 from,
                 replyTo,
-                to: user.email,
+                to: admin.email,
                 subject: "✉️ Uitnodiging beheerder van "+user.organization.name,
                 type: "transactional",
                 text: (admin.firstName ? "Dag "+admin.firstName : "Hallo") + `, \n\n${user.firstName ?? 'Iemand'} heeft je uitgenodigd om beheerder te worden van de vereniging ${user.organization.name} op Stamhoofd. Je kan een account aanmaken door op de volgende link te klikken of door deze te kopiëren in de URL-balk van je browser:\n`+recoveryUrl+"\n\nDeze link is geldig tot "+dateTime+".\n\nKen je deze vereniging niet? Dan kan je deze e-mail veilig negeren.\n\nMet vriendelijke groeten,\nStamhoofd\n\n"+(STAMHOOFD.domains.marketing[user.organization.address.country] ?? "")
