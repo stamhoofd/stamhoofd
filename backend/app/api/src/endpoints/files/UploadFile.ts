@@ -121,7 +121,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         const params = {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
-            Body: fileContent, // todo
+            Body: fileContent, // TODO
             ContentType: file.type ?? "application/pdf",
             ACL: "public-read"
         };

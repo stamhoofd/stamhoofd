@@ -33,7 +33,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         const token = await Token.authenticate(request);
         const user = token.user
 
-        // todo: process everything and throw combined errors
+        // TODO: process everything and throw combined errors
 
         // Process changes
         const addedMembers: Member[] = []
