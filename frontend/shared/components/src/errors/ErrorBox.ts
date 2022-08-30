@@ -52,7 +52,7 @@ export class ErrorBox {
         const scrollRect = scrollElement.getBoundingClientRect()
 
         let scrollPosition = elRect.bottom - scrollRect.top - scrollElement.clientHeight + scrollElement.scrollTop
-        // todo: add the bottom padding of scrollRect as an extra offset (e.g. for the keyboard of st-view)
+        // TODO: add the bottom padding of scrollRect as an extra offset (e.g. for the keyboard of st-view)
 
         let bottomPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'))
         if (isNaN(bottomPadding)) {

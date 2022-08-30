@@ -11,7 +11,7 @@ export enum EditMemberStepType {
     "Parents" = "Parents", // Only if meets criteria
     "EmergencyContact" = "EmergencyContact",
     "DataPermissions" = "DataPermissions",
-    // todo: Questions step
+    // TODO: Questions step
 }
 
 export interface EditMemberStep {
@@ -285,7 +285,7 @@ export class EditMemberStepsManager {
             base.push(new RecordCategoryStep(category, forceReview))
         }
 
-        // todo: categories that are bound to a single group (thats why we need items and member already)
+        // TODO: categories that are bound to a single group (thats why we need items and member already)
 
         return base
     }

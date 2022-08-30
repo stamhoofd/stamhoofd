@@ -217,7 +217,7 @@ export class RecordChooseOneAnswer extends RecordAnswer {
 
     getWarnings(): RecordWarning[] {
         if (this.selectedChoice === null) {
-            // todo: show warning if inverted
+            // TODO: show warning if inverted
             return []
         }
 

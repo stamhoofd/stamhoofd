@@ -453,13 +453,13 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
     }
 
     disabledTicket(product: Product, scannedAt: Date | null) {
-        // todo: show invalid ticket
+        // TODO: show invalid ticket
         new Toast("Dit is een ticket voor: "+product.name+(scannedAt ? ", en werd bovendien al eens gescand." : ""), "error red").show()
         AppManager.shared.hapticError() 
     }
 
     invalidTicket() {
-        // todo: show invalid ticket
+        // TODO: show invalid ticket
         new Toast("Ongeldig ticket", "error red").show()
         AppManager.shared.hapticError() 
     }

@@ -196,7 +196,7 @@ export class Webshop extends Model {
 
         if (allValid) {
             if (!this.meta.domainActive && background) {
-                // todo: send an email
+                // TODO: send an email
                 // + prevent ping pong emails when the dns is not workign properly
             }
             this.meta.domainActive = true

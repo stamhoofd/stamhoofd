@@ -244,7 +244,7 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
         throw new Error("Geen toegang tot bestanden. Wijzig de toestemmingen van de app om bestanden te kunnen opslaan.")
     }
 
-    // todo: automatically encode data to base64 in case of buffer
+    // TODO: automatically encode data to base64 in case of buffer
 
     const result = await Filesystem.writeFile({
         path: filename,
