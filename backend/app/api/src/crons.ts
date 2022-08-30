@@ -410,7 +410,7 @@ async function checkComplaints() {
 
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
-    // todo: only select the ID + organizationId
+    // TODO: only select the ID + organizationId
     const payments = await Payment.where({
         status: {
             sign: "IN",
@@ -420,12 +420,20 @@ async function checkPayments() {
             sign: "IN",
             value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
         },
+        // Check all payments that are 15 minutes old and are still pending
         createdAt: {
-            sign: ">",
-            value: new Date(new Date().getTime() - 60*1000*60*24*3)
+            sign: "<",
+            value: new Date(new Date().getTime() - 60*1000*15)
         },
     }, {
-        limit: 100
+        limit: 100,
+
+        // Return oldest payments first
+        // If at some point, they are still pending after 1 day, their status should change to failed
+        sort: [{
+            column: 'createdAt',
+            direction: 'ASC'
+        }]
     })
 
     console.log("Checking pending payments: "+payments.length)
