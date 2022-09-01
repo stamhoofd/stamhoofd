@@ -1,5 +1,5 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, Member as MemberStruct, MemberDetails, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, Member as MemberStruct, MemberDetails, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct, RegistrationWithMember as RegistrationWithMemberStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Payment } from './Payment';

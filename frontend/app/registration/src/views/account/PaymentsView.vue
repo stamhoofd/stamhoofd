@@ -174,7 +174,6 @@ export default class PaymentsView extends Mixins(NavigationMixin){
                 organization: OrganizationManager.organization,
                 payment,
                 settings: OrganizationManager.organization.meta.transferSettings,
-                additionalReference: payment.getMemberLastNames(),
                 isPopup: true
             })
         }).setDisplayStyle("popup"))

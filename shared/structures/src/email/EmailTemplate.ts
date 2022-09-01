@@ -15,6 +15,7 @@ export enum EmailTemplateType {
     OrderNotification = "OrderNotification",
 
     RegistrationConfirmation = "RegistrationConfirmation",
+    RegistrationTransferDetails = "RegistrationTransferDetails",
 
     OrderConfirmationOnline = "OrderConfirmationOnline",
     OrderConfirmationTransfer = "OrderConfirmationTransfer",
@@ -39,7 +40,7 @@ export enum EmailTemplateType {
     /**
      * Tickets sent after payment is received
      */
-    TicketsReceivedTransfer = "TicketsReceivedTransfer",
+    TicketsReceivedTransfer = "TicketsReceivedTransfer"
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -77,6 +78,36 @@ export class EmailTemplate extends AutoEncoder {
     updatedAt: Date = new Date();
 
     static getSupportedReplacementsForType(type: EmailTemplateType): string[] {
+        if (type === EmailTemplateType.RegistrationConfirmation) {
+            return [
+                "firstName",
+                "lastName",
+                "email",
+                "registerUrl",
+                "organizationName",
+                "groupName",
+                "signInUrl",
+                "unsubscribeUrl"
+            ];
+        }
+
+        if (type === EmailTemplateType.RegistrationTransferDetails) {
+            return [
+                "priceToPay",
+                "paymentMethod",
+                "transferDescription",
+                "transferBankAccount",
+                "transferBankCreditor",
+                "overviewContext",
+                "memberNames",
+                "overviewTable",
+                "paymentTable",
+                "registerUrl",
+                "organizationName",
+                "signInUrl",
+                "unsubscribeUrl"
+            ];
+        }
 
         if ([
             EmailTemplateType.MembersExpirationReminder, 

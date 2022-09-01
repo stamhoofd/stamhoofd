@@ -17,7 +17,7 @@ export class EmailStyler {
         styles += " .inline-link, .inline-link:link, .inline-link:visited, .inline-link:active, .inline-link:hover { "+inlineLinkCSS+" } .inline-link:active { opacity: 0.5; } ";
 
         const descriptionCSS = "color: #5e5e5e;"
-        styles += " .button { "+descriptionCSS+" } "
+        styles += " .description { "+descriptionCSS+" } "
 
         // Transform HTML into text + do replacements
         const element = document.createElement("div.email-style-apply-here")
@@ -58,9 +58,14 @@ export class EmailStyler {
         }
 
         // add force add padding and margin inline
-        const blocks = element.querySelectorAll("h1,h2,h3,h4,p")
+        const blocks = element.querySelectorAll("h1,h2,h3,h4")
         for (const el of blocks) {
             (el as any).style.cssText = "margin: 0; padding: 0;"
+        }
+
+        const ps = element.querySelectorAll("p")
+        for (const el of ps) {
+            (el as any).style.cssText = "margin: 0; padding: 0; line-height: 1.4;"
         }
 
         // Force HR
@@ -80,7 +85,7 @@ export class EmailStyler {
         for (const el of buttons) {
             (el as any).style.cssText = buttonCSS
             // Old e-mail client fix for buttons
-            el.insertAdjacentHTML("beforebegin", `<table width="100%" cellspacing="0" cellpadding="0">
+            el.insertAdjacentHTML("beforebegin", `<table width="100%" cellspacing="0" cellpadding="0" style="margin: 5px 0;">
 <tr>
     <td>
         <table cellspacing="0" cellpadding="0">
@@ -102,14 +107,12 @@ export class EmailStyler {
         for (const el of buttonDescriptionElements) {
             (el as any).style.cssText = descriptionCSS
         }
-        
 
         // add empty paragraph <br>'s
         const emptyP = element.querySelectorAll("p:empty")
         for (const el of emptyP) {
             el.appendChild(document.createElement("br"))
         }
-
 
         const escapeSubject = document.createElement("div")
         escapeSubject.innerText = subject;

@@ -55,11 +55,10 @@ export class PaymentHandler {
         returnUrl: string | null;
         paymentUrl: string | null; 
         transferSettings: TransferSettings | null;
-        additionalReference?: string;
         component: NavigationMixin; 
         type: "order" | "registration";
     }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
-        const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings, additionalReference } = settings;
+        const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings } = settings;
 
         if (payment.method == PaymentMethod.PointOfSale) {
             successHandler(payment)
@@ -71,7 +70,6 @@ export class PaymentHandler {
                 organization,
                 payment,
                 settings: transferSettings,
-                additionalReference,
                 finishedHandler: (payment: Payment) => {
                     // Always go to success
                     successHandler(payment)

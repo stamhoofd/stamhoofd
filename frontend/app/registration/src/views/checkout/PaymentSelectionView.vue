@@ -130,7 +130,6 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     returnUrl: "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id),
                     component: this,
                     transferSettings: OrganizationManager.organization.meta.transferSettings,
-                    additionalReference: Formatter.uniqueArray(this.CheckoutManager.checkout.cart.items.map(r => r.member.details.lastName)).join(", "),
                     type: "registration"
                 }, (payment: Payment) => {
                     // success
