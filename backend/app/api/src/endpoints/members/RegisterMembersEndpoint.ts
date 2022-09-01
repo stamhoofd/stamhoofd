@@ -161,8 +161,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             } else {
                 registration.waitingList = false
                 registration.canRegister = false
+                registration.price = item.calculatedPrice
                 payRegistrations.push(registration)
-                payNames.push(member.details.firstName)
+                payNames.push(member.details.name)
             }
             registrations.push(registration)
         }
@@ -204,7 +205,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     registration.reservedUntil = null
 
                     if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
-                        registration.registeredAt = new Date()
+                        await registration.markValid()
                     } else {
                         // Reserve registration for 30 minutes (if needed)
                         const group = groups.find(g => g.id === registration.groupId)
@@ -212,10 +213,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         if (group && group.settings.maxMembers !== null) {
                             registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
                         }
+                        await registration.save()
                     }
                 }
                 
-                await registration.save()
             }
 
             // Update occupancy
@@ -224,6 +225,11 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     await group.updateOccupancy()
                     await group.save()
                 }
+            }
+
+            if (payment.method == PaymentMethod.Transfer) {
+                // Send a small reminder email
+                await Registration.sendTransferEmail(user, payment)
             }
 
             let paymentUrl: string | null = null

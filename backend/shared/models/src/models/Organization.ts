@@ -10,6 +10,7 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuidv4 } from "uuid";
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
+import { Group } from "./Group";
 import { Webshop } from './Webshop';
 
 export class Organization extends Model {
@@ -687,6 +688,10 @@ export class Organization extends Model {
             return { from, replyTo }
         }
         return this.getDefaultEmail()
+    }
+
+    getGroupEmail(group: Group) {
+        return this.getEmail(group.privateSettings.defaultEmailId)
     }
 
     getDefaultEmail(): { from: string; replyTo: string | undefined } {

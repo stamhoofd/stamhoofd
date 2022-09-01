@@ -9,8 +9,16 @@ export class PaymentDetailed extends Payment {
     @field({ decoder: new ArrayDecoder(RegistrationWithMember) })
     registrations: RegistrationWithMember[]
 
+    getMemberNamesArray() {
+        return Formatter.uniqueArray(this.registrations.map(r => r.member.details.name))
+    }
+
     getMemberNames() {
-        return this.registrations.map(r => r.member.details?.name ?? "Onbekend").join(", ")
+        return Formatter.joinLast(this.getMemberNamesArray(), ", ", " en ")
+    }
+
+    getMemberFirstNames() {
+        return Formatter.joinLast(Formatter.uniqueArray(this.registrations.map(r => r.member.details.firstName)), ", ", " en ")
     }
 
     getMemberLastNames() {

@@ -52,7 +52,11 @@ async function checkDNS() {
         if (STAMHOOFD.environment === "production") {
             console.log("Checking dns for "+organization.name)
         }
-        await organization.updateDNSRecords()
+        try {
+            await organization.updateDNSRecords()
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     lastDNSId = organizations[organizations.length - 1].id

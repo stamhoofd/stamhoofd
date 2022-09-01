@@ -219,9 +219,6 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     @Prop({ default: null }) 
     settings: TransferSettings | null
 
-    @Prop({ default: null }) 
-    additionalReference: string | null
-
     @Prop({ default: false })
     isPopup: boolean
 
@@ -319,9 +316,6 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     get transferDescription() {
-        if (this.additionalReference && this.settings?.type === TransferDescriptionType.Reference) {
-            return this.payment.transferDescription + " " + this.additionalReference
-        }
         return this.payment.transferDescription
     }
 
