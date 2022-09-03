@@ -446,6 +446,7 @@ async function checkPayments() {
                 const organization = await Organization.getByID(payment.organizationId)
                 if (organization) {
                     await ExchangePaymentEndpoint.pollStatus(payment.id, organization)
+                    continue;
                 }
             } else {
                 // Try stamhoofd payment
@@ -454,6 +455,13 @@ async function checkPayments() {
                     await ExchangeSTPaymentEndpoint.pollStatus(payment, invoices[0])
                     continue
                 }
+            }
+
+            // Check expired
+            if (ExchangePaymentEndpoint.isManualExpired(payment.status, payment)) {
+                console.error('[DELAYED PAYMENTS] Could not resolve handler for expired payment, marking as failed', payment.id)
+                payment.status = PaymentStatus.Failed
+                await payment.save()
             }
         } catch (e) {
             console.error(e)

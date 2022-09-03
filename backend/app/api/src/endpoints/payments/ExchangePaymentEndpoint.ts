@@ -166,50 +166,77 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                         const token = await MollieToken.getTokenFor(organization.id)
                         
                         if (token) {
-                            const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                            const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
-                                testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production',
-                            })
+                            try {
+                                const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                                const mollieData = await mollieClient.payments.get(molliePayment.mollieId, {
+                                    testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production',
+                                })
 
-                            console.log(mollieData) // log to log files to check issues
+                                console.log(mollieData) // log to log files to check issues
 
-                            const details = (mollieData.details as any) 
-                            if (details?.consumerName) {
-                                payment.ibanName = details.consumerName
-                            }
-                            if (details?.consumerAccount) {
-                                payment.iban = details.consumerAccount
-                            }
-                            if (details?.cardHolder) {
-                                payment.ibanName = details.cardHolder
-                            }
-                            if (details?.cardNumber) {
-                                payment.iban = "xxxx xxxx xxxx "+details.cardNumber
-                            }
+                                const details = (mollieData.details as any) 
+                                if (details?.consumerName) {
+                                    payment.ibanName = details.consumerName
+                                }
+                                if (details?.consumerAccount) {
+                                    payment.iban = details.consumerAccount
+                                }
+                                if (details?.cardHolder) {
+                                    payment.ibanName = details.cardHolder
+                                }
+                                if (details?.cardNumber) {
+                                    payment.iban = "xxxx xxxx xxxx "+details.cardNumber
+                                }
 
-                            if (mollieData.status == "paid") {
-                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
-                            } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
-                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
-                            } else if (this.isManualExpired(payment.status, payment)) {
-                                // Mollie still returning pending after 1 day: mark as failed
-                                console.error('Manually marking Mollie payment as expired', payment.id)
-                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                                if (mollieData.status == "paid") {
+                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded)
+                                } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
+                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                                } else if (this.isManualExpired(payment.status, payment)) {
+                                    // Mollie still returning pending after 1 day: mark as failed
+                                    console.error('Manually marking Mollie payment as expired', payment.id)
+                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                                }
+                            } catch (e) {
+                                console.error('Payment check failed Mollie', payment.id, e);
+                                if (this.isManualExpired(payment.status, payment)) {
+                                    console.error('Manually marking Mollie payment as expired', payment.id)
+                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                                }
                             }
                         } else {
                             console.warn("Mollie payment is missing for organization "+organization.id+" while checking payment status...")
+
+                            if (this.isManualExpired(payment.status, payment)) {
+                                console.error('Manually marking payment without mollie token as expired', payment.id)
+                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                            }
+                        }
+                    } else {
+                        if (this.isManualExpired(payment.status, payment)) {
+                            console.error('Manually marking payment without mollie payments as expired', payment.id)
+                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
                         }
                     }
                 } else if (payment.provider == PaymentProvider.Buckaroo) {
                     const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? "", organization.privateMeta.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
-                    let status = await helper.getStatus(payment)
+                    try {
+                        let status = await helper.getStatus(payment)
 
-                    if (this.isManualExpired(status, payment)) {
-                        console.error('Manually marking Buckaroo payment as expired', payment.id)
-                        status = PaymentStatus.Failed
+                        if (this.isManualExpired(status, payment)) {
+                            console.error('Manually marking Buckaroo payment as expired', payment.id)
+                            status = PaymentStatus.Failed
+                        }
+
+                        await this.handlePaymentStatusUpdate(payment, organization, status)
+                    } catch (e) {
+                        console.error('Payment check failed Buckaroo', payment.id, e);
+                        if (this.isManualExpired(payment.status, payment)) {
+                            console.error('Manually marking Buckaroo payment as expired', payment.id)
+                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                        }
                     }
-
-                    await this.handlePaymentStatusUpdate(payment, organization, status)
+                   
                 } else if (payment.provider == PaymentProvider.Payconiq) {
                     // Check status
 
