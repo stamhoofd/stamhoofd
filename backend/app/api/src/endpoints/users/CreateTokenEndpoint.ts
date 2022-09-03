@@ -75,6 +75,8 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         case "password": {
+            // Increase timout for legacy
+            request.request.request?.setTimeout(30 * 1000);
             const user = await User.login(organization.id, request.body.username, request.body.password)
 
             const errBody = {
