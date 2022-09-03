@@ -30,7 +30,7 @@ let lastDNSId = ""
 async function checkDNS() {
     // Wait 6 hours between every complete check
     if (lastDNSCheck && lastDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
-        console.log("Skip DNS check")
+        console.log("[DNS] Skip DNS check")
         return
     }
     
@@ -46,11 +46,11 @@ async function checkDNS() {
         return
     }
 
-    console.log("Checking DNS...")
+    console.log("[DNS] Checking DNS...")
 
     for (const organization of organizations) {
         if (STAMHOOFD.environment === "production") {
-            console.log("Checking dns for "+organization.name)
+            console.log("[DNS] "+organization.name)
         }
         try {
             await organization.updateDNSRecords()
@@ -67,7 +67,7 @@ let lastExpirationCheck: Date | null = null
 async function checkExpirationEmails() {
     // Wait 1 hour between every complete check
     if (lastExpirationCheck && lastExpirationCheck > new Date(new Date().getTime() - 1 * 60 * 60 * 1000)) {
-        console.log("Skip checkExpirationEmails")
+        console.log("[EXPIRATION EMAILS] Skip checkExpirationEmails")
         return
     }
     
@@ -81,7 +81,7 @@ async function checkExpirationEmails() {
         emailCount: 0
     })
 
-    console.log("Sending expiration emails...")
+    console.log("[EXPIRATION EMAILS] Sending expiration emails...")
 
     for (const pack of packages) {
         await pack.sendExpiryEmail()
@@ -95,7 +95,7 @@ let lastWebshopDNSId = ""
 async function checkWebshopDNS() {
     // Wait 6 hours between every complete check
     if (lastWebshopDNSCheck && lastWebshopDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
-        console.log("Skip webshop DNS check")
+        console.log("[DNS] Skip webshop DNS check")
         return
     }
     
@@ -114,11 +114,11 @@ async function checkWebshopDNS() {
         return
     }
 
-    console.log("Checking webshop DNS...")
+    console.log("[DNS] Checking webshop DNS...")
 
     for (const webshop of webshops) {
         if (STAMHOOFD.environment === "production" || true) {
-            console.log("Checking dns for webshop "+webshop.meta.name+" ("+webshop.id+")"+" ("+webshop.domain+")")
+            console.log("[DNS] Webshop "+webshop.meta.name+" ("+webshop.id+")"+" ("+webshop.domain+")")
         }
         await webshop.updateDNSRecords()
     }
@@ -189,15 +189,13 @@ let lastPostmarkId: string | null = null
 async function checkPostmarkBounces() {
     const token = STAMHOOFD.POSTMARK_SERVER_TOKEN
     if (!token) {
-        console.log("No postmark token, skipping postmark bounces")
+        console.log("[POSTMARK BOUNCES] No postmark token, skipping postmark bounces")
         return
     }
     const fromDate = (lastPostmarkCheck ?? new Date(new Date().getTime() - 24 * 60 * 60 * 1000 * 2))
     const ET = DateTime.fromJSDate(fromDate).setZone('EST').toISO({ includeOffset: false})
-    console.log("Checking bounces from Postmark since", fromDate, ET)
-    const client = new postmark.ServerClient(token)
-
-    ;
+    console.log("[POSTMARK BOUNCES] Checking bounces from Postmark since", fromDate, ET)
+    const client = new postmark.ServerClient(token);
 
     const bounces = await client.getBounces({
         fromdate: ET,
@@ -207,7 +205,7 @@ async function checkPostmarkBounces() {
     })
 
     if (bounces.TotalCount == 0) {
-        console.log("No Postmark bounces at this time")
+        console.log("[POSTMARK BOUNCES] No Postmark bounces at this time")
         return
     }
 
@@ -220,18 +218,18 @@ async function checkPostmarkBounces() {
 
         if (bounce.Type === "HardBounce" || bounce.Type === "BadEmailAddress" || bounce.Type === "Blocked") {
             // Block for everyone, but not visible
-            console.log("Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
+            console.log("[POSTMARK BOUNCES] Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
             const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null)
             emailAddress.hardBounce = true
             await emailAddress.save()
         } else if (bounce.Type === "SpamComplaint" || bounce.Type === "SpamNotification" || bounce.Type === "VirusNotification") {
-            console.log("Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
+            console.log("[POSTMARK BOUNCES] Postmark "+bounce.Type+" for: ", bounce.Email, "from", source, "organization", organization?.name)
             const emailAddress = await EmailAddress.getOrCreate(bounce.Email, organization?.id ?? null)
             emailAddress.markedAsSpam = true
             await emailAddress.save()
         } else {
-            console.log("Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
-            console.error("Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
+            console.log("[POSTMARK BOUNCES] Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
+            console.error("[POSTMARK BOUNCES] Unhandled Postmark "+bounce.Type+": ", bounce.Email, "from", source, "organization", organization?.name)
         }
 
         const bouncedAt = new Date(bounce.BouncedAt)
@@ -242,7 +240,7 @@ async function checkPostmarkBounces() {
 
     if (lastId && lastPostmarkId) {
         if (lastId === lastPostmarkId) {
-            console.log("Postmark has no new bounces")
+            console.log("[POSTMARK BOUNCES] Postmark has no new bounces")
             // Increase timestamp by one second to avoid refetching it every time
             if (lastPostmarkCheck) {
                 lastPostmarkCheck = new Date(lastPostmarkCheck.getTime() + 1000)
@@ -254,16 +252,16 @@ async function checkPostmarkBounces() {
 
 async function checkBounces() {
     if (STAMHOOFD.environment !== "production") {
-        console.log("Skippping bounce checking")
+        console.log("[AWS BOUNCES] Skippping bounce checking")
         return
     }
-    console.log("Checking bounces from AWS SQS")
+    console.log("[AWS BOUNCES] Checking bounces from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue", MaxNumberOfMessages: 10 }).promise()
     if (messages.Messages) {
         for (const message of messages.Messages) {
-            console.log("Received bounce message");
-            console.log(message);
+            console.log("[AWS BOUNCES] Received bounce message");
+            console.log("[AWS BOUNCES]", message);
 
             if (message.ReceiptHandle) {
                 if (STAMHOOFD.environment === "production") {
@@ -271,7 +269,7 @@ async function checkBounces() {
                         QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue",
                         ReceiptHandle: message.ReceiptHandle
                     }).promise()
-                    console.log("Deleted from queue");
+                    console.log("[AWS BOUNCES] Deleted from queue");
                 }
             }
 
@@ -310,25 +308,25 @@ async function checkBounces() {
                                         emailAddress.hardBounce = true
                                         await emailAddress.save()
                                     } else {
-                                        console.error("Unknown organization for email address "+source)
+                                        console.error("[AWS BOUNCES] Unknown organization for email address "+source)
                                     }
                                 }
 
                             }
-                            console.log("For domain "+source)
+                            console.log("[AWS BOUNCES] For domain "+source)
                         } else {
-                            console.log("'bounce' field missing in bounce message")
+                            console.log("[AWS BOUNCES] 'bounce' field missing in bounce message")
                         }
                     } else {
-                        console.log("'Message' field missing in bounce message")
+                        console.log("[AWS BOUNCES] 'Message' field missing in bounce message")
                     }
                 } else {
-                    console.log("Message Body missing in bounce")
+                    console.log("[AWS BOUNCES] Message Body missing in bounce")
                 }
             } catch (e) {
-                console.log("Bounce message processing failed:")
-                console.error("Bounce message processing failed:")
-                console.error(e)
+                console.log("[AWS BOUNCES] Bounce message processing failed:")
+                console.error("[AWS BOUNCES] Bounce message processing failed:")
+                console.error("[AWS BOUNCES]", e)
             }
         }
     }
@@ -340,13 +338,13 @@ async function checkComplaints() {
         return
     }
 
-    console.log("Checking complaints from AWS SQS")
+    console.log("[AWS COMPLAINTS] Checking complaints from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue", MaxNumberOfMessages: 10 }).promise()
     if (messages.Messages) {
         for (const message of messages.Messages) {
-            console.log("Received complaint message");
-            console.log(message)
+            console.log("[AWS COMPLAINTS] Received complaint message");
+            console.log("[AWS COMPLAINTS]", message)
 
             if (message.ReceiptHandle) {
                 if (STAMHOOFD.environment === "production") {
@@ -354,7 +352,7 @@ async function checkComplaints() {
                         QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-complaints-queue",
                         ReceiptHandle: message.ReceiptHandle
                     }).promise()
-                    console.log("Deleted from queue");
+                    console.log("[AWS COMPLAINTS] Deleted from queue");
                 }
             }
 
@@ -362,7 +360,7 @@ async function checkComplaints() {
                 if (message.Body) {
                     // decode the JSON value
                     const complaint = JSON.parse(message.Body)
-                    console.log(complaint)
+                    console.log("[AWS COMPLAINTS]", complaint)
 
                     if (complaint.Message) {
                         const message = JSON.parse(complaint.Message)
@@ -382,12 +380,12 @@ async function checkComplaints() {
                                     await emailAddress.save()
                                 }
                             } else {
-                                console.error("Unknown organization for email address "+source)
+                                console.error("[AWS COMPLAINTS] Unknown organization for email address "+source)
                             }
 
                              if (type == "virus" || type == "fraud") {
-                                console.error("Received virus / fraud complaint!")
-                                console.error(complaint)
+                                console.error("[AWS COMPLAINTS] Received virus / fraud complaint!")
+                                console.error("[AWS COMPLAINTS]", complaint)
                                 if (STAMHOOFD.environment === "production") {
                                     Email.sendInternal({
                                         to: "simon@stamhoofd.be",
@@ -397,16 +395,16 @@ async function checkComplaints() {
                                 }
                             }
                         } else {
-                            console.log("Missing complaint field")
+                            console.log("[AWS COMPLAINTS] Missing complaint field")
                         }
                     }  else {
-                        console.log("Missing message field in complaint")
+                        console.log("[AWS COMPLAINTS] Missing message field in complaint")
                     }
                 }
             } catch (e) {
-                console.log("Complain message processing failed:")
-                console.error("Complain message processing failed:")
-                console.error(e)
+                console.log("[AWS COMPLAINTS] Complain message processing failed:")
+                console.error("[AWS COMPLAINTS] Complain message processing failed:")
+                console.error("[AWS COMPLAINTS]", e)
             }
         }
     }
@@ -440,7 +438,7 @@ async function checkPayments() {
         }]
     })
 
-    console.log("Checking pending payments: "+payments.length)
+    console.log("[DELAYED PAYMENTS] Checking pending payments: "+payments.length)
 
     for (const payment of payments) {
         try {
@@ -504,11 +502,11 @@ async function checkReservedUntil() {
 let lastBillingCheck: Date | null = new Date()
 let lastBillingId = ""
 async function checkBilling() {
-    console.log("Checking billing...")
+    console.log("[BILLING] Checking billing...")
 
     // Wait for the next day before doing a new check
     if (lastBillingCheck && Formatter.dateIso(lastBillingCheck) === Formatter.dateIso(new Date())) {
-        console.log("Billing check done for today")
+        console.log("[BILLING] Billing check done for today")
         return
     }
     
@@ -525,7 +523,7 @@ async function checkBilling() {
     }
 
     for (const organization of organizations) {
-        console.log("Checking billing for "+organization.name)
+        console.log("[BILLING] Checking billing for "+organization.name)
 
         try {
             await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {

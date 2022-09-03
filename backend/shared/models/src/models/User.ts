@@ -1,10 +1,13 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { KeyConstantsHelper, Sodium } from '@stamhoofd/crypto';
-import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions } from "@stamhoofd/structures"
+import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions, Version } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 import argon2 from "argon2"
+import { Worker, isMainThread } from 'node:worker_threads';
+import path from "path";
 
 import { Organization } from "./Organization";
+import { QueueHandler } from "@stamhoofd/queues";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };
@@ -105,6 +108,58 @@ export class User extends Model {
 
     static organization = new ManyToOneRelation(Organization, "organization");
 
+    static async checkOldPassword(email: string, password: string, keyConstants: KeyConstants, publicAuthSignKey: string): Promise<boolean> {
+        return await QueueHandler.schedule('check-old-password', async () => {
+            return new Promise((resolve) => {
+                console.log('[WORKER] Logging in via the old E2E way...', email)
+
+                let resolved = false;
+                const worker = new Worker(path.join(__dirname, '../helpers/checkPasswordWorker.js'), { workerData: {email, password, publicAuthSignKey, keyConstants: keyConstants.encode({version: Version})} });
+                const timer = setTimeout(() => {
+                    console.log('[WORKER] Worker timed out after 20s for email', email)
+
+                    if (resolved) {
+                        return;
+                    }
+                    resolve(false);
+                    resolved = true;
+                    
+                    worker.terminate();
+                }, 20 * 1000);
+                
+                worker.on('message', (m) => {
+                    if (resolved) {
+                        return;
+                    }
+                    clearTimeout(timer);
+                    resolve(!!m);
+                    resolved = true;
+                });
+                worker.on('error', (e) => {
+                    console.error('[WORKER] Catched worker error', e)
+
+                    if (resolved) {
+                        return;
+                    }
+                    clearTimeout(timer);
+                    resolve(false);
+                    resolved = true;
+                });
+                worker.on('exit', (code) => {
+                    if (code !== 0) {
+                        console.error('[WORKER] Worker stopped with exit code', code);
+                    }
+                    if (resolved) {
+                        return;
+                    }
+                    clearTimeout(timer);
+                    resolve(false);
+                    resolved = true;
+                });
+            })
+        }, 3);
+    }
+
     static async login(organizationId: string, email: string, password: string): Promise<UserForAuthentication | undefined> {
         const user = await User.getForAuthentication(organizationId, email)
         if (!user || !user.hasKeys()) {
@@ -121,16 +176,11 @@ export class User extends Model {
                 return undefined;
             }
 
-            console.log('Logging in via the old E2E way...', email)
+            console.log('Preparing to log in via the old E2E way...', email)
 
             // Old e2e login system: we need to generate the keys locally to check if they match
             try {
-                const authSignKeys = await KeyConstantsHelper.getSignKeyPair(user.authSignKeyConstants, password)
-                
-                // Check if generated private key matches the stored public key
-                console.log('Got keys for password', email, authSignKeys)
-
-                if (await Sodium.isMatchingSignPublicPrivate(user.publicAuthSignKey, authSignKeys.privateKey)) {
+                if (await this.checkOldPassword(email, password, user.authSignKeyConstants, user.publicAuthSignKey)) {
                     console.log('Login succeeded for', email, '. Updating password...')
 
                     await user.changePassword(password)
@@ -139,6 +189,7 @@ export class User extends Model {
 
                     return user
                 }
+                
                 console.log('Login failed for', email)
 
             } catch (e) {

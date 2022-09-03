@@ -2,10 +2,12 @@
 class Queue {
     name: string
     items: QueueItem<any>[] = []
-    running = false
+    parallel = 1
+    runCount = 0
 
-    constructor(name: string) {
+    constructor(name: string, parallel = 1) {
         this.name = name
+        this.parallel = parallel
     }
 
     addItem(item: QueueItem<any>) {
@@ -25,8 +27,8 @@ class QueueItem<T> {
 export class QueueHandler {
     static queues = new Map<string, Queue>()
 
-    static async schedule<T>(queue: string, handler: () => Promise<T>): Promise<T> {
-        //console.log("[QUEUE] Schedule "+queue)
+    static async schedule<T>(queue: string, handler: () => Promise<T>, parallel = 1): Promise<T> {
+        console.log("[QUEUE] Schedule "+queue)
 
         const item = new QueueItem<T>()
         item.handler = handler
@@ -36,14 +38,13 @@ export class QueueHandler {
             item.reject = reject
 
             // We only add it here because resolve and reject is required
-            const q = this.queues.get(queue) ?? new Queue(queue)
+            const q = this.queues.get(queue) ?? new Queue(queue, parallel)
             q.addItem(item)
             this.queues.set(queue, q)
 
             // Run the next item if not already running
             this.runNext(queue).catch(e => {
-                console.log("Fatal error in queue logic")
-                console.error(e)
+                console.error("[QUEUE] Fatal error in queue logic", e)
             })
         })
 
@@ -53,12 +54,12 @@ export class QueueHandler {
     private static async runNext(queue: string) {
         const q = this.queues.get(queue)
         if (!q) {
-            console.warn("Queue not found")
+            console.warn("[QUEUE] Queue not found (no items left)", queue)
             return
         }
 
-        if (q.running) {
-            console.log("Queue already running")
+        if (q.runCount >= q.parallel) {
+            console.log("[QUEUE] Queue", queue, 'reached maximum of', q.parallel)
             return
         }
 
@@ -69,20 +70,20 @@ export class QueueHandler {
             return
         }
 
-        q.running = true
-        console.log("[QUEUE] Executing "+queue+" ("+q.items.length+" remaining)")
+        q.runCount += 1
+        console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
 
         try {
             const result = await next.handler()
             next.resolve(result)
-            console.log("[QUEUE] Resolved "+queue+" ("+q.items.length+" remaining)")
+            console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
             next.reject(e)
-            console.log("[QUEUE] Rejected "+queue+" ("+q.items.length+" remaining)")
+            console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Rejected "+queue+" ("+q.items.length+" remaining)")
             console.error(e)
         }
 
-        q.running = false
+        q.runCount -= 1
         await this.runNext(queue)
     }
 }
