@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : (category ? 'category-' + category.id : 'members')" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openMember">
+    <TableView ref="table" :back-hint="backHint" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : (category ? 'category-' + category.id : 'members')" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openMember">
         <button v-if="titleDescription" class="info-box selectable" type="button" @click="resetCycle">
             {{ titleDescription }}
 
@@ -8,11 +8,11 @@
 
         <template #empty>
             <template v-if="cycleOffset != 0">
-                Er zijn nog geen leden ingeschreven in deze inschrijvingsperiode.
+                Er zijn nog geen leden ingeschreven in deze {{ waitingList ? 'wachtlijst tijdens deze periode' : 'inschrijvingsperiode' }}.
             </template>
 
             <template v-else-if="group">
-                Er zijn nog geen leden ingeschreven in deze inschrijvingsgroep.
+                Er zijn nog geen leden ingeschreven in deze {{ waitingList ? 'wachtlijst' : 'groep' }}.
             </template>
 
             <template v-else>
@@ -63,29 +63,64 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     category!: GroupCategoryTree | null;
 
+    @Prop({ default: 0 })
+    initialCycleOffset!: number
+
+    loading = true
+    cycleOffset = this.initialCycleOffset
+
     @Prop({ default: false })
     waitingList!: boolean;
 
     allValues: MemberWithRegistrations[] = []
+
+    openMemberOnLoad: string | null = null
 
     get organization() {
         return OrganizationManager.organization
     }
 
     mounted() {
+        const parts = UrlHelper.shared.getParts()
+        const urlParams = UrlHelper.shared.getSearchParams()
+
+        if (urlParams.has("c")) {
+            this.cycleOffset = parseInt(urlParams.get("c")!)
+        }
+        
+        // Set url
+        this.updateUrl()
+
+        if (parts[parts.length - 1] === 'waiting-list' && !this.waitingList) {
+            this.openWaitingList(false)
+        } else {
+            if (urlParams.has("member")) {
+                this.openMemberOnLoad = urlParams.get("member")
+            }
+
+            UrlHelper.shared.clear()
+        }
+    }
+
+    updateUrl() {
+        const params = new URLSearchParams()
+        if (this.cycleOffset != 0) {
+            params.set("c", this.cycleOffset.toString())
+        }
+        const queryString = params.toString() ? "?" + params.toString() : ""
+
         // Set url
         if (this.group) {
-            UrlHelper.setUrl("/groups/"+Formatter.slug(this.group.settings.name))
+            UrlHelper.setUrl("/groups/"+Formatter.slug(this.group.settings.name) + (this.waitingList ? "/waiting-list" : "") + queryString)
             document.title = "Stamhoofd - "+this.group.settings.name
         } else {
             if (this.category) {
-                UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all")    
+                UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name)+"/all" + (this.waitingList ? "/waiting-list" : "") + queryString)    
                 document.title = "Stamhoofd - "+ this.category.settings.name +" - Alle leden"
             } else {
                 UrlHelper.setUrl("/groups/all")    
                 document.title = "Stamhoofd - Alle leden"
             }
-            
         }
     }
 
@@ -98,6 +133,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return this.allValues.length
         }
 
+        if (this.cycleOffset !== 0) {
+            return 30;
+        }
+
         if (this.group) {
             if (this.waitingList) {
                 return this.group.settings.waitingListSize ?? 30
@@ -106,16 +145,45 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         if (this.category) {
+            if (this.waitingList) {
+                return this.category.groups.reduce((sum, group) => sum + (group.settings.waitingListSize ?? 30), 0)
+            }
             return this.category.groups.reduce((sum, group) => sum + (group.settings.registeredMembers ?? 30), 0)
         }
 
         return 30
     }
+
+    get waitingListSize() {
+        if (this.cycleOffset != 0) {
+            return 0
+        }
+        if (this.group) {
+            return this.group.settings.waitingListSize;
+        }
+        if (this.category) {
+            return this.category.groups.reduce((sum, group) => sum + (group.settings.waitingListSize ?? 0), 0)
+        }
+        return true;
+    }
+
+    get hasWaitingList() {
+        if (this.cycleOffset != 0) {
+            return true
+        }
+        if (this.group) {
+            return this.group.settings.waitingListSize === null || this.group.settings.waitingListSize > 0;
+        }
+        if (this.category) {
+            return !!this.category.groups.find((group) => group.settings.waitingListSize === null || group.settings.waitingListSize > 0)
+        }
+        return true;
+    }
     
     get actions(): TableAction<MemberWithRegistrations>[] {
         const builder = new MemberActionBuilder({
             component: this,
-            group: this.group,
+            groups: this.groups,
             cycleOffset: this.cycleOffset,
             inWaitingList: this.waitingList,
             hasWrite: this.hasWrite,
@@ -149,12 +217,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             }),
 
             new TableAction({
-                name: "Open wachtlijst"+(this.group?.settings.waitingListSize ? (" ("+this.group.settings.waitingListSize+")") : ""),
+                name: "Open wachtlijst"+(this.waitingListSize ? (" ("+this.waitingListSize+")") : ""),
                 icon: "clock",
                 priority: 0,
                 groupIndex: 2,
                 needsSelection: false,
-                enabled: !this.waitingList && !!this.group && (this.group.settings.waitingListSize === null || this.group.settings.waitingListSize > 0),
+                enabled: !this.waitingList,
                 handler: () => {
                     this.openWaitingList()
                 }
@@ -199,7 +267,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         ]
     }
 
-    allColumns = ((): Column<MemberWithRegistrations, any>[] => {
+    get allColumns(): Column<MemberWithRegistrations, any>[] {
         const cols: Column<MemberWithRegistrations, any>[] = [
             new Column<MemberWithRegistrations, string>({
                 name: "Naam", 
@@ -237,32 +305,15 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 recommendedWidth: 100
             }),
             new Column<MemberWithRegistrations, Date | null>({
-                name: this.waitingList ? "Op wachtlijst sinds" : "Inschrijvingsdatum", 
+                name: this.waitingList ? "Sinds" : "Inschrijvingsdatum", 
                 getValue: (v) => {
-                    let registrations: Registration[] = []
-                    if (this.group) {
-                        const group = this.group
-                        registrations = v.registrations.filter(r => r.groupId == group.id && r.cycle == group.cycle - this.cycleOffset)
-                    } else  {
-                    // Search registrations in this category
-                        if (this.category) {
-                            const groups = this.category.getAllGroups()
-                            registrations = v.registrations.filter(r => {
-                                const group = groups.find(g => g.id == r.groupId)
-                                if (!group) {
-                                    return false
-                                }
-                                return r.cycle == group.cycle - this.cycleOffset
-                            })
-                        } else {
-                            registrations = v.activeRegistrations;
-                        }
-                    }
+                    const registrations = v.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
+
                     if (registrations.length == 0) {
                         return null
                     }
 
-                    let filtered = !this.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.filter(r => r.waitingList).map(r => r.createdAt!.getTime())
+                    let filtered = !this.waitingList ? registrations.filter(r => r.registeredAt).map(r => r.registeredAt!.getTime()) : registrations.map(r => r.createdAt!.getTime())
 
                     if (filtered.length == 0) {
                         return null
@@ -301,21 +352,19 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             cols.push(
                 new Column<MemberWithRegistrations, Group[]>({
                     id: 'category',
-                    name: this.category.settings.name, 
+                    name: this.waitingList ? 'Wachtlijst' : this.category.settings.name, 
                     getValue: (member) => {
                         if (!this.category) {
                             return [];
                         }
                         const groups = this.category.getAllGroups()
-                        const memberGroups = member.registrations.flatMap(r => {
+                        const registrations = member.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
+                        const memberGroups = registrations.flatMap(r => {
                             const group = groups.find(g => g.id == r.groupId)
                             if (!group) {
                                 return []
                             }
-                            if (r.cycle == group.cycle - this.cycleOffset) {
-                                return [group]
-                            }
-                            return []
+                            return [group]
                         })
                         const getIndex = (g) => groups.findIndex(_g => _g.id === g.id)
                         return memberGroups.sort((a,b) => Sorter.byNumberValue(getIndex(b), getIndex(a)))
@@ -354,11 +403,19 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             )
         }
 
-        if (this.waitingList && this.group) {
+        if (this.waitingList) {
             cols.push(
                 new Column<MemberWithRegistrations, boolean>({
                     name: "Status", 
-                    getValue: (member) => !!member.registrations.find(r => r.groupId == this.group!.id && r.waitingList && r.canRegister && r.cycle == this.group!.cycle),
+                    getValue: (member) => !!member.registrations.find(r => {
+                        if (this.groupIds.includes(r.groupId) && r.waitingList && r.canRegister) {
+                            const group = this.groups.find(g => g.id === r.groupId)
+                            if (group && r.cycle == group.cycle - this.cycleOffset) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }),
                     format: (canRegister) => {
                         if (canRegister) {
                             return "Uitgenodigd om in te schrijven";
@@ -374,13 +431,17 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         return cols
-    })()
-
-    loading = true
-    cycleOffset = 0
+    }
 
     get title() {
         return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
+    }
+
+    get backHint() {
+        if (!this.waitingList) {
+            return 'Terug'
+        }
+        return this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden")
     }
 
     get titleDescription() {
@@ -404,17 +465,19 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     goNext() {
         this.cycleOffset--
-        this.reload()
+        this.reload(true)
+        this.updateUrl();
     }
 
     goBack() {
         this.cycleOffset++
-        this.reload()
+        this.reload(true)
+        this.updateUrl();
     }
 
     resetCycle() {
         this.cycleOffset = 0
-        this.reload()
+        this.reload(true)
     }
 
     get hasWrite() {
@@ -577,7 +640,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     addMemberIfInGroup(member: MemberWithRegistrations) {
-        if (member.registrations.find(r => this.groupIds.includes(r.groupId) && r.waitingList === this.waitingList)) {
+        if (member.filterRegistrations({
+            groups: this.groups,
+            waitingList: this.waitingList,
+            cycleOffset: this.cycleOffset
+        }).length > 0) {
             this.allValues.push(member)
         }
     }
@@ -643,6 +710,14 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             // Make sure we keep as many references as possible
             MemberManager.sync(this.allValues, members)
             this.allValues = members
+
+            if (this.openMemberOnLoad) {
+                const member = this.allValues.find(m => m.id === this.openMemberOnLoad);
+                if (member) {
+                    this.openMember(member)
+                }
+                this.openMemberOnLoad = null
+            }
         }).catch((e) => {
             console.error(e)
 
@@ -662,11 +737,18 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    openWaitingList() {
-        this.show(new ComponentWithProperties(GroupMembersView, {
-            group: this.group,
-            waitingList: true
-        }))
+    openWaitingList(animated = true) {
+        this.show({
+            components: [
+                new ComponentWithProperties(GroupMembersView, {
+                    group: this.group,
+                    category: this.category,
+                    waitingList: true,
+                    initialCycleOffset: this.cycleOffset
+                })
+            ],
+            animated
+        })
     }
 
     editSettings() {

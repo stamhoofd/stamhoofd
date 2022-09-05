@@ -115,6 +115,27 @@ export class UrlHelper {
     }
 
     /**
+     * override params
+     */
+    static setSearchParams(params: URLSearchParams) {
+        const helper = new UrlHelper()
+        const url = new URL(helper.getFullHref())
+        url.search = params.toString()
+        this.setUrl(url.pathname+url.search+url.hash)
+    }
+
+    /**
+     * override params
+     */
+    static addSearchParam(key: string, value: string) {
+        const helper = new UrlHelper()
+        const url = new URL(helper.getFullHref())
+        url.searchParams.set(key, value)
+        url.search = url.searchParams.toString()
+        this.setUrl(url.pathname+url.search+url.hash)
+    }
+
+    /**
      * setURL, but add locale
      */
     static setUrl(url: string) {

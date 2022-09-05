@@ -1,12 +1,15 @@
 <template>
     <transition appear name="show">
-        <form class="centered-message-container" @submit.prevent>
-            <div class="centered-message">
-                <Spinner v-if="centeredMessage.type == 'loading'" class="center" />
-                <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg">
-                <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
-                <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg">
-                <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
+        <form class="centered-message-container" @submit.prevent @mousedown="dismiss" @touchdown="dismiss">
+            <div class="centered-message" @mousedown.stop="" @touchdown.stop="">
+                <div class="header">
+                    <Spinner v-if="centeredMessage.type == 'loading'" class="" />
+                    <img v-else-if="centeredMessage.type == 'clock'" class="center" src="~@stamhoofd/assets/images/illustrations/clock.svg">
+                    <img v-else-if="centeredMessage.type == 'health'" class="center" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
+                    <img v-else-if="centeredMessage.type == 'sync'" class="center" src="~@stamhoofd/assets/images/illustrations/sync.svg">
+                    <span v-else-if="centeredMessage.type != 'none'" :class="'center icon '+centeredMessage.type" />
+                </div>
+
                 <h1>
                     {{ centeredMessage.title }}
                 </h1>
@@ -14,16 +17,18 @@
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
-                        <span v-if="button.icon" class="icon" :class="button.icon" />
-                        <span>{{ button.text }}</span>
-                    </a>
-                    <button v-else ref="buttons" class="button full" :class="button.type" :tabindex="0" type="button" @click="onClickButton(button)">
-                        <span v-if="button.icon" class="icon" :class="button.icon" />
-                        <span>{{ button.text }}</span>
-                    </button>
-                </LoadingButton>
+                <div class="buttons">
+                    <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
+                        <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
+                            <span v-if="button.icon" class="icon" :class="button.icon" />
+                            <span>{{ button.text }}</span>
+                        </a>
+                        <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" @click="onClickButton(button)">
+                            <span v-if="button.icon" class="icon" :class="button.icon" />
+                            <span>{{ button.text }}</span>
+                        </button>
+                    </LoadingButton>
+                </div>
             </div>
         </form>
     </transition>
@@ -58,9 +63,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
             this.close()
         }
 
-        if (document.activeElement && (document.activeElement as any).blur) {
-            (document.activeElement as any).blur();
-        }
+        this.focusNextButton()
     }
 
     async onClickButton(button: CenteredMessageButton) {
@@ -85,6 +88,15 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         this.close()
     }
 
+    dismiss() {
+        const closeButton = this.centeredMessage.buttons.find(b => b.type == "secundary")
+        if (!closeButton) {
+            return;
+        }
+
+        this.onClickButton(closeButton).catch(console.error)
+    }
+
     close() {
         if (this.isClosing) {
             return
@@ -101,6 +113,50 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         document.removeEventListener("keydown", this.onKey);
     }
 
+    getButtons() {
+        let buttons = this.$refs.buttons as any
+
+        if (!buttons) {
+            return [];
+        }
+
+        if (!buttons.length) {
+            buttons = [buttons]
+        }
+        return buttons;
+    }
+
+    focusNextButton() {
+        console.log('focusNextButton')
+        let buttons = this.getButtons()
+        if (buttons.length == 0) {
+            console.log('no buttons')
+            return
+        }
+
+        // Find first focused button and select the next one or first one if it is the last one
+        const focusedButton = buttons.findIndex((b: any) => b === document.activeElement)
+        
+        let button = buttons[0];
+        if (focusedButton !== -1) {
+            if (focusedButton == buttons.length - 1) {
+                button = buttons[0];
+            } else {
+                button = buttons[focusedButton+1]
+            }
+        }
+
+        // Fix unreliable focus visible
+        button.classList.add("focus-visible");
+
+        // And we'll remove it again on blur, once
+        button.addEventListener("blur", function () {
+            button.classList.remove("focus-visible");
+        }, { once: true });
+        
+        button.focus()
+    }
+
     onKey(event) {
         if (event.defaultPrevented || event.repeat) {
             return;
@@ -108,6 +164,12 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
 
         const key = event.key || event.keyCode;
         const closeButton = this.centeredMessage.buttons.find(b => b.type == "secundary")
+
+        if (key === "Tab") {
+            this.focusNextButton();
+            event.preventDefault();
+            return;
+        }
 
         if (key === "Escape" || key === "Esc" || key === 27) {
             if (!closeButton) {
@@ -120,6 +182,11 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         }
 
         if (key === "Enter" || key === 13) {
+            const focusedButton = this.getButtons().find((b: any) => b === document.activeElement)
+            if (focusedButton) {
+                // Browser default
+                return;
+            }
             // Do we have a default action?
             const defaultButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type != "destructive")
             if (defaultButton) {
@@ -147,14 +214,37 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     background: $color-background;
     max-width: calc(100vw - 30px);
     width: 350px;
-    padding: 30px;
+    
     box-sizing: border-box;
     max-height: 100vh;
     overflow: auto;
     overflow-x: hidden;
 
-    @media (max-width: 500px) {
+    @media (max-width: 551px) {
         padding: 20px;
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 20px;
+        }
+    }
+
+    @media (min-width: 550px) {
+        width: 550px;
+        padding: 30px 40px;
+
+        .buttons {
+            border-top: $border-width-thin solid $color-border-shade;
+            padding: 15px 40px 15px 40px;
+            margin: 25px -40px -30px -40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            flex-direction: row-reverse;
+            gap: 10px;
+        }
     }
 
     > *:first-child {
@@ -171,18 +261,13 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
     }
 
     > h1 {
-        padding-bottom: 25px;
-        padding-top: 5px;
-        text-align: center;
-        @extend .style-title-1;
+        padding-bottom: 10px;
+        text-align: left;
+        @extend .style-title-2;
 
         + p {
             @extend .style-description;
         }
-    }
-
-    > button, .loading-button {
-        margin-top: 10px;
     }
 }
 

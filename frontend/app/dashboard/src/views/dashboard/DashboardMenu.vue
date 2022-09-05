@@ -230,7 +230,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             for (const category of this.organization.meta.categories) {
                 if (parts[1] == Formatter.slug(category.settings.name)) {
                     if (parts[2] && parts[2] == "all") {
-                        this.openCategoryMembers(category, false).catch(console.error).finally(() => UrlHelper.shared.clear())
+                        this.openCategoryMembers(category, false).catch(console.error)
                     } else {
                         this.openCategory(category, false).catch(console.error).finally(() => UrlHelper.shared.clear())
                     }
@@ -243,7 +243,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         if (!didSet && this.enableMemberModule && parts.length >= 2 && parts[0] == "groups") {
             for (const group of this.organization.groups) {
                 if (parts[1] == Formatter.slug(group.settings.name)) {
-                    this.openGroup(group, false).catch(console.error).finally(() => UrlHelper.shared.clear())
+                    this.openGroup(group, false).catch(console.error)
                     didSet = true
                     break;
                 }

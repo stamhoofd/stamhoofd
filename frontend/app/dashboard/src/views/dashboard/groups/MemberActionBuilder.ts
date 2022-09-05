@@ -1,8 +1,10 @@
 import { ComponentWithProperties, NavigationController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, CenteredMessageButton, LoadComponent, TableAction, Toast } from "@stamhoofd/components";
-import { EncryptedMemberWithRegistrations, Group, MemberWithRegistrations, Registration } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, Group, GroupCategoryTree, MemberWithRegistrations, Registration } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 
 import { MemberManager } from "../../../classes/MemberManager";
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import MailView from "../mail/MailView.vue";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import SMSView from "../sms/SMSView.vue";
@@ -10,7 +12,7 @@ import SMSView from "../sms/SMSView.vue";
 
 export class MemberActionBuilder {
     component: any
-    group?: Group
+    groups: Group[]
     cycleOffset: number
     hasWrite: boolean
     inWaitingList = false
@@ -19,14 +21,128 @@ export class MemberActionBuilder {
         component: any,
         hasWrite: boolean,
         cycleOffset: number,
-        group?: Group | null,
+        groups: Group[],
         inWaitingList?: boolean
     }) {
         this.component = settings.component
         this.hasWrite = settings.hasWrite
         this.cycleOffset = settings.cycleOffset
-        this.group = settings.group ?? undefined
+        this.groups = settings.groups
         this.inWaitingList = settings.inWaitingList ?? false
+    }
+
+    getRegisterActions(): TableAction<MemberWithRegistrations>[] {
+        return [
+            new TableAction({
+                name: "Wachtlijst van",
+                groupIndex: 0,
+                childActions: () => [
+                    ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, true))
+                ]
+            }),
+            new TableAction({
+                name: "Vorige inschrijvingsperiode van",
+                groupIndex: 0,
+                childActions: () => [
+                    ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle - 1, false))
+                ]
+            }),
+            ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, false))
+        ]
+    }
+
+    getMoveAction(): TableAction<MemberWithRegistrations> {
+        return new TableAction({
+            name: this.inWaitingList ? "Verplaats naar wachtlijst" : "Verplaatsen naar",
+            priority: 1,
+            groupIndex: 5,
+            needsSelection: true,
+            allowAutoSelectAll: false,
+            enabled: this.hasWrite,
+            childActions: () => [
+                new TableAction({
+                    name: "Huidige inschrijvingsperiode",
+                    groupIndex: 0,
+                    enabled: this.cycleOffset >= 1 || (this.inWaitingList && this.cycleOffset !== 0),
+                    handler: (members) => {
+                        this.moveCycle(members, 0)
+                    }
+                }),
+                new TableAction({
+                    name: "Vorige inschrijvingsperiode",
+                    groupIndex: 0,
+                    enabled: this.cycleOffset !== 1,
+                    handler: (members) => {
+                        this.moveCycle(members, 1)
+                    }
+                }),
+                new TableAction({
+                    name: (this.cycleOffset + 1) + " inschrijvingsperiodes geleden",
+                    groupIndex: 0,
+                    enabled: this.cycleOffset >= 1,
+                    handler: (members) => {
+                        this.moveCycle(members, this.cycleOffset + 1)
+                    }
+                }),
+                new TableAction({
+                    name: (this.cycleOffset - 1) + " inschrijvingsperiodes geleden",
+                    groupIndex: 0,
+                    enabled: this.cycleOffset > 2,
+                    handler: (members) => {
+                        this.moveCycle(members, this.cycleOffset - 1)
+                    }
+                }),
+                new TableAction({
+                    name: "Wachtlijst",
+                    groupIndex: 0,
+                    enabled: !this.inWaitingList,
+                    handler: (members) => {
+                        this.moveToWaitingList(members)
+                    }
+                }),
+                ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.moveRegistrations(members, group))
+            ]
+        })
+    }
+
+    getUnsubscribeAction(): TableAction<MemberWithRegistrations> {
+        return new TableAction({
+            name: "Uitschrijven",
+            priority: 0,
+            groupIndex: 7,
+            needsSelection: true,
+            allowAutoSelectAll: false,
+            enabled: this.hasWrite,
+            handler: (members) => {
+                this.deleteRegistration(members)
+            }
+        });
+    }
+
+    getActionsForCategory(category: GroupCategoryTree, action: (members: MemberWithRegistrations[], group: Group) => void) {
+        return [
+            ...category.categories.map(c => {
+                return new TableAction({
+                    name: c.settings.name,
+                    groupIndex: 2,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    enabled: c.groups.length > 0 || c.categories.length > 0,
+                    childActions: () => this.getActionsForCategory(c, action),
+                })
+            }),
+            ...category.groups.map(g => {
+                return new TableAction({
+                    name: g.settings.name,
+                    needsSelection: true,
+                    allowAutoSelectAll: false,
+                    handler: (members: MemberWithRegistrations[]) => {
+                        action(members, g)
+                        //this.moveRegistrations(members, g)
+                    }
+                })
+            })
+        ];
     }
 
     getActions(): TableAction<MemberWithRegistrations>[] {
@@ -91,23 +207,24 @@ export class MemberActionBuilder {
                     }),
                 ]
             }),
-
             new TableAction({
-                name: "Uitschrijven",
-                priority: 0,
+                name: "Inschrijven voor",
+                priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled: this.hasWrite,
-                handler: (members) => {
-                    this.deleteRegistration(members)
-                }
+                childActions: () => this.getRegisterActions()
             }),
+            // Waiting list actions
+            this.getMoveAction(),
+
+            this.getUnsubscribeAction(),
 
             new TableAction({
-                name: "Gegevens gedeeltelijk wissen...",
+                name: "Gegevens gedeeltelijk wissen",
                 priority: 0,
-                groupIndex: 5,
+                groupIndex: 7,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled: this.hasWrite,
@@ -117,10 +234,10 @@ export class MemberActionBuilder {
             }),
 
             new TableAction({
-                name: "Verwijderen",
+                name: "Gegevens wissen",
                 icon: "trash",
                 priority: 0,
-                groupIndex: 5,
+                groupIndex: 7,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled: this.hasWrite,
@@ -141,8 +258,8 @@ export class MemberActionBuilder {
                 name: "Toelaten om in te schrijven",
                 icon: "success",
                 priority: 15,
-                groupIndex: 3,
-                enabled: this.hasWrite && this.inWaitingList,
+                groupIndex: 6,
+                enabled: this.hasWrite && this.inWaitingList  && this.cycleOffset == 0,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: MemberWithRegistrations[]) => {
@@ -154,8 +271,8 @@ export class MemberActionBuilder {
                 name: "Toelating intrekken",
                 icon: "canceled",
                 priority: 14,
-                groupIndex: 3,
-                enabled: this.hasWrite && this.inWaitingList,
+                groupIndex: 6,
+                enabled: this.hasWrite && this.inWaitingList && this.cycleOffset == 0,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: MemberWithRegistrations[]) => {
@@ -164,7 +281,7 @@ export class MemberActionBuilder {
             }),
 
             // Waiting list actions
-            new TableAction({
+            /*new TableAction({
                 name: "Verplaatst naar wachtlijst",
                 priority: 0,
                 groupIndex: 5,
@@ -174,11 +291,11 @@ export class MemberActionBuilder {
                 handler: (members) => {
                     this.moveToWaitingList(members)
                 }
-            }),
+            }),*/
 
             new TableAction({
-                name: "Schrijf in",
-                priority: 0,
+                name: "Verplaats naar ingeschreven leden",
+                priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -199,7 +316,7 @@ export class MemberActionBuilder {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MailView, {
                 members,
-                group: this.group,
+                group: this.groups.length === 1 ? this.groups[0] : undefined,
                 defaultSubject: subject
             })
         });
@@ -226,7 +343,7 @@ export class MemberActionBuilder {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: await LoadComponent(() => import(/* webpackChunkName: "MemberExcelBuilderView"*/ '../member/MemberExcelBuilderView.vue'), {
                 members,
-                group: this.group
+                group: this.groups.length === 1 ? this.groups[0] : undefined,
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
@@ -236,7 +353,7 @@ export class MemberActionBuilder {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: await LoadComponent(() => import(/* webpackChunkName: "MemberSummaryBuilderView"*/ '../member/MemberSummaryBuilderView.vue'), {
                 members,
-                group: this.group
+                group: this.groups.length === 1 ? this.groups[0] : undefined,
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
@@ -271,13 +388,16 @@ export class MemberActionBuilder {
 
     deleteData(members: MemberWithRegistrations[]) {
         const member = members.length == 1 ? members[0].name : members.length+" leden"
-        new CenteredMessage(`Wil je alle data van ${member} verwijderen?`, "Dit verwijdert alle data van de geselecteerde leden, inclusief betalingsgeschiedenis. Als er accounts zijn die enkel aangemaakt zijn om dit lid in te schrijven worden deze ook verwijderd. Je kan dit niet ongedaan maken.")
+        new CenteredMessage(`${member} definitief verwijderen?`, "Je kan dit niet ongedaan maken. Je verliest alle gegevens, betaalgegevens, accounts...")
             .addButton(new CenteredMessageButton("Verwijderen", {
-                action: async () => {
-                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, definitief verwijderen")) {
-                        await MemberManager.deleteMembers(members)
-                        new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} verwijderd`, "success green").show()
-                    }
+                action: () => {
+                    CenteredMessage.confirm("Begrijp je dat dit alles verwijdert?", "Ja, verwijderen", 'Alle inschrijvingen, betaalgegevens, gegevens en accounts gaan verloren.').then(async (confirmed) => {
+                        if (confirmed) {
+                            await MemberManager.deleteMembers(members)
+                            new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} verwijderd`, "success green").show()
+                        }
+                    }).catch(console.error)
+                    return Promise.resolve()
                 },
                 type: "destructive",
                 icon: "trash"
@@ -288,13 +408,16 @@ export class MemberActionBuilder {
 
     deleteRegistration(members: MemberWithRegistrations[]) {
         const member = members.length == 1 ? members[0].name : members.length+" leden"
-        new CenteredMessage(`Ben je zeker dat je ${member} wilt uitschrijven?`, "De gegevens van de leden blijven (tijdelijk) toegankelijk voor het lid zelf en die kan zich later eventueel opnieuw inschrijven zonder alles opnieuw in te geven.")
+        new CenteredMessage(`${member} uitschrijven?`, `Hiermee verwijder je alleen de inschrijvingen bij ${Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' of ')}. Andere inschrijvingen en gegevens van ${member} blijven behouden.`)
             .addButton(new CenteredMessageButton("Uitschrijven", {
-                action: async () => {
-                    if (await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
-                        await MemberManager.unregisterMembers(members, this.group, this.cycleOffset, this.inWaitingList)
-                        new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} uitgeschreven`, "success green").show()
-                    }
+                action: () => {
+                    (async () => {
+                        if (members.length == 1 || await CenteredMessage.confirm("Ben je echt heel zeker?", "Ja, uitschrijven")) {
+                            await MemberManager.unregisterMembers(members, this.groups, this.cycleOffset, this.inWaitingList)
+                            new Toast(`${member} ${members.length > 1 ? 'zijn' : 'is'} uitgeschreven`, "success green").show()
+                        }
+                    })().catch(console.error)
+                    return Promise.resolve()
                 },
                 type: "destructive",
                 icon: "unregister"
@@ -302,9 +425,17 @@ export class MemberActionBuilder {
             .addCloseButton("Annuleren")
             .show()
     }
+
+    get groupIds() {
+        return this.groups?.map(g => g.id) ?? []
+    }
   
     async return(members: MemberWithRegistrations[], allow = true) {
-        members = members.filter(m => !this.group || (allow && m.waitingGroups.find(r => r.id === this.group!.id)) || (!allow && m.acceptedWaitingGroups.find(r => r.id === this.group!.id)))
+        members = members.filter(m => {
+            const regs = m.filterRegistrations({groups: this.groups, waitingList: true, cycleOffset: this.cycleOffset, canRegister: !allow})
+            console.log(regs, this.groups, this.cycleOffset, allow)
+            return regs.length > 0
+        })
         if (members.length == 0) {
             return;
         }
@@ -314,14 +445,14 @@ export class MemberActionBuilder {
             for (const member of members) {
                 const registrationsPatch = MemberManager.getRegistrationsPatchArray()
 
-                const registration = member.registrations.find(r => r.groupId == this.group!.id && r.waitingList == true && r.cycle == this.group!.cycle)
-                if (!registration) {
-                    throw new Error("Not found")
+                const registrations = member.filterRegistrations({groups: this.groups, waitingList: true, cycleOffset: this.cycleOffset, canRegister: !allow})
+
+                for (const registration of registrations) {
+                    registrationsPatch.addPatch(Registration.patch({
+                        id: registration.id,
+                        canRegister: allow
+                    }))
                 }
-                registrationsPatch.addPatch(Registration.patch({
-                    id: registration.id,
-                    canRegister: allow
-                }))
 
                 patches.addPatch(EncryptedMemberWithRegistrations.patch({
                     id: member.id,
@@ -344,10 +475,10 @@ export class MemberActionBuilder {
 
     acceptWaitingList(members: MemberWithRegistrations[]) {
         const member = members.length == 1 ? members[0].name : members.length+" leden"
-        new CenteredMessage(`Wil je ${member} inschrijven?`, "We raden sterk aan om leden toe te laten en daarna uit te nodigen om in te schrijven via een e-mail. Dan zijn ze verplicht om de rest van hun gegevens aan te vullen en de betaling in orde te brengen.")
-            .addButton(new CenteredMessageButton("Toch inschrijven", {
+        new CenteredMessage(`${member} inschrijven?`, "We raden sterk aan om leden toe te laten en daarna uit te nodigen om in te schrijven via een e-mail. Dan zijn ze verplicht om de rest van hun gegevens aan te vullen en de betaling in orde te brengen.")
+            .addButton(new CenteredMessageButton("Ja, inschrijven", {
                 action: async () => {
-                    await MemberManager.acceptFromWaitingList(members, this.group, this.cycleOffset)
+                    await MemberManager.acceptFromWaitingList(members, this.groups, this.cycleOffset)
                     new Toast(members.length+" leden zijn ingeschreven", "success green").show()
                 },
                 type: "destructive",
@@ -359,14 +490,64 @@ export class MemberActionBuilder {
 
     moveToWaitingList(members: MemberWithRegistrations[]) {
         const member = members.length == 1 ? members[0].name : members.length+" leden"
-        new CenteredMessage(`Wil je ${member} naar de wachtlijst verplaatsen?`)
-            .addButton(new CenteredMessageButton("Naar wachtlijst", {
+        new CenteredMessage(`${member} naar de wachtlijst verplaatsen?`)
+            .addButton(new CenteredMessageButton("Ja, verplaats", {
                 action: async () => {
-                    await MemberManager.moveToWaitingList(members, this.group, this.cycleOffset)
+                    await MemberManager.moveToWaitingList(members, this.groups, this.cycleOffset)
                     new Toast(members.length+" leden zijn naar de wachtlijst verplaatst", "success green").show()
                 },
-                type: "destructive",
                 icon: "clock"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    moveRegistrations(members: MemberWithRegistrations[], group: Group) {
+        const member = members.length == 1 ? members[0].name : members.length+" leden"
+        new CenteredMessage(`${member} verplaatsen naar ${group.settings.name}?`)
+            .addButton(new CenteredMessageButton("Ja, verplaats", {
+                action: async () => {
+                    await MemberManager.moveRegistrations(members, this.groups, this.cycleOffset, this.inWaitingList, group)
+                    new Toast(members.length+` leden zijn naar ${group.settings.name} verplaatst`, "success green").show()
+                },
+                icon: "sync"
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    register(members: MemberWithRegistrations[], group: Group, cycle: number, waitingList: boolean) {
+        const member = members.length == 1 ? members[0].name : members.length+" leden"
+        new CenteredMessage(waitingList ? `${member} op wachtlijst plaatsen van ${group.settings.name}?` : `${member} inschrijven voor ${group.settings.name}?`)
+            .addButton(new CenteredMessageButton("Ja, inschrijven", {
+                action: async () => {
+                    const n = members.length == 1 ? members[0].name + ' is' : members.length+" leden zijn"
+                    await MemberManager.registerMembers(members, group, cycle, waitingList)
+                    new Toast(waitingList ? n+` op de wachtlijst geplaatst voor ${group.settings.name}` : n + ` ingeschreven voor ${group.settings.name}`, "success green").show()
+                }
+            }))
+            .addCloseButton("Annuleren")
+            .show()
+    }
+
+    moveCycle(members: MemberWithRegistrations[], cycleOffset: number) {
+        const member = members.length == 1 ? members[0].name : members.length+" leden"
+        let cycleName = 'de huidige inschrijvingsperiode';
+
+        if (cycleOffset === 1) {
+            cycleName = 'de vorige inschrijvingsperiode';
+        }
+        else if (cycleOffset >= 2) {
+            cycleName = cycleOffset + ' inschrijvingsperiodes geleden';
+        }
+
+        new CenteredMessage(`${member} verplaatsen naar ${cycleName}?`)
+            .addButton(new CenteredMessageButton("Ja, verplaats", {
+                action: async () => {
+                    await MemberManager.moveCycle(members, this.groups, this.cycleOffset, this.inWaitingList, cycleOffset)
+                    new Toast(members.length+` leden zijn naar ${cycleName} verplaatst`, "success green").show()
+                },
+                icon: "sync"
             }))
             .addCloseButton("Annuleren")
             .show()

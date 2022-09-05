@@ -1,16 +1,7 @@
 <template>
     <div class="member-view-details split">
         <div>
-            <p v-if="hasWrite && member.activeRegistrations.length == 0" class="info-box with-button selectable" @click="editGroup()">
-                {{ member.firstName }} is niet ingeschreven
-                <span class="button icon edit" />
-            </p>
-            <p v-else-if="member.activeRegistrations.length == 0" class="info-box">
-                {{ member.firstName }} is niet ingeschreven
-            </p>
-
             <div v-if="$isMobile && hasWarnings" class="hover-box container">
-                <hr v-if="member.activeRegistrations.length == 0">
                 <ul class="member-records">
                     <li
                         v-for="warning in sortedWarnings"
@@ -28,7 +19,7 @@
             </div>
 
             <div class="hover-box container">
-                <hr v-if="($isMobile && hasWarnings) || member.activeRegistrations.length == 0">
+                <hr v-if="($isMobile && hasWarnings)">
                 <dl class="details-grid hover">
                     <template v-if="member.details.firstName">
                         <dt>Voornaam</dt>
@@ -86,20 +77,21 @@
                 </dl>
             </div>
 
-            <div v-if="member.activeRegistrations.length > 0" key="registrations" class="container">
+            <div class="container">
                 <hr>
                 <h2 class="style-with-button with-list">
                     <div>Inschrijvingen</div>
                     <div>
-                        <button class="button text limit-space" @click="editGroup()">
-                            <span class="icon sync" />
-                            <span>Wijzig</span>
-                        </button>
+                        <button v-long-press="(e) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
                     </div>
                 </h2>
 
+                <p v-if="member.activeRegistrations.length == 0" class="info-box">
+                    {{ member.firstName }} is niet ingeschreven
+                </p>
+
                 <STList>
-                    <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" class="left-center">
+                    <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" v-long-press="(e) => editRegistration(registration, e)" :selectable="true" class="left-center hover-box" @contextmenu.prevent="editRegistration(registration, $event)" @click.prevent="editRegistration(registration, $event)">
                         <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
                             <img :src="imageSrc(registration)">
                             <div>
@@ -125,6 +117,11 @@
                         <p v-else class="style-description-small">
                             Op wachtlijst sinds {{ registration.createdAt | dateTime }}
                         </p>
+                        <p v-if="registration.waitingList && registration.canRegister" class="style-description-small">
+                            Toegelaten om in te schrijven
+                        </p>
+
+                        <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
                 </STList>
             </div>
@@ -177,7 +174,7 @@
                 <h2 class="style-with-button">
                     <div>{{ contact.title }}</div>
                     <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editContact(contact)" />
+                        <button v-if="hasWrite" type="button" class="button icon gray edit" @click="editContact(contact)" />
                     </div>
                 </h2>
 
@@ -199,7 +196,7 @@
                 <h2 class="style-with-button">
                     <div>Huisarts</div>
                     <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editContact(member.details.doctor)" />
+                        <button v-if="hasWrite" type="button" class="button icon gray edit" @click="editContact(member.details.doctor)" />
                     </div>
                 </h2>
 
@@ -226,7 +223,7 @@
                 <h2 class="style-with-button">
                     <div>{{ category.name }}</div>
                     <div class="hover-show">
-                        <button v-if="hasWrite" class="button icon gray edit" @click="editRecordCategory(category)" />
+                        <button v-if="hasWrite" type="button" class="button icon gray edit" @click="editRecordCategory(category)" />
                     </div>
                 </h2>
                 <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :data-permission="dataPermission" />
@@ -330,7 +327,7 @@
             <div v-if="false" class="hover-box container">
                 <hr>
 
-                <h2><span class="icon-spacer">Notities</span><button class="button privacy" /></h2>
+                <h2><span class="icon-spacer">Notities</span><button type="button" class="button privacy" /></h2>
                 <p>Voeg notities toe voor je medeleiding. Leden of ouders krijgen deze niet te zien.</p>
             </div>
         </div>
@@ -339,19 +336,19 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CopyableDirective, ErrorBox, FillRecordCategoryView,RecordCategoryAnswersBox,STList, STListItem,Toast,TooltipDirective as Tooltip } from "@stamhoofd/components";
-import { Keychain, SessionManager } from "@stamhoofd/networking";
-import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact,EncryptedMemberWithRegistrations,FinancialSupportSettings,getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
+import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { CountryHelper } from "@stamhoofd/structures/esm/dist";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
+import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
-import EditMemberGroupView from './edit/EditMemberGroupView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
 import EditMemberView from './edit/EditMemberView.vue';
 import MemberView from './MemberView.vue';
@@ -362,7 +359,11 @@ import MemberView from './MemberView.vue';
         STList,
         RecordCategoryAnswersBox
     },
-    directives: { Tooltip, Copyable: CopyableDirective },
+    directives: { 
+        Tooltip, 
+        Copyable: CopyableDirective, 
+        LongPress: LongPressDirective
+    },
     filters: {
         dateTime: Formatter.dateTime.bind(Formatter)
     },
@@ -717,15 +718,62 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.present(displayedComponent);
     }
 
-    editGroup() {
-        const displayedComponent = new ComponentWithProperties(EditMemberGroupView, {
-            member: this.member,
-            memberDetails: this.member.details,
-            familyManager: this.familyManager
-        }).setDisplayStyle("popup");
-        this.present(displayedComponent);
+    addRegistration(event) {
+        const el = event.currentTarget;
+        const bounds = el.getBoundingClientRect()
+
+        const builder = new MemberActionBuilder({
+            component: this,
+            groups: this.member.groups,
+            cycleOffset: 0,
+            inWaitingList: false,
+            hasWrite: this.hasWrite,
+        })
+
+        const actions = builder.getRegisterActions()
+
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: bounds.left,
+            y: bounds.bottom,
+            xPlacement: "right",
+            yPlacement: "bottom",
+            actions: actions,
+            focused: [this.member]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
     }
-    
+
+    editRegistration(registration: Registration, event) {
+        const group = this.member.allGroups.find(g => g.id === registration.groupId)
+        if (!group) {
+            return
+        }
+
+        const builder = new MemberActionBuilder({
+            component: this,
+            groups: [group],
+            cycleOffset: group.cycle - registration.cycle,
+            inWaitingList: registration.waitingList,
+            hasWrite: this.hasWrite,
+        })
+
+        const actions = [
+            builder.getUnsubscribeAction().setGroupIndex(0).setPriority(10),
+            builder.getMoveAction().setGroupIndex(1).setPriority(5),
+            ...builder.getWaitingListActions()
+        ]
+
+        const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
+            x: event.changedTouches ? event.changedTouches[0].pageX : event.clientX,
+            y: event.changedTouches ? event.changedTouches[0].pageY : event.clientY,
+            xPlacement: "right",
+            yPlacement: "bottom",
+            actions: actions,
+            focused: [this.member]
+        });
+        this.present(displayedComponent.setDisplayStyle("overlay"));
+    }
+
     get familyMembers() {
         return this.familyManager.members.filter(m => m.id != this.member.id)
     }

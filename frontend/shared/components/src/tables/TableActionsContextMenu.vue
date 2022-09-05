@@ -4,7 +4,7 @@
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
             <ContextMenuItemView v-for="(action, index) of actions" :key="groupIndex+'-'+index" :class="{'disabled': isDisabled(action)}" :child-context-menu="getChildContextMenu(action)" @click="handleAction(action, $event)">
                 {{ action.name }}
-                <span v-if="action.childMenu || action.childActions.length > 0" slot="right" class="icon arrow-right-small" />
+                <span v-if="action.hasChildActions" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="action.icon" slot="right" :class="'icon '+action.icon" />
             </ContextMenuItemView>
         </template>
@@ -97,12 +97,12 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
             return action.childMenu
         }
 
-        if (!action.childActions || action.childActions.length == 0) {
-            return
+        if (!action.hasChildActions) {
+            return;
         }
 
         return new ComponentWithProperties(TableActionsContextMenu, {
-            actions: action.childActions,
+            actions: action.getChildActions(),
             table: this.table,
             focused: this.focused,
         })
