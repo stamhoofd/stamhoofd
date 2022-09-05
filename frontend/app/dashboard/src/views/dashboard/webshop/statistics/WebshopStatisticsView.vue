@@ -226,11 +226,14 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                         return
                     }
 
-                    // A general ticket for an order
-                    if (ticket.scannedAt) {
-                        this.totalScannedTickets++
-                    }
-                    this.totalTickets += 1
+                    // Don't add directly, because we don't want to include ticket for canceled / deleted orders
+                    const orderId = ticket.orderId
+                    const orderItemMap: Map<string, { scanned: number, total: number }> = orderTicketMap.get(orderId) ?? new Map()
+                    orderItemMap.set('', {
+                        scanned: (orderItemMap.get('')?.scanned ?? 0) + (ticket.scannedAt ? 1 : 0),
+                        total: (orderItemMap.get('')?.total ?? 0) + 1
+                    })
+                    orderTicketMap.set(orderId, orderItemMap)
                 })
             }
 
@@ -260,6 +263,12 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                     const orderItemMap = orderTicketMap.get(order.id)
                     if (orderItemMap) {
                         for (const [itemId, counter] of orderItemMap) {
+                            if (itemId === '') {
+                                // General order
+                                this.totalScannedTickets += counter.scanned
+                                this.totalTickets += counter.total
+                                continue;
+                            }
                             // Find item
                             const item = order.data.cart.items.find(i => i.id === itemId)
                             if (item) {
