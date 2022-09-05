@@ -30,6 +30,7 @@ import { LongPressDirective, STNavigationTitle, TooltipDirective } from "@stamho
 import { STNavigationBar } from "@stamhoofd/components";
 import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
 import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
+import { UrlHelper } from "@stamhoofd/networking";
 import { Gender,getPermissionLevelNumber,Group,MemberWithRegistrations, PermissionLevel } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -82,6 +83,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
     getPreviousMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
 
+    mounted() {
+        UrlHelper.addSearchParam("member", this.member.id);
+    }
+    
     created() {
         (this as any).Gender = Gender;
     }
@@ -207,7 +212,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
     get actions() {
         const builder = new MemberActionBuilder({
             component: this,
-            group: this.group,
+            groups: this.group ? [this.group] : this.member.groups,
             cycleOffset: this.cycleOffset,
             inWaitingList: this.waitingList,
             hasWrite: this.hasWrite,

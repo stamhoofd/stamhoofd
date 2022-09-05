@@ -130,10 +130,10 @@ export class GetOrganizationPaymentsEndpoint extends Endpoint<Params, Query, Bod
     static async getPaymentsWithRegistrations(organizationId: string, memberId: string | null = null, onlyTransfer = true): Promise<PaymentWithRegistrations[]> {
         let query = `SELECT ${Payment.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Member.getDefaultSelect()} from \`${Payment.table}\`\n`;
         if (memberId) {
-            query += `JOIN \`${Registration.table}\` AS \`MemberCheckTable\` ON \`MemberCheckTable\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND \`MemberCheckTable\`.\`registeredAt\` is not null\n`
+            query += `JOIN \`${Registration.table}\` AS \`MemberCheckTable\` ON \`MemberCheckTable\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND (\`MemberCheckTable\`.\`registeredAt\` is not null OR \`MemberCheckTable\`.\`waitingList\` = 1)\n`
         }
 
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null\n`
+        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Registration.payment.foreignKey}\` = \`${Payment.table}\`.\`${Payment.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
         
 
         query += `JOIN \`${Member.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`

@@ -2,8 +2,9 @@
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, PermissionLevel, Registration, User } from '@stamhoofd/structures';
 
+import { GroupSizeUpdater } from './GroupSizeUpdater';
 import { OrganizationManager } from './OrganizationManager';
 
 export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment"
@@ -227,180 +228,6 @@ export class MemberManagerStatic extends MemberManagerBase {
         return this.sync(members, updated)
     }
 
-    async deleteMembers(members: MemberWithRegistrations[]) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
-        for (const member of members) (
-            patchArray.addDelete(member.id)
-        )
- 
-        const session = SessionManager.currentSession!
-
-        await this.patchMembersAndSync(members, patchArray, false)
-
-        // Update counts
-        let updateOrganization = false
-        for (const member of members) {
-            for (const registration of member.activeRegistrations) {
-                const group = session.organization?.groups.find(g => g.id === registration.groupId)
-                if (group) {
-                    if (group.settings.waitingListSize !== null && registration.waitingList) {
-                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - 1)
-                        updateOrganization = true
-                    }
-
-                    if (group.settings.registeredMembers !== null && !registration.waitingList) {
-                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - 1)
-                        updateOrganization = true
-                    }
-                }
-            }
-        }
-
-        if (updateOrganization) {
-            // Save organization to disk
-            SessionManager.currentSession?.callListeners("organization")
-        }
-
-        for (const member of members) {
-            this.callListeners("deleted", member)
-        }
-    }
-
-    async deleteMember(member: MemberWithRegistrations) {
-        await this.deleteMembers([member])
-    }
-
-    async unregisterMembers(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0, waitingList = false) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
-
-        const countMap: Map<string, number> = new Map()
-
-        for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
-
-            if (group === null) {
-                for (const registration of member.activeRegistrations) {
-                    if (registration.waitingList === waitingList) {
-                        patchMember.registrations.addDelete(registration.id)
-                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
-                    }
-                }
-            } else {
-                for (const registration of member.registrations) {
-                    if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === waitingList) {
-                        patchMember.registrations.addDelete(registration.id)
-                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
-                    }
-                }
-            }
-            
-            patchArray.addPatch(patchMember)
-        }
-   
- 
-        const session = SessionManager.currentSession!
-        await this.patchMembersAndSync(members, patchArray, false)
-
-        // Update group counts only when succesfully adjusted
-        if (cycleOffset === 0) {
-            let updateOrganization = false
-            for (const [groupId, count] of countMap) {
-                const group = session.organization?.groups.find(g => g.id === groupId)
-                if (group) {
-                    if (group.settings.waitingListSize !== null && waitingList) {
-                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - count)
-                        updateOrganization = true
-                    }
-
-                    if (group.settings.registeredMembers !== null && !waitingList) {
-                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - count)
-                        updateOrganization = true
-                    }
-                }
-            }
-
-            if (updateOrganization) {
-                // Save organization to disk
-                SessionManager.currentSession?.callListeners("organization")
-            }
-        }
-
-        for (const member of members) {
-            this.callListeners("changedGroup", member)
-        }
-    }
-
-    async unregisterMember(member: MemberWithRegistrations, group: Group | null = null, cycleOffset = 0, waitingList = false) {
-        await this.unregisterMembers([member], group, cycleOffset, waitingList)
-    }
-
-    async acceptFromWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
-        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
-
-        const countMap: Map<string, number> = new Map()
-
-        for (const member of members) {
-            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
-
-            if (group === null) {
-                for (const registration of member.activeRegistrations) {
-                    if (registration.waitingList === true) {
-                        patchMember.registrations.addPatch(Registration.patch({
-                            id: registration.id,
-                            waitingList: false
-                        }))
-                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
-                    }
-                }
-            } else {
-                for (const registration of member.registrations) {
-                    if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === true) {
-                        patchMember.registrations.addPatch(Registration.patch({
-                            id: registration.id,
-                            waitingList: false
-                        }))
-                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
-                    }
-                }
-            }
-            
-            patchArray.addPatch(patchMember)
-        }
-   
- 
-        const session = SessionManager.currentSession!
-
-        await this.patchMembersAndSync(members, patchArray, false)
-
-        // Update group counts only when succesfully adjusted
-        if (cycleOffset === 0) {
-            let updateOrganization = false
-            for (const [groupId, count] of countMap) {
-                const group = session.organization?.groups.find(g => g.id === groupId)
-                if (group) {
-                    if (group.settings.waitingListSize !== null) {
-                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - count)
-                        updateOrganization = true
-                    }
-
-                    if (group.settings.registeredMembers !== null) {
-                        group.settings.registeredMembers += count
-                        updateOrganization = true
-                    }
-                }
-            }
-
-            if (updateOrganization) {
-                // Save organization to disk
-                SessionManager.currentSession?.callListeners("organization")
-            }
-        }
-
-        for (const member of members) {
-            this.callListeners("changedGroup", member)
-        }
-    }
-
     async deleteDataExceptContacts(members: MemberWithRegistrations[]) {
         for (const member of members) {
             member.details.birthDay = null
@@ -453,66 +280,299 @@ export class MemberManagerStatic extends MemberManagerBase {
         await this.patchMembersDetails(members)
     }
 
-    async moveToWaitingList(members: MemberWithRegistrations[], group: Group | null = null, cycleOffset = 0) {
+    async deleteMembers(members: MemberWithRegistrations[]) {
         const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const sizeUpdater = new GroupSizeUpdater();
 
-        const countMap: Map<string, number> = new Map()
+        for (const member of members) {
+            patchArray.addDelete(member.id);
+
+            for (const registration of member.activeRegistrations) {
+                sizeUpdater.add(registration, -1);
+            }
+        }
+ 
+        await this.patchMembersAndSync(members, patchArray, false)
+        const session = SessionManager.currentSession!
+        sizeUpdater.save(session)
+
+        for (const member of members) {
+            this.callListeners("deleted", member)
+        }
+    }
+
+    async deleteMember(member: MemberWithRegistrations) {
+        await this.deleteMembers([member])
+    }
+
+    async unregisterMembers(members: MemberWithRegistrations[], groups: Group[] | null = null, cycleOffset = 0, waitingList = false) {
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const sizeUpdater = new GroupSizeUpdater();
 
         for (const member of members) {
             const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
 
-            if (group === null) {
-                for (const registration of member.activeRegistrations) {
-                    if (registration.waitingList === false) {
-                        patchMember.registrations.addPatch(Registration.patch({
-                            id: registration.id,
-                            waitingList: true
-                        }))
-                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
-                    }
-                }
-            } else {
-                for (const registration of member.registrations) {
-                    if (registration.groupId === group.id && registration.cycle === group.cycle - cycleOffset && registration.waitingList === false) {
-                        patchMember.registrations.addPatch(Registration.patch({
-                            id: registration.id,
-                            waitingList: true
-                        }))
-                        countMap.set(registration.groupId, (countMap.get(registration.groupId) || 0) + 1)
-                    }
+            for (const registration of member.filterRegistrations({groups, waitingList, cycleOffset})) {
+                patchMember.registrations.addDelete(registration.id)
+
+                if (cycleOffset === 0) {
+                    sizeUpdater.add(registration, -1);
                 }
             }
             
             patchArray.addPatch(patchMember)
         }
    
- 
-        const session = SessionManager.currentSession!
         await this.patchMembersAndSync(members, patchArray, false)
 
-        // Update group counts only when succesfully adjusted
-        if (cycleOffset === 0) {
-            let updateOrganization = false
-            for (const [groupId, count] of countMap) {
-                const group = session.organization?.groups.find(g => g.id === groupId)
-                if (group) {
-                    if (group.settings.waitingListSize !== null) {
-                        group.settings.waitingListSize += count
-                        updateOrganization = true
-                    }
+        const session = SessionManager.currentSession!
+        sizeUpdater.save(session)
 
-                    if (group.settings.registeredMembers !== null) {
-                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - count)
-                        updateOrganization = true
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
+    }
+
+    async unregisterMember(member: MemberWithRegistrations, groups: Group[] | null = null, cycleOffset = 0, waitingList = false) {
+        await this.unregisterMembers([member], groups, cycleOffset, waitingList)
+    }
+
+    async acceptFromWaitingList(members: MemberWithRegistrations[], groups: Group[] | null = null, cycleOffset = 0) {
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+
+        const sizeUpdater = new GroupSizeUpdater();
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+            for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: true})) {
+                patchMember.registrations.addPatch(Registration.patch({
+                    id: registration.id,
+                    waitingList: false,
+                }))
+
+                if (!registration.payment) {
+                    const group = member.allGroups.find(g => g.id === registration.groupId)
+                    if (group) {
+                        const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
+
+                        const payment = Payment.create({
+                            method: PaymentMethod.Unknown,
+                            status: PaymentStatus.Created,
+                            price: price,
+                            paidAt: null,
+
+                            // Placeholders:
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        })
+                        patchMember.registrations.addPatch(Registration.patch({
+                            id: registration.id,
+                            payment
+                        }))
                     }
                 }
+                if (cycleOffset === 0) {
+                    sizeUpdater.add({groupId: registration.groupId, waitingList: true}, -1);
+                    sizeUpdater.add({groupId: registration.groupId, waitingList: false}, 1);
+                }
+            }
+            
+            patchArray.addPatch(patchMember)
+        }
+   
+        await this.patchMembersAndSync(members, patchArray, false)
+
+        const session = SessionManager.currentSession!
+        sizeUpdater.save(session)
+
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
+    }
+
+    async registerMembers(members: MemberWithRegistrations[], group: Group, cycle: number, waitingList: boolean) {
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+
+        const sizeUpdater = new GroupSizeUpdater()
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+        
+            const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
+
+            const payment = Payment.create({
+                method: PaymentMethod.Unknown,
+                status: PaymentStatus.Created,
+                price: price,
+                paidAt: null,
+
+                // Placeholders:
+                createdAt: new Date(),
+                updatedAt: new Date()
+            })
+
+            // Check if we already have a registration for this group and cycle combination
+            const registration = member.registrations.find(r => r.groupId === group.id && r.cycle === cycle);
+            if (registration) {
+                if (registration.waitingList && !waitingList) {
+                    // Do a patch to move this member from the waiting list
+                    patchMember.registrations.addPatch(Registration.patch({
+                        id: registration.id,
+                        waitingList: false,
+                    }))
+
+                    if (!registration.payment) {
+                        patchMember.registrations.addPatch(Registration.patch({
+                            id: registration.id,
+                            payment
+                        }))
+                    }
+
+                    if (registration.cycle === group.cycle) {
+                        sizeUpdater.add({groupId: group.id, waitingList: true}, -1);
+                        sizeUpdater.add({groupId: group.id, waitingList: false}, 1);
+                    }
+                    patchArray.addPatch(patchMember)
+                    continue
+                }
+                // Silently ignore unless we are moving to the waiting list
+                if (!registration.waitingList && waitingList) {
+                    throw new Error('' + member.name + ' is al ingeschreven bij '+group.settings.name+'. Je kan een lid niet inschrijven voor een wachtlijst voor een groep waarvoor het al is ingeschreven.')
+                } 
+                continue;
             }
 
-            if (updateOrganization) {
-                // Save organization to disk
-                SessionManager.currentSession?.callListeners("organization")
+            patchMember.registrations.addPut(Registration.create({
+                groupId: group.id,
+                cycle: cycle,
+                waitingList,
+                payment: waitingList ? null : payment,
+                registeredAt: new Date()
+            }))
+
+            if (cycle === group.cycle) {
+                sizeUpdater.add({groupId: group.id, waitingList}, 1)
             }
+            patchArray.addPatch(patchMember)
         }
+
+        await this.patchMembersAndSync(members, patchArray, false)
+        
+        const session = SessionManager.currentSession!
+        sizeUpdater.save(session)
+
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
+    }
+
+    async moveCycle(members: MemberWithRegistrations[], groups: Group[] | null, cycleOffset: number, waitingList: boolean, newCycleOffset: number) {
+        if (newCycleOffset === cycleOffset) {
+            return;
+        }
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+
+        const sizeUpdater = new GroupSizeUpdater()
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+            for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList})) {
+                // Check if already has a registratino with these details, skip otherwise
+                if (member.registrations.find(r => r.id !== registration.id && r.groupId === registration.groupId && r.cycle === registration.cycle + cycleOffset - newCycleOffset)) {
+                    throw new Error('Al ingeschreven bij die groep in die periode')
+                }
+
+                patchMember.registrations.addPatch(Registration.patch({
+                    id: registration.id,
+                    cycle: registration.cycle + cycleOffset - newCycleOffset
+                }))
+
+                if (cycleOffset === 0) {
+                    sizeUpdater.add({groupId: registration.groupId, waitingList: registration.waitingList}, -1)
+                } else if (newCycleOffset === 0) {
+                    sizeUpdater.add({groupId: registration.groupId, waitingList: registration.waitingList}, 1)
+                }
+            }
+            
+            patchArray.addPatch(patchMember)
+        }
+ 
+        await this.patchMembersAndSync(members, patchArray, false)
+        
+        const session = SessionManager.currentSession!
+        sizeUpdater.save(session)
+        
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
+    }
+
+    async moveRegistrations(members: MemberWithRegistrations[], groups: Group[] | null, cycleOffset: number, waitingList: boolean, newGroup: Group) {
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const sizeUpdater = new GroupSizeUpdater()
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+            for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList})) {
+                // Check if already has a registratino with these details, skip otherwise
+                if (member.registrations.find(r => r.id !== registration.id && r.groupId === newGroup.id && r.cycle === newGroup.cycle + cycleOffset)) {
+                    throw new Error('Je kan deze inschrijving niet verplaatsen omdat ' + member.name + ' al is ingeschreven bij die groep of daarbij horende wachtlijst in die periode')
+                }
+
+                patchMember.registrations.addPatch(Registration.patch({
+                    id: registration.id,
+                    groupId: newGroup.id,
+                    cycle: newGroup.cycle + cycleOffset // offset won't change but cycle can
+                }))
+
+                if (cycleOffset === 0) {
+                    sizeUpdater.add({groupId: registration.groupId, waitingList: registration.waitingList}, -1)
+                    sizeUpdater.add({groupId: newGroup.id, waitingList: waitingList}, 1)
+                }
+            }
+            
+            patchArray.addPatch(patchMember)
+        }
+
+        await this.patchMembersAndSync(members, patchArray, false)
+        
+        const session = SessionManager.currentSession!
+        sizeUpdater.save(session)
+        
+        for (const member of members) {
+            this.callListeners("changedGroup", member)
+        }
+    }
+
+    async moveToWaitingList(members: MemberWithRegistrations[], groups: Group[] | null = null, cycleOffset = 0) {
+        const patchArray: PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations> = new PatchableArray()
+        const sizeUpdater = new GroupSizeUpdater()
+
+        for (const member of members) {
+            const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
+
+            for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: false})) {
+                patchMember.registrations.addPatch(Registration.patch({
+                    id: registration.id,
+                    waitingList: true
+                }))
+
+                if (cycleOffset == 0) {
+                    sizeUpdater.add({groupId: registration.groupId, waitingList: false}, -1)
+                    sizeUpdater.add({groupId: registration.groupId, waitingList: true}, 1)
+                }
+            }
+            
+            patchArray.addPatch(patchMember)
+        }
+ 
+        await this.patchMembersAndSync(members, patchArray, false)
+
+        const session = SessionManager.currentSession!
+        sizeUpdater.save(session)
         
         for (const member of members) {
             this.callListeners("changedGroup", member)

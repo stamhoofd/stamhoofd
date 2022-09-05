@@ -2,7 +2,7 @@ import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-e
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailTemplate, Token } from '@stamhoofd/models';
-import { EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
+import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -44,9 +44,20 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                 statusCode: 403
             })
         }
+
+        const types = [
+            EmailTemplateType.OrderConfirmationOnline, 
+            EmailTemplateType.OrderConfirmationTransfer,
+            EmailTemplateType.OrderConfirmationPOS,
+            EmailTemplateType.OrderReceivedTransfer,
+            EmailTemplateType.TicketsConfirmation,
+            EmailTemplateType.TicketsConfirmationTransfer,
+            EmailTemplateType.TicketsConfirmationPOS,
+            EmailTemplateType.TicketsReceivedTransfer,
+        ]
         
-        const templates = await EmailTemplate.where({ organizationId: user.organizationId, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null });
-        const defaultTemplates = await EmailTemplate.where({ organizationId: null });
+        const templates = await EmailTemplate.where({ organizationId: user.organizationId, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}});
+        const defaultTemplates = await EmailTemplate.where({ organizationId: null, type: {sign: 'IN', value: types} });
         return new Response([...templates, ...defaultTemplates].map(template => EmailTemplateStruct.create(template)))
     }
 }

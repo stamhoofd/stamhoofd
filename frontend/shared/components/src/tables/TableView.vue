@@ -11,7 +11,9 @@
                         Selecteer alles
                     </template>
                 </button>
-                <BackButton v-else-if="canPop" slot="left" @click="pop" />
+                <BackButton v-else-if="canPop" slot="left" @click="pop">
+                    {{ backHint || 'Terug' }}
+                </BackButton>
             </template>
             <template #right>
                 <template v-if="!isIOS">
@@ -209,6 +211,9 @@ class ColumnConfiguration extends AutoEncoder {
 export default class TableView<Value extends TableListable> extends Mixins(NavigationMixin) {
     @Prop({ required: true})
     title!: string
+
+    @Prop({ required: false})
+    backHint?: string
 
     @Prop({ default: "" })
     description!: string
@@ -1209,7 +1214,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             return
         }
 
-        if (action.childActions.length > 0) {
+        if (action.hasChildActions) {
             const el = event.currentTarget;
             const bounds = el.getBoundingClientRect()
             const isOnTop = !this.isIOS
@@ -1219,7 +1224,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
                 y: isOnTop ? bounds.bottom : bounds.top,
                 xPlacement: "right",
                 yPlacement: isOnTop ? "bottom" : "top",
-                actions: action.childActions,
+                actions: action.getChildActions(),
                 table: this,
                 focused: this.showSelection && this.isMobile ? selection : []
             });

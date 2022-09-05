@@ -70,6 +70,23 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
         return m
     }
 
+    filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, canRegister?: boolean}) {
+        return this.registrations.filter(r => {
+            const group = (filters.groups ?? this.allGroups).find(g => g.id === r.groupId)
+            if (
+                group 
+                && (filters.waitingList === undefined || r.waitingList === filters.waitingList) 
+                && r.cycle === group.cycle - (filters.cycleOffset ?? 0)
+            ) {
+                if (filters.canRegister !== undefined && r.waitingList) {
+                    return r.canRegister === filters.canRegister
+                }
+                return true;
+            }
+            return false;
+        })
+    }
+
     /**
      * Pass all the groups of an organization to the member so we can fill in all the groups and registrations that are active
      */

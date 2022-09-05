@@ -60,6 +60,10 @@
                 </RadioGroup>
             </STInputBox>
 
+            <p v-if="needRegistration === true" class="info-box">
+                De leden zullen worden ingeschreven in de vorige inschrijvingsperiode, en zullen dus niet meteen zichtbaar zijn in het normale overzicht (daarin staan enkel de bevestigde inschrijvingen). Om de leden na het importeren te bekijken ga je naar de inschrijvingsgroep > ... > Vorige inschrijvingsperiode.
+            </p>
+
             <template v-if="needsGroup">
                 <hr>
                 <h2>Leeftijdsgroep</h2>

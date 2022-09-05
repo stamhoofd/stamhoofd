@@ -269,8 +269,8 @@ export class EmailVerificationCode extends Model {
                 to: this.email,
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
                 type: "transactional",
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`+footer,
-                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>${user.permissions ? "Stamhoofd" : user.organization.name}`+footerHTML
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de code "${formattedCode}" in op de website of klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`+footer,
+                html: `Hallo${user.firstName ? (" "+user.firstName) : ""}!<br><br>Verifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Vul de onderstaande code in op de website<br><br><strong style="font-size: 30px; font-weight: bold;">${formattedCode}</strong><br><br>Of klik op de onderstaande link om jouw e-mailadres te bevestigen:<br>${url}<br><br>Dit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.<br><br>${user.permissions ? "Stamhoofd" : user.organization.name}`+footerHTML
             })
         } else {
             Email.send({
@@ -279,7 +279,7 @@ export class EmailVerificationCode extends Model {
                 to: this.email,
                 type: "transactional",
                 subject: `[${user.permissions ? "Stamhoofd" : user.organization.name}] Verifieer jouw e-mailadres`,
-                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`+footer
+                text: `Hallo${user.firstName ? (" "+user.firstName) : ""}!\n\nVerifieer jouw e-mailadres om te kunnen inloggen bij ${user.organization.name}. Klik op de onderstaande link om jouw e-mailadres te bevestigen.\n${url}\n\nDit is een automatische e-mail. Gelieve niet op dit e-mailadres te reageren.\n\n${user.permissions ? "Stamhoofd" : user.organization.name}`+footer
             })
         }
     }

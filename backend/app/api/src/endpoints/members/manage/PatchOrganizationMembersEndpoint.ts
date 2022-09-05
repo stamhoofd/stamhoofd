@@ -125,7 +125,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                await this.addRegistration(user, member, registrationStruct)
+                await this.addRegistration(member, registrationStruct)
             }
 
             // Add users if they don't exist (only placeholders allowed)
@@ -220,12 +220,28 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 registration.groupId = patchRegistration.groupId ?? registration.groupId
 
                 // Check if we should create a placeholder payment?
-                await registration.save()
 
                 if (patchRegistration.cycle !== undefined || patchRegistration.waitingList !== undefined || patchRegistration.canRegister !== undefined) {
                     // We need to update occupancy (because cycle / waitlist change)
                     updateGroups.set(group.id, group)
                 }
+
+                // Check payment
+                if (!registration.payment && patchRegistration.payment && patchRegistration.payment.isPut()) {
+                    const payment = new Payment()
+                    payment.organizationId = member.organizationId
+                    payment.userId = member.users[0]?.id ?? null
+                    payment.method = patchRegistration.payment.method
+                    payment.paidAt = patchRegistration.payment.paidAt
+                    payment.price = patchRegistration.payment.price
+                    payment.status = patchRegistration.payment.status
+                    payment.transferDescription = patchRegistration.payment.transferDescription
+                    await payment.save()
+
+                    registration.setOptionalRelation(Registration.payment, payment)
+                    registration.price = patchRegistration.payment.price
+                }
+                await registration.save()
             }
 
             let shouldUsePayment: Payment | null = null
@@ -274,7 +290,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                const reg = await this.addRegistration(user, member, struct)
+                const reg = await this.addRegistration(member, struct)
                 if (!reg.payment && shouldUsePayment) {
                     reg.setRelation(Registration.payment, shouldUsePayment)
                     await reg.save()
@@ -342,7 +358,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return new Response(members.map(m => m.getStructureWithRegistrations(true)));
     }
 
-    async addRegistration(user: User, member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
+    async addRegistration(member: Member & Record<"registrations", RegistrationWithPayment[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
         const registration = new Registration().setOptionalRelation(Registration.payment, null)
         registration.groupId = registrationStruct.groupId
         registration.cycle = registrationStruct.cycle
@@ -365,7 +381,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         if (registrationStruct.payment) {
             const payment = new Payment()
             payment.organizationId = member.organizationId
-            payment.userId = user.id
+            payment.userId = member.users[0]?.id ?? null
             payment.method = registrationStruct.payment.method
             payment.paidAt = registrationStruct.payment.paidAt
             payment.price = registrationStruct.payment.price
@@ -374,6 +390,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await payment.save()
 
             registration.setOptionalRelation(Registration.payment, payment)
+
+            registration.price = registrationStruct.payment.price
         }
 
         await registration.save()

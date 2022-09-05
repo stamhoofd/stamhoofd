@@ -30,8 +30,28 @@ export class TableAction<T> {
 
     singleSelection = false
 
-    childActions: TableAction<T>[] = []
+    childActions: (TableAction<T>[]) | (() => TableAction<T>[])  = []
     childMenu: ComponentWithProperties | null = null
+
+    get hasChildActions() {
+        if (this.childMenu !== null) {
+            return true;
+        }
+        if (this.childActions instanceof Array) {
+            return this.childActions.length > 0
+        } else {
+            // function
+            return true;
+        }
+    }
+
+    getChildActions(): TableAction<T>[] {
+        if (this.childActions instanceof Array) {
+            return this.childActions
+        } else {
+            return this.childActions()
+        }
+    }
 
     constructor(settings: Partial<TableAction<T>>) {
         this.name = settings.name ?? "";
@@ -46,6 +66,16 @@ export class TableAction<T> {
         this.allowAutoSelectAll = settings.allowAutoSelectAll ?? true;
         this.childActions = settings.childActions ?? [];
         this.childMenu = settings.childMenu ?? null;
+    }
+
+    setGroupIndex(index: number) {
+        this.groupIndex = index
+        return this
+    }
+
+    setPriority(priority: number) {
+        this.priority = priority
+        return this
     }
 
     async handle(item: T[]) {
