@@ -63,7 +63,12 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
             this.close()
         }
 
-        this.focusNextButton()
+        if (document.activeElement && (document.activeElement as any).blur) {
+            (document.activeElement as any).blur();
+        }
+        setTimeout(() => {
+            this.focusNextButton()
+        }, 200)
     }
 
     async onClickButton(button: CenteredMessageButton) {

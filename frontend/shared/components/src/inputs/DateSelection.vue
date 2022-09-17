@@ -31,8 +31,10 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         const displayedComponent = new ComponentWithProperties(DateSelectionView, {
             x: el.getBoundingClientRect().left + el.offsetWidth,
             y: el.getBoundingClientRect().top + el.offsetHeight - 2,
+            wrapHeight: el.offsetHeight - 4,
+            xPlacement: 'left',
             //preferredWidth: el.offsetWidth, 
-            selectedDay: this.value,
+            selectedDay: new Date(this.value),
             setDate: (value: Date) => {
                 const d = new Date(value.getTime())
                 d.setHours(this.value.getHours(), this.value.getMinutes(), 0, 0)

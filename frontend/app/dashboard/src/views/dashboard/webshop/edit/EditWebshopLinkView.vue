@@ -171,7 +171,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
     }
 
     get defaultDomains() {
-        return Formatter.uniqueArray(this.organization.webshops.filter(w => w.meta.domainActive).map(w => w.domain))
+        return Formatter.uniqueArray(this.organization.webshops.filter(w => w.meta.domainActive && w.domain).map(w => w.domain))
     }
 
     onChangeSelectedDomain() {

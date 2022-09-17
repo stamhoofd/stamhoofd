@@ -141,8 +141,18 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         throw new SimpleError({
                             code: "invalid_field",
                             message: "domainUri contains invalid characters",
-                            human: "Een link mag geen spaties of speciale tekens bevatten",
+                            human: "Een link mag geen spaties, hoofdletters of speciale tekens bevatten",
                             field: "customUrl"
+                        })
+                    }
+
+                    // Check exists
+                    const existing = await Webshop.getByDomain(webshop.domain, webshop.domainUri);
+                    if (existing !== undefined) {
+                        throw new SimpleError({
+                            code: "invalid_domain",
+                            message: "This domain is already in use",
+                            human: "Deze link is al in gebruik door een andere webshop: " + existing.meta.name+". Verwijder of pas daar de link eerst aan als je die wilt hergebruiken."
                         })
                     }
                 } else {
@@ -174,7 +184,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         throw new SimpleError({
                             code: "invalid_field",
                             message: "Uri contains invalid characters",
-                            human: "Een link mag geen spaties of speciale tekens bevatten",
+                            human: "Een link mag geen spaties, hoofdletters of speciale tekens bevatten",
                             field: "uri"
                         })
                     }

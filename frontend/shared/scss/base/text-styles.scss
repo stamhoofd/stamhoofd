@@ -382,6 +382,7 @@
 
     &> *:first-child {
         flex-grow: 1;
+        text-align: left;
     }
 
     &> *:last-child {

@@ -48,7 +48,7 @@ export class ContextMenu {
         return new ComponentWithProperties(GeneralContextMenuView, { menu: this})
     }
 
-    async show(position: { clickEvent?: TouchEvent | MouseEvent, button?: HTMLElement, x?: number, y?: number, xPlacement?: "right" | "left", yPlacement?: "bottom" | "top" , wrapWidth?: number, wrapHeight?: number }) {
+    async show(position: { clickEvent?: TouchEvent | MouseEvent, button?: HTMLElement, x?: number, y?: number, xPlacement?: "right" | "left", yPlacement?: "bottom" | "top" , wrapWidth?: number, wrapHeight?: number, yOffset?: number, xOffset?: number }) {
         if (position.button) {
             const bounds = position.button.getBoundingClientRect()
 
@@ -72,6 +72,14 @@ export class ContextMenu {
             const event = position.clickEvent as any
             position.x = event.changedTouches ? event.changedTouches[0].pageX : event.clientX
             position.y = event.changedTouches ? event.changedTouches[0].pageY : event.clientY
+        }
+
+        if (position.y !== undefined && position.yOffset) {
+            position.y += position.yOffset
+        }
+
+        if (position.x !== undefined && position.xOffset) {
+            position.x += position.xOffset
         }
 
         const component = new ComponentWithProperties(GeneralContextMenuView, {

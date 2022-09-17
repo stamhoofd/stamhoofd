@@ -31,23 +31,35 @@ export class MemberActionBuilder {
         this.inWaitingList = settings.inWaitingList ?? false
     }
 
-    getRegisterActions(): TableAction<MemberWithRegistrations>[] {
+    getRegisterActions(cycleOffset?: number): TableAction<MemberWithRegistrations>[] {
+        if (cycleOffset === undefined) {
+            return [
+                ...this.getRegisterActions(0),
+                new TableAction({
+                    name: "Vorige inschrijvingsperiode van",
+                    groupIndex: 0,
+                    childActions: () => [
+                        ...this.getRegisterActions(1),
+                    ]
+                }),
+            ]
+        }
+
+        if(cycleOffset === 0) {
+            return [
+                new TableAction({
+                    name: "Wachtlijst van",
+                    groupIndex: 0,
+                    childActions: () => [
+                        ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, true))
+                    ]
+                }),
+                ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, false))
+            ]
+        }
+
         return [
-            new TableAction({
-                name: "Wachtlijst van",
-                groupIndex: 0,
-                childActions: () => [
-                    ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, true))
-                ]
-            }),
-            new TableAction({
-                name: "Vorige inschrijvingsperiode van",
-                groupIndex: 0,
-                childActions: () => [
-                    ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle - 1, false))
-                ]
-            }),
-            ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, false))
+            ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle - cycleOffset, false))
         ]
     }
 
@@ -518,12 +530,23 @@ export class MemberActionBuilder {
 
     register(members: MemberWithRegistrations[], group: Group, cycle: number, waitingList: boolean) {
         const member = members.length == 1 ? members[0].name : members.length+" leden"
-        new CenteredMessage(waitingList ? `${member} op wachtlijst plaatsen van ${group.settings.name}?` : `${member} inschrijven voor ${group.settings.name}?`)
+        let periodText = '';
+
+        if (cycle !== group.cycle) {
+            const offset = group.cycle - cycle;
+            if (offset === 1) {
+                periodText = ' (vorige periode)';
+            } else {
+                periodText = ` (${offset} periodes geleden)`;
+            }
+        }
+
+        new CenteredMessage(waitingList ? `${member} op wachtlijst plaatsen van ${group.settings.name}${periodText}?` : `${member} inschrijven voor ${group.settings.name}${periodText}?`)
             .addButton(new CenteredMessageButton("Ja, inschrijven", {
                 action: async () => {
                     const n = members.length == 1 ? members[0].name + ' is' : members.length+" leden zijn"
                     await MemberManager.registerMembers(members, group, cycle, waitingList)
-                    new Toast(waitingList ? n+` op de wachtlijst geplaatst voor ${group.settings.name}` : n + ` ingeschreven voor ${group.settings.name}`, "success green").show()
+                    new Toast(waitingList ? n+` op de wachtlijst geplaatst voor ${group.settings.name}${periodText}` : n + ` ingeschreven voor ${group.settings.name}${periodText}`, "success green").show()
                 }
             }))
             .addCloseButton("Annuleren")

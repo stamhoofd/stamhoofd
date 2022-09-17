@@ -80,18 +80,24 @@
             <div class="container">
                 <hr>
                 <h2 class="style-with-button with-list">
-                    <div>Inschrijvingen</div>
+                    <button v-long-press="(e) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
+                        {{ visibleRegistrationsTitle }}
+                        <span class="icon arrow-down-small" />
+                    </button>
                     <div>
                         <button v-long-press="(e) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
                     </div>
                 </h2>
 
-                <p v-if="member.activeRegistrations.length == 0" class="info-box">
+                <p v-if="visibleRegistrations.length == 0 && cycleOffset == 0" class="info-box">
                     {{ member.firstName }} is niet ingeschreven
+                </p>
+                <p v-else-if="visibleRegistrations.length == 0" class="info-box">
+                    {{ member.firstName }} was niet ingeschreven
                 </p>
 
                 <STList>
-                    <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" v-long-press="(e) => editRegistration(registration, e)" :selectable="true" class="left-center hover-box" @contextmenu.prevent="editRegistration(registration, $event)" @click.prevent="editRegistration(registration, $event)">
+                    <STListItem v-for="registration in visibleRegistrations" :key="registration.id" v-long-press="(e) => editRegistration(registration, e)" :selectable="true" class="left-center hover-box" @contextmenu.prevent="editRegistration(registration, $event)" @click.prevent="editRegistration(registration, $event)">
                         <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
                             <img :src="imageSrc(registration)">
                             <div>
@@ -121,7 +127,7 @@
                             Toegelaten om in te schrijven
                         </p>
 
-                        <span slot="right" class="icon arrow-right-small gray" />
+                        <span slot="right" class="icon arrow-down-small gray" />
                     </STListItem>
                 </STList>
             </div>
@@ -337,7 +343,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { CountryHelper } from "@stamhoofd/structures/esm/dist";
@@ -430,6 +436,21 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     get dataPermission() {
         return this.member.details.dataPermissions?.value ?? false
+    }
+
+    get visibleRegistrationsTitle() {
+        if (this.cycleOffset === 0) {
+            return 'Inschrijvingen';
+        }
+        if (this.cycleOffset === 1) {
+            return 'Vorige inschrijvingsperiode';
+        }
+
+        return 'Inschrijvingen '+this.cycleOffset+' periodes geleden';
+    }
+
+    get visibleRegistrations() {
+        return this.member.filterRegistrations({cycleOffset: this.cycleOffset})
     }
 
     get hasWarnings() {
@@ -718,6 +739,44 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.present(displayedComponent);
     }
 
+    cycleOffset = 0;
+
+    switchCycle(event) {
+        let maxCycle = 1;
+        for (const registration of this.member.registrations) {
+            const group = this.member.allGroups.find(g => g.id === registration.groupId)
+            if (group) {
+                const offset = group.cycle - registration.cycle;
+                if (offset > maxCycle) {
+                    maxCycle = offset;
+                }
+            }
+        }
+
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Huidige inschrijvingsperiode",
+                    selected: this.cycleOffset === 0,
+                    action: () => {
+                        this.cycleOffset = 0;
+                        return true;
+                    }
+                }),
+                // Repeat maxCycle times
+                ...Array.from({ length: maxCycle }, (_, i) => i + 1).map(i => new ContextMenuItem({
+                    name: `${i === 1 ? 'Vorige' : i} inschrijvingsperiode${i >= 2 ? 's geleden' : ''}`,
+                    selected: this.cycleOffset === i,
+                    action: () => {
+                        this.cycleOffset = i;
+                        return true;
+                    }
+                }))
+            ],
+        ])
+        menu.show({ button: event.currentTarget, yOffset: -10 }).catch(console.error)
+    }
+
     addRegistration(event) {
         const el = event.currentTarget;
         const bounds = el.getBoundingClientRect()
@@ -730,7 +789,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             hasWrite: this.hasWrite,
         })
 
-        const actions = builder.getRegisterActions()
+        const actions = builder.getRegisterActions(this.cycleOffset)
 
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
             x: bounds.left,

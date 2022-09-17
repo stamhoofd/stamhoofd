@@ -13,7 +13,10 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
     @Prop({ required: false })
     webshopManager?: WebshopManager
 
-    originalWebshop: PrivateWebshop = this.webshopManager?.webshop ?? PrivateWebshop.create({})
+    @Prop({ required: false })
+    initialWebshop?: PrivateWebshop
+
+    originalWebshop: PrivateWebshop = this.webshopManager?.webshop ?? this.initialWebshop ?? PrivateWebshop.create({})
 
     get isNew() {
         return this.webshopManager === undefined

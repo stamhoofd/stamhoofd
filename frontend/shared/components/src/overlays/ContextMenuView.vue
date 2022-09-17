@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, ModalStackComponent } from "@simonbackx/vue-app-navigation";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 import { ViewportHelper } from "../ViewportHelper";
@@ -179,10 +179,10 @@ export default class ContextMenuView extends Vue {
                 this.top = null
                 this.usedYPlacement = "top"
 
-                if (this.wrapHeight !== null) {
+                if (this.wrapHeight !== null && height <= usedY - this.wrapHeight - viewPaddingTop) {
                     // Wrap instead of sticking to bottom
                     usedY = usedY - this.wrapHeight
-                    this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPaddingBottom - height);
+                    this.bottom = Math.min(clientHeight - usedY, clientHeight - viewPaddingTop - height);
 
                     if (this.bottom < viewPaddingBottom) {
                         this.bottom = viewPaddingBottom
@@ -619,15 +619,39 @@ export default class ContextMenuView extends Vue {
         document.removeEventListener("keydown", this.onKey);
     }
 
+    get isFocused() {
+        const popups = this.modalStackComponent?.stackComponent?.components ?? []
+        if (popups.length > 0 && !popups[popups.length - 1].componentInstance()?.$el?.contains(this.$el)) {
+            return false
+        }
+        return true
+    }
+
+    get modalStackComponent(): ModalStackComponent | null {
+        let start: any = this.$parent;
+        while (start) {
+            if (start instanceof ModalStackComponent) {
+                return start;
+            }
+
+            start = start.$parent;
+        }
+        return null;
+    }
+
     onKey(event) {
         if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+
+        if (!this.isFocused) {
             return;
         }
 
         const key = event.key || event.keyCode;
 
         if (key === "Escape" || key === "Esc" || key === 27) {
-            this.pop();
+            this.pop(true);
             event.preventDefault();
         }
     }
