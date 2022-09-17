@@ -50,10 +50,13 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         webshop.id = request.body.id
         webshop.meta = request.body.meta
+        webshop.meta.domainActive = false;
         webshop.privateMeta = request.body.privateMeta
         webshop.products = request.body.products
         webshop.categories = request.body.categories
         webshop.organizationId = user.organizationId
+        webshop.privateMeta.authorId = user.id;
+        webshop.privateMeta.dnsRecords = [];
         let updateDNS = false
 
         // Check if we can decide the domain
@@ -91,24 +94,20 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
         } else {
-            if (request.body.domain !== undefined) {
+            if (request.body.domain) {
                 webshop.domain = request.body.domain
-            }
 
-            if (request.body.domainUri !== undefined) {
-                webshop.domainUri = request.body.domainUri
+                if (request.body.domainUri) {
+                    webshop.domainUri = Formatter.slug(request.body.domainUri)
+                }
+
+                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(request.body.domain)
+                await this.checkDomainUri(webshop)
+                updateDNS = true
             }
         }
 
-        if (request.request.getVersion() < 134 && request.body.legacyUri !== null) {   
-            console.log("Tried to create webshop with legacy uri", request.body.legacyUri)
-
-            // Also set the legacy url
-            webshop.legacyUri = request.body.legacyUri.length > 0 ? request.body.legacyUri : Formatter.slug(webshop.meta.name)
-            webshop.uri = webshop.legacyUri
-        } else {
-            webshop.uri = request.body.uri.length > 0 ? request.body.uri : Formatter.slug(webshop.meta.name)
-        }
+        webshop.uri = request.body.uri.length > 0 ? Formatter.slug(request.body.uri) : Formatter.slug(webshop.meta.name)
 
         // Check if this uri is inique
         const original = webshop.uri
@@ -163,18 +162,18 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             return
         }
         // Check if this uri is inique
-        const original = webshop.domainUri
+        const original = webshop.domainUri ? webshop.domainUri + '-' : ''
         const possibleSuffixes = [new Date().getFullYear().toString()]
         let tried = 0
         while (await Webshop.getByDomain(webshop.domain, webshop.domainUri) !== undefined) {
             console.log("Webshop already exists", webshop.domainUri)
 
             if (tried < possibleSuffixes.length) {
-                webshop.domainUri = original + "-" + possibleSuffixes[tried]
+                webshop.domainUri = original + possibleSuffixes[tried]
             } else if (tried > 9) {
-                webshop.domainUri = original + "-" + Math.floor(Math.random() * 100000)
+                webshop.domainUri = original + Math.floor(Math.random() * 100000)
             } else {
-                webshop.domainUri = original + "-" + (tried - possibleSuffixes.length + 2)
+                webshop.domainUri = original + (tried - possibleSuffixes.length + 2)
             }
             
             tried++

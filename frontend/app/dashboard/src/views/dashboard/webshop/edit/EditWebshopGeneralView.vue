@@ -14,7 +14,7 @@
         </STInputBox>
 
 
-        <template v-if="isNew">
+        <template v-if="canChangeType">
             <hr>
             <h2>Type verkoop</h2>
 
@@ -131,6 +131,10 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
                 }))
             }
         }
+    }
+
+    get canChangeType() {
+        return this.webshop.products.length == 0 && this.webshop.meta.checkoutMethods.length == 0
     }
     
     get viewTitle() {

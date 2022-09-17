@@ -192,6 +192,20 @@
                 <h2>Acties</h2>
 
                 <STList>
+                    <STListItem v-if="isOpen" :selectable="true" @click="duplicateWebshop()">
+                        <h2 class="style-title-list">
+                            Webshop dupliceren
+                        </h2>
+                        <p class="style-description">
+                            Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.
+                        </p>
+                        <button slot="right" type="button" class="button secundary hide-smartphone">
+                            <span class="icon copy" />
+                            <span>Dupliceren</span>
+                        </button>
+                        <button slot="right" type="button" class="button icon copy only-smartphone" />
+                    </STListItem>
+
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
                             Webshop sluiten
@@ -483,6 +497,51 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         if (parts.length >= 3 && parts[0] == 'webshops' && parts[2] == 'statistics') {
             this.openStatistics(false)
         }
+    }
+
+    get canCreateWebshops() {
+        const result = SessionManager.currentSession!.user!.permissions!.canCreateWebshops(this.organization.privateMeta?.roles ?? [])
+        return result
+    }
+
+    duplicateWebshop() {
+        if (!this.canCreateWebshops) {
+            return;
+        }
+
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PromiseView, {
+                promise: async () => {
+                    try {
+                        // Make sure we have an up to date webshop
+                        const webshop = await this.webshopManager.loadWebshopIfNeeded(false)
+                        const duplicate = PrivateWebshop.create({
+                            ...webshop,
+                            id: undefined, 
+                        }).patch({
+                            meta: WebshopMetaData.patch({
+                                status: WebshopStatus.Open,
+                            })
+                        })
+                        return new ComponentWithProperties(EditWebshopGeneralView, {
+                            initialWebshop: duplicate
+                        })
+                    } catch (e) {
+                        Toast.fromError(e).show()
+                        throw e
+                    }
+                }
+            })
+        })
+
+        this.present({
+            animated: true,
+            adjustHistory: true,
+            modalDisplayStyle: "popup",
+            components: [
+                displayedComponent
+            ]
+        });
     }
 
     async closeWebshop() {

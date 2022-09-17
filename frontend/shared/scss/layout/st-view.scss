@@ -82,8 +82,9 @@ body.modern.web-iOS {
             // Windows scrollbars
             scrollbar-gutter: stable;
 
-            display: flex;
-            flex-direction: column;
+            // Flexbox negative margins are broken on iOS 16 and Safari 16...
+            // display: flex;
+            // flex-direction: column;
             
             > * {
                 flex-shrink: 0;

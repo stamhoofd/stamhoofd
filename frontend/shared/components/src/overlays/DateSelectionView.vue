@@ -1,10 +1,19 @@
 <template>
-    <ContextMenuView v-bind="{ x, y, xPlacement: 'left', preferredWidth }">
+    <ContextMenuView v-bind="$attrs">
         <aside class="date-selection-view">
             <header>
-                <button class="button icon gray arrow-left" @click="previousMonth" />
-                <h1>{{ monthTitle }}</h1>
-                <button class="button icon gray arrow-right" @click="nextMonth" />
+                <button type="button" class="button icon gray arrow-left" @click="previousMonth" />
+                <h1>
+                    <button v-long-press="(e) => openMonthContextMenu(e)" type="button" class="button title-button" @click.prevent="openMonthContextMenu" @contextmenu.prevent="openMonthContextMenu">
+                        <span>{{ monthTitle }}</span>
+                        <span class="icon arrow-down-small gray" />
+                    </button>
+                    <button v-long-press="(e) => openYearContext(e)" type="button" class="button title-button" @click.prevent="openYearContext" @contextmenu.prevent="openYearContext">
+                        <span>{{ yearTitle }}</span>
+                        <span class="icon arrow-down-small gray" />
+                    </button>
+                </h1>
+                <button type="button" class="button icon gray arrow-right" @click="nextMonth" />
             </header>
             <div>
                 <div class="days">
@@ -17,7 +26,7 @@
                     <div>Zo</div>
                 </div>
                 <div v-for="(week, index) in weeks" :key="index" class="row">
-                    <button v-for="day in week" :key="day.number" :class="{selected: day.selected, 'other-month': day.otherMonth}" @click="onSelect(day)">
+                    <button v-for="day in week" :key="day.number" type="button" :class="{selected: day.selected, 'other-month': day.otherMonth}" @click="onSelect(day)">
                         {{ day.number }}
                     </button>
                 </div>
@@ -31,23 +40,19 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Formatter } from "@stamhoofd/utility"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
+import LongPressDirective from "../directives/LongPress";
+import { ContextMenu, ContextMenuItem } from "./ContextMenu";
 import ContextMenuView from "./ContextMenuView.vue";
 
 @Component({
     components: {
         ContextMenuView
     },
+    directives: {
+        LongPress: LongPressDirective
+    }
 })
 export default class DateSelectionView extends Mixins(NavigationMixin) {
-    @Prop({ default: 0 })
-    x!: number;
-
-    @Prop({ default: 0 })
-    y!: number;
-
-    @Prop()
-    preferredWidth?: number;
-
     @Prop()
     setDate!: (date: Date) => void;
 
@@ -56,6 +61,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     currentMonth: Date = new Date((this.selectedDay ?? new Date()).getTime())
     weeks: any = null
     monthTitle = ""
+    yearTitle = ""
 
     created() {
         this.weeks = this.generateDays()
@@ -101,32 +107,53 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     updateMonthTitle() {
-        this.monthTitle = Formatter.capitalizeFirstLetter(Formatter.month(this.currentMonth.getMonth() + 1))
-        this.monthTitle += " "+this.currentMonth.getFullYear()
+        this.monthTitle = Formatter.capitalizeFirstLetter(Formatter.month(this.currentMonth.getMonth() + 1));
+        this.yearTitle = this.currentMonth.getFullYear().toString()
     }
 
     nextMonth() {
         this.currentMonth.setDate(1)
         this.currentMonth.setMonth(this.currentMonth.getMonth() + 1)
+
+        this.updateSelectedMonth()
         this.updateMonthTitle();
         this.weeks = this.generateDays()
+    }
+
+    updateSelectedMonth() {
+        if (!this.selectedDay) {
+            return
+        }
+        // Don't make a copy
+        const selectedDay = this.selectedDay
+        const day = selectedDay.getDate();
+        selectedDay.setMonth(this.currentMonth.getMonth())
+        selectedDay.setMonth(this.currentMonth.getMonth())
+        selectedDay.setFullYear(this.currentMonth.getFullYear())
+        if (selectedDay.getDate() < day) {
+            selectedDay.setDate(new Date(selectedDay.getFullYear(), selectedDay.getMonth() + 1, 0).getDate())
+        }
+        this.setDate(selectedDay)
     }
 
     previousMonth() {
         this.currentMonth.setDate(0)
         this.currentMonth.setDate(1)
+        this.updateSelectedMonth()
         this.updateMonthTitle();
         this.weeks = this.generateDays()
     }
 
     nextYear() {
         this.currentMonth.setFullYear(this.currentMonth.getFullYear() + 1)
+        this.updateSelectedMonth()
         this.updateMonthTitle();
         this.weeks = this.generateDays()
     }
 
     previousYear() {
         this.currentMonth.setFullYear(this.currentMonth.getFullYear() - 1)
+        this.updateSelectedMonth()
         this.updateMonthTitle();
         this.weeks = this.generateDays()
     }
@@ -135,6 +162,54 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         day.selected = true;
         this.setDate(day.value)
         this.pop();
+    }
+
+    openMonthContextMenu(event) {
+        // array from 1 - 12
+        const months = Array.from({length: 12},(_, i)=> i + 1)
+
+        const menu = new ContextMenu([
+            months.map(m => {
+                return new ContextMenuItem({
+                    name: Formatter.capitalizeFirstLetter(Formatter.month(m)),
+                    selected: m === this.currentMonth.getMonth() + 1,
+                    action: () => {
+                        this.currentMonth.setDate(1)
+                        this.currentMonth.setMonth(m - 1)
+                        this.updateSelectedMonth()
+                        this.updateMonthTitle();
+                        this.weeks = this.generateDays()
+                        return true;
+                    }
+                })
+            })
+        ])
+
+        menu.show({ button: event.currentTarget }).catch(console.error)
+    }
+
+    openYearContext(event) {
+        const currentYear = new Date().getFullYear(); 
+        const years = Array.from({length: 15},(_, i)=> currentYear - i + 3) // 3 years in the future
+
+        const menu = new ContextMenu([
+            years.map(y => {
+                return new ContextMenuItem({
+                    name: y.toString(),
+                    selected: y === this.currentMonth.getFullYear(),
+                    icon: y === currentYear ? 'dot' : undefined,
+                    action: () => {
+                        this.currentMonth.setFullYear(y)
+                        this.updateSelectedMonth()
+                        this.updateMonthTitle();
+                        this.weeks = this.generateDays()
+                        return true;
+                    }
+                })
+            })
+        ])
+
+        menu.show({ button: event.currentTarget }).catch(console.error)
     }
 
     activated() {
@@ -193,6 +268,17 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
             flex-grow: 1;
             text-align: center;
             @extend .style-title-3;
+        }
+    }
+
+    .title-button {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+
+        > .icon {
+            margin-left: -2px;
+            margin-right: -2px;
         }
     }
 
