@@ -26,7 +26,7 @@ export default new Migration(async () => {
         }
 
         for (const order of orders) {
-            if (order.shouldIncludeStock()) {
+            if (order.shouldIncludeStock() && order.data.timeSlot) {
                 const webshop = shopBuffer.get(order.webshopId) ?? await Webshop.getByID(order.webshopId)
                 if (webshop){
                     shopBuffer.set(order.webshopId, webshop)

@@ -128,7 +128,6 @@ export class Order extends Model {
      * + in combination with validation and reading the webshop
      */
     async updateStock(this: Order & { webshop: Webshop }, previousData: OrderData | null = null) {
-        console.log('Updating stock for order '+this.id)
         // Previous data?
 
         // Add or delete this order from the stock?
@@ -205,8 +204,6 @@ export class Order extends Model {
     }
 
     private static updateTimeSlotStock(timeSlot: WebshopTimeSlot, data: OrderData, add: boolean) {
-        console.log('Updating timeslot stock for order')
-
         let changed = false
         if (data.reservedOrder !== add) {
             data.reservedOrder = add
@@ -218,7 +215,6 @@ export class Order extends Model {
         }
 
         const personDifference = (add ? data.cart.persons : 0) - data.reservedPersons 
-        console.log('Updating timeslot stock for order '+data.reservedPersons+' -> '+data.cart.persons, personDifference)
 
         if (personDifference !== 0) {
             timeSlot.usedPersons += personDifference
