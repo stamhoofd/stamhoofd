@@ -453,7 +453,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                 promise: async () => {
                     try {
                         // Make sure we have an up to date webshop
-                        await this.webshopManager.loadWebshopIfNeeded(false)
+                        await this.webshopManager.loadWebshopIfNeeded(false, true)
                         return new ComponentWithProperties(component, {
                             webshopManager: this.webshopManager
                         })

@@ -121,6 +121,10 @@ export class Formatter {
         return datetime.hour+":"+(datetime.minute+"").padStart(2, "0")
     }
 
+    static luxon(date = new Date()): DateTime {
+        return DateTime.fromJSDate(date).setZone(this.timezone);
+    }
+
     /**
      * 12:00
      */

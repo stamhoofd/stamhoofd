@@ -130,11 +130,11 @@ export class WebshopManager {
      * The goal is to have a working webshop as soon as possible.
      * Set shouldRetry to true if you don't want network errors and want to wait indefinitely for a network connection if we don't have any cached webshops
      */
-    async loadWebshopIfNeeded(shouldRetry = true): Promise<PrivateWebshop> {
+    async loadWebshopIfNeeded(shouldRetry = true, forceBackground = false): Promise<PrivateWebshop> {
         if (this.webshop) {
             // If too long ago, also initiate a background update
 
-            if (!this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
+            if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
                 // Do a background update if not yet already doing this
                 this.loadWebshop(false).catch(console.error)
             }
@@ -156,9 +156,8 @@ export class WebshopManager {
                     } else {
                         this.webshop = webshop
                     }
-                    // TODO: if too long ago, also initiate a background update
 
-                    if (!this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
+                    if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
                         // Do a background update if not yet already doing this
                         this.loadWebshop(false).catch(console.error)
                     }

@@ -67,16 +67,15 @@ export class STPackage extends Model {
     @column({ type: "datetime", nullable: true })
     lastEmailAt: Date | null = null
 
-    static async getForOrganization(organizationId: string) {
-        const pack1 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
-        const pack2 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: null })
+    static async getForOrganization(organizationId: string, date = new Date()) {
+        const pack1 = await STPackage.where({ organizationId, validAt: { sign: ">=", value: date }, removeAt: { sign: ">", value: date }})
+        const pack2 = await STPackage.where({ organizationId, validAt: { sign: ">=", value: date }, removeAt: null })
 
         return [...pack1, ...pack2]
     }
 
-    static async updateOrganizationPackages(organizationId: string) {
-        console.log("Updating packages for organization "+organizationId)
-        const packages = await this.getForOrganization(organizationId)
+    static async getOrganizationPackagesMap(organizationId: string, date = new Date()): Promise<Map<STPackageType, STPackageStatus>> {
+        const packages = await this.getForOrganization(organizationId, date)
 
         const map = new Map<STPackageType, STPackageStatus>()
         for (const pack of packages) {
@@ -87,6 +86,13 @@ export class STPackage extends Model {
                 map.set(pack.meta.type, pack.createStatus())
             }
         }
+
+        return map;
+    }
+
+    static async updateOrganizationPackages(organizationId: string, date = new Date()) {
+        console.log("Updating packages for organization "+organizationId)
+        const map = await this.getOrganizationPackagesMap(organizationId, date)
 
         const organization = await Organization.getByID(organizationId)
         if (organization) {
@@ -103,7 +109,6 @@ export class STPackage extends Model {
             console.error("Couldn't find organization when updating packages "+organizationId)
         }
     }
-
 
     async activate() {
         if (this.validAt !== null) {
