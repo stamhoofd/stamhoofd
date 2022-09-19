@@ -412,6 +412,11 @@ async function checkComplaints() {
 
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
+    if (STAMHOOFD.environment === "development") {
+        console.log("Skipping payments checking")
+        return
+    }
+    
     // TODO: only select the ID + organizationId
     const payments = await Payment.where({
         status: {

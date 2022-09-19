@@ -28,7 +28,7 @@ export class QueueHandler {
     static queues = new Map<string, Queue>()
 
     static async schedule<T>(queue: string, handler: () => Promise<T>, parallel = 1): Promise<T> {
-        console.log("[QUEUE] Schedule "+queue)
+        // console.log("[QUEUE] Schedule "+queue)
 
         const item = new QueueItem<T>()
         item.handler = handler
@@ -54,12 +54,12 @@ export class QueueHandler {
     private static async runNext(queue: string) {
         const q = this.queues.get(queue)
         if (!q) {
-            console.warn("[QUEUE] Queue not found (no items left)", queue)
+            // console.warn("[QUEUE] Queue not found (no items left)", queue)
             return
         }
 
         if (q.runCount >= q.parallel) {
-            console.log("[QUEUE] Queue", queue, 'reached maximum of', q.parallel)
+            //  console.log("[QUEUE] Queue", queue, 'reached maximum of', q.parallel)
             return
         }
 
@@ -71,12 +71,12 @@ export class QueueHandler {
         }
 
         q.runCount += 1
-        console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
+        // console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
 
         try {
             const result = await next.handler()
             next.resolve(result)
-            console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
+            // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
             next.reject(e)
             console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Rejected "+queue+" ("+q.items.length+" remaining)")
