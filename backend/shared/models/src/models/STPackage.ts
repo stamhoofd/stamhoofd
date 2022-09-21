@@ -98,8 +98,8 @@ export class STPackage extends Model {
         if (organization) {
             const didUseMembers = organization.meta.packages.useMembers && organization.meta.packages.useActivities
             organization.meta.packages.packages = map
-
             await organization.save()
+            
             if (!didUseMembers && organization.meta.packages.useMembers && organization.meta.packages.useActivities) {
                 console.log("Building groups and categories for "+organization.id)
                 const builder = new GroupBuilder(organization)
