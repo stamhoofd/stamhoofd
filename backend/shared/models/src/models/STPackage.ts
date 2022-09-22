@@ -67,15 +67,15 @@ export class STPackage extends Model {
     @column({ type: "datetime", nullable: true })
     lastEmailAt: Date | null = null
 
-    static async getForOrganization(organizationId: string, date = new Date()) {
-        const pack1 = await STPackage.where({ organizationId, validAt: { sign: ">=", value: date }, removeAt: { sign: ">", value: date }})
-        const pack2 = await STPackage.where({ organizationId, validAt: { sign: ">=", value: date }, removeAt: null })
+    static async getForOrganization(organizationId: string) {
+        const pack1 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
+        const pack2 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: null })
 
         return [...pack1, ...pack2]
     }
 
-    static async getOrganizationPackagesMap(organizationId: string, date = new Date()): Promise<Map<STPackageType, STPackageStatus>> {
-        const packages = await this.getForOrganization(organizationId, date)
+    static async getOrganizationPackagesMap(organizationId: string): Promise<Map<STPackageType, STPackageStatus>> {
+        const packages = await this.getForOrganization(organizationId)
 
         const map = new Map<STPackageType, STPackageStatus>()
         for (const pack of packages) {
@@ -90,16 +90,16 @@ export class STPackage extends Model {
         return map;
     }
 
-    static async updateOrganizationPackages(organizationId: string, date = new Date()) {
+    static async updateOrganizationPackages(organizationId: string) {
         console.log("Updating packages for organization "+organizationId)
-        const map = await this.getOrganizationPackagesMap(organizationId, date)
+        const map = await this.getOrganizationPackagesMap(organizationId)
 
         const organization = await Organization.getByID(organizationId)
         if (organization) {
             const didUseMembers = organization.meta.packages.useMembers && organization.meta.packages.useActivities
             organization.meta.packages.packages = map
             await organization.save()
-            
+
             if (!didUseMembers && organization.meta.packages.useMembers && organization.meta.packages.useActivities) {
                 console.log("Building groups and categories for "+organization.id)
                 const builder = new GroupBuilder(organization)
