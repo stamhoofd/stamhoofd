@@ -23,6 +23,9 @@ export class STCredit extends Model {
     @column({ type: "integer" })
     change: number;
 
+    @column({ type: "boolean" })
+    allowTransactions: boolean;
+
     @column({
         type: "datetime", beforeSave(old?: any) {
             if (old !== undefined) {
@@ -62,6 +65,8 @@ export class STCredit extends Model {
         const credits = await this.getForOrganization(organizationId)
         credits.reverse()
         let balance = 0
+        let balanceTransactions = 0
+
         for (const credit of credits) {
             if (credit.expireAt !== null && credit.expireAt <= now) {
                 continue
@@ -74,17 +79,31 @@ export class STCredit extends Model {
                 // E.g. Getting credits, using them, and later expiring 'getting the credits' won't have impact on future credits
                 balance = 0
             }
+
+            if (credit.allowTransactions || credit.change < 0) {
+                balanceTransactions += credit.change
+
+                // No point in time we can have more balance for transactions
+                balanceTransactions = Math.min(Math.max(balanceTransactions, 0), balance)
+            }
         }
-        return balance
+
+        return {balance: balance - balanceTransactions, balanceTransactions}
     }
 
     static async applyCredits(organizationId, invoice: STInvoice, dryRun: boolean) {
         // Apply credits
-        const balance = await STCredit.getBalance(organizationId)
+        const {balance, balanceTransactions} = await STCredit.getBalance(organizationId)
         if (balance > 0) {
             // Loop all items where you can use credits for
             const maxCredits = invoice.meta.items.filter(i => i.canUseCredits).reduce((price, item) => price + item.price, 0)
-            const applyValue = Math.min(maxCredits, balance)
+            let applyValue = Math.min(maxCredits, balance)
+
+            if (balanceTransactions > 0) {
+                // Can apply to all items
+                const maxTransactionsCredits = invoice.meta.items.reduce((price, item) => price + item.price, 0) - applyValue
+                applyValue += Math.min(maxTransactionsCredits, balanceTransactions)
+            }
 
             if (applyValue > 0) {
                 invoice.meta.items.push(STInvoiceItem.create({

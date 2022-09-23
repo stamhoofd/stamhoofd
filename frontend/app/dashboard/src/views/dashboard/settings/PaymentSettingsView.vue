@@ -624,7 +624,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             }
             this.updateMollie().catch(console.error);
         } else {
-            if (this.organization.privateMeta && this.organization.privateMeta.mollieOnboarding) {
+            if ((this.organization.privateMeta && this.organization.privateMeta.mollieOnboarding) || this.forceMollie) {
                 this.updateMollie().catch(console.error);
             }
         }
@@ -632,10 +632,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     async updateMollie() {
-        if (!this.organization.privateMeta?.mollieOnboarding) {
-            return;
-        }
-
         try {
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
