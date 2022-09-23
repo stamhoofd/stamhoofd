@@ -46,10 +46,11 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
             return new Response(await user.getOrganizatonStructure(organization));
         }
 
+        const status = await mollie.getOnboardingStatus();
         const organization = user.organization
-        organization.privateMeta.mollieOnboarding = await mollie.getOnboardingStatus()
+        organization.privateMeta.mollieOnboarding = status;
         await organization.save()
-        
+
         return new Response(await user.getOrganizatonStructure(organization));
     }
 }

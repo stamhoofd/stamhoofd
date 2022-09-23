@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { v4 as uuidv4 } from "uuid";
 
 export class STCredit extends AutoEncoder {
@@ -10,6 +10,9 @@ export class STCredit extends AutoEncoder {
      */
     @field({ decoder: IntegerDecoder })
     change = 0
+
+    @field({ decoder: BooleanDecoder, optional: true })
+    allowTransactions = false
 
     @field({ decoder: StringDecoder })
     description = ""
