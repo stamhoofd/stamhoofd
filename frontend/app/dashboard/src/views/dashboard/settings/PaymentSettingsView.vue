@@ -69,11 +69,11 @@
             Online betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethodsString }}
         </p>
 
-        <p class="st-list-description">
+        <p v-if="!isBuckarooActive" class="st-list-description">
             {{ $t('dashboard.settings.paymentMethods.buckaroo.description') }}
         </p>
 
-        <p>
+        <p v-if="!isBuckarooActive">
             <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-buckaroo'" target="_blank">
                 <span>Aansluiten</span>
                 <span class="icon arrow-right" />

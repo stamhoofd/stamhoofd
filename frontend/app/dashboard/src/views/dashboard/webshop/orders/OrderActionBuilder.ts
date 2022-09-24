@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
-import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentStatus, PrivateOrder } from "@stamhoofd/structures"
+import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures"
 
 import { WebshopManager } from "../WebshopManager"
 
@@ -28,6 +28,55 @@ export class OrderActionBuilder {
                 }
             })
         })
+    }
+
+    getTicketStatusActions() {
+        return [
+            new TableAction({
+                name: 'Gescand',
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (orders: PrivateOrderWithTickets[]) => {
+                    const patches: AutoEncoderPatchType<TicketPrivate>[] = []
+                    for ( const order of orders) {
+                        for (const ticket of order.tickets) {
+                            if (ticket.scannedAt) {
+                                continue;
+                            }
+                            patches.push(TicketPrivate.patch({
+                                id: ticket.id,
+                                secret: ticket.secret, // needed for lookups
+                                scannedAt: new Date(),
+                                scannedBy: SessionManager.currentSession!.user?.firstName ?? null
+                            }))
+                        }
+                    }
+                    await this.webshopManager.addTicketPatches(patches)
+                }
+            }),
+            new TableAction({
+                name: 'Niet gescand',
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (orders: PrivateOrderWithTickets[]) => {
+                    const patches: AutoEncoderPatchType<TicketPrivate>[] = []
+                    for ( const order of orders) {
+                        for (const ticket of order.tickets) {
+                            if (!ticket.scannedAt) {
+                                continue;
+                            }
+                            patches.push(TicketPrivate.patch({
+                                id: ticket.id,
+                                secret: ticket.secret, // needed for lookups
+                                scannedAt: null,
+                                scannedBy: null
+                            }))
+                        }
+                    }
+                    await this.webshopManager.addTicketPatches(patches)
+                }
+            })
+        ]
     }
 
     getPaymentActions() {
@@ -87,6 +136,17 @@ export class OrderActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 childActions: this.getStatusActions()
+            }),
+
+            new TableAction({
+                name: "Wijzig ticketstatus",
+                enabled: this.webshopManager.hasWrite && this.webshopManager.preview.hasTickets,
+                icon: "flag",
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                childActions: this.getTicketStatusActions()
             }),
 
             new TableAction({

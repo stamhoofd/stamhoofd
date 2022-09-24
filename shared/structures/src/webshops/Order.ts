@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Recipient, Replacement } from '../endpoints/EmailRequest';
@@ -8,6 +8,7 @@ import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, Payment
 import { PaymentStatus } from '../PaymentStatus';
 import { Checkout } from './Checkout';
 import { Customer } from './Customer';
+import { TicketPrivate } from './Ticket';
 import { WebshopPreview } from './Webshop';
 import { CheckoutMethodType } from './WebshopMetaData';
 
@@ -387,6 +388,11 @@ export class Order extends AutoEncoder {
 export class PrivateOrder extends Order {
     @field({ decoder: PrivatePayment, nullable: true })
     payment: PrivatePayment | null
+}
+
+export class PrivateOrderWithTickets extends PrivateOrder {
+    @field({ decoder: new ArrayDecoder(TicketPrivate) })
+    tickets: TicketPrivate[] = []
 }
 
 export class OrderResponse extends AutoEncoder {

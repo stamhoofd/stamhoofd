@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
-import { Formatter } from "@stamhoofd/utility";
+import { Formatter, StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../addresses/Address";
@@ -256,6 +256,37 @@ export class STInvoicePrivate extends STInvoice {
 
     @field({ decoder: Settlement, nullable: true })
     settlement: Settlement | null = null
+
+    matchQuery(query: string) {
+        if (query === this.number?.toString() || query === this.id) {
+            return true
+        }
+
+        if (
+            StringCompare.typoCount(this.meta.companyName, query) < 2 ||
+            StringCompare.typoCount(this.meta.companyAddress.city, query) < 2 ||
+            StringCompare.typoCount(this.meta.companyContact, query) < 2 ||
+            (this.meta.companyVATNumber && StringCompare.typoCount(this.meta.companyVATNumber, query) < 2) ||
+            StringCompare.typoCount(this.meta.companyAddress.street, query) < 2
+        ) {
+            return true;
+        }
+
+        if (!this.organization) {
+            return false
+        }
+    
+        if (
+            StringCompare.typoCount(this.organization.name, query) < 2 ||
+            StringCompare.typoCount(this.organization.address.city, query) < 2 ||
+            StringCompare.typoCount(this.organization.address.street, query) < 2 ||
+            StringCompare.typoCount(this.meta.companyName, query) < 2 ||
+            StringCompare.typoCount(this.meta.companyName, query) < 2
+        ) {
+            return true;
+        }
+        return false;
+    }
 }
 
 export class STPendingInvoice extends AutoEncoder {

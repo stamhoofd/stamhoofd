@@ -236,7 +236,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,ColorHelper,LongPressDirective,Spinner,STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { getPermissionLevelNumber, Order, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, TicketPrivate } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, Order, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -275,7 +275,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
     ticket!: TicketPrivate
 
     @Prop({ required: true })
-    order!: Order
+    order!: PrivateOrder
 
     get item() {
         return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
@@ -379,7 +379,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         this.present({
             components: [
                 new ComponentWithProperties(OrderView, {
-                    initialOrder: this.order,
+                    initialOrder: PrivateOrderWithTickets.create(this.order),
                     webshopManager: this.webshopManager,
                 })
             ],

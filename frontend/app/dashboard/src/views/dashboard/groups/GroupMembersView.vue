@@ -267,7 +267,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         ]
     }
 
-    get allColumns(): Column<MemberWithRegistrations, any>[] {
+    allColumns: Column<MemberWithRegistrations, any>[] = (() => {
         const cols: Column<MemberWithRegistrations, any>[] = [
             new Column<MemberWithRegistrations, string>({
                 name: "Naam", 
@@ -431,7 +431,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         return cols
-    }
+    })()
 
     get title() {
         return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))

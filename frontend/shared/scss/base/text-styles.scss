@@ -192,6 +192,11 @@
         background: $color-tertiary-background;
     }
 
+    &.gray {
+        color: $color-gray-1;
+        background: $color-background-shade;
+    }
+
     &.inline {
         // need to evaluate the usage of this class
         display: inline-block;

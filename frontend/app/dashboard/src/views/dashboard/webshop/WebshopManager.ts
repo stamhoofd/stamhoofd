@@ -36,6 +36,8 @@ export class WebshopManager {
      * Listen for new orders that are being fetched or loaded
      */
     ordersEventBus = new EventBus<string, PrivateOrder[]>()
+    ticketsEventBus = new EventBus<string, TicketPrivate[]>()
+    ticketPatchesEventBus = new EventBus<string, AutoEncoderPatchType<TicketPrivate>[]>()
 
     constructor(preview: WebshopPreview) {
         this.preview = preview
@@ -405,7 +407,7 @@ export class WebshopManager {
         return tickets
     }
 
-    async streamTickets(callback: (ticket: TicketPrivate) => void): Promise<void> {
+    async streamTickets(callback: (ticket: TicketPrivate) => void, networkFetch = true): Promise<void> {
         const db = await this.getDatabase()
 
         await new Promise<void>((resolve, reject) => {
@@ -434,9 +436,41 @@ export class WebshopManager {
             }
         })
 
-        await this.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
-            for (const ticket of tickets) {
-                callback(ticket)
+        if (networkFetch) {
+            await this.fetchNewTickets(false, false, (tickets: TicketPrivate[]) => {
+                for (const ticket of tickets) {
+                    callback(ticket)
+                }
+            })
+        }
+    }
+
+    async streamTicketPatches(callback: (ticket: AutoEncoderPatchType<TicketPrivate>) => void): Promise<void> {
+        const db = await this.getDatabase()
+
+        await new Promise<void>((resolve, reject) => {
+            const transaction = db.transaction(["ticketPatches"], "readonly");
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event)
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore("ticketPatches");
+
+            const request = objectStore.openCursor()
+            request.onsuccess = (event: any) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const rawPatch = cursor.value
+                    const patch = (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawPatch, { version: Version }))
+                    callback(patch)
+                    cursor.continue();
+                } else {
+                    // no more results
+                    resolve()
+                }
             }
         })
     }
@@ -606,13 +640,22 @@ export class WebshopManager {
         await this.storeSettingKey("lastFetchedOrder", this.lastFetchedOrder)
     }
 
-    async addTicketPatch(patch: AutoEncoderPatchType<TicketPrivate>) {
+    async addTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        if (patches.length === 0) {
+            return;
+        }
+
         // First save the patch in the local database
-        await this.storeTicketPatches([patch])
+        await this.storeTicketPatches(patches)
+        await this.ticketPatchesEventBus.sendEvent("patched", patches)
 
         // Try to save all remaining patches to the server (once)
         // Don't wait
         this.trySavePatches().catch(console.error)
+    }
+
+    async addTicketPatch(patch: AutoEncoderPatchType<TicketPrivate>) {
+        await this.addTicketPatches([patch])
     }
 
     async trySavePatches() {
@@ -626,10 +669,11 @@ export class WebshopManager {
         if (patches.length > 0) {
             try {
                 await this.patchTickets(patches)
+                this.savingTicketPatches = false
+                return this.trySavePatches();
             } catch (e) {
                 if (Request.isNetworkError(e)) {
                     // failed.
-                    // ignore the error for now
                 } else {
                     this.savingTicketPatches = false
                     throw e;
@@ -657,6 +701,7 @@ export class WebshopManager {
             console.error(e)
             // No db support or other error. Should ignore
         }
+        this.ticketsEventBus.sendEvent("fetched", response.data).catch(console.error)
 
         return response.data
     }
@@ -957,6 +1002,8 @@ export class WebshopManager {
 
                     if (callback) {
                         callback(response.results)
+                    } else {
+                        this.ticketsEventBus.sendEvent("fetched", response.results).catch(console.error)
                     }
                 }
                 

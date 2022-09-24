@@ -7,11 +7,12 @@
 </template>
 
 <script lang="ts">
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
 import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -43,9 +44,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     loading = false;
-    orders: PrivateOrder[] = []
+    orders: PrivateOrderWithTickets[] = []
     nextQuery: WebshopOrdersQuery | null = WebshopOrdersQuery.create({})
-
 
     get estimatedRows() {
         if (this.isLoadingOrders) {
@@ -55,7 +55,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return 0
     }
 
-    get actions(): TableAction<PrivateOrder>[] {
+    get actions(): TableAction<PrivateOrderWithTickets>[] {
         const builder = new OrderActionBuilder({
             webshopManager: this.webshopManager,
             component: this
@@ -68,7 +68,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
-                handler: (orders: PrivateOrder[]) => {
+                handler: (orders: PrivateOrderWithTickets[]) => {
                     this.openOrder(orders[0])
                 }
             }),
@@ -77,8 +77,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         ]
     }
 
-    allColumns = ((): Column<PrivateOrder, any>[] => {
-        const cols: Column<PrivateOrder, any>[] = [
+    allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
+        const cols: Column<PrivateOrderWithTickets, any>[] = [
             new Column<PrivateOrder, number>({
                 name: "#", 
                 getValue: (order) => order.number ?? 0, 
@@ -102,7 +102,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 getStyle: (status) => {
                     return OrderStatusHelper.getColor(status)
                 }, // todo: based on status
-                minimumWidth: 70,
+                minimumWidth: 100,
                 recommendedWidth: 120,
                 index: (this as any).$isMobile ? 1 : 0
             }),
@@ -272,6 +272,47 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 index: 1
             }),
         )
+
+        if (this.hasTickets) {
+            cols.push(
+                new Column<PrivateOrderWithTickets, {scanned: number, total: number}>({
+                    name: this.hasSingleTickets ? 'Ticket' : "Tickets", 
+                    enabled: true,
+                    getValue: (order) => {
+                        return {
+                            scanned: order.tickets.filter(t => !!t.scannedAt).length,
+                            total: order.tickets.length
+                        }
+                    },
+                    format: (stat) => {
+                        if (this.hasSingleTickets) {
+                            if (stat.total === 0) {
+                                return '—'
+                            }
+                            return stat.scanned === stat.total ? "Gescand" : "Niet gescand"
+                        }
+                        return stat.scanned.toString() + " / " + stat.total
+                    },
+                    compare: (a, b) => Sorter.stack(Sorter.byNumberValue(b.scanned, a.scanned), Sorter.byNumberValue(b.total, a.total)),
+                    getStyle: (stat) => {
+                        if (stat.total === 0) {
+                            return "gray"
+                        }
+
+                        if (stat.scanned === stat.total) {
+                            return "info"
+                        }
+                        if (stat.scanned === 0) {
+                            return "tag-gray"
+                        }
+                        return "warn"
+                    },
+                    minimumWidth: 100,
+                    recommendedWidth: this.hasSingleTickets ? 150 : 100,
+                    index: 1
+                })
+            )
+        }
       
         return cols
     })()
@@ -287,12 +328,12 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     putOrder(order: PrivateOrder) {
         for (const _order of this.orders) {
             if (order.id === _order.id) {
-                // replace data without affecting reference
+                // replace data without affecting reference or tickets
                 _order.set(order)
                 return
             }
         }
-        this.orders.push(order)
+        this.orders.push(PrivateOrderWithTickets.create(order))
     }
 
     async onNewOrders(orders: PrivateOrder[]) {
@@ -306,9 +347,50 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return Promise.resolve()
     }
 
+    async onNewTickets(tickets: TicketPrivate[]) {
+        console.log("Received new tickets from network")
+        
+        for (const ticket of tickets) {
+            const order = this.orders.find(o => o.id === ticket.orderId)
+            if (order) {
+                const existing = order.tickets.find(t => t.id === ticket.id);
+                if (existing) {
+                    existing.set(ticket)
+                } else {
+                    order.tickets.push(ticket)
+                }
+            } else {
+                console.warn('Couldn\'t find order for ticket', ticket)
+            }
+        }
+
+        return Promise.resolve()
+    }
+
+    onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        console.log("Received new tickets from network")
+        
+        mainLoop: for (const patch of patches) {
+            for (const order of this.orders) {
+                for (const ticket of order.tickets) {
+                    if (ticket.id === patch.id) {
+                        ticket.set(ticket.patch(patch))
+                        continue mainLoop;
+                    }
+                }
+            }
+        }
+
+        return Promise.resolve()
+    }
+
     created() {
         this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onNewOrders.bind(this))
         this.webshopManager.ordersEventBus.addListener(this, "deleted", this.onDeleteOrders.bind(this))
+
+        this.webshopManager.ticketsEventBus.addListener(this, "fetched", this.onNewTickets.bind(this))
+        this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
+
         this.reload();
         this.loadOrders().catch(console.error)
     }
@@ -329,6 +411,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
 
     beforeDestroy() {
         this.webshopManager.ordersEventBus.removeListener(this)
+        this.webshopManager.ticketsEventBus.removeListener(this)
+        this.webshopManager.ticketPatchesEventBus.removeListener(this)
         Request.cancelAll(this)
     }
 
@@ -344,8 +428,12 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return Promise.resolve()
     }
 
+    get hasSingleTickets() {
+        return this.preview.hasSingleTickets
+    }
+
     get hasTickets() {
-        return this.preview.meta.ticketType === WebshopTicketType.SingleTicket || this.preview.meta.ticketType === WebshopTicketType.Tickets
+        return this.preview.hasTickets
     }
 
     isLoadingOrders = true
@@ -362,12 +450,36 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             // (we don't need to decode all orders at the same time on the main thread)
 
             // We use a buffer to prevent DOM updates or Vue slowdown during streaming
-            let arrayBuffer: PrivateOrder[] = []
+            let arrayBuffer: PrivateOrderWithTickets[] = []
 
             await this.webshopManager.streamOrders((order) => {
                 // Same orders could be seen twice
-                arrayBuffer.push(order)
+                arrayBuffer.push(
+                    PrivateOrderWithTickets.create(order)
+                )
             }, false)
+
+            let ticketBuffer: TicketPrivate[] = []
+
+            await this.webshopManager.streamTickets((ticket) => {
+                ticketBuffer.push(ticket)
+            }, false)
+
+            await this.webshopManager.streamTicketPatches((patch) => {
+                const ticket = ticketBuffer.find(o => o.id === patch.id)
+                if (ticket) {
+                    ticket.set(ticket.patch(patch))
+                }
+            })
+
+            for (const ticket of ticketBuffer) {
+                const order = arrayBuffer.find(o => o.id === ticket.orderId)
+                if (order) {
+                    order.tickets.push(ticket)
+                } else {
+                    console.warn('Couldn\'t find order for ticket', ticket)
+                }
+            }
 
             if (arrayBuffer.length > 0) {
                 this.orders = arrayBuffer
@@ -396,18 +508,21 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             Toast.fromError(e).show()
         }
 
-        this.isLoadingOrders = false
 
         // And preload the tickets if needed
         if (this.hasTickets) {
             try {
-                await this.webshopManager.fetchNewTickets(false, false).catch(console.error)
+                await this.webshopManager.fetchNewTickets(false, false)
             } catch (e) {
                 // Fetching failed
                 Toast.fromError(e).show()
             }
+            
+            // Do we still have some missing patches that are not yet synced with the server?
+            this.webshopManager.trySavePatches().catch(console.error)
         }
 
+        this.isLoadingOrders = false
         this.isRefreshingOrders = false
     }
 
@@ -595,7 +710,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             )
         }
 
-        // todo: products
         definitions.push(
             new ChoicesFilterDefinition<PrivateOrder>({
                 id: "order_products",
@@ -610,6 +724,53 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             })
         )
 
+        if (this.hasTickets) {
+            definitions.push(
+                new ChoicesFilterDefinition<PrivateOrderWithTickets>({
+                    id: "order_ticket_scanned",
+                    name: "Ticket scanstatus",
+                    choices: this.hasSingleTickets ? [
+                        new ChoicesFilterChoice('none', 'Niet gescand'),
+                        new ChoicesFilterChoice('all', 'Gescand'),
+                    ] : [
+                        new ChoicesFilterChoice('none', 'Geen enkel ticket gescand'),
+                        new ChoicesFilterChoice('partial', 'Gedeeltelijk gescand'),
+                        new ChoicesFilterChoice('all', 'Alle tickets gescand'),
+                    ],
+                    defaultMode: ChoicesFilterMode.Or,
+                    getValue: (order) => {
+                        const scanned = order.tickets.filter(t => t.scannedAt).length
+                        const total = order.tickets.length
+
+                        if (scanned === 0) {
+                            return ['none']
+                        }
+
+                        if (scanned === total) {
+                            return ['all']
+                        }
+
+                        return ['partial']
+                    }
+                })
+            )
+
+            if (!this.hasSingleTickets) {
+                definitions.push(
+                    new NumberFilterDefinition<PrivateOrderWithTickets>({
+                        id: "order_ticket_count",
+                        name: "Aantal aangemaakte tickets",
+                        description: "Tickets worden pas aangemaakt als de bestelling werd betaald.",
+                        currency: false,
+                        floatingPoint: false,
+                        getValue: (order) => {
+                            return order.tickets.length
+                        }
+                    })
+                )
+            }
+        }
+
 
         return definitions
     }
@@ -618,8 +779,8 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         return "Bestellingen"
     }
 
-    openOrder(order: PrivateOrder) {
-        const table = this.$refs.table as TableView<PrivateOrder> | undefined
+    openOrder(order: PrivateOrderWithTickets) {
+        const table = this.$refs.table as TableView<PrivateOrderWithTickets> | undefined
         const component = new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(OrderView, { 
                 initialOrder: order,

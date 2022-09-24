@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { CartItem } from "./Cart";
@@ -65,6 +66,15 @@ export class TicketPublic extends Ticket {
             return this.index+" / "+this.total
         }
         return null
+    }
+
+    static sort(a: TicketPublic, b: TicketPublic) {
+        return Sorter.stack(
+            Sorter.byNumberValue(a.items.length, b.items.length),
+            Sorter.byStringValue(a.items[0]?.product?.name ?? "", b.items[0]?.product?.name ?? ""),
+            Sorter.byStringValue(a.items[0]?.id ?? "", b.items[0]?.id ?? ""), // group same options and items
+            -1 * Sorter.byNumberValue(a.index, b.index) as any,
+        )
     }
 }
 

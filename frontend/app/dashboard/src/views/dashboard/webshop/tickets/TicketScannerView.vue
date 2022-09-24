@@ -48,7 +48,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { AppManager } from "@stamhoofd/networking";
-import { Order, OrderStatus, Product, TicketPrivate } from "@stamhoofd/structures";
+import { Order, OrderStatus, PrivateOrder, Product, TicketPrivate } from "@stamhoofd/structures";
 import { sleep } from "@stamhoofd/utility";
 // QR-scanner worker
 import QrScanner from 'qr-scanner';
@@ -434,7 +434,7 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
         }))
     }
 
-    validTicket(ticket: TicketPrivate, order: Order) {
+    validTicket(ticket: TicketPrivate, order: PrivateOrder) {
         AppManager.shared.hapticSuccess() 
 
         // Disable scanning same one for 2 seconds

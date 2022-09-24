@@ -411,14 +411,7 @@ export default class OrderView extends Mixins(NavigationMixin){
                 },
                 decoder: new ArrayDecoder(TicketOrder as Decoder<TicketOrder>)
             })
-            this.tickets = response.data.map(ticket => ticket.getPublic(this.order!)).sort((a, b) => {
-                return Sorter.stack(
-                    Sorter.byNumberValue(a.items.length, b.items.length),
-                    Sorter.byStringValue(a.items[0]?.product?.name ?? "", b.items[0]?.product?.name ?? ""),
-                    Sorter.byStringValue(a.items[0]?.id ?? "", b.items[0]?.id ?? ""), // group same options and items
-                    -1 * Sorter.byNumberValue(a.index, b.index) as any,
-                )
-            })
+            this.tickets = response.data.map(ticket => ticket.getPublic(this.order!)).sort(TicketPublic.sort)
         } catch (e) {
             Toast.fromError(e).show()
         }        
@@ -487,7 +480,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         const TicketBuilder = (await import(
             /* webpackChunkName: "TicketBuilder" */
             /* webpackPrefetch: true */
-            '../../classes/TicketBuilder'
+            '@stamhoofd/ticket-builder'
         )).TicketBuilder
 
         const builder = new TicketBuilder(this.publicTickets, this.webshop, WebshopManager.organization, this.order ?? undefined)
