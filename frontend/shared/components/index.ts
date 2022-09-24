@@ -136,3 +136,7 @@ export * from "./src/tables/TableAction"
 export { default as TableActionsContextMenu } from "./src/tables/TableActionsContextMenu.vue"
 export { default as TableView } from "./src/tables/TableView.vue"
 export * from "./src/VueGlobalHelper"
+
+// Graphs
+export * from "./src/views/DateRange"
+export { default as GraphView } from "./src/views/GraphView.vue"
