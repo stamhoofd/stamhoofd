@@ -191,7 +191,6 @@ export class SessionManagerStatic {
 
         if (session.organization) {
             this.addOrganizationToStorage(session.organization).catch(console.error)
-            
         }
 
         this.callListeners("session")
@@ -209,6 +208,7 @@ export class SessionManagerStatic {
         })
 
         this.setUserId();
+        this.currentSession.saveToStorage()
     }
 
     setUserId() {
