@@ -576,12 +576,12 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             // todo
             console.info("Window became visible again")
 
-            if (this.lastRefresh.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
-                // Update when at least 5 minutes inactive
-                console.info("Updating table contents")
-                this.lastRefresh = new Date()
-                this.$emit("refresh")
-            }
+            //if (this.lastRefresh.getTime() + 1000 * 60 * 5 < new Date().getTime()) {
+            // Update when at least 5 minutes inactive
+            console.info("Updating table contents")
+            this.lastRefresh = new Date()
+            this.$emit("refresh")
+            //}
         }
     }
 
@@ -1508,7 +1508,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         color: $color-gray-5;
     }
 
-    &[data-style="success"], &[data-style="error"], &[data-style="info"], &[data-style="warn"], &[data-style="secundary"], &[data-style="tertiary"] {
+    &[data-style="success"], &[data-style="error"], &[data-style="info"], &[data-style="warn"], &[data-style="secundary"], &[data-style="tertiary"], &[data-style="tag-gray"] {
         > span {
             display: inline-block;
             font-size: 11px;
@@ -1558,6 +1558,11 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     &[data-style="tertiary"] > span {
         color: $color-tertiary-dark;
         background: $color-tertiary-background;
+    }
+
+    &[data-style="tag-gray"] > span {
+        color: $color-gray-1;
+        background: $color-background-shade;
     }
 
     &[data-align="right"] {

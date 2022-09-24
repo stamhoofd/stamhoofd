@@ -39,12 +39,12 @@
             </figure>
         </article>
         <div class="ticket-buttons">
-            <button class="button text" @click="download">
+            <button class="button text" type="button" @click="download">
                 <span class="icon download" />
                 <span>Download dit ticket</span>
             </button>
 
-            <button v-if="canShare" class="button text" @click="share">
+            <button v-if="canShare" class="button text" type="button" @click="share">
                 <span class="icon share" />
                 <span>Delen</span>
             </button>
@@ -133,7 +133,7 @@ export default class TicketBox extends Mixins(NavigationMixin){
         const TicketBuilder = (await import(
             /* webpackChunkName: "TicketBuilder" */
             /* webpackPrefetch: true */
-            '../../classes/TicketBuilder'
+            '@stamhoofd/ticket-builder'
         )).TicketBuilder
 
         const builder = new TicketBuilder([this.ticket], this.webshop, WebshopManager.organization, this.order ?? undefined)

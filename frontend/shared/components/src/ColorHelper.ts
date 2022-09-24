@@ -27,6 +27,8 @@ function hexToHSL(hex) {
 
 export class ColorHelper {
     static primaryColor: string | null;
+    static hue;
+    static saturation;
 
     static setColor(color: string, element?: HTMLElement) {
         const { h, s } = hexToHSL(color.substring(1));
@@ -35,6 +37,8 @@ export class ColorHelper {
         element.style.setProperty("--color-primary-saturation", s+"%");
 
         this.primaryColor = color;
+        this.hue = h;
+        this.saturation = s;
         element.style.setProperty("--color-primary", color)
     }
 }

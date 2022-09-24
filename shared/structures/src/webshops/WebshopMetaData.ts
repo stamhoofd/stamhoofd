@@ -386,6 +386,14 @@ export class WebshopMetaData extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 135 })
     domainActive = false
+
+    get hasTickets() {
+        return this.ticketType === WebshopTicketType.SingleTicket || this.ticketType === WebshopTicketType.Tickets
+    }
+
+    get hasSingleTickets() {
+        return this.ticketType === WebshopTicketType.SingleTicket
+    }
 }
 
 export class WebshopPrivateMetaData extends AutoEncoder {

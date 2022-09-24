@@ -50,24 +50,34 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="hasTickets" class="right-description">
-                    Ticketstatus
+                <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" @click="tickets.length > 0 ? openTickets($event) : null">
+                    <template v-if="tickets.length > 1">
+                        Tickets
+                    </template>
+                    <template v-else>
+                        Ticket
+                    </template>
                     
                     <template v-if="loadingTickets" slot="right">
                         -
                     </template>
-                    <span v-else-if="tickets.length == 0" slot="right" class="style-tag">
+                    <span v-else-if="hasSingleTickets && tickets.length == 0" slot="right" class="style-tag gray">
+                        Geen ticket
+                    </span>
+                    <span v-else-if="tickets.length == 0" slot="right" class="style-tag gray">
                         Geen tickets
                     </span>
-                    <span v-else-if="tickets.length == 1 && scannedCount == 1" slot="right" class="style-tag warn">
+                    <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 1" slot="right" class="style-tag succes">
                         Gescand
                     </span>
-                    <span v-else-if="tickets.length == 1 && scannedCount == 0" slot="right" class="style-tag success">
-                        Nog niet gescand
+                    <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 0" slot="right" class="style-tag gray">
+                        Niet gescand
                     </span>
-                    <span v-else slot="right" class="style-tag" :class="{ warn: scannedCount > 0, success: scannedCount == 0}">
+                    <span v-else slot="right" class="style-tag" :class="{ warn: scannedCount > 0 && scannedCount < tickets.length, gray: scannedCount == 0}">
                         {{ scannedCount }} / {{ tickets.length }} gescand
                     </span>
+
+                    <span v-if="tickets.length > 0" slot="right" class="icon arrow-right-small" />
                 </STListItem>
 
                 <STListItem v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')" @click="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null">
@@ -257,31 +267,24 @@
                     </figure>
                 </STListItem>
             </STList>
-
-            <div v-if="hasTickets" class="container">
-                <hr>
-                <h2>Tickets</h2>
-                <p>Is deze persoon zijn link kwijt, of is er een fout e-mailadres opgegeven? Dan kan je de volgende link bezorgen om de tickets opnieuw te laten downloaden.</p>
-
-                <input v-tooltip="'Klik om te kopiëren'" class="input" :value="orderUrl" readonly @click="copyElement">
-            </div>
         </main>
     </div>
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemView, CenteredMessage, ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, getPermissionLevelNumber, OrderData, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, ProductType, TicketPrivate, Version, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { WebshopManager } from "../WebshopManager";
-import AddItemView from "./AddItemView.vue";
 import { OrderActionBuilder } from "./OrderActionBuilder";
+import OrderTicketsView from "./OrderTicketsView.vue";
+import TicketRow from "./TicketRow.vue";
 
 @Component({
     components: {
@@ -292,7 +295,8 @@ import { OrderActionBuilder } from "./OrderActionBuilder";
         Radio,
         LoadingButton,
         STErrorsDefault,
-        LoadingView
+        LoadingView,
+        TicketRow
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -312,7 +316,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
 
     @Prop({ required: true })
-    initialOrder!: PrivateOrder
+    initialOrder!: PrivateOrderWithTickets
 
     @Prop({ required: true })
     webshopManager!: WebshopManager
@@ -321,21 +325,36 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.webshopManager.preview
     }
 
-    order: PrivateOrder = this.initialOrder
-    tickets: TicketPrivate[] = []
+    order: PrivateOrderWithTickets = this.initialOrder
     loadingTickets = false
     
     @Prop({ default: null })
-    getNextOrder!: (order: PrivateOrder) => PrivateOrder | null;
+    getNextOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
 
     @Prop({ default: null })
-    getPreviousOrder!: (order: PrivateOrder) => PrivateOrder | null;
+    getPreviousOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
 
     @Watch("order.payment.status")
     onChangePaymentStatus(n: string, old: string) {
         if (n === PaymentStatus.Succeeded && old !== PaymentStatus.Succeeded) {
             this.downloadNewTickets()
         }
+    }
+
+    get tickets() {
+        return this.order.tickets
+    }
+
+    openTickets() {
+        this.present({
+            components: [
+                new ComponentWithProperties(OrderTicketsView, {
+                    initialOrder: this.order,
+                    webshopManager: this.webshopManager,
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
 
     get hasNextOrder(): boolean {
@@ -369,6 +388,10 @@ export default class OrderView extends Mixins(NavigationMixin){
             return false
         }
         return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
+
+    get hasSingleTickets() {
+        return this.webshop.meta.ticketType === WebshopTicketType.SingleTicket
     }
 
     get hasTickets() {
@@ -444,6 +467,9 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     created() {
+        this.webshopManager.ticketsEventBus.addListener(this, "fetched", this.onNewTickets.bind(this))
+        this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
+        
         if (this.hasTickets) {
             this.recheckTickets()
         }
@@ -453,7 +479,7 @@ export default class OrderView extends Mixins(NavigationMixin){
         if (this.hasTickets) {
             this.loadingTickets = true
             this.webshopManager.getTicketsForOrder(this.order.id, true).then((tickets) => {
-                this.tickets = tickets
+                this.order.tickets = tickets
                 this.loadingTickets = false
             }).catch(e => {
                 console.error(e)
@@ -507,6 +533,39 @@ export default class OrderView extends Mixins(NavigationMixin){
         return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod, this.order.data.paymentContext))
     }
 
+    async onNewTickets(tickets: TicketPrivate[]) {        
+        for (const ticket of tickets) {
+            if (ticket.orderId == this.order.id) {
+                const existing = this.order.tickets.find(t => t.id === ticket.id);
+                if (existing) {
+                    existing.set(ticket)
+                } else {
+                    this.order.tickets.push(ticket)
+                }
+            }
+        }
+
+        return Promise.resolve()
+    }
+
+    onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {        
+        for (const patch of patches) {
+            for (const ticket of this.order.tickets) {
+                if (ticket.id === patch.id) {
+                    ticket.set(ticket.patch(patch))
+                    break;
+                }
+            }
+        }
+
+        return Promise.resolve()
+    }
+
+    beforeDestroy() {
+        this.webshopManager.ticketsEventBus.removeListener(this)
+        this.webshopManager.ticketPatchesEventBus.removeListener(this)
+    }
+
     activated() {
         // eslint-disable-next-line @typescript-eslint/unbound-method
         document.addEventListener("keydown", this.onKey);
@@ -552,35 +611,11 @@ export default class OrderView extends Mixins(NavigationMixin){
                     if (existing) {
                         existing.set(ticket)
                     } else {
-                        this.tickets.push(ticket)
+                        this.order.tickets.push(ticket)
                     }
                 }
             }
         }).catch(console.error);
-    }
-
-    get orderUrl() {
-        return "https://"+this.webshop.getUrl(OrganizationManager.organization)+"/order/"+(this.order.id)
-    }
-
-    copyElement(event) {
-        event.target.contentEditable = true;
-
-        document.execCommand('selectAll', false);
-        document.execCommand('copy')
-
-        event.target.contentEditable = false;
-
-        const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: "📋 Gekopieerd!",
-            x: event.clientX,
-            y: event.clientY + 10,
-        });
-        this.present(displayedComponent.setDisplayStyle("overlay"));
-
-        setTimeout(() => {
-            displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");
-        }, 1000);
     }
 }
 </script>

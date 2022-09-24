@@ -44,6 +44,14 @@ export class WebshopPreview extends AutoEncoder {
     @field({ decoder: WebshopPrivateMetaData, version: 62 })
     privateMeta = WebshopPrivateMetaData.create({})
 
+    get hasSingleTickets() {
+        return this.meta.hasSingleTickets
+    }
+
+    get hasTickets() {
+        return this.meta.hasTickets
+    }
+
     getDefaultDomain(organization: Organization): string  {
         return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])
     }
@@ -142,6 +150,14 @@ export class Webshop extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Category) })
     categories: Category[] = []
+
+    get hasSingleTickets() {
+        return this.meta.hasSingleTickets
+    }
+
+    get hasTickets() {
+        return this.meta.hasTickets
+    }
 
     getDefaultDomain(organization: Organization): string  {
         return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])

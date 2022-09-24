@@ -2,13 +2,13 @@
 import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2'
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2'
 import { I18nController } from "@stamhoofd/frontend-i18n";
-import { Order, Organization, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
+import { Order, Organization, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 // PDFKit is used! Wrong warning below!
 //import PDFKit from "pdfkit"
 import QRCode from "qrcode"
 
-import PDFDocument from '../pdfkit.standalone';
+import PDFDocument from './pdfkit.standalone';
 
 // 1 mm
 const MM = 2.834666666666667
@@ -36,14 +36,14 @@ export class TicketBuilder {
      */
     order?: Order
 
-    webshop: Webshop
+    webshop: WebshopPreview | Webshop
     organization: Organization
 
     document: PDFDocument
 
     private dataBuffer: any[] = []
 
-    constructor(tickets: TicketPublic[], webshop: Webshop, organization: Organization, order?: Order) {
+    constructor(tickets: TicketPublic[], webshop: WebshopPreview | Webshop, organization: Organization, order?: Order) {
         this.tickets = tickets
         this.webshop = webshop
         this.organization = organization

@@ -1,0 +1,8 @@
+{
+    "name": "@stamhoofd/ticket-builder",
+    "version": "1.0.0",
+    "private": true,
+    "dependencies": {
+        "@stamhoofd/assets": "1.0.0"
+    }
+}
