@@ -1,10 +1,17 @@
 <template>
     <div class="container graph">
         <h2 class="style-with-button">
-            <span>{{ title }}</span>
-            <GraphDateRangeSelector v-if="options === null || options.length > 1" v-model="range" :options="options" />
+            <button class="button style-label" type="button" @click="chooseConfiguration">
+                <span class="">{{ title }}</span>
+                <span v-if="configurations.length > 1" class="icon arrow-down-small" />
+                <span v-else class="icon empty" />
+            </button>
+
+            <div>
+                <GraphDateRangeSelector v-if="options === null || options.length > 1" v-model="range" :options="options" />
+            </div>
         </h2>
-        <p class="style-price-big">
+        <p class="style-statistic">
             {{ loading ? '-' : format(lastValue) }}
         </p>
         <div class="canvas-box">
@@ -15,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { Spinner, STNavigationBar, Toast } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, Spinner, STNavigationBar, Toast } from "@stamhoofd/components";
 import { Graph } from "@stamhoofd/structures";
 import {
     CategoryScale,
@@ -27,6 +34,7 @@ import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 import { DateOption } from "./DateRange";
 import GraphDateRangeSelector from "./GraphDateRangeSelector.vue";
+import { GraphViewConfiguration } from "./GraphViewConfiguration";
 
 @Component({
     components: {
@@ -36,22 +44,39 @@ import GraphDateRangeSelector from "./GraphDateRangeSelector.vue";
     }
 })
 export default class GraphView extends  Vue {
-    @Prop({ default: false })
-    sum: boolean
+    @Prop({ required: true }) 
+    configurations!: GraphViewConfiguration[][]
 
-    @Prop({ default: null })
-    formatter: ((value: number) => string) | null
+    selectedConfiguration = this.configurations[0][0]
 
-    @Prop({ required: true })
-    title: string
+    get sum() {
+        return this.selectedConfiguration.sum
+    }
 
-    @Prop({ required: true })
-    load: (range: DateOption) => Promise<Graph>
+    get formatter() {
+        return this.selectedConfiguration.formatter
+    }
 
-    @Prop({ required: true, default: null })
-    options!: DateOption[] | null
+    get title() {
+        return this.selectedConfiguration.title
+    }
+
+    async load(range: DateOption): Promise<Graph> {
+        return await this.selectedConfiguration.load(range)
+    }
+
+    get options() {
+        return this.selectedConfiguration.options
+    }
     
-    range = this.options ? this.options[0] : null;
+    get range() {
+        return this.selectedConfiguration.selectedRange
+    }
+
+    set range(range: DateOption | null) {
+        this.selectedConfiguration.selectedRange = range
+    }
+
     chart: Chart
     loading = true
 
@@ -61,11 +86,26 @@ export default class GraphView extends  Vue {
         this.loadData().catch(console.error) 
     }
 
+    chooseConfiguration(event) {
+        const contextMenu = new ContextMenu(
+            this.configurations.map(arr => {
+                return arr.map(config => {
+                    return new ContextMenuItem({
+                        name: config.title,
+                        action: () => {
+                            this.selectedConfiguration = config
+                            return true;
+                        }
+                    })
+                })
+            })
+        );
+        contextMenu.show({ button: event.currentTarget, xPlacement: "right" }).catch(console.error);
+    }
+
     @Watch('options')
-    onChangeOptions(n, old) {
-        if (old === null) {
-            this.range = n[0]
-        }
+    onChangeOptions(n) {
+        this.range = n[0]
     }
 
     @Watch('range')
@@ -118,6 +158,7 @@ export default class GraphView extends  Vue {
     }
 
     loadGraph(graph: Graph) {
+        let update = false
         if (!this.chart) {
             Chart.register(
                 LineElement,
@@ -131,7 +172,8 @@ export default class GraphView extends  Vue {
                 Tooltip
             );
         } else {
-            this.chart.destroy()
+            //this.chart.destroy()
+            update = true;
         }
 
         let width, height, gradient;
@@ -170,150 +212,167 @@ export default class GraphView extends  Vue {
 
         const fontFamily = `Metropolis, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`;
         
-        this.chart = new Chart(this.$refs.canvas as HTMLCanvasElement, {
-            type: 'line',
-            data: {
-                labels: graph.labels,
-                datasets: graph.data.map(d => {
-                    return {
-                        label: d.label,
-                        data: d.values,
-                        cubicInterpolationMode: 'monotone',
-                        backgroundColor: function(context) {
-                            const chart = context.chart;
-                            const {ctx, chartArea} = chart;
-
-                            if (!chartArea) {
-                            // This case happens on initial chart load
-                                return;
-                            }
-                            return getBackgroundGradient(ctx, chartArea);
-                        },
-                        borderColor: function(context) {
-                            const chart = context.chart;
-                            const {ctx, chartArea} = chart;
-
-                            if (!chartArea) {
-                            // This case happens on initial chart load
-                                return;
-                            }
-                            return getBorderGradient(ctx, chartArea);
-                        },
-                        fill: true,
-                        borderWidth: 3,
-                        tension: 1,
-                        clip: false,
-                        borderJoinStyle: 'miter',
-                        pointBackgroundColor: function(context) {
-                            const chart = context.chart;
-                            const {ctx, chartArea} = chart;
-
-                            if (!chartArea) {
-                            // This case happens on initial chart load
-                                return;
-                            }
-                            return getBorderGradient(ctx, chartArea);
-                        }
-                    }
-                })
+        const options = {
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    bottom: 10,
+                    top: 10,
+                    left: 10,
+                    right: 10
+                },
             },
-            options: {
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        bottom: 10,
-                        top: 10,
-                        left: 10,
-                        right: 10
+            scales: {
+                y: {
+                    display: false,
+                    stacked: false,
+                    beginAtZero: true,
+                    suggestedMax: 1,
+                    position: {
+                        x: -50,
                     },
-                },
-                scales: {
-                    y: {
-                        display: false,
-                        stacked: false,
-                        beginAtZero: true,
-                        suggestedMax: 100,
-                        position: {
-                            x: -50,
-                        },
-                        ticks: {
-                            display: false
-                        },
-                        
-                        grid: {
-                            display: false
-                        }
-                    },
-                    x: {
-                        //display: false,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)',
-                            borderColor: "rgba(0, 0, 0, 0)",
-                            tickColor: 'red',
-                            display: false,
-                        },
-                        ticks: {
-                            display: true,
-                            align: 'inner',
-                            font: {
-                                size: 13,
-                                family: fontFamily
-                            },
-                            // Include a dollar sign in the ticks
-                            callback: function(value, index, ticks) {
-                                if (index === 0 || index === ticks.length - 1) {
-                                    return this.getLabelForValue(value as any as number)
-                                }
-                                return undefined;
-                            }
-                        }
-                    }
-                },
-                // Hide horizontal lines
-
-                plugins: {
-                    legend: {
+                    ticks: {
                         display: false
                     },
-                    tooltip: {
-                        padding: 15,
-                        cornerRadius: 7,
-                        caretSize: 0,
-                        bodyFont: {
-                            family: fontFamily,
-                            weight: '400',
-                            size: 13
-                        },
-                        titleFont: {
-                            family: fontFamily,
-                            weight: '600',
-                            size: 14
-                        },
-                        displayColors: false,
-                        callbacks: {
-                            label: (context) => {
-                                return this.format(context.parsed.y as number)
-                            }
-                        }
-                    },
-                },
-                elements: {
-                    point:{
-                        radius: 0,
-                        hoverRadius: 5,
-                        hitRadius: 50,
-                        borderWidth: 0,
-                        hoverBorderWidth: 0
+                        
+                    grid: {
+                        display: false
                     }
+                },
+                x: {
+                    //display: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        borderColor: "rgba(0, 0, 0, 0)",
+                        tickColor: 'red',
+                        display: false,
+                    },
+                    ticks: {
+                        display: true,
+                        align: 'inner',
+                        font: {
+                            size: 13,
+                            family: fontFamily
+                        },
+                        // Include a dollar sign in the ticks
+                        callback: function(value, index, ticks) {
+                            if (index === 0 || index === ticks.length - 1) {
+                                return this.getLabelForValue(value as any as number)
+                            }
+                            return undefined;
+                        }
+                    }
+                }
+            },
+            elements: {
+                point:{
+                    radius: 0,
+                    hoverRadius: 5,
+                    hitRadius: 50,
+                    borderWidth: 0,
+                    hoverBorderWidth: 0
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    padding: 15,
+                    cornerRadius: 7,
+                    caretSize: 0,
+                    bodyFont: {
+                        family: fontFamily,
+                        weight: '400',
+                        size: 13
+                    },
+                    titleFont: {
+                        family: fontFamily,
+                        weight: '600',
+                        size: 14
+                    },
+                    displayColors: false,
+                    callbacks: {
+                        label: (context) => {
+                            return this.format(context.parsed.y as number)
+                        }
+                    }
+                },
+            }
+        };
+
+        const datasets = graph.data.map(d => {
+            return {
+                label: d.label,
+                data: d.values,
+                cubicInterpolationMode: 'monotone',
+                backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+
+                    if (!chartArea) {
+                    // This case happens on initial chart load
+                        return;
+                    }
+                    return getBackgroundGradient(ctx, chartArea);
+                },
+                borderColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+
+                    if (!chartArea) {
+                    // This case happens on initial chart load
+                        return;
+                    }
+                    return getBorderGradient(ctx, chartArea);
+                },
+                fill: true,
+                borderWidth: 3,
+                tension: 1,
+                clip: false,
+                borderJoinStyle: 'miter',
+                pointBackgroundColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+
+                    if (!chartArea) {
+                    // This case happens on initial chart load
+                        return;
+                    }
+                    return getBorderGradient(ctx, chartArea);
                 }
             }
         });
+
+        if (update) {
+            // Only update these values because they can animate
+            this.chart.data.datasets[0].data! = datasets[0].data
+            this.chart.data.datasets[0].label! = datasets[0].label
+            this.chart.data.labels = graph.labels
+            this.chart.update()
+        } else {
+            this.chart = new Chart(this.$refs.canvas as HTMLCanvasElement, {
+                type: 'line',
+                data: {
+                    labels: graph.labels,
+                    datasets: datasets as any
+                },
+                options: options as any
+            });
+        }
+            
+        
     }
 }
 </script>
 
 <style scoped lang="scss">
 
+.graph {
+    h2.style-with-button > *:first-child{
+        padding-bottom: 5px !important;
+    }
+}
 .canvas-box {
     position: relative;
     width: 100%;

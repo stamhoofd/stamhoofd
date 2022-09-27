@@ -8,23 +8,18 @@
             <h1>
                 Statistieken
             </h1>
-            <p class="info-box">
-                Geannuleerde bestellingen zijn niet inbegrepen.
-            </p>
+
+            <hr>
 
             <div class="graph-grid">
-                <GraphView title="Omzet" :formatter="priceFormatter()" :sum="true" :options="dateOptions" :load="loadRevenueGraph" />
-
-                <template v-if="hasTickets && (scanDateOptions === null || scanDateOptions.length > 0)">
-                    <GraphView title="Gescande tickets" :formatter="formatNumber" :sum="true" :options="scanDateOptions" :load="loadScanGraph" />
-                </template>
+                <GraphView :configurations="graphConfigurations" />
             </div>
 
             <hr>
 
             <div class="stats-grid">
                 <STInputBox v-if="false" title="Omzet">
-                    <p class="style-price-big">
+                    <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : formatPrice(totalRevenue) }}
                         </span>
@@ -32,98 +27,88 @@
                 </STInputBox>
 
                 <STInputBox title="Bestellingen">
-                    <p class="style-price-big">
+                    <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : totalOrders }}
                         </span>
                     </p>
-                </STInputBox>
-
-                <STInputBox title="Gemiddeld bestelbedrag">
-                    <p class="style-price-big">
-                        <span>
-                            {{ loading ? '-' : formatPrice(averagePrice) }}
-                        </span>
+                    <p class="style-description-small">
+                        {{ loading ? '-' : formatPrice(averagePrice) + ' / bestelling' }}
                     </p>
                 </STInputBox>
+
+                <STInputBox title="Betaald">
+                    <p class="style-statistic">
+                        <span>
+                            {{ loading ? '-' : totalOrders }}
+                        </span>
+                    </p>
+                    <p class="style-description-small">
+                        {{ loading ? '-' : formatPrice(averagePrice) + ' / bestelling' }}
+                    </p>
+                </STInputBox>
+
+                <template v-if="hasTickets">
+                    <STInputBox title="Tickets">
+                        <p class="style-statistic">
+                            {{ loading ? '-' : totalTickets }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ loading ? '-' : totalScannedTickets + ' gescand' }}
+                        </p>
+                    </STInputBox>
+                </template>
+
+                <template v-if="hasVouchers">
+                    <STInputBox title="Vouchers">
+                        <p class="style-statistic">
+                            {{ loading ? '-' : totalVouchers }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ loading ? '-' : totalScannedVouchers + ' gescand' }}
+                        </p>
+                    </STInputBox>
+                </template>
             </div>
 
-            <template v-if="hasTickets">
-                <hr>
-                <h2>Tickets</h2>
-
-                <div class="stats-grid">
-                    <STInputBox title="Verkocht">
-                        <p class="style-price-big">
-                            <span>
-                                {{ loading ? '-' : totalTickets }}
-                            </span>
-                        </p>
-                    </STInputBox>
-
-                    <STInputBox title="Gescand">
-                        <p class="style-price-big">
-                            <span>
-                                {{ loading ? '-' : totalScannedTickets }}
-                            </span>
-                        </p>
-                    </STInputBox>
-                </div>
-            </template>
-
-            <template v-if="hasVouchers">
-                <hr>
-                <h2>Vouchers</h2>
-
-                <div class="stats-grid">
-                    <STInputBox title="Verkocht">
-                        <p class="style-price-big">
-                            <span>
-                                {{ loading ? '-' : totalVouchers }}
-                            </span>
-                        </p>
-                    </STInputBox>
-
-                    <STInputBox title="Gescand">
-                        <p class="style-price-big">
-                            <span>
-                                {{ loading ? '-' : totalScannedVouchers }}
-                            </span>
-                        </p>
-                    </STInputBox>
-                </div>
-            </template>
 
             <div v-if="!loading && totalByProduct.length > 0" class="container">
                 <hr>
                 <h2>Per productcombinatie</h2>
 
-                <div class="stats-grid">
-                    <STInputBox v-for="(info, index) in totalByProduct" :key="index" :title="info.name">
-                        <p class="style-price-big">
-                            <span>
-                                {{ loading ? '-' : info.amount }}
-                            </span>
-                        </p>
-                        <p class="style-description-small">
-                            {{ loading ? '-' : formatPrice(info.price) }}
-                        </p>
-
+                <STList>
+                    <STListItem v-for="(info, index) in totalByProduct" :key="index" class="right-small">
+                        <h3>{{ info.name }}</h3>
                         <p v-if="info.description" class="style-description-small pre-wrap" v-text="info.description" />
-                    </STInputBox>
-                </div>
+
+                        <template slot="right">
+                            <p class="style-price-big">
+                                {{ loading ? '-' : info.amount }}
+                            </p>
+                            <p class="style-description-small">
+                                {{ loading ? '-' : formatPrice(info.price) }}
+                            </p>
+                        </template>
+                    </STListItem>
+                </STList>
             </div>
+
+            <hr>
+            <h2>Info</h2>
+            <p>Geannuleerde bestellingen of verwijderde bestellingen worden niet meegeteld in de statistieken.</p>
         </main>
     </div>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, DateOption, GraphView,Spinner, STInputBox, STNavigationBar, Toast } from "@stamhoofd/components";
+import { BackButton, Checkbox, DateOption, GraphView, Spinner, STInputBox, STList, STListItem,STNavigationBar, Toast,   } from "@stamhoofd/components";
+import { GraphViewConfiguration } from "@stamhoofd/components/src/views/GraphViewConfiguration";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { Category, Graph, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { GraphData } from "@stamhoofd/structures/esm/dist";
 import { Formatter } from '@stamhoofd/utility';
+import { DateTime } from "luxon";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from '../WebshopManager';
@@ -135,7 +120,9 @@ import { WebshopManager } from '../WebshopManager';
         BackButton,
         Spinner,
         STInputBox,
-        GraphView
+        GraphView,
+        STListItem,
+        STList
     }
 })
 export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
@@ -167,6 +154,9 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     }
 
     async createGroupedChart(range: DateOption, dataGenerator: (callback: (total: number, date: Date) => void) => Promise<void>): Promise<Graph> {
+        // Create range copy so we don't change the reference
+        range = new DateOption(range.name, {...range.range})
+        
         // Keep a Set of all order Id's to prevent duplicate orders (in case an order gets updated, we'll receive it multiple times)
         const orderByDate = new Map<string, {total: number, date: Date}>()
 
@@ -177,30 +167,41 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
         // If range is larger than 2 month: group by week
         const days = (range.range.end.getTime() - range.range.start.getTime()) / (1000 * 60 * 60 * 24)
-        
-        if (days <= 3) {
-            // Group per hour
-            groupingMethod = (date: Date) => {
-                return Formatter.dateIso(date) + " " + date.getHours()
+        const initialTimezone = range.range.start.getTimezoneOffset()
+        const getDaylightSavingSuffix = (date: Date) => {
+            if (date.getTimezoneOffset() !== initialTimezone) {
+                return "'"
             }
-            groupingInterval = { hours: 1 }
+            return ""
+        }
+    
+        if (days <= 4) {
+            let minutes = 60;
+
+            // If range is larger than 2 days: group by hour
+            if (days <= 3) {
+                minutes = 30;
+            }
+
+            if (days <= 1.5) {
+                minutes = 15;
+            }
+
+            if (days <= 1) {
+                minutes = 10;
+            }
+            // Group per 15 minutes
+            groupingMethod = (date: Date) => {
+                return Formatter.dateIso(date) + " " + date.getHours() + ":" + Math.floor(date.getMinutes()/minutes) + getDaylightSavingSuffix(date)
+            }
+            groupingInterval = { minutes }
             groupingLabel = (date: Date) => {
-                return Formatter.date(date) + " " + date.getHours() + ":00"
+                return Formatter.date(date) + " " + date.getHours() + ":" + (Math.floor(date.getMinutes()/minutes)*minutes).toString().padStart(2, "0") + getDaylightSavingSuffix(date)
             }
             range.range.start = Formatter.luxon(range.range.start).startOf("hour").toJSDate()
         }
-        
-        if (days <= 2) {
-            // Group per half hour
-            groupingMethod = (date: Date) => {
-                return Formatter.dateIso(date) + " " + date.getHours() + ":" + (date.getMinutes() >= 30 ? "30" : "00")
-            }
-            groupingInterval = { minutes: 30 }
-            groupingLabel = (date: Date) => {
-                return Formatter.date(date) + " " + date.getHours() + ":" + (date.getMinutes() >= 30 ? "30" : "00")
-            }
-            range.range.start = Formatter.luxon(range.range.start).startOf("hour").toJSDate()
-        }
+
+        console.log(range)
 
         if (days > 60) {
             groupingMethod = (date: Date) => {
@@ -276,8 +277,8 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
         })
     }
 
-    async loadRevenueGraph(range: DateOption): Promise<Graph> {
-        console.log('Loading revenue graph');
+    async loadOrderGraph(range: DateOption, type: 'revenue' | 'count'): Promise<Graph> {
+        console.log('Loading ' + type + ' graph');
         const orderIds = new Set<string>()
 
         return await this.createGroupedChart(range, async (callback) => {
@@ -289,36 +290,94 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                     }
 
                     orderIds.add(order.id)
-                    callback(order.data.totalPrice, order.createdAt)
+
+                    switch (type) {
+                        case 'revenue':
+                            callback(order.data.totalPrice, order.createdAt)
+                            break;
+                        case 'count':
+                            callback(1, order.createdAt)
+                            break;
+                    }
                 }
             }, false)
         });
     }
 
-    async loadScanGraph(range: DateOption): Promise<Graph> {
-        console.log('Loading scan graph');
-
+    async loadScanGraph(range: DateOption, filterVouchers: boolean): Promise<Graph> {
         return await this.createGroupedChart(range, async (callback) => {
+            const orderIds = new Set<string>()
+
+            // Keep track of all the order item ids that are a voucher, so we can count them separately
+            const voucherItemMap = new Set<string>()
+
+            await this.webshopManager.streamOrders((order: Order) => {
+                if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
+                    orderIds.add(order.id)
+
+                    // Vouchermap
+                    for (const item of order.data.cart.items) {
+                        if (item.product.type === ProductType.Voucher) {
+                            voucherItemMap.add(item.id)
+                        }
+                    }
+                }
+            }, false)
+
             await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
-                if (ticket.scannedAt) {
+                if (ticket.scannedAt && orderIds.has(ticket.orderId)) {
+                    if (filterVouchers) {
+                        if (!ticket.itemId) {
+                            return
+                        }
+                        if (!voucherItemMap.has(ticket.itemId)) {
+                            return
+                        }
+                    } else {
+                        if (ticket.itemId && voucherItemMap.has(ticket.itemId)) {
+                            return
+                        }
+                    }
+
+                    // Only count tickets for not canceled orders
                     return callback(1, ticket.scannedAt)
                 }
             }, false)
         });
     }
 
-    
-
     dateOptions: DateOption[] | null = null
     scanDateOptions: DateOption[] | null = null
+    
+    revenueGraph = new GraphViewConfiguration({
+        title: 'Omzet',
+        load: (range) => this.loadOrderGraph(range, 'revenue'),
+        formatter: (value: number) => Formatter.price(value),
+        sum: true
+    });
+
+    countGraph = new GraphViewConfiguration({
+        title: 'Aantal bestellingen',
+        load: (range) => this.loadOrderGraph(range, 'count'),
+        formatter: (value: number) => value.toString(),
+        sum: true
+    });
+
+
+    graphConfigurations = [
+        [
+            this.revenueGraph,
+            this.countGraph
+        ]
+    ]
 
     buildTicketDateRangeOptions() {
         const options: DateOption[] = []
         // Fill options here
         if (this.firstScannedTicketDate && this.lastScannedTicketDate) {
-            options.push(new DateOption("Per uur", { 
-                start: Formatter.luxon(this.firstScannedTicketDate).startOf('hour').toJSDate(), 
-                end: Formatter.luxon(this.lastScannedTicketDate).endOf('hour').toJSDate()
+            options.push(new DateOption("Altijd", { 
+                start: Formatter.luxon(this.firstScannedTicketDate).startOf('minute').toJSDate(), 
+                end: Formatter.luxon(this.lastScannedTicketDate).endOf('minute').toJSDate()
             }))
         }
         return options;
@@ -331,7 +390,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
         // Fill options here
         if (this.firstOrderDate && this.lastOrderDate) {
-            options.push(new DateOption("Alles", { 
+            options.push(new DateOption("Altijd", { 
                 start: Formatter.luxon(this.firstOrderDate).startOf('day').toJSDate(), 
                 end: Formatter.luxon(this.lastOrderDate).endOf('day').toJSDate()
             }))
@@ -428,45 +487,8 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 
             await this.webshopManager.loadWebshopIfNeeded(false)
 
-            /**
-             * Count the tickets per order item (we need to order item type to know if it is a voucher or a ticket)
-             */
-            const orderTicketMap: Map<string, Map<string, { scanned: number, total: number }>> = new Map()
-
-            if (this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
-                await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
-                    if (ticket.scannedAt) {
-                        if (!this.firstScannedTicketDate || ticket.scannedAt < this.firstScannedTicketDate) {
-                            this.firstScannedTicketDate = ticket.scannedAt
-                        }
-                        if (!this.lastScannedTicketDate || ticket.scannedAt > this.lastScannedTicketDate) {
-                            this.lastScannedTicketDate = ticket.scannedAt
-                        }
-                    }
-
-                    // determine ticket type
-                    if (ticket.itemId !== null) {
-                        // Add it to the orderTicketMap
-                        const orderId = ticket.orderId
-                        const orderItemMap: Map<string, { scanned: number, total: number }> = orderTicketMap.get(orderId) ?? new Map()
-                        orderItemMap.set(ticket.itemId, {
-                            scanned: (orderItemMap.get(ticket.itemId)?.scanned ?? 0) + (ticket.scannedAt ? 1 : 0),
-                            total: (orderItemMap.get(ticket.itemId)?.total ?? 0) + 1
-                        })
-                        orderTicketMap.set(orderId, orderItemMap)
-                        return
-                    }
-
-                    // Don't add directly, because we don't want to include ticket for canceled / deleted orders
-                    const orderId = ticket.orderId
-                    const orderItemMap: Map<string, { scanned: number, total: number }> = orderTicketMap.get(orderId) ?? new Map()
-                    orderItemMap.set('', {
-                        scanned: (orderItemMap.get('')?.scanned ?? 0) + (ticket.scannedAt ? 1 : 0),
-                        total: (orderItemMap.get('')?.total ?? 0) + 1
-                    })
-                    orderTicketMap.set(orderId, orderItemMap)
-                })
-            }
+            // Keep track of all the order item ids that are a voucher, so we can count them separately
+            const voucherItemMap = new Set<string>()
 
             await this.webshopManager.streamOrders((order: Order) => {
                 if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
@@ -496,34 +518,38 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                                 price: item.getPrice(order.data.cart),
                             })
                         }
-                    }
 
-                    // Check if we have tickets in orderTicketMap
-                    const orderItemMap = orderTicketMap.get(order.id)
-                    if (orderItemMap) {
-                        for (const [itemId, counter] of orderItemMap) {
-                            if (itemId === '') {
-                                // General order
-                                this.totalScannedTickets += counter.scanned
-                                this.totalTickets += counter.total
-                                continue;
-                            }
-                            // Find item
-                            const item = order.data.cart.items.find(i => i.id === itemId)
-                            if (item) {
-                                // Check if it is a voucher
-                                if (item.product.type === ProductType.Voucher) {
-                                    this.totalScannedVouchers += counter.scanned
-                                    this.totalVouchers += counter.total
-                                } else {
-                                    this.totalScannedTickets += counter.scanned
-                                    this.totalTickets += counter.total
-                                }
-                            }
+                        if (item.product.type === ProductType.Voucher) {
+                            voucherItemMap.add(item.id)
                         }
                     }
                 }
             })
+
+            if (this.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
+                await this.webshopManager.streamTickets((ticket: TicketPrivate) => {
+                    if (!orderIds.has(ticket.orderId)) {
+                        return;
+                    }
+
+                    if (ticket.scannedAt) {
+                        if (!this.firstScannedTicketDate || ticket.scannedAt < this.firstScannedTicketDate) {
+                            this.firstScannedTicketDate = ticket.scannedAt
+                        }
+                        if (!this.lastScannedTicketDate || ticket.scannedAt > this.lastScannedTicketDate) {
+                            this.lastScannedTicketDate = ticket.scannedAt
+                        }
+                    }
+
+                    if (ticket.itemId !== null && voucherItemMap.has(ticket.itemId)) {
+                        this.totalScannedVouchers += (ticket.scannedAt ? 1 : 0)
+                        this.totalVouchers += 1
+                    } else {
+                        this.totalScannedTickets += (ticket.scannedAt ? 1 : 0)
+                        this.totalTickets += 1
+                    }
+                })
+            }
 
             // Sort productmap values by amount and store in totalByProduct
             this.totalByProduct = Array.from(productMap.values()).sort((a, b) => b.amount - a.amount)
@@ -532,8 +558,31 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                 this.averagePrice = Math.round(this.totalRevenue / this.totalOrders)
             }
 
-            this.dateOptions = this.buildDateRangeOptions()
-            this.scanDateOptions = this.buildTicketDateRangeOptions()
+            this.revenueGraph.options = this.countGraph.options = this.buildDateRangeOptions()
+
+            if (this.totalScannedTickets > 0 || this.totalScannedVouchers > 0) {
+                const group: GraphViewConfiguration[] = []
+                if (this.totalScannedTickets > 0) {
+                    group.push(new GraphViewConfiguration({
+                        title: "Gescande tickets",
+                        options: this.buildTicketDateRangeOptions(),
+                        formatter: (value: number) => value.toString(),
+                        sum: true,
+                        load: (range) => this.loadScanGraph(range, false)
+                    }))
+                }
+
+                if (this.totalScannedVouchers > 0) {
+                    group.push(new GraphViewConfiguration({
+                        title: "Gescande vouchers",
+                        options: this.buildTicketDateRangeOptions(),
+                        formatter: (value: number) => value.toString(),
+                        sum: true,
+                        load: (range) => this.loadScanGraph(range, true)
+                    }))
+                }
+                this.graphConfigurations.push(group)
+            }
             
         } catch (e) {
             Toast.fromError(e).show()
@@ -560,7 +609,7 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
 .webshop-statistics-view {
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr) );
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr) );
         gap: 0px 15px;
     }
 
