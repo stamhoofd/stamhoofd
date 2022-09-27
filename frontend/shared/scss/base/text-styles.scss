@@ -278,6 +278,17 @@
     color: $color-primary;
 }
 
+.style-statistic {
+    font-size: 28px;
+    line-height: 1.4;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+
+    + .style-description-small {
+        margin-top: 0;
+    }
+}
+
 .style-interactive-small {
     font-size: 14px;
     font-weight: $font-weight-semibold;

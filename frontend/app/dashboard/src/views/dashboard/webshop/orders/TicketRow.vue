@@ -7,9 +7,9 @@
         <p v-if="isSingle && order" class="style-description-small" v-text="'Bestelling #'+order.number" />
         <p v-if="isSingle && order" class="style-description-small" v-text="order.data.customer.name" />
         <p v-if="cartItem.description" class="style-description-small" v-text="cartItem.description" />
-
         <p v-if="cartItem.product.location" class="style-description-small" v-text="cartItem.product.location.name" />
         <p v-if="cartItem.product.location && cartItem.product.location.address" class="style-description-small" v-text="cartItem.product.location.address" />
+        <p v-if="scannedAtDescription" class="style-description-small" v-text="scannedAtDescription" />
 
         <button slot="right" class="button text" type="button" @click="markAs">
             <span :class="'style-tag '+statusColor">{{ statusName }}</span>
@@ -24,7 +24,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, LongPressDirective, STList, STListItem } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { TicketPrivate } from "@stamhoofd/structures";
-import { getPermissionLevelNumber, Order, PermissionLevel, ProductDateRange, TicketPublic, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, Order, PermissionLevel, ProductDateRange, TicketPublicPrivate, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -42,7 +42,7 @@ import { WebshopManager } from "../WebshopManager";
 })
 export default class TicketRow extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    ticket!: TicketPublic
+    ticket!: TicketPublicPrivate
 
     @Prop({ required: true })
     order!: Order
@@ -63,6 +63,16 @@ export default class TicketRow extends Mixins(NavigationMixin){
 
     get name() {
         return this.ticket.getTitle()
+    }
+
+    get scannedAtDescription() {
+        if (!this.ticket.scannedAt) {
+            return 'Niet gescand';
+        }
+        if (!this.ticket.scannedBy) {
+            return 'Gescand op '+Formatter.dateTime(this.ticket.scannedAt);
+        }
+        return "Gescand op "+Formatter.dateTime(this.ticket.scannedAt) + " door " + this.ticket.scannedBy
     }
 
     get canShare() {

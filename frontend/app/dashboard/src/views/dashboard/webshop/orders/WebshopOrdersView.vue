@@ -755,6 +755,22 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 })
             )
 
+            definitions.push(
+                new DateFilterDefinition<PrivateOrderWithTickets>({
+                    id: "order_ticket_scanned_at",
+                    name: "Ticket scan tijdstip",
+                    getValue: (order) => {
+                        return order.tickets.reduce((acc, ticket) => {
+                            if (ticket.scannedAt && ticket.scannedAt < acc) {
+                                return ticket.scannedAt
+                            }
+
+                            return acc
+                        }, new Date(2222, 0, 1))
+                    }
+                })
+            )
+
             if (!this.hasSingleTickets) {
                 definitions.push(
                     new NumberFilterDefinition<PrivateOrderWithTickets>({

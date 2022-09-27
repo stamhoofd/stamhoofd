@@ -113,10 +113,28 @@ export class TicketOrder extends Ticket {
 /**
  * Structure if you do have access to the order (needs proof first: be an admin or pass the order id along the request)
  */
+export class TicketPublicPrivate extends TicketPublic {
+    /**
+     * Private information
+     */
+    @field({ decoder: StringDecoder, nullable: true })
+    scannedBy: string | null = null;
+}
+
+/**
+ * Structure if you do have access to the order (needs proof first: be an admin or pass the order id along the request)
+ */
 export class TicketPrivate extends TicketOrder {
     /**
      * Private information
      */
     @field({ decoder: StringDecoder, nullable: true })
     scannedBy: string | null = null;
+
+    getPublic(order: Order): TicketPublicPrivate {
+        return TicketPublicPrivate.create({
+            ...super.getPublic(order),
+            scannedBy: this.scannedBy
+        })
+    }
 }

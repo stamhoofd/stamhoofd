@@ -37,7 +37,7 @@ export default class GraphDateRangeSelector extends Mixins(NavigationMixin) {
                 })
             ]
         ]);
-        contextMenu.show({ button: event.target, xPlacement: "left" }).catch(console.error);
+        contextMenu.show({ button: event.currentTarget, xPlacement: "left" }).catch(console.error);
     }
 }
 </script>
