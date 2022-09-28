@@ -9,7 +9,7 @@ import { Registration } from '@stamhoofd/models';
 import { STInvoice } from '@stamhoofd/models';
 import { STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
@@ -474,6 +474,70 @@ async function checkPayments() {
     }
 }
 
+let didCheckBuckaroo = false;
+let lastBuckarooId = '';
+
+// Time to start checking (needs to be consistent to avoid weird jumps)
+const startBuckarooDate = new Date(new Date().getTime() - 60*1000*60*24*7*4);
+
+// Keep checking pending paymetns for 3 days
+async function checkFailedBuckarooPayments() {
+    if (didCheckBuckaroo) {
+        return
+    }
+
+    console.log('Checking failed Buckaroo payments')
+    
+    // TODO: only select the ID + organizationId
+    const payments = await Payment.where({
+        status: {
+            sign: "IN",
+            value: [PaymentStatus.Failed]
+        },
+        provider: PaymentProvider.Buckaroo,
+
+        // Only check payments of last 4 weeks
+        createdAt: {
+            sign: ">",
+            value: startBuckarooDate
+        },
+        id: {
+            sign: ">",
+            value: lastBuckarooId
+        }
+    }, {
+        limit: 100,
+
+        // Sort by ID
+        sort: [{
+            column: 'id',
+            direction: 'ASC'
+        }]
+    })
+
+    console.log("[BUCKAROO PAYMENTS] Checking failed payments: "+payments.length)
+
+    for (const payment of payments) {
+        try {
+            if (payment.organizationId) {
+                const organization = await Organization.getByID(payment.organizationId)
+                if (organization) {
+                    await ExchangePaymentEndpoint.pollStatus(payment.id, organization)
+                    continue;
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    if (payments.length === 0) {
+        didCheckBuckaroo = true
+        lastBuckarooId = ''
+    } else {
+        lastBuckarooId = payments[payments.length - 1].id
+    }
+}
 // Unreserve reserved registrations
 async function checkReservedUntil() {
     console.log("Check reserved until...")
@@ -561,7 +625,7 @@ export const crons = () => {
     }
     isRunningCrons = true
     try {
-        checkSettlements()/*.then(citySync)*/.then(checkExpirationEmails).then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
+        checkSettlements().then(checkFailedBuckarooPayments).then(checkExpirationEmails).then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
             console.error(e)
         }).finally(() => {
             isRunningCrons = false

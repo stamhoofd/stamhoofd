@@ -78,7 +78,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             return;
         }
         const wasPaid = payment.paidAt !== null
-        if (status == PaymentStatus.Succeeded) {
+        if (status === PaymentStatus.Succeeded) {
             payment.status = PaymentStatus.Succeeded
             payment.paidAt = new Date()
             await payment.save();
@@ -128,7 +128,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await STPendingInvoice.addItems(organization, [item])
                 });
             }
-        } else if (status == PaymentStatus.Failed) {
+        } else if (status === PaymentStatus.Failed) {
             const order = await Order.getForPayment(organization.id, payment.id)
             await order?.onPaymentFailed()
             payment.status = PaymentStatus.Failed
@@ -155,7 +155,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 return
             }
 
-            if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {
+            if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status == PaymentStatus.Failed)) {
                 
                 if (payment.provider === PaymentProvider.Mollie) {
                     // check status via mollie

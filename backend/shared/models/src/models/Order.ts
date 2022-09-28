@@ -102,6 +102,28 @@ export class Order extends Model {
         return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted
     }
 
+    async undoPaymentFailed(this: Order) {
+        if (this.status !== OrderStatus.Deleted) {
+            return
+        }
+
+        console.log('Undoing payment failed for order '+this.id)
+        this.status = OrderStatus.Created
+        await this.save()
+
+        await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {
+            // Fetch webshop inside queue to make sure the stock is up to date
+            const webshop = await Webshop.getByID(this.webshopId);
+            if (!webshop) {
+                // ignore for now
+                console.error("Missing webshop with id "+this.webshopId+" in webshop stock queue for order "+this.id)
+                return
+            }
+            
+            await this.setRelation(Order.webshop, webshop).updateStock() // readd reserved stock
+        })
+    }
+
     async onPaymentFailed(this: Order) {
         if (this.shouldIncludeStock()) {
             this.status = OrderStatus.Deleted
@@ -345,6 +367,10 @@ export class Order extends Model {
         if (!webshop) {
             console.error("Missing webshop for order "+this.id)
             return
+        }
+
+        if (this.status === OrderStatus.Deleted) {
+            await this.undoPaymentFailed()
         }
 
         const { tickets, didCreateTickets } = await this.setRelation(Order.webshop, webshop).updateTickets()
