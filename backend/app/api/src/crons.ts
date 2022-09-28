@@ -482,6 +482,11 @@ const startBuckarooDate = new Date(new Date().getTime() - 60*1000*60*24*7*4);
 
 // Keep checking pending paymetns for 3 days
 async function checkFailedBuckarooPayments() {
+    if (STAMHOOFD.environment !== "production") {
+        console.log("Skipping checkFailedBuckarooPayments")
+        return
+    }
+
     if (didCheckBuckaroo) {
         return
     }
