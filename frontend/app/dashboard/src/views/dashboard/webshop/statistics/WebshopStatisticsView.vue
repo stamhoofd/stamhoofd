@@ -18,26 +18,7 @@
             <hr>
 
             <div class="stats-grid">
-                <STInputBox v-if="false" title="Omzet">
-                    <p class="style-statistic">
-                        <span>
-                            {{ loading ? '-' : formatPrice(totalRevenue) }}
-                        </span>
-                    </p>
-                </STInputBox>
-
                 <STInputBox title="Bestellingen">
-                    <p class="style-statistic">
-                        <span>
-                            {{ loading ? '-' : totalOrders }}
-                        </span>
-                    </p>
-                    <p class="style-description-small">
-                        {{ loading ? '-' : formatPrice(averagePrice) + ' / bestelling' }}
-                    </p>
-                </STInputBox>
-
-                <STInputBox title="Betaald">
                     <p class="style-statistic">
                         <span>
                             {{ loading ? '-' : totalOrders }}
@@ -108,7 +89,6 @@ import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { Category, Graph, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { GraphData } from "@stamhoofd/structures/esm/dist";
 import { Formatter } from '@stamhoofd/utility';
-import { DateTime } from "luxon";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from '../WebshopManager';

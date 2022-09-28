@@ -3,7 +3,7 @@
         <h2 class="style-with-button">
             <button class="button style-label" type="button" @click="chooseConfiguration">
                 <span class="">{{ title }}</span>
-                <span v-if="configurations.length > 1" class="icon arrow-down-small" />
+                <span v-if="hasMultipleConfigurations" class="icon arrow-down-small" />
                 <span v-else class="icon empty" />
             </button>
 
@@ -86,6 +86,10 @@ export default class GraphView extends  Vue {
         this.loadData().catch(console.error) 
     }
 
+    get hasMultipleConfigurations() {
+        return this.configurations.length || this.configurations.find(c => c.length)
+    }
+
     chooseConfiguration(event) {
         const contextMenu = new ContextMenu(
             this.configurations.map(arr => {
@@ -164,10 +168,8 @@ export default class GraphView extends  Vue {
                 LineElement,
                 PointElement,
                 LineController,
-                RadarController,
                 CategoryScale,
                 LinearScale,
-                //Decimation,
                 Filler,
                 Tooltip
             );
@@ -217,7 +219,7 @@ export default class GraphView extends  Vue {
             layout: {
                 padding: {
                     bottom: 10,
-                    top: 10,
+                    top: 5,
                     left: 10,
                     right: 10
                 },
@@ -225,7 +227,6 @@ export default class GraphView extends  Vue {
             scales: {
                 y: {
                     display: false,
-                    stacked: false,
                     beginAtZero: true,
                     suggestedMax: 1,
                     position: {
@@ -233,8 +234,7 @@ export default class GraphView extends  Vue {
                     },
                     ticks: {
                         display: false
-                    },
-                        
+                    },  
                     grid: {
                         display: false
                     }
@@ -242,9 +242,6 @@ export default class GraphView extends  Vue {
                 x: {
                     //display: false,
                     grid: {
-                        color: 'rgba(0, 0, 0, 0.1)',
-                        borderColor: "rgba(0, 0, 0, 0)",
-                        tickColor: 'red',
                         display: false,
                     },
                     ticks: {
@@ -274,9 +271,6 @@ export default class GraphView extends  Vue {
                 }
             },
             plugins: {
-                legend: {
-                    display: false
-                },
                 tooltip: {
                     padding: 15,
                     cornerRadius: 7,
@@ -330,7 +324,9 @@ export default class GraphView extends  Vue {
                 borderWidth: 3,
                 tension: 1,
                 clip: false,
-                borderJoinStyle: 'miter',
+                borderJoinStyle: 'round',
+                borderCapStyle: 'round',
+                showLine: true,
                 pointBackgroundColor: function(context) {
                     const chart = context.chart;
                     const {ctx, chartArea} = chart;
