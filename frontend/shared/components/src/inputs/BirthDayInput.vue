@@ -107,7 +107,7 @@ export default class BirthDayInput extends Vue {
 
     updateDate() {
         if (this.year && this.month && this.day) {
-            this.$emit("input", new Date(this.year, this.month - 1, this.day))
+            this.$emit("input", new Date(this.year, this.month - 1, this.day, 12))
         } else {
             this.$emit("input", null)
         }
@@ -115,7 +115,7 @@ export default class BirthDayInput extends Vue {
 
     validate() {
         if (this.year && this.month && this.day) {
-            this.$emit("input", new Date(this.year, this.month - 1, this.day))
+            this.$emit("input", new Date(this.year, this.month - 1, this.day, 12))
             this.errorBox = null
             return true
         }

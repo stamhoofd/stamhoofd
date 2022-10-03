@@ -204,7 +204,9 @@ export class MemberDetails extends AutoEncoder {
         if (!this.birthDay) {
             return null
         }
-        return year - this.birthDay.getFullYear();
+        // For now calculate based on Brussels timezone (we'll need to correct this later)
+        const birthDay = Formatter.luxon(this.birthDay);
+        return year - birthDay.year;
     }
 
     get age(): number | null {
@@ -212,10 +214,12 @@ export class MemberDetails extends AutoEncoder {
             return null
         }
 
+        // For now calculate based on Brussels timezone (we'll need to correct this later)
         const today = new Date();
-        let age = today.getFullYear() - this.birthDay.getFullYear();
-        const m = today.getMonth() - this.birthDay.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < this.birthDay.getDate())) {
+        const birthDay = Formatter.luxon(this.birthDay);
+        let age = today.getFullYear() - birthDay.year;
+        const m = today.getMonth() - (birthDay.month - 1)
+        if (m < 0 || (m === 0 && today.getDate() < birthDay.day)) {
             age--;
         }
         return age;
@@ -233,9 +237,7 @@ export class MemberDetails extends AutoEncoder {
             return null
         }
 
-        const date = new Date(this.birthDay);
-        const options = { year: "numeric", month: "long", day: "numeric" };
-        return date.toLocaleDateString("nl-BE", options as any);
+        return Formatter.date(this.birthDay, true);
     }
 
     matchQuery(query: string): boolean {
@@ -260,7 +262,7 @@ export class MemberDetails extends AutoEncoder {
      */
     doesMatchGroup(group: Group) {
         if (group.settings.minAge || group.settings.maxAge) {
-            const age = this.ageForYear(group.settings.startDate.getFullYear())
+            const age = this.ageForYear(Formatter.luxon(group.settings.startDate).year)
 
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
@@ -285,7 +287,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     getMatchingError(group: Group): string {
-        const age = this.ageForYear(group.settings.startDate.getFullYear())
+        const age = this.ageForYear(Formatter.luxon(group.settings.startDate).year)
         if (group.settings.minAge || group.settings.maxAge) {
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {

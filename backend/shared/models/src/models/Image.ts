@@ -38,7 +38,7 @@ export class Image extends Model {
                 width: r.width ?? undefined,
                 height: r.height ?? undefined,
                 fit: r.fit,
-                withoutEnlargement: true
+                withoutEnlargement: type !== "image/svg+xml"
             }
         })
 
