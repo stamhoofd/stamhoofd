@@ -81,9 +81,6 @@ export default class App extends Vue {
                     ColorHelper.setColor(response.data.organization.meta.color)
                 }
 
-                console.log(response.data)
-
-
                 if (!response.data.webshop) {
                     if (response.data.webshops.length == 0) {
                         const marketingWebshops = "https://"+this.$t('shared.domains.marketing')+"/webshops"
