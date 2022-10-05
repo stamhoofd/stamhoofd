@@ -39,7 +39,7 @@
         <hr>
         <h2>Domeinnaam</h2>
 
-        <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen'" target="_blank">deze pagina</a>.</p>
+        <p>Alle informatie over domeinnamen vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen/'" target="_blank">deze pagina</a>.</p>
 
         <template v-if="organization.privateMeta && organization.privateMeta.pendingMailDomain">
             <p class="warning-box">

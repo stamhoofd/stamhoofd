@@ -190,7 +190,7 @@ export class Webshop extends Model {
 
         let { allValid } = await validateDNSRecords(this.privateMeta.dnsRecords)
 
-        if (STAMHOOFD.environment === "development") {
+        if (STAMHOOFD.environment === "development" || STAMHOOFD.environment === "staging") {
             allValid = true
         }
 

@@ -5,7 +5,7 @@
         </h1>
 
         <p>
-            Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. Een lid kan dan kiezen uit 0 euro, enkele voorgestelde bedragen of een eigen gekozen bedrag. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/vrije-bijdrage'" target="_blank">Meer info</a>.
+            Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. Een lid kan dan kiezen uit 0 euro, enkele voorgestelde bedragen of een eigen gekozen bedrag.
         </p>
 
         <Checkbox v-model="freeContribution">

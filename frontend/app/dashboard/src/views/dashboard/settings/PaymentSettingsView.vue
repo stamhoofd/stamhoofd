@@ -4,7 +4,7 @@
             Betaalmethodes
         </h1>
 
-        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-betalen'" target="_blank">deze pagina</a>.</p>
+        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">deze pagina</a>.</p>
         
         <STErrorsDefault :error-box="errorBox" />
 
@@ -74,7 +74,7 @@
         </p>
 
         <p v-if="!isBuckarooActive">
-            <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-buckaroo'" target="_blank">
+            <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-betaalprovider/'" target="_blank">
                 <span>Aansluiten</span>
                 <span class="icon arrow-right" />
             </a>

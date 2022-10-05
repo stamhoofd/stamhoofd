@@ -10,7 +10,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
 import { GetWebshopFromDomainResult } from '@stamhoofd/structures';
@@ -68,6 +68,21 @@ export default class App extends Vue {
                         UrlHelper.fixedPrefix = usedUri
                     }
                     console.info("Using fixed prefix", UrlHelper.fixedPrefix)
+                }
+
+                // Do we need to redirect?
+                if (response.data.webshop) {
+                    try {
+                        const url = new URL("https://" + response.data.webshop.getUrl(response.data.organization));
+
+                        if (window.location.hostname.toLowerCase() != url.hostname.toLowerCase()) {
+                            // Redirect
+                            window.location.href = UrlHelper.initial.getFullHref({ host: url.hostname, removePrefix: true })
+                            return new ComponentWithProperties(LoadingView, {})
+                        }
+                    } catch (e) {
+                        console.error(e)
+                    }
                 }
 
                 I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
