@@ -10,7 +10,7 @@
                 E-mailadressen
             </h1>
 
-            <p>Wijzig de e-mailadressen waarmee je e-mails kan versturen. Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">deze pagina</a>.</p>
+            <p>Wijzig de e-mailadressen waarmee je e-mails kan versturen. Alle informatie over e-mailadressen en e-mails vind je op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/e-mailadressen-instellen/'" target="_blank">deze pagina</a>.</p>
 
             <STList>
                 <STListItem v-for="email in emails" :key="email.id" :selectable="true" class="right-stack" @click="editEmail(email)">

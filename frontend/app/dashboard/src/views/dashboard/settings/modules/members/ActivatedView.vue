@@ -63,36 +63,20 @@
             <h2>Handige links</h2>
 
             <STList>
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/'" target="_blank">
                     <span slot="left" class="icon link" />
                     Documentatie
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen'" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/ledenadministratie-instellen/'" target="_blank">
                     <span slot="left" class="icon link" />
-                    Domeinnaam koppelen
-                </STListItem>
-
-
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">
-                    <span slot="left" class="icon link" />
-                    E-mails versturen en e-mailadressen instellen
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/overschakelen-midden-werkjaar'" target="_blank">
-                    <span slot="left" class="icon link" />
-                    Overschakelen midden in een werkjaar
-                </STListItem>
-
-                <STListItem v-if="isYouth" :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-inschrijvingen-kampen-weekends'" target="_blank">
-                    <span slot="left" class="icon link" />
-                    Online inschrijvingen voor kampen en weekends
+                    Ledenadministratie instellen
                 </STListItem>
             </STList>
         </main>
 
         <STToolbar>
-            <button slot="right" class="button primary" @click="dismiss">
+            <button slot="right" class="button primary" type="button" @click="dismiss">
                 <span>Doorgaan</span>
                 <span class="icon arrow-right" />
             </button>

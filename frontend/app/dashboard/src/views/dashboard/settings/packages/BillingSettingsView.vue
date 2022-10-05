@@ -23,7 +23,7 @@
                         <STInputBox title="Openstaand bedrag">
                             <p class="button style-price-big" @click="openPendingInvoice">
                                 <span>
-                                    {{ status.pendingInvoice ? status.pendingInvoice.meta.priceWithoutVAT : 0 | price }}
+                                    {{ status.pendingInvoice ? status.pendingInvoice.meta.priceWithoutVAT : 0 | price }}
                                 </span>
                                 <span v-if="status.pendingInvoice && status.pendingInvoice.meta.priceWithoutVAT > 0" class="icon arrow-right" />
                             </p>

@@ -2,12 +2,20 @@
     <div id="registration-page-settings-view" class="st-view background">
         <STNavigationBar title="Jouw inschrijvingspagina">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-else slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
             <h1>Jouw inschrijvingspagina</h1>
-            <p>
+
+            <a v-if="isBelgium && hasDefaultDomain" class="selectable warning-box" href="https://www.stamhoofd.be/blog/blokkade-facebook/" target="_blank">
+                <div>
+                    Deel je jouw inschrijvingspagina op Facebook of Instagram? Dan moet je tijdelijk een andere link gebruiken om die daar te delen. Lees meer informatie op onze website.
+                </div>
+                <span class="button icon gray arrow-right-small" />
+            </a>
+
+            <p class="style-description">
                 Leden kunnen zelfstandig inschrijven via de inschrijvingspagina. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Stamhoofd en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.
             </p>
 
@@ -32,30 +40,14 @@
             <h2>Handige links</h2>
 
             <STList>
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/'" target="_blank">
                     <span slot="left" class="icon link" />
                     Documentatie
                 </STListItem>
 
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/domeinnaam-koppelen'" target="_blank">
+                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/ledenadministratie-instellen/'" target="_blank">
                     <span slot="left" class="icon link" />
-                    Domeinnaam koppelen
-                </STListItem>
-
-
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/emails-versturen'" target="_blank">
-                    <span slot="left" class="icon link" />
-                    E-mails versturen en e-mailadressen instellen
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/overschakelen-midden-werkjaar'" target="_blank">
-                    <span slot="left" class="icon link" />
-                    Overschakelen midden in een werkjaar
-                </STListItem>
-
-                <STListItem v-if="isYouth" :selectable="true" element-name="a" :href="'https://'+$t('shared.domains.marketing')+'/docs/online-inschrijvingen-kampen-weekends'" target="_blank">
-                    <span slot="left" class="icon link" />
-                    Online inschrijvingen voor kampen en weekends
+                    Ledenadministratie instellen
                 </STListItem>
             </STList>
         </main>
@@ -65,7 +57,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, LoadingButton, STInputBox, STList, STListItem,STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import { OrganizationType } from "@stamhoofd/structures";
+import { Country, OrganizationType } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager"
@@ -87,6 +79,14 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
 export default class RegistrationPageSettingsView extends Mixins(NavigationMixin) {
     get organization() {
         return OrganizationManager.organization
+    }
+
+    get isBelgium() {
+        return this.organization.address.country == Country.Belgium
+    }
+
+    get hasDefaultDomain() {
+        return this.organization.registerDomain === null;
     }
 
     get isYouth() {
