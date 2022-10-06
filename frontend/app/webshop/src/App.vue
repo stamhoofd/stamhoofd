@@ -77,7 +77,10 @@ export default class App extends Vue {
 
                         if (window.location.hostname.toLowerCase() != url.hostname.toLowerCase()) {
                             // Redirect
-                            window.location.href = UrlHelper.initial.getFullHref({ host: url.hostname, removePrefix: true })
+                            const prefix = url.pathname.replace(/^\/+|\/+$/g, '');
+                            // Remove starting and trailing slash
+
+                            window.location.href = UrlHelper.initial.getFullHref({ host: url.hostname, removePrefix: true, appendPrefix: prefix })
                             return new ComponentWithProperties(LoadingView, {})
                         }
                     } catch (e) {
