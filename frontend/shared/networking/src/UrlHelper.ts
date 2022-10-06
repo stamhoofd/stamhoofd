@@ -32,7 +32,7 @@ export class UrlHelper {
      * Get full path, with the locale removed by default
      * /your-path/test?q=t#hash
      */
-    getPath(options?: { removeLocale?: boolean, removePrefix?: boolean  }) {
+    getPath(options?: { removeLocale?: boolean, removePrefix?: boolean, appendPrefix?: string }) {
         const search = new URL(this.href ?? "/", "https://"+window.location.hostname).search
         return "/"+this.getParts(options).join("/")+search+this.hash
     }
@@ -42,12 +42,12 @@ export class UrlHelper {
         return url.protocol+"//"+url.host
     }
 
-    getFullHref(options?: { removeLocale?: boolean, removePrefix?: boolean , host?: string }) {
+    getFullHref(options?: { removeLocale?: boolean, removePrefix?: boolean , host?: string, appendPrefix?: string }) {
         const url = new URL(this.href ?? "/", "https://"+window.location.hostname)
         return url.protocol+"//"+(options?.host ?? url.host)+this.getPath(options)
     }
 
-    getParts(options?: { removeLocale?: boolean, removePrefix?: boolean }) {
+    getParts(options?: { removeLocale?: boolean, removePrefix?: boolean, appendPrefix?: string }) {
         const parts = this.path?.substring(1).split("/") ?? []
 
         if (
@@ -76,6 +76,11 @@ export class UrlHelper {
                     break
                 }
             }
+        }
+
+        if (options?.appendPrefix) {
+            // TODO: check if locale is okay
+            parts.unshift(options.appendPrefix)
         }
 
         return parts

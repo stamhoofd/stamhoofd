@@ -6,13 +6,6 @@
             We hebben het formaat gewijzigd van webshop links. Maar jouw webshop is (en blijft) ook bereikbaar via {{ legacyUrl }}. In toekomstige communicaties gebruik je best de nieuwe link, maar pas de nieuwe link eerst aan naar wens.
         </p>
 
-        <a v-if="isBelgium && webshop.domain === null" class="selectable warning-box" href="https://www.stamhoofd.be/blog/blokkade-facebook/" target="_blank">
-            <div>
-                Deel je jouw webshop op Facebook of Instagram? Dan moet je tijdelijk een andere link gebruiken om je webshop daar te delen. Lees meer informatie op onze website.
-            </div>
-            <span class="button icon gray arrow-right-small" />
-        </a>
-
         <STErrorsDefault :error-box="errorBox" />
 
         <STInputBox title="Domeinnaam">
@@ -123,7 +116,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Dropdown, PrefixInput, SaveView, Spinner, STErrorsDefault, STInputBox, Toast, Tooltip } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Country, DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
+import { DNSRecordStatus, PrivateWebshop, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -175,10 +168,6 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
 
     mounted() {
         this.selectedDomain = this.webshop.meta.domainActive ? this.webshop.domain : (this.webshop.domain ? '' : null)
-    }
-
-    get isBelgium() {
-        return this.organization.address.country == Country.Belgium
     }
 
     get defaultDomains() {

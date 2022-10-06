@@ -13,13 +13,6 @@
                 <span v-else class="icon dot red" />
             </h1>
 
-            <a v-if="isBelgium && hasDefaultDomain" class="selectable warning-box" href="https://www.stamhoofd.be/blog/blokkade-facebook/" target="_blank">
-                <div>
-                    Deel je jouw webshop op Facebook of Instagram? Dan moet je tijdelijk een andere link gebruiken om je webshop daar te delen. Lees meer informatie op onze website.
-                </div>
-                <span class="button icon gray arrow-right-small" />
-            </a>
-
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
             <STList class="illustration-list">    
@@ -293,7 +286,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Country, getPermissionLevelNumber, PermissionLevel, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, PermissionLevel, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -338,14 +331,6 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     get isArchive() {
         return this.webshopManager.preview.meta.status == WebshopStatus.Archived
-    }
-
-    get isBelgium() {
-        return this.organization.address.country == Country.Belgium
-    }
-
-    get hasDefaultDomain() {
-        return !this.webshopManager.preview.domain || !this.webshopManager.preview.meta.domainActive
     }
 
     get organization() {

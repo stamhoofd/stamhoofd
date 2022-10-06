@@ -8,13 +8,6 @@
         <main>
             <h1>Jouw inschrijvingspagina</h1>
 
-            <a v-if="isBelgium && hasDefaultDomain" class="selectable warning-box" href="https://www.stamhoofd.be/blog/blokkade-facebook/" target="_blank">
-                <div>
-                    Deel je jouw inschrijvingspagina op Facebook of Instagram? Dan moet je tijdelijk een andere link gebruiken om die daar te delen. Lees meer informatie op onze website.
-                </div>
-                <span class="button icon gray arrow-right-small" />
-            </a>
-
             <p class="style-description">
                 Leden kunnen zelfstandig inschrijven via de inschrijvingspagina. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Stamhoofd en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.
             </p>
@@ -56,11 +49,11 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, LoadingButton, STInputBox, STList, STListItem,STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
-import { Country, OrganizationType } from "@stamhoofd/structures";
+import { BackButton, LoadingButton, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { OrganizationType } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from "../../../classes/OrganizationManager"
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 @Component({
     components: {
@@ -79,14 +72,6 @@ import { OrganizationManager } from "../../../classes/OrganizationManager"
 export default class RegistrationPageSettingsView extends Mixins(NavigationMixin) {
     get organization() {
         return OrganizationManager.organization
-    }
-
-    get isBelgium() {
-        return this.organization.address.country == Country.Belgium
-    }
-
-    get hasDefaultDomain() {
-        return this.organization.registerDomain === null;
     }
 
     get isYouth() {
