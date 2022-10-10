@@ -28,7 +28,7 @@ import {
     CategoryScale,
     Chart, Filler, LinearScale,
     LineController,
-    LineElement, PointElement, RadarController, Tooltip
+    LineElement, PointElement, Tooltip
 } from 'chart.js';
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
@@ -83,6 +83,9 @@ export default class GraphView extends  Vue {
     graphData: Graph | null = null
 
     mounted() {
+        if (this.selectedConfiguration && this.options) {
+            this.range = this.options[0];
+        }
         this.loadData().catch(console.error) 
     }
 

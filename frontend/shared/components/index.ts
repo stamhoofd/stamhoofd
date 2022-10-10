@@ -140,3 +140,4 @@ export * from "./src/VueGlobalHelper"
 // Graphs
 export * from "./src/views/DateRange"
 export { default as GraphView } from "./src/views/GraphView.vue"
+export * from "./src/views/GraphViewConfiguration"
