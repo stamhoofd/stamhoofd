@@ -24,7 +24,7 @@ export class STCredit extends Model {
     change: number;
 
     @column({ type: "boolean" })
-    allowTransactions: boolean;
+    allowTransactions = false
 
     @column({
         type: "datetime", beforeSave(old?: any) {

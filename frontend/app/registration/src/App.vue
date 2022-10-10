@@ -182,15 +182,6 @@ export default class App extends Vue {
         }
         HistoryManager.activate();
     }
-
-    mounted() {
-        const ua = navigator.userAgent;
-
-        if (ua.indexOf("FBAN") != -1 || ua.indexOf("FBAV") != -1) {
-            new Toast("Je zit in de ingebouwde Facebook browser. Deze werkt minder goed en is minder veilig. We raden je héél sterk aan om over te schakelen naar je vaste browser. Dat kan via één van de knoppen boven of onderaan of door zelf naar de site te surfen.", "red error").setHide(null).show()
-        }
-    }
-    
 }
 </script>
 
