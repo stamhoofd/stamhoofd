@@ -83,7 +83,7 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
     }
 
     editEmail(email: OrganizationEmail) {
-        this.show(new ComponentWithProperties(EditEmailView, { emailId: email.id }))
+        this.present(new ComponentWithProperties(EditEmailView, { emailId: email.id }).setDisplayStyle('popup'))
     }
     
     addEmail() {
@@ -91,7 +91,7 @@ export default class EmailSettingsView extends Mixins(NavigationMixin) {
         const patch = OrganizationManager.getPatch()
         patch.privateMeta = OrganizationPrivateMetaData.patchType().create({})
         patch.privateMeta!.emails.addPut(email)
-        this.show(new ComponentWithProperties(EditEmailView, { initialPatch: patch, emailId: email.id, isNew: true }))
+        this.present(new ComponentWithProperties(EditEmailView, { initialPatch: patch, emailId: email.id, isNew: true }).setDisplayStyle('popup'))
     }
 }
 </script>

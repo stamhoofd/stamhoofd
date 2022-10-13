@@ -53,6 +53,9 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 30, nullable: true })
     memberNumber: string | null = null;
 
+    @field({ decoder: DateDecoder, optional: true, nullable: true })
+    lastExternalSync?: Date | null
+
     @field({ decoder: new EnumDecoder(Gender) })
     gender: Gender = Gender.Other;
 

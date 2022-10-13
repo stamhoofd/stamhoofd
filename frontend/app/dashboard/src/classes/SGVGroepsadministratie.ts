@@ -5,7 +5,7 @@ import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-na
 import { Toast } from '@stamhoofd/components';
 import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
 import { MemberWithRegistrations } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
 import SGVReportView from '../views/dashboard/scouts-en-gidsen/SGVReportView.vue';
@@ -30,7 +30,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     functies: SGVFunctie[] = []
 
     get hasToken() {
-        return !!this.token
+        return !!this.token || this.dryRun
     }
 
     /**
@@ -212,7 +212,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     /**
      * Voor we een lid als 'nieuw' beschouwen moeten we echt zeker zijn
      */
-    async zoekGelijkaardig(member: MemberWithRegistrations): Promise<SGVZoekLid | undefined> {
+    async zoekGelijkaardig(member: MemberWithRegistrations): Promise<SGVZoekLid | undefined> {
         const response = await this.authenticatedServer.request({
             method: "GET",
             path: "/zoeken/gelijkaardig",
@@ -234,10 +234,27 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     return lid
                 }
             }
+
+            for (const lid of response.data.leden) {
+                if (lid.isProbablyEqualLastResort(member)) {
+                    return lid
+                }
+            }
         }
     }
 
     async downloadAll() {
+        if (this.dryRun) {
+            this.leden = [new SGVLid({
+                id: '3',
+                firstName: 'Existing',
+                lastName: 'Member',
+                lidNummer: '123',
+                birthDay: new Date(2000, 1, 1, 12),
+            })]
+            return;
+        }
+
         await this.setGroupIfNeeded();
         await this.checkFuncties()
         await this.setManagedFilter()
@@ -282,45 +299,73 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         let newMembers: MemberWithRegistrations[] = []
 
         const matchedMembers: SGVLidMatch[] = []
+        const probablyEqualList: SGVLidMatchVerify[] = []
 
         // Start! :D
         const allMembers = await MemberManager.loadMembers([], false)
 
-        for (const member of allMembers) {
-            if (!member.details) {
-                throw new SimpleError({
-                    code: "",
-                    message: "We konden niet synchroniseren omdat de gegevens van "+member.firstName+" ontbreken (achternaam ontbreekt ook). Vul dit lid eerst verder aan in Stamhoofd."
-                })
-            }
-            const sgvMember = this.leden.find((sgvLid) => {
-                return sgvLid.isEqual(member)
+        if (this.dryRun) {
+            // Add some fake data
+            matchedMembers.push({
+                stamhoofd: allMembers[0],
+                sgvId: '1'
             })
 
-            if (sgvMember) {
-                matchedMembers.push({
-                    stamhoofd: member,
-                    sgvId: sgvMember.id
+            probablyEqualList.push({
+                stamhoofd: allMembers[1],
+                sgv: new SGVLid({
+                    id: '2',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    lidNummer: '123',
+                    birthDay: new Date(2000, 1, 1, 12),
+                }),
+                verify: true
+            })
+        } else {
+            for (const member of allMembers) {
+                if (!member.details) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "We konden niet synchroniseren omdat de gegevens van "+member.firstName+" ontbreken (achternaam ontbreekt ook). Vul dit lid eerst verder aan in Stamhoofd."
+                    })
+                }
+                const sgvMember = this.leden.find((sgvLid) => {
+                    return sgvLid.isEqual(member)
                 })
 
-            } else {
-                // Lid niet gevonden, zoeken in groepsadmin...
-                const gelijkaardig = await this.zoekGelijkaardig(member)
-                if (gelijkaardig) {
-                    // Gevonden
+                if (sgvMember) {
                     matchedMembers.push({
                         stamhoofd: member,
-                        sgvId: gelijkaardig.id
+                        sgvId: sgvMember.id
                     })
+
                 } else {
-                    // Is echt een nieuw lid
-                    newMembers.push(member)
+                    // Lid niet gevonden, zoeken in groepsadmin...
+                    const gelijkaardig = await this.zoekGelijkaardig(member)
+                    if (gelijkaardig) {
+                        if (gelijkaardig.isEqual(member)) {
+                            // Gevonden
+                            matchedMembers.push({
+                                stamhoofd: member,
+                                sgvId: gelijkaardig.id
+                            })
+                        } else {
+                            // Gelijkaardig, maar niet gelijk
+                            probablyEqualList.push({
+                                stamhoofd: member,
+                                sgv: gelijkaardig,
+                                verify: true
+                            })
+                        }
+                    } else {
+                        // Is echt een nieuw lid
+                        newMembers.push(member)
+                    }
+                    await sleep(250)
                 }
-                await sleep(250)
             }
         }
-
-        const probablyEqualList: SGVLidMatchVerify[] = []
 
         newMembers = newMembers.filter((member) => {
             const sgvMember = this.leden.find((sgvLid) => {
@@ -349,17 +394,27 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         console.log(probablyEqualList)*/
 
         if (probablyEqualList.length > 0) {
+            onPopup()
             await new Promise<void>((resolve, reject) => {
-                onPopup()
+                let resolved = false
                 component.present(new ComponentWithProperties(SGVVerifyProbablyEqualView, {
                     matches: probablyEqualList,
                     onCancel: () => {
+                        if (resolved) {
+                            return;
+                        }
+                        resolved = true;
                         reject(new SimpleError({
                             code: "",
                             message: "Synchronisatie geannuleerd"
                         }))
                     },
                     onVerified: (verified: SGVLidMatchVerify[]) => {
+                        if (resolved) {
+                            return;
+                        }
+                        resolved = true;
+
                         try {
                             for (const member of verified) {
                                 if (member.verify) {
@@ -397,15 +452,24 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         if (oldMembers.length > 0) {
             return new Promise((resolve, reject) => {
                 // Show a window
+                let resolved = false;
                 component.present(new ComponentWithProperties(SGVOldMembersView, {
                     members: oldMembers,
                     onCancel: () => {
+                        if (resolved) {
+                            return;
+                        }
+                        resolved = true;
                         reject(new SimpleError({
                             code: "",
                             message: "Synchronisatie geannuleerd"
                         }))
                     },
                     setAction: (action: "delete" | "import" | "nothing") => {
+                        if (resolved) {
+                            return;
+                        }
+                        resolved = true;
                         try {
                             resolve({ oldMembers, action })
                         } catch (e) {
@@ -457,20 +521,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             }
         }
 
-        // Start syncing...
-        for (const match of matched) {
-            try {
-                if (onStatusChange) {
-                    onStatusChange(match.stamhoofd.details!.firstName+" "+match.stamhoofd.details!.lastName+" aanpassen...", progress/total)
-                    progress++;
-                }
-                await this.syncLid(match, report)
-                report.markSynced(match.stamhoofd)
-            } catch (e) {
-                report.addError(new SGVMemberError(match.stamhoofd, e))
-            }
-        }
-
         // Start creating
         for (const member of newMembers) {
             try {
@@ -485,6 +535,27 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             }
         }
 
+        matched.sort((a, b) => Sorter.byDateValue(b.stamhoofd.details?.lastExternalSync ?? new Date(1900, 0, 1), a.stamhoofd.details?.lastExternalSync ?? new Date(1900, 0, 1)));
+
+        // Start syncing...
+        for (const match of matched) {
+            try {
+                // If updatedAt close to lastsynced at (5 seconds)
+                /*if (match.stamhoofd.details.lastExternalSync && Math.abs(match.stamhoofd.details.lastExternalSync.getTime() - match.stamhoofd.updatedAt.getTime()) < 1000*5) {
+                    report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
+                    continue;
+                }*/
+                if (onStatusChange) {
+                    onStatusChange(match.stamhoofd.details!.firstName+" "+match.stamhoofd.details!.lastName+" aanpassen...", progress/total)
+                    progress++;
+                }
+                await this.syncLid(match, report)
+                report.markSynced(match.stamhoofd)
+            } catch (e) {
+                report.addError(new SGVMemberError(match.stamhoofd, e))
+            }
+        }
+
         // Show report
         component.present(new ComponentWithProperties(SGVReportView, {
             report
@@ -492,20 +563,20 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async schrapLid(lid: SGVLid, report: SGVSyncReport) {
-        // Fetch full member from SGV
-        const response = await this.authenticatedServer.request<any>({
-            method: "GET",
-            path: "/lid/"+lid.id
-        })
-
-        const lidData = response.data;
-        const patch = schrappen( lidData, OrganizationManager.organization.groups, this.functies)
-
         if (!this.dryRun) {
+            // Fetch full member from SGV
+            const response = await this.authenticatedServer.request<any>({
+                method: "GET",
+                path: "/lid/"+lid.id
+            })
+
+            const lidData = response.data;
+            const patch = schrappen( lidData, OrganizationManager.organization.groups, this.functies)
+
             await sleep(250);
 
             try {
-                const updateResponse = await this.authenticatedServer.request<any>({
+                await this.authenticatedServer.request<any>({
                     method: "PATCH",
                     path: "/lid/"+lid.id+"?bevestig=true",
                     body: patch
@@ -528,25 +599,24 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
         const details = match.stamhoofd.details!
 
-        // Fetch full member from SGV
-        const response = await this.authenticatedServer.request<any>({
-            method: "GET",
-            path: "/lid/"+match.sgvId
-        })
-
-
-        const lid = response.data;
-
-        const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, OrganizationManager.organization.groups, this.functies, report)
-
-        if (patch.adressen && patch.adressen.length == 0) {
-            throw new SimpleError({
-                code: "",
-                message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
-            })
-        }
-
         if (!this.dryRun) {
+            // Fetch full member from SGV
+            const response = await this.authenticatedServer.request<any>({
+                method: "GET",
+                path: "/lid/"+match.sgvId
+            })
+
+            const lid = response.data;
+
+            const patch = getPatch(details, lid, this.groupNumber!, match.stamhoofd.groups, OrganizationManager.organization.groups, this.functies, report)
+
+            if (patch.adressen && patch.adressen.length == 0) {
+                throw new SimpleError({
+                    code: "",
+                    message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
+                })
+            }
+
             await sleep(250);
 
             try {
@@ -556,12 +626,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     body: patch
                 })
 
-                // Patch in Stamhoofd
-                if (match.stamhoofd.details && updateResponse.data.verbondsgegevens && match.stamhoofd.details.memberNumber != updateResponse.data.verbondsgegevens.lidnummer) {
-                    match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
-                    await MemberManager.patchMembersDetails([match.stamhoofd])
-                }
-
+                // Mark as synced in Stamhoofd
+                match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
+                match.stamhoofd.details.lastExternalSync = new Date()
+                await MemberManager.patchMembersDetails([match.stamhoofd])
             } catch (e) {
                 console.error(e)
                 throw e;
@@ -594,12 +662,32 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             await sleep(250);
 
             try {
-                const updateResponse = await this.authenticatedServer.request<any>({
-                    method: "POST",
-                    path: "/lid?bevestig=true",
-                    body: post
-                })
+                if (post.functies && post.functies.length > 1) {
+                    // SGV doesn't support adding multiple functies in one go for new members (...)
+                    post.functies = [post.functies[0]]
+                    const updateResponse = await this.authenticatedServer.request<any>({
+                        method: "POST",
+                        path: "/lid?bevestig=true",
+                        body: post
+                    })
 
+                    // Do a patch for the remaining functies
+                    await this.syncLid({
+                        stamhoofd: member,
+                        sgvId: updateResponse.data.id
+                    }, report);
+                } else {
+                    const updateResponse = await this.authenticatedServer.request<any>({
+                        method: "POST",
+                        path: "/lid?bevestig=true",
+                        body: post
+                    })
+
+                    // Mark as synced in Stamhoofd
+                    member.details.memberNumber = updateResponse.data.verbondsgegevens?.lidnummer ?? null
+                    member.details.lastExternalSync = new Date()
+                    await MemberManager.patchMembersDetails([member])
+                }
             } catch (e) {
                 console.error(e)
                 throw e;

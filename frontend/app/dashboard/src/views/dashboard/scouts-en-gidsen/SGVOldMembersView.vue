@@ -82,24 +82,27 @@ export default class SGVOldMembersView extends Mixins(NavigationMixin) {
             this.onCancel()
         }
     }
-
     
     doDelete() {
         if (this.didSetAction) {
             return;
         }
-        this.setAction("delete")
         this.didSetAction = true;
         this.dismiss({ force: true })
+        setTimeout(() => {
+            this.setAction("delete") 
+        }, 200)
     }
 
     doNothing() {
         if (this.didSetAction) {
             return;
         }
-        this.setAction("nothing")
         this.didSetAction = true;
         this.dismiss({ force: true })
+        setTimeout(() => {
+            this.setAction("nothing")
+        }, 200)
     }
 }
 

@@ -1,4 +1,5 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
+import { Request } from "@simonbackx/simple-networking";
 
 export type ToastListener = (toast: Toast) => void
 
@@ -45,7 +46,7 @@ export class Toast {
             }))
         }
 
-        if (simpleErrors.hasCode("network_error") || simpleErrors.hasCode("network_timeout")) {
+        if (Request.isNetworkError(errors)) {
             return new Toast("Geen of slechte internetverbinding", "error red")
         }
         return new Toast(simpleErrors.getHuman(), "error red")

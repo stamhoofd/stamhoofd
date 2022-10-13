@@ -82,7 +82,7 @@ export interface SGVLidMatch {
 
 export interface SGVLidMatchVerify {
     stamhoofd: MemberWithRegistrations;
-    sgv: SGVLid;
+    sgv: SGVLid | SGVZoekLid;
     verify: boolean;
 }
 
@@ -145,23 +145,33 @@ export class SGVLid {
             return false
         }
 
+        if (member.details.memberNumber && this.lidNummer && member.details.memberNumber === this.lidNummer) {
+            return true
+        }
+
         return StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay)) == 0 
     }
 
+    /// Typo in name
     isProbablyEqual(member: MemberWithRegistrations) {
         if (!member.details?.birthDay) {
             return false
+        }
+
+        if (member.details.memberNumber && this.lidNummer) {
+            return member.details.memberNumber === this.lidNummer
         }
         
         const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName)
         const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay))
 
-        if (t + y <= 3 && y <= 1 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
+        if (t + y <= 3 && y <= 0 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
             return true;
         }
         return false;
     }
 
+    // Typo in name or birthday
     isProbablyEqualLastResort(member: MemberWithRegistrations) {
         const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
 
@@ -183,14 +193,60 @@ export class SGVZoekLid extends AutoEncoder {
     @field({ decoder: StringDecoder, field: "achternaam" })
     lastName: string;
 
-    isEqual(member: MemberWithRegistrations) {
-        return StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName) == 0
+    @field({ decoder: StringDecoder, field: "geboortedatum" }) // format 1995-08-20
+    birthDayString: string;
+
+    get birthDay() {
+        const splitted = this.birthDayString.split("-")
+        if (splitted.length != 3) {
+            return new Date();
+        }
+
+        const year = parseInt(splitted[0])
+        const month = parseInt(splitted[1])
+        const day = parseInt(splitted[2])
+
+        if (isNaN(year) || isNaN(month) || isNaN(day) || day > 31 || month > 12 || year > 2200 || year < 1900) {
+            return new Date();
+        }
+
+        return new Date(year, month-1, day, 12);
     }
 
-    isProbablyEqual(member: MemberWithRegistrations) {
-        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
+    // No typeos
+    isEqual(member: MemberWithRegistrations) {
+        if (!member.details?.birthDay) {
+            return false
+        }
 
-        if (t <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
+        return StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName) == 0 && StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay)) == 0 
+    }
+
+    /// typo in name
+    isProbablyEqual(member: MemberWithRegistrations) {
+        if (!member.details?.birthDay) {
+            return false
+        }
+        
+        const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.firstName+" "+this.lastName)
+        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay))
+
+        if (t + y <= 3 && y <= 0 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length+member.details.lastName.length)) {
+            return true;
+        }
+        return false;
+    }
+
+    /// typo in name or birthdate
+    isProbablyEqualLastResort(member: MemberWithRegistrations) {
+        if (!member.details?.birthDay) {
+            return false
+        }
+
+        const t = StringCompare.typoCount(member.details!.firstName+" "+member.details!.lastName, this.firstName+" "+this.lastName)
+        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay))
+
+        if (t <= 2 && y <= 2 && t < 0.4*Math.min(this.firstName.length + this.lastName.length, member.details!.firstName.length+member.details!.lastName.length)) {
             return true;
         }
         return false;

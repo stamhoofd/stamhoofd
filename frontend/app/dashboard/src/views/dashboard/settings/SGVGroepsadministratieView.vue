@@ -7,10 +7,6 @@
         <main>
             <h1>Groepsadministratie synchroniseren</h1>
 
-            <p class="warning-box">
-                De synchronisatie is pas gelukt als je een overzicht krijgt van alle wijzigingen. In sommige Chrome (en daarvan afgeleide browsers, zoals Edge of Brave) versies durft de synchronisatie te blokkeren door een bug in Chrome zelf, in dat geval blokkeren we dat en krijg je een melding of je de pagina wilt verlaten (klik dan om de pagina niet te verlaten). We zijn dit probleem nog verder aan het onderzoeken aangezien de oorzaak onduidelijk is.
-            </p>
-
             <p class="info-box">
                 Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via {{ $t('shared.emails.general') }}
             </p>
@@ -66,8 +62,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { SGVGroepsadministratie } from "../../../classes/SGVGroepsadministratie";
-import { WhatsNewCount } from "../../../classes/WhatsNewCount";
-
 
 @Component({
     components: {
@@ -81,7 +75,7 @@ import { WhatsNewCount } from "../../../classes/WhatsNewCount";
         Spinner,
         LoadingButton
     },
-     directives: {
+    directives: {
         tooltip: TooltipDirective
     },
     filters: {
@@ -95,13 +89,9 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
     mounted() {
         SGVGroepsadministratie.checkUrl();
+
         UrlHelper.setUrl("/scouts-en-gidsen-vlaanderen")
-
-        if (WhatsNewCount as any == 5) {
-            localStorage.setItem("what-is-new", WhatsNewCount.toString());
-        }
     }
-
 
     get isLoggedIn() {
         return SGVGroepsadministratie.hasToken
@@ -115,6 +105,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
         const toast = new Toast("Synchroniseren voorbereiden...", "spinner").setWithOffset().setHide(null).show()
 
         try {
+            this.setLeave()
             await SGVGroepsadministratie.downloadAll()
             const { matchedMembers, newMembers } = await SGVGroepsadministratie.matchAndSync(this, () => {
                 toast.hide()
@@ -122,8 +113,6 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
             toast.hide();
 
             const { oldMembers, action } = await SGVGroepsadministratie.prepareSync(this, matchedMembers, newMembers)
-
-            this.setLeave()
             const toast2 = new Toast("Synchroniseren...", "spinner").setProgress(0).setWithOffset().setHide(null).show()
 
             try {
@@ -142,7 +131,7 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
             toast.hide()
             console.error(e)
 
-            Toast.fromError(e).setWithOffset().show()
+            Toast.fromError(e).setHide(null).setWithOffset().show()
         }
         this.removeLeave()
         this.loading = false

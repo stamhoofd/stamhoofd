@@ -2,7 +2,7 @@
     <div class="loading-button" :class="{loading}">
         <div><slot /></div>
         <div>
-            <Spinner v-if="loading || delayLoading" />
+            <Spinner v-if="loading || delayLoading" />
         </div>
     </div>
 </template>

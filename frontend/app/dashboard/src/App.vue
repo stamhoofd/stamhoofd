@@ -61,12 +61,15 @@ export default class App extends Vue {
 
     created() {
         if (STAMHOOFD.environment == "development") {
-            //ComponentWithProperties.debug = true
+            console.log('Debug mode activated', ComponentWithProperties)
+            ComponentWithProperties.debug = true;
+            (window as any).ComponentWithProperties = ComponentWithProperties;
+            (window as any).HistoryManager = HistoryManager
         }
 
         try {
             // ColorHelper.setColor("#8B17FF")
-            //ColorHelper.setupDarkTheme()
+            // ColorHelper.setupDarkTheme()
         } catch (e) {
             console.error("Color setup failed")
             console.error(e)
