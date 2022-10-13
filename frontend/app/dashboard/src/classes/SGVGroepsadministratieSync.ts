@@ -66,13 +66,13 @@ export class SGVSyncReport {
 }
 
 export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any {
-    const newFuncties: any[] = []
+    const newFunctions: any[] = []
     const mapping = buildGroupMapping(allGroups, groepFuncties)
 
     for (const functie of lid.functies ?? []) {
         // Keep all functies that have been ended
         if (functie.einde) {
-            newFuncties.push(functie)
+            newFunctions.push(functie)
             continue;
         } 
 
@@ -81,7 +81,7 @@ export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any
         if (!info) {
             // Keep.
             console.warn("Unknown functie "+functie.functie)
-            newFuncties.push(functie)
+            newFunctions.push(functie)
             continue
         }
 
@@ -89,9 +89,9 @@ export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any
             // Managed by stamhoofd
             // => end this
             functie.einde = Formatter.dateIso(new Date())
-            newFuncties.push(functie)
+            newFunctions.push(functie)
         } else {
-            newFuncties.push(functie)
+            newFunctions.push(functie)
             continue
         }
 
@@ -99,7 +99,7 @@ export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any
 
     // Construct the patch: compare and check the fields that need changes
     const patch: any = {
-        functies: newFuncties
+        functies: newFunctions
     }
 
     return patch
@@ -152,15 +152,15 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         newAddresses[0].postadres = true
     }
 
-    const newFuncties: any[] = []
+    const newFunctions: any[] = []
     let hasActiveFunctie = false // True als we een active functie hebben (zonder einde)
     const mapping = buildGroupMapping(allGroups, groepFuncties)
-    const remainingFuncties: any[] = []
+    const endedFunctions: any[] = []
 
     for (const functie of lid.functies ?? []) {
         // Keep all functies that have been ended
         if (functie.einde) {
-            newFuncties.push(functie)
+            newFunctions.push(functie)
             continue;
         } 
 
@@ -169,7 +169,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         if (!info) {
             // Keep.
             console.warn("Unknown functie "+functie.functie)
-            newFuncties.push(functie)
+            newFunctions.push(functie)
             hasActiveFunctie = true
             continue
         }
@@ -177,31 +177,35 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         if (mapping.has(functie.functie)) {
             // Managed by stamhoofd
         } else {
-            newFuncties.push(functie)
+            newFunctions.push(functie)
             hasActiveFunctie = true
             continue
         }
 
         // All functies that should end, unless we add them again
-        remainingFuncties.push(functie)
+        endedFunctions.push(functie)
     }
 
 
     // Map all groepen
-    for (const groep of groups) {
+    for (const group of groups) {
         // Find a match in groepsadmin
         for (const [functieId, _groeps] of mapping) {
             for (const _groep of _groeps) {
-                if (groep.id == _groep.id) {
+                if (group.id == _groep.id) {
                     const functie =  groepFuncties.find(f => f.id == functieId)
-                    const remaingFunctieIndex = remainingFuncties.findIndex(f => f.functie == functie.id)
+                    const endedFunctionIndex = endedFunctions.findIndex(f => f.functie == functie.id && !f.einde)
+                    const alreadyAdded = newFunctions.find(f => f.functie == functie.id && !f.einde)
+                    if (alreadyAdded) {
+                        continue;
+                    }
 
-                    if (remaingFunctieIndex != -1) {
-                        const [spl] = remainingFuncties.splice(remaingFunctieIndex, 1)
-                        newFuncties.push(spl)
+                    if (endedFunctionIndex != -1) {
+                        const [spl] = endedFunctions.splice(endedFunctionIndex, 1)
+                        newFunctions.push(spl)
                         hasActiveFunctie = true
                     } else {
-                        newFuncties.push({
+                        newFunctions.push({
                             groep: groepNummer,
                             functie: functie.id,
                             begin: Formatter.dateIso(new Date()),
@@ -214,9 +218,9 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         }
     }
 
-    // Add all remaing functies, but end them
-    for (const functie of remainingFuncties) {
-        newFuncties.push(Object.assign({}, functie, { einde: Formatter.dateIso(new Date()), }))
+    // Add all remaining functies, but end them
+    for (const functie of endedFunctions) {
+        newFunctions.push(Object.assign({}, functie, { einde: Formatter.dateIso(new Date()), }))
     }
 
     if (!hasActiveFunctie) {
@@ -248,9 +252,9 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
         patch.adressen = newAddresses
     }
 
-    if (!lid.functies || !deepEqual(lid.functies, newFuncties)) {
+    if (!lid.functies || !deepEqual(lid.functies, newFunctions)) {
         // Skip updates
-        patch.functies = newFuncties
+        patch.functies = newFunctions
     }
 
     if (!lid.contacten || !deepEqual(lid.contacten, newContacts)) {

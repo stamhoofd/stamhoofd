@@ -12,7 +12,7 @@
             <p>We zijn niet 100% zeker dat deze leden uit Stamhoofd in de Groepsadministratie op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum of geslacht). Kan je dit manueel verifiëren?</p>
         
             <STList>
-                <STListItem v-for="match in verifiedMatches" :key="match.stamhoofd.id" element-name="label" :selectable="true">
+                <STListItem v-for="match in matches" :key="match.stamhoofd.id" element-name="label" :selectable="true">
                     <div slot="left">
                         <h2 class="style-title-list">
                             {{ match.stamhoofd.details.name }}
@@ -38,14 +38,12 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" type="button" @click="dismiss">
+                <button class="button secundary" type="button" @click.prevent.stop="cancel">
                     <span>Annuleren</span>
                 </button>
-                <LoadingButton :loading="loading">
-                    <button class="button primary" type="button" @click="goNext">
-                        Verder
-                    </button>
-                </LoadingButton>
+                <button class="button primary" type="button" @click.prevent.stop="goNext">
+                    Verder
+                </button>
             </template>
         </STToolbar>
     </div>
@@ -82,29 +80,25 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
     @Prop({ required: true })
     matches: SGVLidMatchVerify[]
 
-    verifiedMatches: SGVLidMatchVerify[] = []
-
     @Prop({ required: true })
     onVerified: (verified: SGVLidMatchVerify[]) => void
 
     @Prop({ required: true })
     onCancel: () => void
 
-    mounted() {
-        // clone
-        this.verifiedMatches = this.matches.map(m => {
-            return {
-                sgv: m.sgv,
-                stamhoofd: m.stamhoofd,
-                verify: m.verify
-            }
-        })
-    }
-
     beforeDestroy() {
         if (!this.didVerify) {
+            this.didVerify = true;
             this.onCancel()
         }
+    }
+
+    cancel() {
+        if (this.didVerify) {
+            return;
+        }
+        
+        this.dismiss({force: true})
     }
     
     goNext() {
@@ -112,9 +106,11 @@ export default class SGVVerifyProbablyEqualView extends Mixins(NavigationMixin) 
             return;
         }
         this.didVerify = true;
-
         this.dismiss({ force: true })
-        this.onVerified(this.verifiedMatches)
+
+        setTimeout(() => {
+            this.onVerified(this.matches)
+        }, 200);
     }
 }
 

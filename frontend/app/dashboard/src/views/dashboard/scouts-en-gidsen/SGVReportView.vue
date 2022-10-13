@@ -2,7 +2,7 @@
     <div id="sgv-report-view" class="st-view">
         <STNavigationBar title="Synchronisatie-rapport">
             <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
+            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -110,12 +110,14 @@
 
 <script lang="ts">
 import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import { SGVSyncReport } from '../../../classes/SGVGroepsadministratieSync';
+import { SGVMemberError } from "../../../classes/SGVStructures";
 import MemberView from '../member/MemberView.vue';
 
 @Component({
@@ -149,12 +151,15 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
     }
 
     getErrorMessage(error: Error) {
-        if (!isSimpleError(error) || !isSimpleErrors(error)) {
-            return error.message
+        if (error instanceof SGVMemberError) {
+            return this.getErrorMessage(error.error)
         }
         
-        if (error.hasCode("network_error") || error.hasCode("network_timeout")) {
-            return "Geen of slechte internetverbinding"
+        if (Request.isNetworkError(error)) {
+            return 'Er was een internetprobleem of de groepsadministratie was tijdelijk onbereikbaar, gaf een interne foutmelding of reageerde niet.'
+        }
+        if (!isSimpleError(error) || !isSimpleErrors(error)) {
+            return error.message
         }
         return error.getHuman()
     }
