@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -175,6 +175,14 @@ export default class SGVGroepsadministratieView extends Mixins(NavigationMixin) 
 
         // This message is not visible on most browsers
         return "De synchronisatie is nog bezig. Wacht tot de synchronisatie is voltooid voor je de pagina verlaat"
+    }
+
+    shouldNavigateAway() {
+        if (this.leaveSet) {
+            new CenteredMessage("De synchronisatie is nog bezig", "Wacht tot de synchronisatie is voltooid voor je de pagina verlaat").addCloseButton().show()
+            return false;
+        }
+        return true;
     }
 }
 </script>
