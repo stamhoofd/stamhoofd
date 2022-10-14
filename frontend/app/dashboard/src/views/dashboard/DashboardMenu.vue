@@ -124,6 +124,12 @@
                     <span>Mijn account</span>
                 </button>
 
+                <button class="menu-button button heading" type="button" @click="manageWhatsNew()">
+                    <span class="icon gift" />
+                    <span>Wat is er nieuw?</span>
+                    <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
+                </button>
+
                 <a class="menu-button button heading" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
                     <span class="icon book" />
                     <span>Documentatie</span>
@@ -432,7 +438,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     manageWhatsNew() {
         this.whatsNewBadge = ""
 
-        window.open('https://'+this.$t('shared.domains.marketing')+'/release-notes', '_blank');
+        window.open('https://'+this.$t('shared.domains.marketing')+'/changelog', '_blank');
         localStorage.setItem("what-is-new", WhatsNewCount.toString());
     }
 

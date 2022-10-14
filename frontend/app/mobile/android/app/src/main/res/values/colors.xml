@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="statusBar">#f5f5f5</color>
-    <color name="navigationBarColor">#FFFFFF</color>
+    <color name="navigationBarColor">#f5f5f5</color>
+    <color name="colorPrimary">#0053FF</color>
+    <color name="colorAccent">#0053FF</color>
 </resources>

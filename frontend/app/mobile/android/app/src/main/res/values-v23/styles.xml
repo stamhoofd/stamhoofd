@@ -10,9 +10,7 @@
         <item name="colorPrimaryDark">@color/statusBar</item>
 
         <item name="android:statusBarColor">@color/statusBar</item>
-        <item name="android:navigationBarColor">@color/navigationBarColor</item>
         <item name="colorAccent">@color/colorAccent</item>
-
         <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>
