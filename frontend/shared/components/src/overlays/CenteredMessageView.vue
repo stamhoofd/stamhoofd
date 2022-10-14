@@ -1,6 +1,6 @@
 <template>
     <transition appear name="show">
-        <form class="centered-message-container" @submit.prevent @mousedown="dismiss" @touchdown="dismiss">
+        <form class="centered-message-container" @submit.prevent @mousedown="onClickOutside" @touchdown="onClickOutside">
             <div class="centered-message" @mousedown.stop="" @touchdown.stop="">
                 <div class="header">
                     <Spinner v-if="centeredMessage.type == 'loading'" class="" />
@@ -71,6 +71,14 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         }, 200)
     }
 
+    onClickOutside() {
+        // If this is a touch device, do nothing
+        if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)) {
+            return
+        }
+        this.dismiss();
+    }
+
     async onClickButton(button: CenteredMessageButton) {
         if (this.isClosing) {
             return
@@ -125,7 +133,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
             return [];
         }
 
-        if (!buttons.length) {
+        if (buttons.length === undefined) {
             buttons = [buttons]
         }
         return buttons;
@@ -144,7 +152,7 @@ export default class CenteredMessageView extends Mixins(NavigationMixin) {
         
         let button = buttons[0];
         if (focusedButton !== -1) {
-            if (focusedButton == buttons.length - 1) {
+            if (focusedButton >= buttons.length - 2) {
                 button = buttons[0];
             } else {
                 button = buttons[focusedButton+1]

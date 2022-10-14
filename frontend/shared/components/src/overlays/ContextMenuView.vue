@@ -1,6 +1,6 @@
 <template>
     <transition appear name="show">
-        <div class="context-menu-container" :class="{ hasParent: !!parentMenu }" @click="pop" @contextmenu.prevent="pop">
+        <div class="context-menu-container" :class="{ hasParent: !!parentMenu }" @click="pop" @contextmenu.prevent>
             <div
                 ref="context"
                 class="context-menu"
@@ -368,7 +368,9 @@ export default class ContextMenuView extends Vue {
     }
 
     onClickItem(item: ContextMenuItemView, event) {
+        console.log('On click item');
         if (item.clicked) {
+            console.log('Already clicked');
             return;
         }
         item.clicked = true
@@ -396,10 +398,11 @@ export default class ContextMenuView extends Vue {
             }
             return
         }
-
+        console.log('Emit clicked');
         item.$emit("click", event);
 
         // Wait to pop to let the browser handle events (e.g. label > checkbox)
+        console.log('Delay pop');
         this.delayPop(true);
     }
 

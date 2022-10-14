@@ -52,7 +52,7 @@ export default class TableActionsContextMenu extends Mixins(NavigationMixin) {
         if (this.focused.length > 0 || !this.table) {
             action.handle(this.focused)?.catch((e) => {
                 console.error(e)
-                Toast.fromError(e).show
+                Toast.fromError(e).show()
             })
         } else {
             this.table.handleAction(action, event)

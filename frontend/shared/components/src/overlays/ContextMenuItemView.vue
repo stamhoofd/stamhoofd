@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="context-menu-item" type="button" :class="{ isOpen: isOpen, hover: isHovered }" @click.passive="onClick" @mouseover.passive="onMouseOver" @mouseleave.passive="onMouseLeave">
+    <component :is="elementName" class="context-menu-item" type="button" :class="{ isOpen: isOpen, hover: isHovered }" @click.stop.passive="onClick" @mouseover.passive="onMouseOver" @mouseleave.passive="onMouseLeave">
         <div class="left">
             <slot name="left" />
         </div>
