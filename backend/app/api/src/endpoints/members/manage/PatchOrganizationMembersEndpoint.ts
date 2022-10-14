@@ -81,8 +81,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
-            if (STAMHOOFD.environment == "development") {
-                if (member.details.firstName == "create" || member.details.firstName == "Create") {
+            if (STAMHOOFD.environment == "development" || STAMHOOFD.environment == "staging") {
+                if (member.details.firstName == "create" && parseInt(member.details.lastName) > 0) {
+                    const count = parseInt(member.details.lastName);
                     let group = groups[0];
 
                     for (const registrationStruct of struct.registrations) {
@@ -92,7 +93,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         }
                     }
 
-                    await this.createDummyMembers(user.organization, group)
+                    await this.createDummyMembers(user.organization, group, count)
 
                     // Skip creating this member
                     continue;
@@ -400,12 +401,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return registration
     }
 
-    async createDummyMembers(organization: Organization, group: Group) {
+    async createDummyMembers(organization: Organization, group: Group, count: number) {
         const members = await new MemberFactory({ 
             organization,
             minAge: group.settings.minAge ?? undefined,
             maxAge: group.settings.maxAge ?? undefined
-        }).createMultiple(25)
+        }).createMultiple(count)
 
         for (const m of members) {
             const member = m.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])

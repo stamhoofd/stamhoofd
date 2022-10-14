@@ -314,7 +314,7 @@ export default class STNavigationBar extends Vue {
 
     &.show-title {
         > h1 {
-            opacity: 0.6;
+            opacity: 1;
         }
     }
 

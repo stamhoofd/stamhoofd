@@ -1,7 +1,7 @@
 <template>
     <div class="st-view scanner-view">
         <STNavigationBar title="Scan een ticket" :show-title="true">
-            <button slot="left" class="icon button close" @click="dismiss" />
+            <button slot="left" class="icon button close" type="button" @click="dismiss" />
         </STNavigationBar>
 
         <div class="video-container" :class="{ native: disableWebVideo }">
@@ -10,10 +10,10 @@
 
             <div class="video-footer">
                 <div class="button-bar">
-                    <button v-if="hasFlash" class="round-button" :class="{ selected: isFlashOn }" @click="toggleFlash">
+                    <button v-if="hasFlash" class="round-button" :class="{ selected: isFlashOn }" type="button" @click="toggleFlash">
                         <span class="icon flashlight" />
                     </button>
-                    <button v-if="cameras.length > 1" class="round-button" @click="switchCamera">
+                    <button v-if="cameras.length > 1" class="round-button" type="button" @click="switchCamera">
                         <span class="icon reverse" />
                     </button>
                 </div>
@@ -25,7 +25,7 @@
                     <p v-else-if="hadNetworkError">
                         Geen internetverbinding. Scannen van tickets blijft gedeeltelijk werken. Internet is aan te raden.<br>
                         <span class="style-description-small">Laatst bijgewerkt: {{ lastUpdatedText }}</span><br>
-                        <button class="button text" @click="updateTickets">
+                        <button class="button text" type="button" @click="updateTickets">
                             Opnieuw proberen
                         </button>
                     </p>
