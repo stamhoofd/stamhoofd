@@ -117,7 +117,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, LoadingButton, Spinner, STErrorsDefault, STList, STListItem, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { FinancialSupportSettings, getPermissionLevelNumber, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from '@stamhoofd/structures';
+import { FinancialSupportSettings, getPermissionLevelNumber, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -143,6 +143,9 @@ import EditBalanceItemView from './balance/EditBalanceItemView.vue';
 export default class MemberViewPayments extends Mixins(NavigationMixin) {
     @Prop()
     member!: MemberWithRegistrations;
+
+    @Prop({default: null})
+    defaultRegistration!: Registration | null;
 
     @Prop()
     familyManager!: FamilyManager;
@@ -187,6 +190,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     createBalanceItem() {
         const balanceItem = MemberBalanceItem.create({
             memberId: this.member.id,
+            registration: this.defaultRegistration ?? null
         })
         const component = new ComponentWithProperties(EditBalanceItemView, {
             balanceItem,

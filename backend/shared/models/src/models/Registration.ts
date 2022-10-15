@@ -259,17 +259,13 @@ export class Registration extends Model {
         const template = templates[0]
 
         const organization = user.organization;
-        const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
-        const groups = await Group.getByIDs(...Formatter.uniqueArray(registrations.map(r => r.groupId)))
 
-        const paymentDetailed = PaymentDetailed.create({
-            ...payment,
-            registrations: registrations.map(r => RegistrationWithMemberStruct.create({
-                ...r.setRelation(Registration.payment, payment).getStructure(),
-                member: MemberStruct.create(r.member),
-                group: groups.find(g => g.id === r.groupId)?.getStructure()
-            }))
-        })
+        const paymentGeneral = await payment.getGeneralStructure();
+        const registrations = paymentGeneral.registrations
+        let groups = registrations.map(r => r.group);
+        
+        // Remove duplicate groups
+        groups = groups.filter((g, index) => groups.findIndex(g2 => g2.id === g.id) === index)
 
         const recipients = [
             Recipient.create({
@@ -301,25 +297,25 @@ export class Registration extends Model {
                     Replacement.create({
                         token: "overviewTable",
                         value: "",
-                        html: paymentDetailed.getDetailsHTMLTable()
+                        html: paymentGeneral.getDetailsHTMLTable()
                     }),
                     Replacement.create({
                         token: "overviewContext",
-                        value: "Inschrijving van " + paymentDetailed.getMemberFirstNames()
+                        value: "Inschrijving van " + paymentGeneral.memberFirstNames
                     }),
                     Replacement.create({
                         token: "memberNames",
-                        value: paymentDetailed.getMemberNames()
+                        value: paymentGeneral.memberNames
                     }),
                     Replacement.create({
                         token: "overviewTable",
                         value: "",
-                        html: paymentDetailed.getDetailsHTMLTable()
+                        html: paymentGeneral.getDetailsHTMLTable()
                     }),
                     Replacement.create({
                         token: "paymentTable",
                         value: "",
-                        html: paymentDetailed.getHTMLTable()
+                        html: paymentGeneral.getHTMLTable()
                     }),
                     Replacement.create({
                         token: "registerUrl",
@@ -333,7 +329,7 @@ export class Registration extends Model {
             })
         ];
 
-        const {from, replyTo} = groups.length == 1 ? organization.getGroupEmail(groups[0]) : organization.getDefaultEmail()
+        const {from, replyTo} = groups.length == 1 && groups[0].privateSettings ? organization.getEmail(groups[0].privateSettings.defaultEmailId) : organization.getDefaultEmail()
 
         // Create e-mail builder
         const builder = await getEmailBuilder(organization, {

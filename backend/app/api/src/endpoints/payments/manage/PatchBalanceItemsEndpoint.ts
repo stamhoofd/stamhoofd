@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, Group, Member, Token, User, UserWithOrganization } from '@stamhoofd/models';
+import { BalanceItem, Group, Member, Registration, Token, User, UserWithOrganization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { MemberBalanceItem } from "@stamhoofd/structures";
 
@@ -58,7 +58,17 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     model.memberId = (await this.validateMemberId(put.memberId, user)).id;
                 }
 
-                // todo: support registration and order
+                if (put.registration) {
+                    const registration = await Registration.getByID(put.registration.id)
+                    if (!registration || registration.memberId !== model.memberId) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Registration not found',
+                            field: 'registration'
+                        })
+                    }
+                    model.registrationId = registration.id
+                }
 
                 await model.save();
                 returnedModels.push(model);
@@ -81,6 +91,23 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     await this.validateUserId(model.userId, user);
                 }
 
+                if (patch.memberId) {
+                    model.memberId = (await this.validateMemberId(patch.memberId, user)).id;
+                }
+
+                if (patch.registration) {
+                    const registration = await Registration.getByID(patch.registration.id)
+                    if (!registration || registration.memberId !== model.memberId) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Registration not found',
+                            field: 'registration'
+                        })
+                    }
+                    model.registrationId = registration.id
+                } else if (patch.registration === null) {
+                    model.registrationId = null
+                }
                 model.description = patch.description ?? model.description;
                 model.price = patch.price ?? model.price;
                 

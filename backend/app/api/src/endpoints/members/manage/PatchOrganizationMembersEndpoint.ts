@@ -3,7 +3,7 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
@@ -126,7 +126,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                await this.addRegistration(member, registrationStruct)
+                await this.addRegistration(user, member, registrationStruct)
             }
 
             // Add users if they don't exist (only placeholders allowed)
@@ -227,21 +227,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     updateGroups.set(group.id, group)
                 }
 
-                // Check payment
-                if (!registration.payment && patchRegistration.payment && patchRegistration.payment.isPut()) {
-                    const payment = new Payment()
-                    payment.organizationId = member.organizationId
-                    payment.userId = member.users[0]?.id ?? null
-                    payment.method = patchRegistration.payment.method
-                    payment.paidAt = patchRegistration.payment.paidAt
-                    payment.price = patchRegistration.payment.price
-                    payment.status = patchRegistration.payment.status
-                    payment.transferDescription = patchRegistration.payment.transferDescription
-                    await payment.save()
-
-                    registration.setOptionalRelation(Registration.payment, payment)
-                    registration.price = patchRegistration.payment.price
-                }
                 await registration.save()
             }
 

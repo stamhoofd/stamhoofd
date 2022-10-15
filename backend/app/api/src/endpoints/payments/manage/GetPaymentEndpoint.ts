@@ -28,11 +28,11 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const user = token.user
 
         return new Response(
-            (await GetPaymentEndpoint.getPayment(request.params.id, user, PermissionLevel.Read)).struct
+            (await this.getPayment(request.params.id, user, PermissionLevel.Read))
         );
     }
 
-    static async getPayment(id: string, user: UserWithOrganization, permissionLevel: PermissionLevel) {
+    async getPayment(id: string, user: UserWithOrganization, permissionLevel: PermissionLevel) {
         if (!user.permissions) {
             throw new SimpleError({
                 code: "permission_denied",
@@ -49,79 +49,6 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             })
         }
 
-        const balanceItemPayments = await BalanceItemPayment.where({paymentId: payment.id})
-        const ids = Formatter.uniqueArray(balanceItemPayments.flatMap(p => p.balanceItemId));
-        const balanceItems = await BalanceItem.getByIDs(...ids);
-
-        // Load members and orders
-        const registrationIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.registrationId ? [b.registrationId] : []))
-        const orderIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.orderId ? [b.orderId] : []))
-
-        const registrations = await Registration.getByIDs(...registrationIds)
-        const orders = await Order.getByIDs(...orderIds)
-
-        const memberIds = Formatter.uniqueArray(registrations.flatMap(b => b.memberId ? [b.memberId] : []))
-        const members = await Member.getByIDs(...memberIds)
-
-        const groupIds = Formatter.uniqueArray(registrations.flatMap(b => b.groupId ? [b.groupId] : []))
-        const groups = await Group.getByIDs(...groupIds)
-
-        let hasAccess = false;
-        if (user.permissions.hasFullAccess() || user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
-            hasAccess = true;
-        } else {
-            for (const registration of registrations) {
-                if (registration.hasAccess(user, groups, permissionLevel)) {
-                    hasAccess = true;
-                    break;
-                }
-            }
-
-            if (!hasAccess) {
-                for (const order of orders) {
-                    const webshop = await Webshop.getByID(order.webshopId)
-                    if (webshop && getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(permissionLevel)) {
-                        hasAccess = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!hasAccess) {
-            throw new SimpleError({
-                code: "not_found",
-                message: "Payment not found",
-                human: "Je hebt geen togang tot deze betaling"
-            })
-        }
-
-        return {
-            payment,
-            struct: PaymentGeneral.create({
-                ...payment,
-                balanceItemPayments: balanceItemPayments.map((item) => {
-                    const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)
-                    const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
-                    const member = registration ? members.find(r => r.id === registration.memberId) : undefined
-                    const group = registration ? groups.find(r => r.id === registration.groupId) : undefined
-                    const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
-
-                    return BalanceItemPaymentDetailed.create({
-                        ...item,
-                        balanceItem: BalanceItemDetailed.create({
-                            ...balanceItem,
-                            registration: registration ? RegistrationWithMember.create({
-                                ...registration,
-                                member: MemberStruct.create(member!),
-                                group: GroupStruct.create(group!)
-                            }) : null,
-                            order: order ? OrderStruct.create(order) : null
-                        })
-                    })
-                })
-            })
-        }
-
+        return await payment.getGeneralStructure({user, permissionLevel})
     }
 }

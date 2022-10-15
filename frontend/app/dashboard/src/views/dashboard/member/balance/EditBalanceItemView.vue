@@ -20,6 +20,29 @@
             <PriceInput v-model="price" placeholder="Gratis" :min="null" />
         </STInputBox>
 
+        <template v-if="familyManager.members.length > 1 && member">
+            <STInputBox title="Lid" error-fields="memberId" :error-box="errorBox" class="max">
+                <RadioGroup>
+                    <Radio v-for="member in familyManager.members" :key="member.id" v-model="memberId" :value="member.id">
+                        {{ member.name }}
+                    </Radio>
+                </RadioGroup>
+            </STInputBox>
+        </template>
+
+        <template v-if="patchedBalanceItem.registration">
+            <hr>
+            <h2>Aanrekening voor</h2>
+
+            <STList>
+                <MemberRegistrationBlock :registration="patchedBalanceItem.registration" @edit="linkRegistration" />
+            </STList>
+        </template>
+
+        <button v-else-if="member" class="button text" type="button" @click="linkRegistration">
+            <span class="icon link" /><span>Koppelen aan inschrijving</span>
+        </button>
+
         <template v-if="!isNew">
             <hr>
             <h2>Betaalpogingen</h2>
@@ -80,12 +103,15 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, PriceInput,SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, PriceInput,Radio,RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { FamilyManager } from '../../../../classes/FamilyManager';
+import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import PaymentView from '../../payments/PaymentView.vue';
+import MemberRegistrationBlock from '../MemberRegistrationBlock.vue';
 
 @Component({
     components: {
@@ -94,7 +120,10 @@ import PaymentView from '../../payments/PaymentView.vue';
         STErrorsDefault,
         PriceInput,
         STListItem,
-        STList
+        STList,
+        MemberRegistrationBlock,
+        RadioGroup,
+        Radio
     },
 })
 export default class EditBalanceItemView extends Mixins(NavigationMixin) {
@@ -112,8 +141,22 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     saveHandler: ((patch: AutoEncoderPatchType<MemberBalanceItem>) => Promise<void>);
 
+    familyManager = new FamilyManager([]);
+
     get title() {
         return this.isNew ? 'Aanrekening toevoegen' : 'Aanrekening bewerken';
+    }
+
+    mounted() {
+        // Load family if connected to a member
+        if (this.balanceItem.memberId) {
+            // Load family
+            this.familyManager.loadFamily(this.balanceItem.memberId).catch(console.error)
+        }
+    }
+
+    get member() {
+        return this.familyManager.members.find(m => m.id == this.balanceItem.memberId)
     }
 
     get patchedBalanceItem() {
@@ -122,6 +165,41 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
 
     addPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<MemberBalanceItem>>) {
         this.patchBalanceItem = this.patchBalanceItem.patch(patch)
+    }
+
+    linkRegistration(event) {
+        if (!this.member) {
+            return
+        }
+        const member = this.member
+
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: 'Geen',
+                    action: () => {
+                        this.addPatch({
+                            registration: null
+                        })
+                        return false;
+                    }
+                })
+            ],
+            member.activeRegistrations.map(r => {
+                const group = OrganizationManager.organization.groups.find(g => g.id === r.groupId)
+                return new ContextMenuItem({
+                    name: group?.settings.name ?? '?',
+                    action: () => {
+                        this.addPatch({
+                            registration: r
+                        })
+                        return false;
+                    }
+                })
+            })
+        ])
+
+        menu.show({clickEvent: event}).catch(console.error)
     }
 
     get description() {
@@ -141,6 +219,17 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     set price(price: number) {
         this.addPatch({
             price
+        })
+    }
+
+    get memberId() {
+        return this.patchedBalanceItem.memberId;
+    }
+
+    set memberId(memberId: string | null) {
+        this.addPatch({
+            memberId,
+            registration: null
         })
     }
 

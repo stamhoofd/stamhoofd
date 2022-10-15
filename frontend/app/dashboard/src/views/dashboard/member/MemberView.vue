@@ -18,7 +18,7 @@
             </h1>
 
             <SegmentedControl v-model="tab" :items="tabs" :labels="tabLabels" />
-            <component :is="tab" :member="member" :family-manager="familyManager" />
+            <component :is="tab" :member="member" :family-manager="familyManager" :default-registration="defaultRegistration" />
         </main>
     </div>
 </template>
@@ -85,6 +85,14 @@ export default class MemberView extends Mixins(NavigationMixin) {
 
     mounted() {
         UrlHelper.addSearchParam("member", this.member.id);
+    }
+
+    get registrations() {
+        return this.member.filterRegistrations({groups: this.group ? [this.group] : undefined, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
+    }
+
+    get defaultRegistration() {
+        return this.registrations[0] ?? this.member.activeRegistrations[0] ?? null
     }
     
     created() {

@@ -417,6 +417,10 @@ export class Order extends Model {
         })
     }
 
+    getStructureWithoutPayment()  {
+        return OrderStruct.create(Object.assign({}, this, { payment: null }));
+    }
+
     async getStructure()  {
         if (this.paymentId) {
             if (Order.payment.isLoaded(this)) {

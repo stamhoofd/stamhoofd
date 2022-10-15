@@ -1,5 +1,6 @@
 import { column, Model } from '@simonbackx/simple-database';
 import { BalanceItemStatus, MemberBalanceItem, MemberBalanceItemPayment, Payment as PaymentStruct } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 import { Group } from './Group';
 import { Order } from './Order';
@@ -136,6 +137,13 @@ export class BalanceItem extends Model {
         // Load balance payment items
         const {BalanceItemPayment} = await import('./BalanceItemPayment');
         const balanceItemPayments = await BalanceItemPayment.where({ balanceItemId: {sign: 'IN', value: items.map(i => i.id)} })
+
+        // Load members and orders
+        const registrationIds = Formatter.uniqueArray(items.flatMap(b => b.registrationId ? [b.registrationId] : []))
+        const orderIds = Formatter.uniqueArray(items.flatMap(b => b.orderId ? [b.orderId] : []))
+
+        const registrations = await Registration.getByIDs(...registrationIds)
+        const orders = await Order.getByIDs(...orderIds)
     
         // Load payments
         const payments = await Payment.getByIDs(...balanceItemPayments.map(p => p.paymentId))
@@ -144,6 +152,8 @@ export class BalanceItem extends Model {
             const thisBalanceItemPayments = balanceItemPayments.filter(p => p.balanceItemId === item.id)
             return MemberBalanceItem.create({
                 ...item,
+                registration: registrations.find(r => r.id === item.registrationId)?.getStructure() ?? null,
+                order: orders.find(o => o.id === item.orderId)?.getStructureWithoutPayment() ?? null,
                 payments: thisBalanceItemPayments.map(p => {
                     const payment = payments.find(pp => pp.id === p.paymentId)!
                     return MemberBalanceItemPayment.create({
