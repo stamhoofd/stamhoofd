@@ -160,7 +160,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
             // Merge both patches
             this.addPatch(p.patch(patch))
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("popup"))
     }
 

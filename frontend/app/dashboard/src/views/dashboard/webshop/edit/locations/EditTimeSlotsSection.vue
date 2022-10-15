@@ -92,7 +92,7 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
             // Merge both patches
             this.addPatch(p.patch(patch))
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("sheet"))
     }
 
@@ -100,7 +100,7 @@ export default class EditTimeSlotsSection extends Mixins(NavigationMixin) {
         this.present(new ComponentWithProperties(EditTimeSlotView, { timeSlots: this.timeSlots, isNew: false, webshop: this.webshop, timeSlot, saveHandler: (patch: AutoEncoderPatchType<WebshopTimeSlots>) => {
             this.addPatch(patch)
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("sheet"))
     }
     

@@ -297,7 +297,7 @@ $slider-height: 6px;
 
         .fill {
             left: calc(-1 * $border-width / 2);
-            // todo: also right + width should get corrected
+            // TODO: also right + width should get corrected
             top: 0;
             bottom: 0;
             background: $color-primary;

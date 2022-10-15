@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { Address, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent, Payment, PaymentDetailed, RegistrationWithMember } from '@stamhoofd/structures';
+import { Address, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
 import { Vue } from "vue-property-decorator";
 
 import { OrganizationManager } from './OrganizationManager';
@@ -170,33 +170,6 @@ export class MemberManagerStatic extends MemberManagerBase {
         return found
     }
 
-    /**
-     * Get last updated emergency contact
-     */
-    getDoctor(): EmergencyContact | null {
-        if (!this.members) {
-            return null
-        }
-        let minDate = -1
-        let found: EmergencyContact | null = null
-
-        for (const member of this.members) {
-            if (!member.details) {
-                continue
-            }
-            
-            if (member.details.doctor) {
-                const lastReviewed = member.details.reviewTimes.getLastReview("records")
-                if ((lastReviewed && lastReviewed.getTime() > minDate) || minDate == -1) {
-                    minDate = lastReviewed?.getTime() ?? -1
-                    found = member.details.doctor
-                }
-            }
-        }
-
-        return found
-    }
-
     updateAddress(oldValue: Address, newValue: Address) {
         if (!this.members) {
             return
@@ -252,81 +225,6 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         return Array.from(addresses.values())
     }
-
-
-    getPaymentDetailed(payment: Payment) {
-        if (payment instanceof PaymentDetailed) {
-            return payment
-        }
-
-        const detailed = PaymentDetailed.create(Object.assign({
-            registrations: []
-        }, payment))
-
-        if (!MemberManager.members) {
-            return detailed
-        }
-        
-        const groups = OrganizationManager.organization.groups
-        for (const member of MemberManager.members) {
-            for (const registration of member.registrations) {
-                if (!registration.payment || registration.payment.id != payment.id) {
-                    continue;
-                }
-
-                const group = groups.find(g => g.id == registration.groupId)
-                if (!group) {
-                    continue;
-                }
-                const reg = RegistrationWithMember.create(
-                    Object.assign({
-                        member,
-                        group
-                    }, registration)
-                );
-                detailed.registrations.push(reg)
-            }
-        }
-        return detailed
-    }
-
-    /**
-     * Get registrations that are up to date
-     */
-    getLatestRegistrations(members: Member[]): RegistrationWithMember[] {
-        if (!MemberManager.members) {
-            return []
-        }
-
-        const registrations: RegistrationWithMember[] = []
-        const groups = OrganizationManager.organization.groups
-        for (const member of MemberManager.members) {
-            if (!members.find(m => m.id == member.id)) {
-                continue;
-            }
-
-            for (const registration of member.registrations) {
-                // todo
-                if (registration.createdAt > new Date(new Date().getTime() - 10*1000)) {
-                    continue;
-                }
-
-                const group = groups.find(g => g.id == registration.groupId)
-                if (!group) {
-                    continue;
-                }
-                const reg = RegistrationWithMember.create(
-                    Object.assign({
-                        member,
-                        group
-                    }, registration)
-                );
-                registrations.push(reg)
-            }
-        }
-        return registrations
-    }
-
 }
 
 export const MemberManager = new MemberManagerStatic();

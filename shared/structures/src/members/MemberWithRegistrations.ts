@@ -122,6 +122,9 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
     }
 
     get outstandingAmount() {
+        // TODO
+        return 0;
+        /*
         // Warning: some registrations might share the same payments!
         // Don't count those twice!
         const counted = new Set<string>()
@@ -136,11 +139,13 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
             }
             
             return o
-        }, 0)
+        }, 0)*/
     }
     
     get paid(): boolean {
-        return !this.registrations.find(r => r.payment && r.payment.status != PaymentStatus.Succeeded)
+        // TODO
+        return false;
+        // return !this.registrations.find(r => r.payment && r.payment.status != PaymentStatus.Succeeded)
     }
 
     get info(): string {

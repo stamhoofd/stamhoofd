@@ -15,7 +15,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Column, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, EncryptedPaymentGeneral, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod } from '@stamhoofd/structures';
 import { PaymentStatus } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -116,7 +116,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
 
     async sms(payments: PaymentGeneral[]) {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ "../sms/SMSView.vue"), {
-            customers: payments.flatMap(p => p.order ? [p.order.data.customer] : []),
+            customers: payments.flatMap(p => p.orders.map(o => o.data.customer)),
             members: payments.flatMap(p => p.registrations.map(r => r.member))
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
@@ -136,10 +136,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                 name: "Webshops", 
                 choices: this.organization.webshops.map(webshop => new ChoicesFilterChoice(webshop.id, webshop.meta.name)),
                 getValue: (payment) => {
-                    if (!payment.order) {
-                        return []
-                    }
-                    return [payment.order.webshopId]
+                    return payment.orders.map(o => o.webshopId)
                 },
                 defaultMode: ChoicesFilterMode.Or
             }),
@@ -203,7 +200,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         const cols: Column<PaymentGeneral, any>[] = [
             new Column<PaymentGeneral, string>({
                 name: "Naam", 
-                getValue: (payment) => payment.order ? payment.order.data.customer.name : payment.registrations.map(r => r.member.name).join(", "), 
+                getValue: (payment) => payment.orders.map(o => o.data.customer.name).join(", ") + payment.registrations.map(r => r.member.name).join(", "), 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 50,
                 recommendedWidth: 100
@@ -212,14 +209,19 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new Column<PaymentGeneral, string>({
                 name: "Beschrijving", 
                 getValue: (payment) => {
-                    if (!payment.order) {
-                        return payment.registrations.map(r => r.group.settings.name).join(", ")
+                    const contexts: string[] = [];
+                    for (const registration of payment.registrations) {
+                        contexts.push(registration.group.settings.name)
                     }
-                    const webshop = this.organization.webshops.find(w => w.id == payment.order!.webshopId)
-                    if (webshop) {
-                        return webshop.meta.name+" #"+payment.order.number
+                    for (const order of payment.orders) {
+                        const webshop = this.organization.webshops.find(w => w.id == order.webshopId)
+                        if (webshop) {
+                            contexts.push(webshop.meta.name+" #"+order.number)
+                        } else {
+                            contexts.push("#"+order.number)
+                        }
                     }
-                    return "#"+payment.order.number
+                    return contexts.join(', ');
                 }, 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 50,
@@ -297,7 +299,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         const response = await session.authenticatedServer.request({
             method: "GET",
             path: "/organization/payments",
-            decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>),
+            decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
             owner: this,
         })
 
@@ -308,24 +310,12 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         Request.cancelAll(this)
     }
 
-    setPayments(encryptedPayments: EncryptedPaymentGeneral[], add = false) {
-        encryptedPayments = encryptedPayments.filter(p => p.method == PaymentMethod.Transfer)
-        const organization = OrganizationManager.organization
+    setPayments(setPayments: PaymentGeneral[], add = false) {
+        setPayments = setPayments.filter(p => p.method == PaymentMethod.Transfer)
 
         // Decrypt data
         const payments: PaymentGeneral[] = []
-        for (const encryptedPayment of encryptedPayments) {
-            // Create a detailed payment without registrations
-            const payment = PaymentGeneral.create({
-                ...encryptedPayment, 
-                registrations: MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
-            })
-
-            // Set payment reference
-            for (const registration of payment.registrations) {
-                registration.payment = payment
-            }
-
+        for (const payment of setPayments) {
             if (add) {
                 const pp = this.payments.find(p => p.id == payment.id)
                 if (pp) {
@@ -338,7 +328,6 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             } else {
                 payments.push(payment)
             }
-
         }
 
         if (add) {
@@ -353,7 +342,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         let hasOrder = false
 
         for (const payment of payments) {
-            if (payment.order) {
+            if (payment.orders.length > 0) {
                 hasOrder = true
             }
             if (paid) {
@@ -385,7 +374,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>),
+                    decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
                     shouldRetry: false
                 })
 

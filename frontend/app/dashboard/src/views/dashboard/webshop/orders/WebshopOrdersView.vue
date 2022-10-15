@@ -569,7 +569,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             id: "order_checkoutMethod",
             name: "Afhaal/leveringsmethode",
             choices: (this.webshop?.meta.checkoutMethods ?? []).flatMap(method => {
-                // todo: also add checkout methods that are not valid anymore from existing orders
+                // TODO: also add checkout methods that are not valid anymore from existing orders
                 const choices: ChoicesFilterChoice[] = []
 
                 if (method.timeSlots.timeSlots.length == 0) {

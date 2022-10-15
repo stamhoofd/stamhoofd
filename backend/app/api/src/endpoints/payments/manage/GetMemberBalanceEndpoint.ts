@@ -1,28 +1,22 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group } from "@stamhoofd/models";
-import { Member } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { EncryptedPaymentGeneral } from "@stamhoofd/structures";
+import { BalanceItem, Group, Member, Token } from "@stamhoofd/models";
+import { MemberBalanceItem } from "@stamhoofd/structures";
 
-import { GetOrganizationPaymentsEndpoint } from "./GetOrganizationPaymentsEndpoint";
-import { PatchOrganizationPaymentsEndpoint } from "./PatchOrganizationPaymentsEndpoint";
+import { GetUserBalanceEndpoint } from "../GetUserBalanceEndpoint";
+
 type Params = { id: string };
 type Query = undefined
 type Body = undefined
-type ResponseBody = EncryptedPaymentGeneral[]
+type ResponseBody = MemberBalanceItem[]
 
-/**
- * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
- */
-
-export class GetMemberPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "GET") {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/members/@id/payments", { id: String});
+        const params = Endpoint.parseParameters(request.url, "/organization/members/@id/balance", { id: String});
 
         if (params) {
             return [true, params as Params];
@@ -52,12 +46,11 @@ export class GetMemberPaymentsEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        const payments = await GetOrganizationPaymentsEndpoint.getPaymentsWithRegistrations(user.organizationId, member.id, false)
+        // Get all balance items for this member or users
+        const balanceItems = await GetUserBalanceEndpoint.balanceItemsForUsersAndMembers(member.users.map(u => u.id), [member.id])
 
         return new Response(
-            payments.map((p: any) => {
-                return GetOrganizationPaymentsEndpoint.getPaymentStructure(p)
-            })
+            await BalanceItem.getMemberStructure(balanceItems)
         );
     }
 }

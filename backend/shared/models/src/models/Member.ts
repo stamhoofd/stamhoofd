@@ -1,11 +1,13 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, Member as MemberStruct, MemberDetails, PermissionLevel, RegistrationWithEncryptedMember, User as UserStruct, RegistrationWithMember as RegistrationWithMemberStruct } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrations, Member as MemberStruct, MemberDetails, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
+import { BalanceItem } from './BalanceItem';
+import { BalanceItemPayment } from './BalanceItemPayment';
 
 import { Payment } from './Payment';
-import { Registration, RegistrationWithPayment } from './Registration';
+import { Registration } from './Registration';
 import { User } from './User';
-export type MemberWithRegistrations = Member & { registrations: RegistrationWithPayment[]; users: User[] }
+export type MemberWithRegistrations = Member & { registrations: Registration[]; users: User[] }
 
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member }
@@ -55,14 +57,14 @@ export class Member extends Model {
     static users = new ManyToManyRelation(Member, User, "users");
 
     /**
-     * Fetch all members with their corresponding (valid) registrations and payment
+     * Fetch all members with their corresponding (valid) registration
      */
     static async getWithRegistrations(id: string): Promise<MemberWithRegistrations | null> {
         return (await this.getAllWithRegistrations(id))[0] ?? null
     }
 
     /**
-     * Fetch all registrations with members with their corresponding (valid) registrations and payment
+     * Fetch all registrations with members with their corresponding (valid) registrations
      */
     static async getRegistrationWithMembersByIDs(ids: string[]): Promise<RegistrationWithMember[]> {
         if (ids.length === 0) {
@@ -107,10 +109,14 @@ export class Member extends Model {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
         
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
-        query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
+        
+        query += `LEFT JOIN \`${BalanceItem.table}\` ON \`${BalanceItem.table}\`.\`registrationId\` = \`${Registration.table}\`.\`${Registration.primary.name}\`\n`
+        query += `LEFT JOIN \`${BalanceItemPayment.table}\` ON \`${BalanceItemPayment.table}\`.\`${BalanceItemPayment.primary.name}\` = \`${BalanceItem.table}\`.\`${BalanceItemPayment.balanceItem.foreignKey}\`\n`
+        query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${BalanceItemPayment.table}\`.\`${BalanceItemPayment.payment.foreignKey}\`\n`
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Payment.table}\`.\`${Payment.primary.name}\` = ?`
+        query += `WHERE \`${Payment.table}\`.\`${Payment.primary.name}\` = ?\n`
+        query += `GROUP BY \`${Registration.table}\`.\`${Registration.primary.name}\`, \`${Member.table}\`.\`${Member.primary.name}\``
 
         const [results] = await Database.select(query, [paymentId])
         const registrations: RegistrationWithMember[] = []
@@ -138,18 +144,16 @@ export class Member extends Model {
     }
 
      /**
-     * Fetch all members with their corresponding (valid) registrations, users and payment
+     * Fetch all members with their corresponding (valid) registrations, users
      */
     static async getAllWithRegistrations(...ids: string[]): Promise<MemberWithRegistrations[]> {
         if (ids.length == 0) {
             return []
         }
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Member.table}\`\n`;
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Member.table}\`\n`;
         
         //query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
         query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
-
-        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
 
         query += Member.users.joinQuery(Member.table, User.table)+"\n"
 
@@ -164,7 +168,7 @@ export class Member extends Model {
             if (!foundMember) {
                 throw new Error("Expected member in every row")
             }
-            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
+            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
             // Seach if we already got this member?
             const existingMember = members.find(m => m.id == _f.id)
 
@@ -178,12 +182,7 @@ export class Member extends Model {
             if (registration) {
                 // Check if we already have this registration
                 if (!member.registrations.find(r => r.id == registration.id)) {
-                    const payment = Payment.fromRow(row[Payment.table]) ?? null
-                    // Every registration should have a valid payment (unless they are on the waiting list)
-
-                    const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
-
-                    member.registrations.push(regWithPayment)
+                    member.registrations.push(registration)
                 }
             }
 
@@ -227,13 +226,11 @@ export class Member extends Model {
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()} from \`${Member.users.linkTable}\`\n`;
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.users.linkTable}\`\n`;
         query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${Member.users.linkTable}\`.\`${Member.users.linkKeyA}\`\n`
         
         //query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.waitingList = 1)\n`
         query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
-
-        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
 
         query += `where \`${Member.users.linkTable}\`.\`${Member.users.linkKeyB}\` = ?`
 
@@ -245,7 +242,7 @@ export class Member extends Model {
             if (!foundMember) {
                 throw new Error("Expected member in every row")
             }
-            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [
+            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [
                 user // for now only assign this... Todo: expand with query
             ])
 
@@ -260,9 +257,7 @@ export class Member extends Model {
             // Check if we have a registration with a payment
             const registration = Registration.fromRow(row[Registration.table])
             if (registration) {
-                const payment = Payment.fromRow(row[Payment.table]) ?? null
-                const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
-                member.registrations.push(regWithPayment)
+                member.registrations.push(registration)
             }
         }
 
@@ -279,17 +274,12 @@ export class Member extends Model {
         })
     }
 
-    static getRegistrationWithMemberStructure(registration: RegistrationWithMember, forOrganization: null | boolean = null) {
-        return RegistrationWithEncryptedMember.create({
-            id: registration.id,
-            groupId: registration.groupId,
+    static getRegistrationWithMemberStructure(registration: RegistrationWithMember & {group: import('./Group').Group}): RegistrationWithMemberStruct {
+        return RegistrationWithMemberStruct.create({
+            ...registration,
+            group: registration.group.getStructure(),
             cycle: registration.cycle,
-            registeredAt: registration.registeredAt,
-            deactivatedAt: registration.deactivatedAt,
-            createdAt: registration.createdAt,
-            updatedAt: registration.updatedAt,
             member: MemberStruct.create(registration.member),
-            waitingList: registration.waitingList,
         })
     }
 
@@ -297,29 +287,26 @@ export class Member extends Model {
         if (!user.permissions) {
             return false
         }
-        let hasAccess = user.permissions.hasWriteAccess()
+        if (user.permissions.hasReadAccess()) {
+            return true;
+        }
 
-        if (!hasAccess) {
-            for (const registration of this.registrations) {
-                const group = groups.find(g => g.id === registration.groupId)
-                if (!group) {
-                    continue;
+        for (const registration of this.registrations) {
+            if (registration.hasReadAccess(user, groups)) {
+                if (!needAll) {
+                    return true;
                 }
-
-                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Read)) {
-                    hasAccess = true
-                } else {
-                    if (needAll) {
-                        return false
-                    }
+            } else {
+                if (needAll) {
+                    return false
                 }
             }
         }
 
-        if (!hasAccess) {
-            return false
-        }            
-        return true
+        if (needAll) {
+            return this.registrations.length > 0;
+        }
+        return false;
     }
 
     async hasWriteAccess(this: MemberWithRegistrations, user: User, groups: import('./Group').Group[], needAll = false, checkFamily = false) {
@@ -332,12 +319,7 @@ export class Member extends Model {
         }
 
         for (const registration of this.registrations) {
-            const group = groups.find(g => g.id === registration.groupId)
-            if (!group) {
-                continue;
-            }
-
-            if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+            if (registration.hasWriteAccess(user, groups)) {
                 if (!needAll) {
                     return true;
                 }
@@ -363,35 +345,5 @@ export class Member extends Model {
         }
         
         return false
-    }
-
-    /// This is defined here instead of registrations to prevent reference cycles...
-    static haveRegistrationsWriteAccess(registrations: RegistrationWithMember[], user: User, groups: import('./Group').Group[], needAll = false) {
-        if (!user.permissions) {
-            return false
-        }
-        let hasAccess = user.permissions.hasWriteAccess()
-
-        if (!hasAccess) {
-            for (const registration of registrations) {
-                const group = groups.find(g => g.id === registration.groupId)
-                if (!group) {
-                    continue;
-                }
-
-                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
-                    hasAccess = true
-                } else {
-                    if (needAll) {
-                        return false
-                    }
-                }
-            }
-        }
-
-        if (!hasAccess) {
-            return false
-        }            
-        return true
     }
 }

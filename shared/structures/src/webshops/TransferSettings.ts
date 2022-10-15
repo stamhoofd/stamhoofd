@@ -33,4 +33,11 @@ export class TransferSettings extends AutoEncoder {
         }
         return duplicate
     }
+
+    toString() {
+        if (this.creditor && this.creditor.length > 0) {
+            return this.creditor + ', ' + this.iban;
+        }
+        return this.iban;
+    }
 }

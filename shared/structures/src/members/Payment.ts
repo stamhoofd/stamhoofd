@@ -48,6 +48,18 @@ export class Payment extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date
 
+    get isPending() {
+        return this.status !== PaymentStatus.Succeeded && this.status !== PaymentStatus.Failed
+    }
+
+    get isSucceeded() {
+        return this.status === PaymentStatus.Succeeded
+    }
+
+    get isFailed() {
+        return this.status === PaymentStatus.Failed
+    }
+
     matchQuery(query: string): boolean {
         const lowerQuery = query.toLowerCase();
         if (

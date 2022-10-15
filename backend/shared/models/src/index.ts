@@ -23,6 +23,8 @@ export * from "./models/UsedRegisterCode"
 export * from "./models/Ticket"
 export * from "./models/EmailTemplate"
 export * from "./models/BuckarooPayment"
+export * from "./models/BalanceItem"
+export * from "./models/BalanceItemPayment"
 
 export * from "./models/addresses/Street"
 export * from "./models/addresses/City"

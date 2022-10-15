@@ -140,7 +140,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
     }
 
     get canGoBack() {
-        // todo
+        // TODO
         return true
     }
 
@@ -355,7 +355,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                             groupId: change.group.id,
                             cycle: change.cycle,
                             waitingList: false,
-                            payment: null,
+                            //payment: null,
                             registeredAt: new Date()
                         })
                     )
@@ -379,7 +379,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                             groupId: change.group.id,
                             cycle: change.cycle,
                             waitingList: false,
-                            payment: null,
+                            //payment: null,
                             registeredAt: new Date()
                         })
                     )

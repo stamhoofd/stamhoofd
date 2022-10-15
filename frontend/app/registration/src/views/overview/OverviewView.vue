@@ -70,9 +70,9 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, GlobalEventBus, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar, STToolbar, TransferPaymentView } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { EncryptedPaymentDetailed, MemberWithRegistrations, Payment, PaymentDetailed, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Payment, PaymentStatus, PaymentWithRegistrations } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -199,16 +199,13 @@ export default class OverviewView extends Mixins(NavigationMixin){
         UrlHelper.setUrl("/")
         document.title = "Ledenportaal - " + this.organization.name
         
-        let didShow = false
 
         if (parts.length == 1 && parts[0] == 'payment' && searchParams.get("id")) {
             UrlHelper.shared.clear()
 
             const paymentId = searchParams.get("id")
-            didShow = true
 
             const session = SessionManager.currentSession!
-            // tood: password reset view
             const component = new ComponentWithProperties(NavigationController, { 
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
@@ -222,9 +219,9 @@ export default class OverviewView extends Mixins(NavigationMixin){
                                     const response = await session.authenticatedServer.request({
                                         method: "GET",
                                         path: "/payments/"+payment.id+"/registrations",
-                                        decoder: EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>
+                                        decoder: PaymentWithRegistrations as Decoder<PaymentWithRegistrations>
                                     })
-                                    const registrations = MemberManager.decryptRegistrationsWithMember(response.data.registrations, OrganizationManager.organization.groups)
+                                    const registrations = response.data.registrations
 
                                     this.show({
                                         components: [
@@ -296,25 +293,6 @@ export default class OverviewView extends Mixins(NavigationMixin){
     registerMember(member: MemberWithRegistrations) {
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberChooseGroupsView, { member })
-        }).setDisplayStyle("popup"))
-    }
-
-    canOpenPayment(payment: PaymentDetailed) {
-        return payment.method == PaymentMethod.Transfer
-    }
-
-    openPayment(payment: PaymentDetailed) {
-        if (!this.canOpenPayment(payment)) {
-            return;
-        }
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(TransferPaymentView, {
-                type: "registration",
-                organization: OrganizationManager.organization,
-                payment,
-                settings: OrganizationManager.organization.meta.transferSettings,
-                isPopup: true
-            })
         }).setDisplayStyle("popup"))
     }
 }

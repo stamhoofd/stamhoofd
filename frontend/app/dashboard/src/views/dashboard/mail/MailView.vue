@@ -1115,7 +1115,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
     }
 
-    addOrderRecipient(order: Order, recipients:  Map<string, Recipient>, payment?: Payment) {
+    addOrderRecipient(order: Order, recipients:  Map<string, Recipient>, payment?: PaymentGeneral) {
         if (order.data.customer.email.length > 0) {
             let webshop: WebshopPreview | null = this.webshop
 
@@ -1131,6 +1131,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
             const existing = recipients.get(id)
             const recipient = order.getRecipient(this.organization, webshop, payment)
+
             if (existing) {
                 existing.merge(recipient)
                 existing.email = recipient.email
@@ -1146,14 +1147,13 @@ export default class MailView extends Mixins(NavigationMixin) {
 
         for (const payment of this.payments) {
             const paymentRecipientsMap: Map<string, Recipient> = new Map()
-            if (payment.order) {
-                const order = payment.order
+            for (const order of payment.orders) {
                 this.addOrderRecipient(order, paymentRecipientsMap, payment)
-            } else {
-                const members = payment.registrations.map(r => r.member)
-                for (const member of members) {
-                    this.addMemberRecipient(member, paymentRecipientsMap)
-                }
+            }
+
+            const members = payment.registrations.map(r => r.member)
+            for (const member of members) {
+                this.addMemberRecipient(member, paymentRecipientsMap)
             }
 
             // Move recipients
@@ -1175,9 +1175,22 @@ export default class MailView extends Mixins(NavigationMixin) {
 
             // Readd to recipients
             for (const recipient of paymentRecipients) {
-                recipient.replacements = recipient.replacements.filter(r => !["priceToPay", "paymentMethod", "transferDescription", "orderTable", "paymentTable"].includes(r.token))
+                // Override some replacements (we'll remove duplicates later)       
+                let overviewContext: string[] = [];
 
-                let webshop = payment.order ? (this.organization.webshops.find(w => w.id === payment.order!.webshopId) ?? null) : null
+                for (const order of payment.orders) {
+                    const webshop = this.organization.webshops.find(w => w.id === order.webshopId) ?? null
+                    if (webshop) {
+                        overviewContext.push(`${webshop.meta.name} (bestelling ${order.number ?? ''})`)
+                    } else {
+                        overviewContext.push(`Bestelling ${order.number ?? ''}`)
+                    }
+                }
+
+                if (payment.registrations.length > 0) {
+                    overviewContext.push("Inschrijving " + Formatter.joinLast(Formatter.uniqueArray(payment.registrations.map(r => r.member.details.firstName)), ', ', ' en '))
+                }
+
                 recipient.replacements.push(
                     ...[
                         Replacement.create({
@@ -1192,12 +1205,11 @@ export default class MailView extends Mixins(NavigationMixin) {
                         }),
                         Replacement.create({
                             token: "overviewContext",
-                            value: payment.order ? (webshop ? webshop.meta.name+" (bestelling "+payment.order.number+")" : "Bestelling "+payment.order.number) : "Inschrijvingen"
+                            value: overviewContext.join(', '),
                         }),
-                    ]
-                )
+                    ]);
 
-                if (payment.status !== PaymentStatus.Succeeded &&  payment?.method === PaymentMethod.Transfer) {
+                if (payment.method && payment.status !== PaymentStatus.Succeeded) {
                     // Add data
                     recipient.replacements.push(
                         ...[
@@ -1216,21 +1228,19 @@ export default class MailView extends Mixins(NavigationMixin) {
                         ]
                     )
 
-                    if (!payment.order) {
-                        const transferSettings = this.organization.meta.transferSettings
-                        recipient.replacements.push(
-                            ...[
-                                Replacement.create({
-                                    token: "transferBankAccount",
-                                    value: transferSettings.iban ?? ""
-                                }),
-                                Replacement.create({
-                                    token: "transferBankCreditor",
-                                    value: transferSettings.creditor ?? this.organization.name
-                                }),
-                            ]
-                        )
-                    }
+                    const transferSettings = payment.transferSettings ?? this.organization.meta.transferSettings
+                    recipient.replacements.push(
+                        ...[
+                            Replacement.create({
+                                token: "transferBankAccount",
+                                value: transferSettings.iban ?? ""
+                            }),
+                            Replacement.create({
+                                token: "transferBankCreditor",
+                                value: transferSettings.creditor ?? this.organization.name
+                            }),
+                        ]
+                    )
                 } else if (payment.status === PaymentStatus.Succeeded) {
                     recipient.replacements.push(
                         ...[
@@ -1246,6 +1256,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                     )
                 }
 
+                recipient.removeDuplicates()
                 recipients.set(payment.id+"-"+recipient.email, recipient)
             }
         }
@@ -1300,7 +1311,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
         }
       
-        // todo: need to validate the recplacements of other recipients
+        // TODO: need to validate the recplacements of other recipients
         for (const recipient of this.otherRecipients) {
             const email = recipient.email.toLowerCase()
             const existing = recipients.get(email)

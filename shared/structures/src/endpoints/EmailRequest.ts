@@ -77,6 +77,19 @@ export class Recipient extends AutoEncoder {
         this.userId = this.userId ?? recipient.userId
         this.types = Formatter.uniqueArray(this.types.concat(recipient.types))
     }
+
+    /**
+     * Remove duplicate replacements, keeping the last added replacements
+     */
+    removeDuplicates() {
+        const replacements: Replacement[] = [];
+        for (const replacement of this.replacements.slice().reverse()) {
+            if (!replacements.find(r => r.token === replacement.token)) {
+                replacements.unshift(replacement);
+            }
+        }
+        this.replacements = replacements;
+    }
 }
 
 export class EmailAttachment extends AutoEncoder {
