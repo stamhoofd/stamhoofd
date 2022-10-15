@@ -1,7 +1,10 @@
 import { column,Model } from '@simonbackx/simple-database';
-import { Country, PaymentMethod, PaymentProvider, PaymentStatus, Settlement, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Country, getPermissionLevelNumber, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Settlement, TransferDescriptionType, TransferSettings, BalanceItemPaymentDetailed, BalanceItemDetailed, RegistrationWithMember, Member as MemberStruct, Group as GroupStruct, Order as OrderStruct } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 import { Organization } from './Organization';
+import { UserWithOrganization } from './User';
 
 export class Payment extends Model {
     static table = "payments"
@@ -160,5 +163,140 @@ export class Payment extends Model {
         const str = (firstChars + "").padStart(10, "0") + (modulo + "").padStart(2, "0")
 
         return "+++"+str.substr(0, 3) + "/" + str.substr(3, 4) + "/"+str.substr(3 + 4)+"+++"
+    }
+
+    /**
+     * 
+     * @param checkPermissions Only set to undefined when not returned in the API + not for public use
+     * @returns 
+     */
+    async getGeneralStructure(checkPermissions?: {user: UserWithOrganization, permissionLevel: PermissionLevel}): Promise<PaymentGeneral> {
+        return (await Payment.getGeneralStructure([this], checkPermissions))[0]
+    }
+
+    /**
+     * 
+     * @param payments 
+     * @param checkPermissions Only set to undefined when not returned in the API + not for public use
+     * @returns 
+     */
+    static async getGeneralStructure(payments: Payment[], checkPermissions?: {user: UserWithOrganization, permissionLevel: PermissionLevel}): Promise<PaymentGeneral[]> {
+        const {BalanceItemPayment} = await import("./BalanceItemPayment");
+        const {BalanceItem} = await import("./BalanceItem");
+        const {Registration} = await import("./Registration");
+        const {Order} = await import("./Order");
+        const {Member} = await import("./Member");
+        const {Group} = await import("./Group");
+
+        // Load all the related models from the database so we can build the structures
+        const balanceItemPayments = await BalanceItemPayment.where({
+            paymentId: {
+                sign: 'IN',
+                value: payments.map(p => p.id)
+            }
+        })
+        const ids = Formatter.uniqueArray(balanceItemPayments.flatMap(p => p.balanceItemId));
+        const balanceItems = await BalanceItem.getByIDs(...ids);
+
+        // Load members and orders
+        const registrationIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.registrationId ? [b.registrationId] : []))
+        const orderIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.orderId ? [b.orderId] : []))
+
+        const registrations = await Registration.getByIDs(...registrationIds)
+        const orders = await Order.getByIDs(...orderIds)
+
+        const memberIds = Formatter.uniqueArray(registrations.flatMap(b => b.memberId ? [b.memberId] : []))
+        const members = await Member.getByIDs(...memberIds)
+
+        const groupIds = Formatter.uniqueArray(registrations.flatMap(b => b.groupId ? [b.groupId] : []))
+        const groups = await Group.getByIDs(...groupIds)
+
+        if (checkPermissions) {
+            // This needs some optimizations
+            const {user, permissionLevel} = checkPermissions;
+
+            let hasAccess = false;
+            
+            // First try without queries
+            if (!hasAccess && permissionLevel === PermissionLevel.Read) {
+                for (const balanceItem of balanceItems) {
+                    if (balanceItem.userId === user.id) {
+                        hasAccess = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasAccess && user.permissions) {
+                if (user.permissions.hasFullAccess() || user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
+                    hasAccess = true;
+                } else {
+                    const {Webshop} = await import("./Webshop");
+
+                    // We grant permission for a whole payment when the user has at least permission for a part of that payment.
+                    for (const registration of registrations) {
+                        if (registration.hasAccess(user, groups, permissionLevel)) {
+                            hasAccess = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasAccess) {
+                        for (const order of orders) {
+                            const webshop = await Webshop.getByID(order.webshopId)
+                            if (webshop && getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(permissionLevel)) {
+                                hasAccess = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!hasAccess && permissionLevel === PermissionLevel.Read) {
+                // Check members
+                const userMembers = await Member.getMembersWithRegistrationForUser(user)
+                for (const member of userMembers) {
+                    if (memberIds.includes(member.id)) {
+                        hasAccess = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasAccess) {
+                throw new SimpleError({
+                    code: "not_found",
+                    message: "Payment not found",
+                    human: "Je hebt geen togang tot deze betaling"
+                })
+            }
+        }
+        
+        return payments.map(payment => {
+            return PaymentGeneral.create({
+                ...payment,
+                balanceItemPayments: balanceItemPayments.map((item) => {
+                    const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)
+                    const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
+                    const member = registration ? members.find(r => r.id === registration.memberId) : undefined
+                    const group = registration ? groups.find(r => r.id === registration.groupId) : undefined
+                    const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
+
+                    return BalanceItemPaymentDetailed.create({
+                        ...item,
+                        balanceItem: BalanceItemDetailed.create({
+                            ...balanceItem,
+                            registration: registration ? RegistrationWithMember.create({
+                                ...registration,
+                                member: MemberStruct.create(member!),
+                                group: checkPermissions ? (checkPermissions.user.permissions ? group?.getPrivateStructure(checkPermissions.user.permissions) : group?.getStructure()) : group?.getPrivateStructure()
+                            }) : null,
+                            order: order ? OrderStruct.create(order) : null
+                        })
+                    })
+                })
+            })
+        })
     }
 }

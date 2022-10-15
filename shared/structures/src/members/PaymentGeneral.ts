@@ -12,6 +12,21 @@ export class PaymentGeneral extends Payment {
         return this.balanceItemPayments.flatMap(p => p.balanceItem.registration ? [p.balanceItem.registration] : [])
     }
 
+    get members() {
+        const members = this.registrations.map(r => r.member)
+
+        // Remove duplicates by id
+        return members.filter((m, index) => members.findIndex(m2 => m2.id == m.id) === index)
+    }
+
+    get memberNames() {
+        return Formatter.joinLast(this.members.map(m => m.name), ", ", " en ")
+    }
+
+    get memberFirstNames() {
+        return Formatter.joinLast(this.members.map(m => m.firstName), ", ", " en ")
+    }
+
     get orders() {
         return this.balanceItemPayments.flatMap(p => p.balanceItem.order ? [p.balanceItem.order] : [])
     }

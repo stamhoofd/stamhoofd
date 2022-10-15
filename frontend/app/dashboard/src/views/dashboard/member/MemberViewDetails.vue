@@ -97,38 +97,7 @@
                 </p>
 
                 <STList>
-                    <STListItem v-for="registration in visibleRegistrations" :key="registration.id" v-long-press="(e) => editRegistration(registration, e)" :selectable="true" class="left-center hover-box" @contextmenu.prevent="editRegistration(registration, $event)" @click.prevent="editRegistration(registration, $event)">
-                        <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
-                            <img :src="imageSrc(registration)">
-                            <div>
-                                <span v-if="!registration.waitingList" class="icon green success" />
-                                <span v-else class="icon gray clock" />
-                            </div>
-                        </figure>
-                        <figure v-else slot="left" class="registration-image">
-                            <figure>
-                                <span>{{ getGroup(registration.groupId).settings.name.substr(0, 2) }}</span>
-                            </figure>
-                            <div>
-                                <span v-if="!registration.waitingList" class="icon green success" />
-                                <span v-else class="icon gray clock" />
-                            </div>
-                        </figure>
-                        <h3 class="style-title-list">
-                            {{ getGroup(registration.groupId).settings.name }}
-                        </h3>
-                        <p v-if="!registration.waitingList" class="style-description-small">
-                            Ingeschreven op {{ registration.registeredAt | dateTime }}
-                        </p>
-                        <p v-else class="style-description-small">
-                            Op wachtlijst sinds {{ registration.createdAt | dateTime }}
-                        </p>
-                        <p v-if="registration.waitingList && registration.canRegister" class="style-description-small">
-                            Toegelaten om in te schrijven
-                        </p>
-
-                        <span slot="right" class="icon arrow-down-small gray" />
-                    </STListItem>
+                    <MemberRegistrationBlock v-for="registration in visibleRegistrations" :key="registration.id" :registration="registration" @edit="(e) => editRegistration(registration, e)" />
                 </STList>
             </div>
 
@@ -358,13 +327,15 @@ import { MemberActionBuilder } from "../groups/MemberActionBuilder";
 import EditMemberEmergencyContactView from './edit/EditMemberEmergencyContactView.vue';
 import EditMemberParentView from './edit/EditMemberParentView.vue';
 import EditMemberView from './edit/EditMemberView.vue';
+import MemberRegistrationBlock from './MemberRegistrationBlock.vue';
 import MemberView from './MemberView.vue';
 
 @Component({
     components: {
         STListItem,
         STList,
-        RecordCategoryAnswersBox
+        RecordCategoryAnswersBox,
+        MemberRegistrationBlock
     },
     directives: { 
         Tooltip, 
@@ -402,10 +373,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
 
     formatCountry(country: Country) {
         return CountryHelper.getName(country)
-    }
-
-    getGroup(groupId: string) {
-        return OrganizationManager.organization.groups.find(g => g.id === groupId)
     }
 
     get recordCategories(): RecordCategory[] {
@@ -528,14 +495,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         this.present(displayedComponent);
     }
 
-    imageSrc(registration: Registration) {
-        const group = this.getGroup(registration.groupId)
-        if (!group) {
-            return null
-        }
-        return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
-    }
-    
     get hasWrite(): boolean {
         if (!OrganizationManager.user.permissions) {
             return false

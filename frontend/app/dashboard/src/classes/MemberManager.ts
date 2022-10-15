@@ -351,27 +351,6 @@ export class MemberManagerStatic extends MemberManagerBase {
                     waitingList: false,
                 }))
 
-                if (!registration.payment) {
-                    const group = member.allGroups.find(g => g.id === registration.groupId)
-                    if (group) {
-                        const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
-
-                        const payment = Payment.create({
-                            method: PaymentMethod.Unknown,
-                            status: PaymentStatus.Created,
-                            price: price,
-                            paidAt: null,
-
-                            // Placeholders:
-                            createdAt: new Date(),
-                            updatedAt: new Date()
-                        })
-                        patchMember.registrations.addPatch(Registration.patch({
-                            id: registration.id,
-                            payment
-                        }))
-                    }
-                }
                 if (cycleOffset === 0) {
                     sizeUpdater.add({groupId: registration.groupId, waitingList: true}, -1);
                     sizeUpdater.add({groupId: registration.groupId, waitingList: false}, 1);
@@ -399,19 +378,6 @@ export class MemberManagerStatic extends MemberManagerBase {
         for (const member of members) {
             const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
         
-            const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
-
-            const payment = Payment.create({
-                method: PaymentMethod.Unknown,
-                status: PaymentStatus.Created,
-                price: price,
-                paidAt: null,
-
-                // Placeholders:
-                createdAt: new Date(),
-                updatedAt: new Date()
-            })
-
             // Check if we already have a registration for this group and cycle combination
             const registration = member.registrations.find(r => r.groupId === group.id && r.cycle === cycle);
             if (registration) {
@@ -421,13 +387,6 @@ export class MemberManagerStatic extends MemberManagerBase {
                         id: registration.id,
                         waitingList: false,
                     }))
-
-                    if (!registration.payment) {
-                        patchMember.registrations.addPatch(Registration.patch({
-                            id: registration.id,
-                            payment
-                        }))
-                    }
 
                     if (registration.cycle === group.cycle) {
                         sizeUpdater.add({groupId: group.id, waitingList: true}, -1);
@@ -447,7 +406,6 @@ export class MemberManagerStatic extends MemberManagerBase {
                 groupId: group.id,
                 cycle: cycle,
                 waitingList,
-                payment: waitingList ? null : payment,
                 registeredAt: new Date()
             }))
 

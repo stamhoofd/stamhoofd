@@ -147,9 +147,9 @@ export class Group extends Model {
         return GroupStruct.create(Object.assign({}, this, { privateSettings: null }))
     }
 
-    getPrivateStructure(permissions: Permissions) {
+    getPrivateStructure(permissions?: Permissions) {
         const struct = GroupStruct.create(this)
-        if (!struct.canViewMembers(permissions)) {
+        if (permissions && !struct.canViewMembers(permissions)) {
             struct.privateSettings = null
         }
         return struct

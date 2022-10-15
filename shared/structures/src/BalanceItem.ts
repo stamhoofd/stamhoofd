@@ -77,9 +77,9 @@ export class MemberBalanceItem extends BalanceItem {
     @field({ decoder: StringDecoder, nullable: true })
     userId: string | null = null
 
-    @field({ decoder: StringDecoder, nullable: true })
-    registrationId: string | null = null
+    @field({ decoder: Registration, nullable: true })
+    registration: Registration | null = null
 
-    @field({ decoder: StringDecoder, nullable: true })
-    orderId: string | null = null
+    @field({ decoder: Order, nullable: true })
+    order: Order | null = null
 }
