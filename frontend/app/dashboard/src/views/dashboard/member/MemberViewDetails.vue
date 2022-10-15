@@ -342,6 +342,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
@@ -389,6 +390,10 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     created() {
         (this as any).ParentTypeHelper = ParentTypeHelper;
         this.checkBounces().catch(e => console.error(e))
+    }
+
+    beforeDestroy() {
+        Request.cancelAll(this)
     }
 
     get currentCountry() {
@@ -585,7 +590,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
                     method: "POST",
                     path: "/email/check-bounces",
                     body: emails,
-                    decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>)
+                    decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>),
+                    owner: this
                 })
                 this.emailInformation = response.data
             } catch (e) {

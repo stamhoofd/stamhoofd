@@ -33,7 +33,7 @@ export class DateFilterDefinition<T> extends FilterDefinition<T, DateFilter<T>, 
         const filter = new DateFilter()
         filter.definition = this
 
-        // todo
+        // TODO
         filter.mode = data.optionalField("mode")?.enum(DateFilterMode) ?? DateFilterMode.Equal
         filter.minimumDate = data.optionalField("minimumDate")?.decode(DateDecoder)
         filter.maximumDate = data.optionalField("maximumDate")?.decode(DateDecoder)

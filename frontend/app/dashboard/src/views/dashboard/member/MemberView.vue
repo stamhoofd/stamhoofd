@@ -72,8 +72,8 @@ export default class MemberView extends Mixins(NavigationMixin) {
     waitingList!: boolean
 
     tabs = [MemberViewDetails, MemberViewPayments];
-    tab = this.tabs[this.payments.length > 0 ? (this.initialTab ?? 0) : 0];
-    tabLabels = ["Gegevens", "Betaling"];
+    tabLabels = ["Gegevens", "Rekening"];
+    tab = this.tabs[this.initialTab && this.initialTab < this.tabs.length ? (this.initialTab) : 0];
 
     familyManager = new FamilyManager([this.member]);
 
@@ -103,10 +103,6 @@ export default class MemberView extends Mixins(NavigationMixin) {
             return false
         }
         return !!this.getPreviousMember(this.member);
-    }
-
-    get payments() {
-        return this.member.registrations.flatMap(r => r.payment ? [r.payment] : [])
     }
 
     get tabIndex() {

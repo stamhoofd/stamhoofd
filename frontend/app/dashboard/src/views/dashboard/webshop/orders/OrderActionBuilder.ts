@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
-import { EncryptedPaymentDetailed, OrderStatus, OrderStatusHelper, Payment, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures"
+import { OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures"
 
 import { WebshopManager } from "../WebshopManager"
 
@@ -322,7 +322,8 @@ export class OrderActionBuilder {
                     method: "PATCH",
                     path: "/organization/payments",
                     body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentDetailed as Decoder<EncryptedPaymentDetailed>),
+                    // TODO: need to confirm response type
+                    decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
                     shouldRetry: false
                 })
 

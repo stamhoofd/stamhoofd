@@ -3,7 +3,7 @@ import { Sodium } from "./Sodium";
 
 describe("KeyConstantsHelper", () => {
     beforeAll( () => {
-        // todo
+        // TODO
     });
 
     test("Sign keys always the same for the same constants and password", async () => {

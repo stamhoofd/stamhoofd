@@ -1,94 +1,139 @@
 <template>
-    <div class="view-payments">
-        <main>
+    <div class="member-payments-view">
+        <main class="container">
+            <STErrorsDefault :error-box="errorBox" />
             <Spinner v-if="loadingPayments" />
+
             <template v-else>
                 <p v-if="member.details.requiresFinancialSupport && member.details.requiresFinancialSupport.value" class="warning-box">
                     {{ financialSupportWarningText }}
                 </p>
-                <div v-for="(payment, index) in payments" :key="payment.id" class="container">
-                    <hr v-if="index > 0">
-                    <h2 class="style-with-button">
-                        <div>Afrekening {{ payments.length - index }}</div>
-                        <div class="hover-show">
-                            <button v-if="hasWrite" class="button icon gray edit" type="button" @click="editPayment(payment)" />
-                        </div>
-                    </h2>
 
-                    <dl class="details-grid">
-                        <dt>
-                            Inschrijvingen
-                        </dt>
-                        <dd>{{ paymentDescription(payment) }}</dd>
-
-                        <dt>Bedrag</dt>
-                        <dd>{{ payment.price | price }}</dd>
-
-                        <template v-if="payment.freeContribution > 0">
-                            <dt>Vrije bijdrage</dt>
-                            <dd>{{ payment.freeContribution | price }} (inbegrepen in bedrag)</dd>
+                <h2>Openstaande bedragen</h2>
+                
+                <STList>
+                    <STListItem v-for="item in balanceItems" :key="item.id" :selectable="true" @click="editBalanceItem(item)">
+                        <h3 class="style-title-list">
+                            {{ item.description }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ formatDate(item.createdAt) }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ formatPrice(item.price) }}
+                        </p>
+                        <template slot="right">
+                            <span v-if="item.pricePaid === item.price" class="style-tag success">Betaald</span>
+                            <span v-else-if="item.payments.length == 0" class="style-tag">Openstaand</span>
+                            <span v-else-if="item.pricePaid > 0" class="style-tag warn">{{ formatPrice(item.pricePaid) }} betaald</span>
+                            <span v-else class="style-tag warn">In verwerking</span>
                         </template>
+                    </STListItem>
+                </STList>
 
-                        <dt>Datum</dt>
-                        <dd>{{ payment.createdAt | date }}</dd>
+                <div class="pricing-box">
+                    <STList>
+                        <STListItem>
+                            Totaal te betalen
 
-                        <template v-if="payment.method == 'Transfer'">
-                            <dt>Bankrekening</dt>
-                            <dd>{{ organization.meta.transferSettings.iban }}</dd>
+                            <template slot="right">
+                                {{ formatPrice(outstandingBalance.total) }}
+                            </template>
+                        </STListItem>
+                        <STListItem v-if="outstandingBalance.withPayment > 0 && outstandingBalance.withoutPayment > 0">
+                            Waarvan in verwerking
 
-                            <dt>Mededeling</dt>
-                            <dd>{{ payment.transferDescription }}</dd>
-                        </template>
-
-                        <dt>Betaalmethode</dt>
-                        <dd>{{ getMethodName(payment.method) }}</dd>
-                    </dl>
-
-                    <p v-if="payment.status == 'Succeeded' && payment.paidAt" class="success-box with-button">
-                        Betaald op {{ payment.paidAt | date }}
-
-                        <button v-if="hasWrite" class="button text" type="button" @click="markNotPaid(payment)">
-                            Ongedaan maken
-                        </button>
-                    </p>
-
-                    <LoadingButton v-else-if="hasWrite" :loading="loading">
-                        <button class="button primary" type="button" @click="markPaid(payment)">
-                            Markeer als betaald
-                        </button>
-                    </LoadingButton>
+                            <template slot="right">
+                                {{ formatPrice(outstandingBalance.withPayment) }}
+                            </template>
+                        </STListItem>
+                    </STList>
                 </div>
-                <p v-if="payments.length == 0" class="info-box">
-                    Er zijn nog geen betalingen aangemaakt voor dit lid. Hiermee kan je bijhouden dat er nog een bepaald bedrag verschuldigd is voor een inschrijving.
-                </p>
-                <button v-if="hasRegistrationsWithoutPayments && hasWrite" class="button text" type="button" @click="addPayment">
+
+                <button type="button" class="button text" @click="createBalanceItem">
                     <span class="icon add" />
-                    <span>Afrekening aanmaken</span>
+                    <span>Bedrag aanrekenen</span>
                 </button>
+
+                <button type="button" class="button text">
+                    <span class="icon card" />
+                    <span>Betaling ontvangen</span>
+                </button>
+
+                <button type="button" class="button text">
+                    <span class="icon email" />
+                    <span>Betaalverzoek versturen</span>
+                </button>
+               
+                <template v-if="pendingPayments.length > 0">
+                    <hr>
+                    <h2>In verwerking</h2>
+                    <p>Het kan dat het openstaande bedrag eerder betaald werd via overschrijving. In dit geval weten we nog niet of die echt is uitgevoerd tot jullie het bedrag ontvangen op jullie rekening. Je kan deze overschrijvingen hier markeren als betaald of annuleren.</p>
+
+                    <STList>
+                        <STListItem v-for="payment of pendingPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
+                            <h3 class="style-title-list">
+                                {{ getPaymentMethodName(payment.method) }}
+                            </h3>
+                            <p class="style-description-small">
+                                Aangemaakt op {{ formatDate(payment.createdAt) }}
+                            </p>
+
+                            <span slot="right">{{ formatPrice(payment.price) }}</span>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+                    </STList>
+                </template>
+
+                <template v-if="succeededPayments.length > 0">
+                    <hr>
+                    <h2>Ontvangen betalingen</h2>
+
+                    <STList>
+                        <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
+                            <h3 class="style-title-list">
+                                {{ getPaymentMethodName(payment.method) }}
+                            </h3>
+                            <p class="style-description-small">
+                                Aangemaakt op {{ formatDate(payment.createdAt) }}
+                            </p>
+                            <p class="style-description-small">
+                                Betaald op {{ formatDate(payment.paidAt) }}
+                            </p>
+
+                            <span slot="right">{{ formatPrice(payment.price) }}</span>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+                    </STList>
+                </template>
             </template>
         </main>
     </div>
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, LoadingButton, Spinner, STToolbar, Toast } from "@stamhoofd/components";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ErrorBox, LoadingButton, Spinner, STErrorsDefault, STList, STListItem, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { CreatePaymentGeneral, EncryptedPaymentGeneral, FinancialSupportSettings, getPermissionLevelNumber, MemberWithRegistrations, PaymentDetailed, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentPatch, PaymentStatus, PermissionLevel, RegisterCart, RegisterItem } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { FinancialSupportSettings, getPermissionLevelNumber, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
-import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import EditPaymentView from '../payments/EditPaymentView.vue';
+import PaymentView from '../payments/PaymentView.vue';
+import EditBalanceItemView from './balance/EditBalanceItemView.vue';
 
 @Component({ 
     components: { 
         STToolbar,
         LoadingButton,
-        Spinner
+        Spinner,
+        STErrorsDefault,
+        STList,
+        STListItem
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -102,10 +147,10 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     @Prop()
     familyManager!: FamilyManager;
     
-    loading = false
     loadingPayments = true
+    errorBox: ErrorBox | null = null
 
-    payments: PaymentGeneral[] = []
+    balanceItems: MemberBalanceItem[] = []
 
     organization = OrganizationManager.organization
 
@@ -113,6 +158,118 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         this.reload().catch(e => {
             console.error(e)
         })
+    }
+
+    get pendingPayments() {
+        const payments = new Map<string, Payment>()
+        for (const item of this.balanceItems) {
+            for (const payment of item.payments) {
+                if (payment.payment.isPending) {
+                    payments.set(payment.payment.id, payment.payment)
+                }
+            }
+        }
+        return [...payments.values()]
+    }
+
+    get succeededPayments() {
+        const payments = new Map<string, Payment>()
+        for (const item of this.balanceItems) {
+            for (const payment of item.payments) {
+                if (payment.payment.isSucceeded) {
+                    payments.set(payment.payment.id, payment.payment)
+                }
+            }
+        }
+        return [...payments.values()]
+    }
+
+    createBalanceItem() {
+        const balanceItem = MemberBalanceItem.create({
+            memberId: this.member.id,
+        })
+        const component = new ComponentWithProperties(EditBalanceItemView, {
+            balanceItem,
+            isNew: true,
+            saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
+                const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
+                arr.addPut(balanceItem.patch(patch))
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/organization/balance',
+                    body: arr,
+                    decoder: new ArrayDecoder(MemberBalanceItem)
+                });
+                await this.reload();
+            }
+        })
+        this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        })
+    }
+
+    editBalanceItem(balanceItem: MemberBalanceItem) {
+        const component = new ComponentWithProperties(EditBalanceItemView, {
+            balanceItem,
+            isNew: false,
+            saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
+                const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
+                patch.id = balanceItem.id;
+                arr.addPatch(patch)
+                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/organization/balance',
+                    body: arr,
+                    decoder: new ArrayDecoder(MemberBalanceItem)
+                });
+                await this.reload();
+            }
+        })
+        this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        })
+    }
+
+    openPayment(payment: Payment) {
+        const component = new ComponentWithProperties(PaymentView, {
+            initialPayment: payment
+        })
+        this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        })
+    }
+
+    get outstandingBalance() {
+        // Get sum of balance payments
+        const withPayment = this.balanceItems.flatMap(b => b.payments).filter(p => p.payment.status !== PaymentStatus.Succeeded).map(p => p.price).reduce((t, total) => total + t, 0)
+
+        const total = this.balanceItems.map(p => p.price - p.pricePaid).reduce((t, total) => total + t, 0)
+        const withoutPayment = total - withPayment;
+
+        return {
+            withPayment,
+            withoutPayment,
+            total: withPayment + withoutPayment
+        }
+    }
+
+    beforeDestroy() {
+        Request.cancelAll(this)
+    }
+
+    formatDate(date: Date) {
+        return Formatter.date(date, true)
+    }
+
+    formatPrice(price: number) {
+        return Formatter.price(price)
+    }
+
+    getPaymentMethodName(method: PaymentMethod) {
+        return PaymentMethodHelper.getNameCapitalized(method);
     }
 
     get hasWrite(): boolean {
@@ -139,12 +296,21 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         return false
     }
 
-    paymentDescription(payment: PaymentGeneral) {
-        return payment.getRegistrationList()
-    }
-
-    get hasRegistrationsWithoutPayments() {
-        return !!this.member.registrations.find(r => r.payment === null)
+    async reload() {
+        try {
+            this.loadingPayments = true;
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: 'GET',
+                path: `/organization/members/${this.member.id}/balance`,
+                decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>),
+                owner: this
+            });
+            response.data.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt));
+            this.balanceItems = response.data;
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.loadingPayments = false;
     }
 
     get financialSupportWarningText() {
@@ -154,227 +320,27 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     getMethodName(method: PaymentMethod) {
         return PaymentMethodHelper.getNameCapitalized(method)
     }
-
-    addPayment() {
-        const registrations = this.member.registrations.filter(r => r.payment === null)
-        const groups = OrganizationManager.organization.groups
-        const items = registrations.flatMap(r => {
-            const group = groups.find(g => g.id == r.groupId)
-            if (!group) {
-                return []
-            }
-            return [new RegisterItem(
-                this.member, 
-                group, 
-                { 
-                    reduced: this.member.details.requiresFinancialSupport?.value ?? false, 
-                    waitingList: r.waitingList 
-                }
-            )]
-        })
-
-        const cart = new RegisterCart(items)
-        // Calculate price
-        cart.calculatePrices(this.familyManager.members, groups, OrganizationManager.organization.meta.categories)
-
-        this.present(new ComponentWithProperties(EditPaymentView, { 
-            payment: CreatePaymentGeneral.create({
-                registrationIds: registrations.map(r => r.id),
-                price: cart.price
-            }),
-            isNew: true,
-            callback: async (payments: EncryptedPaymentGeneral[]) => {
-                this.appendPayments(payments)
-                MemberManager.callListeners("payment", this.member)
-            }
-        }).setDisplayStyle("popup"))
-    }
-
-    editPayment(payment: PaymentGeneral) {
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(EditPaymentView, { 
-                payment,
-                isNew: false,
-                callback: async (payments: EncryptedPaymentGeneral[]) => {
-                    this.appendPayments(payments)
-                    MemberManager.callListeners("payment", this.member)
-                }
-            })
-        }).setDisplayStyle("popup"))
-    }
-
-    async reload() {
-        this.loadingPayments = true
-        try {
-            const session = SessionManager.currentSession!
-            const response = await session.authenticatedServer.request({
-                method: "GET",
-                path: "/organization/members/"+this.member.id+"/payments",
-                decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
-            })
-            this.setPayments(response.data)
-        } catch (e) {
-            Toast.fromError(e).show()
-        }
-        this.loadingPayments = false
-    }
-
-    appendPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
-        const organization = OrganizationManager.organization
-
-        // Decrypt data
-        const payments = new Map<string, PaymentGeneral>()
-
-        for (const payment of this.payments) {
-            payments.set(payment.id, payment)
-        }
-
-        for (const encryptedPayment of encryptedPayments) {
-            // Create a detailed payment without registrations
-            const payment = PaymentGeneral.create({
-                ...encryptedPayment, 
-                registrations: MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
-            })
-
-            // Set payment reference
-            for (const registration of payment.registrations) {
-                registration.payment = payment
-            }
-
-
-            payments.set(payment.id, payment)
-        }
-
-        const arr = [...payments.values()]
-
-        // Sort
-        arr.sort((a, b) => {
-            return b.createdAt.getTime() - a.createdAt.getTime()
-        })
-
-        this.payments = arr
-    }
-
-    setPayments(encryptedPayments: EncryptedPaymentGeneral[]) {
-        const organization = OrganizationManager.organization
-
-        // Decrypt data
-        const payments: PaymentGeneral[] = []
-        for (const encryptedPayment of encryptedPayments) {
-            // Create a detailed payment without registrations
-            const payment = PaymentGeneral.create({
-                ...encryptedPayment, 
-                registrations: MemberManager.decryptRegistrationsWithMember(encryptedPayment.registrations, organization.groups)
-            })
-
-            // Set payment reference
-            for (const registration of payment.registrations) {
-                registration.payment = payment
-            }
-
-            payments.push(payment)
-        }
-
-        // Sort
-        payments.sort((a, b) => {
-            return b.createdAt.getTime() - a.createdAt.getTime()
-        })
-
-        this.payments = payments
-    }
-
-    async markPaid(payment: PaymentDetailed) {
-        if (this.loading) {
-            return;
-        }
-
-        const data: PaymentPatch[] = []
-        if (payment.status != PaymentStatus.Succeeded) {
-            data.push(PaymentPatch.create({
-                id: payment.id,
-                status: PaymentStatus.Succeeded
-            }))
-        }
-
-        if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker dat deze betaling uitgevoerd is?", "Markeer als betaald")) {
-                return;
-            }
-            this.loading = true
-            const session = SessionManager.currentSession!
-
-            try {
-                const response = await session.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/organization/payments",
-                    body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
-                })
-                this.appendPayments(response.data)
-                MemberManager.callListeners("payment", this.member)
-            } catch (e) {
-                Toast.fromError(e).show()
-            }
-            this.loading = false
-            
-        }
-    }
-
-    async markNotPaid(payment: PaymentDetailed) {
-        if (this.loading) {
-            return;
-        }
-
-        const data: PaymentPatch[] = []
-        if (payment.status == PaymentStatus.Succeeded) {
-            data.push(PaymentPatch.create({
-                id: payment.id,
-                status: PaymentStatus.Created
-            }))
-        }
-
-        if (data.length > 0) {
-            if (!await CenteredMessage.confirm("Ben je zeker dat deze betaling niet uitgevoerd is?", "Markeer als niet betaald")) {
-                return;
-            }
-
-            this.loading = true
-            const session = SessionManager.currentSession!
-
-            try {
-                const response = await session.authenticatedServer.request({
-                    method: "PATCH",
-                    path: "/organization/payments",
-                    body: data,
-                    decoder: new ArrayDecoder(EncryptedPaymentGeneral as Decoder<EncryptedPaymentGeneral>)
-                })
-
-                this.appendPayments(response.data)
-                MemberManager.callListeners("payment", this.member)
-            } catch (e) {
-                Toast.fromError(e).show()
-            }
-            this.loading = false
-            
-        }
-    }
 }
 </script>
 
 <style lang="scss">
-@use '@stamhoofd/scss/base/text-styles.scss';
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-.view-payments {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+.member-payments-view {
+    .pricing-box {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: flex-end;
 
-    > main > div {
-        @extend .main-text-container;
-    }
+        > * {
+            flex-basis: 350px;
+        }
 
-    .details-grid {
-        margin-bottom: 15px;
+        .middle {
+            font-weight: 600;
+        }
     }
 }
 </style>

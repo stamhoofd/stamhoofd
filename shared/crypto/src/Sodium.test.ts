@@ -2,7 +2,7 @@ import { Sodium } from "./Sodium";
 
 describe("Sodium", () => {
     beforeAll( () => {
-        // todo
+        // TODO
     });
 
     test("Authenticated public-key encryption", async () => {

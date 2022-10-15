@@ -1,8 +1,6 @@
-import { AutoEncoder, BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { Group } from '../Group';
-import { GroupCategory } from '../GroupCategory';
 import { Payment } from './Payment';
 
 export class Registration extends AutoEncoder {
@@ -40,6 +38,6 @@ export class Registration extends AutoEncoder {
     canRegister = false
 
     /// Payment can be null if the member is on a waiting list
-    @field({ decoder: Payment, nullable: true })
-    payment: Payment | null = null
+    // @field({ decoder: Payment, nullable: true })
+    // payment: Payment | null = null
 }

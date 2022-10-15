@@ -52,7 +52,6 @@
                 </template>
             </div>
 
-
             <div v-if="!loading && totalByProduct.length > 0" class="container">
                 <hr>
                 <h2>Per productcombinatie</h2>

@@ -118,7 +118,7 @@ export default class EditPolicyBox extends Mixins(NavigationMixin) {
     }
 
     validate() {
-        // todo: add validator
+        // TODO: add validator
         if (this.selectedType == "file") {
             this.url = null;
             // We don't clear the file if url is selected, since url has priority over the file. So we don't need to reupload the file

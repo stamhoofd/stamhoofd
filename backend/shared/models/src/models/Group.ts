@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Member,MemberWithRegistrations } from './Member';
 import { Payment } from './Payment';
-import { Registration, RegistrationWithPayment } from './Registration';
+import { Registration } from './Registration';
 import { User } from './User';
 
 if (Member === undefined) {
@@ -84,10 +84,10 @@ export class Group extends Model {
     }
 
     /**
-     * Fetch all members with their corresponding (valid) registrations, users and payments
+     * Fetch all members with their corresponding (valid) registrations, users
      */
     async getMembersWithRegistration(waitingList = false, cycleOffset = 0): Promise<MemberWithRegistrations[]> {
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${Payment.getDefaultSelect()}, ${User.getDefaultSelect()} from \`${Member.table}\`\n`;
+        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${User.getDefaultSelect()} from \`${Member.table}\`\n`;
         
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
 
@@ -96,8 +96,6 @@ export class Group extends Model {
         } else {
             query += `JOIN \`${Registration.table}\` as reg_filter ON reg_filter.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND reg_filter.\`waitingList\` = 0 AND reg_filter.\`registeredAt\` is not null\n`
         }
-
-        query += `LEFT JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${Registration.table}\`.\`${Registration.payment.foreignKey}\`\n`
 
         query += Member.users.joinQuery(Member.table, User.table)+"\n"
 
@@ -112,7 +110,7 @@ export class Group extends Model {
             if (!foundMember) {
                 throw new Error("Expected member in every row")
             }
-            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, RegistrationWithPayment>, []).setManyRelation(Member.users, [])
+            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
 
             // Seach if we already got this member?
             const existingMember = members.find(m => m.id == _f.id)
@@ -127,12 +125,7 @@ export class Group extends Model {
             if (registration) {
                 // Check if we already have this registration
                 if (!member.registrations.find(r => r.id == registration.id)) {
-                    const payment = Payment.fromRow(row[Payment.table]) ?? null
-                    // Every registration should have a valid payment (unless they are on the waiting list)
-
-                    const regWithPayment: RegistrationWithPayment = registration.setOptionalRelation(Registration.payment, payment)
-
-                    member.registrations.push(regWithPayment)
+                    member.registrations.push(registration)
                 }
             }
 

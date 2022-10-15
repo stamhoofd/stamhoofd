@@ -1,11 +1,13 @@
+import { ManyToOneRelation } from "@simonbackx/simple-database";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Member, Payment, Token } from '@stamhoofd/models';
-import { EncryptedPaymentDetailed } from "@stamhoofd/structures";
+import { Group, Member, Payment, Registration, Token } from '@stamhoofd/models';
+import { PaymentWithRegistrations } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 type Params = {id: string};
 type Query = undefined
 type Body = undefined
-type ResponseBody = EncryptedPaymentDetailed | undefined;
+type ResponseBody = PaymentWithRegistrations | undefined;
 
 export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -34,6 +36,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
         }
         const registrations = await Member.getRegistrationWithMembersForPayment(payment.id)
         const authorizedMembers = (await Member.getMembersWithRegistrationForUser(user)).map(m => m.id)
+        const groups = await Group.getByIDs(...Formatter.uniqueArray(registrations.map(r => r.groupId)))
 
         // Check permissions
         for (const registration of registrations) {
@@ -44,9 +47,12 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
                 })
             }
         }
+
+        const registrationGroupRelation = new ManyToOneRelation(Group, "group")
+        registrationGroupRelation.foreignKey = "groupId"
                
         return new Response( 
-            EncryptedPaymentDetailed.create({
+            PaymentWithRegistrations.create({
                 id: payment.id,
                 method: payment.method,
                 status: payment.status,
@@ -56,7 +62,7 @@ export class GetPaymentRegistrations extends Endpoint<Params, Query, Body, Respo
                 paidAt: payment.paidAt,
                 createdAt: payment.createdAt,
                 updatedAt: payment.updatedAt,
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r, false))
+                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r.setRelation(registrationGroupRelation, groups.find(g => g.id === r.groupId)!)))
             })
         );
     }

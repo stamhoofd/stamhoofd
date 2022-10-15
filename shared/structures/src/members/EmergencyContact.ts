@@ -13,7 +13,7 @@ export class EmergencyContact extends AutoEncoder {
     phone: string | null = null;
 
     @field({ decoder: StringDecoder })
-    title = "Oma"; // Todo
+    title = "Oma"; // TODO
 
     /**
      * Call this to clean up capitals in all the available data

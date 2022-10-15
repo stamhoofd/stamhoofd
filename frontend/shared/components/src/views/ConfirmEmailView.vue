@@ -110,7 +110,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
             new Toast("Je moet minimaal 5 minuten wachten voor je een nieuwe e-mail kan versturen. Kijk jouw inbox goed na!", "error red").show()
             return
         }
-        // todo
+        // TODO
         if (!await CenteredMessage.confirm("Wil je een nieuwe bevestigingsmail sturen?", "Ja, versturen", "Kijk ook zeker in jouw spambox, wacht enkele minuten en kijk opnieuw. Kijk ook na of je geen typefouten hebt gemaakt in jouw e-mailadres (dan maak je best een nieuw account aan).")) {
             return
         }

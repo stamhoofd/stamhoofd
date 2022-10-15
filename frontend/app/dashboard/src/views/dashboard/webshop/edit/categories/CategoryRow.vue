@@ -36,7 +36,7 @@ export default class CategoryRow extends Mixins(NavigationMixin) {
             // This same patch could also patch products ;)
             this.$emit("patch", patch)
 
-            // todo: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
         }}).setDisplayStyle("popup"))
     }
 
