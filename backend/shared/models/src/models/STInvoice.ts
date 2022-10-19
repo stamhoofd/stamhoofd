@@ -1,17 +1,12 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { STCredit as STCreditStruct, calculateVATPercentage, Payment as PaymentStruct, STBillingStatus, STInvoice as STInvoiceStruct,STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPendingInvoice as STPendingInvoiceStruct, User, PaymentMethod, STPackageType } from '@stamhoofd/structures';
+import { calculateVATPercentage, Payment as PaymentStruct, PaymentMethod, STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { QueueHandler } from "@stamhoofd/queues";
-import { Organization } from './Organization';
-import { Payment } from "./Payment";
-import { STPackage } from "./STPackage";
-import { STPendingInvoice } from "./STPendingInvoice";
-import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
-import { Sorter } from "@stamhoofd/utility";
-import { STCredit } from "./STCredit";
 import { Email } from "@stamhoofd/email";
-import { UsedRegisterCode } from "./UsedRegisterCode";
+import { QueueHandler } from "@stamhoofd/queues";
+import { Sorter } from "@stamhoofd/utility";
+import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
+import { Organization, Payment, STCredit, STPackage, STPendingInvoice, UsedRegisterCode } from './';
 
 export class STInvoice extends Model {
     static table = "stamhoofd_invoices";

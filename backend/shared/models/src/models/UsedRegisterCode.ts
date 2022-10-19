@@ -2,9 +2,7 @@ import { column, Model } from "@simonbackx/simple-database";
 import { Email } from "@stamhoofd/email";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
-import { Organization } from "./Organization";
-import { RegisterCode } from "./RegisterCode";
-import { STCredit } from "./STCredit";
+import { Organization, RegisterCode, STCredit } from "./";
 
 export class UsedRegisterCode extends Model {
     static table = "used_register_codes";

@@ -64,7 +64,8 @@
                         Aangemaakt op {{ formatDate(payment.payment.createdAt) }}
                     </p>
 
-                    <span v-if="payment.payment.status !== 'Succeeded'" slot="right" class="style-tag warn">In verwerking</span>
+                    <span v-if="payment.payment.status === 'Failed'" slot="right" class="style-tag error">Mislukt</span>
+                    <span v-else-if="payment.payment.status !== 'Succeeded'" slot="right" class="style-tag warn">In verwerking</span>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>

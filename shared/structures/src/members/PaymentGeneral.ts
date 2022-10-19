@@ -9,11 +9,14 @@ export class PaymentGeneral extends Payment {
     balanceItemPayments: BalanceItemPaymentDetailed[]
 
     get registrations() {
-        return this.balanceItemPayments.flatMap(p => p.balanceItem.registration ? [p.balanceItem.registration] : [])
+        const registrations = this.balanceItemPayments.flatMap(p => p.balanceItem.registration ? [p.balanceItem.registration] : [])
+
+        // Remove duplicates by id
+        return registrations.filter((r, index) => registrations.findIndex(r2 => r2.id == r.id) === index)
     }
 
     get members() {
-        const members = this.registrations.map(r => r.member)
+        const members = this.balanceItemPayments.flatMap(p => p.balanceItem.member ? [p.balanceItem.member] : [])
 
         // Remove duplicates by id
         return members.filter((m, index) => members.findIndex(m2 => m2.id == m.id) === index)
@@ -34,7 +37,7 @@ export class PaymentGeneral extends Payment {
     override matchQuery(query: string): boolean {
         if (
             super.matchQuery(query) 
-            || !!this.registrations.find(r => r.member.details.matchQuery(query))
+            || !!this.members.find(member => member.details.matchQuery(query))
             || !!this.orders.find(o => o.matchQuery(query))
         ) {
             return true;

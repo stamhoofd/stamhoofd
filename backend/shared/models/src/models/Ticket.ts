@@ -1,9 +1,7 @@
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization } from './Organization';
-import { Webshop } from './Webshop';
-import { Order } from "./Order";
+import { Order, Organization, Webshop } from './';
 
 import basex from "base-x";
 import crypto from "crypto";

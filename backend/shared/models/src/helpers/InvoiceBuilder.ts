@@ -1,11 +1,10 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { File, PaymentMethod, PaymentMethodHelper, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
+import AWS from 'aws-sdk';
 import PDFDocument from 'pdfkit';
 import { v4 as uuidv4 } from "uuid";
-import AWS from 'aws-sdk';
-import { STInvoice } from "../models/STInvoice";
-import { Formatter } from "@stamhoofd/utility";
-import { Payment } from "../models/Payment";
+import { Payment, STInvoice } from "../models";
 
 // 1 mm
 const MM = 2.834666666666667

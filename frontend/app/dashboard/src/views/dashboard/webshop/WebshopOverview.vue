@@ -650,14 +650,3 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-#webshop-overview {
-    .illustration-list img {
-        @extend .style-illustration-img;
-    }
-}
-
-</style>

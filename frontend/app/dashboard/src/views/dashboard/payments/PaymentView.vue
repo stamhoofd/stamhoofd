@@ -2,7 +2,8 @@
     <div class="st-view payment-view">
         <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss">
             <template #right>
-                <!-- TODO buttons -->
+                <button v-if="hasPrevious|| hasNext" v-tooltip="'Ga naar vorige betaling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="'Ga naar volgende betaling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goNext" />
             </template>
         </STNavigationBar>
 
@@ -11,7 +12,12 @@
                 <span class="icon-spacer">{{ title }}</span>
 
                 <span v-if="mappedPayment.isPending" class="style-tag warn">Wacht op betaling</span>
+                <span v-if="mappedPayment.isFailed" class="style-tag error">Mislukt</span>
             </h1>
+
+            <p v-if="payment.method == 'Transfer' && payment.isFailed" class="error-box">
+                Deze overschrijving werd geannuleerd en is niet langer zichtbaar voor leden. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
             <Spinner v-if="loading" />
@@ -69,6 +75,20 @@
                     <h2>Acties</h2>
 
                     <STList>
+                        <STListItem v-if="mappedPayment.isFailed" :selectable="true" @click="markPending">
+                            <h2 class="style-title-list">
+                                Heactiveer
+                            </h2>
+                            <p class="style-description">
+                                Wijzig de status terug naar 'wacht op betaling'.
+                            </p>
+                            <button slot="right" type="button" class="button secundary hide-smartphone">
+                                <span class="icon clock" />
+                                <span>Heractiveer</span>
+                            </button>
+                            <button slot="right" type="button" class="button icon success only-smartphone" />
+                        </STListItem>
+
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markPaid">
                             <h2 class="style-title-list">
                                 Markeer als betaald
@@ -113,41 +133,46 @@
                     </STList>
                 </template>
 
-                <hr>
-                <h2>Overzicht</h2>
-                <STList>
-                    <STListItem v-for="item in payment.balanceItemPayments" :key="item.id" :selectable="false">
-                        <h3 class="style-title-list">
-                            {{ item.balanceItem.description }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ formatDate(item.balanceItem.createdAt) }}
-                        </p>
-                        <p v-if="item.price !== item.balanceItem.price" class="style-description-small">
-                            Gedeeltelijke betaling van totaalbedrag van {{ formatPrice(item.balanceItem.price) }}
-                        </p>
-                        <template slot="right">
-                            {{ formatPrice(item.price) }}
-                        </template>
-                    </STListItem>
-                </STList>
-
-                <div class="pricing-box">
+                <template v-if="payment.balanceItemPayments.length">
+                    <hr>
+                    <h2>Overzicht</h2>
                     <STList>
-                        <STListItem>
-                            Totaal
-
+                        <STListItem v-for="item in payment.balanceItemPayments" :key="item.id" :selectable="false">
+                            <h3 class="style-title-list">
+                                {{ item.balanceItem.description }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ formatDate(item.balanceItem.createdAt) }}
+                            </p>
+                            <p v-if="item.price !== item.balanceItem.price" class="style-description-small">
+                                Slechts deel van het totaalbedrag, {{ formatPrice(item.price) }} / {{ formatPrice(item.balanceItem.price) }}
+                            </p>
                             <template slot="right">
-                                {{ formatPrice(payment.price) }}
+                                {{ formatPrice(item.price) }}
                             </template>
                         </STListItem>
                     </STList>
-                </div>
+
+                    <div class="pricing-box">
+                        <STList>
+                            <STListItem>
+                                Totaal
+
+                                <template slot="right">
+                                    {{ formatPrice(payment.price) }}
+                                </template>
+                            </STListItem>
+                        </STList>
+                    </div>
+                </template>
 
                 <hr>
                 <h2>Contactgegevens</h2>
                 
-                <STList class="info">
+                <p v-if="contactInfo.length == 0" class="info-box">
+                    Er zijn geen contactgegevens beschikbaar.
+                </p>
+                <STList v-else class="info">
                     <STListItem v-for="(info, index) of contactInfo" :key="index">
                         <h3 class="style-definition-label">
                             {{ info.title }}
@@ -161,10 +186,10 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CopyableDirective, ErrorBox, Spinner,STErrorsDefault,STList, STListItem, STNavigationBar, Toast } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CopyableDirective, ErrorBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
@@ -180,7 +205,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         Spinner
     },
     directives: {
-        Copyable: CopyableDirective
+        Copyable: CopyableDirective,
+        Tooltip: TooltipDirective
     }
 })
 export default class PaymentView extends Mixins(NavigationMixin) {
@@ -198,6 +224,93 @@ export default class PaymentView extends Mixins(NavigationMixin) {
 
     get mappedPayment() {
         return this.payment ?? this.initialPayment;
+    }
+
+    @Prop({ default: null })
+    getNext!: (PaymentGeneral) => PaymentGeneral | null;
+
+    @Prop({ default: null })
+    getPrevious!: (PaymentGeneral) => PaymentGeneral | null;
+
+    get hasNext(): boolean {
+        if (!this.getNext) {
+            return false
+        }
+        return !!this.getNext(this.initialPayment);
+    }
+
+    get hasPrevious(): boolean {
+        if (!this.getPrevious) {
+            return false
+        }
+        return !!this.getPrevious(this.initialPayment);
+    }
+
+    goBack() {
+        const payment = this.getPrevious(this.initialPayment);
+        if (!payment) {
+            return;
+        }
+        const component = new ComponentWithProperties(PaymentView, {
+            initialPayment: payment,
+            getNext: this.getNext,
+            getPrevious: this.getPrevious
+        });
+
+        this.show({
+            components: [component],
+            replace: 1,
+            reverse: true,
+            animated: false
+        })
+    }
+
+    goNext() {
+        const payment = this.getNext(this.initialPayment);
+        if (!payment) {
+            return;
+        }
+        const component = new ComponentWithProperties(PaymentView, {
+            initialPayment: payment,
+            getNext: this.getNext,
+            getPrevious: this.getPrevious
+        });
+
+        this.show({
+            components: [component],
+            replace: 1,
+            animated: false
+        })
+    }
+
+    activated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        document.addEventListener("keydown", this.onKey);
+    }
+
+    deactivated() {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        document.removeEventListener("keydown", this.onKey);
+    }
+
+    onKey(event) {
+        if (event.defaultPrevented || event.repeat) {
+            return;
+        }
+
+        if (!this.isFocused()) {
+            return
+        }
+
+        const key = event.key || event.keyCode;
+
+        if (key === "ArrowLeft" || key === "ArrowUp" || key === "PageUp") {
+            this.goBack();
+            event.preventDefault();
+        } else if (key === "ArrowRight" || key === "ArrowDown" || key === "PageDown") {
+            this.goNext();
+            event.preventDefault();
+        }
     }
 
     mounted() {
@@ -226,7 +339,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             this.loading = true;
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: 'GET',
-                path: `/organization/payments/${this.initialPayment.id}`,
+                path: `/payments/${this.initialPayment.id}`,
                 decoder: PaymentGeneral as Decoder<PaymentGeneral>,
                 owner: this
             });
@@ -246,8 +359,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             return contactInfo;
         }
 
-        for (const registration of this.payment.registrations) {
-            const member = registration.member;
+        for (const member of this.payment.members) {
 
             const key = 'member-' + member.id;
             if (!added.has(key)) {

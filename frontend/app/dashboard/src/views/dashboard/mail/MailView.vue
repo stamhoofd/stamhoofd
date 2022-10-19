@@ -100,9 +100,9 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler,ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, Dropdown, EditorSmartButton, EditorSmartVariable, EditorView, EmailStyler, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager } from '@stamhoofd/networking';
-import { CheckoutMethodType, EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { EmailAttachment, EmailInformation, EmailRequest, Group, Member, MemberWithRegistrations, Order, PaymentGeneral, PaymentMethodHelper, PaymentStatus, PrivateOrder, Recipient, Replacement, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -110,6 +110,7 @@ import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import EmailSettingsView from '../settings/EmailSettingsView.vue';
 import MissingFirstNameView from './MissingFirstNameView.vue';
+
 
 class TmpFile {
     name: string;
@@ -615,7 +616,6 @@ export default class MailView extends Mixins(NavigationMixin) {
         return (!!this.group?.privateSettings?.defaultEmailId && !!this.emails.find(e => e.id === this.group?.privateSettings?.defaultEmailId)?.id ? this.group?.privateSettings?.defaultEmailId : null) ?? this.emails.find(e => e.default)?.id ?? this.emails[0]?.id ?? null
     }
 
-
     activated() {
         // Update email id if created
         if (!this.emailId) {
@@ -652,7 +652,6 @@ export default class MailView extends Mixins(NavigationMixin) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         //this.editor.state.tr.setSelection(TextSelection.create(this.editor.state.tr.doc, position))
     }
-
 
     get orderButtonType() {
         for (const order of this.orders) {
@@ -1151,8 +1150,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 this.addOrderRecipient(order, paymentRecipientsMap, payment)
             }
 
-            const members = payment.registrations.map(r => r.member)
-            for (const member of members) {
+            for (const member of payment.members) {
                 this.addMemberRecipient(member, paymentRecipientsMap)
             }
 
@@ -1188,7 +1186,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 }
 
                 if (payment.registrations.length > 0) {
-                    overviewContext.push("Inschrijving " + Formatter.joinLast(Formatter.uniqueArray(payment.registrations.map(r => r.member.details.firstName)), ', ', ' en '))
+                    overviewContext.push("Inschrijving " + Formatter.joinLast(Formatter.uniqueArray(payment.members.map(member => member.details.firstName)), ', ', ' en '))
                 }
 
                 recipient.replacements.push(

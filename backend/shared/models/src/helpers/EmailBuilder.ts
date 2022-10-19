@@ -1,9 +1,7 @@
 import { EmailAddress, EmailBuilder } from "@stamhoofd/email";
 import { Recipient, Replacement } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Organization } from "../models/Organization";
-import { PasswordToken } from "../models/PasswordToken";
-import { User } from "../models/User";
+import { Organization, PasswordToken, User } from "../models";
 
 export async function getEmailBuilder(organization: Organization, email: {
     recipients: Recipient[], 

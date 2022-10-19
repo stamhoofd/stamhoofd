@@ -14,14 +14,37 @@ import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations
  * This is usefull to share the validation between backend and frontend (for both the encrypted and non-encrypted versions)
  */
 export class RegisterCartValidator {
+    static isAlreadyRegistered(member: UnknownMemberWithRegistrations, group: Group, waitingList: boolean) {
+        return !!member.registrations.find(r => r.groupId === group.id && (waitingList || r.registeredAt !== null) && r.deactivatedAt === null && r.waitingList === waitingList && r.cycle === group.cycle)
+    }
     static canRegister(member: UnknownMemberWithRegistrations, group: Group, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string; description?: string } {
         // Already registered
-        if (member.registrations.find(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === group.cycle)) {
+        if (this.isAlreadyRegistered(member, group, false)) {
             return {
                 closed: true,
                 waitingList: false,
                 message: "Al ingeschreven",
                 description: "Je kan "+member.details.firstName+" maar één keer inschrijven voor "+group.settings.name
+            }
+        }
+
+        // Check all categories maximum limits
+        if (this.hasReachedCategoryMaximum(member, group, groups, categories, cart)) {
+            // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
+            return {
+                closed: true,
+                waitingList: false,
+                message: "Niet combineerbaar",
+                description: "Je kan niet meer inschrijven voor "+group.settings.name+" omdat je al ingeschreven bent of aan het inschrijven bent voor een groep die je niet kan combineren."
+            }
+        }
+
+        if (group.closed) {
+            return {
+                closed: true,
+                waitingList: false,
+                message: "Gesloten",
+                description: "De inschrijvingen voor "+group.settings.name+" zijn afgelopen."
             }
         }
 
@@ -31,7 +54,7 @@ export class RegisterCartValidator {
                 return {
                     closed: true,
                     waitingList: false,
-                    message: member.details.getMatchingError(group)
+                    ...member.details.getMatchingError(group)
                 }
             }
         }
@@ -90,17 +113,6 @@ export class RegisterCartValidator {
             }
         }
 
-        // Check all categories maximum limits
-        if (this.hasReachedCategoryMaximum(member, group, groups, categories, cart)) {
-            // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
-            return {
-                closed: true,
-                waitingList: false,
-                message: "Niet combineerbaar",
-                description: "Je kan niet meer inschrijven voor "+group.settings.name+" omdat je al ingeschreven bent of aan het inschrijven bent voor een groep die je niet kan combineren."
-            }
-        }
-
         if (group.notYetOpen) {
             return {
                 closed: true,
@@ -121,15 +133,6 @@ export class RegisterCartValidator {
             }
         }
 
-        if (group.closed) {
-            return {
-                closed: true,
-                waitingList: false,
-                message: "Gesloten",
-                description: "De inschrijvingen voor "+group.settings.name+" zijn afgelopen."
-            }
-        }
-
         const existingMember = this.isExistingMember(member, groups) || (group.settings.priorityForFamily && !!family.find(f => this.isExistingMember(f, groups)))
 
         // Pre registrations?
@@ -145,18 +148,37 @@ export class RegisterCartValidator {
         }
 
         if (group.settings.waitingListType === WaitingListType.All) {
+            if (this.isAlreadyRegistered(member, group, true)) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Al op wachtlijst",
+                    description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name
+                }
+            }
             return {
                 closed: false,
                 waitingList: true,
-                message: "Wachtlijst"
+                message: "Wachtlijst",
+                description: this.getAlreadyInCartDescription({member, group, cart, waitingList: true})
             };
         }
 
         if (group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
+            if (this.isAlreadyRegistered(member, group, true)) {
+                return {
+                    closed: true,
+                    waitingList: false,
+                    message: "Al op wachtlijst",
+                    description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name
+                }
+            }
+
             return {
                 closed: false,
                 waitingList: true,
-                message: "Wachtlijst nieuwe leden"
+                message: "Wachtlijst nieuwe leden",
+                description: this.getAlreadyInCartDescription({member, group, cart, waitingList: true})
             };
         }
 
@@ -182,21 +204,21 @@ export class RegisterCartValidator {
                         }
                     }
 
-                    // If this is already in the cart, no need to return 'waitingList: true'
-                    /*const item = cart.find(item => item.memberId === member.id && item.groupId === group.id)
-                    if (item && !item.waitingList) {
+                    if (this.isAlreadyRegistered(member, group, true)) {
                         return {
-                            closed: false,
+                            closed: true,
                             waitingList: false,
+                            message: "Al op wachtlijst",
+                            description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name
                         }
-                    }*/
+                    }
 
                     // Still allow waiting list
                     return {
                         closed: false,
                         waitingList: true,
                         message: "Wachtlijst (volzet)",
-                        description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."
+                        description: (this.getAlreadyInCartDescription({member, group, cart, waitingList: true}) ?? "") + (available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."),
                     }
                 } else {
                     return {
@@ -212,8 +234,26 @@ export class RegisterCartValidator {
         return {
             closed: false,
             waitingList: false,
-            message: group.activePreRegistrationDate ? 'Voorinschrijvingen' : undefined
+            message: group.activePreRegistrationDate ? 'Voorinschrijvingen' : undefined,
+            description: this.getAlreadyInCartDescription({member, group, cart, waitingList: false})
         }
+    }
+
+    static getAlreadyInCartDescription({member, group, waitingList, cart}: {member: UnknownMemberWithRegistrations, group: Group, waitingList: boolean, cart: (IDRegisterItem | RegisterItem)[]}) {
+        const item = cart.find(item => item.memberId === member.id && item.groupId === group.id)
+        if (!item) {
+            return
+        }
+
+        if (item.waitingList) {
+            if (!waitingList) {
+                // From waitingList -> normal registration is possible and doesn't need a warning
+                return;
+            }
+            return "Dit staat klaar in jouw mandje. Bevestig het mandje om jouw plaats op de wachtlijst te bevestigen. "
+        }
+
+        return "Dit staat klaar in jouw mandje. Bevestig het mandje om jouw plaats om jouw inschrijving te bevestigen. "
     }
 
     /**

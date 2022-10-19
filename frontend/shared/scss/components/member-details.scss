@@ -17,28 +17,48 @@
     position: relative;
 
     img {
-        width: 60px;
-        height: 60px;
+        width: 40px;
+        height: 40px;
         border-radius: $border-radius;
         object-fit: cover;
 
+        @media (max-width: 400px) {
+            width: 30px;
+            height: 30px;
+            margin-right: 0px;
+        }
+    
         @media (max-width: 350px) {
-            width: 40px;
-            height: 40px;
+            width: 25px;
+            height: 25px;
         }
     }
 
     figure {
-        width: 60px;
-        height: 60px;
+        width: 40px;
+        height: 40px;
         border-radius: $border-radius;
         text-align: center;
         background: $color-primary-background;
         color: $color-primary;
         text-transform: uppercase;
-        line-height: 60px;
-        font-size: 20px;
+        line-height: 40px;
+        font-size: 14px;
         font-weight: 600;
+
+        @media (max-width: 400px) {
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            margin-right: 0px;
+        }
+    
+        @media (max-width: 350px) {
+            width: 25px;
+            height: 25px;
+            line-height: 25px;
+            font-size: 12px;
+        }
 
         > span {
             opacity: 0.8;
@@ -54,7 +74,7 @@
         background: $color-background;
         border-radius: 40px;
         line-height: 24px;
-        transform: translate(40%, 30%);
+        transform: translate(40%, 40%);
         height: 23px; // alignment fix for centered icons
 
         display: flex;

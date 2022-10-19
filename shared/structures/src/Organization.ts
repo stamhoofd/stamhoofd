@@ -82,38 +82,30 @@ export class Organization extends AutoEncoder {
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     get categoryTree(): GroupCategoryTree {
-        const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
-        if (root) {
-            const tree = GroupCategoryTree.build(root, this.meta.categories, this.groups)
-
-            if (tree.categories.length == 0 && tree.groups.length > 0) {
-                tree.settings.name = "Inschrijvingsgroepen"
-                return GroupCategoryTree.create({
-                    settings: GroupCategorySettings.create({
-                        name: ""
-                    }),
-                    categories: [tree]
-                })
-            }
-
-            if (!this.meta.packages.useActivities && tree.categories.length > 1) {
-                tree.categories = [tree.categories[0]]
-            }
-            return tree
-        }
-
-        // Broken setup here
-        console.warn("Root category ID is missing in categories. Migration might be needed")
-        return GroupCategoryTree.create({ })
+        return this.getCategoryTree()
     }
 
     /**
+     * @deprecated
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     categoryTreeForPermissions(permissions: Permissions): GroupCategoryTree {
+        return this.getCategoryTree({permissions})
+    }
+
+    /**
+     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     */
+    getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: Permissions | null, smartCombine?: boolean}): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
-            const tree = GroupCategoryTree.build(root, this.meta.categories, this.groups, permissions)
+            let tree = GroupCategoryTree.build(root, this.meta.categories, options?.filterGroups ? this.groups.filter(options.filterGroups) : this.groups, options?.permissions, options?.maxDepth, options?.smartCombine)
+
+            if (!options?.permissions) {
+                // Hide non public items
+                tree = tree.filterForDisplay(true, this.meta.packages.useActivities)
+            }
+
             if (tree.categories.length == 0 && tree.groups.length > 0) {
                 tree.settings.name = "Inschrijvingsgroepen"
                 return GroupCategoryTree.create({
@@ -133,40 +125,18 @@ export class Organization extends AutoEncoder {
     }
 
     /**
+     * @deprecated
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     getCategoryTreeWithDepth(maxDepth: number): GroupCategoryTree {
-        const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
-        if (root) {
-            const tree = GroupCategoryTree.build(root, this.meta.categories, this.groups, null, maxDepth)
-
-            if (tree.categories.length == 0 && tree.groups.length > 0) {
-                tree.settings.name = "Inschrijvingsgroepen"
-                return GroupCategoryTree.create({
-                    settings: GroupCategorySettings.create({
-                        name: ""
-                    }),
-                    categories: [tree]
-                })
-            }
-
-            if (!this.meta.packages.useActivities && tree.categories.length > 1) {
-                tree.categories = [tree.categories[0]]
-            }
-
-            return tree
-        }
-
-        // Broken setup here
-        console.warn("Root category ID is missing in categories. Migration might be needed")
-        return GroupCategoryTree.create({ })
+        return this.getCategoryTree({maxDepth})
     }
 
     isCategoryDeactivated(category: GroupCategoryTree) {
         if (this.meta.packages.useActivities) {
             return false
         }
-        const cleanedTree = this.getCategoryTreeWithDepth(1).filterForDisplay(true, this.meta.packages.useActivities)
+        const cleanedTree = this.getCategoryTree({maxDepth: 1})
         if (cleanedTree.categories.find( c => c.id === category.id)) {
             return false
         }

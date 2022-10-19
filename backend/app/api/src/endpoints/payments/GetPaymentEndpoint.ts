@@ -1,8 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Group, Member, Order, Payment, Registration, Token, UserWithOrganization, Webshop } from "@stamhoofd/models";
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, getPermissionLevelNumber, Group as GroupStruct, Member as MemberStruct, Order as OrderStruct, PaymentGeneral, PermissionLevel, RegistrationWithMember } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { Payment, Token, UserWithOrganization } from "@stamhoofd/models";
+import { PaymentGeneral, PermissionLevel } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined
@@ -15,7 +14,7 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/payments/@id", { id: String});
+        const params = Endpoint.parseParameters(request.url, "/payments/@id", { id: String});
 
         if (params) {
             return [true, params as Params];
@@ -33,13 +32,6 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async getPayment(id: string, user: UserWithOrganization, permissionLevel: PermissionLevel) {
-        if (!user.permissions) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot deze groep"
-            })
-        }
-
         const payment = await Payment.getByID(id);
         if (!payment || payment.organizationId !== user.organizationId) {
             throw new SimpleError({

@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <PromiseView :promise="promise" />
+        <ModalStackComponent ref="modalStack" :root="root" />
         <ToastBox />
     </div>
 </template>
@@ -8,12 +8,12 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController } from "@simonbackx/vue-app-navigation";
-import { AuthenticatedView, CenteredMessage, ColorHelper, ErrorBox, LoadingView, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { GoogleTranslateHelper, sleep } from '@stamhoofd/utility';
+import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
 import { CheckoutManager } from './classes/CheckoutManager';
@@ -21,7 +21,7 @@ import { MemberManager } from './classes/MemberManager';
 import { TabBarItem } from "./classes/TabBarItem";
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
-import RegistrationTabBarController from './views/overview/RegistrationTabBarController.vue';
+import NewOverviewView from './views/overview/NewOverviewView.vue';
 
 async function getDefaultView() {
     //if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
@@ -41,7 +41,7 @@ async function getCartView() {
 @Component({
     components: {
         ToastBox,
-        PromiseView
+        ModalStackComponent
     },
 })
 export default class App extends Vue {
@@ -123,7 +123,7 @@ export default class App extends Vue {
                         basket.badge = CheckoutManager.cart.count > 0 ? (CheckoutManager.cart.count + "") : null
 
                         return new ComponentWithProperties(ModalStackComponent, {
-                            root: new ComponentWithProperties(RegistrationTabBarController, { 
+                            root: /*new ComponentWithProperties(RegistrationTabBarController, { 
                                 items: [
                                     new TabBarItem(
                                         "Inschrijven",
@@ -141,6 +141,9 @@ export default class App extends Vue {
                                     ),
                                     basket
                                 ]
+                            })*/
+                            new ComponentWithProperties(NavigationController, { 
+                                root: new ComponentWithProperties(NewOverviewView, {})
                             })
                         })
                     }
@@ -171,6 +174,10 @@ export default class App extends Vue {
         }
     }
 
+    root = new ComponentWithProperties(PromiseView, {
+        promise: this.promise
+    });
+
     created() {
         if (GoogleTranslateHelper.isGoogleTranslateDomain(window.location.hostname)) {
             // Enable translations
@@ -181,6 +188,32 @@ export default class App extends Vue {
             ComponentWithProperties.debug = true
         }
         HistoryManager.activate();
+    }
+
+    mounted() {
+        ModalStackEventBus.addListener(this, "present", async (options: PushOptions | ComponentWithProperties) => {
+            if (this.$refs.modalStack === undefined) {
+                // Could be a webpack dev server error (HMR) (not fixable) or called too early
+                await this.$nextTick()
+            }
+            if (!(options as any).components) {
+                (this.$refs.modalStack as any).present({ components: [options] });
+            } else {
+                (this.$refs.modalStack as any).present(options)
+            }
+        })
+
+        CenteredMessage.addListener(this, async (centeredMessage) => {
+            if (this.$refs.modalStack === undefined) {
+                // Could be a webpack dev server error (HMR) (not fixable) or called too early
+                await this.$nextTick()
+            }
+            (this.$refs.modalStack as any).present({
+                components: [
+                    new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay")
+                ]
+            })
+        })
     }
 }
 </script>

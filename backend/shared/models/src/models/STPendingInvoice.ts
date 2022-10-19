@@ -1,19 +1,13 @@
+import { createMollieClient, SequenceType } from '@mollie/api-client';
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { calculateVATPercentage, PaymentMethod, PaymentStatus, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct,STPricingType, Version } from '@stamhoofd/structures';
+import { calculateVATPercentage, PaymentMethod, PaymentStatus, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPricingType, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
-import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
 
-import { Organization } from './Organization';
-import { Payment } from "./Payment";
-import { Registration } from "./Registration";
-import { STInvoice } from "./STInvoice";
-import { STPackage } from "./STPackage";
-import { MolliePayment } from "./MolliePayment";
-import { STCredit } from "./STCredit";
 import { Email } from "@stamhoofd/email";
 import { Formatter } from "@stamhoofd/utility";
 import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
+import { MolliePayment, Organization, Payment, Registration, STCredit, STInvoice, STPackage } from './';
 
 /**
  * Things that should get paid, but are not yet invoiced yet because:

@@ -1,7 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Payment, Token, UserWithOrganization } from "@stamhoofd/models";
-import { PaymentGeneral, PermissionLevel } from "@stamhoofd/structures";
+import { PaymentGeneral, PaymentMethod, PermissionLevel } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined
@@ -45,13 +45,15 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             paidAt: {
                 sign: '>', 
                 value: new Date(Date.now() - (24 * 60 * 60 * 1000 * 7 ))
-            }
+            },
+            method: PaymentMethod.Transfer
         });
 
         payments.push(...
             await Payment.where({
                 organizationId: user.organizationId, 
-                paidAt: null
+                paidAt: null,
+                method: PaymentMethod.Transfer
             })
         );
 

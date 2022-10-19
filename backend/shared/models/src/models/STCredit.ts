@@ -1,7 +1,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { STInvoiceItem } from "@stamhoofd/structures";
 import { v4 as uuidv4 } from "uuid";
-import { STInvoice } from "./STInvoice";
+import { STInvoice } from "./";
 
 export class STCredit extends Model {
     static table = "stamhoofd_credits";

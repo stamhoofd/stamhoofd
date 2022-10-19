@@ -197,6 +197,100 @@ export class GroupSettings extends AutoEncoder {
         }
         return foundPrice
     }
+
+    get maxYear() {
+        if (this.minAge === null) {
+            return null
+        }
+        return (this.startDate.getFullYear() - this.minAge)
+    }
+
+    get minYear() {
+        if (this.maxAge === null) {
+            return null
+        }
+        return (this.startDate.getFullYear() - this.maxAge)
+    }
+
+    get forAdults() {
+        return ((this.minAge && this.minAge >= 18) || (this.maxAge && this.maxAge > 18))
+    }
+
+    getAgeGenderDescription({includeAge = false, includeGender = false}: {includeAge?: boolean, includeGender?: boolean} = {}) {
+        let who = '';
+
+        if (includeAge && this.minYear && this.maxYear) {
+            if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
+                if (this.forAdults) {
+                    who += "mannen geboren in"
+                } else {
+                    who += "jongens geboren in"
+                }
+            } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
+                if (this.forAdults) {
+                    who += "vrouwen geboren in"
+                } else {
+                    who += "meisjes geboren in"
+                }
+            } else {
+                who += "geboren in"
+            }
+            who += " " + (this.minYear) + " - " + (this.maxYear);
+        } else if (includeAge && this.maxYear) {
+            if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
+                if (this.forAdults) {
+                    who += "mannen geboren in of voor"
+                } else {
+                    who += "jongens geboren in of voor"
+                }
+            } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
+                if (this.forAdults) {
+                    who += "vrouwen geboren in of voor"
+                } else {
+                    who += "meisjes geboren in of voor"
+                }
+            } else {
+                who += "geboren in of voor"
+            }
+            who += " " + (this.maxYear);
+        } else if (includeAge && this.minYear) {
+            if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
+                if (this.forAdults) {
+                    who += "mannen geboren in of na"
+                } else {
+                    who += "jongens geboren in of na"
+                }
+            } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
+                if (this.forAdults) {
+                    who += "vrouwen geboren in of na"
+                } else {
+                    who += "meisjes geboren in of na"
+                }
+            } else {
+                who += "geboren in of na"
+            }
+            who += " " + (this.minYear);
+        } else if (includeGender) {
+            if (this.genderType === GroupGenderType.OnlyMale) {
+                if (this.forAdults) {
+                    who += "mannen"
+                } else {
+                    who += "jongens"
+                }
+            } else if (this.genderType === GroupGenderType.OnlyFemale) {
+                if (this.forAdults) {
+                    who += "vrouwen"
+                } else {
+                    who += "meisjes"
+                }
+            }
+        }
+
+        if (!who) {
+            return null;
+        }
+        return who;
+    }
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType()

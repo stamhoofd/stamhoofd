@@ -1,8 +1,6 @@
 
-import { GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures'
-import { Group as GroupStruct } from "@stamhoofd/structures";
-import { Group } from '../models/Group';
-import { Organization } from '../models/Organization';
+import { Group as GroupStruct, GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Group, Organization } from '../models';
 
 export class GroupBuilder {
     organization: Organization

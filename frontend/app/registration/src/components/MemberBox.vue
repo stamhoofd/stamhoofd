@@ -1,41 +1,30 @@
 <template>
-    <STListItem :selectable="!canRegister.closed" class="member-box right-stack" @click="onClicked">
-        <!--<Checkbox v-if="!canRegister.closed" slot="left" v-model="selected" @click.native.stop />-->
-        <!--<span v-else slot="left" class="icon canceled gray" />-->
-
+    <STListItem :selectable="true" class="member-box right-stack member-registration-block" @click="onClicked">
         <span v-if="type == 'member'" slot="left" class="icon user" />
+        <template v-else slot="left">
+            <figure v-if="imageSrc" class="registration-image">
+                <img :src="imageSrc">
+                <div>
+                    <span v-if="waitingList" class="icon gray clock" />
+                </div>
+            </figure>
+            <figure v-else class="registration-image">
+                <figure>
+                    <span>{{ group.settings.name.substr(0, 2) }}</span>
+                </figure>
+                <div>
+                    <span v-if="waitingList" class="icon gray clock" />
+                </div>
+            </figure>
+        </template>
 
         <h4 class="style-title-list ">
             {{ type == "member" ? member.name : group.settings.name }}
         </h4>
 
-        <!--<template v-if="!canRegister.closed">
-            <p v-if="!selected" class="style-description">
-                <template v-if="item.waitingList">
-                    Klik om dit lid op de wachtlijst te zetten
-                </template>
-                <template v-else>
-                    Klik om dit lid in te schrijven
-                </template>
-            </p>
-            <p v-else class="style-description">
-                Ga door naar je mandje om te bevestigen
-            </p>
-        </template>-->
-        
-        <!--<p v-if="type == 'group'">
-            <button class="button text" @click.stop="openGroup">
-                <span>Meer info</span>
-            </button>
-        </p>-->
-
-
         <template slot="right">
             <span v-if="selected" class="style-tag">In mandje</span>
             <span v-if="canRegister.message" class="style-tag" :class="{ error: canRegister.closed, warn: canRegister.waitingList }">{{ canRegister.message }}</span>
-            <figure v-else-if="!selected && imageSrc && type == 'group'">
-                <img :src="imageSrc">
-            </figure>
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -43,21 +32,20 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { Group, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import CartView from "../../../webshop/src/views/checkout/CartView.vue";
 import { CheckoutManager } from "../classes/CheckoutManager";
 import { MemberManager } from "../classes/MemberManager";
 import { OrganizationManager } from "../classes/OrganizationManager";
 import GroupView from "../views/groups/GroupView.vue";
-import { EditMemberStepsManager } from "../views/members/details/EditMemberStepsManager";
-
 
 @Component({
-    components: {
+    components: { 
         STNavigationBar,
         STToolbar,
         STList,
@@ -95,6 +83,10 @@ export default class MemberBox extends Mixins(NavigationMixin){
         return new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.canRegister.waitingList })
     }
 
+    get waitingList() {
+        return this.canRegister.waitingList;
+    }
+
     get selected() {
         return this.CheckoutManager.cart.hasItem(this.item)
     }
@@ -107,21 +99,11 @@ export default class MemberBox extends Mixins(NavigationMixin){
     }
 
     onClicked() {
-        if (this.canRegister.closed) {
-            new Toast(this.canRegister.message ?? "Inschrijven niet mogelijk", "error red").show()
-            return
-        }
-
         if (this.type === "group") {
             return this.openGroup()
         }
         
-        this.CheckoutManager.startAddToCartFlow(this, this.item, (c: NavigationMixin) => {
-            c.dismiss({ force: true })
-        }).catch(e => {
-            console.error(e)
-            Toast.fromError(e).show()
-        })
+        throw new Error('Member type is deprecated. Always show group!')
     }
 
 

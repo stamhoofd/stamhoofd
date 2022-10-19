@@ -8,8 +8,6 @@
                 <p v-if="member.details.requiresFinancialSupport && member.details.requiresFinancialSupport.value" class="warning-box">
                     {{ financialSupportWarningText }}
                 </p>
-
-                <h2>Openstaande bedragen</h2>
                 
                 <STList>
                     <STListItem v-for="item in balanceItems" :key="item.id" :selectable="true" @click="editBalanceItem(item)">
@@ -24,8 +22,8 @@
                         </p>
                         <template slot="right">
                             <span v-if="item.pricePaid === item.price" class="style-tag success">Betaald</span>
-                            <span v-else-if="item.payments.length == 0" class="style-tag">Openstaand</span>
                             <span v-else-if="item.pricePaid > 0" class="style-tag warn">{{ formatPrice(item.pricePaid) }} betaald</span>
+                            <span v-else-if="!item.hasPendingPayment" class="style-tag">Openstaand</span>
                             <span v-else class="style-tag warn">In verwerking</span>
                         </template>
                     </STListItem>
@@ -40,11 +38,11 @@
                                 {{ formatPrice(outstandingBalance.total) }}
                             </template>
                         </STListItem>
-                        <STListItem v-if="outstandingBalance.withPayment > 0 && outstandingBalance.withoutPayment > 0">
+                        <STListItem v-if="outstandingBalance.totalPending > 0 && outstandingBalance.totalOpen > 0">
                             Waarvan in verwerking
 
                             <template slot="right">
-                                {{ formatPrice(outstandingBalance.withPayment) }}
+                                {{ formatPrice(outstandingBalance.totalPending) }}
                             </template>
                         </STListItem>
                     </STList>
@@ -221,7 +219,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
                 patch.id = balanceItem.id;
                 arr.addPatch(patch)
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                await SessionManager.currentSession!.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,
@@ -247,17 +245,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     }
 
     get outstandingBalance() {
-        // Get sum of balance payments
-        const withPayment = this.balanceItems.flatMap(b => b.payments).filter(p => p.payment.status !== PaymentStatus.Succeeded).map(p => p.price).reduce((t, total) => total + t, 0)
-
-        const total = this.balanceItems.map(p => p.price - p.pricePaid).reduce((t, total) => total + t, 0)
-        const withoutPayment = total - withPayment;
-
-        return {
-            withPayment,
-            withoutPayment,
-            total: withPayment + withoutPayment
-        }
+        return MemberBalanceItem.getOutstandingBalance(this.balanceItems)
     }
 
     beforeDestroy() {

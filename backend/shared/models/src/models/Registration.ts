@@ -1,16 +1,10 @@
 import { column, Database, Model } from '@simonbackx/simple-database';
 import { Email } from '@stamhoofd/email';
-import { EmailTemplateType, getPermissionLevelNumber, Member as MemberStruct, PaymentDetailed, PaymentMethod, PaymentMethodHelper, PermissionLevel, Recipient, Registration as RegistrationStructure, RegistrationWithMember as RegistrationWithMemberStruct, Replacement } from '@stamhoofd/structures';
+import { EmailTemplateType, getPermissionLevelNumber, PaymentMethod, PaymentMethodHelper, PermissionLevel, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 import { getEmailBuilder } from '../helpers/EmailBuilder';
-import { EmailTemplate } from './EmailTemplate';
-import { Group } from './Group';
-import { Member } from './Member';
-import { Organization } from './Organization';
-
-import { Payment } from './Payment';
-import { User, UserWithOrganization } from './User';
+import { EmailTemplate, Organization, User, UserWithOrganization } from './';
 
 export class Registration extends Model {
     static table = "registrations"
@@ -91,7 +85,7 @@ export class Registration extends Model {
         return RegistrationStructure.create(this)
     }
 
-    hasAccess(user: User, groups: import('./Group').Group[], permissionLevel: PermissionLevel) {
+    hasAccess(user: User, groups: import('./').Group[], permissionLevel: PermissionLevel) {
         if (!user.permissions) {
             return false
         }
@@ -108,11 +102,11 @@ export class Registration extends Model {
         return false;
     }
 
-    hasReadAccess(user: User, groups: import('./Group').Group[]) {
+    hasReadAccess(user: User, groups: import('./').Group[]) {
         return this.hasAccess(user, groups, PermissionLevel.Read)
     }
 
-    hasWriteAccess(user: User, groups: import('./Group').Group[]) {
+    hasWriteAccess(user: User, groups: import('./').Group[]) {
         return this.hasAccess(user, groups, PermissionLevel.Write)
     }
 
@@ -153,7 +147,7 @@ export class Registration extends Model {
         return true;
     }
 
-    async getRecipients(organization: Organization, group: Group) {
+    async getRecipients(organization: Organization, group: import('./').Group) {
         const {Member} = await import('./Member');
 
         const member = await Member.getWithRegistrations(this.memberId);
@@ -213,6 +207,7 @@ export class Registration extends Model {
 
         const template = templates[0]
 
+        const Group = (await import('./')).Group
         const group = await Group.getByID(this.groupId);
 
         if (!group) {
@@ -239,7 +234,7 @@ export class Registration extends Model {
         Email.schedule(builder)
     }
 
-    static async sendTransferEmail(user: UserWithOrganization, payment: Payment) {
+    static async sendTransferEmail(user: UserWithOrganization, payment: import('./').Payment) {
         const data = {
             type: EmailTemplateType.RegistrationTransferDetails
         };
@@ -262,10 +257,10 @@ export class Registration extends Model {
 
         const paymentGeneral = await payment.getGeneralStructure();
         const registrations = paymentGeneral.registrations
-        let groups = registrations.map(r => r.group);
+        let groupIds = registrations.map(r => r.groupId);
         
-        // Remove duplicate groups
-        groups = groups.filter((g, index) => groups.findIndex(g2 => g2.id === g.id) === index)
+        // Remove duplicate groupIds
+        groupIds = groupIds.filter((v, i, a) => a.indexOf(v) === i);
 
         const recipients = [
             Recipient.create({
@@ -329,7 +324,17 @@ export class Registration extends Model {
             })
         ];
 
-        const {from, replyTo} = groups.length == 1 && groups[0].privateSettings ? organization.getEmail(groups[0].privateSettings.defaultEmailId) : organization.getDefaultEmail()
+        let {from, replyTo} = organization.getDefaultEmail()
+
+        if (groupIds.length == 1) {
+            const Group = (await import('./')).Group
+            const group = await Group.getByID(groupIds[0]);
+            if (group) {
+                const groupEmail = organization.getGroupEmail(group)
+                from = groupEmail.from
+                replyTo = groupEmail.replyTo
+            }
+        }
 
         // Create e-mail builder
         const builder = await getEmailBuilder(organization, {

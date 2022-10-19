@@ -139,7 +139,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
         const tree = OrganizationManager.organization.getCategoryTreeWithDepth(1)
         // Filter the tree
 
-        tree.groups = tree.groups.filter(g => {
+        /*tree.groups = tree.groups.filter(g => {
             for (const member of this.members) {
                 if (member.shouldShowGroup(g, OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)) {
                     return true
@@ -157,7 +157,7 @@ export default class OverviewView extends Mixins(NavigationMixin){
                 }
                 return false
             })
-        }
+        }*/
 
         return tree.filterForDisplay(SessionManager.currentSession!.user!.permissions !== null, this.organization.meta.packages.useActivities)
     }

@@ -122,6 +122,7 @@ export * from "./src/billing/STPackageBundle"
 
 // Admin
 export * from "./src/admin/Admin"
+export * from "./src/admin/MemberSummary"
 export * from "./src/admin/OrganizationSummary"
 export * from "./src/Graph"
 

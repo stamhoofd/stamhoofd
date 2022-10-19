@@ -1,12 +1,8 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToManyRelation } from '@simonbackx/simple-database';
 import { EncryptedMemberWithRegistrations, Member as MemberStruct, MemberDetails, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
-import { BalanceItem } from './BalanceItem';
-import { BalanceItemPayment } from './BalanceItemPayment';
-
-import { Payment } from './Payment';
-import { Registration } from './Registration';
-import { User } from './User';
+import { Payment, Registration, User } from './';
 export type MemberWithRegistrations = Member & { registrations: Registration[]; users: User[] }
 
 // Defined here to prevent cycles
@@ -25,6 +21,32 @@ export class Member extends Model {
 
     @column({ type: "string" })
     organizationId: string;
+
+    @column({
+        type: "string", 
+        beforeSave: function() {
+            return this.details?.firstName ?? ''
+        },
+        skipUpdate: true
+    })
+    firstName: string
+
+    @column({ type: "string", 
+        beforeSave: function() {
+            return this.details?.lastName ?? ''
+        },
+        skipUpdate: true })
+    lastName: string
+
+    @column({ 
+        type: "string", 
+        nullable: true, 
+        beforeSave: function() {
+            return this.details?.birthDay ? Formatter.dateIso(this.details.birthDay) : null
+        },
+        skipUpdate: true 
+    })
+    birthDay: string | null
 
     @column({ type: "json", decoder: MemberDetails })
     details: MemberDetails
@@ -106,12 +128,14 @@ export class Member extends Model {
      * Fetch all registrations with members with their corresponding (valid) registrations and payment
      */
     static async getRegistrationWithMembersForPayment(paymentId: string): Promise<RegistrationWithMember[]> {
+        const { BalanceItem, BalanceItemPayment} = await import('./');
+
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
         
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
         
         query += `LEFT JOIN \`${BalanceItem.table}\` ON \`${BalanceItem.table}\`.\`registrationId\` = \`${Registration.table}\`.\`${Registration.primary.name}\`\n`
-        query += `LEFT JOIN \`${BalanceItemPayment.table}\` ON \`${BalanceItemPayment.table}\`.\`${BalanceItemPayment.primary.name}\` = \`${BalanceItem.table}\`.\`${BalanceItemPayment.balanceItem.foreignKey}\`\n`
+        query += `LEFT JOIN \`${BalanceItemPayment.table}\` ON \`${BalanceItemPayment.table}\`.\`${BalanceItemPayment.balanceItem.foreignKey}\` = \`${BalanceItem.table}\`.\`${BalanceItem.primary.name}\`\n`
         query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${BalanceItemPayment.table}\`.\`${BalanceItemPayment.payment.foreignKey}\`\n`
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)

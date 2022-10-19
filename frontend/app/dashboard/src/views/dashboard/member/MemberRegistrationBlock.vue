@@ -3,8 +3,7 @@
         <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
             <img :src="imageSrc(registration)">
             <div>
-                <span v-if="!registration.waitingList" class="icon green success" />
-                <span v-else class="icon gray clock" />
+                <span v-if="registration.waitingList" class="icon gray clock" />
             </div>
         </figure>
         <figure v-else slot="left" class="registration-image">
@@ -12,8 +11,7 @@
                 <span>{{ getGroup(registration.groupId).settings.name.substr(0, 2) }}</span>
             </figure>
             <div>
-                <span v-if="!registration.waitingList" class="icon green success" />
-                <span v-else class="icon gray clock" />
+                <span v-if="registration.waitingList" class="icon gray clock" />
             </div>
         </figure>
         <h3 class="style-title-list">

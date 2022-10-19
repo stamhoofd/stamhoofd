@@ -1,10 +1,9 @@
-import { column, Database, ManyToOneRelation,Model } from "@simonbackx/simple-database";
+import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import crypto from "crypto";
 
-import { Organization } from './Organization';
-import { User, UserWithOrganization } from "./User";
+import { Organization, User, UserWithOrganization } from './';
 
 export type TokenWithUser = Token & { user: User };
 export type UserWithOrganizationAndUser = Token & { user: UserWithOrganization };

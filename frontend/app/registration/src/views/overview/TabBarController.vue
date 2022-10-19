@@ -118,21 +118,6 @@ export default class TabBarController extends Mixins(NavigationMixin) {
         }
     }
 
-    mounted() {
-        ModalStackEventBus.addListener(this, "present", async (options: PushOptions | ComponentWithProperties) => {
-            this.present(options);
-            return Promise.resolve()
-        })
-        
-        CenteredMessage.addListener(this, (centeredMessage) => {
-            this.present(new ComponentWithProperties(CenteredMessageView, { centeredMessage }).setDisplayStyle("overlay"))
-        })
-    }
-
-    beforeDestroy() {
-        CenteredMessage.removeListener(this)
-    }
-
     destroyed() {
         console.log("Destroyed tab bar controller");
 

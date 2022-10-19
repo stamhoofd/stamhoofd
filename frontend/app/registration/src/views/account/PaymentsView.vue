@@ -1,8 +1,9 @@
 <template>
-    <section>
+    <div class="st-view payments-view">
+        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Mijn account" />
         <main>
             <h1>Afrekeningen</h1>
-            <p>Hier kan je de betaalstatus van jouw inschrijvingen opvolgen.</p>
+            <p>Hier kan je jouw betalingen opvolgen.</p>
 
             <STErrorsDefault :error-box="errorBox" />
 
@@ -10,33 +11,104 @@
                 Er zijn momenteel nog geen afrekeningen beschikbaar voor jouw account
             </p>
 
-            <STList v-else>
-                <STListItem v-for="payment in payments" :key="payment.id" class="right-stack" :selectable="canOpenPayment(payment)" @click="openPayment(payment)">
-                    <span slot="left" class="icon card" />
+            <hr>
+            <h2>Openstaand</h2>
 
-                    <h2 class="style-title-list">
-                        {{ getPaymentPeriod(payment) }}
-                    </h2>
-                    <p class="style-description-small pre-wrap" v-text="getPaymentDescription(payment)" />
+            <STList>
+                <STListItem v-for="item in outstandingItems" :key="item.id">
+                    <h3 class="style-title-list">
+                        {{ item.description }}
+                    </h3>
                     <p class="style-description-small">
-                        {{ paymentMethodName(payment) }}
+                        {{ formatDate(item.createdAt) }}
                     </p>
-
+                    <p class="style-description-small">
+                        {{ formatPrice(item.price) }}
+                    </p>
                     <template slot="right">
-                        <span>{{ payment.price | price }}</span>
-                        <span v-if="payment.status == 'Succeeded'" class="icon green success" />
-                        <span v-else-if="canOpenPayment(payment)" class="icon arrow-right" />
+                        <span v-if="item.pricePaid === item.price" class="style-tag success">Betaald</span>
+                        <span v-else-if="item.pricePaid > 0" class="style-tag warn">{{ formatPrice(item.pricePaid) }} betaald</span>
+                        <span v-else-if="!item.hasPendingPayment" class="style-tag">Openstaand</span>
+                        <span v-else class="style-tag warn">In verwerking</span>
                     </template>
                 </STListItem>
             </STList>
+
+            <div class="pricing-box">
+                <STList>
+                    <STListItem>
+                        Totaal te betalen
+
+                        <template slot="right">
+                            {{ formatPrice(outstandingBalance.total) }}
+                        </template>
+                    </STListItem>
+                    <STListItem v-if="outstandingBalance.totalPending > 0 && outstandingBalance.totalOpen > 0">
+                        Waarvan in verwerking
+
+                        <template slot="right">
+                            {{ formatPrice(outstandingBalance.totalPending) }}
+                        </template>
+                    </STListItem>
+                </STList>
+            </div>
+
+            <template v-if="pendingPayments.length > 0">
+                <hr>
+                <h2>In verwerking</h2>
+                <p>Het kan dat het openstaande bedrag eerder betaald werd via overschrijving. In dit geval weten we nog niet of die echt is uitgevoerd tot jullie het bedrag ontvangen op jullie rekening. Je kan deze overschrijvingen hier markeren als betaald of annuleren.</p>
+
+                <STList>
+                    <STListItem v-for="payment of pendingPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
+                        <h3 class="style-title-list">
+                            {{ getPaymentMethodName(payment.method) }}
+                        </h3>
+                        <p class="style-description-small">
+                            Aangemaakt op {{ formatDate(payment.createdAt) }}
+                        </p>
+
+                        <span slot="right">{{ formatPrice(payment.price) }}</span>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+            </template>
+
+            <template v-if="succeededPayments.length > 0">
+                <hr>
+                <h2>Ontvangen betalingen</h2>
+
+                <STList>
+                    <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
+                        <h3 class="style-title-list">
+                            {{ getPaymentMethodName(payment.method) }}
+                        </h3>
+                        <p class="style-description-small">
+                            Aangemaakt op {{ formatDate(payment.createdAt) }}
+                        </p>
+                        <p class="style-description-small">
+                            Betaald op {{ formatDate(payment.paidAt) }}
+                        </p>
+
+                        <span slot="right">{{ formatPrice(payment.price) }}</span>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+            </template>
         </main>
-    </section>
+        <STToolbar v-if="outstandingBalance.totalOpen">
+            <button slot="right" class="button primary full" type="button" @click="startPayment">
+                <span class="icon card" />
+                <span>Betalen</span>
+            </button>
+        </STToolbar>
+    </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STList, STListItem, TransferPaymentView } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { MemberBalanceItem } from "@stamhoofd/structures/esm/dist";
@@ -45,12 +117,16 @@ import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import PaymentView from "./PaymentView.vue";
+
 
 @Component({
     components: {
         STList,
         STListItem,
-        STErrorsDefault
+        STErrorsDefault,
+        STNavigationBar,
+        STToolbar
     },
     filters: {
         price: Formatter.price
@@ -61,6 +137,34 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     loading = true
     balanceItems: MemberBalanceItem[] = []
     errorBox: ErrorBox | null = null
+
+    get pendingPayments() {
+        const payments = new Map<string, Payment>()
+        for (const item of this.balanceItems) {
+            for (const payment of item.payments) {
+                if (payment.payment.isPending) {
+                    payments.set(payment.payment.id, payment.payment)
+                }
+            }
+        }
+        return [...payments.values()]
+    }
+
+    get succeededPayments() {
+        const payments = new Map<string, Payment>()
+        for (const item of this.balanceItems) {
+            for (const payment of item.payments) {
+                if (payment.payment.isSucceeded) {
+                    payments.set(payment.payment.id, payment.payment)
+                }
+            }
+        }
+        return [...payments.values()]
+    }
+
+    get outstandingBalance() {
+        return MemberBalanceItem.getOutstandingBalance(this.balanceItems)
+    }
 
     async load() {
         this.loading = true;
@@ -95,15 +199,24 @@ export default class PaymentsView extends Mixins(NavigationMixin){
         return this.organization.categoryTree
     }
 
-    logout() {
-        if (SessionManager.currentSession && SessionManager.currentSession.isComplete()) {
-            SessionManager.currentSession.logout()
-            return;
-        }
-    }
-
     getPaymentPeriod(payment: Payment) {
         return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
+    }
+
+    formatDate(date: Date) {
+        return Formatter.date(date, true)
+    }
+
+    formatPrice(price: number) {
+        return Formatter.price(price)
+    }
+
+    getPaymentMethodName(method: PaymentMethod) {
+        return PaymentMethodHelper.getNameCapitalized(method);
+    }
+
+    get outstandingItems() {
+        return this.balanceItems.filter(i => i.pricePaid < i.price)
     }
 
     paymentMethodName(payment: Payment) {
@@ -168,14 +281,39 @@ export default class PaymentsView extends Mixins(NavigationMixin){
             return;
         }
         this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(TransferPaymentView, {
-                type: "registration",
-                organization: OrganizationManager.organization,
-                payment,
-                settings: OrganizationManager.organization.meta.transferSettings,
-                isPopup: true
+            root: new ComponentWithProperties(PaymentView, {
+                initialPayment: payment,
             })
         }).setDisplayStyle("popup"))
     }
+
+    startPayment() {
+        CenteredMessage.fromError(new SimpleError({
+            code: 'not_available',
+            message: 'Deze functie is nog niet beschikbaar',
+        })).addCloseButton().show()
+    }
 }
 </script>
+
+<style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+.payments-view {
+    .pricing-box {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: flex-end;
+
+        > * {
+            flex-basis: 350px;
+        }
+
+        .middle {
+            font-weight: 600;
+        }
+    }
+}
+</style>

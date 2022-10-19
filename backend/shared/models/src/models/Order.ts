@@ -1,19 +1,13 @@
-import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { EmailTemplateType, OrderData, OrderStatus, PaymentMethod, ProductType, WebshopTicketType, WebshopTimeSlot, Order as OrderStruct, WebshopPreview, Payment as PaymentStruct, WebshopStatus, Recipient, Replacement } from '@stamhoofd/structures';
+import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { EmailTemplateType, Order as OrderStruct, OrderData, OrderStatus, Payment as PaymentStruct, PaymentMethod, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from '@stamhoofd/email';
-import { Organization } from './Organization';
-import { Payment } from './Payment';
-import { Webshop } from './Webshop';
-import { WebshopCounter } from '../helpers/WebshopCounter';
 import { QueueHandler } from "@stamhoofd/queues";
-import { Ticket } from "./Ticket";
-import { I18n } from "@stamhoofd/backend-i18n";
-import { getEmailBuilder } from "../helpers/EmailBuilder";
-import { EmailTemplate } from "./EmailTemplate";
 import { Formatter } from "@stamhoofd/utility";
-
+import { getEmailBuilder } from "../helpers/EmailBuilder";
+import { WebshopCounter } from '../helpers/WebshopCounter';
+import { EmailTemplate, Organization, Payment, Ticket, Webshop } from './';
 
 export class Order extends Model {
     static table = "webshop_orders";

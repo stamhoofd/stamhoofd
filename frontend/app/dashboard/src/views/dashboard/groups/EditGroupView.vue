@@ -21,6 +21,9 @@
                     autocomplete=""
                 >
             </STInputBox>
+            <p v-if="duplicateName" class="warning-box">
+                Er bestaat al een andere inschrijvingsgroep met dezelfde naam. Dit kan voor onduidelijkheid zorgen aangezien de categorie niet altijd zichtbaar is.
+            </p>
 
             <STInputBox title="Beschrijving" error-fields="settings.description" :error-box="errorBox" class="max">
                 <textarea
@@ -332,6 +335,7 @@ import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder,
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AgeInput, CenteredMessage, Checkbox, DateSelection, ErrorBox, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, Validator } from "@stamhoofd/components";
 import { FinancialSupportSettings, Group, GroupCategory, GroupGenderType, GroupPrices, GroupPrivateSettings, GroupSettings, Image, Organization, OrganizationMetaData, OrganizationRecordsConfiguration, PermissionLevel, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, Version, WaitingListType } from '@stamhoofd/structures';
+import { StringCompare } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -383,6 +387,10 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
     organization: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
+
+    get duplicateName() {
+        return !!this.patchedOrganization.groups.find(g => StringCompare.typoCount(g.settings.name, this.patchedGroup.settings.name) === 0 && g.id !== this.patchedGroup.id)
+    }
 
     mounted() {
         // Auto assign roles

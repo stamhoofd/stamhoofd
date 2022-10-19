@@ -6,9 +6,9 @@ import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { GroupBuilder } from "../helpers/GroupBuilder";
-import { EmailTemplate } from "./EmailTemplate";
+import { EmailTemplate } from "./";
 
-import { Organization } from "./Organization";
+import { Organization } from "./";
 
 export class STPackage extends Model {
     static table = "stamhoofd_packages";

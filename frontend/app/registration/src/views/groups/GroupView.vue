@@ -13,6 +13,14 @@
             <figure v-if="coverPhotoSrc" class="cover-photo">
                 <img :src="coverPhotoSrc">
             </figure>
+
+            <p v-if="member && (itemCanRegister.description || itemCanRegister.message) && itemCanRegister.closed && !itemCanRegister.waitingList" class="error-box">
+                {{ itemCanRegister.description || itemCanRegister.message }}
+            </p>
+            <p v-else-if="member && (itemCanRegister.description || itemCanRegister.message) && itemCanRegister.waitingList" class="warning-box">
+                {{ itemCanRegister.description || itemCanRegister.message }}
+            </p>
+
             <p v-if="group.settings.description" class="style-description pre-wrap" v-text="group.settings.description" />
 
             <p v-if="infoBox" class="info-box">
@@ -23,7 +31,7 @@
                 {{ infoBox2 }}
             </p>
 
-            <p v-if="errorBox" class="error-box">
+            <p v-if="!member && errorBox" class="error-box">
                 {{ errorBox }}
             </p>
 
@@ -62,11 +70,10 @@
             </STList>
         </main>
 
-        <STToolbar v-if="isSignedIn && registerButton && !closed">
-            <button slot="right" class="primary button" type="button" @click="chooseMembers">
-                <span class="icon add" />
-                <span v-if="!member">Inschrijven</span>
-                <span v-else>{{ member.firstName }} inschrijven</span>
+        <STToolbar v-if="isSignedIn && registerButton && canRegister && member">
+            <button slot="right" class="primary button" type="button" @click="registerMember">
+                <span>{{ member.firstName }} inschrijven</span>
+                <span class="icon arrow-right" />
             </button>
         </STToolbar>
     </div>
@@ -76,7 +83,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking";
-import { Group, GroupGenderType, MemberWithRegistrations, RegisterItem, WaitingListType } from '@stamhoofd/structures';
+import { Group, MemberWithRegistrations, RegisterItem, WaitingListType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -85,6 +92,7 @@ import { CheckoutManager } from "../../classes/CheckoutManager";
 import { MemberManager } from "../../classes/MemberManager";
 import GroupTag from "../../components/GroupTag.vue"
 import MemberBox from "../../components/MemberBox.vue"
+import CartView from "../checkout/CartView.vue";
 import GroupMemberSelectionView from "./GroupMemberSelectionView.vue";
 
 @Component({
@@ -130,6 +138,16 @@ export default class GroupView extends Mixins(NavigationMixin){
         return this.group.closed
     }
 
+    get canRegister() {
+        if (!this.member) {
+            return !!this.members.find((m) => {
+                const r = m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
+                return !r.closed || r.waitingList
+            })
+        }
+        return !this.itemCanRegister.closed || this.itemCanRegister.waitingList
+    }
+
     get now() {
         return new Date()
     }
@@ -138,15 +156,25 @@ export default class GroupView extends Mixins(NavigationMixin){
         return this.member!.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
     }
 
-    chooseMembers() {
-        if (this.member) {
-            const item = new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.itemCanRegister.waitingList })
-            CheckoutManager.startAddToCartFlow(this, item, (c: NavigationMixin) => {
-                c.dismiss({ force: true })
-            }).catch(console.error)
+    registerMember() {
+        if (!this.member) {
             return
         }
-        this.show(new ComponentWithProperties(GroupMemberSelectionView, { group: this.group }))
+        const item = new RegisterItem(this.member, this.group, { reduced: false, waitingList: this.itemCanRegister.waitingList })
+        CheckoutManager.startAddToCartFlow(this, item, (c: NavigationMixin) => {
+            // If the cart is already visible, dismiss
+            if (c.navigationController?.$attrs['fromCart']) {
+                return c.dismiss({force: true})
+            }
+
+            // Else go to the cart directly and replace the navigation stack
+            c.show({
+                components: [
+                    new ComponentWithProperties(CartView, {})
+                ],
+                replace: c.navigationController?.components?.length ?? 0
+            })
+        }).catch(console.error)
     }
 
     get coverPhotoSrc() {
@@ -231,14 +259,6 @@ export default class GroupView extends Mixins(NavigationMixin){
         return null;
     }
 
-    get canRegister() {
-        return !!this.members.find((m) => {
-            const r = m.canRegister(this.group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items)
-            return !r.closed && !r.waitingList
-        })
-    }
-
-
     get errorBox() {
         if (this.group.settings.registrationEndDate < this.now) {
             return "De inschrijvingen zijn afgelopen"
@@ -255,66 +275,8 @@ export default class GroupView extends Mixins(NavigationMixin){
     }
 
     get who() {
-        let who = ""
-
-        if (this.group.settings.minAge && this.group.settings.maxAge) {
-            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
-                if (this.group.settings.minAge >= 18) {
-                    who += "Mannen geboren in"
-                } else {
-                    who += "Jongens geboren in"
-                }
-            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
-                if (this.group.settings.minAge >= 18) {
-                    who += "Vrouwen geboren in"
-                } else {
-                    who += "Meisjes geboren in"
-                }
-            } else {
-                who += "Geboren in"
-            }
-            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.maxAge) + " - " + (this.group.settings.startDate.getFullYear() - this.group.settings.minAge);
-        } else if (this.group.settings.minAge) {
-            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
-                if (this.group.settings.minAge >= 18) {
-                    who += "Mannen geboren in of voor"
-                } else {
-                    who += "Jongens geboren in of voor"
-                }
-            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
-                if (this.group.settings.minAge >= 18) {
-                    who += "Vrouwen geboren in of voor"
-                } else {
-                    who += "Meisjes geboren in of voor"
-                }
-            } else {
-                who += "Geboren in of voor"
-            }
-            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.minAge);
-        } else if (this.group.settings.maxAge) {
-            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
-                if (this.group.settings.maxAge > 18) {
-                    who += "Mannen geboren in of na"
-                } else {
-                    who += "Jongens geboren in of na"
-                }
-            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
-                if (this.group.settings.maxAge > 18) {
-                    who += "Vrouwen geboren in of na"
-                } else {
-                    who += "Meisjes geboren in of na"
-                }
-            } else {
-                who += "Geboren in of na"
-            }
-            who += " " + (this.group.settings.startDate.getFullYear() - this.group.settings.maxAge);
-        } else {
-            if (this.group.settings.genderType === GroupGenderType.OnlyMale) {
-                who += "Mannen/jongens"
-            } else if (this.group.settings.genderType === GroupGenderType.OnlyFemale) {
-                who += "Vrouwen/Meisjes"
-            }
-        }
+        let who = this.group.settings.getAgeGenderDescription({includeAge: true, includeGender: true}) ?? '';
+        
 
         if (this.group.settings.requireGroupIds.length > 0) {
             const prefix = Formatter.joinLast(this.group.settings.requireGroupIds.map(id => OrganizationManager.organization.groups.find(g => g.id == id)?.settings.name ?? "Onbekend"), ", ", " of ")

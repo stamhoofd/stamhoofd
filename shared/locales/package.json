@@ -11,7 +11,8 @@
         "esm/dist"
     ],
     "scripts": {
-        "build": "tsc -b . esm && node build.mjs"
+        "build": "tsc -b . esm && node build.mjs",
+        "build:full": "rm -r ./dist && rm -r ./esm/dist && yarn build"
     },
     "devDependencies": {},
     "dependencies": {}

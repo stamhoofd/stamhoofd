@@ -160,7 +160,7 @@ export class GroupCategoryTree extends GroupCategory {
      * @param permissions 
      * @param maxDepth Should be at least 1, we don't support building only groups
      */
-    static build(root: GroupCategory, categories: GroupCategory[], groups: Group[], permissions: Permissions | null = null, maxDepth: number | null = null): GroupCategoryTree {
+    static build(root: GroupCategory, categories: GroupCategory[], groups: Group[], permissions: Permissions | null = null, maxDepth: number | null = null, smartCombine = false): GroupCategoryTree {
         return GroupCategoryTree.create({ 
             ...root,
             categories: root.categoryIds.flatMap(id => {
@@ -171,6 +171,12 @@ export class GroupCategoryTree extends GroupCategory {
                     if (permissions !== null && t.categories.length == 0 && t.groups.length == 0 && !f.canCreate(permissions, categories)) {
                         // Hide empty categories where we cannot create new groups
                         return []
+                    }
+
+                    if (smartCombine && !t.categories.find(c => c.categories.length || c.groups.length > 1)) {
+                        // If all categories only have groups and no more than 1 group, combine them all
+                        t.groups = t.getAllGroups()
+                        t.categories = []
                     }
                     
                     if (maxDepth !== null && t.depth >= maxDepth && t.categories.length > 0) {

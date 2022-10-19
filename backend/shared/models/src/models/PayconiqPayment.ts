@@ -1,12 +1,11 @@
-import { column,Model } from "@simonbackx/simple-database";
+import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { PaymentStatus,Version } from '@stamhoofd/structures';
+import { PaymentStatus, Version } from '@stamhoofd/structures';
 import { IncomingMessage } from 'http';
 import https from "https";
 import { v4 as uuidv4 } from "uuid";
 
-import { Organization } from './Organization';
-import { Payment } from './Payment';
+import { Organization, Payment } from './';
 
 export class PayconiqPayment extends Model {
     static table = "payconiq_payments";

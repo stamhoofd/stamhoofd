@@ -1,40 +1,38 @@
 <template>
-    <div class="st-view boxed">
+    <div class="st-view">
         <STNavigationBar :title="needsPay ? 'Betaalmethode' : 'Bevestigen'">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
-        <div class="box">
-            <main v-if="needsPay">
-                <h1>Kies een betaalmethode</h1>
-                <p>
-                    Te betalen: 
-                    <span class="style-tag">{{ cart.price | price }}</span>
-                </p>
+        <main v-if="needsPay">
+            <h1>Kies een betaalmethode</h1>
+            <p>
+                Te betalen: 
+                <span class="style-tag">{{ cart.price | price }}</span>
+            </p>
 
-                <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox" />
 
-                <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
-            </main>
-            <main v-else>
-                <h1>Bevestig je inschrijvingen</h1>
-                <p>Heb je alle inschrijvingen toegevoegd aan je mandje? Je kan meerdere inschrijvingen in één keer afrekenen.</p>
+            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+        </main>
+        <main v-else>
+            <h1>Bevestig je inschrijvingen</h1>
+            <p>Heb je alle inschrijvingen toegevoegd aan je mandje? Je kan meerdere inschrijvingen in één keer afrekenen.</p>
 
-                <STErrorsDefault :error-box="errorBox" />
-            </main>
+            <STErrorsDefault :error-box="errorBox" />
+        </main>
 
-            <STToolbar>
-                <span slot="left">Totaal: {{ cart.price | price }}</span>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" type="button" @click="goNext">
-                        <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Inschrijving bevestigen</span>
-                        <span v-else-if="needsPay">Betalen</span>
-                        <span v-else>Doorgaan</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
-        </div>
+        <STToolbar>
+            <span slot="left">Totaal: {{ cart.price | price }}</span>
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" type="button" @click="goNext">
+                    <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Inschrijving bevestigen</span>
+                    <span v-else-if="needsPay">Betalen</span>
+                    <span v-else>Bevestigen</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </LoadingButton>
+        </STToolbar>
     </div>
 </template>
 
@@ -149,6 +147,11 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     console.log(payment)
                     // failure
                     this.loading = false
+                }, (payment: Payment) => {
+                    // Transfer view opened:
+                    // Clear cart
+                    CheckoutManager.cart.clear()
+                    CheckoutManager.saveCart()
                 })
                 return;
             }

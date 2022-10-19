@@ -1,8 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar title="Overschrijven">
-            <button v-if="isPopup" slot="right" class="button icon gray close" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Overschrijven" :pop="false" :dismiss="isPopup && canDismiss" />
 
         <div class="box">
             <main>
@@ -276,7 +274,6 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     beforeDestroy() {
-        console.log("destroy")
         window.removeEventListener("beforeunload", this.preventLeave);
     }
 
@@ -284,14 +281,20 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         if (!this.created) {
             return;
         }
-        if (this.type === "order") {
-            window.addEventListener("beforeunload", this.preventLeave);
-        }
+        window.addEventListener("beforeunload", this.preventLeave);
     }
 
     preventLeave(event) {
         // Cancel the event
         event.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        
+        if (this.type === "registration") {
+            // Chrome requires returnValue to be set
+            event.returnValue = 'Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen.';
+
+            // This message is not visible on most browsers
+            return "Jouw inschrijving is al bevestigd! Je kan niet meer van betaalmethode veranderen."
+        }
         // Chrome requires returnValue to be set
         event.returnValue = 'Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!';
 
@@ -358,14 +361,16 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     }
 
     goNext() {
-        if (this.isPopup) {
+        if (this.finishedHandler) {
+            this.finishedHandler(this.payment)
+            return;
+        }
+
+        if (this.canDismiss) {
             this.dismiss({ force: true })
             return;
         }
-       
-        if (this.finishedHandler) {
-            this.finishedHandler(this.payment)
-        }
+        this.pop({force: true})
     }
 
 }
