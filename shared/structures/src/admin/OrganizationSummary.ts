@@ -125,6 +125,10 @@ export class OrganizationOverview extends AutoEncoder {
     @field({ decoder: OrganizationStats, version: 90 })
     stats: OrganizationStats
 
+    get fullAccessAdmins() {
+        return this.admins.filter(a => a.permissions && a.permissions.hasFullAccess())
+    }
+
     matchQuery(q: string) {
         const parts = q.split(/[ -]/);
         const name = Formatter.slug(this.name)

@@ -51,7 +51,7 @@
                         </p>
                     </STListItem>
 
-                    <STListItem>
+                    <STListItem v-if="payment.method == 'Transfer'">
                         <h3 class="style-definition-label">
                             Aangemaakt op
                         </h3>

@@ -402,7 +402,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         
         > table {
             align-self: flex-start;
-            margin-left: 20px;
+            margin-left: 10px;
 
             @media (max-width: 800px) {
                 margin-left: 0px;

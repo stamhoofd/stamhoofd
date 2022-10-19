@@ -189,7 +189,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (payment.method == PaymentMethod.Transfer) {
                 // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
-                payment.transferSettings = user.organization.meta.transferSettings
+                payment.transferSettings = user.organization.mappedTransferSettings
                 payment.generateDescription(user.organization, Formatter.uniqueArray(payRegistrations.map(r => r.registration.member.details.firstName)).join(", ") + " " + Formatter.uniqueArray(payRegistrations.map(r => r.registration.member.details.lastName)).sort().join("-"))
             }
             payment.paidAt = null

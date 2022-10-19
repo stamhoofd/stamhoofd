@@ -56,7 +56,7 @@
             <template v-if="pendingPayments.length > 0">
                 <hr>
                 <h2>In verwerking</h2>
-                <p>Het kan dat het openstaande bedrag eerder betaald werd via overschrijving. In dit geval weten we nog niet of die echt is uitgevoerd tot jullie het bedrag ontvangen op jullie rekening. Je kan deze overschrijvingen hier markeren als betaald of annuleren.</p>
+                <p>Bij betalingen via overschrijving moeten we de betaling manueel markeren als betaald zodra we ze ontvangen op onze rekening. Het kan even duren voor je hiervan een bevestiging ontvangt.</p>
 
                 <STList>
                     <STListItem v-for="payment of pendingPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
@@ -277,9 +277,6 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     openPayment(payment: Payment) {
-        if (!this.canOpenPayment(payment)) {
-            return;
-        }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(PaymentView, {
                 initialPayment: payment,

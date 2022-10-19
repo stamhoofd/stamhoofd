@@ -38,51 +38,63 @@
                     </STListItem>
                 </STList>
             </template>
+            <p v-else class="info-box">
+                Er zijn nog geen leden bekend in het systeem voor dit account.
+            </p>
 
-            <hr>
-            <h2>Ouders</h2>
+            <template v-if="parents.length">
+                <hr>
+                <h2>Ouders</h2>
 
-            <STList class="illustration-list">
-                <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                <STList class="illustration-list">
+                    <STListItem v-for="parent in parents" :key="parent.id" class="right-stack" :selectable="true" @click.stop="editParent(parent)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
 
-                    <h2 class="style-title-list">
-                        {{ parent.firstName }} {{ parent.lastName || "" }}
-                    </h2>
-                    <p class="style-description">
-                        {{ parent.email }}
-                    </p>
-                    <p class="style-description">
-                        {{ parent.phone }}
-                    </p>
+                        <h2 class="style-title-list">
+                            {{ parent.firstName }} {{ parent.lastName || "" }}
+                        </h2>
+                        <p class="style-description">
+                            {{ parent.email }}
+                        </p>
+                        <p class="style-description">
+                            {{ parent.phone }}
+                        </p>
 
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
 
-            <hr>
-            <h2>Adressen</h2>
-            <p>Je kan nieuwe adressen toevoegen bij leden en/of ouders</p>
+            <template v-if="addresses.length">
+                <hr>
+                <h2>Adressen</h2>
+                <p v-if="parents.length">
+                    Je kan nieuwe adressen toevoegen bij leden en/of ouders
+                </p>
+                <p v-else>
+                    Je kan nieuwe adressen toevoegen bij leden.
+                </p>
 
-            <STList class="illustration-list">
-                <STListItem v-for="address in addresses" :key="address.id" class="right-stack" :selectable="true" @click.stop="editAddress(address)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg">
+                <STList class="illustration-list">
+                    <STListItem v-for="address in addresses" :key="address.id" class="right-stack" :selectable="true" @click.stop="editAddress(address)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/house.svg">
 
-                    <h2 class="style-title-list">
-                        {{ address.street }} {{ address.number }}
-                    </h2>
-                    <p class="style-description">
-                        {{ address.postalCode }} {{ address.city }}
-                    </p>
+                        <h2 class="style-title-list">
+                            {{ address.street }} {{ address.number }}
+                        </h2>
+                        <p class="style-description">
+                            {{ address.postalCode }} {{ address.city }}
+                        </p>
 
 
-                    <template slot="right">
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-            </STList>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
         </main>
     </div>
 </template>
@@ -90,12 +102,14 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
-import { MemberWithRegistrations } from "@stamhoofd/structures";
+import { Address, MemberWithRegistrations, Parent } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from "../../classes/OrganizationManager";
+import AddressView from "../members/details/AddressView.vue";
 import { createMemberComponent } from "../members/details/createMemberComponent";
+import ParentView from "../members/details/ParentView.vue";
 import MemberView from "../members/MemberView.vue";
 
 @Component({
@@ -142,12 +156,19 @@ export default class CheckDataView extends Mixins(NavigationMixin){
         }).setDisplayStyle("popup"))
     }
 
-    editParent() {
-        // TODO
+    editParent(parent: Parent) {
+        this.present(new ComponentWithProperties(ParentView, {
+            parent,
+            handler: (parent: Parent, component: NavigationMixin) => {
+                component.pop({ force: true })
+            }
+        }).setDisplayStyle("popup"))
     }
 
-    editAddress() {
-        // TODO
+    editAddress(address: Address) {
+        this.present(new ComponentWithProperties(AddressView, {
+            address
+        }).setDisplayStyle("sheet"))
     }
 }
 </script>
