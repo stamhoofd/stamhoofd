@@ -3,10 +3,8 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { validateDNSRecords } from "../helpers/DNSValidator";
-const { Resolver } = require('dns').promises;
 
-import { Organization } from './Organization';
-
+import { Organization } from './';
 
 export class Webshop extends Model {
     static table = "webshops";

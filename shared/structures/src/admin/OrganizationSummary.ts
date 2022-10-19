@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { Formatter, StringCompare } from "@stamhoofd/utility";
 
 import { Address } from "../addresses/Address";
 import { STBillingStatus } from "../billing/STBillingStatus";
@@ -123,4 +124,50 @@ export class OrganizationOverview extends AutoEncoder {
 
     @field({ decoder: OrganizationStats, version: 90 })
     stats: OrganizationStats
+
+    matchQuery(q: string) {
+        const parts = q.split(/[ -]/);
+        const name = Formatter.slug(this.name)
+        const orgParts = name.split(/[ -]/);
+
+        for (const [index, part] of parts.entries()) {
+            if (part.length > 1 || index >= parts.length - 1) {
+                if (index < parts.length - 1) {
+                    // Should be a full match of a word in name
+                    if (!orgParts.some(o => o.toLocaleLowerCase() == (part.toLocaleLowerCase()))) {
+                        if (
+                            StringCompare.typoCount(this.address.city, part) > 0
+                        ) {
+                            return false;
+                        }
+                    }
+                    continue;
+                }
+                if (
+                    name.toLocaleLowerCase().includes(part.toLocaleLowerCase())
+                ) {
+                    return true;
+                }
+
+                if (
+                    StringCompare.typoCount(this.address.city, part) == 0
+                ) {
+                    return true;
+                }
+            }
+        }
+
+        if (
+            StringCompare.typoCount(name, q) < 2
+        ) {
+            return true;
+        }
+
+        if (
+            StringCompare.typoCount(this.address.city, q) < 2
+        ) {
+            return true;
+        }
+        return false;
+    }
 }

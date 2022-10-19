@@ -1,32 +1,33 @@
 <template>
-    <div class="st-view boxed">
+    <div class="st-view">
         <STNavigationBar :title="text">
             <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
-        <div class="box">
-            <main>
-                <h1>{{ text }}</h1>
-                
-                <p v-if="names.length == 0">
-                    We houden je op de hoogte als je de inschrijving kan voltooien. 
-                </p>
-            </main>
+        <main>
+            <h1>{{ text }}</h1>
+            
+            <p v-if="names.length == 0">
+                We houden je op de hoogte als je de inschrijving kan voltooien. 
+            </p>
+            <p v-else>
+                Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.
+            </p>
+        </main>
 
-            <STToolbar>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" type="button" @click="close">
-                        <span>Sluiten</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
-        </div>
+        <STToolbar>
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" type="button" @click="close">
+                    <span>Sluiten</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </LoadingButton>
+        </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ErrorBox, GlobalEventBus, LoadingButton,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { Checkbox, GlobalEventBus, LoadingButton,LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { RegistrationWithMember } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,  Prop } from "vue-property-decorator";

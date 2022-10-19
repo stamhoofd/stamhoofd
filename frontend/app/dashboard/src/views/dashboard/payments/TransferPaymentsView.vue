@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions">
+    <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openPayment">
         <p class="style-description">
             Overzicht van alle openstaande overschrijvingen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 7 dagen zichtbaar).
         </p>
@@ -12,7 +12,7 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Column, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod } from '@stamhoofd/structures';
@@ -20,8 +20,9 @@ import { PaymentStatus } from "@stamhoofd/structures/esm/dist";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
-import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
+import MemberView from "../member/MemberView.vue";
+import PaymentView from "./PaymentView.vue";
 
 @Component({
     components: {
@@ -59,6 +60,24 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         }
        
         return 0
+    }
+
+    openPayment(payment: PaymentGeneral) {
+        const table = this.$refs.table as TableView<PaymentGeneral> | undefined
+        const component = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PaymentView, {
+                initialPayment: payment,
+                getNext: table?.getNext,
+                getPrevious: table?.getPrevious
+            }),
+        });
+
+        if ((this as any).$isMobile) {
+            this.show(component)
+        } else {
+            component.modalDisplayStyle = "popup";
+            this.present(component);
+        }
     }
 
     get actions(): TableAction<PaymentGeneral>[] {
@@ -117,7 +136,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     async sms(payments: PaymentGeneral[]) {
         const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ "../sms/SMSView.vue"), {
             customers: payments.flatMap(p => p.orders.map(o => o.data.customer)),
-            members: payments.flatMap(p => p.registrations.map(r => r.member))
+            members: payments.flatMap(p => p.members)
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
     }
@@ -200,7 +219,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         const cols: Column<PaymentGeneral, any>[] = [
             new Column<PaymentGeneral, string>({
                 name: "Naam", 
-                getValue: (payment) => payment.orders.map(o => o.data.customer.name).join(", ") + payment.registrations.map(r => r.member.name).join(", "), 
+                getValue: (payment) => payment.orders.map(o => o.data.customer.name).join(", ") + payment.members.map(r => r.name).join(", "), 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 50,
                 recommendedWidth: 100
@@ -209,23 +228,12 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new Column<PaymentGeneral, string>({
                 name: "Beschrijving", 
                 getValue: (payment) => {
-                    const contexts: string[] = [];
-                    for (const registration of payment.registrations) {
-                        contexts.push(registration.group.settings.name)
-                    }
-                    for (const order of payment.orders) {
-                        const webshop = this.organization.webshops.find(w => w.id == order.webshopId)
-                        if (webshop) {
-                            contexts.push(webshop.meta.name+" #"+order.number)
-                        } else {
-                            contexts.push("#"+order.number)
-                        }
-                    }
-                    return contexts.join(', ');
+                    return payment.balanceItemPayments.map(bip => bip.balanceItem.description).join(", ")
                 }, 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 50,
-                recommendedWidth: 200
+                recommendedWidth: 200,
+                enabled: false
             }),
 
             new Column<PaymentGeneral, Date>({
@@ -275,9 +283,12 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                     if (status === PaymentStatus.Succeeded) {
                         return "Betaald"
                     }
+                    if (status === PaymentStatus.Failed) {
+                        return "Geannuleerd"
+                    }
                     return "Niet betaald"
                 },
-                getStyle: (status) => status === PaymentStatus.Succeeded ? "success" : "error",
+                getStyle: (status) => status === PaymentStatus.Succeeded ? "success" : (status === PaymentStatus.Failed ? "gray" : "error"),
                 minimumWidth: 60,
                 recommendedWidth: 70,
             }),

@@ -23,8 +23,13 @@ export class GetUserBalanceEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     static async balanceItemsForUsersAndMembers(userIds: string[], memberIds: string[]): Promise<BalanceItem[]> {
-        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE ${BalanceItem.table}.status != ? AND (memberId IN (?) OR userId IN (?))`;
-        const [rows] = await Database.select(query, [BalanceItemStatus.Hidden, memberIds, userIds]);
+        const userIdQuery = ` OR (memberId is null AND userId IN (?))`;
+        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE ${BalanceItem.table}.status != ? AND (memberId IN (?)${userIds.length ? userIdQuery : ''})`;
+        const params = [BalanceItemStatus.Hidden, memberIds];
+        if (userIds.length) {
+            params.push(userIds);
+        }
+        const [rows] = await Database.select(query, params);
         const balanceItems = BalanceItem.fromRows(rows, BalanceItem.table);
         return balanceItems;
     }

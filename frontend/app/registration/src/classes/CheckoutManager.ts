@@ -62,19 +62,7 @@ export class CheckoutManagerStatic {
     }
 
     doSelect(item: RegisterItem) {
-        const toast = new Toast("De inschrijving is toegevoegd aan jouw inschrijvingsmandje. Ga naar jouw mandje om de inschrijving af te ronden.", "success green").setHide(10000)
-        toast.setButton(new ToastButton("Nog een inschrijving toevoegen", () => {
-            ModalStackEventBus.sendEvent("present", {
-                components: [
-                    new ComponentWithProperties(NavigationController, {
-                        root: AsyncComponent(() => import(/* webpackChunkName: "MemberChooseGroupsView" */ "../views/members/MemberChooseGroupsView.vue"), {
-                            member: item.member
-                        })
-                    })
-                ],
-                modalDisplayStyle: "popup"
-            }).catch(console.error)
-        }))
+        const toast = new Toast("De inschrijving is toegevoegd aan jouw inschrijvingsmandje.", "success green").setHide(10000)
         toast.show()
 
         this.cart.addItem(item)
@@ -90,7 +78,6 @@ export class CheckoutManagerStatic {
             return
         }
 
-        // Only ask details + parents for new members
         const items = [...this.cart.items.filter(i => i.memberId === item.member.id), item]
 
         const stepManager = new EditMemberStepsManager(

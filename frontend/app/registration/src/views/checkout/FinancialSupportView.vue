@@ -1,31 +1,26 @@
 <template>
-    <div id="financial-support-view" class="st-view boxed">
-        <STNavigationBar :title="title">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
-        </STNavigationBar>
-        <div class="box">
-            <main>
-                <h1>{{ title }}</h1>
-                <p class="style-description pre-wrap" v-text="description" />
+    <div id="financial-support-view" class="st-view">
+        <STNavigationBar :title="title" :pop="canPop" :dismiss="canDismiss" />
+        <main>
+            <h1>{{ title }}</h1>
+            <p class="style-description pre-wrap" v-text="description" />
 
-                <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox" />
 
-                <Checkbox v-model="reduced">
-                    {{ checkboxLabel }}
-                </Checkbox>
-            </main>
+            <Checkbox v-model="reduced">
+                {{ checkboxLabel }}
+            </Checkbox>
+        </main>
 
-            <STToolbar>
-                <span slot="left">Totaal: {{ cart.price | price }}</span>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
-        </div>
+        <STToolbar>
+            <span slot="left">Totaal: {{ cart.price | price }}</span>
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" type="button" @click="goNext">
+                    <span>Doorgaan</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </LoadingButton>
+        </STToolbar>
     </div>
 </template>
 

@@ -190,7 +190,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (payment.method == PaymentMethod.Transfer) {
                 // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
                 payment.transferSettings = user.organization.meta.transferSettings
-                payment.generateDescription(user.organization, payRegistrations.map(r => r.registration.member.details.name).join(", "))
+                payment.generateDescription(user.organization, Formatter.uniqueArray(payRegistrations.map(r => r.registration.member.details.firstName)).join(", ") + " " + Formatter.uniqueArray(payRegistrations.map(r => r.registration.member.details.lastName)).sort().join("-"))
             }
             payment.paidAt = null
 
@@ -235,7 +235,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 const balanceItem = new BalanceItem();
                 balanceItem.registrationId = registration.id;
                 balanceItem.price = bundle.item.calculatedPrice
-                balanceItem.description = `Inschrijving van ${registration.member.details.name} voor ${registration.group.settings.name}`
+                balanceItem.description = `Inschrijving ${registration.group.settings.name}`
                 balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? bundle.item.calculatedPrice : 0;
                 balanceItem.memberId = registration.memberId;
                 balanceItem.userId = user.id
@@ -256,7 +256,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // Create balance item
                 const balanceItem = new BalanceItem();
                 balanceItem.price = request.body.cart.freeContribution
-                balanceItem.description = `Vrije bijdrage bij inschrijven`
+                balanceItem.description = `Vrije bijdrage`
                 balanceItem.pricePaid = 0;
                 balanceItem.userId = user.id
                 balanceItem.organizationId = organization.id;

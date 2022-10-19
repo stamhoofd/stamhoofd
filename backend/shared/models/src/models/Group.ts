@@ -1,11 +1,8 @@
-import { column,Database,Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { GroupPrivateSettings, GroupSettings, Group as GroupStruct, Permissions, OrganizationMetaData } from '@stamhoofd/structures';
+import { column, Database, Model, OneToManyRelation } from '@simonbackx/simple-database';
+import { Group as GroupStruct, GroupPrivateSettings, GroupSettings, OrganizationMetaData, Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { Member,MemberWithRegistrations } from './Member';
-import { Payment } from './Payment';
-import { Registration } from './Registration';
-import { User } from './User';
+import { Member, MemberWithRegistrations, Payment, Registration, User } from './';
 
 if (Member === undefined) {
     throw new Error("Import Member is undefined")

@@ -2,11 +2,7 @@ import { column, Model } from '@simonbackx/simple-database';
 import { BalanceItemStatus, MemberBalanceItem, MemberBalanceItemPayment, Payment as PaymentStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
-import { Group } from './Group';
-import { Order } from './Order';
-import { Organization } from './Organization';
-import { Payment } from './Payment';
-import { Registration } from './Registration';
+import { Organization, Payment } from './';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -87,6 +83,7 @@ export class BalanceItem extends Model {
 
         // If registration
         if (this.registrationId) {
+            const {Registration} = await import("./Registration");
             const registration = await Registration.getByID(this.registrationId);
 
             if (registration) {
@@ -95,6 +92,8 @@ export class BalanceItem extends Model {
                     registration.registeredAt = new Date()
                     registration.reservedUntil = null
                     await registration.save();
+
+                    const {Group} = await import("./Group");
 
                     // Update group occupancy
                     // TODO: maybe we should schedule this, to prevent doing many updates at once
@@ -112,6 +111,7 @@ export class BalanceItem extends Model {
 
         // If order
         if (this.orderId) {
+            const {Order} = await import("./Order");
             const order = await Order.getByID(this.orderId);
             if (order) {
                 await order.markPaid(payment, organization)
@@ -122,6 +122,7 @@ export class BalanceItem extends Model {
     async markFailed() {
         // If order
         if (this.orderId) {
+            const {Order} = await import("./Order");
             const order = await Order.getByID(this.orderId);
             if (order) {
                 await order.onPaymentFailed()
@@ -133,6 +134,9 @@ export class BalanceItem extends Model {
         if (items.length == 0) {
             return []
         }
+
+        const {Registration} = await import("./Registration");
+        const {Order} = await import("./Order");
         
         // Load balance payment items
         const {BalanceItemPayment} = await import('./BalanceItemPayment');

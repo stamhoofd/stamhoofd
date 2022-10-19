@@ -186,6 +186,10 @@ export class Group extends AutoEncoder {
         return false
     }
 
+    get squareImage() {
+        return this.settings.squarePhoto ?? this.settings.coverPhoto
+    }
+
 }
 
 export const GroupPatch = Group.patchType()

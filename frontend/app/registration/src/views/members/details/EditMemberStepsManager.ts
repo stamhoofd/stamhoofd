@@ -87,7 +87,6 @@ export class RecordCategoryStep implements EditMemberStep {
 
     shouldReview(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
         const records = this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), details.dataPermissions?.value ?? false)
-        console.log("shouldReview", records, details)
 
         if (this.forceReview) {
             return records.length > 0
@@ -98,7 +97,6 @@ export class RecordCategoryStep implements EditMemberStep {
             const answer = details.recordAnswers.find(a => a.settings.id === record.id)
             if (!answer || answer.isOutdated(this.outdatedTime)) {
                 // This was never answered
-                console.log("Need review: ", record, answer)
                 return true
             }
         }

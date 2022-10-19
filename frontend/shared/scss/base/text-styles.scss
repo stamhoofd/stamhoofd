@@ -649,6 +649,10 @@
     }
 }
 
+.illustration-list img {
+    @extend .style-illustration-img;
+}
+
 .style-bubble {
     background: $color-error;
     border-radius: 30px;

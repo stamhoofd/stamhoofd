@@ -264,7 +264,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';

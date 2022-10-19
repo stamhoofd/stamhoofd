@@ -1,10 +1,9 @@
-import { column,Model } from '@simonbackx/simple-database';
+import { column, Model } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Country, getPermissionLevelNumber, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Settlement, TransferDescriptionType, TransferSettings, BalanceItemPaymentDetailed, BalanceItemDetailed, RegistrationWithMember, Member as MemberStruct, Group as GroupStruct, Order as OrderStruct } from '@stamhoofd/structures';
+import { BalanceItemDetailed, BalanceItemPaymentDetailed, Country, getPermissionLevelNumber, Member as MemberStruct, Order as OrderStruct, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, Settlement, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
-import { Organization } from './Organization';
-import { UserWithOrganization } from './User';
+import { Organization, UserWithOrganization } from './';
 
 export class Payment extends Model {
     static table = "payments"
@@ -186,7 +185,6 @@ export class Payment extends Model {
         const {Registration} = await import("./Registration");
         const {Order} = await import("./Order");
         const {Member} = await import("./Member");
-        const {Group} = await import("./Group");
 
         // Load all the related models from the database so we can build the structures
         const balanceItemPayments = await BalanceItemPayment.where({
@@ -201,15 +199,11 @@ export class Payment extends Model {
         // Load members and orders
         const registrationIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.registrationId ? [b.registrationId] : []))
         const orderIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.orderId ? [b.orderId] : []))
+        const memberIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.memberId ? [b.memberId] : []))
 
         const registrations = await Registration.getByIDs(...registrationIds)
         const orders = await Order.getByIDs(...orderIds)
-
-        const memberIds = Formatter.uniqueArray(registrations.flatMap(b => b.memberId ? [b.memberId] : []))
         const members = await Member.getByIDs(...memberIds)
-
-        const groupIds = Formatter.uniqueArray(registrations.flatMap(b => b.groupId ? [b.groupId] : []))
-        const groups = await Group.getByIDs(...groupIds)
 
         if (checkPermissions) {
             // This needs some optimizations
@@ -231,7 +225,10 @@ export class Payment extends Model {
                 if (user.permissions.hasFullAccess() || user.permissions.canManagePayments(user.organization.privateMeta.roles)) {
                     hasAccess = true;
                 } else {
+                    const {Group} = await import("./Group");
                     const {Webshop} = await import("./Webshop");
+                    const groupIds = Formatter.uniqueArray(registrations.flatMap(b => b.groupId ? [b.groupId] : []))
+                    const groups = await Group.getByIDs(...groupIds)
 
                     // We grant permission for a whole payment when the user has at least permission for a part of that payment.
                     for (const registration of registrations) {
@@ -268,7 +265,7 @@ export class Payment extends Model {
                 throw new SimpleError({
                     code: "not_found",
                     message: "Payment not found",
-                    human: "Je hebt geen togang tot deze betaling"
+                    human: "Je hebt geen toegang tot deze betaling"
                 })
             }
         }
@@ -276,22 +273,18 @@ export class Payment extends Model {
         return payments.map(payment => {
             return PaymentGeneral.create({
                 ...payment,
-                balanceItemPayments: balanceItemPayments.map((item) => {
+                balanceItemPayments: balanceItemPayments.filter(item => item.paymentId === payment.id).map((item) => {
                     const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)
                     const registration = balanceItem?.registrationId && registrations.find(r => r.id === balanceItem.registrationId)
-                    const member = registration ? members.find(r => r.id === registration.memberId) : undefined
-                    const group = registration ? groups.find(r => r.id === registration.groupId) : undefined
+                    const member = balanceItem?.memberId ? members.find(r => r.id === balanceItem.memberId) : undefined
                     const order = balanceItem?.orderId && orders.find(r => r.id === balanceItem.orderId)
 
                     return BalanceItemPaymentDetailed.create({
                         ...item,
                         balanceItem: BalanceItemDetailed.create({
                             ...balanceItem,
-                            registration: registration ? RegistrationWithMember.create({
-                                ...registration,
-                                member: MemberStruct.create(member!),
-                                group: checkPermissions ? (checkPermissions.user.permissions ? group?.getPrivateStructure(checkPermissions.user.permissions) : group?.getStructure()) : group?.getPrivateStructure()
-                            }) : null,
+                            registration: registration ? RegistrationStruct.create(registration) : null,
+                            member: member ? MemberStruct.create(member!) : null,
                             order: order ? OrderStruct.create(order) : null
                         })
                     })

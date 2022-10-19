@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading="loading" save-text="Volgende" title="Inschrijven" @save="goNext">
         <h1 v-if="isNew">
-            Wie ga je inschrijven?
+            Nieuw lid toevoegen
         </h1>
         <h1 v-else>
             Gegevens nakijken van {{ details.firstName }}

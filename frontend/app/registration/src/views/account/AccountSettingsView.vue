@@ -1,68 +1,60 @@
 <template>
     <div id="account-view" class="st-view">
-        <STNavigationBar title="Mijn account" :class="{'only-tab-bar': !canPop}">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Mijn account" />
 
+        <main>
+            <h1>
+                Mijn account
+            </h1>
+            <p>Met een account kan je één of meerdere leden beheren.</p>
+        
+            <STErrorsDefault :error-box="errorBox" />
 
-        <main class="limit-width">
-            <section class="white-top view">
-                <main class="container">
-                    <h1>
-                        Mijn account
-                    </h1>
-                    <p>Met een account kan je één of meerdere leden beheren.</p>
-                
-                    <STErrorsDefault :error-box="errorBox" />
+            <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errorBox">
+                <div class="input-group">
+                    <div>
+                        <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                    </div>
+                    <div>
+                        <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                    </div>
+                </div>
+            </STInputBox>
 
-                    <STInputBox title="Mijn naam" error-fields="firstName,lastName" :error-box="errorBox">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="firstName" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                            </div>
-                            <div>
-                                <input v-model="lastName" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                            </div>
-                        </div>
-                    </STInputBox>
+            <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
 
-                    <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="email" />
+            <hr>
 
-                    <hr>
+            <p>
+                <button class="button text" type="button" @click.prevent="openChangePassword">
+                    <span class="icon key" />
+                    <span>Wachtwoord wijzigen</span>
+                </button>
+            </p>
 
-                    <p>
-                        <button class="button text" type="button" @click.prevent="openChangePassword">
-                            <span class="icon key" />
-                            <span>Wachtwoord wijzigen</span>
-                        </button>
-                    </p>
+            <p>
+                <a v-if="privacyUrl" class="button text" type="button" :href="privacyUrl" target="_blank">
+                    <span class="icon privacy" />
+                    <span>Privacyvoorwaarden</span>
+                </a>
+            </p>
 
-                    <p>
-                        <a v-if="privacyUrl" class="button text" type="button" :href="privacyUrl" target="_blank">
-                            <span class="icon privacy" />
-                            <span>Privacyvoorwaarden</span>
-                        </a>
-                    </p>
-
-                    <p>
-                        <button class="button text" type="button" @click.prevent="logout">
-                            <span class="icon logout" />
-                            <span>Uitloggen</span>
-                        </button>
-                    </p>
-                </main>
-                <STToolbar :sticky="false">
-                    <template slot="right">
-                        <LoadingButton :loading="saving">
-                            <button class="button primary" @click="save">
-                                Opslaan
-                            </button>
-                        </LoadingButton>
-                    </template>
-                </STToolbar>
-            </section>
-            <PaymentsView class="gray-shadow view" />
+            <p>
+                <button class="button text" type="button" @click.prevent="logout">
+                    <span class="icon logout" />
+                    <span>Uitloggen</span>
+                </button>
+            </p>
         </main>
+        <STToolbar :sticky="false">
+            <template slot="right">
+                <LoadingButton :loading="saving">
+                    <button class="button primary" type="button" @click="save">
+                        Opslaan
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
     </div>
 </template>
 
@@ -119,12 +111,12 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
         return this.patchedUser.email
     }
 
-    get isAdmin() {
-        return this.user.permissions !== null
-    }
-
     set email(email: string) {
         this.$set(this.userPatch, "email", email)
+    }
+
+    get isAdmin() {
+        return this.user.permissions !== null
     }
 
     get firstName() {
@@ -189,6 +181,7 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
             // Create a new patch
             this.userPatch = User.patch({ id: this.user.id })
+            this.dismiss({force: true});
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
@@ -215,7 +208,5 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
             SessionManager.currentSession?.logout()
         }
     }
-    
-
 }
 </script>

@@ -1,13 +1,12 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { KeyConstantsHelper, Sodium } from '@stamhoofd/crypto';
-import { KeyConstants, NewUser,Organization as OrganizationStruct,Permissions, Version } from "@stamhoofd/structures"
-import { v4 as uuidv4 } from "uuid";
-import argon2 from "argon2"
-import { Worker, isMainThread } from 'node:worker_threads';
+import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version } from "@stamhoofd/structures";
+import argon2 from "argon2";
+import { Worker } from 'node:worker_threads';
 import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
-import { Organization } from "./Organization";
 import { QueueHandler } from "@stamhoofd/queues";
+import { Organization } from "./";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };

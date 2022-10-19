@@ -4,7 +4,7 @@ import { I18n } from "@stamhoofd/backend-i18n";
 import basex from "base-x";
 import crypto from "crypto";
 
-import { User, UserWithOrganization } from "./User";
+import { User, UserWithOrganization } from "./";
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = basex(ALPHABET)
 

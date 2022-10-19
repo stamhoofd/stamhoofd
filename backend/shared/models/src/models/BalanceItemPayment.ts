@@ -1,11 +1,7 @@
 import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
-import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
-import { BalanceItem } from './BalanceItem';
-import { Organization } from './Organization';
-import { Payment } from './Payment';
-
+import { BalanceItem, Organization, Payment } from './';
 
 /**
  * Keeps track of all the created payments of a balance item, which contains the (tries) to pay a balance item.

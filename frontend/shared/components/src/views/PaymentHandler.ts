@@ -57,12 +57,15 @@ export class PaymentHandler {
         transferSettings: TransferSettings | null;
         component: NavigationMixin; 
         type: "order" | "registration";
-    }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void) {
+    }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void, transferHandler?: (payment: Payment | null) => void) {
         const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings } = settings;
 
         if (payment.method == PaymentMethod.PointOfSale) {
             successHandler(payment)
         } else if (payment.method == PaymentMethod.Transfer) {
+            if (transferHandler) {
+                transferHandler(payment)
+            }
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             component.show(new ComponentWithProperties(TransferPaymentView, {
                 created: true,

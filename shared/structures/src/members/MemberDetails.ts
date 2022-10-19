@@ -264,60 +264,44 @@ export class MemberDetails extends AutoEncoder {
      * Check if this member could fit a group, ignoring dates and waiting lists
      */
     doesMatchGroup(group: Group) {
-        if (group.settings.minAge || group.settings.maxAge) {
-            const age = this.ageForYear(Formatter.luxon(group.settings.startDate).year)
-
-            if (age) {
-                if (group.settings.minAge && age < group.settings.minAge) {
-                    return false
-                }
-
-                if (group.settings.maxAge && age > group.settings.maxAge) {
-                    return false
-                }
-            }
-        }
-
-        if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
-            return false
-        }
-
-        if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
-            return false
-        }
-        
-        return true
+        return this.getMatchingError(group) === null
     }
 
-    getMatchingError(group: Group): string {
+    getMatchingError(group: Group): {message: string, description: string} | null {
         const age = this.ageForYear(Formatter.luxon(group.settings.startDate).year)
         if (group.settings.minAge || group.settings.maxAge) {
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
-                    return "Te jong"
+                    return {
+                        message: "Te jong",
+                        description: this.firstName + " is te jong. Inschrijvingen is beperkt tot leden " + (group.settings.getAgeGenderDescription({includeAge: true}) ?? '')
+                    }
                 }
 
                 if (group.settings.maxAge && age > group.settings.maxAge) {
-                    return "Te oud"
+                    return {
+                        message: "Te oud",
+                        description: this.firstName + " is te jong. Inschrijvingen is beperkt tot leden " + (group.settings.getAgeGenderDescription({includeAge: true}) ?? '')
+                    }
                 }
             }
         }
 
         if (this.gender == Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
-            if (age && age < 18) {
-                return "Enkel voor meisjes"
+            return {
+                message: "Enkel " + group.settings.getAgeGenderDescription({includeGender: true}),
+                description: "Inschrijvingen is beperkt tot " + group.settings.getAgeGenderDescription({includeGender: true}),
             }
-            return "Enkel voor vrouwen"
         }
 
         if (this.gender == Gender.Female && group.settings.genderType == GroupGenderType.OnlyMale) {
-            if (age && age < 18) {
-                return "Enkel voor jongens"
+            return {
+                message: "Enkel " + group.settings.getAgeGenderDescription({includeGender: true}),
+                description: "Inschrijvingen is beperkt tot " + group.settings.getAgeGenderDescription({includeGender: true}),
             }
-            return "Enkel voor mannen"
         }
         
-        return "Kan niet inschrijven"
+        return null
     }
 
     getMatchingGroups(groups: Group[]) {

@@ -662,14 +662,3 @@ export default class SettingsView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-#settings-view {
-    .illustration-list img {
-        @extend .style-illustration-img;
-    }
-}
-
-</style>

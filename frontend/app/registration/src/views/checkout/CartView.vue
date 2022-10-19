@@ -1,66 +1,81 @@
 <template>
     <div class="st-view cart-view">
-        <main class="limit-width">
-            <section class="view">
-                <STNavigationBar :title="title" class="only-tab-bar">
-                    <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
-                </STNavigationBar>
+        <STNavigationBar :pop="canPop" :dismiss="canDismiss">
+            <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
+        </STNavigationBar>
 
-                <main>
-                    <h1>{{ title }}</h1>
+        <main>
+            <h1>{{ title }}</h1>
 
-                    <p>Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.</p>
+            <p v-if="cart.price">
+                Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.
+            </p>
+            <p v-else>
+                Voeg alle inschrijvingen toe aan het mandje en bevestig ze.
+            </p>
 
-                    <p v-if="cart.items.length == 0" class="info-box">
-                        Jouw mandje is leeg. Schrijf een lid in via het tabblad 'inschrijven'.
+            <p v-if="cart.items.length == 0" class="info-box">
+                Jouw mandje is leeg. Schrijf een lid in via het tabblad 'inschrijven'.
+            </p>
+            <STErrorsDefault :error-box="errorBox" />
+
+            <STList>
+                <STListItem v-for="item in cart.items" :key="item.id" class="cart-item-row" :selectable="true" @click="openGroup(item.group)">
+                    <h3>
+                        <span>{{ item.member.name }}</span>
+                    </h3>
+                    <p v-if="!item.waitingList" class="description">
+                        {{ item.calculatedPrice | price }}
                     </p>
-                    <STErrorsDefault :error-box="errorBox" />
 
-                    <STList>
-                        <STListItem v-for="item in cart.items" :key="item.id" class="cart-item-row" :selectable="true" @click="openGroup(item.group)">
-                            <h3>
-                                <span>{{ item.member.name }}</span>
-                            </h3>
-                            <p v-if="!item.waitingList" class="description">
-                                {{ item.calculatedPrice | price }}
-                            </p>
+                    <footer>
+                        <p class="price">
+                            {{ item.waitingList ? "Wachtlijst van " : "" }}{{ item.group.settings.name }}
+                        </p>
+                        <div @click.stop>
+                            <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
+                        </div>
+                    </footer>
 
-                            <footer>
-                                <p class="price">
-                                    {{ item.waitingList ? "Wachtlijst van " : "" }}{{ item.group.settings.name }}
-                                </p>
-                                <div @click.stop>
-                                    <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
-                                </div>
-                            </footer>
+                    <figure v-if="imageSrc(item)" slot="right">
+                        <img :src="imageSrc(item)">
+                    </figure>
+                </STListItem>
 
-                            <figure v-if="imageSrc(item)" slot="right">
-                                <img :src="imageSrc(item)">
-                            </figure>
-                        </STListItem>
+                <STListItem v-if="cart.freeContribution > 0 && cart.items.length > 0">
+                    <h3 class="style-title-list">
+                        + Vrije bijdrage van {{ cart.freeContribution | price }}. Bedankt!
+                    </h3>
+                    <p class="style-description-small">
+                        Je kan dit in één van de volgende stappen wijzigen
+                    </p>
+                </STListItem>
+            </STList>
 
-                        <STListItem v-if="cart.freeContribution > 0 && cart.items.length > 0">
-                            <h3 class="style-title-list">
-                                + Vrije bijdrage van {{ cart.freeContribution | price }}. Bedankt!
-                            </h3>
-                            <p class="style-description-small">
-                                Je kan dit in één van de volgende stappen wijzigen
-                            </p>
-                        </STListItem>
-                    </STList>
-                </main>
+            <hr>
 
-                <STToolbar v-if="cart.items.length > 0" class="dont-float">
-                    <span slot="left">Totaal: {{ cart.price | price }}</span>
-                    <LoadingButton slot="right" :loading="loading">
-                        <button class="button primary" type="button" @click="goToCheckout">
-                            <span class="icon flag" />
-                            <span>Afrekenen</span>
-                        </button>
-                    </LoadingButton>
-                </STToolbar>
-            </section>
+            <button slot="right" class="button text" type="button" @click="addItem">
+                <span class="icon add" />
+                <span>Inschrijving toevoegen</span>
+            </button>
         </main>
+
+        <STToolbar v-if="cart.items.length > 0">
+            <span slot="left">Totaal: {{ cart.price | price }}</span>
+
+            <button slot="right" class="button secundary" type="button" @click="addItem">
+                <span class="icon add" />
+                <span>Inschrijving</span>
+            </button>
+
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" type="button" @click="goToCheckout">
+                    <span class="icon flag" />
+                    <span v-if="cart.price">Afrekenen</span>
+                    <span v-else>Bevestigen</span>
+                </button>
+            </LoadingButton>
+        </STToolbar>
     </div>
 </template>
 
@@ -71,12 +86,13 @@ import { ErrorBox, LoadingButton, StepperInput, Steps, STErrorsDefault, STList, 
 import { UrlHelper } from '@stamhoofd/networking';
 import { Group, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from 'vue-property-decorator';
+import { Component, Mixins, Watch } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import GroupView from '../groups/GroupView.vue';
+import ChooseMemberView from '../overview/register-flow/ChooseMemberView.vue';
 
 
 @Component({
@@ -105,6 +121,18 @@ export default class CartView extends Mixins(NavigationMixin){
         return this.CheckoutManager.cart
     }
 
+    addItem() {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(ChooseMemberView, {}),
+                    fromCart: true
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
+    }
+
     async goToCheckout() { 
         if (this.loading) {
             return
@@ -119,33 +147,31 @@ export default class CartView extends Mixins(NavigationMixin){
             if (OrganizationManager.organization.meta.recordsConfiguration.financialSupport) {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FinancialSupportView.vue')).default;
-                this.present(
+                this.show(
                     new ComponentWithProperties(Steps, { 
                         root: new ComponentWithProperties(component, {}),
                         totalSteps: OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null ? 3 : 2
-                    })       
+                    })
                 );
             } else if(OrganizationManager.organization.meta.recordsConfiguration.freeContribution !== null) {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './FreeContributionView.vue')).default;
-                this.present(
+                this.show(
                     new ComponentWithProperties(Steps, { 
                         root: new ComponentWithProperties(component, {}),
                         totalSteps: 2
-                    })       
+                    })
                 );
             } else {
                 // Go to financial view
                 const component = (await import(/* webpackChunkName: "FinancialSupportView" */ './PaymentSelectionView.vue')).default;
-                this.present(
+                this.show(
                     new ComponentWithProperties(Steps, { 
                         root: new ComponentWithProperties(component, {}),
                         totalSteps: 1
-                    })       
+                    })
                 );
             }
-
-            await Promise.resolve()
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
@@ -173,15 +199,23 @@ export default class CartView extends Mixins(NavigationMixin){
         CheckoutManager.saveCart()
     }
 
-    activated() {
-        console.log("set cart url")
-        this.$nextTick(() => {
-            UrlHelper.setUrl("/cart")
-        })
+    mounted() {
+        UrlHelper.setUrl("/cart")
 
         this.recalculate().catch(e => {
             console.error(e)
         })
+    }
+
+    @Watch("cart.items")
+    onCartChanged() {
+        try {
+            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+        } catch (e) {
+            // error in calculation!
+            console.error(e)
+        }
+        CheckoutManager.saveCart()
     }
 
     async recalculate() {

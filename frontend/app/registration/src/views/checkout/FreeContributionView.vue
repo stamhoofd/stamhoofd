@@ -1,59 +1,57 @@
 <template>
-    <div id="free-contribution-view" class="st-view boxed">
+    <div id="free-contribution-view" class="st-view">
         <STNavigationBar title="Vrije bijdrage">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
-        <div class="box">
-            <main>
-                <h1>Vrije bijdrage <span class="style-tag">Optioneel</span></h1>
-                <p v-if="description" class="style-description pre-wrap" v-text="description" />
+        <main>
+            <h1>Vrije bijdrage <span class="style-tag">Optioneel</span></h1>
+            <p v-if="description" class="style-description pre-wrap" v-text="description" />
 
-                <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox" />
 
-                <Radio v-model="amountOption" :value="0" name="contributionRadio">
-                    Geen vrije bijdrage
-                </Radio>
+            <Radio v-model="amountOption" :value="0" name="contributionRadio">
+                Geen vrije bijdrage
+            </Radio>
 
-                <Radio v-for="(a, index) in amounts" :key="index" v-model="amountOption" :value="a" name="contributionRadio">
-                    {{ a | price }}
-                </Radio>
-              
-                <Radio v-model="amountOption" :value="otherValue" name="contributionRadio">
-                    {{ amounts.length == 0 ? 'Bedrag kiezen' : 'Ander bedrag kiezen' }}
-                </Radio>
+            <Radio v-for="(a, index) in amounts" :key="index" v-model="amountOption" :value="a" name="contributionRadio">
+                {{ a | price }}
+            </Radio>
+            
+            <Radio v-model="amountOption" :value="otherValue" name="contributionRadio">
+                {{ amounts.length == 0 ? 'Bedrag kiezen' : 'Ander bedrag kiezen' }}
+            </Radio>
 
-                <div v-if="amountOption === otherValue" class="textarea-container">
-                    <PriceInput v-model="amount" placeholder="Jouw bijdrage" />
-                </div>
+            <div v-if="amountOption === otherValue" class="textarea-container">
+                <PriceInput v-model="amount" placeholder="Jouw bijdrage" />
+            </div>
 
-                <p v-if="amount >= 5000" class="info-box">
-                    Heel erg bedankt voor de gulle bijdrage! 😍❤️
-                </p>
+            <p v-if="amount >= 5000" class="info-box">
+                Heel erg bedankt voor de gulle bijdrage! 😍❤️
+            </p>
 
-                <p v-else-if="amount >= 3000" class="info-box">
-                    Heel erg bedankt voor de gulle bijdrage! 😍
-                </p>
+            <p v-else-if="amount >= 3000" class="info-box">
+                Heel erg bedankt voor de gulle bijdrage! 😍
+            </p>
 
-                <p v-else-if="amount >= 1500" class="info-box">
-                    Bedankt voor de warme bijdrage! 🙌
-                </p>     
+            <p v-else-if="amount >= 1500" class="info-box">
+                Bedankt voor de warme bijdrage! 🙌
+            </p>     
 
-                <p v-else-if="amount > 0" class="info-box">
-                    Bedankt voor de bijdrage 😊
-                </p>              
-            </main>
+            <p v-else-if="amount > 0" class="info-box">
+                Bedankt voor de bijdrage 😊
+            </p>              
+        </main>
 
-            <STToolbar>
-                <span slot="left">Totaal: {{ cart.price | price }}</span>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" type="button" @click="goNext">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
-        </div>
+        <STToolbar>
+            <span slot="left">Totaal: {{ cart.price | price }}</span>
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary" type="button" @click="goNext">
+                    <span>Doorgaan</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </LoadingButton>
+        </STToolbar>
     </div>
 </template>
 
