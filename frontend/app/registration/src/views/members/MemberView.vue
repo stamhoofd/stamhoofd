@@ -13,9 +13,7 @@
                 <span v-if="member.activeRegistrations.length == 0" class="style-tag error">Nog niet ingeschreven</span>
             </h1>
 
-            <p v-if="hasItems" class="info-box">
-                Ga naar het mandje om de inschrijving af te ronden.
-            </p>
+            <hr>
 
             <div v-if="member.activeRegistrations.length > 0" class="container">
                 <h2 class="style-with-button with-list">
@@ -294,11 +292,6 @@ export default class MemberView extends Mixins(NavigationMixin){
             }
             return [cat]
         })
-    }
-
-
-    get hasItems() {
-        return !!CheckoutManager.cart.items.find(i => i.member.id === this.member.id)
     }
 
     get dataPermission() {

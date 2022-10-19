@@ -8,6 +8,7 @@ import { OrganizationMetaData } from './OrganizationMetaData';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData';
 import { Permissions } from './Permissions';
 import { User } from './User';
+import { TransferSettings } from './webshops/TransferSettings';
 import { Webshop, WebshopPreview } from './webshops/Webshop';
 
 export class OrganizationKey extends AutoEncoder {

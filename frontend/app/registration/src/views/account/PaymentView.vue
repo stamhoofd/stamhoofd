@@ -6,16 +6,16 @@
             <h1 class="style-navigation-title with-icons">
                 <span class="icon-spacer">{{ title }}</span>
 
-                <span v-if="mappedPayment.isPending" class="style-tag warn">Wacht op betaling</span>
+                <span v-if="mappedPayment.isPending" class="style-tag warn">In verwerking</span>
                 <span v-if="mappedPayment.isFailed" class="style-tag error">Mislukt</span>
             </h1>
 
-            <p v-if="payment.method == 'Transfer' && payment.isFailed" class="error-box">
+            <p v-if="mappedPayment.method == 'Transfer' && mappedPayment.isFailed" class="error-box">
                 Deze overschrijving werd geannuleerd.
             </p>
 
-            <p v-if="payment.method == 'Transfer' && payment.isPending" class="error-box">
-                We hebben deze overschrijving nog niet gemarkeerd als betaald. Breng de betaling indien nodig in orde (als die nog niet gebeurd is).
+            <p v-if="mappedPayment.method == 'Transfer' && mappedPayment.isPending" class="warning-box">
+                We hebben deze overschrijving nog niet gemarkeerd als betaald. Breng de betaling indien nodig in orde (als dat nog niet gebeurd is).
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -50,7 +50,7 @@
                         </p>
                     </STListItem>
 
-                    <STListItem>
+                    <STListItem v-if="payment.method == 'Transfer'">
                         <h3 class="style-definition-label">
                             Aangemaakt op
                         </h3>
@@ -103,13 +103,6 @@
                 </template>
             </template>
         </main>
-
-        <STToolbar>
-            <button slot="right" class="button primary full" type="button">
-                <span class="icon lock" />
-                <span>Toon betaalinstructies</span>
-            </button>
-        </STToolbar>
     </div>
 </template>
 

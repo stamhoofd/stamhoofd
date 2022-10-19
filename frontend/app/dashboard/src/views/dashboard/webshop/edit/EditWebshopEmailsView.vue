@@ -275,11 +275,7 @@ export default class EditWebshopEmailsView extends Mixins(NavigationMixin) {
                 method: PaymentMethod.Transfer,
                 transferDescription: "+++111/111/111+++",
                 price: 1500,
-                transferSettings: this.webshopManager.preview.meta.transferSettings.fillMissing(this.organization.meta.transferSettings ?? TransferSettings.create({
-                    type: TransferDescriptionType.Structured,
-                    iban: "BE1234 1234 1234",
-                    creditor: this.organization.name
-                })),
+                transferSettings: this.webshopManager.preview.meta.transferSettings.fillMissing(this.organization.meta.transferSettings),
                 createdAt: new Date(),
                 updatedAt: new Date()
             }),

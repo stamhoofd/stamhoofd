@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
@@ -101,6 +101,14 @@ export class Organization extends Model {
     get i18n() {
         return new I18n("nl", this.address.country)
     }
+
+    /**
+     * Makes sure empty name is replaced with organization name
+     */
+    get mappedTransferSettings(): TransferSettings {
+        return this.meta.transferSettings.fillMissing(TransferSettings.create({creditor: this.name}));
+    }
+
 
     // Methods
     static async getByURI(uri: string): Promise<Organization | undefined> {

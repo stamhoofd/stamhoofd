@@ -138,7 +138,7 @@
                     </STListItem>
                 </STList>
 
-                <template v-if="members.length">
+                <template v-if="members.length && false">
                     <hr>
                     <h2>
                         Documenten

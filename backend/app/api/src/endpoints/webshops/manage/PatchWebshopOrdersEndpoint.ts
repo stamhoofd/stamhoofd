@@ -159,7 +159,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         await order.markValid(payment, [])
 
                         // Only now we can update the transfer description, since we need the order number as a reference
-                        payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.meta.transferSettings)
+                        payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings)
                         payment.generateDescription(organization, (order.number ?? "")+"")
                         await payment.save()
                         await order.save()
