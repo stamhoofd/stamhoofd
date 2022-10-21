@@ -31,6 +31,9 @@
 
                 <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label')" :validator="validator" :placeholder="$t('registration.inputs.parentPhone.placeholder')" />
                 <EmailInput v-model="email" title="E-mailadres" :validator="validator" placeholder="Voor belangrijke mededelingen" autocomplete="email" />
+                <p v-if="hasAccess" class="style-description-small">
+                    Deze ouder kan met het bovenstaande e-mailadres inloggen om toegang te krijgen tot het ledenportaal.
+                </p>
             </div>
                 
             <SelectionAddressInput v-model="address" :addresses="availableAddresses" :validator="validator" @modify="modifyAddress" />
@@ -80,6 +83,10 @@ export default class ParentView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     MemberManager = MemberManager
+
+    get hasAccess() {
+        return this.memberDetails?.parentsHaveAccess ?? false
+    }
 
     mounted() {
         if (this.parent) {

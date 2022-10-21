@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { getEmailBuilder, Token } from '@stamhoofd/models';
-import { EmailRequest } from "@stamhoofd/structures";
+import { EmailRequest, Recipient } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -148,16 +148,27 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
         Email.schedule(builder)
 
         // Also send a copy
+        const recipient = Recipient.create(email.recipients[0])
+        recipient.email = sender.email
+        recipient.firstName = sender.name ?? null
+        recipient.lastName = null
+        recipient.userId = null
+        
         const prefix = "<p><i>Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"</i><br /><br /></p>"
-        Email.send({
+        const builder2 = await getEmailBuilder(user.organization, {
+            ...email,
+            subject: "[KOPIE] "+email.subject,
+            html: email.html?.replace("<body>", "<body>"+prefix) ?? null,
+            recipients: [
+                recipient
+            ],
             from,
             replyTo,
-            to: sender.email,
-            subject: "[KOPIE] "+email.subject,
-            text: "Kopie e-mail verzonden door "+user.firstName+" "+user.lastName+"\n\n"+email.text ?? undefined,
-            html: email.html?.replace("<body>", "<body>"+prefix) ?? undefined,
             attachments
         })
+
+        Email.schedule(builder2)
+
         return new Response(undefined);
     }
 }

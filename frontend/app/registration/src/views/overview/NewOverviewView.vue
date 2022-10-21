@@ -21,9 +21,19 @@
         <div class="box">
             <main>
                 <h1>Ledenportaal</h1>
+                <p v-if="members.length == 0">
+                    Welkom op het ledenportaal van {{ organization.name }}. Momenteel heb je nog geen leden ingeschreven.
+                </p>
+                <p v-else>
+                    Welkom op het ledenportaal van {{ organization.name }}.
+                </p>
 
-                <p>Welkom op het ledenportaal van {{ organization.name }}.</p>
-
+                <template v-if="members.length == 0">
+                    <button class="button primary" type="button" @click="registerMember">
+                        <span class="icon edit" />
+                        <span>Schrijf een lid in</span>
+                    </button>
+                </template>
                 <template v-if="cart.count || notYetPaidBalance || suggestedRegistrations.length">
                     <hr>
                     <h2>
@@ -178,6 +188,7 @@ import AccountSettingsView from "../account/AccountSettingsView.vue";
 import PaymentsView from "../account/PaymentsView.vue";
 import CartView from "../checkout/CartView.vue";
 import GroupView from "../groups/GroupView.vue";
+import { createMemberComponent } from "../members/details/createMemberComponent";
 import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import CheckDataView from "./CheckDataView.vue";
 import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
@@ -399,7 +410,22 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
         return Formatter.price(price)
     }
 
-    registerMember() {
+    async registerMember() {
+        if (this.members.length == 0) {
+            const component = await createMemberComponent()
+            this.present({
+                components: [
+                    new ComponentWithProperties(
+                        NavigationController,
+                        {
+                            root: component
+                        }
+                    )
+                ],
+                modalDisplayStyle: "popup"
+            })
+            return;
+        }
         this.present({
             components: [
                 new ComponentWithProperties(

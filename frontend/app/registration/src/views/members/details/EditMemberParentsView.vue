@@ -11,7 +11,7 @@
             </h1>
 
             <p v-if="details.age <= 18">
-                Voeg alle ouders van {{ details.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar kunnen ook de gegevens tijdens het jaar wijzigen.
+                Voeg alle ouders van {{ details.firstName }} toe. Deze kunnen we contacteren in noodgevallen, maar krijgen ook toegang tot het ledenportaal.
             </p>
             <p v-else>
                 Voeg alle ouders van {{ details.firstName }} toe. Deze kunnen we contacteren in noodgevallen.

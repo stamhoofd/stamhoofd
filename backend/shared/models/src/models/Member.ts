@@ -3,7 +3,8 @@ import { EncryptedMemberWithRegistrations, Member as MemberStruct, MemberDetails
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 import { Payment, Registration, User } from './';
-export type MemberWithRegistrations = Member & { registrations: Registration[]; users: User[] }
+export type MemberWithUsers = Member & { users: User[] }
+export type MemberWithRegistrations = MemberWithUsers & { registrations: Registration[] }
 
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member }
@@ -175,10 +176,7 @@ export class Member extends Model {
             return []
         }
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Member.table}\`\n`;
-        
-        //query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`
         query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
-
         query += Member.users.joinQuery(Member.table, User.table)+"\n"
 
         // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
@@ -250,43 +248,14 @@ export class Member extends Model {
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.users.linkTable}\`\n`;
+        let query = `SELECT \`${Member.table}\`.\`${Member.primary.name}\` from \`${Member.users.linkTable}\`\n`;
         query += `JOIN \`${Member.table}\` ON \`${Member.table}\`.\`${Member.primary.name}\` = \`${Member.users.linkTable}\`.\`${Member.users.linkKeyA}\`\n`
-        
-        //query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.waitingList = 1)\n`
-        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`
-
         query += `where \`${Member.users.linkTable}\`.\`${Member.users.linkKeyB}\` = ?`
 
         const [results] = await Database.select(query, [user.id])
-        const members: MemberWithRegistrations[] = []
 
-        for (const row of results) {
-            const foundMember = Member.fromRow(row[Member.table])
-            if (!foundMember) {
-                throw new Error("Expected member in every row")
-            }
-            const _f = foundMember.setManyRelation(Member.registrations as unknown as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [
-                user // for now only assign this... Todo: expand with query
-            ])
-
-            // Seach if we already got this member?
-            const existingMember = members.find(m => m.id == _f.id)
-
-            const member: MemberWithRegistrations = (existingMember ?? _f)
-            if (!existingMember) {
-                members.push(member)
-            }
-
-            // Check if we have a registration with a payment
-            const registration = Registration.fromRow(row[Registration.table])
-            if (registration) {
-                member.registrations.push(registration)
-            }
-        }
-
-        return members
-
+        const memberIds = results.map((r: any) => r[Member.table][Member.primary.name])
+        return await this.getAllWithRegistrations(...memberIds)
     }
 
     getStructureWithRegistrations(this: MemberWithRegistrations, forOrganization: null | boolean = null) {

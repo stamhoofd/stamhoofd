@@ -11,47 +11,49 @@
                 Er zijn momenteel nog geen afrekeningen beschikbaar voor jouw account
             </p>
 
-            <hr>
-            <h2>Openstaand</h2>
+            <template v-if="outstandingItems.length">
+                <hr>
+                <h2>Openstaand</h2>
 
-            <STList>
-                <STListItem v-for="item in outstandingItems" :key="item.id">
-                    <h3 class="style-title-list">
-                        {{ item.description }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ formatDate(item.createdAt) }}
-                    </p>
-                    <p class="style-description-small">
-                        {{ formatPrice(item.price) }}
-                    </p>
-                    <template slot="right">
-                        <span v-if="item.pricePaid === item.price" class="style-tag success">Betaald</span>
-                        <span v-else-if="item.pricePaid > 0" class="style-tag warn">{{ formatPrice(item.pricePaid) }} betaald</span>
-                        <span v-else-if="!item.hasPendingPayment" class="style-tag">Openstaand</span>
-                        <span v-else class="style-tag warn">In verwerking</span>
-                    </template>
-                </STListItem>
-            </STList>
-
-            <div class="pricing-box">
                 <STList>
-                    <STListItem>
-                        Totaal te betalen
-
+                    <STListItem v-for="item in outstandingItems" :key="item.id">
+                        <h3 class="style-title-list">
+                            {{ item.description }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ formatDate(item.createdAt) }}
+                        </p>
+                        <p class="style-description-small">
+                            {{ formatPrice(item.price) }}
+                        </p>
                         <template slot="right">
-                            {{ formatPrice(outstandingBalance.total) }}
-                        </template>
-                    </STListItem>
-                    <STListItem v-if="outstandingBalance.totalPending > 0 && outstandingBalance.totalOpen > 0">
-                        Waarvan in verwerking
-
-                        <template slot="right">
-                            {{ formatPrice(outstandingBalance.totalPending) }}
+                            <span v-if="item.pricePaid === item.price" class="style-tag success">Betaald</span>
+                            <span v-else-if="item.pricePaid > 0" class="style-tag warn">{{ formatPrice(item.pricePaid) }} betaald</span>
+                            <span v-else-if="!item.hasPendingPayment" class="style-tag">Openstaand</span>
+                            <span v-else class="style-tag warn">In verwerking</span>
                         </template>
                     </STListItem>
                 </STList>
-            </div>
+
+                <div class="pricing-box">
+                    <STList>
+                        <STListItem>
+                            Totaal te betalen
+
+                            <template slot="right">
+                                {{ formatPrice(outstandingBalance.total) }}
+                            </template>
+                        </STListItem>
+                        <STListItem v-if="outstandingBalance.totalPending > 0 && outstandingBalance.totalOpen > 0">
+                            Waarvan in verwerking
+
+                            <template slot="right">
+                                {{ formatPrice(outstandingBalance.totalPending) }}
+                            </template>
+                        </STListItem>
+                    </STList>
+                </div>
+            </template>
 
             <template v-if="pendingPayments.length > 0">
                 <hr>

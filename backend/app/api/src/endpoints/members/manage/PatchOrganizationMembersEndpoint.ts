@@ -131,7 +131,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Add users if they don't exist (only placeholders allowed)
             for (const placeholder of struct.users) {
-                await this.linkUser(placeholder, member)
+                await PatchOrganizationMembersEndpoint.linkUser(placeholder, member)
             }
         }
 
@@ -278,12 +278,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Link users
             for (const placeholder of patch.users.getPuts()) {
-                await this.linkUser(placeholder.put, member)
+                await PatchOrganizationMembersEndpoint.linkUser(placeholder.put, member)
             }
 
             // Unlink users
             for (const userId of patch.users.getDeletes()) {
-                await this.unlinkUser(userId, member)
+                await PatchOrganizationMembersEndpoint.unlinkUser(userId, member)
             }
 
             if (!members.find(m => m.id === member.id)) {
@@ -382,7 +382,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    async linkUser(user: UserStruct, member: MemberWithRegistrations) {
+    static async linkUser(user: UserStruct, member: MemberWithRegistrations) {
         const email = user.email
         const existing = await User.where({ organizationId: member.organizationId, email }, { limit: 1 })
         let u: User
@@ -414,10 +414,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         // Update model relation to correct response
         member.users.push(u)
-
     }
 
-    async unlinkUser(userId: string, member: MemberWithRegistrations) {
+    static async unlinkUser(userId: string, member: MemberWithRegistrations) {
         console.log("Removing access for "+ userId +" to member "+member.id)
         const existingIndex = member.users.findIndex(u => u.id === userId)
         if (existingIndex === -1) {

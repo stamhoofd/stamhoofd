@@ -330,27 +330,6 @@ export class User extends Model {
         return user as UserForAuthentication;
     }
 
-    /*static async register(email: string, password: string): Promise<Admin | undefined> {
-
-        const user = new Admin();
-        user.email = email;
-        user.password = await this.hash(password)
-
-        try {
-            await user.save();
-        } catch (e) {
-            // Duplicate key probably
-            if (e.code && e.code == "ER_DUP_ENTRY") {
-                return;
-            }
-            throw e;
-        }
-
-        // Remove from memory and avoid accidental leaking
-        user.eraseProperty("password");
-        return user;
-    }*/
-
     static async hash(password: string) {
         const hash = await argon2.hash(password, { type: argon2.argon2id })
         return hash
@@ -390,7 +369,7 @@ export class User extends Model {
             throw e;
         }
 
-        user.eraseProperty('password');
+        //user.eraseProperty('password');
         return user;
     }
 

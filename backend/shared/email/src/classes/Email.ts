@@ -211,7 +211,7 @@ class EmailStatic {
         }
 
         // Check spam and bounces
-        const matches = await EmailAddress.filterSendTo(parsedEmails)
+        let matches = await EmailAddress.filterSendTo(parsedEmails)
 
         if (matches.length === 0) {
             // Invalid string
@@ -219,6 +219,20 @@ class EmailStatic {
             return
         }
 
+        // Filter by environment
+        if (STAMHOOFD.environment === 'staging') {
+            matches = matches.filter(mail => mail.endsWith("@stamhoofd.be") || mail.endsWith("@chiro.be"))
+        }
+        if (STAMHOOFD.environment === 'development') {
+            matches = matches.filter(mail => mail.endsWith("@stamhoofd.be") || mail.endsWith("@bounce-testing.postmarkapp.com"))
+        }
+
+        if (matches.length === 0) {
+            // Invalid string
+            console.warn("Filtered all emails due to environment filter '"+data.to+"'. E-mail skipped")
+            return
+        }
+    
         let to = data.to
 
         if (matches.length !== parsedEmails.length) {
@@ -233,7 +247,7 @@ class EmailStatic {
             from: data.from, // sender address
             bcc: (STAMHOOFD.environment === "production" || !data.bcc) ? data.bcc : "simon@stamhoofd.be",
             replyTo: data.replyTo,
-            to: STAMHOOFD.environment === "production" || to.endsWith("@bounce-testing.postmarkapp.com") ? to : "hallo@stamhoofd.be",
+            to,
             subject: data.subject, // Subject line
             text: data.text, // plain text body
         };
