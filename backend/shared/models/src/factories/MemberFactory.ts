@@ -1,6 +1,7 @@
 import { Factory } from "@simonbackx/simple-database";
 import { Sodium } from '@stamhoofd/crypto';
 import { Gender, MemberDetails, ParentType } from '@stamhoofd/structures';
+import { Formatter } from "@stamhoofd/utility";
 
 import { Member, MemberWithRegistrations } from "../models/Member";
 import { Organization } from "../models/Organization";
@@ -25,8 +26,6 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
         const organization = this.options.organization
             ?? this.options.user?.organization
             ?? await new OrganizationFactory({}).create()
-
-        const memberKeyPair = await Sodium.generateEncryptionKeyPair();
 
         const memberDetails = new MemberDetails()
         const minAge = (this.options.minAge ?? 6)
@@ -81,53 +80,7 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
                 // 10% chance to have divorced parents
                 memberDetails.parents[1].address = memberDetails.parents[0].address;
             }
-
-            if (Math.random() >= 0.5) {
-                // 50% chance no e-mail
-                memberDetails.parents[1].email = null;
-            }
         }
-        
-        /*const recordFactory = new RecordFactory({});
-        memberDetails.records = await recordFactory.createMultiple(Math.floor(Math.random() * 15 + 1));
-        memberDetails.records.push(LegacyRecord.create({ type: LegacyRecordType.DataPermissions }))
-        // Remove duplicates    
-        const unique = {};
-        memberDetails.records.forEach(function (i) {
-            if (!unique[i.type]) {
-                unique[i.type] = i;
-            }
-        });
-        memberDetails.records = Object.values(unique);
-        
-        memberDetails.records.sort((a, b) => {
-            const pA = LegacyRecordTypeHelper.getPriority(a.type);
-            const pB = LegacyRecordTypeHelper.getPriority(b.type);
-            if (pA == pB) {
-                if (a.getText() < b.getText()) {
-                    return -1;
-                }
-                if (a.getText() > b.getText()) {
-                    return 1;
-                }
-                return 0;
-            }
-            if (pA == LegacyRecordTypePriority.High && pB != LegacyRecordTypePriority.High) {
-                return -1;
-            }
-            if (pB == LegacyRecordTypePriority.High && pA != LegacyRecordTypePriority.High) {
-                return 1;
-            }
-            if (pA == LegacyRecordTypePriority.Medium && pB != LegacyRecordTypePriority.Medium) {
-                return -1;
-            }
-            if (pB == LegacyRecordTypePriority.Medium && pA != LegacyRecordTypePriority.Medium) {
-                return 1;
-            }
-
-            // Not possible
-            throw new Error("Method records sorting failure")
-        });*/
 
         // Sort
 
@@ -141,6 +94,10 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
             } else {
                 memberDetails.lastName = memberDetails.parents[0].lastName;
             }
+        }
+
+        if (memberDetails.age! >= 16) {
+            memberDetails.email = Formatter.slugEmail(memberDetails.firstName + "-" + memberDetails.lastName) + "@geen-email.com";
         }
 
         const emergencyContactFactory = new EmergencyContactFactory({});
@@ -164,7 +121,7 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
         if (this.options.user) {
             await Member.users.link(member, [this.options.user])
         }
-
+        
         return member as any;
     }
 }

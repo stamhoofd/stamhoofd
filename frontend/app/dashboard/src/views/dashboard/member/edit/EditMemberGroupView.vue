@@ -9,7 +9,7 @@
             <h1>
                 Inschrijvingen wijzigen
             </h1>
-            <p>Kies alle inschrijvingsgroepen waarvoor je dit lid wilt inschrijven. Kijk de betaalstatus na voor je iets wijzigt, want die kan Stamhoofd zelf niet automatisch wijzigen (en bij uitschrijven gaat die informatie verloren). Na de wijziging kan je het te betalen lidgeld eventueel manueel wijzigen.</p>
+            <p>Kies alle inschrijvingsgroepen waarvoor je dit lid wilt inschrijven.</p>
 
             <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
                 <button v-if="canGoBack" class="button text gray" type="button" @click="goBack">

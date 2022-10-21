@@ -39,9 +39,9 @@
                             <h1>Hoe schrijf je iemand in?</h1>
                             <ol>
                                 <li>Log in, of maak een account aan.</li>
-                                <li>Vul alle gegevens van de leden in of kijk ze na.</li>
+                                <li>Schrijf leden in en vul gegevens aan.</li>
                                 <li>Betaal het lidgeld.</li>
-                                <li>Klaar! De volgende keer moet je enkel de gegevens nakijken.</li>
+                                <li>Klaar!</li>
                             </ol>
                         </aside>
                     </div>

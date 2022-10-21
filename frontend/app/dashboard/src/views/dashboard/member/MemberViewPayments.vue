@@ -8,6 +8,10 @@
                 <p v-if="member.details.requiresFinancialSupport && member.details.requiresFinancialSupport.value" class="warning-box">
                     {{ financialSupportWarningText }}
                 </p>
+
+                <p v-if="balanceItems.length == 0" class="info-box">
+                    Geen openstaande rekening
+                </p>
                 
                 <STList>
                     <STListItem v-for="item in balanceItems" :key="item.id" :selectable="true" @click="editBalanceItem(item)">
@@ -53,12 +57,12 @@
                     <span>Bedrag aanrekenen</span>
                 </button>
 
-                <button type="button" class="button text">
+                <button v-if="false" type="button" class="button text">
                     <span class="icon card" />
                     <span>Betaling ontvangen</span>
                 </button>
 
-                <button type="button" class="button text">
+                <button v-if="false" type="button" class="button text">
                     <span class="icon email" />
                     <span>Betaalverzoek versturen</span>
                 </button>

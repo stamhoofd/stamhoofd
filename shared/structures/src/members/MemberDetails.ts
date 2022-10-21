@@ -379,6 +379,10 @@ export class MemberDetails extends AutoEncoder {
         }
     }
 
+    get parentsHaveAccess() {
+        return (this.age && (this.age < 18 || (this.age < 24 && !this.address)))
+    }
+
     /**
      * Return all the e-mail addresses that should have access to this user
      */
@@ -388,7 +392,7 @@ export class MemberDetails extends AutoEncoder {
             emails.add(this.email)
         }
 
-        if (this.age && (this.age < 18 || (this.age < 24 && !this.address))) {
+        if (this.parentsHaveAccess) {
             for (const parent of this.parents) {
                 if (parent.email) {
                     emails.add(parent.email)

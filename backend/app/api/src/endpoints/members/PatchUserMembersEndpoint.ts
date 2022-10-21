@@ -1,11 +1,11 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { KeychainItem } from '@stamhoofd/models';
-import { Member } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainItem as KeychainItemStruct, MemberDetails } from "@stamhoofd/structures";
+import { Member, Token } from '@stamhoofd/models';
+import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
+
+import { PatchOrganizationMembersEndpoint } from './manage/PatchOrganizationMembersEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = AutoEncoderPatchType<KeychainedMembers>
@@ -112,6 +112,32 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 })
             }
             await member.save();
+
+            // Check accounts
+            const managers = member.details.getManagerEmails()
+
+            for(const email of managers) {
+                const u = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase())
+                if (!u) {
+                    console.log("Linking user "+email+" to member "+member.id + " from patch by " + user.id)
+                    await PatchOrganizationMembersEndpoint.linkUser(UserStruct.create({
+                        firstName: member.details.parents.find(p => p.email === email)?.firstName,
+                        lastName: member.details.parents.find(p => p.email === email)?.lastName,
+                        email,
+                    }), member)
+                }
+            }
+
+            // Delete accounts that should no longer have access
+            for (const u of member.users) {
+                if (!u.hasAccount()) {
+                    // And not in managers list (case insensitive)
+                    if (!managers.find(m => m.toLocaleLowerCase() === u.email.toLocaleLowerCase())) {
+                        console.log("Unlinking user "+u.email+" from member "+member.id + " from patch by " + user.id)
+                        await PatchOrganizationMembersEndpoint.unlinkUser(u.id, member)
+                    }
+                }
+            }
         }
 
         return new Response(new KeychainedResponse({

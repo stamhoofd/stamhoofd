@@ -129,9 +129,6 @@ export class Token extends Model {
             })
         }
 
-        // Do not leak the password property
-        token.user.eraseProperty('password');
-
         return token as UserWithOrganizationAndUser
     }
 
