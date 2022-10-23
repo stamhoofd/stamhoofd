@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { MemberDetails } from './MemberDetails';
@@ -26,6 +26,9 @@ export class Member extends AutoEncoder {
     @field({ decoder: MemberDetails, field: 'nonEncryptedDetails' })
     @field({ decoder: MemberDetails, version: 165 })
     details: MemberDetails
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    outstandingBalance = 0
 
     @field({ decoder: DateDecoder, version: 31 })
     createdAt: Date = new Date()

@@ -6,10 +6,7 @@
         <main>
             <h1>{{ text }}</h1>
             
-            <p v-if="names.length == 0">
-                We houden je op de hoogte als je de inschrijving kan voltooien. 
-            </p>
-            <p v-else>
+            <p>
                 Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via het ledenportaal.
             </p>
         </main>
@@ -99,6 +96,9 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
         // Clear cart
         CheckoutManager.cart.clear()
         CheckoutManager.saveCart()
+
+        // Clear balance (probably changed)
+        CheckoutManager.fetchBalance().catch(console.error)
 
         // Switch to register tab
         GlobalEventBus.sendEvent("checkout-complete", undefined).catch(e => console.error(e))

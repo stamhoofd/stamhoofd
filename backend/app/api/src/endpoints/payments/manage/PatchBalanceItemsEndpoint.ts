@@ -4,6 +4,9 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, Group, Member, Registration, Token, User, UserWithOrganization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { MemberBalanceItem } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
+
+import { ExchangePaymentEndpoint } from '../ExchangePaymentEndpoint';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -43,6 +46,10 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
         const returnedModels: BalanceItem[] = []
 
+        // Keep track of updates
+        const memberIds: string[] = []
+        const registrationIds: string[] = []
+
         await QueueHandler.schedule("balance-item-update/"+user.organization.id, async () => {
             for (const {put} of request.body.getPuts()) {
                 // Create a new balance item
@@ -56,7 +63,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (put.memberId) {
                     model.memberId = (await this.validateMemberId(put.memberId, user)).id;
+                    memberIds.push(model.memberId)
                 }
+
 
                 if (put.registration) {
                     const registration = await Registration.getByID(put.registration.id)
@@ -68,6 +77,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                         })
                     }
                     model.registrationId = registration.id
+                    registrationIds.push(registration.id)
                 }
 
                 await model.save();
@@ -86,13 +96,25 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 // Check permissions
                 if (model.memberId) {
                     await this.validateMemberId(model.memberId, user);
+
+                    // Update old
+                    memberIds.push(model.memberId)
                 }
+
                 if (model.userId) {
                     await this.validateUserId(model.userId, user);
                 }
 
                 if (patch.memberId) {
                     model.memberId = (await this.validateMemberId(patch.memberId, user)).id;
+
+                    // Update new
+                    memberIds.push(model.memberId)
+                }
+
+                if (model.registrationId) {
+                    // Update old
+                    registrationIds.push(model.registrationId)
                 }
 
                 if (patch.registration) {
@@ -105,6 +127,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                         })
                     }
                     model.registrationId = registration.id
+
+                    // Update new
+                    registrationIds.push(model.registrationId)
                 } else if (patch.registration === null) {
                     model.registrationId = null
                 }
@@ -115,6 +140,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 returnedModels.push(model);
             }
         });
+
+        await Member.updateOutstandingBalance(Formatter.uniqueArray(memberIds))
+        await Registration.updateOutstandingBalance(Formatter.uniqueArray(registrationIds))
 
          return new Response(
             await BalanceItem.getMemberStructure(returnedModels)

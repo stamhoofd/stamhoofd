@@ -331,19 +331,55 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (!this.waitingList) {
             cols.push(
                 new Column<MemberWithRegistrations, number>({
-                    name: "Te betalen", 
-                    getValue: (v) => v.outstandingAmount,
-                    format: (outstandingAmount) => {
-                        if (outstandingAmount == 0) {
-                            return "Betaald";
-                        }
-                        return Formatter.price(outstandingAmount)
+                    name: "Prijs", 
+                    getValue: (v) => {
+                        const registrations = v.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
+                        return registrations.reduce((a, b) => a + b.price, 0)
+                    },
+                    format: (p) => {
+                        return Formatter.price(p)
                     }, 
-                    getStyle: (v) => v == 0 ? "gray" : "",
+                    getStyle: (v) => v <= 0 ? "gray" : "",
                     compare: (a, b) => Sorter.byNumberValue(b, a),
                     minimumWidth: 70,
                     recommendedWidth: 80,
-                    align: "right"
+                    enabled: false
+                })
+            )
+            cols.push(
+                new Column<MemberWithRegistrations, number>({
+                    name: "Prijs betaald", 
+                    getValue: (v) => {
+                        const registrations = v.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
+                        return registrations.reduce((a, b) => a + b.pricePaid, 0)
+                    },
+                    format: (p) => {
+                        return Formatter.price(p)
+                    }, 
+                    getStyle: (v) => v <= 0 ? "gray" : "",
+                    compare: (a, b) => Sorter.byNumberValue(b, a),
+                    minimumWidth: 70,
+                    recommendedWidth: 80,
+                    enabled: false
+                })
+            )
+            cols.push(
+                new Column<MemberWithRegistrations, number>({
+                    name: "Openstaand saldo", 
+                    getValue: (v) => v.outstandingBalance,
+                    format: (outstandingBalance) => {
+                        if (outstandingBalance < 0) {
+                            return Formatter.price(outstandingBalance)
+                        }
+                        if (outstandingBalance <= 0) {
+                            return "Betaald";
+                        }
+                        return Formatter.price(outstandingBalance)
+                    }, 
+                    getStyle: (v) => v <= 0 ? "gray" : "",
+                    compare: (a, b) => Sorter.byNumberValue(b, a),
+                    minimumWidth: 70,
+                    recommendedWidth: 80
                 })
             )
         }
@@ -668,6 +704,12 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         if (type === "changedGroup" && member) {
+            this.removeMember(member)
+            this.addMemberIfInGroup(member)
+            return
+        }
+
+        if (type === "updated" && member) {
             this.removeMember(member)
             this.addMemberIfInGroup(member)
             return

@@ -38,8 +38,7 @@ import payPointOfSaleIllustration from "@stamhoofd/assets/images/illustrations/p
 import transferIllustration from "@stamhoofd/assets/images/illustrations/transfer.svg";
 import { CenteredMessage, EditEmailTemplateView, EditorSmartButton, EditorSmartVariable, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
-import { TransferDescriptionType } from "@stamhoofd/structures/esm/dist";
+import { Address, Cart, CartItem, Country, Customer, EmailTemplate, EmailTemplateType, Order, OrderData, Payment, PaymentMethod, Product, ProductPrice, TransferDescriptionType, TransferSettings, ValidatedAddress, WebshopTakeoutMethod, WebshopTicketType, WebshopTimeSlot } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";

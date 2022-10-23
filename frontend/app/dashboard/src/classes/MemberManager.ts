@@ -2,12 +2,12 @@
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, Payment, PaymentMethod, PaymentStatus, PermissionLevel, Registration, User } from '@stamhoofd/structures';
+import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 import { OrganizationManager } from './OrganizationManager';
 
-export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment"
+export type MemberChangeEvent = "changedGroup" | "deleted" | "created" | "payment" | 'updated'
 export type MembersChangedListener = (type: MemberChangeEvent, member: MemberWithRegistrations | null) => void
 
 

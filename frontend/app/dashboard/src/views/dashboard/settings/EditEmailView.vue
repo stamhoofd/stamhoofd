@@ -83,8 +83,7 @@ import { AutoEncoderPatchType, isPatchable, PartialWithoutMethods, PatchableArra
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version, WebshopPreview } from "@stamhoofd/structures";
-import { WebshopPrivateMetaData } from '@stamhoofd/structures/esm/dist';
+import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version, WebshopPreview,WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";

@@ -315,8 +315,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, CopyableDirective, ErrorBox, FillRecordCategoryView, LongPressDirective, RecordCategoryAnswersBox, STList, STListItem, TableActionsContextMenu, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Country, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
-import { CountryHelper } from "@stamhoofd/structures/esm/dist";
+import { Country, CountryHelper, DataPermissionsSettings, EmailInformation, EmergencyContact, EncryptedMemberWithRegistrations, FinancialSupportSettings, getPermissionLevelNumber, MemberDetailsWithGroups, MemberWithRegistrations, Parent, ParentTypeHelper, PermissionLevel, RecordAnswer, RecordCategory, RecordSettings, RecordWarning, RecordWarningType, Registration, User } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 

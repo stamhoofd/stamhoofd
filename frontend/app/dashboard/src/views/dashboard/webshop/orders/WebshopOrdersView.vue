@@ -12,8 +12,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopOrdersQuery, WebshopTicketType } from '@stamhoofd/structures';
-import { WebshopTimeSlot } from "@stamhoofd/structures/esm/dist";
+import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopOrdersQuery, WebshopTicketType,WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 

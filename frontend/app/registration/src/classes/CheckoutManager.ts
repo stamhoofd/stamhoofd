@@ -1,11 +1,12 @@
-import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, ModalStackEventBus, Toast, ToastButton } from '@stamhoofd/components';
-import { IDRegisterCheckout, RegisterCheckout, RegisterItem, Version } from '@stamhoofd/structures'
+import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Toast } from '@stamhoofd/components';
+import { SessionManager } from '@stamhoofd/networking';
+import { IDRegisterCheckout, MemberBalanceItem, RegisterCheckout, RegisterItem, Version } from '@stamhoofd/structures';
 
 import { EditMemberStepsManager } from '../views/members/details/EditMemberStepsManager';
-import { MemberManager } from './MemberManager'
-import { OrganizationManager } from './OrganizationManager'
+import { MemberManager } from './MemberManager';
+import { OrganizationManager } from './OrganizationManager';
 import { TabBarItem } from './TabBarItem';
 
 /**
@@ -15,6 +16,7 @@ export class CheckoutManagerStatic {
     private _checkout: RegisterCheckout | null = null
 
     watchTabBar: TabBarItem | null = null
+    balanceItems: MemberBalanceItem[] | null = null
 
     saveCart() {
         this.saveCheckout()
@@ -99,6 +101,40 @@ export class CheckoutManagerStatic {
         } else {
             component.show(c)
         }
+    }
+
+    async fetchBalance() {
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: 'GET',
+            path: '/balance',
+            decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>)
+        })
+        this.balanceItems = response.data
+    }
+
+    async recalculateCart(refetch = false) {
+        try {
+            // Reload groups
+            if (refetch) {
+                await OrganizationManager.reloadGroups()
+            }
+
+            if (refetch || this.balanceItems === null) {
+                await this.fetchBalance()
+            }
+
+            // Revalidate
+            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories, this.balanceItems!)
+        } finally {
+            try {
+                this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            } catch (e) {
+                // error in calculation!
+                console.error(e)
+            }
+            this.saveCart()
+        }
+        
     }
 }
 

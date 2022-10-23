@@ -42,7 +42,7 @@
                                 {{ formatPrice(outstandingBalance.total) }}
                             </template>
                         </STListItem>
-                        <STListItem v-if="outstandingBalance.totalPending > 0 && outstandingBalance.totalOpen > 0">
+                        <STListItem v-if="outstandingBalance.totalPending > 0">
                             Waarvan in verwerking
 
                             <template slot="right">
@@ -117,7 +117,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, LoadingButton, Spinner, STErrorsDefault, STList, STListItem, STToolbar } from "@stamhoofd/components";
+import { ErrorBox, GlobalEventBus, LoadingButton, Spinner, STErrorsDefault, STList, STListItem, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
 import { FinancialSupportSettings, getPermissionLevelNumber, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -159,10 +159,43 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
 
     organization = OrganizationManager.organization
 
-    mounted() {
+    created() {
         this.reload().catch(e => {
             console.error(e)
         })
+
+        // Listen for patches in payments
+        GlobalEventBus.addListener(this, "paymentPatch", async (payment) => {
+            if (payment && payment.id && this.paymentIds.includes(payment.id as string)) {
+                // Reload members and family
+                this.reloadFamily()
+
+                // We need to reload because pricePaid doesn't update from balace items
+                this.reload().catch(console.error)
+            }
+            return Promise.resolve()
+        })
+    }
+
+    get payments() {
+        const payments = new Map<string, Payment>()
+        for (const item of this.balanceItems) {
+            for (const payment of item.payments) {
+                payments.set(payment.payment.id, payment.payment)
+            }
+        }
+        return [...payments.values()]
+    }
+
+
+    get paymentIds() {
+        const payments = new Set<string>()
+        for (const item of this.balanceItems) {
+            for (const payment of item.payments) {
+                payments.add(payment.payment.id)
+            }
+        }
+        return [...payments.values()]
     }
 
     get pendingPayments() {
@@ -174,7 +207,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 }
             }
         }
-        return [...payments.values()]
+        return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
     }
 
     get succeededPayments() {
@@ -186,13 +219,12 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 }
             }
         }
-        return [...payments.values()]
+        return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.paidAt ?? a.createdAt, b.paidAt ?? b.createdAt))
     }
 
     createBalanceItem() {
         const balanceItem = MemberBalanceItem.create({
-            memberId: this.member.id,
-            registration: this.defaultRegistration ?? null
+            memberId: this.member.id
         })
         const component = new ComponentWithProperties(EditBalanceItemView, {
             balanceItem,
@@ -200,13 +232,15 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
                 const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
                 arr.addPut(balanceItem.patch(patch))
-                const response = await SessionManager.currentSession!.authenticatedServer.request({
+                await SessionManager.currentSession!.authenticatedServer.request({
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,
                     decoder: new ArrayDecoder(MemberBalanceItem)
                 });
                 await this.reload();
+                // Also reload member outstanding amount of the whole family
+                await this.reloadFamily();
             }
         })
         this.present({
@@ -230,6 +264,8 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                     decoder: new ArrayDecoder(MemberBalanceItem)
                 });
                 await this.reload();
+                // Also reload member outstanding amount of the whole family
+                await this.reloadFamily();
             }
         })
         this.present({
@@ -253,6 +289,7 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     }
 
     beforeDestroy() {
+        GlobalEventBus.removeListener(this)
         Request.cancelAll(this)
     }
 
@@ -292,6 +329,11 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         return false
     }
 
+    reloadFamily() {
+        // This can happen in the background
+        this.familyManager.loadFamily(this.member.id).catch(console.error)
+    }
+
     async reload() {
         try {
             this.loadingPayments = true;
@@ -301,8 +343,33 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                 decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>),
                 owner: this
             });
-            response.data.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt));
-            this.balanceItems = response.data;
+            response.data.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
+            
+            // Try to reuse existing references
+            const newItems = response.data
+
+            for (const item of this.balanceItems) {
+                const found = newItems.findIndex(i => i.id === item.id)
+                if (found !== -1) {
+                    // Replace with existing reference
+                    const newItem = newItems[found];
+
+                    // Same for payments
+                    for (const payment of item.payments) {
+                        const foundPayment = newItem.payments.findIndex(p => p.payment.id === payment.payment.id)
+                        if (foundPayment !== -1) {
+                            // Replace with existing reference
+                            payment.set(newItem.payments[foundPayment])
+                            newItem.payments[foundPayment] = payment
+                        }
+                    }
+                    
+                    item.set(newItem)
+                    newItems[found] = item
+                }
+            }
+            
+            this.balanceItems = newItems;
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

@@ -40,6 +40,10 @@ export class BalanceItem extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     createdAt = new Date()
+
+    get isPaid() {
+        return this.pricePaid === this.price;
+    }
 }
 
 export class BalanceItemPayment extends AutoEncoder {

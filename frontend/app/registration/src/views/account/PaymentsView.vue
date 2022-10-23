@@ -1,6 +1,6 @@
 <template>
     <div class="st-view payments-view">
-        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Mijn account" />
+        <STNavigationBar :pop="canPop" :dismiss="canDismiss" title="Afrekeningen" />
         <main>
             <h1>Afrekeningen</h1>
             <p>Hier kan je jouw betalingen opvolgen.</p>
@@ -20,6 +20,9 @@
                         <h3 class="style-title-list">
                             {{ item.description }}
                         </h3>
+                        <p v-if="item.memberId && getMember(item.memberId) && multipleMembers" class="style-description-small">
+                            {{ getMember(item.memberId).name }}
+                        </p>
                         <p class="style-description-small">
                             {{ formatDate(item.createdAt) }}
                         </p>
@@ -97,7 +100,7 @@
                 </STList>
             </template>
         </main>
-        <STToolbar v-if="outstandingBalance.totalOpen">
+        <STToolbar v-if="outstandingBalance.totalOpen > 0">
             <button slot="right" class="button primary full" type="button" @click="startPayment">
                 <span class="icon card" />
                 <span>Betalen</span>
@@ -108,18 +111,18 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { ErrorBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
-import { MemberBalanceItem } from "@stamhoofd/structures/esm/dist";
-import { Formatter } from '@stamhoofd/utility';
+import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import AddBalanceItemsToCartView from "./AddBalanceItemsToCartView.vue";
 import PaymentView from "./PaymentView.vue";
+
 
 
 @Component({
@@ -149,7 +152,15 @@ export default class PaymentsView extends Mixins(NavigationMixin){
                 }
             }
         }
-        return [...payments.values()]
+        return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))
+    }
+
+    get multipleMembers() {
+        return (MemberManager.members?.length ?? 0) > 1
+    }
+
+    getMember(memberId: string) {
+        return MemberManager.members?.find(m => m.id === memberId)
     }
 
     get succeededPayments() {
@@ -161,7 +172,7 @@ export default class PaymentsView extends Mixins(NavigationMixin){
                 }
             }
         }
-        return [...payments.values()]
+        return [...payments.values()].sort((a, b) => Sorter.byDateValue(a.paidAt ?? a.createdAt, b.paidAt ?? b.createdAt))
     }
 
     get outstandingBalance() {
@@ -218,7 +229,7 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     get outstandingItems() {
-        return this.balanceItems.filter(i => i.pricePaid < i.price)
+        return this.balanceItems.filter(i => !i.isPaid).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
     }
 
     paymentMethodName(payment: Payment) {
@@ -270,7 +281,7 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        UrlHelper.setUrl("/")
+        UrlHelper.setUrl("/payments")
         this.load().catch(console.error)
     }
 
@@ -287,10 +298,9 @@ export default class PaymentsView extends Mixins(NavigationMixin){
     }
 
     startPayment() {
-        CenteredMessage.fromError(new SimpleError({
-            code: 'not_available',
-            message: 'Deze functie is nog niet beschikbaar',
-        })).addCloseButton().show()
+        this.show(new ComponentWithProperties(AddBalanceItemsToCartView, {
+            balanceItems: this.balanceItems
+        }))
     }
 }
 </script>

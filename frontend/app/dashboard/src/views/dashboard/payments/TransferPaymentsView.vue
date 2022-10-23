@@ -15,8 +15,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Column, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod } from '@stamhoofd/structures';
-import { PaymentStatus } from "@stamhoofd/structures/esm/dist";
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod,PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 

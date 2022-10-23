@@ -233,9 +233,13 @@ body.modern.web-iOS {
             padding: 0 var(--st-horizontal-padding, 15px) 0 var(--st-horizontal-padding, 15px);
         }
 
+        flex-grow: 1;
+
         // the main extend has moved to .box general because CSS stops working (don't know why)
 
         &:not(.popup .st-view > .box) {
+            flex-grow: 0;
+
             @media (max-width: 800px) {
                 flex-grow: 1;
             }

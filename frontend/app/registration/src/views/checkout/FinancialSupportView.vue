@@ -103,7 +103,7 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
                 item.reduced = false
             }
         }
-        this.recalculate()
+        this.recalculate().catch(console.error)
     }
 
     async goNext() {
@@ -150,21 +150,14 @@ export default class FinancialSupportView extends Mixins(NavigationMixin){
         return this.CheckoutManager.cart
     }
 
-    recalculate() {
+    async recalculate() {
         try {
-            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            await CheckoutManager.recalculateCart()
             this.errorBox = null
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
         }
-        try {
-            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
-        } catch (e) {
-            // error in calculation!
-            console.error(e)
-        }
-        CheckoutManager.saveCart()
     }
 }
 </script>

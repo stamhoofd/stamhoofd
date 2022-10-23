@@ -14,7 +14,7 @@
                 Voeg alle inschrijvingen toe aan het mandje en bevestig ze.
             </p>
 
-            <p v-if="cart.items.length == 0" class="info-box">
+            <p v-if="cart.isEmpty" class="info-box">
                 Jouw mandje is leeg. Schrijf een lid in via het tabblad 'inschrijven'.
             </p>
             <STErrorsDefault :error-box="errorBox" />
@@ -24,22 +24,36 @@
                     <h3>
                         <span>{{ item.member.name }}</span>
                     </h3>
-                    <p v-if="!item.waitingList" class="description">
-                        {{ item.calculatedPrice | price }}
+                    <p class="description">
+                        {{ item.waitingList ? "Wachtlijst van " : "Inschrijven voor " }}{{ item.group.settings.name }}
                     </p>
 
-                    <footer>
-                        <p class="price">
-                            {{ item.waitingList ? "Wachtlijst van " : "" }}{{ item.group.settings.name }}
+                    <footer slot="right">
+                        <p v-if="item.calculatedPrice" class="price">
+                            {{ item.calculatedPrice | price }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" type="button" @click="deleteItem(item)" />
                         </div>
                     </footer>
+                </STListItem>
 
-                    <figure v-if="imageSrc(item)" slot="right">
-                        <img :src="imageSrc(item)">
-                    </figure>
+                <STListItem v-for="item in cart.balanceItems" :key="item.id" class="cart-item-row">
+                    <h3>
+                        <span>{{ item.item.description }}</span>
+                    </h3>
+                    <p class="style-description-small">
+                        Openstaand bedrag van {{ item.item.createdAt | date }}
+                    </p>
+
+                    <footer slot="right">
+                        <p class="price">
+                            {{ item.price | price }}
+                        </p>
+                        <div @click.stop>
+                            <button class="button icon trash gray" type="button" @click="deleteBalanceItem(item)" />
+                        </div>
+                    </footer>
                 </STListItem>
 
                 <STListItem v-if="cart.freeContribution > 0 && cart.items.length > 0">
@@ -60,7 +74,7 @@
             </button>
         </main>
 
-        <STToolbar v-if="cart.items.length > 0">
+        <STToolbar v-if="!cart.isEmpty">
             <span slot="left">Totaal: {{ cart.price | price }}</span>
 
             <button slot="right" class="button secundary" type="button" @click="addItem">
@@ -81,10 +95,11 @@
 
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, LoadingButton, StepperInput, Steps, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from '@stamhoofd/components';
-import { UrlHelper } from '@stamhoofd/networking';
-import { Group, RegisterItem } from '@stamhoofd/structures';
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { BalanceItemCartItem, Group, MemberBalanceItem, RegisterItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Watch } from 'vue-property-decorator';
 
@@ -107,18 +122,25 @@ import ChooseMemberView from '../overview/register-flow/ChooseMemberView.vue';
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter)
+        priceChange: Formatter.priceChange.bind(Formatter),
+        date: Formatter.date.bind(Formatter)
     }
 })
 export default class CartView extends Mixins(NavigationMixin){
     CheckoutManager = CheckoutManager
 
-    title = "Inschrijvingsmandje"
     loading = false
     errorBox: ErrorBox | null = null
 
     get cart() {
         return this.CheckoutManager.cart
+    }
+
+    get title() {
+        if (this.cart.balanceItems.length > 0) {
+            return "Winkelmandje"
+        }
+        return "Inschrijvingsmandje"
     }
 
     addItem() {
@@ -137,7 +159,7 @@ export default class CartView extends Mixins(NavigationMixin){
         if (this.loading) {
             return
         }
-        if (this.cart.items.length == 0) {
+        if (this.cart.isEmpty) {
             return
         }
         this.loading = true
@@ -174,6 +196,7 @@ export default class CartView extends Mixins(NavigationMixin){
             }
         } catch (e) {
             console.error(e)
+            this.recalculate().catch(console.error)
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
@@ -194,8 +217,13 @@ export default class CartView extends Mixins(NavigationMixin){
         }).setDisplayStyle("popup"))
     }
 
-    deleteItem(RegisterItem: RegisterItem) {
-        CheckoutManager.cart.removeItem(RegisterItem)
+    deleteItem(item: RegisterItem) {
+        CheckoutManager.cart.removeItem(item)
+        CheckoutManager.saveCart()
+    }
+
+    deleteBalanceItem(item: BalanceItemCartItem) {
+        CheckoutManager.cart.removeBalanceItem(item)
         CheckoutManager.saveCart()
     }
 
@@ -220,23 +248,12 @@ export default class CartView extends Mixins(NavigationMixin){
 
     async recalculate() {
         try {
-            // Reload groups
-            await OrganizationManager.reloadGroups()
-
-            // Revalidate
-            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            await CheckoutManager.recalculateCart(true)
             this.errorBox = null
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
         }
-        try {
-            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
-        } catch (e) {
-            // error in calculation!
-            console.error(e)
-        }
-        CheckoutManager.saveCart()
     }
 }
 </script>
@@ -269,8 +286,9 @@ export default class CartView extends Mixins(NavigationMixin){
 
         footer {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 15px;
         }
 
         img {
