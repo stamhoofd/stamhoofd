@@ -2,9 +2,10 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItemPayment, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, STPendingInvoice } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Member, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, Registration, STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 
@@ -66,6 +67,15 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         );
     }
+    
+    static async updateOutstanding(items: BalanceItem[]) {
+        // Update outstanding amount of related members and registrations
+        const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null)) as any
+        await Member.updateOutstandingBalance(memberIds)
+
+        const registrationIds: string[] = Formatter.uniqueArray(items.map(p => p.registrationId).filter(id => id !== null)) as any
+        await Registration.updateOutstandingBalance(registrationIds)
+    }
 
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
         if (payment.status === status) {
@@ -86,6 +96,8 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 for (const balanceItemPayment of balanceItemPayments) {
                     await balanceItemPayment.markPaid(organization);
                 }
+
+                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
             })
 
             if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
@@ -107,6 +119,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             return;
         }
 
+        // If OLD status was succeeded, we need to revert the actions
         if (payment.status === PaymentStatus.Succeeded) {
             // No longer succeeded
             await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
@@ -117,6 +130,8 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 for (const balanceItemPayment of balanceItemPayments) {
                     await balanceItemPayment.undoPaid(organization);
                 }
+
+                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
             })
         }
         
@@ -129,6 +144,8 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 for (const balanceItemPayment of balanceItemPayments) {
                     await balanceItemPayment.markFailed(organization);
                 }
+
+                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
             })
         }
 

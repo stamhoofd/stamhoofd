@@ -75,7 +75,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
 
     mounted() {
-        this.recalculate()
+        this.recalculate().catch(console.error)
     }
 
     get selectedPaymentMethod() {
@@ -92,7 +92,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     }
 
     get needsPay() {
-        return this.CheckoutManager.cart.items.find(i => !i.waitingList) && this.cart.price > 0
+        return this.cart.price > 0
     }
 
     get organization() {
@@ -169,8 +169,13 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             
         } catch (e) {
             console.error(e)
+            // Do a force refetch of data
+            await this.recalculate(true)
+
+            // Show error
             this.errorBox = new ErrorBox(e)
             this.loading = false
+            
         }
     }
 
@@ -178,21 +183,14 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         return this.CheckoutManager.cart
     }
 
-    recalculate() {
+    async recalculate(refetch = false) {
         try {
-            this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            await CheckoutManager.recalculateCart(refetch)
             this.errorBox = null
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)
         }
-        try {
-            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
-        } catch (e) {
-            // error in calculation!
-            console.error(e)
-        }
-        CheckoutManager.saveCart()
     }
 }
 </script>

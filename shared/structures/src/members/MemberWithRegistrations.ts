@@ -121,37 +121,6 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
         this.allGroups = groups.slice()
     }
 
-    get outstandingAmount() {
-        // TODO
-        return 0;
-        /*
-        // Warning: some registrations might share the same payments!
-        // Don't count those twice!
-        const counted = new Set<string>()
-        return this.registrations.reduce((o, r) => {
-            if (!r.payment || r.payment.status === PaymentStatus.Succeeded) {
-                return o
-            }
-
-            if (!counted.has(r.payment.id)) {
-                counted.add(r.payment.id)
-                return r.payment.price + o
-            }
-            
-            return o
-        }, 0)*/
-    }
-    
-    get paid(): boolean {
-        // TODO
-        return false;
-        // return !this.registrations.find(r => r.payment && r.payment.status != PaymentStatus.Succeeded)
-    }
-
-    get info(): string {
-        return this.paid ? "" : "Lidgeld nog niet betaald";
-    }
-
     getAllEmails(): string[] {
         const emails = new Set<string>(this.details.getAllEmails())
 
@@ -333,21 +302,13 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
                 defaultMode: ChoicesFilterMode.Or
             }),
 
-            new ChoicesFilterDefinition<MemberWithRegistrations>({
-                id: "paid", 
-                name: "Betaling", 
-                choices: [
-                    new ChoicesFilterChoice("checked", "Betaald"),
-                    new ChoicesFilterChoice("not_checked", "Niet betaald"),
-                ], 
+            new NumberFilterDefinition<MemberWithRegistrations>({
+                id: "outstandingBalance", 
+                name: "Openstaand saldo", 
                 getValue: (member) => {
-                    // TODO: remove spaces
-                    if (member.paid) {
-                        return ["checked"]
-                    }
-                    return ["not_checked"]
+                    return member.outstandingBalance
                 },
-                defaultMode: ChoicesFilterMode.Or
+                currency: true
             }),
             new ChoicesFilterDefinition<MemberWithRegistrations>({
                 id: "financial_support", 

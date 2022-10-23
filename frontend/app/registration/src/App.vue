@@ -16,27 +16,10 @@ import { Organization } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
-import { CheckoutManager } from './classes/CheckoutManager';
 import { MemberManager } from './classes/MemberManager';
-import { TabBarItem } from "./classes/TabBarItem";
 import InvalidOrganizationView from './views/errors/InvalidOrganizationView.vue';
 import HomeView from './views/login/HomeView.vue';
 import NewOverviewView from './views/overview/NewOverviewView.vue';
-
-async function getDefaultView() {
-    //if (MemberManager.members!.find(m => m.activeRegistrations.length > 0)) {
-    //    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default
-    //}
-    return (await import(/* webpackChunkName: "RegistrationOverview" */ "./views/overview/OverviewView.vue")).default;
-}
-
-async function getAccountView() {
-    return (await import(/* webpackChunkName: "AccountSettingsView" */ "./views/account/AccountSettingsView.vue")).default;
-}
-
-async function getCartView() {
-    return (await import(/* webpackChunkName: "CartView" */ "./views/checkout/CartView.vue")).default;
-}
 
 @Component({
     components: {
@@ -112,37 +95,8 @@ export default class App extends Vue {
                     promise: async () => {
                         await MemberManager.loadMembers();
 
-                        const basket = new TabBarItem(
-                            "Mandje",
-                            "basket",
-                            new ComponentWithProperties(NavigationController, { 
-                                root: new ComponentWithProperties(await getCartView(), {}),
-                            })
-                        )
-                        CheckoutManager.watchTabBar = basket
-                        basket.badge = CheckoutManager.cart.count > 0 ? (CheckoutManager.cart.count + "") : null
-
                         return new ComponentWithProperties(ModalStackComponent, {
-                            root: /*new ComponentWithProperties(RegistrationTabBarController, { 
-                                items: [
-                                    new TabBarItem(
-                                        "Inschrijven",
-                                        "edit",
-                                        new ComponentWithProperties(NavigationController, { 
-                                            root: new ComponentWithProperties(await getDefaultView(), {}),
-                                        })
-                                    ),
-                                    new TabBarItem(
-                                        "Account",
-                                        "user",
-                                        new ComponentWithProperties(NavigationController, { 
-                                            root: new ComponentWithProperties(await getAccountView(), {}),
-                                        })
-                                    ),
-                                    basket
-                                ]
-                            })*/
-                            new ComponentWithProperties(NavigationController, { 
+                            root: new ComponentWithProperties(NavigationController, { 
                                 root: new ComponentWithProperties(NewOverviewView, {})
                             })
                         })

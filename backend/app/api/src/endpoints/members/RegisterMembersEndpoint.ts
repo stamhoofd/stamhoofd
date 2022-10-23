@@ -3,18 +3,12 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Group } from '@stamhoofd/models';
-import { Member, RegistrationWithMember } from '@stamhoofd/models';
-import { MolliePayment } from '@stamhoofd/models';
-import { MollieToken } from '@stamhoofd/models';
-import { PayconiqPayment } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
-import { Registration } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, Payment as PaymentStruct, PaymentMethod,PaymentMethodHelper,PaymentProvider,PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
+import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, Registration, Token } from '@stamhoofd/models';
+import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, MemberBalanceItem, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
+import { ExchangePaymentEndpoint } from '../payments/ExchangePaymentEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout
@@ -67,7 +61,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const registrations: RegistrationWithMemberAndGroup[] = []
         const payRegistrations: {registration: RegistrationWithMemberAndGroup, item: IDRegisterItem}[] = []
 
-        if (request.body.cart.items.length == 0) {
+        if (request.body.cart.isEmpty) {
             throw new SimpleError({
                 code: "empty_data",
                 message: "Oeps, jouw mandje is leeg. Voeg eerst inschrijvingen toe voor je verder gaat."
@@ -90,8 +84,23 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Should update the calculation methods to also accept a model by using interfaces
         const groupsStructure = groups.map(g => g.getStructure())
 
+        // Validate balance items (can only happen serverside)
+        const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id)
+        let memberBalanceItems: MemberBalanceItem[] = []
+        let balanceItems: BalanceItem[] = []
+        if (balanceItemIds.length > 0) {
+            balanceItems = await BalanceItem.where({ id: { sign:'IN', value: balanceItemIds }, organizationId: organization.id })
+            if (balanceItems.length != balanceItemIds.length) {
+                throw new SimpleError({
+                    code: "invalid_data",
+                    message: "Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast. Herlaad de pagina en probeer opnieuw."
+                })
+            }
+            memberBalanceItems = await BalanceItem.getMemberStructure(balanceItems)
+        }
+
         // Validate the cart
-        request.body.cart.validate(members, groupsStructure, organization.meta.categories)
+        request.body.cart.validate(members, groupsStructure, organization.meta.categories, memberBalanceItems)
 
         // Recalculate the price
         request.body.cart.calculatePrices(members, groupsStructure, organization.meta.categories)
@@ -101,6 +110,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             throw new SimpleError({
                 code: "empty_data",
                 message: "Oeps! De prijs is gewijzigd terwijl je aan het inschrijven was. De totaalprijs kwam op "+Formatter.price(totalPrice)+", in plaats van "+Formatter.price(clientSidePrice)+". Herlaad je pagina en probeer opnieuw om de aanpassingen te zien doorkomen. Daarna kan je verder met inschrijven. Neem contact op met "+request.$t("shared.emails.general")+" als je dit probleem blijft krijgen."
+            })
+        }
+
+        if (totalPrice < 0) {
+            throw new SimpleError({
+                code: "empty_data",
+                message: "Oeps! De totaalprijs is negatief."
             })
         }
 
@@ -176,188 +192,145 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registrations.push(registration)
         }
 
-        // TODO: validate payment method
-        
-        if (payRegistrations.length > 0) {
-            const payment = new Payment()
-            payment.userId = user.id
-            payment.organizationId = user.organizationId
-            payment.method = request.body.paymentMethod
-            payment.status = PaymentStatus.Created
-            payment.price = totalPrice
-            payment.freeContribution = request.body.cart.freeContribution
+        // Validate payment method
+        if (totalPrice > 0) {
+            const allowedPaymentMethods = organization.meta.paymentMethods
 
-            if (payment.method == PaymentMethod.Transfer) {
-                // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
-                payment.transferSettings = user.organization.mappedTransferSettings
-                payment.generateDescription(user.organization, Formatter.uniqueArray(payRegistrations.map(r => r.registration.member.details.firstName)).join(", ") + " " + Formatter.uniqueArray(payRegistrations.map(r => r.registration.member.details.lastName)).sort().join("-"))
+            if (!allowedPaymentMethods.includes(request.body.paymentMethod)) {
+                throw new SimpleError({
+                    code: "invalid_payment_method",
+                    message: "Oeps, je hebt geen geldige betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw. Herlaad de pagina indien nodig."
+                })
             }
-            payment.paidAt = null
-
-            if (totalPrice == 0) {
-                payment.status = PaymentStatus.Succeeded
-                payment.method = PaymentMethod.Unknown
-                payment.paidAt = new Date()
-            }
-
-            // Determine the payment provider
-            // Throws if invalid
-            payment.provider = organization.getPaymentProviderFor(payment.method)
-
-            await payment.save()
-
-            // Save registrations and add extra data if needed
-            for (const bundle of payRegistrations) {
-                const registration = bundle.registration;
-
-                if (!registration.waitingList) {
-                    // Replaced with balance items
-                    // registration.paymentId = payment.id
-
-                    registration.reservedUntil = null
-
-                    if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
-                        await registration.markValid()
-                    } else {
-                        // Reserve registration for 30 minutes (if needed)
-                        const group = groups.find(g => g.id === registration.groupId)
-
-                        if (group && group.settings.maxMembers !== null) {
-                            registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
-                        }
-                        await registration.save()
-                    }
-                }
-                
-                await registration.save()
-
-                // Create balance item
-                const balanceItem = new BalanceItem();
-                balanceItem.registrationId = registration.id;
-                balanceItem.price = bundle.item.calculatedPrice
-                balanceItem.description = `Inschrijving ${registration.group.settings.name}`
-                balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? bundle.item.calculatedPrice : 0;
-                balanceItem.memberId = registration.memberId;
-                balanceItem.userId = user.id
-                balanceItem.organizationId = organization.id;
-                balanceItem.status = payment.status == PaymentStatus.Succeeded ? BalanceItemStatus.Paid : (registration.registeredAt ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
-                await balanceItem.save();
-
-                // Create one balance item payment to pay it in one payment
-                const balanceItemPayment = new BalanceItemPayment()
-                balanceItemPayment.balanceItemId = balanceItem.id;
-                balanceItemPayment.paymentId = payment.id;
-                balanceItemPayment.organizationId = organization.id;
-                balanceItemPayment.price = balanceItem.price;
-                await balanceItemPayment.save();
-            }
-
-            if (request.body.cart.freeContribution) {
-                // Create balance item
-                const balanceItem = new BalanceItem();
-                balanceItem.price = request.body.cart.freeContribution
-                balanceItem.description = `Vrije bijdrage`
-                balanceItem.pricePaid = 0;
-                balanceItem.userId = user.id
-                balanceItem.organizationId = organization.id;
-                balanceItem.status = (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
-                await balanceItem.save();
-
-                // Create one balance item payment to pay it in one payment
-                const balanceItemPayment = new BalanceItemPayment()
-                balanceItemPayment.balanceItemId = balanceItem.id;
-                balanceItemPayment.paymentId = payment.id;
-                balanceItemPayment.organizationId = organization.id;
-                balanceItemPayment.price = balanceItem.price;
-                await balanceItemPayment.save();
-            }
-
-            // Update occupancy
-            for (const group of groups) {
-                if (registrations.find(p => p.groupId === group.id)) {
-                    await group.updateOccupancy()
-                    await group.save()
-                }
-            }
-
-            if (payment.method == PaymentMethod.Transfer) {
-                // Send a small reminder email
-                await Registration.sendTransferEmail(user, payment)
-            }
-
-            let paymentUrl: string | null = null
-            const description = 'Inschrijving bij '+user.organization.name
-            if (payment.status != PaymentStatus.Succeeded) {
-                const redirectUrl = "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id)
-                const webhookUrl = 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
-
-               if (payment.provider === PaymentProvider.Mollie) {
-                    
-                    // Mollie payment
-                    const token = await MollieToken.getTokenFor(user.organizationId)
-                    if (!token) {
-                        throw new SimpleError({
-                            code: "",
-                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
-                        })
-                    }
-                    const profileId = await token.getProfileId()
-                    if (!profileId) {
-                        throw new SimpleError({
-                            code: "",
-                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is tijdelijk onbeschikbaar"
-                        })
-                    }
-                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                    const molliePayment = await mollieClient.payments.create({
-                        amount: {
-                            currency: 'EUR',
-                            value: (totalPrice / 100).toFixed(2)
-                        },
-                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                        testmode: STAMHOOFD.environment != 'production',
-                        profileId,
-                        description,
-                        redirectUrl,
-                        webhookUrl,
-                        metadata: {
-                            paymentId: payment.id,
-                        },
-                    });
-                    paymentUrl = molliePayment.getCheckoutUrl()
-
-                    // Save payment
-                    const dbPayment = new MolliePayment()
-                    dbPayment.paymentId = payment.id
-                    dbPayment.mollieId = molliePayment.id
-                    await dbPayment.save();
-                } else if (payment.provider === PaymentProvider.Payconiq) {
-                    paymentUrl = await PayconiqPayment.createPayment(payment, user.organization, description)
-                } else if (payment.provider == PaymentProvider.Buckaroo) {
-                    // Increase request timeout because buckaroo is super slow
-                    request.request.request?.setTimeout(60 * 1000)
-                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
-                    const ip = request.request.getIP()
-                    paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, webhookUrl)
-                    await payment.save()
-
-                    // TypeScript doesn't understand that the status can change and isn't a const....
-                    if ((payment.status as any) === PaymentStatus.Failed) {
-                        throw new SimpleError({
-                            code: "payment_failed",
-                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
-                        })
-                    }
-                }
-            }
-
-            return new Response(RegisterResponse.create({
-                payment: PaymentStruct.create(payment),
-                members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
-                registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
-                paymentUrl
-            }));
+        } else {
+            request.body.paymentMethod = PaymentMethod.Unknown
         }
+
+        const payment = new Payment()
+        payment.userId = user.id
+        payment.organizationId = user.organizationId
+        payment.method = request.body.paymentMethod
+        payment.status = PaymentStatus.Created
+        payment.price = totalPrice
+        payment.freeContribution = request.body.cart.freeContribution
+
+        if (payment.method == PaymentMethod.Transfer) {
+            // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
+            payment.transferSettings = user.organization.mappedTransferSettings
+
+            const memberNames = Formatter.uniqueArray([
+                ...payRegistrations.map(r => r.registration.member.details.firstName),
+                ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details?.firstName).filter(n => n !== undefined)
+            ])
+            const memberLastNames = Formatter.uniqueArray([
+                ...payRegistrations.map(r => r.registration.member.details.lastName),
+                ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details?.lastName).filter(n => n !== undefined)
+            ])
+            payment.generateDescription(user.organization, memberNames.join(", ") + " " + memberLastNames.sort().join("-"))
+        }
+        payment.paidAt = null
+
+        if (totalPrice == 0) {
+            payment.status = PaymentStatus.Succeeded
+            payment.method = PaymentMethod.Unknown
+            payment.paidAt = new Date()
+        }
+
+        // Determine the payment provider
+        // Throws if invalid
+        payment.provider = organization.getPaymentProviderFor(payment.method)
+
+        await payment.save()
+        const items: BalanceItem[] = []
+
+        // Save registrations and add extra data if needed
+        for (const bundle of payRegistrations) {
+            const registration = bundle.registration;
+
+            if (!registration.waitingList) {
+                // Replaced with balance items
+                // registration.paymentId = payment.id
+
+                registration.reservedUntil = null
+
+                if (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale || payment.status == PaymentStatus.Succeeded) {
+                    await registration.markValid()
+                } else {
+                    // Reserve registration for 30 minutes (if needed)
+                    const group = groups.find(g => g.id === registration.groupId)
+
+                    if (group && group.settings.maxMembers !== null) {
+                        registration.reservedUntil = new Date(new Date().getTime() + 1000*60*30)
+                    }
+                    await registration.save()
+                }
+            }
+            
+            await registration.save()
+
+            // Create balance item
+            const balanceItem = new BalanceItem();
+            balanceItem.registrationId = registration.id;
+            balanceItem.price = bundle.item.calculatedPrice
+            balanceItem.description = `Inschrijving ${registration.group.settings.name}`
+            balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? bundle.item.calculatedPrice : 0;
+            balanceItem.memberId = registration.memberId;
+            balanceItem.userId = user.id
+            balanceItem.organizationId = organization.id;
+            balanceItem.status = payment.status == PaymentStatus.Succeeded ? BalanceItemStatus.Paid : (registration.registeredAt ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
+            await balanceItem.save();
+
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment()
+            balanceItemPayment.balanceItemId = balanceItem.id;
+            balanceItemPayment.paymentId = payment.id;
+            balanceItemPayment.organizationId = organization.id;
+            balanceItemPayment.price = balanceItem.price;
+            await balanceItemPayment.save();
+
+            items.push(balanceItem)
+        }
+
+        if (request.body.cart.freeContribution) {
+            // Create balance item
+            const balanceItem = new BalanceItem();
+            balanceItem.price = request.body.cart.freeContribution
+            balanceItem.description = `Vrije bijdrage`
+            balanceItem.pricePaid = 0;
+            balanceItem.userId = user.id
+            balanceItem.organizationId = organization.id;
+
+            // Connect this to the oldest member
+            const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0]
+            if (oldestMember) {
+                balanceItem.memberId = oldestMember.id;
+            }
+            balanceItem.status = (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
+            await balanceItem.save();
+
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment()
+            balanceItemPayment.balanceItemId = balanceItem.id;
+            balanceItemPayment.paymentId = payment.id;
+            balanceItemPayment.organizationId = organization.id;
+            balanceItemPayment.price = balanceItem.price;
+            await balanceItemPayment.save();
+
+            items.push(balanceItem)
+        }
+
+        // Create a payment pending balance item
+        for (const item of request.body.cart.balanceItems) {
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment()
+            balanceItemPayment.balanceItemId = item.item.id;
+            balanceItemPayment.paymentId = payment.id;
+            balanceItemPayment.organizationId = organization.id;
+            balanceItemPayment.price = item.price;
+            await balanceItemPayment.save();
+        }
+        items.push(...balanceItems)
+        await ExchangePaymentEndpoint.updateOutstanding(items)
 
         // Update occupancy
         for (const group of groups) {
@@ -366,11 +339,84 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 await group.save()
             }
         }
-        
+
+        // Update balance items
+        if (payment.method == PaymentMethod.Transfer) {
+            // Send a small reminder email
+            await Registration.sendTransferEmail(user, payment)
+        }
+
+        let paymentUrl: string | null = null
+        const description = 'Inschrijving '+user.organization.name
+        if (payment.status != PaymentStatus.Succeeded) {
+            const redirectUrl = "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id)
+            const webhookUrl = 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
+
+            if (payment.provider === PaymentProvider.Mollie) {
+                
+                // Mollie payment
+                const token = await MollieToken.getTokenFor(user.organizationId)
+                if (!token) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
+                    })
+                }
+                const profileId = await token.getProfileId()
+                if (!profileId) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is tijdelijk onbeschikbaar"
+                    })
+                }
+                const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                const molliePayment = await mollieClient.payments.create({
+                    amount: {
+                        currency: 'EUR',
+                        value: (totalPrice / 100).toFixed(2)
+                    },
+                    method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                    testmode: STAMHOOFD.environment != 'production',
+                    profileId,
+                    description,
+                    redirectUrl,
+                    webhookUrl,
+                    metadata: {
+                        paymentId: payment.id,
+                    },
+                });
+                paymentUrl = molliePayment.getCheckoutUrl()
+
+                // Save payment
+                const dbPayment = new MolliePayment()
+                dbPayment.paymentId = payment.id
+                dbPayment.mollieId = molliePayment.id
+                await dbPayment.save();
+            } else if (payment.provider === PaymentProvider.Payconiq) {
+                paymentUrl = await PayconiqPayment.createPayment(payment, user.organization, description)
+            } else if (payment.provider == PaymentProvider.Buckaroo) {
+                // Increase request timeout because buckaroo is super slow (in development)
+                request.request.request?.setTimeout(60 * 1000)
+                const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+                const ip = request.request.getIP()
+                paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, webhookUrl)
+                await payment.save()
+
+                // TypeScript doesn't understand that the status can change and isn't a const....
+                if ((payment.status as any) === PaymentStatus.Failed) {
+                    throw new SimpleError({
+                        code: "payment_failed",
+                        message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
+                    })
+                }
+            }
+        }
+
         return new Response(RegisterResponse.create({
-            payment: null,
+            payment: PaymentStruct.create(payment),
             members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
-            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r))
+            registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
+            paymentUrl
         }));
     }
 }

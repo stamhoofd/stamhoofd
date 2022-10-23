@@ -11,7 +11,7 @@
                     <span class="icon external" />
                     <span>Terug naar website</span>
                 </a>
-                <button class="primary button" type="button" @click="openCart">
+                <button class="primary button" type="button" @click="openCart(true)">
                     <span class="icon basket" />
                     <span>{{ cart.count }}</span>
                 </button>
@@ -34,14 +34,14 @@
                         <span>Schrijf een lid in</span>
                     </button>
                 </template>
-                <template v-if="cart.count || notYetPaidBalance || suggestedRegistrations.length">
+                <template v-if="cart.count || notYetPaidBalance > 0 || suggestedRegistrations.length">
                     <hr>
                     <h2>
                         Snelle acties
                     </h2>
 
                     <STList>
-                        <STListItem v-if="cart.count" class="left-center right-stack" :selectable="true" @click="openCart">
+                        <STListItem v-if="cart.count" class="left-center right-stack" :selectable="true" @click="openCart(true)">
                             <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
                             <h3 class="style-title-list">
                                 Mandje afrekenen
@@ -57,7 +57,7 @@
                             <span slot="right" class="icon arrow-right-small gray" />
                         </STListItem>
 
-                        <STListItem v-if="notYetPaidBalance" class="left-center" :selectable="true" @click="managePayments">
+                        <STListItem v-if="notYetPaidBalance > 0" class="left-center" :selectable="true" @click="managePayments(true)">
                             <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img">
                             <h3 class="style-title-list">
                                 Betaal jouw openstaand bedrag
@@ -125,7 +125,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="managePayments">
+                    <STListItem :selectable="true" class="left-center" @click="managePayments(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
                         <h2 class="style-title-list">
                             Afrekeningen en openstaande rekening
@@ -204,11 +204,15 @@ import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
 })
 export default class NewOverviewView extends Mixins(NavigationMixin){
     loadingBalance = false
-    balanceItems: MemberBalanceItem[] = []
     MemberManager = MemberManager
+    CheckoutManager = CheckoutManager
 
     created() {
-        this.loadBalance().catch(console.error)
+        this.updateCartAndBalance().catch(console.error)
+    }
+
+    get balanceItems() {
+        return CheckoutManager.balanceItems ?? []
     }
 
     mounted() {
@@ -216,9 +220,18 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
         const searchParams = UrlHelper.shared.getSearchParams()
         UrlHelper.setUrl("/")
         document.title = "Ledenportaal - " + this.organization.name
-        
 
-        if (parts.length == 1 && parts[0] == 'payment' && searchParams.get("id")) {
+        if (parts.length >= 1 && parts[0] == 'cart') {
+            if (parts.length === 1) {
+                UrlHelper.shared.clear()
+            }
+            this.openCart(false)
+        } else if (parts.length >= 1 && parts[0] == 'payments') {
+            if (parts.length === 1) {
+                UrlHelper.shared.clear()
+            }
+            this.managePayments(false)
+        } else if (parts.length == 1 && parts[0] == 'payment' && searchParams.get("id")) {
             UrlHelper.shared.clear()
 
             const paymentId = searchParams.get("id")
@@ -269,15 +282,10 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
         }
     }
 
-    async loadBalance() {
+    async updateCartAndBalance() {
         this.loadingBalance = true;
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: 'GET',
-                path: '/balance',
-                decoder: new ArrayDecoder(MemberBalanceItem as Decoder<MemberBalanceItem>)
-            })
-            this.balanceItems = response.data
+            await CheckoutManager.recalculateCart(false)
         } catch (e) {
             // Fail silently here
             console.error(e);
@@ -395,14 +403,15 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
         })
     }
 
-    openCart() {
+    openCart(animated = true) {
         this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(CartView, {})
                 })
             ],
-            modalDisplayStyle: "popup"
+            modalDisplayStyle: "popup",
+            animated
         })
     }
 
@@ -467,7 +476,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
         })
     }
 
-    managePayments() {
+    managePayments(animated = true) {
         this.present({
             components: [
                 new ComponentWithProperties(
@@ -477,7 +486,8 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
                     }
                 )
             ],
-            modalDisplayStyle: "popup"
+            modalDisplayStyle: "popup",
+            animated
         })
     }
 }

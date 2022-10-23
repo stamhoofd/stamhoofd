@@ -51,7 +51,7 @@
                         </p>
                     </STListItem>
 
-                    <STListItem v-if="payment.method == 'Transfer'">
+                    <STListItem v-if="isManualMethod">
                         <h3 class="style-definition-label">
                             Aangemaakt op
                         </h3>
@@ -70,7 +70,7 @@
                     </STListItem>
                 </STList>
 
-                <template v-if="payment.method == 'Transfer'">
+                <template v-if="isManualMethod">
                     <hr>
                     <h2>Acties</h2>
 
@@ -107,8 +107,11 @@
                             <h2 class="style-title-list">
                                 Toch niet betaald
                             </h2>
-                            <p class="style-description">
+                            <p v-if="payment.method == 'Transfer'" class="style-description">
                                 Overschrijving per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.
+                            </p>
+                            <p v-else class="style-description">
+                                Betaling per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.
                             </p>
                             <button slot="right" type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
@@ -121,8 +124,11 @@
                             <h2 class="style-title-list">
                                 Annuleren
                             </h2>
-                            <p class="style-description">
+                            <p v-if="payment.method == 'Transfer'" class="style-description">
                                 Annuleer de overschrijving zodat voor een andere betaalmethode gekozen kan worden.
+                            </p>
+                            <p v-else class="style-description">
+                                Annuleer de betaling zodat voor een andere betaalmethode gekozen kan worden.
                             </p>
                             <button slot="right" type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon canceled" />
@@ -189,7 +195,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CopyableDirective, ErrorBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
@@ -220,6 +226,10 @@ export default class PaymentView extends Mixins(NavigationMixin) {
 
     get title() {
         return PaymentMethodHelper.getNameCapitalized(this.initialPayment.method ?? PaymentMethod.Unknown)
+    }
+
+    get isManualMethod() {
+        return this.initialPayment.method === PaymentMethod.Transfer || this.initialPayment.method === PaymentMethod.PointOfSale || this.initialPayment.method === PaymentMethod.Unknown
     }
 
     get mappedPayment() {
@@ -469,6 +479,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             this.payment = response.data[0];
             this.initialPayment.set(this.payment);
 
+            GlobalEventBus.sendEvent('paymentPatch', this.payment).catch(console.error);
             new Toast("Betaalstatus gewijzigd", "success").setHide(1000).show()
         } catch (e) {
             Toast.fromError(e).show()

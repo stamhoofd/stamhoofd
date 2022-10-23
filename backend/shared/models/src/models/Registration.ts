@@ -75,14 +75,17 @@ export class Registration extends Model {
     @column({ type: "datetime", nullable: true})
     deactivatedAt: Date | null = null
 
-    /*@column({ type: "integer", nullable: true})
-    cachedPrice: number | null = null
-
-    @column({ type: "integer", nullable: true})
-    cachedPricePaid: number | null = null*/
+    /**
+     * Part of price that is paid
+     */
+    @column({ type: "integer" })
+    pricePaid = 0
 
     getStructure() {
-        return RegistrationStructure.create(this)
+        return RegistrationStructure.create({
+            ...this,
+            price: this.price ?? 0
+        })
     }
 
     hasAccess(user: User, groups: import('./').Group[], permissionLevel: PermissionLevel) {
@@ -108,6 +111,45 @@ export class Registration extends Model {
 
     hasWriteAccess(user: User, groups: import('./').Group[]) {
         return this.hasAccess(user, groups, PermissionLevel.Write)
+    }
+
+    /**
+     * Update the outstanding balance of multiple members in one go (or all members)
+     */
+    static async updateOutstandingBalance(registrationIds: string[] | 'all') {
+        if (registrationIds !== 'all' && registrationIds.length == 0) {
+            return
+        }
+
+        const params: any[] = []
+        let firstWhere = ''
+        let secondWhere = ''
+
+        if (registrationIds !== 'all') {
+            firstWhere = ` AND registrationId IN (?)`
+            params.push(registrationIds)
+
+            secondWhere = `WHERE registrations.id IN (?)`
+            params.push(registrationIds)
+        }
+        
+        const query = `UPDATE
+            registrations
+            LEFT JOIN (
+                SELECT
+                    registrationId,
+                    sum(price) AS price,
+                    sum(pricePaid) AS pricePaid
+                FROM
+                    balance_items
+                WHERE status != 'Hidden'${firstWhere}
+                GROUP BY
+                    registrationId
+            ) i ON i.registrationId = registrations.id 
+        SET registrations.price = i.price, registrations.pricePaid = i.pricePaid
+        ${secondWhere}`
+        
+        await Database.update(query, params)
     }
 
     /**

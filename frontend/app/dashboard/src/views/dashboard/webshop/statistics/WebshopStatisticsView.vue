@@ -85,8 +85,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, DateOption, GraphView, Spinner, STInputBox, STList, STListItem,STNavigationBar, Toast,   } from "@stamhoofd/components";
 import { GraphViewConfiguration } from "@stamhoofd/components/src/views/GraphViewConfiguration";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
-import { Category, Graph, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
-import { GraphData } from "@stamhoofd/structures/esm/dist";
+import { Category, Graph, GraphData, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 

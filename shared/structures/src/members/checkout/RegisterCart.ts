@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from "@simonbackx/simple-encoding"
 import { SimpleErrors } from "@simonbackx/simple-errors"
 
+import { MemberBalanceItem } from "../../BalanceItem"
 import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
 // eslint bug marks types as "unused"
@@ -11,7 +12,7 @@ import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistra
 import { MemberWithRegistrations } from "../MemberWithRegistrations"
 import { RegisterCartPriceCalculator } from "./RegisterCartPriceCalculator"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { IDRegisterItem, RegisterItem } from "./RegisterItem"
+import { BalanceItemCartItem, IDRegisterItem, RegisterItem } from "./RegisterItem"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 /**
@@ -19,6 +20,7 @@ import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations
  */
 export class RegisterCart {
     items: RegisterItem[] = []
+    balanceItems: BalanceItemCartItem[] = []
     freeContribution = 0
 
     constructor(items: RegisterItem[] = []) {
@@ -27,12 +29,14 @@ export class RegisterCart {
 
     clear() {
         this.items = []
+        this.balanceItems = []
         this.freeContribution = 0
     }
 
     convert(): IDRegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),
+            balanceItems: this.balanceItems,
             freeContribution: this.freeContribution
         })
     }
@@ -40,11 +44,17 @@ export class RegisterCart {
     get price(): number {
         return this.items.reduce((total, item) => {
             return total + item.calculatedPrice
-        }, 0) + this.freeContribution
+        }, 0) + this.freeContribution + this.balanceItems.reduce((total, item) => {
+            return total + item.price
+        }, 0);
     }
 
     get count(): number {
-        return this.items.length
+        return this.items.length + this.balanceItems.length
+    }
+
+    get isEmpty(): boolean {
+        return this.count === 0
     }
 
     hasItem(item: RegisterItem): boolean {
@@ -58,15 +68,7 @@ export class RegisterCart {
     }
 
     addItem(item: RegisterItem): void {
-        const c = item.id
-        for (const [index, i,] of this.items.entries()) {
-            if (i.id === c) {
-
-                // replace
-                this.items.splice(index, 1)
-                break;
-            }
-        }
+        this.removeItem(item)
         this.items.push(item)
     }
 
@@ -80,7 +82,22 @@ export class RegisterCart {
         }
     }
 
-    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]): void {
+    addBalanceItem(item: BalanceItemCartItem): void {
+        this.removeBalanceItem(item)
+        this.balanceItems.push(item)
+    }
+
+    removeBalanceItem(item: BalanceItemCartItem): void {
+        const c = item.item.id
+        for (const [index, i] of this.balanceItems.entries()) {
+            if (i.item.id === c) {
+                this.balanceItems.splice(index, 1)
+                return
+            }
+        }
+    }
+
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], memberBalanceItems: MemberBalanceItem[]): void {
         const newItems: RegisterItem[] = []
         const errors = new SimpleErrors()
 
@@ -94,6 +111,18 @@ export class RegisterCart {
         }
 
         this.items = newItems
+
+        const newBalanceItems: BalanceItemCartItem[] = []
+        for (const item of this.balanceItems) {
+            try {
+                item.validate(memberBalanceItems)
+                newBalanceItems.push(item)
+            } catch (e) {
+                errors.addError(e)
+            }
+        }
+        this.balanceItems = newBalanceItems
+        
         errors.throwIfNotEmpty()
     }
 
@@ -109,13 +138,26 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(IDRegisterItem) })
     items: IDRegisterItem[] = []
 
+    @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
+    balanceItems: BalanceItemCartItem[] = []
+
     @field({ decoder: IntegerDecoder, version: 91 })
     freeContribution = 0
 
     get price(): number {
         return this.items.reduce((total, item) => {
             return total + item.calculatedPrice
-        }, 0) + this.freeContribution
+        }, 0) + this.freeContribution + this.balanceItems.reduce((total, item) => {
+            return total + item.price
+        }, 0);
+    }
+
+    get count(): number {
+        return this.items.length + this.balanceItems.length
+    }
+
+    get isEmpty(): boolean {
+        return this.count === 0
     }
 
     convert(organization: Organization, members: MemberWithRegistrations[]): RegisterCart {
@@ -127,12 +169,13 @@ export class IDRegisterCart extends AutoEncoder {
             }
             return []
         })
+        cart.balanceItems = this.balanceItems
         cart.freeContribution = this.freeContribution
 
         return cart
     }
 
-    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]): void {
+    validate(family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], memberBalanceItems: MemberBalanceItem[]): void {
         const newItems: IDRegisterItem[] = []
         const errors = new SimpleErrors()
 
@@ -146,6 +189,18 @@ export class IDRegisterCart extends AutoEncoder {
         }
 
         this.items = newItems
+
+        const newBalanceItems: BalanceItemCartItem[] = []
+        for (const item of this.balanceItems) {
+            try {
+                item.validate(memberBalanceItems)
+                newBalanceItems.push(item)
+            } catch (e) {
+                errors.addError(e)
+            }
+        }
+        this.balanceItems = newBalanceItems
+
         errors.throwIfNotEmpty()
     }
 

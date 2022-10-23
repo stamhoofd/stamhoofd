@@ -283,7 +283,7 @@ export class Payment extends Model {
                         ...item,
                         balanceItem: BalanceItemDetailed.create({
                             ...balanceItem,
-                            registration: registration ? RegistrationStruct.create(registration) : null,
+                            registration: registration ? registration.getStructure() : null,
                             member: member ? MemberStruct.create(member!) : null,
                             order: order ? OrderStruct.create(order) : null
                         })

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-balance-item-view" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-balance-item-view" :loading="loading" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -53,7 +53,7 @@
             </p>
 
             <STList v-else>
-                <STListItem v-for="payment of patchedBalanceItem.payments" :key="payment.id" :selectable="true" @click="openPayment(payment.payment)">
+                <STListItem v-for="payment of patchedBalanceItem.payments" :key="payment.id" :selectable="true" class="right-stack" @click="openPayment(payment.payment)">
                     <h3 class="style-title-list">
                         {{ getPaymentMethodName(payment.payment.method) }}
                     </h3>
@@ -64,8 +64,9 @@
                         Aangemaakt op {{ formatDate(payment.payment.createdAt) }}
                     </p>
 
-                    <span v-if="payment.payment.status === 'Failed'" slot="right" class="style-tag error">Mislukt</span>
-                    <span v-else-if="payment.payment.status !== 'Succeeded'" slot="right" class="style-tag warn">In verwerking</span>
+                    <span v-if="payment.payment.isFailed" slot="right" class="style-tag error">Mislukt</span>
+                    <span v-else-if="payment.payment.isPending" slot="right" class="style-tag warn">In verwerking</span>
+                    <span v-else-if="payment.payment.isSucceeded" slot="right" class="style-tag success">{{ formatPrice(payment.payment.price) }}</span>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>
@@ -104,8 +105,8 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, PriceInput,Radio,RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, Version } from "@stamhoofd/structures";
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, PriceInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -247,8 +248,8 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     }
     
     get outstanding() {
-        const paid = this.patchedBalanceItem.payments.filter(p => p.payment.status === PaymentStatus.Succeeded).map(p => p.price).reduce((a, b) => a + b, 0)
-        const pending = this.patchedBalanceItem.payments.filter(p => p.payment.status !== PaymentStatus.Succeeded).map(p => p.price).reduce((a, b) => a + b, 0)
+        const paid = this.patchedBalanceItem.payments.filter(p => p.payment.isSucceeded).map(p => p.price).reduce((a, b) => a + b, 0)
+        const pending = this.patchedBalanceItem.payments.filter(p => p.payment.isPending).map(p => p.price).reduce((a, b) => a + b, 0)
         const remaining = this.patchedBalanceItem.price - paid
 
         return {
@@ -258,7 +259,12 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
         }
     }
 
+    loading = false
+
     async save() {
+        if (this.loading) {
+            return
+        }
         this.errorBox = null;
 
         try {
@@ -266,11 +272,13 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
             if (!valid) {
                 return;
             }
+            this.loading = true
             await this.saveHandler(this.patchBalanceItem)
             this.pop({ force: true })
         } catch (e) {
             this.errorBox = new ErrorBox(e);
         }
+        this.loading = false
     }
 
     get hasChanges() {

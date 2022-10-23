@@ -5,7 +5,6 @@ import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDeta
 
 import { Toast } from '../../../../shared/components';
 import { MemberManager } from './MemberManager';
-import { OrganizationManager } from './OrganizationManager';
 
 // Manage a complete family so you can sync changes across multiple members (addresses, parents, emergency contacts)
 export class FamilyManager {
@@ -33,6 +32,10 @@ export class FamilyManager {
             shouldRetry: false
         })
         this.setMembers(MemberManager.decryptMembersWithRegistrations(response.data))
+
+        for (const member of this.members) {
+            MemberManager.callListeners("updated", member)
+        }
     }
 
     async addMember(memberDetails: MemberDetails, registrations: Registration[]): Promise<MemberWithRegistrations | null> {

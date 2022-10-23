@@ -1,8 +1,6 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { Payment } from './Payment';
-
 export class Registration extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4()  })
     id: string
@@ -36,6 +34,12 @@ export class Registration extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 20 })
     canRegister = false
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    price = 0
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    pricePaid = 0
 
     /// Payment can be null if the member is on a waiting list
     // @field({ decoder: Payment, nullable: true })
