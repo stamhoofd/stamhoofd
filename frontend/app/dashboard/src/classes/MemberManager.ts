@@ -2,7 +2,7 @@
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures';
+import { BalanceItem, EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberBalanceItem, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 import { OrganizationManager } from './OrganizationManager';
@@ -346,9 +346,16 @@ export class MemberManagerStatic extends MemberManagerBase {
             const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
 
             for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: true})) {
+                const group = member.allGroups.find(g => g.id === registration.groupId)
+                let price: number | undefined = undefined
+                if (group) {
+                    price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
+                }
+
                 patchMember.registrations.addPatch(Registration.patch({
                     id: registration.id,
                     waitingList: false,
+                    price
                 }))
 
                 if (cycleOffset === 0) {
@@ -382,16 +389,19 @@ export class MemberManagerStatic extends MemberManagerBase {
             const registration = member.registrations.find(r => r.groupId === group.id && r.cycle === cycle);
             if (registration) {
                 if (registration.waitingList && !waitingList) {
-                    // Do a patch to move this member from the waiting list
-                    patchMember.registrations.addPatch(Registration.patch({
-                        id: registration.id,
-                        waitingList: false,
-                    }))
-
                     if (registration.cycle === group.cycle) {
                         sizeUpdater.add({groupId: group.id, waitingList: true}, -1);
                         sizeUpdater.add({groupId: group.id, waitingList: false}, 1);
                     }
+
+                    const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
+                    
+                    // Do a patch to move this member from the waiting list
+                    patchMember.registrations.addPatch(Registration.patch({
+                        id: registration.id,
+                        waitingList: false,
+                        price
+                    }))
                     patchArray.addPatch(patchMember)
                     continue
                 }
@@ -402,11 +412,14 @@ export class MemberManagerStatic extends MemberManagerBase {
                 continue;
             }
 
+            const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
+
             patchMember.registrations.addPut(Registration.create({
                 groupId: group.id,
                 cycle: cycle,
                 waitingList,
-                registeredAt: new Date()
+                registeredAt: new Date(),
+                price
             }))
 
             if (cycle === group.cycle) {

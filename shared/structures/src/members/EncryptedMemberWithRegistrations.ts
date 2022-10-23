@@ -1,5 +1,6 @@
 import { ArrayDecoder,field } from '@simonbackx/simple-encoding';
 
+import { BalanceItem } from '../BalanceItem';
 import { User } from '../User';
 import { Member } from './Member';
 import { Registration } from './Registration';
