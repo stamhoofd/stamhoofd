@@ -2,8 +2,9 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
-import { EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItem, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Registration, Token, User } from '@stamhoofd/models';
+import { BalanceItemStatus, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
@@ -45,6 +46,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         const members: MemberWithRegistrations[] = []
         const groups = await Group.getAll(user.organizationId)
         const updateGroups = new Map<string, Group>()
+
+        const balanceItemMemberIds: string[] = []
+        const balanceItemRegistrationIds: string[] = []
 
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
@@ -123,10 +127,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             await member.save()
             members.push(member)
+            balanceItemMemberIds.push(member.id)
 
             // Add registrations
             for (const registrationStruct of struct.registrations) {
-                await this.addRegistration(user, member, registrationStruct)
+                const reg = await this.addRegistration(user, member, registrationStruct, groups)
+                balanceItemRegistrationIds.push(reg.id)
             }
 
             // Add users if they don't exist (only placeholders allowed)
@@ -227,6 +233,24 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     updateGroups.set(group.id, group)
                 }
 
+                if (patchRegistration.price) {
+                    const group = groups.find(g => g.id === registration.groupId)
+                    // Create balance item
+                    const balanceItem = new BalanceItem();
+                    balanceItem.registrationId = registration.id;
+                    balanceItem.price = patchRegistration.price
+                    balanceItem.description = group ? `Inschrijving ${group.settings.name}` : `Inschrijving`
+                    balanceItem.pricePaid = 0
+                    balanceItem.memberId = registration.memberId;
+                    balanceItem.userId = member.users[0]?.id ?? null
+                    balanceItem.organizationId = member.organizationId
+                    balanceItem.status = BalanceItemStatus.Pending;
+                    await balanceItem.save();
+
+                    balanceItemRegistrationIds.push(registration.id)
+                    balanceItemMemberIds.push(member.id)
+                }
+
                 await registration.save()
             }
 
@@ -270,7 +294,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     })
                 }
 
-                await this.addRegistration(user, member, struct)
+                const reg = await this.addRegistration(user, member, struct, groups)
+                balanceItemMemberIds.push(member.id)
+                balanceItemRegistrationIds.push(reg.id)
 
                 // We need to update this group occupancy because we moved one member away from it
                 updateGroups.set(group.id, group)
@@ -325,6 +351,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
         }
 
+        await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
+        await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds))
+        
+        // todo: outstanding amount is not updated in response
+
         // Loop all groups and update occupancy if needed
         for (const group of updateGroups.values()) {
             await group.updateOccupancy()
@@ -334,7 +365,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return new Response(members.map(m => m.getStructureWithRegistrations(true)));
     }
 
-    async addRegistration(user: User, member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct) {
+    async addRegistration(user: User, member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, groups: Group[]) {
         const registration = new Registration()
         registration.groupId = registrationStruct.groupId
         registration.cycle = registrationStruct.cycle
@@ -355,6 +386,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         await registration.save()
         member.registrations.push(registration)
+
+        if (registrationStruct.price) {
+            const group = groups.find(g => g.id === registration.groupId)
+            // Create balance item
+            const balanceItem = new BalanceItem();
+            balanceItem.registrationId = registration.id;
+            balanceItem.price = registrationStruct.price
+            balanceItem.description = group ? `Inschrijving ${group.settings.name}` : `Inschrijving`
+            balanceItem.pricePaid = 0
+            balanceItem.memberId = registration.memberId;
+            balanceItem.userId = member.users[0]?.id ?? null
+            balanceItem.organizationId = member.organizationId
+            balanceItem.status = BalanceItemStatus.Pending;
+            await balanceItem.save();
+        }
 
         return registration
     }
