@@ -94,6 +94,8 @@ export * from "./src/members/ReviewTime"
 
 // Register checkout
 export * from "./src/members/checkout/RegisterCart"
+export * from "./src/members/checkout/RegisterCartPriceCalculator"
+export * from './src/members/checkout/RegisterCartValidator';
 export * from "./src/members/checkout/RegisterCheckout"
 export * from "./src/members/checkout/RegisterItem"
 export * from "./src/members/checkout/UnknownMemberWithRegistrations"

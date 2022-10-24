@@ -1,30 +1,18 @@
 <template>
     <div id="parent-view" class="st-view">
-        <STNavigationBar title="Inschrijvingen wijzigen">
+        <STNavigationBar title="Inschrijvingen">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
         </STNavigationBar>
         
         <main>
             <h1>
-                Inschrijvingen wijzigen
+                Waarvoor wil je {{ memberDetails.firstName }} inschrijven?
             </h1>
-            <p>Kies alle inschrijvingsgroepen waarvoor je dit lid wilt inschrijven.</p>
 
-            <div v-if="canGoBack || canGoNext" class="history-navigation-bar">
-                <button v-if="canGoBack" class="button text gray" type="button" @click="goBack">
-                    <span class="icon arrow-left" />
-                    <span>Vorige inschrijvingsperiode</span>
-                </button>
-
-                <button v-if="canGoNext" class="button text gray" type="button" @click="goNext">
-                    <span>Volgende inschrijvingsperiode</span>
-                    <span class="icon arrow-right" />
-                </button>
-            </div>
+            <SegmentedControl v-model="waitingList" :items="tabs" :labels="tabLabels" />
 
             <STErrorsDefault :error-box="errorBox" />
-            
             <div v-for="category in categoryTree.categories" :key="category.id" class="container">
                 <hr>
                 <h2>{{ category.settings.name }}</h2>
@@ -46,8 +34,11 @@
         </main>
 
         <STToolbar>
-            <template v-if="pendingRegistrations.length > 0" slot="left">
+            <template v-if="pendingRegistrations.length > 0 && !isNew" slot="left">
                 {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'wijziging' : 'wijzigingen' }}
+            </template>
+            <template v-else-if="pendingRegistrations.length > 0" slot="left">
+                {{ pendingRegistrations.length }} {{ pendingRegistrations.length == 1 ? 'inschrijving' : 'inschrijvingen' }}
             </template>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="save">
@@ -62,18 +53,19 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast,Validator } from "@stamhoofd/components"
-import { Group,GroupCategoryTree,MemberDetails } from "@stamhoofd/structures"
-import { MemberWithRegistrations } from '@stamhoofd/structures';
-import { Registration } from '@stamhoofd/structures';
+import { AddressInput, BackButton, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton, PhoneInput, Radio, SegmentedControl, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { SessionManager } from '@stamhoofd/networking';
+import { Group, GroupCategoryTree, MemberDetails, MemberWithRegistrations, RegisterCartPriceCalculator, RegisterCartValidator, Registration, UnknownMemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../classes/FamilyManager';
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
 
+
 class PendingRegistration {
     replace: Registration | null = null
     group: Group
+    waitingList = false
     cycle = 0
     delete = false
 
@@ -99,7 +91,8 @@ class PendingRegistration {
         STList,
         STListItem,
         BackButton,
-        LoadingButton
+        LoadingButton,
+        SegmentedControl
     }
 })
 export default class EditMemberGroupView extends Mixins(NavigationMixin) {
@@ -122,42 +115,37 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
 
     pendingRegistrations: PendingRegistration[] = []
 
+    tabs = [false, true];
+    tabLabels = ["Groepen", "Wachtlijsten"];
+    waitingList = false;
+
     mounted() {
         this.groups = OrganizationManager.organization.groups
+    }
 
-        if (!this.member) {
-            // Select matching groups
-            for (const category of this.categoryTree.categories) {
-                if (category.settings.maximumRegistrations === 1) {
-                    // Select the first matching one
-                    const matching = this.memberDetails.getMatchingGroups(category.groups)[0] ?? null
-                    if (matching) {
-                        this.setSelectedGroupForCategory(category, matching)
-                    }
+    get isNew() {
+        return !this.member
+    }
+
+    get suggestedTree() {
+        return OrganizationManager.organization.getCategoryTree({
+            maxDepth: 1, 
+            permissions: SessionManager.currentSession!.user!.permissions, 
+            smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
+            filterGroups: g => {
+                const member: UnknownMemberWithRegistrations = this.member ?? {
+                    id: '',
+                    registrations: [],
+                    details: this.memberDetails
                 }
+                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, OrganizationManager.organization.availableGroups, OrganizationManager.organization.availableCategories, [])
+                return !canRegister.closed || canRegister.waitingList
             }
-        }
-    }
-
-    get canGoBack() {
-        // TODO
-        return true
-    }
-
-    get canGoNext() {
-        return this.cycleOffset > 0
-    }
-
-    goNext() {
-        this.cycleOffset--
-    }
-
-    goBack() {
-        this.cycleOffset++
+        })
     }
 
     get categoryTree() {
-        return OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(true, OrganizationManager.organization.meta.packages.useActivities)
+        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, smartCombine: true, permissions: SessionManager.currentSession?.user?.permissions})
     }
 
     getSelectedGroupForCategory(category: GroupCategoryTree): Group | null {
@@ -167,7 +155,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
         if (this.member) {
             for (const registration of this.member.registrations) {
                 const g = category.groups.find(gg => gg.id === registration.groupId)
-                if (g && !registration.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && registration.cycle === g.cycle - this.cycleOffset) {
+                if (g && registration.waitingList === this.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && registration.cycle === g.cycle - this.cycleOffset) {
                     // Found a result
                     group = g
                 }
@@ -177,7 +165,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
         // Check pending ones
         for (const reg of this.pendingRegistrations) {
             const g = category.groups.find(gg => gg.id === reg.group.id)
-            if (g && reg.cycle === g.cycle - this.cycleOffset) {
+            if (g && reg.cycle === g.cycle - this.cycleOffset && reg.waitingList === this.waitingList) {
                 if (reg.delete) {
                     // Was deleted
                     if (group && group.id === g.id) {
@@ -225,7 +213,9 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                 // Add explicit delete
                 const g = category.groups.find(gg => gg.id === replace!.groupId)
                 if (g) {
-                    newPending.push(new PendingRegistration(g, g.cycle - this.cycleOffset, replace, true))
+                    const p = new PendingRegistration(g, g.cycle - this.cycleOffset, replace, true)
+                    p.waitingList = this.waitingList
+                    newPending.push(p)
                 } else {
                     console.warn("Group not found when trying to mark registration for deletion")
                 }
@@ -234,10 +224,11 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
             if (replace && replace.groupId === group.id) {
                 // No change needed to existing registrations
             } else {
-                newPending.push(new PendingRegistration(group, group.cycle - this.cycleOffset, replace))
+                const p = new PendingRegistration(group, group.cycle - this.cycleOffset, replace)
+                p.waitingList = this.waitingList
+                newPending.push(p)
             }
         }
-
 
         this.pendingRegistrations = newPending
         console.log(newPending)
@@ -249,7 +240,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
         // Check normal registrations
         if (this.member) {
             for (const registration of this.member.registrations) {
-                if (registration.groupId === group.id && !registration.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && registration.cycle === group.cycle - this.cycleOffset) {
+                if (registration.groupId === group.id && registration.waitingList === this.waitingList && registration.registeredAt !== null && registration.deactivatedAt === null && registration.cycle === group.cycle - this.cycleOffset) {
                     // Found a result
                     selected = true
                 }
@@ -258,7 +249,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
         
         // Check pending ones
         for (const reg of this.pendingRegistrations) {
-            if (reg.group.id === group.id && reg.cycle === group.cycle - this.cycleOffset) {
+            if (reg.group.id === group.id && reg.cycle === group.cycle - this.cycleOffset && reg.waitingList === this.waitingList) {
                 if (reg.delete) {
                     // Was deleted
                     selected = false
@@ -300,12 +291,16 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
             if (replace) {
                 // No change needed
             } else {
-                newPending.push(new PendingRegistration(group, group.cycle - this.cycleOffset, replace))
+                const p = new PendingRegistration(group, group.cycle - this.cycleOffset, replace)
+                p.waitingList = this.waitingList
+                newPending.push(p)
             }
         } else {
             if (replace) {
                 // Add delete
-                newPending.push(new PendingRegistration(group, group.cycle - this.cycleOffset, replace, true))
+                const p = new PendingRegistration(group, group.cycle - this.cycleOffset, replace, true)
+                p.waitingList = this.waitingList
+                newPending.push(p)
             } else {
                 // No change needed
             }
@@ -347,17 +342,22 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                             id: change.replace.id,
                             groupId: change.group.id,
                             cycle: change.cycle,
+                            waitingList: change.waitingList,
                         }))
                         continue
                     }
+
+
+                    const registration = Registration.create({
+                        groupId: change.group.id,
+                        cycle: change.cycle,
+                        waitingList: change.waitingList,
+                        registeredAt: new Date()
+                    })
+
+                    registration.price = RegisterCartPriceCalculator.calculateSinglePrice(this.member, registration, this.familyManager.members, OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
                     patchRegistrations.addPut(
-                        Registration.create({
-                            groupId: change.group.id,
-                            cycle: change.cycle,
-                            waitingList: false,
-                            //payment: null,
-                            registeredAt: new Date()
-                        })
+                        registration
                     )
                 }
 
@@ -374,14 +374,18 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                         // not supported
                         continue
                     }
+
+                    const registration = Registration.create({
+                        groupId: change.group.id,
+                        cycle: change.cycle,
+                        waitingList: change.waitingList,
+                        //payment: null,
+                        registeredAt: new Date()
+                    });
+
+                    registration.price = RegisterCartPriceCalculator.calculateSinglePriceForNewMember(this.memberDetails, registration, this.familyManager.members, OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
                     registrations.push(
-                        Registration.create({
-                            groupId: change.group.id,
-                            cycle: change.cycle,
-                            waitingList: false,
-                            //payment: null,
-                            registeredAt: new Date()
-                        })
+                        registration
                     )
                 }
 
