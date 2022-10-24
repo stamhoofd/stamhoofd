@@ -146,7 +146,7 @@ export class Registration extends Model {
                 GROUP BY
                     registrationId
             ) i ON i.registrationId = registrations.id 
-        SET registrations.price = i.price, registrations.pricePaid = i.pricePaid
+        SET registrations.price = coalesce(i.price, 0), registrations.pricePaid = coalesce(i.pricePaid, 0)
         ${secondWhere}`
         
         await Database.update(query, params)

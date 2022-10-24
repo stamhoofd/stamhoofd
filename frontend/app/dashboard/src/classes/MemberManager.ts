@@ -2,7 +2,7 @@
 
 import { ArrayDecoder, ConvertArrayToPatchableArray, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { BalanceItem, EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberBalanceItem, MemberWithRegistrations, PermissionLevel, Registration, User } from '@stamhoofd/structures';
+import { BalanceItem, EncryptedMemberWithRegistrations, Gender, Group, KeychainedResponseDecoder, MemberBalanceItem, MemberWithRegistrations, PermissionLevel, RegisterCartPriceCalculator, Registration, User } from '@stamhoofd/structures';
 
 import { GroupSizeUpdater } from './GroupSizeUpdater';
 import { OrganizationManager } from './OrganizationManager';
@@ -347,9 +347,9 @@ export class MemberManagerStatic extends MemberManagerBase {
 
             for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: true})) {
                 const group = member.allGroups.find(g => g.id === registration.groupId)
-                let price: number | undefined = undefined
+                let price: number | undefined = undefined
                 if (group) {
-                    price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
+                    price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
                 }
 
                 patchMember.registrations.addPatch(Registration.patch({
@@ -394,7 +394,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                         sizeUpdater.add({groupId: group.id, waitingList: false}, 1);
                     }
 
-                    const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
+                    const price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
                     
                     // Do a patch to move this member from the waiting list
                     patchMember.registrations.addPatch(Registration.patch({
@@ -412,15 +412,15 @@ export class MemberManagerStatic extends MemberManagerBase {
                 continue;
             }
 
-            const price = group.settings.prices.find(p => p.startDate === null)?.getPriceFor(member.details.requiresFinancialSupport?.value ?? false) ?? 0
-
-            patchMember.registrations.addPut(Registration.create({
+            const reg = Registration.create({
                 groupId: group.id,
                 cycle: cycle,
                 waitingList,
-                registeredAt: new Date(),
-                price
-            }))
+                registeredAt: new Date()
+            })
+
+            reg.price = RegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            patchMember.registrations.addPut(reg)
 
             if (cycle === group.cycle) {
                 sizeUpdater.add({groupId: group.id, waitingList}, 1)

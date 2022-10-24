@@ -354,12 +354,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
         await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds))
         
-        // todo: outstanding amount is not updated in response
 
         // Loop all groups and update occupancy if needed
         for (const group of updateGroups.values()) {
             await group.updateOccupancy()
             await group.save()
+        }
+        
+        // We need to refetch the outstanding amounts of members that have changed
+        const updatedMembers = balanceItemMemberIds.length > 0 ? await Member.getAllWithRegistrations(...balanceItemMemberIds) : []
+        for (const member of updatedMembers) {
+            const index = members.findIndex(m => m.id === member.id)
+            if (index !== -1) {
+                members[index] = member
+            }
         }
 
         return new Response(members.map(m => m.getStructureWithRegistrations(true)));

@@ -168,8 +168,8 @@ export class GroupCategoryTree extends GroupCategory {
                 if (f) {
                     const t = GroupCategoryTree.build(f, categories, groups, permissions, maxDepth !== null ? maxDepth - 1 : null)
 
-                    if (permissions !== null && t.categories.length == 0 && t.groups.length == 0 && !f.canCreate(permissions, categories)) {
-                        // Hide empty categories where we cannot create new groups
+                    if (t.categories.length == 0 && t.groups.length == 0 && (smartCombine || (permissions !== null && !f.canCreate(permissions, categories)))) {
+                        // Hide empty categories where we cannot create new groups or when smart combine is enabled
                         return []
                     }
 
@@ -180,14 +180,19 @@ export class GroupCategoryTree extends GroupCategory {
                     }
                     
                     if (maxDepth !== null && t.depth >= maxDepth && t.categories.length > 0) {
+                        const categories: GroupCategoryTree[] = []
                         for (const cat of t.categories) {
+                            if (smartCombine && cat.groups.length === 0 && cat.categories.length === 0) {
+                                continue
+                            }
                             // Clone reference
                             cat.settings = GroupCategorySettings.create(cat.settings)
                             cat.settings.name = t.settings.name + " - " + cat.settings.name
                             cat.settings.public = t.settings.public && cat.settings.public
+                            categories.push(cat)
                         }
                         // Concat here
-                        return t.categories
+                        return categories
                     }
                     return [t]
                 }

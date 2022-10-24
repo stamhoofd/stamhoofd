@@ -246,7 +246,7 @@ export class MemberActionBuilder {
             }),
 
             new TableAction({
-                name: "Gegevens wissen",
+                name: "Overal verwijderen",
                 icon: "trash",
                 priority: 0,
                 groupIndex: 7,

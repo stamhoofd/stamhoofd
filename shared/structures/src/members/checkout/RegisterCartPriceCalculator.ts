@@ -1,6 +1,8 @@
 import { Group } from "../../Group"
 import { GroupCategory } from "../../GroupCategory"
 import { GroupPrices } from "../../GroupPrices"
+import { MemberDetails } from "../MemberDetails"
+import { Registration } from "../Registration"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
 /**
@@ -46,6 +48,40 @@ export class RegisterCartPriceCalculator {
     private static getParentCategory(group: Group, all: GroupCategory[]): GroupCategory | null {
         const parents = group.getParentCategories(all, false)
         return parents[0] ?? null
+    }
+
+    static calculateSinglePrice(member: UnknownMemberWithRegistrations, registration: Registration, members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
+        const item = {
+            memberId: member.id,
+            groupId: registration.groupId,
+            reduced: member.details.requiresFinancialSupport?.value ?? false,
+            waitingList: registration.waitingList,
+            calculatedPrice: 0
+        }
+
+        this.calculatePrices([item], [...members, member], groups, categories)
+
+        return item.calculatedPrice;
+    }
+
+    static calculateSinglePriceForNewMember(details: MemberDetails, registration: Registration, members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
+        const member: UnknownMemberWithRegistrations = {
+            id: 'calculating-member',
+            details,
+            registrations: [registration],
+        };
+
+        const item = {
+            memberId: member.id,
+            groupId: registration.groupId,
+            reduced: details.requiresFinancialSupport?.value ?? false,
+            waitingList: registration.waitingList,
+            calculatedPrice: 0
+        }
+
+        this.calculatePrices([item], [...members, member], groups, categories)
+
+        return item.calculatedPrice;
     }
 
     /**

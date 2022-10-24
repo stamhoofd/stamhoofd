@@ -95,7 +95,7 @@ export class Organization extends AutoEncoder {
     }
 
     /**
-     * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     * Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: Permissions | null, smartCombine?: boolean}): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
@@ -104,7 +104,7 @@ export class Organization extends AutoEncoder {
 
             if (!options?.permissions) {
                 // Hide non public items
-                tree = tree.filterForDisplay(true, this.meta.packages.useActivities)
+                tree = tree.filterForDisplay(false, this.meta.packages.useActivities)
             }
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {
