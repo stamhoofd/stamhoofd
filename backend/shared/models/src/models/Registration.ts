@@ -97,7 +97,7 @@ export class Registration extends Model {
         const query = `
         SELECT COUNT(DISTINCT \`${Registration.table}\`.memberId) as c FROM \`${Registration.table}\` 
         JOIN \`groups\` ON \`groups\`.id = \`${Registration.table}\`.groupId
-        WHERE \`groups\`.organizationId = ? AND \`${Registration.table}\`.cycle = \`groups\`.cycle AND \`${Registration.table}\`.registeredAt is not null AND \`${Registration.table}\`.waitingList = 0`
+        WHERE \`groups\`.organizationId = ? AND \`${Registration.table}\`.cycle = \`groups\`.cycle AND \`groups\`.deletedAt is null AND \`${Registration.table}\`.registeredAt is not null AND \`${Registration.table}\`.waitingList = 0`
         
         const [results] = await Database.select(query, [organizationId])
         const count = results[0]['']['c'];
