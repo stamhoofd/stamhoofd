@@ -8,10 +8,10 @@
                 Alle geselecteerden
             </option>
             <option :value="RegistrationsFilterMode.Nor">
-                Niet ingeschreven voor minstens één van de geselecteerden
+                Ingeschreven voor geen van
             </option>
             <option :value="RegistrationsFilterMode.Nand">
-                Niet ingeschreven voor alle geselecteerden tegelijk
+                Niet ingeschreven voor minstens één van
             </option>
         </Dropdown>
         <STList>

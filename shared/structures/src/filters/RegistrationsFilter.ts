@@ -29,11 +29,11 @@ export enum RegistrationsFilterMode {
     Or = "Or",
     And = "And",
     /**
-     * Not registered for at least one of the selection
+     * Means !(A || B) == !A && !B
      */
     Nor = "Nor",
     /**
-     * Not registered for all of the selection
+     * Means !(A && B) == !A || !B
      */
     Nand = "Nand",
 }
@@ -120,11 +120,11 @@ export class RegistrationsFilter<T> extends Filter<T> {
             case RegistrationsFilterMode.Or:
                 return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " of ")
             case RegistrationsFilterMode.And:
-                return "Is ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " en ")
-            case RegistrationsFilterMode.Nor:
-                return "Niet ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " of ")
+                return "Is ingeschreven voor zowel "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " als ")
             case RegistrationsFilterMode.Nand:
-                return "Niet ingeschreven voor "+Formatter.joinLast(this.choices.map(c => c.name), ", ", " en ")+(this.choices.length > 0 ? ' (samen)' : '')
+                return Formatter.capitalizeFirstLetter(Formatter.joinLast(this.choices.map(c => 'niet ingeschreven voor ' + c.name), ", ", " of "))
+            case RegistrationsFilterMode.Nor:
+                return Formatter.capitalizeFirstLetter(Formatter.joinLast(this.choices.map(c => 'niet ingeschreven voor ' + c.name), ", ", " en "))
         }
     }
 }
