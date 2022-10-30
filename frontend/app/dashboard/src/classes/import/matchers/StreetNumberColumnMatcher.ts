@@ -54,13 +54,10 @@ export class StreetNumberColumnMatcher extends SharedMatcher implements ColumnMa
         }
 
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        const number = ((cell.w ?? cell.v)+"")
+        const number = ((cell.w ?? cell.v)+"").trim()
 
         if (number.length == 0) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
+            return;
         }
 
         if (this.category == MatcherCategory.Member) {

@@ -48,30 +48,35 @@ export class LastNameColumnMatcher extends SharedMatcher implements ColumnMatche
             return
         }
 
-        // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
+        const value = ((cell.w ?? cell.v)+"").trim()
+
+        if (!value) {
+            if (this.category === MatcherCategory.Member) {
+                throw new SimpleError({
+                    code: "invalid_type",
+                    message: "Deze cel is leeg"
+                })
+            }
+            // Not required field
+            return;
         }
 
         if (this.category == MatcherCategory.Member) {
-            member.details.lastName = cell.v
+            member.details.lastName = value
         } else if (this.category == MatcherCategory.Parent1) {
             if (member.details.parents.length == 0) {
                 member.details.parents.push(Parent.create({
                     type: ParentType.Parent1
                 }))
             }
-            member.details.parents[0].lastName = cell.v
+            member.details.parents[0].lastName = value
         } else if (this.category == MatcherCategory.Parent2) {
             while (member.details.parents.length < 2) {
                 member.details.parents.push(Parent.create({
                     type: ParentType.Parent2
                 }))
             }
-            member.details.parents[1].lastName = cell.v
+            member.details.parents[1].lastName = value
         }
     }
 }

@@ -57,16 +57,12 @@ export class CityColumnMatcher extends SharedMatcher implements ColumnMatcher {
         if (!cell) {
             return
         }
-        
-        // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
-        }
 
-        const city = cell.v
+        const city = ((cell.w ?? cell.v)+"").trim()
+
+        if (!city) {
+            return
+        }
         
         if (this.category == MatcherCategory.Member) {
             if (!member.details.address) {

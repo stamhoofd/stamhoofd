@@ -1,16 +1,13 @@
 <template>
     <div id="import-members-questions-view" class="st-view background">
-        <STNavigationBar title="Leden importeren">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Leden importeren" :pop="canPop" :dismis="canDismiss" />
 
         <main>
             <h1>Importeer instellingen</h1>
             <p>We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.</p>
 
             <p v-if="existingCount > 0" class="warning-box">
-                Opgelet, {{ existingCount }} leden uit jouw bestand zitten al in het systeem. Let op, want zo ga je mogelijk informatie van deze leden overschrijven door de informatie uit jouw bestand. De betaalstatus en leeftijdsgroep van {{ existingCountRegistrations }} leden wordt niet gewijzigd via deze import.
+                {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem. Zo ga je mogelijk informatie van deze leden overschrijven door de informatie uit jouw bestand. De betaalstatus en leeftijdsgroep van {{ existingCountRegistrations }} leden kan niet worden gewijzigd via deze import.
             </p>
 
             <hr>
@@ -82,7 +79,7 @@
                         </Radio>
                     </RadioGroup>
 
-                    <button slot="right" class="button text" @click.stop="openAssignment">
+                    <button slot="right" class="button text" type="button" @click.stop="openAssignment">
                         <span class="icon help" />
                         <span>Toon resultaat</span>
                     </button>
@@ -91,7 +88,7 @@
                 <template v-if="autoAssign">
                     <STInputBox v-if="membersWithMultipleGroups.length > 0" title="Prioriteit van leeftijdsgroepen" error-fields="group" :error-box="errorBox" class="max">
                         <p class="info-box">
-                            {{ membersWithMultipleGroups.length }} leden passen in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > leeftijdsgroepen)
+                            {{ membersWithMultipleGroups.length }} {{ membersWithMultipleGroups.length == 1 ? 'lid past' : 'leden passen' }} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > leeftijdsgroepen)
                         </p>
 
                         <STList>
@@ -99,17 +96,17 @@
                                 {{ index + 1 }}. {{ group.settings.name }}
 
                                 <template slot="right">
-                                    <button class="button text" @click="openPriorityAssignedToGroup(group)">
+                                    <button class="button text" type="button" @click="openPriorityAssignedToGroup(group)">
                                         <span class="icon external" />
                                         <span>{{ getGroupAutoAssignCountForPriority(group) }} leden</span>
                                     </button>
-                                    <button class="button icon arrow-up gray" @click.stop="moveUp(index)" />
-                                    <button class="button icon arrow-down gray" @click.stop="moveDown(index)" />
+                                    <button type="button" class="button icon arrow-up gray" @click.stop="moveUp(index)" />
+                                    <button type="button" class="button icon arrow-down gray" @click.stop="moveDown(index)" />
                                 </template>
                             </STListItem>
                         </STList>
 
-                        <button slot="right" class="button text" @click.stop="openMultipleGroups">
+                        <button slot="right" type="button" class="button text" @click.stop="openMultipleGroups">
                             <span class="icon help" />
                             <span>Toon leden</span>
                         </button>
@@ -127,7 +124,7 @@
                             </option>
                         </Dropdown>
 
-                        <button slot="right" class="button text" @click.stop="openWithoutMatchingGroups">
+                        <button slot="right" type="button" class="button text" @click.stop="openWithoutMatchingGroups">
                             <span class="icon help" />
                             <span>Toon leden</span>
                         </button>
@@ -151,7 +148,7 @@
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="goNext">
+                    <button type="button" class="button primary" @click="goNext">
                         Importeer {{ members.length }} leden
                     </button>
                 </LoadingButton>
@@ -218,11 +215,11 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     get needsPaidStatus() {
-        return !!this.members.find(m => m.registration.paid === null)
+        return !!this.members.find(m => m.registration.paid === null && m.registration.paidPrice === null)
     }
 
     get somePaid() {
-        return !!this.members.find(m => m.registration.paid !== null)
+        return !!this.members.find(m => m.registration.paid !== null || m.registration.paidPrice !== null)
     }
 
     get needsGroup() {
@@ -469,20 +466,14 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     buildRegistration(member: ImportingMember) {
         const group = (member.registration.group ?? member.registration.autoAssignedGroup)!
         const price = member.registration.price ?? group.settings.prices.find(p => p.startDate === null)?.getPriceFor(false) ?? 0
-        let paid = member.registration.paid ?? this.paid ?? false
+        
+        let paidPrice = (member.registration.paid ?? this.paid ?? false) ? price : 0
 
-        if (!paid && member.registration.paidPrice && price !== 0) {
-            if (member.registration.paidPrice !== 0 && price !== member.registration.paidPrice) {
-                throw new SimpleError({
-                    code: "price_not_supported",
-                    message: "Het is momenteel niet mogelijk om lidgeld dat maar voor een deel betaald is, te importeren (voor lid "+member.details.name+")"
-                })
-            }
-
-            paid = (member.registration.paidPrice !== 0)
+        if (member.registration.paidPrice !== null) {
+            paidPrice = member.registration.paidPrice
         }
 
-        const payment = Payment.create({
+        /*const payment = Payment.create({
             method: member.registration.paymentMethod ?? PaymentMethod.Unknown,
             status: paid ? PaymentStatus.Succeeded : PaymentStatus.Created,
             price: price,
@@ -491,16 +482,14 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             // Placeholders:
             createdAt: new Date(),
             updatedAt: new Date()
-        })
+        })*/
 
         return Registration.create({
             groupId: group.id,
             cycle: group.cycle + (this.needRegistration ? -1 : 0),
             waitingList: this.waitingList,
-            
-            // TODO: we need to set how much is already paid etc
-            //payment: payment,
-
+            price,
+            pricePaid: paidPrice,
             registeredAt: this.waitingList ? null : (member.registration.date ?? new Date()),
             createdAt: member.registration.date ?? new Date(),
         })
@@ -514,7 +503,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         this.saving = true
 
         // Show message 
-        const toast = new Toast("Bezig met importeren...", "spinner").setWithOffset().setHide(null).show()
+        const toast = new Toast("Bezig met importeren...", "spinner").setHide(null).show()
 
         try {
             // Add all members that do not yet exist
@@ -549,13 +538,13 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             }
 
             toast.hide()
-            new Toast("Importeren voltooid", "success green").setWithOffset().show()
+            new Toast("Importeren voltooid", "success green").show()
             this.dismiss({ force: true })
 
         } catch (e) {
             toast.hide()
             console.error(e)
-            Toast.fromError(e).setWithOffset().show()
+            Toast.fromError(e).show()
         }
         this.saving = false
     }

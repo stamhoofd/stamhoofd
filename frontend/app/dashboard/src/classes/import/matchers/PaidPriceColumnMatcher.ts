@@ -47,16 +47,9 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
         const b = parseFloat(value)
         
         if (isNaN(b)) {
-             throw new SimpleError({
-                code: "invalid_type",
-                message: "'"+ value +"' is geen geldig bedrag",
-            })
-        }
-
-        if (Math.floor(b*100) !== b*100 ) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "'"+ value +"' bevat te veel cijfers na de komma",
+                message: "'"+ value +"' is geen geldig bedrag",
             })
         }
 

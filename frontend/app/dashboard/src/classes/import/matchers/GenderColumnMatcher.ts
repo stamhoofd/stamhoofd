@@ -37,14 +37,7 @@ export class GenderColumnMatcher implements ColumnMatcher {
         }
         
         // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
-        }
-
-        const value = cell.v.toLowerCase().trim()
+        const value = ((cell.w ?? cell.v)+"").toLowerCase().trim()
         let gender = Gender.Other
         
         if (value.includes("jongen") || value.includes("boy") || (value.startsWith("m") && !value.includes("meisje"))) {
@@ -54,7 +47,7 @@ export class GenderColumnMatcher implements ColumnMatcher {
         } else if (value == "x") {
             gender = Gender.Other
         } else if (value != "") {
-             throw new SimpleError({
+            throw new SimpleError({
                 code: "invalid_type",
                 message: "'"+ value +"' is geen geslacht dat we kunnen herkennen. Probeer M of V, Man, Vrouw, Jongen, Meisje... Laat leeg voor onbekend.",
             })

@@ -55,14 +55,11 @@ export class StreetColumnMatcher extends SharedMatcher implements ColumnMatcher 
         }
         
         // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
-        }
+        const street = ((cell.w ?? cell.v)+"").trim()
 
-        const street = cell.v
+        if (!street) {
+            return
+        }
 
         if (this.category == MatcherCategory.Member) {
             if (!member.details.address) {

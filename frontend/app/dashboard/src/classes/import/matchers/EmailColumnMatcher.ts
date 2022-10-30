@@ -43,14 +43,14 @@ export class EmailColumnMatcher extends SharedMatcher implements ColumnMatcher {
         }
         
         // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
+        const value = ((cell.w ?? cell.v)+"").trim()
+
+        if (!value) {
+            // Not required field
+            return;
         }
 
-        const email = cell.v.toLowerCase()
+        const email = value.toLowerCase()
         if (!DataValidator.isEmailValid(email)) {
             throw new SimpleError({
                 "code": "invalid_field",

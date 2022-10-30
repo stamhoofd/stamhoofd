@@ -34,7 +34,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "Deze cel is leeg"
+                message: "Deze leeftijdsgroep is leeg"
             })
         }
         
@@ -42,7 +42,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "Geen tekst in deze cel"
+                message: "De leeftijdsgroep is leeg"
             })
         }
 

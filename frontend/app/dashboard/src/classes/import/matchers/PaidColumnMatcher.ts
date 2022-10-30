@@ -92,7 +92,7 @@ export class PaidColumnMatcher implements ColumnMatcher {
         const b = this.castBoolean(value)
         
         if (b === null) {
-             throw new SimpleError({
+            throw new SimpleError({
                 code: "invalid_type",
                 message: "'"+ value +"' is geen ja of nee. Probeer Ja of Nee, X, 0, 1 of leeg",
             })

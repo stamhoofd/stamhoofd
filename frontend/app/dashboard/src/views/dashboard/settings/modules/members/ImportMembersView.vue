@@ -17,7 +17,7 @@
 
             <label class="upload-box">
                 <span v-if="!file" class="icon upload" />
-                <span v-else class="icon file" />
+                <span v-else class="icon file-excel color-excel" />
                 <div v-if="!file">
                     <h2 class="style-title-list">
                         Kies een bestand
@@ -52,7 +52,7 @@
                         <td>
                             <Checkbox v-model="column.selected">
                                 <h2 class="style-title-list">
-                                    {{ column.name }}
+                                    {{ column.name }}
                                 </h2>
                                 <p v-if="column.examples.length > 0" class="style-description-small">
                                     {{ column.examples.slice(0, 2).join(', ') }}...

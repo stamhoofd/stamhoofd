@@ -49,7 +49,7 @@ export class ZipColumnMatcher extends SharedMatcher implements ColumnMatcher {
 
         // Check if string value
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        const postalCode = ((cell.w ?? cell.v)+"")
+        const postalCode = ((cell.w ?? cell.v)+"").trim()
 
         if (postalCode.length == 0) {
             throw new SimpleError({
