@@ -2,8 +2,8 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Registration, Token, User } from '@stamhoofd/models';
-import { BalanceItemStatus, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItem, BalanceItemPayment, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
+import { BalanceItemStatus, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 type Params = Record<string, never>;
 type Query = undefined;
@@ -240,7 +240,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     balanceItem.registrationId = registration.id;
                     balanceItem.price = patchRegistration.price
                     balanceItem.description = group ? `Inschrijving ${group.settings.name}` : `Inschrijving`
-                    balanceItem.pricePaid = 0
+                    balanceItem.pricePaid = patchRegistration.pricePaid ?? 0
                     balanceItem.memberId = registration.memberId;
                     balanceItem.userId = member.users[0]?.id ?? null
                     balanceItem.organizationId = member.organizationId
@@ -249,6 +249,26 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                     balanceItemRegistrationIds.push(registration.id)
                     balanceItemMemberIds.push(member.id)
+
+                    if (balanceItem.pricePaid > 0) {
+                        // Create an Unknown payment and attach it to the balance item
+                        const payment = new Payment();
+                        payment.userId = member.users[0]?.id ?? null
+                        payment.organizationId = user.organizationId
+                        payment.method = PaymentMethod.Unknown
+                        payment.status = PaymentStatus.Succeeded
+                        payment.price = balanceItem.pricePaid;
+                        payment.paidAt = new Date()
+                        payment.provider = null
+                        await payment.save()
+
+                        const balanceItemPayment = new BalanceItemPayment()
+                        balanceItemPayment.balanceItemId = balanceItem.id;
+                        balanceItemPayment.paymentId = payment.id;
+                        balanceItemPayment.organizationId = user.organizationId;
+                        balanceItemPayment.price = payment.price;
+                        await balanceItemPayment.save();
+                    }
                 }
 
                 await registration.save()
@@ -402,12 +422,32 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             balanceItem.registrationId = registration.id;
             balanceItem.price = registrationStruct.price
             balanceItem.description = group ? `Inschrijving ${group.settings.name}` : `Inschrijving`
-            balanceItem.pricePaid = 0
+            balanceItem.pricePaid = registrationStruct.pricePaid ?? 0
             balanceItem.memberId = registration.memberId;
             balanceItem.userId = member.users[0]?.id ?? null
             balanceItem.organizationId = member.organizationId
             balanceItem.status = BalanceItemStatus.Pending;
             await balanceItem.save();
+
+            if (balanceItem.pricePaid > 0) {
+                // Create an Unknown payment and attach it to the balance item
+                const payment = new Payment();
+                payment.userId = member.users[0]?.id ?? null
+                payment.organizationId = user.organizationId
+                payment.method = PaymentMethod.Unknown
+                payment.status = PaymentStatus.Succeeded
+                payment.price = balanceItem.pricePaid;
+                payment.paidAt = new Date()
+                payment.provider = null
+                await payment.save()
+
+                const balanceItemPayment = new BalanceItemPayment()
+                balanceItemPayment.balanceItemId = balanceItem.id;
+                balanceItemPayment.paymentId = payment.id;
+                balanceItemPayment.organizationId = user.organizationId;
+                balanceItemPayment.price = payment.price;
+                await balanceItemPayment.save();
+            }
         }
 
         return registration

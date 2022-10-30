@@ -58,21 +58,17 @@ export class CityWithZipColumnMatcher extends SharedMatcher implements ColumnMat
             return
         }
 
-        // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
+        const value = ((cell.w ?? cell.v)+"").trim()
+
+        if (!value) {
+            return
         }
-
-
-
-        let match = this.reg.exec(cell.v)
+        
+        let match = this.reg.exec(value)
         let city = ""
         let zip = ""
         if (!match) {
-            match = this.regReverse.exec(cell.v)
+            match = this.regReverse.exec(value)
             if (!match) {
                 throw new SimpleError({
                     code: "invalid_field",

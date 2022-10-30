@@ -50,7 +50,7 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
         const b = parseFloat(value)
         
         if (isNaN(b)) {
-             throw new SimpleError({
+            throw new SimpleError({
                 code: "invalid_type",
                 message: "'"+ value +"' is geen geldig bedrag",
             })

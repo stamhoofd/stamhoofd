@@ -56,15 +56,16 @@ export class StreetWithNumberColumnMatcher extends SharedMatcher implements Colu
         }
 
         // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            console.log(cell)
+        const value = ((cell.w ?? cell.v)+"").trim()
+
+        if (!value) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "Geen tekst in deze cel"
+                message: "Geen straat en huisnummer in deze cel"
             })
         }
 
-        const { number, street } = Address.splitAddressLine(cell.v)
+        const { number, street } = Address.splitAddressLine(value)
 
         if (this.category == MatcherCategory.Member) {
             if (!member.details.address) {

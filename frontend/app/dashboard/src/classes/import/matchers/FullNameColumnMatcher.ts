@@ -65,15 +65,18 @@ export class FullNameColumnMatcher extends SharedMatcher implements ColumnMatche
             return
         }
 
-        // Check if string value
-        if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Geen tekst in deze cel"
-            })
-        }
+        const v = ((cell.w ?? cell.v)+"").trim()
 
-        const v = cell.v
+        if (!v) {
+            if (this.category === MatcherCategory.Member) {
+                throw new SimpleError({
+                    code: "invalid_type",
+                    message: "Deze cel is leeg"
+                })
+            }
+            // Not required field
+            return;
+        }
 
         // TODO: improve splitting
         let firstName = v.split(" ")[0]
