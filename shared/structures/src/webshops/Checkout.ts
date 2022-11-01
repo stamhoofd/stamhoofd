@@ -1,5 +1,6 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { v4 as uuidv4 } from "uuid";
 
 import { ValidatedAddress } from '../addresses/Address';
 import { I18n } from '../I18nInterface';

@@ -61,13 +61,6 @@ export default class Steps extends Vue {
     get canDismiss() {
         return (this.navigationController?.mainComponent?.componentInstance() as any)?.canDismiss ?? false
     }
-
-    async shouldNavigateAway() {
-        if (await CenteredMessage.confirm("Ben je zeker dat je wilt teruggaan?", "Teruggaan")) {
-            return true;
-        }
-        return false;
-    }
 }
 </script>
 

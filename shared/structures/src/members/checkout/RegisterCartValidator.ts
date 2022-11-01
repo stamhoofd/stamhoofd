@@ -8,6 +8,7 @@ import { MemberWithRegistrations } from "../MemberWithRegistrations"
 import { IDRegisterItem, RegisterItem } from "./RegisterItem"
 import { UnknownMemberWithRegistrations } from "./UnknownMemberWithRegistrations"
 
+export type CanRegisterResponse = { closed: boolean; waitingList: boolean; message?: string; description?: string, invited: boolean};
 
 /**
  * Class that can validate a Cart and registrations.
@@ -17,14 +18,15 @@ export class RegisterCartValidator {
     static isAlreadyRegistered(member: UnknownMemberWithRegistrations, group: Group, waitingList: boolean) {
         return !!member.registrations.find(r => r.groupId === group.id && (waitingList || r.registeredAt !== null) && r.deactivatedAt === null && r.waitingList === waitingList && r.cycle === group.cycle)
     }
-    static canRegister(member: UnknownMemberWithRegistrations, group: Group, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string; description?: string } {
+    static canRegister(member: UnknownMemberWithRegistrations, group: Group, family: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): CanRegisterResponse {
         // Already registered
         if (this.isAlreadyRegistered(member, group, false)) {
             return {
                 closed: true,
                 waitingList: false,
                 message: "Al ingeschreven",
-                description: "Je kan "+member.details.firstName+" maar één keer inschrijven voor "+group.settings.name
+                description: "Je kan "+member.details.firstName+" maar één keer inschrijven voor "+group.settings.name,
+                invited: false
             }
         }
 
@@ -35,7 +37,8 @@ export class RegisterCartValidator {
                 closed: true,
                 waitingList: false,
                 message: "Niet combineerbaar",
-                description: "Je kan niet meer inschrijven voor "+group.settings.name+" omdat je al ingeschreven bent of aan het inschrijven bent voor een groep die je niet kan combineren."
+                description: "Je kan niet meer inschrijven voor "+group.settings.name+" omdat je al ingeschreven bent of aan het inschrijven bent voor een groep die je niet kan combineren.",
+                invited: false
             }
         }
 
@@ -44,7 +47,20 @@ export class RegisterCartValidator {
                 closed: true,
                 waitingList: false,
                 message: "Gesloten",
-                description: "De inschrijvingen voor "+group.settings.name+" zijn afgelopen."
+                description: "De inschrijvingen voor "+group.settings.name+" zijn afgelopen.",
+                invited: false
+            }
+        }
+
+        // Check if we have an invite (doesn't matter if registrations are closed)
+        if (member.registrations.find(r => r.groupId === group.id && r.waitingList && r.canRegister && r.cycle === group.cycle)) {
+            // Max members doesn't matter (invites are counted into the occupancy)
+            return {
+                closed: false,
+                waitingList: false,
+                message: "Uitnodiging",
+                description: "Je bent uitgenodigd om "+member.details.firstName+" in te schrijven voor "+group.settings.name,
+                invited: true
             }
         }
 
@@ -54,7 +70,8 @@ export class RegisterCartValidator {
                 return {
                     closed: true,
                     waitingList: false,
-                    ...member.details.getMatchingError(group)
+                    ...member.details.getMatchingError(group),
+                    invited: false
                 }
             }
         }
@@ -67,12 +84,13 @@ export class RegisterCartValidator {
                     return false
                 }
                 return group.settings.requireGroupIds.includes(r.groupId) && r.registeredAt !== null && r.deactivatedAt === null && !r.waitingList && r.cycle === registrationGroup.cycle
-            })) {
+            }) && !cart.find(item => group.settings.requireGroupIds.includes(item.groupId) && item.memberId === member.id && !item.waitingList)) {
                 return {
                     closed: true,
                     waitingList: false,
                     message: "Niet toegelaten",
-                    description: "Inschrijving bij "+Formatter.joinLast(group.settings.requireGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")+" is verplicht voor je kan inschrijven voor "+group.settings.name
+                    description: "Inschrijving bij "+Formatter.joinLast(group.settings.requireGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")+" is verplicht voor je kan inschrijven voor "+group.settings.name,
+                    invited: false
                 }
             }
         }
@@ -90,7 +108,8 @@ export class RegisterCartValidator {
                     closed: true,
                     waitingList: false,
                     message: "Niet toegelaten",
-                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer niet was ingeschreven voor "+Formatter.joinLast(group.settings.preventPreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")
+                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer niet was ingeschreven voor "+Formatter.joinLast(group.settings.preventPreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of "),
+                    invited: false
                 }
             }
         }
@@ -108,7 +127,8 @@ export class RegisterCartValidator {
                     closed: true,
                     waitingList: false,
                     message: "Niet toegelaten",
-                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer was ingeschreven voor "+Formatter.joinLast(group.settings.requirePreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of ")
+                    description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer was ingeschreven voor "+Formatter.joinLast(group.settings.requirePreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of "),
+                    invited: false
                 }
             }
         }
@@ -118,18 +138,8 @@ export class RegisterCartValidator {
                 closed: true,
                 waitingList: false,
                 message: "Nog niet geopend",
-                description: "De inschrijvingen voor "+group.settings.name+" zijn nog niet geopend."
-            }
-        }
-
-        // Check if we have an invite (doesn't matter if registrations are closed)
-        if (member.registrations.find(r => r.groupId === group.id && r.waitingList && r.canRegister && r.cycle === group.cycle)) {
-            // Max members doesn't matter (invites are counted into the occupancy)
-            return {
-                closed: false,
-                waitingList: false,
-                message: "Uitnodiging",
-                description: "Je bent uitgenodigd om "+member.details.firstName+" in te schrijven voor "+group.settings.name
+                description: "De inschrijvingen voor "+group.settings.name+" zijn nog niet geopend.",
+                invited: false
             }
         }
 
@@ -142,7 +152,8 @@ export class RegisterCartValidator {
                     closed: true,
                     waitingList: false,
                     message: "Voorinschrijvingen",
-                    description: "Momenteel zijn de voorinschrijvingen nog bezig voor "+group.settings.name+". Dit is enkel voor bestaande leden"+(group.settings.priorityForFamily ? " en hun broers/zussen" : "")+"."
+                    description: "Momenteel zijn de voorinschrijvingen nog bezig voor "+group.settings.name+". Dit is enkel voor bestaande leden"+(group.settings.priorityForFamily ? " en hun broers/zussen" : "")+".",
+                    invited: false
                 }
             }
         }
@@ -153,14 +164,16 @@ export class RegisterCartValidator {
                     closed: true,
                     waitingList: false,
                     message: "Al op wachtlijst",
-                    description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name
+                    description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name,
+                    invited: false
                 }
             }
             return {
                 closed: false,
                 waitingList: true,
                 message: "Wachtlijst",
-                description: this.getAlreadyInCartDescription({member, group, cart, waitingList: true})
+                description: this.getAlreadyInCartDescription({member, group, cart, waitingList: true}) ?? 'Je kan inschrijven op de wachtlijst',
+                invited: false
             };
         }
 
@@ -170,7 +183,8 @@ export class RegisterCartValidator {
                     closed: true,
                     waitingList: false,
                     message: "Al op wachtlijst",
-                    description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name
+                    description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name,
+                    invited: false
                 }
             }
 
@@ -178,7 +192,8 @@ export class RegisterCartValidator {
                 closed: false,
                 waitingList: true,
                 message: "Wachtlijst nieuwe leden",
-                description: this.getAlreadyInCartDescription({member, group, cart, waitingList: true})
+                description: this.getAlreadyInCartDescription({member, group, cart, waitingList: true}),
+                invited: false
             };
         }
 
@@ -200,7 +215,8 @@ export class RegisterCartValidator {
                             closed: true,
                             waitingList: false,
                             message: "Volzet",
-                            description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.") : ("Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.")
+                            description: available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.") : ("Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven."),
+                            invited: false
                         }
                     }
 
@@ -209,7 +225,8 @@ export class RegisterCartValidator {
                             closed: true,
                             waitingList: false,
                             message: "Al op wachtlijst",
-                            description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name
+                            description: member.details.firstName+" staat al op de wachtlijst voor "+group.settings.name,
+                            invited: false
                         }
                     }
 
@@ -219,12 +236,14 @@ export class RegisterCartValidator {
                         waitingList: true,
                         message: "Wachtlijst (volzet)",
                         description: (this.getAlreadyInCartDescription({member, group, cart, waitingList: true}) ?? "") + (available > 0 ? ("Er zijn nog maar " + available + " plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven. Je kan wel nog inschrijven voor de wachtlijst.") : "Er zijn geen plaatsen meer vrij voor "+group.settings.name+". Je kan "+member.details.firstName+" niet meer inschrijven.  Je kan wel nog inschrijven voor de wachtlijst."),
+                        invited: false
                     }
                 } else {
                     return {
                         closed: false,
                         waitingList: false,
-                        message: "Tijdelijk gereserveerd"
+                        message: "Tijdelijk gereserveerd",
+                        invited: false
                     }
                 }
             }
@@ -235,7 +254,8 @@ export class RegisterCartValidator {
             closed: false,
             waitingList: false,
             message: group.activePreRegistrationDate ? 'Voorinschrijvingen' : undefined,
-            description: this.getAlreadyInCartDescription({member, group, cart, waitingList: false})
+            description: this.getAlreadyInCartDescription({member, group, cart, waitingList: false}),
+            invited: false
         }
     }
 

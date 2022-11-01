@@ -2,7 +2,7 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@molli
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { MolliePayment } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
@@ -10,7 +10,7 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
 type Params = { id: string };
@@ -91,9 +91,30 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             await payment.save()
 
+            // Deprecated field
             order.paymentId = payment.id
             order.setRelation(Order.payment, payment)
 
+            // Save order to get the id
+            await order.save()
+
+            // Create balance item
+            const balanceItem = new BalanceItem();
+            balanceItem.orderId = order.id;
+            balanceItem.price = totalPrice
+            balanceItem.description = webshop.meta.name
+            balanceItem.pricePaid = 0
+            balanceItem.organizationId = organization.id;
+            balanceItem.status = BalanceItemStatus.Hidden;
+            await balanceItem.save();
+
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment()
+            balanceItemPayment.balanceItemId = balanceItem.id;
+            balanceItemPayment.paymentId = payment.id;
+            balanceItemPayment.organizationId = organization.id;
+            balanceItemPayment.price = balanceItem.price;
+            await balanceItemPayment.save();
 
             let paymentUrl: string | null = null
             const description = webshop.meta.name+" - "+payment.id
@@ -101,24 +122,31 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (payment.method == PaymentMethod.Transfer) {
                 await order.markValid(payment, [])
 
+                if (order.number) {
+                    balanceItem.description = 'Bestelling ' + order.number.toString() + ' - ' + webshop.meta.name
+                }
+
                 // Only now we can update the transfer description, since we need the order number as a reference
                 payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings)
                 payment.generateDescription(organization, (order.number ?? "")+"")
+                balanceItem.status = BalanceItemStatus.Pending;
+                await balanceItem.save()
                 await payment.save()
-                await order.save()
             } else if (payment.method == PaymentMethod.PointOfSale) {
                 // Not really paid, but needed to create the tickets if needed
                 await order.markPaid(payment, organization, webshop)
-                await payment.save()
-                await order.save()
-            } else {
-                // Save order, because we need the id
-                await order.save()
 
+                if (order.number) {
+                    balanceItem.description = 'Bestelling ' + order.number.toString() + ' - ' + webshop.meta.name
+                }
+                
+                balanceItem.status = BalanceItemStatus.Pending;
+                await balanceItem.save()
+                await payment.save()
+            } else {
                 const redirectUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)
                 const exchangeUrl = 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
 
-                
                 if (payment.provider === PaymentProvider.Mollie) {
                     // Mollie payment
                     const token = await MollieToken.getTokenFor(webshop.organizationId)

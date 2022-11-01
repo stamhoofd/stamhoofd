@@ -352,11 +352,18 @@ export class Order extends Model {
         this.forceSaveProperty("updatedAt")
     }
 
+    async undoPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+        this.markUpdated()
+        await this.save()
+    }
+
     /**
      * Only call this once! Make sure you use the queues correctly
      */
     async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
         console.log("Marking order "+this.id+" as paid")
+        this.markUpdated()
+        await this.save()
         const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
         if (!webshop) {
             console.error("Missing webshop for order "+this.id)

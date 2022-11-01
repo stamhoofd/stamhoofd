@@ -1,6 +1,6 @@
 <template>
     <div class="st-view order-view">
-        <STNavigationBar :title="'Bestelling ' + order.number" :pop="canPop" :dismiss="canDismiss">
+        <STNavigationBar :title="'Bestelling #' + order.number" :pop="canPop" :dismiss="canDismiss">
             <template #right>
                 <button v-if="hasPreviousOrder || hasNextOrder" v-tooltip="'Ga naar vorige bestelling'" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" @click="goBack" />
                 <button v-if="hasNextOrder || hasPreviousOrder" v-tooltip="'Ga naar volgende bestelling'" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" @click="goNext" />
@@ -9,203 +9,215 @@
         </STNavigationBar>
         <main>
             <h1>
-                Bestelling {{ order.number }}
+                Bestelling #{{ order.number }}
             </h1>
 
-            <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
-                Opgelet: deze bestelling werd nog niet betaald.
-            </p>
-
-            <STList>
-                <STListItem class="right-description">
-                    Naam
-
-                    <template slot="right">
-                        {{ order.data.customer.name }}
-                    </template>
+            <STList class="info">
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Totaalbedrag
+                    </h3>
+                    <p class="style-definition-text">
+                        <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+                        {{ order.data.totalPrice | price }}<template v-if="order.payment && (order.payment.price != order.data.totalPrice || !order.payment && order.data.totalPrice > 0)">*</template>
+                    </p>
                 </STListItem>
 
-                <STListItem class="right-description">
-                    GSM-nummer
-
-                    <template slot="right">
-                        <p>{{ order.data.customer.phone }}</p>
-                    </template>
-                </STListItem>
-
-                <STListItem class="right-description">
-                    E-mailadres
-
-                    <template slot="right">
-                        {{ order.data.customer.email }}
-                    </template>
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Geplaatst op
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
+                    </p>
                 </STListItem>
 
                 <STListItem v-long-press="(e) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
-                    Status
+                    <h3 :class="'style-definition-label '+statusColor">
+                        Status
+                    </h3>
+                    <p class="style-definition-text">
+                        <span>{{ statusName }}</span>
+                        <span v-if="isCanceled" class="icon canceled" />
+                    </p>
+                    <span v-if="hasWrite" slot="right" class="icon arrow-down-small gray" />
+                </STListItem>
 
-                    <template slot="right">
-                        <span :class="'style-tag '+statusColor">{{ statusName }}</span>
-                        <span v-if="hasWrite" class="icon arrow-down-small" />
-                    </template>
+                <STListItem v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                            @click="openPayment" @contextmenu.prevent="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null"
+                >
+                    <h3 class="style-definition-label">
+                        Betaling
+                    </h3>
+                    <p class="style-definition-text">
+                        <span>{{ getName(order.payment.method) }}</span>
+                        <span v-if="order.payment.status == 'Succeeded'" class="icon primary success" />
+                        <span v-else class="icon clock" />
+                    </p>
+
+                    <span v-if="hasPaymentsWrite" slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
                 <STListItem v-if="hasTickets" class="right-description right-stack" :selectable="tickets.length > 0" @click="tickets.length > 0 ? openTickets($event) : null">
-                    <template v-if="tickets.length > 1">
+                    <h3 v-if="tickets.length > 1 || (!hasSingleTickets && tickets.length == 0)" class="style-definition-label">
                         Tickets
-                    </template>
-                    <template v-else>
+                    </h3>
+                    <h3 v-else class="style-definition-label">
                         Ticket
-                    </template>
-                    
-                    <template v-if="loadingTickets" slot="right">
-                        -
-                    </template>
-                    <span v-else-if="hasSingleTickets && tickets.length == 0" slot="right" class="style-tag gray">
-                        Geen ticket
-                    </span>
-                    <span v-else-if="tickets.length == 0" slot="right" class="style-tag gray">
-                        Geen tickets
-                    </span>
-                    <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 1" slot="right" class="style-tag succes">
-                        Gescand
-                    </span>
-                    <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 0" slot="right" class="style-tag gray">
-                        Niet gescand
-                    </span>
-                    <span v-else slot="right" class="style-tag" :class="{ warn: scannedCount > 0 && scannedCount < tickets.length, gray: scannedCount == 0}">
-                        {{ scannedCount }} / {{ tickets.length }} gescand
-                    </span>
+                    </h3>
+
+                    <p class="style-definition-text">
+                        <template v-if="loadingTickets">
+                            -
+                        </template>
+                        <span v-else-if="hasSingleTickets && tickets.length == 0" class="gray">
+                            Geen ticket
+                        </span>
+                        <span v-else-if="tickets.length == 0" slot="right" class="gray">
+                            Geen tickets
+                        </span>
+                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 1" slot="right">
+                            Gescand
+                        </span>
+                        <span v-else-if="hasSingleTickets && tickets.length == 1 && scannedCount == 0" slot="right">
+                            Niet gescand
+                        </span>
+                        <span v-else slot="right">
+                            {{ scannedCount }} / {{ tickets.length }} gescand
+                        </span>
+                    </p>
 
                     <span v-if="tickets.length > 0" slot="right" class="icon arrow-right-small" />
                 </STListItem>
+            </STList>
 
-                <STListItem v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')" @click="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null">
-                    Betaalmethode
+            <p v-if="!order.payment && order.data.totalPrice > 0" class="warning-box">
+                *Er werd geen betaling aangemaakt voor deze bestelling. Je moet zelf de betaalinformatie communiceren.
+            </p>
 
-                    <template slot="right">
-                        <span>{{ getName(order.payment.method) }}</span>
-                        <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
-                        <span v-else class="icon clock" />
-                        <span v-if="hasPaymentsWrite && ((order.payment && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')))" class="icon arrow-down-small" />
-                    </template>
-                </STListItem>
+            <p v-if="order.payment && order.payment.price != order.data.totalPrice" class="warning-box">
+                *De totaalprijs van deze bestelling is gewijzigd nadat de bestelling geplaatst werd. De betaling die daardoor aangemaakt is is dus enkel van toepassing op het oorspronkelijke bedrag. Je moet zelf de communicatie in orde brengen voor het overige gedeelte.
+            </p>
+            
+            <template v-if="order.data.checkoutMethod">
+                <hr>
+                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                    Afhalen
+                </h2>
+                <h2 v-else-if="order.data.checkoutMethod.type == 'Delivery'">
+                    Levering
+                </h2>
+                <h2 v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                    Ter plaatse consumeren
+                </h2>
+                <h2 v-else>
+                    Onbekende methode
+                </h2>
 
-                <STListItem v-if="order.payment && order.payment.iban" class="right-description right-stack">
-                    Betaald via IBAN
-
-                    <template slot="right">
-                        {{ order.payment.iban }}
-                        <template v-if="order.payment.ibanName">
-                            <br>({{ order.payment.ibanName }})
-                        </template>
-                    </template>
-                </STListItem>
-                
-                <STListItem v-if="order.payment && order.payment.method == 'Transfer'" class="right-description right-stack">
-                    Mededeling
-
-                    <template slot="right">
-                        {{ order.payment.transferDescription }}
-                    </template>
-                </STListItem>
-
-                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
-                    {{ a.field.name }}
-
-                    <template slot="right">
-                        {{ a.answer || "/" }}
-                    </template>
-                </STListItem>
-                <STListItem v-if="order.validAt" class="right-description">
-                    Geplaatst op
-                    <template slot="right">
-                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
-                    </template>
-                </STListItem>
-                <STListItem v-if="order.payment && order.payment.settlement" class="right-description right-stack">
-                    Uitbetaald op
-
-                    <template slot="right">
-                        {{ order.payment.settlement.settledAt | dateTime | capitalizeFirstLetter }}<br>
-                        Mededeling "{{ order.payment.settlement.reference }}"
-                    </template>
-                </STListItem>
-                
-                <STListItem class="right-description">
-                    Bestelnummer
-
-                    <template slot="right">
-                        {{ order.number }}
-                    </template>
-                </STListItem>
-                <template v-if="order.data.checkoutMethod">
+                <STList class="info">
                     <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
-                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
-                            Afhaallocatie
-                        </template>
-                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
-                            Locatie
-                        </template>
-                        <template v-else>
-                            Leveringsmethode
-                        </template>
+                        <h3 class="style-definition-label">
+                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                Afhaallocatie
+                            </template>
+                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                Locatie
+                            </template>
+                            <template v-else>
+                                Leveringsmethode
+                            </template>
+                        </h3>
 
-                        <template slot="right">
+                        <p class="style-definition-text">
                             {{ order.data.checkoutMethod.name }}
-                        </template>
+                        </p>
                     </STListItem>
                     <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
-                        Adres
+                        <h3 class="style-definition-label">
+                            Adres
+                        </h3>
 
-                        <template slot="right">
+                        <p class="style-definition-text">
                             {{ order.data.checkoutMethod.address }}
-                        </template>
+                        </p>
                     </STListItem>
                     <STListItem v-if="order.data.address" class="right-description">
-                        Leveringsadres
+                        <h3 class="style-definition-label">
+                            Leveringsadres
+                        </h3>
 
-                        <template slot="right">
+                        <p class="style-definition-text">
                             {{ order.data.address }}
-                        </template>
+                        </p>
                     </STListItem>
                     <STListItem v-if="order.data.timeSlot" class="right-description">
-                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
-                            Wanneer afhalen?
-                        </template>
-                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
-                            Wanneer?
-                        </template>
-                        <template v-else>
-                            Wanneer leveren?
-                        </template>
+                        <h3 class="style-definition-label">
+                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                Wanneer afhalen?
+                            </template>
+                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                Wanneer?
+                            </template>
+                            <template v-else>
+                                Wanneer leveren?
+                            </template>
+                        </h3>
 
-                        <template slot="right">
+                        <p class="style-definition-text">
                             {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
-                        </template>
+                        </p>
                     </STListItem>
-                </template>
-                <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
-                    Leveringskost
+                    <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
+                        <h3 class="style-definition-label">
+                            Leveringskost
+                        </h3>
 
-                    <template slot="right">
-                        {{ order.data.deliveryPrice | price }}
-                    </template>
+                        <p class="style-definition-text">
+                            {{ order.data.deliveryPrice | price }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <hr>
+            <h2>Contactgegevens</h2>
+
+            <STList class="info">
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Naam
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.data.customer.name }}
+                    </p>
                 </STListItem>
-                <STListItem class="right-description">
-                    Totaal
 
-                    <template slot="right">
-                        {{ order.data.totalPrice | price }}
-                    </template>
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        E-mailadres
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.data.customer.email }}
+                    </p>
                 </STListItem>
 
-                <STListItem v-if="order.payment && order.payment.status === 'Succeeded' && order.payment.price != order.data.totalPrice" class="right-description">
-                    Waarvan al betaald
-                    
-                    <template slot="right">
-                        {{ order.payment.price | price }}
-                    </template>
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        {{ $t("shared.inputs.mobile.label") }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.data.customer.phone }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id">
+                    <h3 class="style-definition-label">
+                        {{ a.field.name }}
+                    </h3>
+
+                    <p class="style-definition-text">
+                        {{ a.answer || "/" }}
+                    </p>
                 </STListItem>
             </STList>
 
@@ -276,11 +288,12 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, getPermissionLevelNumber, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import PaymentView from "../../payments/PaymentView.vue";
 import { WebshopManager } from "../WebshopManager";
 import { OrderActionBuilder } from "./OrderActionBuilder";
 import OrderTicketsView from "./OrderTicketsView.vue";
@@ -357,6 +370,20 @@ export default class OrderView extends Mixins(NavigationMixin){
         })
     }
 
+    openPayment() {
+        if (!this.hasPaymentsWrite) {
+            return;
+        }
+        this.present({
+            components: [
+                new ComponentWithProperties(PaymentView, {
+                    initialPayment: this.order.payment
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
+    }
+
     get hasNextOrder(): boolean {
         if (!this.getNextOrder || !this.order) {
             return false
@@ -417,6 +444,10 @@ export default class OrderView extends Mixins(NavigationMixin){
         return this.order ? OrderStatusHelper.getColor(this.order.status) : ""
     }
 
+    get isCanceled() {
+        return this.order.status === OrderStatus.Canceled
+    }
+
     showContextMenu(event) {
         const el = event.currentTarget;
         const bounds = el.getBoundingClientRect()
@@ -446,11 +477,13 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     changePaymentStatus(event) {
-        const el = (event.currentTarget as HTMLElement).querySelector(".right") ?? event.currentTarget;
+        const x = event.changedTouches ? event.changedTouches[0].pageX : event.clientX
+        const y = event.changedTouches ? event.changedTouches[0].pageY : event.clientY
+
         const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
-            x: el.getBoundingClientRect().left + el.offsetWidth,
-            y: el.getBoundingClientRect().top + el.offsetHeight,
-            xPlacement: "left",
+            x,
+            y,
+            xPlacement: "right",
             yPlacement: "bottom",
             actions: this.actionBuilder.getPaymentActions(),
             focused: [this.order]

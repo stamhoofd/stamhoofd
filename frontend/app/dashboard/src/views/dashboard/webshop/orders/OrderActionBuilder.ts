@@ -278,7 +278,7 @@ export class OrderActionBuilder {
     }
     
     async markPaid(orders: PrivateOrder[], paid = true) {
-        const data: AutoEncoderPatchType<Payment>[] = []
+        const data: PatchableArrayAutoEncoder<Payment> = new PatchableArray()
         let willSendEmail = false
 
         for (const order of orders) {
@@ -289,7 +289,7 @@ export class OrderActionBuilder {
 
             if (paid) {
                 if (payment.status != PaymentStatus.Succeeded || order.data.totalPrice != payment.price) {
-                    data.push(Payment.patch({
+                    data.addPatch(Payment.patch({
                         id: payment.id,
                         price: order.data.totalPrice,
                         status: PaymentStatus.Succeeded
@@ -301,17 +301,16 @@ export class OrderActionBuilder {
                 }
             } else {
                 if (payment.status == PaymentStatus.Succeeded || order.data.totalPrice != payment.price) {
-                    data.push(Payment.patch({
+                    data.addPatch(Payment.patch({
                         id: payment.id,
                         status: PaymentStatus.Created,
                         price: order.data.totalPrice
                     }))
                 }
             }
-            
         }
         
-        if (data.length > 0) {
+        if (data.changes.length) {
             if (willSendEmail && !await CenteredMessage.confirm("Ben je zeker?", paid ? "Markeer als betaald" : "Markeer als niet betaald", paid ? "De besteller ontvangt een automatische e-mail." : undefined)) {
                 return;
             }

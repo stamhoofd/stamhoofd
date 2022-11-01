@@ -1564,12 +1564,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         color: $color-gray-1;
         background: $color-background-shade;
     }
-
-    &[data-align="right"] {
-        text-align: right;
-        margin-left: auto;
-        padding-right: 20px;
-    }
 }
 
 .table-with-columns {
@@ -1812,13 +1806,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             flex-direction: row;
             align-items: center;
             padding-right: 10px;
-
-            &[data-align="right"] {
-
-                > button:first-child {
-                    justify-content: flex-end;
-                }
-            }
 
             > button:first-child {
                 flex-grow: 1;

@@ -333,13 +333,8 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         const iban = this.iban
         const creditor = this.creditor
 
-        let message: string
-        if (this.isStructured) {
-            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n"+this.transferDescription+"\n\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
-        } else {
-            message = "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100)+"\n\n\n"+this.transferDescription+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
-        }
-        return message
+        // Note: structured reference still as normal description (the structured reference ISO is not supported)
+        return "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
     }
 
     async generateQRCode() {

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Column, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
@@ -20,7 +20,6 @@ import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
-import MemberView from "../member/MemberView.vue";
 import PaymentView from "./PaymentView.vue";
 
 @Component({
@@ -219,6 +218,8 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new Column<PaymentGeneral, string>({
                 name: "Naam", 
                 getValue: (payment) => payment.orders.map(o => o.data.customer.name).join(", ") + payment.members.map(r => r.name).join(", "), 
+                getStyle: (name) => name == "" ? "gray" : "",
+                format: (name) => name == "" ? "Onbekend" : name,
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 50,
                 recommendedWidth: 100
@@ -348,7 +349,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
     }
 
     async markPaid(payments: PaymentGeneral[], paid = true) {
-        const data: AutoEncoderPatchType<Payment>[] = []
+        const data: PatchableArrayAutoEncoder<Payment> = new PatchableArray()
         let hasOrder = false
 
         for (const payment of payments) {
@@ -357,14 +358,14 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             }
             if (paid) {
                 if (payment.status != PaymentStatus.Succeeded) {
-                    data.push(Payment.patch({
+                    data.addPatch(Payment.patch({
                         id: payment.id,
                         status: PaymentStatus.Succeeded
                     }))
                 }
             } else {
                 if (payment.status == PaymentStatus.Succeeded) {
-                    data.push(Payment.patch({
+                    data.addPatch(Payment.patch({
                         id: payment.id,
                         status: PaymentStatus.Created,
                     }))
@@ -373,7 +374,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             
         }
         
-        if (data.length > 0) {
+        if (data.changes.length > 0) {
             if (!await CenteredMessage.confirm("Ben je zeker?", paid ? "Markeer als betaald" : "Markeer als niet betaald", paid && hasOrder ? "De besteller(s) van bestellingen ontvangen een automatische e-mail." : undefined)) {
                 return;
             }

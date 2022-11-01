@@ -88,10 +88,10 @@
                                 </figure>
                             </template>
                             <h3 class="style-title-list">
-                                {{ getSuggestionTitle(suggestion) }}
+                                {{ suggestion.title }}
                             </h3>
-                            <p v-if="getSuggestionDescription(suggestion)" class="style-description-small">
-                                {{ getSuggestionDescription(suggestion) }}
+                            <p v-if="suggestion.description" class="style-description-small">
+                                {{ suggestion.description }}
                             </p>
 
                             <span slot="right" class="icon arrow-right-small gray" />
@@ -173,25 +173,25 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
+import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { Group, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentStatus, PaymentWithRegistrations, RegisterItem } from "@stamhoofd/structures";
+import { MemberBalanceItem, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from "../../classes/CheckoutManager";
 import { MemberManager } from "../../classes/MemberManager";
 import { OrganizationManager } from "../../classes/OrganizationManager";
+import { Suggestion, SuggestionBuilder } from "../../classes/SuggestionBuilder";
 import AccountSettingsView from "../account/AccountSettingsView.vue";
 import PaymentsView from "../account/PaymentsView.vue";
 import CartView from "../checkout/CartView.vue";
-import GroupView from "../groups/GroupView.vue";
 import { createMemberComponent } from "../members/details/createMemberComponent";
-import MemberChooseGroupsView from "../members/MemberChooseGroupsView.vue";
 import CheckDataView from "./CheckDataView.vue";
 import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
+
 
 @Component({
     components: {
@@ -312,91 +312,15 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
         return CheckoutManager.cart
     }
 
-    get suggestedRegistrations(): {group?: Group, member: MemberWithRegistrations, waitingList: boolean, id: string}[] {
-        const suggestions: {group?: Group, member: MemberWithRegistrations, waitingList: boolean, id: string}[] = []
-        const groups = OrganizationManager.organization.availableGroups
-
-        // todo: ignore all members with zero current or past registrations
-
-        for (const member of this.members) {
-            for (const group of groups) {
-                const canRegister = member.canRegister(group, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items);
-                
-                // Check in cart
-                const item = new RegisterItem(member, group, { reduced: false, waitingList: canRegister.waitingList })
-                if (CheckoutManager.cart.hasItem(item)) {
-                    continue;
-                }
-                
-                if (!canRegister.closed) {
-                    suggestions.push({ group, member, waitingList: canRegister.waitingList, id: member.id })
-                } else {
-                    // Add waiting list
-                    if (canRegister.waitingList) {
-                        suggestions.push({ group, member, waitingList: true, id: member.id })
-                    }
-                }
-            }
-        }
-
-        // If a given member can register for multiple groups, only show one and remove the group
-        const filteredSuggestions: {group?: Group, member: MemberWithRegistrations, waitingList: boolean, id: string}[] = []
-        for (const suggestion of suggestions) {
-            const existing = filteredSuggestions.find(s => s.member.id == suggestion.member.id)
-            if (existing) {
-                existing.group = undefined
-                existing.waitingList = existing.waitingList && suggestion.waitingList
-                continue
-            }
-            filteredSuggestions.push(suggestion)
-        }
-
-        return filteredSuggestions
+    get suggestedRegistrations(): Suggestion[] {
+        return SuggestionBuilder.getSuggestions(this.members)
     }
 
-    getSuggestionTitle(suggestion: {group?: Group, member: MemberWithRegistrations, waitingList: boolean}) {
-        if (suggestion.waitingList) {
-            if (suggestion.group) {
-                return suggestion.member.firstName + " inschrijven op wachtlijst voor "+suggestion.group.settings.name
-            }
-            return  suggestion.member.firstName + " inschrijven op wachtlijst"
-        }
-        if (suggestion.group) {
-            return suggestion.member.firstName + " inschrijven voor "+suggestion.group.settings.name
-        }
-        return suggestion.member.firstName + " inschrijven"
-    }
-
-    getSuggestionDescription(suggestion: {group?: Group, member: MemberWithRegistrations, waitingList: boolean}) {
-        if (suggestion.group && suggestion.group.settings.registrationEndDate) {
-            const group = suggestion.group;
-            return "Inschrijvingen sluiten op " + Formatter.dateTime(group.settings.registrationEndDate)
-        }
-        return ""
-    }
-
-    startRegistrationFlow({group, member}: {group?: Group, member: MemberWithRegistrations}) {
-        if (!group) {
-            this.present({
-                components: [
-                    new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(MemberChooseGroupsView, {
-                            member
-                        })
-                    })
-                ],
-                modalDisplayStyle: "popup"
-            })
-            return
-        }
-
+    startRegistrationFlow(suggestion: Suggestion) {
         this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
-                    root: new ComponentWithProperties(GroupView, {
-                        group,
-                        member
-                    })
+                    root: suggestion.getComponent()
                 })
             ],
             modalDisplayStyle: "popup"

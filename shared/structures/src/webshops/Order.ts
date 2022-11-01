@@ -133,6 +133,9 @@ export class Order extends AutoEncoder {
     @field({ decoder: OrderData })
     data: OrderData = OrderData.create({})
 
+    /**
+     * @deprecated: replaced by balance items
+     */
     @field({ decoder: Payment, nullable: true })
     payment: Payment | null // no default to prevent errors
 
