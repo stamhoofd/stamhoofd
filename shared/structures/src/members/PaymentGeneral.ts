@@ -1,12 +1,24 @@
-import { ArrayDecoder, field } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, field, StringDecoder } from '@simonbackx/simple-encoding'
 import { Formatter } from '@stamhoofd/utility'
 
 import { BalanceItemPaymentDetailed } from '../BalanceItem'
-import { Payment } from './Payment'
+import { Payment, Settlement } from './Payment'
 
 export class PaymentGeneral extends Payment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
     balanceItemPayments: BalanceItemPaymentDetailed[]
+
+    @field({ decoder: StringDecoder, nullable: true })
+    iban: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true })
+    ibanName: string | null = null
+
+    /**
+     * Only set for administrators with the correct permissions
+     */
+    @field({ decoder: Settlement, nullable: true })
+    settlement: Settlement | null = null
 
     get registrations() {
         const registrations = this.balanceItemPayments.flatMap(p => p.balanceItem.registration ? [p.balanceItem.registration] : [])

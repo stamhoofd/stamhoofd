@@ -119,6 +119,17 @@ export class BalanceItem extends Model {
         }
     }
 
+    async undoPaid(payment: Payment, organization: Organization) {
+        // If order
+        if (this.orderId) {
+            const {Order} = await import("./Order");
+            const order = await Order.getByID(this.orderId);
+            if (order) {
+                await order.undoPaid(payment, organization)
+            }
+        }
+    }
+
     async markFailed() {
         // If order
         if (this.orderId) {
@@ -126,6 +137,17 @@ export class BalanceItem extends Model {
             const order = await Order.getByID(this.orderId);
             if (order) {
                 await order.onPaymentFailed()
+            }
+        }
+    }
+
+    async undoFailed() {
+        // If order
+        if (this.orderId) {
+            const {Order} = await import("./Order");
+            const order = await Order.getByID(this.orderId);
+            if (order) {
+                await order.undoPaymentFailed()
             }
         }
     }

@@ -149,6 +149,19 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
+        // If OLD status was FAILED, we need to revert the actions
+        if (payment.status === PaymentStatus.Failed) { // OLD FAILED!! -> NOW PENDING
+            await QueueHandler.schedule("balance-item-update/"+organization.id, async () => {
+                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                    (await BalanceItemPayment.where({paymentId: payment.id})).map(r => r.setRelation(BalanceItemPayment.payment, payment))
+                );
+
+                for (const balanceItemPayment of balanceItemPayments) {
+                    await balanceItemPayment.undoFailed(organization);
+                }
+            })
+        }
+
         payment.status = status
         payment.paidAt = null
         await payment.save();

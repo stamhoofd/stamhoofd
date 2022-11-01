@@ -59,10 +59,10 @@
                         <hr>
                         <h2>Overzicht</h2>
                     </template>
-                    <p v-else-if="!isPaid && isTransfer" class="warning-box">
+                    <p v-else-if="!isCanceled && !isPaid && isTransfer" class="warning-box">
                         Opgelet: deze bestelling moet worden betaald via overschrijving, daardoor weten we niet automatisch of deze al betaald werd of niet. Zorg er zeker voor dat je deze meteen betaalt zodat het bedrag op tijd op onze rekening komt. Klik onderaan op de knop om de instructies nog eens te tonen.
                     </p>
-                    <p v-else-if="!isPaid && !isTransfer" class="warning-box">
+                    <p v-else-if="!isCanceled && !isPaid && !isTransfer" class="warning-box">
                         Opgelet: je zal deze bestelling nog moeten betalen {{ getLowerCaseName(order.payment.method) }}
                     </p>
 
@@ -211,7 +211,7 @@
                         </STList>
                     </template>
                 </main>
-                <STToolbar v-if="(canShare && !hasTickets) || !isPaid">
+                <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || !isPaid)">
                     <template slot="right">
                         <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
                             <span class="icon share" />
@@ -224,7 +224,7 @@
                     </template>
                 </STToolbar>
             </section>
-            <section v-if="hasTickets && (isPaid || !isTransfer)" class="gray-shadow view">
+            <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" class="gray-shadow view">
                 <main id="tickets">
                     <h2 v-if="singleTicket">
                         Download ticket

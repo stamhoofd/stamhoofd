@@ -9,7 +9,7 @@ import { Group } from '../Group';
 import { GroupCategory } from '../GroupCategory';
 import { Organization } from '../Organization';
 import { UmbrellaOrganization } from '../UmbrellaOrganization';
-import { RegisterCartValidator } from './checkout/RegisterCartValidator';
+import { CanRegisterResponse, RegisterCartValidator } from './checkout/RegisterCartValidator';
 import { IDRegisterItem, RegisterItem } from './checkout/RegisterItem';
 import { EncryptedMemberWithRegistrations } from './EncryptedMemberWithRegistrations';
 import { Gender } from './Gender';
@@ -129,7 +129,7 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
         return [...emails]
     }
 
-    canRegister(group: Group, family: MemberWithRegistrations[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): { closed: boolean; waitingList: boolean; message?: string; description?: string } {
+    canRegister(group: Group, family: MemberWithRegistrations[], categories: GroupCategory[], cart: (IDRegisterItem | RegisterItem)[]): CanRegisterResponse {
         return RegisterCartValidator.canRegister(this, group, family, this.allGroups, categories, cart)
     }
 

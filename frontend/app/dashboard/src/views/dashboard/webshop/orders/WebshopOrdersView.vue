@@ -252,7 +252,6 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
                 minimumWidth: 70,
                 recommendedWidth: 80,
-                align: "right",
                 index: 1
             }),
         )
@@ -261,13 +260,12 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             new Column<PrivateOrder, number | undefined>({
                 name: "Te betalen", 
                 enabled: this.preview.meta.paymentMethods.includes(PaymentMethod.Transfer), // keep it available because should be able to enable it when payment methods are changed
-                getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.payment.price : (order.payment && order.payment.price < order.data.totalPrice ? order.data.totalPrice - order.payment.price : undefined),
+                getValue: (order) => order.payment && order.payment.status !== PaymentStatus.Succeeded ? order.data.totalPrice : (order.payment && order.payment.price < order.data.totalPrice ? order.data.totalPrice - order.payment.price : undefined),
                 format: (price) => price ? Formatter.price(price) : "Betaald",
                 compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
                 getStyle: (price) => price === undefined ? "gray" : (price === 0 ? "gray" : ""),
                 minimumWidth: 70,
                 recommendedWidth: 80,
-                align: "right",
                 index: 1
             }),
         )

@@ -66,12 +66,40 @@
                 </STListItem>
             </STList>
 
-            <hr>
+            <template v-if="suggestedRegistrations.length">
+                <hr>
 
-            <button slot="right" class="button text" type="button" @click="addItem">
-                <span class="icon add" />
-                <span>Inschrijving toevoegen</span>
-            </button>
+                <h2>Alles toegevoegd?</h2>
+                <STList>
+                    <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
+                        <img v-if="!suggestion.group" slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
+                        <template v-else slot="left">
+                            <figure v-if="suggestion.group.squareImage" class="registration-image">
+                                <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
+                                <div>
+                                    <span v-if="suggestion.waitingList" class="icon gray clock" />
+                                </div>
+                            </figure>
+                            <figure v-else class="registration-image">
+                                <figure>
+                                    <span>{{ suggestion.group.settings.name.substr(0, 2) }}</span>
+                                </figure>
+                                <div>
+                                    <span v-if="suggestion.waitingList" class="icon gray clock" />
+                                </div>
+                            </figure>
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ suggestion.title }}
+                        </h3>
+                        <p v-if="suggestion.description" class="style-description-small">
+                            {{ suggestion.description }}
+                        </p>
+
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+            </template>
         </main>
 
         <STToolbar v-if="!cart.isEmpty">
@@ -106,6 +134,7 @@ import { Component, Mixins, Watch } from 'vue-property-decorator';
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { MemberManager } from '../../classes/MemberManager';
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import { Suggestion, SuggestionBuilder } from '../../classes/SuggestionBuilder';
 import GroupView from '../groups/GroupView.vue';
 import ChooseMemberView from '../overview/register-flow/ChooseMemberView.vue';
 
@@ -254,6 +283,26 @@ export default class CartView extends Mixins(NavigationMixin){
             console.error(e)
             this.errorBox = new ErrorBox(e)
         }
+    }
+
+    get members() {
+        return MemberManager.members ?? []
+    }
+
+    get suggestedRegistrations(): Suggestion[] {
+        return SuggestionBuilder.getSuggestions(this.members)
+    }
+
+    startRegistrationFlow(suggestion: Suggestion) {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: suggestion.getComponent(),
+                    fromCart: true
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
 }
 </script>

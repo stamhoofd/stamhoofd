@@ -16,7 +16,7 @@
             </h1>
 
             <p v-if="payment.method == 'Transfer' && payment.isFailed" class="error-box">
-                Deze overschrijving werd geannuleerd en is niet langer zichtbaar voor leden. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.
+                Deze overschrijving werd geannuleerd en is niet langer zichtbaar. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -68,6 +68,30 @@
                             {{ formatDate(payment.paidAt) }}
                         </p>
                     </STListItem>
+
+                    <STListItem v-if="payment.iban">
+                        <h3 class="style-definition-label">
+                            Betaald via IBAN
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ payment.iban }}
+                            <template v-if="payment.ibanName">
+                                <br>({{ payment.ibanName }})
+                            </template>
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.settlement" class="right-description right-stack">
+                        <h3 class="style-definition-label">
+                            Uitbetaald op
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ formatDate(payment.settlement.settledAt) }}<br>
+                            Mededeling "{{ payment.settlement.reference }}"
+                        </p>
+                    </STListItem>
                 </STList>
 
                 <template v-if="isManualMethod">
@@ -93,8 +117,8 @@
                             <h2 class="style-title-list">
                                 Markeer als betaald
                             </h2>
-                            <p class="style-description">
-                                Stuurt een automatische e-mail ter bevestiging
+                            <p v-if="mappedPayment.orders.length" class="style-description">
+                                Stuurt mogelijks een automatische e-mail ter bevestiging.
                             </p>
                             <button slot="right" type="button" class="button secundary hide-smartphone">
                                 <span class="icon success" />
@@ -125,10 +149,10 @@
                                 Annuleren
                             </h2>
                             <p v-if="payment.method == 'Transfer'" class="style-description">
-                                Annuleer de overschrijving zodat voor een andere betaalmethode gekozen kan worden.
+                                Annuleer de overschrijving als je denkt dat deze niet meer betaald zal worden.
                             </p>
                             <p v-else class="style-description">
-                                Annuleer de betaling zodat voor een andere betaalmethode gekozen kan worden.
+                                Annuleer de betaling als je denkt dat deze niet meer betaald zal worden.
                             </p>
                             <button slot="right" type="button" class="button secundary danger hide-smartphone">
                                 <span class="icon canceled" />

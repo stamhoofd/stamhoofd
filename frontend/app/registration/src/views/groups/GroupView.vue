@@ -7,7 +7,7 @@
         
         <main>
             <h1>
-                {{ group.settings.name }}
+                <span>{{ group.settings.name }}</span>
                 <GroupTag :group="group" />
             </h1>
             <figure v-if="coverPhotoSrc" class="cover-photo">
@@ -20,20 +20,24 @@
             <p v-else-if="member && (itemCanRegister.description || itemCanRegister.message) && itemCanRegister.waitingList" class="warning-box">
                 {{ itemCanRegister.description || itemCanRegister.message }}
             </p>
+            <p v-else-if="member && (itemCanRegister.description || itemCanRegister.message) && itemCanRegister.invited" class="info-box icon email">
+                {{ itemCanRegister.description || itemCanRegister.message }}
+            </p>
+            <template v-else>
+                <p v-if="infoBox" class="info-box">
+                    {{ infoBox }}
+                </p>
+
+                <p v-if="infoBox2" class="info-box">
+                    {{ infoBox2 }}
+                </p>
+
+                <p v-if="!member && errorBox" class="error-box">
+                    {{ errorBox }}
+                </p>
+            </template>
 
             <p v-if="group.settings.description" class="style-description pre-wrap" v-text="group.settings.description" />
-
-            <p v-if="infoBox" class="info-box">
-                {{ infoBox }}
-            </p>
-
-            <p v-if="infoBox2" class="info-box">
-                {{ infoBox2 }}
-            </p>
-
-            <p v-if="!member && errorBox" class="error-box">
-                {{ errorBox }}
-            </p>
 
             <STList class="group-info-list">
                 <STListItem class="right-description">

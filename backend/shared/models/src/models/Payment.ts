@@ -285,10 +285,11 @@ export class Payment extends Model {
                             ...balanceItem,
                             registration: registration ? registration.getStructure() : null,
                             member: member ? MemberStruct.create(member!) : null,
-                            order: order ? OrderStruct.create(order) : null
+                            order: order ? OrderStruct.create({...order, payment: null}) : null
                         })
                     })
-                })
+                }),
+                ...(!checkPermissions || !checkPermissions.user || !checkPermissions.user.permissions) ? {settlement: null} : {}
             })
         })
     }

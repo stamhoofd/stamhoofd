@@ -84,12 +84,20 @@ export class BalanceItemPayment extends Model {
         this.balanceItem.status = this.balanceItem.pricePaid >= this.balanceItem.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
 
         await this.balanceItem.save();
+
+        await this.balanceItem.undoPaid(this.payment, organization)
     }
 
     async markFailed(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
         // Do logic of balance item
         await this.balanceItem.markFailed()
     }
+
+    async undoFailed(this: BalanceItemPayment & Loaded<typeof BalanceItemPayment.balanceItem> & Loaded<typeof BalanceItemPayment.payment>, organization: Organization) {
+        // Reactivate deleted items
+        await this.balanceItem.undoFailed()
+    }
+
 }
 
 type Loaded<T> = (T) extends ManyToOneRelation<infer Key, infer Model> ? Record<Key, Model> : never;
