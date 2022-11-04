@@ -5,20 +5,29 @@
         </h1>
         <STErrorsDefault :error-box="errorBox" />
 
-        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox">
-            <input
-                ref="firstInput"
-                v-model="description"
-                class="input"
-                type="text"
-                placeholder="Bv. Aankoop T-shirt"
-                autocomplete=""
-            >
-        </STInputBox>
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox">
+                    <input
+                        ref="firstInput"
+                        v-model="description"
+                        class="input"
+                        type="text"
+                        placeholder="Bv. Aankoop T-shirt"
+                        autocomplete=""
+                    >
+                </STInputBox>
 
-        <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
-            <PriceInput v-model="price" placeholder="Gratis" :min="null" />
-        </STInputBox>
+                <STInputBox title="Prijs" error-fields="price" :error-box="errorBox">
+                    <PriceInput v-model="price" placeholder="Gratis" :min="null" />
+                </STInputBox>
+            </div>
+            <div>
+                <STInputBox title="Datum" error-fields="createdAt" :error-box="errorBox">
+                    <DateSelection v-model="createdAt" />
+                </STInputBox>
+            </div>
+        </div>
 
         <template v-if="familyManager.members.length > 1 && member">
             <STInputBox title="Lid" error-fields="memberId" :error-box="errorBox" class="max">
@@ -105,7 +114,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, PriceInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection,ErrorBox, PriceInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -125,7 +134,8 @@ import MemberRegistrationBlock from '../MemberRegistrationBlock.vue';
         STList,
         MemberRegistrationBlock,
         RadioGroup,
-        Radio
+        Radio,
+        DateSelection
     },
 })
 export default class EditBalanceItemView extends Mixins(NavigationMixin) {
@@ -221,6 +231,16 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     set price(price: number) {
         this.addPatch({
             price
+        })
+    }
+
+    get createdAt() {
+        return this.patchedBalanceItem.createdAt;
+    }
+
+    set createdAt(createdAt: Date) {
+        this.addPatch({
+            createdAt
         })
     }
 

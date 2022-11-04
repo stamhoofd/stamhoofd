@@ -1,10 +1,7 @@
-import { AutoEncoderPatchType,Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { PermissionLevel, PrivateWebshop } from "@stamhoofd/structures";
-
-import { Token } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { BalanceItem, Order, Token, Webshop } from '@stamhoofd/models';
+import { PermissionLevel } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -58,9 +55,10 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 statusCode: 403
             })
         }
-        
+
+        const orders = await Order.where({ webshopId: webshop.id });
+        await BalanceItem.deleteForDeletedOrders(orders.map(o => o.id))
         await webshop.delete()
-        
         return new Response(undefined);
     }
 }

@@ -3,7 +3,7 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, BalanceItemPayment, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
-import { BalanceItemStatus, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentProvider, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItemStatus, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 type Params = Record<string, never>;
 type Query = undefined;
@@ -283,6 +283,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         human: "Je hebt geen toegang om deze registratie te wijzigen"
                     })
                 }
+                balanceItemMemberIds.push(member.id)                
+                await BalanceItem.deleteForDeletedRegistration(registration.id)
                 await registration.delete()
                 member.registrations = member.registrations.filter(r => r.id !== deleteId)
 
@@ -358,6 +360,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }     
 
             await User.deleteForDeletedMember(member.id)
+            await BalanceItem.deleteForDeletedMember(member.id)
             await member.delete()
 
             // Update occupancy of this member because we removed registrations

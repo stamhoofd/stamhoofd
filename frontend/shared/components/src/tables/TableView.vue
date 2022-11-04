@@ -300,6 +300,13 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     isColumnDragActive = false
     dragType: "width" | "order" = "width"
 
+    @Watch("allColumns")
+    onUpdateColumns() {
+        console.log('update columns')
+        this.loadColumnConfiguration().catch(console.error)
+        this.updateVisibleRows()
+    }
+
     getEventX(event: any) {
         let x = 0;
         if (event.changedTouches) {
@@ -1074,7 +1081,14 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get sortedValues() {
         const m = (this.sortDirection === SortDirection.Ascending ? 1 : -1)
-        return this.filteredValues.sort((a, b) => this.sortBy.doCompare(a, b) * m)
+        return this.filteredValues.sort((a, b) => {
+            const d = this.sortBy.doCompare(a, b) * m
+            if (d === 0) {
+                // Use ID to have a stable sort
+                return a.id.localeCompare(b.id)
+            }
+            return d;
+        })
     }
 
     toggleSort(column: Column<any, any>) {

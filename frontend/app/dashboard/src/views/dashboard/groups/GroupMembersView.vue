@@ -87,7 +87,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         if (urlParams.has("c")) {
             this.cycleOffset = parseInt(urlParams.get("c")!)
         }
-        
+                
         // Set url
         this.updateUrl()
 
@@ -100,6 +100,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
             UrlHelper.shared.clear()
         }
+        this.reload();
     }
 
     updateUrl() {
@@ -267,14 +268,20 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         ]
     }
 
-    allColumns: Column<MemberWithRegistrations, any>[] = (() => {
+    getColumns(): Column<MemberWithRegistrations, any>[] {
+        console.log('Updating all columns');
+
+        if (this.cycleOffset) {
+            // do nothing, but used to trigger update on cycle update
+        }
+
         const cols: Column<MemberWithRegistrations, any>[] = [
             new Column<MemberWithRegistrations, string>({
                 name: "Naam", 
                 getValue: (v) => v.name, 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 100,
-                recommendedWidth: 300,
+                recommendedWidth: 320,
                 grow: true,
             }),
             new Column<MemberWithRegistrations, string>({
@@ -329,40 +336,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         ]
 
         if (!this.waitingList) {
-            cols.push(
-                new Column<MemberWithRegistrations, number>({
-                    name: "Prijs", 
-                    getValue: (v) => {
-                        const registrations = v.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
-                        return registrations.reduce((a, b) => a + b.price, 0)
-                    },
-                    format: (p) => {
-                        return Formatter.price(p)
-                    }, 
-                    getStyle: (v) => v <= 0 ? "gray" : "",
-                    compare: (a, b) => Sorter.byNumberValue(b, a),
-                    minimumWidth: 70,
-                    recommendedWidth: 80,
-                    enabled: false
-                })
-            )
-            cols.push(
-                new Column<MemberWithRegistrations, number>({
-                    name: "Prijs betaald", 
-                    getValue: (v) => {
-                        const registrations = v.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
-                        return registrations.reduce((a, b) => a + b.pricePaid, 0)
-                    },
-                    format: (p) => {
-                        return Formatter.price(p)
-                    }, 
-                    getStyle: (v) => v <= 0 ? "gray" : "",
-                    compare: (a, b) => Sorter.byNumberValue(b, a),
-                    minimumWidth: 70,
-                    recommendedWidth: 80,
-                    enabled: false
-                })
-            )
             cols.push(
                 new Column<MemberWithRegistrations, number>({
                     name: "Openstaand saldo", 
@@ -467,7 +440,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         return cols
-    })()
+
+    }
+
+    allColumns = this.getColumns()
 
     get title() {
         return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
@@ -501,18 +477,21 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
     goNext() {
         this.cycleOffset--
+        this.allColumns = this.getColumns()
         this.reload(true)
         this.updateUrl();
     }
 
     goBack() {
         this.cycleOffset++
+        this.allColumns = this.getColumns()
         this.reload(true)
         this.updateUrl();
     }
 
     resetCycle() {
         this.cycleOffset = 0
+        this.allColumns = this.getColumns()
         this.reload(true)
     }
 
@@ -663,7 +642,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     }
 
     created() {
-        this.reload();
         MemberManager.addListener(this, this.onUpdateMember)
     }
 

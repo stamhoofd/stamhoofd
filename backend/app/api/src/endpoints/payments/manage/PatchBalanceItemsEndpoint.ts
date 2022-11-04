@@ -57,6 +57,8 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.description = put.description;
                 model.price = put.price;
                 model.organizationId = user.organizationId;
+                model.createdAt = put.createdAt;
+
                 if (put.userId) {
                     model.userId = (await this.validateUserId(put.userId, user)).id;
                 }
@@ -115,6 +117,10 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 if (model.registrationId) {
                     // Update old
                     registrationIds.push(model.registrationId)
+                }
+                
+                if (patch.createdAt) {
+                    model.createdAt = patch.createdAt
                 }
 
                 if (patch.registration) {

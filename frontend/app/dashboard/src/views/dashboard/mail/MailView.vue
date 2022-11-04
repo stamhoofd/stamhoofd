@@ -335,6 +335,12 @@ export default class MailView extends Mixins(NavigationMixin) {
             example: "", 
         }))
 
+        variables.push(new EditorSmartVariable({
+            id: "outstandingBalance", 
+            name: "Openstaand bedrag", 
+            example: "", 
+        }))
+
         // Remove all smart variables that are not set in the recipients
         return variables.filter(variable => {
             for (const recipient of this.recipients) {
@@ -1047,6 +1053,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                     Replacement.create({
                         token: "email",
                         value: parent.email.toLowerCase()
+                    }),
+                    Replacement.create({
+                        token: "outstandingBalance",
+                        value: Formatter.price(member.outstandingBalance)
                     })
                 ],
                 types: ["parent", isMinor ? "minor-parent" : "adult-parent"]
@@ -1083,6 +1093,10 @@ export default class MailView extends Mixins(NavigationMixin) {
                         Replacement.create({
                             token: "email",
                             value: email
+                        }),
+                        Replacement.create({
+                            token: "outstandingBalance",
+                            value: Formatter.price(member.outstandingBalance)
                         })
                     ],
                     types: ["member", isMinor ? "minor-member" : "adult-member"]

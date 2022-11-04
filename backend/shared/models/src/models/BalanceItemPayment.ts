@@ -1,4 +1,4 @@
-import { column, ManyToOneRelation, Model } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import { BalanceItem, Organization, Payment } from './';

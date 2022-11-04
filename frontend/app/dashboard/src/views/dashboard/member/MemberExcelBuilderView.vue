@@ -138,8 +138,14 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
     loading = false
     errorBox: ErrorBox | null = null
 
-    @Prop({ default: null })
-    group: Group | null;
+    @Prop({ default: [] })
+    groups!: Group[];
+
+    @Prop({ default: false })
+    waitingList!: boolean;
+
+    @Prop({ default: 0 })
+    cycleOffset!: number;
 
     @Prop()
     members!: MemberWithRegistrations[];
@@ -179,6 +185,35 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 getValue: (member: MemberWithRegistrations) => member.details.email ?? "",
                 width: 30,
                 description: OrganizationManager.organization.meta.recordsConfiguration.parents === null ? undefined : "E-mailadres van lid zelf, niet van een ouder"
+            }),
+        ]),
+        new ExcelMemberPropertyGroup("Betaling", undefined, [
+            new ExcelMemberProperty({
+                name: "Openstaand bedrag",
+                description: 'Totaal van aangerekende bedragen die nog niet betaald werden.',
+                getValue: (member: MemberWithRegistrations) => member.outstandingBalance/100,
+                format: "€0.00",
+                width: 20
+            }),
+            new ExcelMemberProperty({
+                name: "Prijs",
+                description: "Prijs van alle inschrijvingen bij " + Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' en '),
+                getValue: (member: MemberWithRegistrations) => {
+                    const registrations = member.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
+                    return registrations.reduce((a, b) => a + b.price, 0)/100
+                },
+                format: "€0.00",
+                width: 12
+            }),
+            new ExcelMemberProperty({
+                name: "Prijs betaald",
+                description: "Totaal bedrag betaald van 'Prijs'",
+                getValue: (member: MemberWithRegistrations) => {
+                    const registrations = member.filterRegistrations({groups: this.groups, waitingList: this.waitingList, cycleOffset: this.cycleOffset})
+                    return registrations.reduce((a, b) => a + b.pricePaid, 0)/100
+                },
+                format: "€0.00",
+                width: 15
             }),
         ]),
         new ExcelMemberPropertyGroup("Adres 1", OrganizationManager.organization.meta.recordsConfiguration.parents === null ? "Adres van het lid zelf" : "Adres van het lid zelf, of van de eerste ouder", [
@@ -483,7 +518,7 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, ws, wsName);
 
-        const fileName = Formatter.fileSlug(this.group?.settings.name ?? "Leden")
+        const fileName = Formatter.fileSlug((this.waitingList ? 'Wachtlijst ' : '') + (this.groups.length === 1 ? this.groups[0].settings.name : 'Leden'))
 
         if (AppManager.shared.downloadFile) {
             const data = XLSX.write(wb, { type: 'base64' });
