@@ -5,6 +5,7 @@ import { ModalStackEventBus } from "./ModalStackEventBus"
 
 export class ContextMenuItem {
     name: string
+    description?: string
 
     leftIcon: string | null = null
     rightText: string | null = null

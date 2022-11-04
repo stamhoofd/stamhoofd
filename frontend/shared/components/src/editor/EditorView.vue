@@ -418,7 +418,7 @@ export default class EditorView extends Vue {
         // Loop all nodes with type smartButton or smartText and remove them if needed (when they are not in the smartVariables + list warning)
         //this.checkNode(content, newSmartVariables, oldSmartVariables)
         this.warnInvalidNodes(content, newSmartVariables, oldSmartVariables)
-        this.deleteInvalidButtons(content)
+        this.deleteInvalidNodes(content)
 
         // console.log(content)
         this.editor.destroy()
@@ -448,13 +448,16 @@ export default class EditorView extends Vue {
     /**
      * Return true if node needs to be kept
      */
-    deleteInvalidButtons(node: JSONContent) {
-        if (node.type == "smartButton") {
+    deleteInvalidNodes(node: JSONContent) {
+        if (node.type == "smartButton" || node.type == "smartButtonInline") {
             return !!this.smartButtons.find(smartButton => smartButton.id == node.attrs?.id)
+        }
+        if (node.type == "smartVariable") {
+            return !!this.smartVariables.find(v => v.id == node.attrs?.id)
         }
         if (node.content) {
             node.content = node.content.filter(childNode => {
-                return this.deleteInvalidButtons(childNode,)
+                return this.deleteInvalidNodes(childNode)
             })
         }
         return true
@@ -474,6 +477,7 @@ export default class EditorView extends Vue {
                 this.smartVariables.map(variable => {
                     return new ContextMenuItem({
                         name: variable.name,
+                        description: variable.description ? variable.description : undefined,
                         action: () => {
                             if (initialSelection && initialSelection.tagName === 'INPUT') {
                                 // Allow replacements in input fields

@@ -94,7 +94,7 @@
                     </STListItem>
                 </STList>
 
-                <template v-if="isManualMethod">
+                <template v-if="isManualMethod && canWrite">
                     <hr>
                     <h2>Acties</h2>
 
@@ -221,6 +221,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
+import { PermissionLevel } from "@stamhoofd/structures";
 import { ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -258,6 +259,42 @@ export default class PaymentView extends Mixins(NavigationMixin) {
 
     get mappedPayment() {
         return this.payment ?? this.initialPayment;
+    }
+
+    get canWrite() {
+        const user = SessionManager.currentSession?.user
+        if (!user || !user.permissions) {
+            return false
+        }
+        const organization = SessionManager.currentSession?.organization
+        if (!organization) {
+            return false
+        }
+
+        if (user.permissions.canManagePayments(organization.privateMeta?.roles ?? []) || user.permissions.hasFullAccess()) {
+            return true;
+        }
+
+        if (!this.payment) {
+            return false
+        }
+
+        for (const order of this.payment.orders) {
+            const webshop = organization?.webshops.find(w => w.id === order.webshopId)
+            if (webshop && webshop.privateMeta.permissions.hasAccess(user.permissions, PermissionLevel.Write)) {
+                return true
+            }
+        }
+
+        for (const registration of this.payment.registrations) {
+            const group = organization?.groups.find(w => w.id === registration.groupId)
+
+            if (group && group.privateSettings?.permissions.hasAccess(user.permissions, PermissionLevel.Write)) {
+                return true
+            }
+        }
+
+        return false;
     }
 
     @Prop({ default: null })

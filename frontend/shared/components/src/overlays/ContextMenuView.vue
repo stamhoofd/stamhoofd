@@ -795,6 +795,15 @@ export default class ContextMenuView extends Vue {
             min-height: 38px;
         }
 
+        &.with-description {
+            min-height: 42px;
+        }
+
+        .description {
+            @extend .style-context-menu-item-description;
+            padding-top: 3px;
+        }
+
         > .left {
             &:empty {
                 display: none;

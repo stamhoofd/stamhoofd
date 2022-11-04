@@ -198,6 +198,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     memberFilter = MemberFilter.Adults
     parentFilter = ParentFilter.Minors
     userFilter = UserFilter.All
+    oneEmailPerMember = true
 
     get smartVariables() {
         const variables = [
@@ -205,6 +206,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 id: "firstName", 
                 name: "Voornaam", 
                 example: "", 
+                description: (this.members.length > 0) ? (this.parentFilter !== ParentFilter.None ? "'beste ouder' voor onbekende voornaam" : "'beste lid' voor onbekende voornaam") : "",
                 deleteMessage: "De voornaam van één of meerdere ontvangers ontbreekt in het systeem. De magische tekstvervanging voor de voornaam is daarom weggehaald."
             }),
             new EditorSmartVariable({
@@ -217,7 +219,25 @@ export default class MailView extends Mixins(NavigationMixin) {
                 id: "email", 
                 name: "E-mailadres", 
                 example: "", 
-            })
+            }),
+            new EditorSmartVariable({
+                id: "firstNameMember", 
+                name: "Voornaam van lid", 
+                example: "", 
+                deleteMessage: "Je kan de voornaam van een lid enkel gebruiken als je één e-mail per lid verstuurt."
+            }),
+            new EditorSmartVariable({
+                id: "lastNameMember", 
+                name: "Achternaam van lid", 
+                example: "", 
+                deleteMessage: "Je kan de achternaam van een lid enkel gebruiken als je één e-mail per lid verstuurt."
+            }),
+            new EditorSmartVariable({
+                id: "outstandingBalance", 
+                name: "Openstaand bedrag", 
+                example: "", 
+                deleteMessage: "Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt."
+            }),
         ]
 
         //if (this.orders.length > 0) {
@@ -335,11 +355,6 @@ export default class MailView extends Mixins(NavigationMixin) {
             example: "", 
         }))
 
-        variables.push(new EditorSmartVariable({
-            id: "outstandingBalance", 
-            name: "Openstaand bedrag", 
-            example: "", 
-        }))
 
         // Remove all smart variables that are not set in the recipients
         return variables.filter(variable => {
@@ -379,9 +394,17 @@ export default class MailView extends Mixins(NavigationMixin) {
             hint: "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies."
         }))
 
+        buttons.push(new EditorSmartButton({
+            id: "unsubscribeUrl",
+            name: "Knop om uit te schrijven voor e-mails",
+            text: "Uitschrijven",
+            hint: "Met deze knop kan de ontvanger zich uitschrijven voor alle e-mails.",
+            type: 'inline'
+        }))
+
         // Remove all smart variables that are not set in the recipients
         return buttons.filter(button => {
-            if (button.id === "signInUrl") {
+            if (button.id === "signInUrl" || button.id === "unsubscribeUrl") {
                 // Already checked initially
                 return true
             }
@@ -499,7 +522,7 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         list[0] = Formatter.capitalizeFirstLetter(list[0])
-        return Formatter.joinLast(list, ", ", " en ")
+        return Formatter.joinLast(list, ", ", " en ") + (this.oneEmailPerMember && this.parentFilter !== ParentFilter.None ? " (één e-mail per lid)" : "")
     }
 
     deleteAttachment(index: number) {
@@ -564,6 +587,38 @@ export default class MailView extends Mixins(NavigationMixin) {
                         ),
                     ])
                 }),
+            ],
+            [
+                // oneEmailPerMember
+                new ContextMenuItem({
+                    name: this.oneEmailPerMember ? "Eén e-mail per lid" : "Groepeer per gezin",
+                    childMenu: new ContextMenu([
+                        [
+                            new ContextMenuItem({
+                                name: "Eén e-mail per lid",
+                                selected: this.oneEmailPerMember,
+                                action() {
+                                    this.selected = true
+                                    if (this.selected) {
+                                        m.oneEmailPerMember = true
+                                    }
+                                    return false
+                                }
+                            }),
+                            new ContextMenuItem({
+                                name: "Groepeer per gezin",
+                                selected: !this.oneEmailPerMember,
+                                action() {
+                                    this.selected = true
+                                    if (this.selected) {
+                                        m.oneEmailPerMember = false
+                                    }
+                                    return false
+                                }
+                            }),
+                        ],
+                    ])
+                }),
             ]
         ])
 
@@ -604,6 +659,10 @@ export default class MailView extends Mixins(NavigationMixin) {
 
     get hasMinors() {
         return !!this.members.find(m => m.isMinor)
+    }
+
+    get hasParents() {
+        return !!this.members.find(m => !!m.details.parents.length)
     }
 
     get fullAccess() {
@@ -1028,9 +1087,29 @@ export default class MailView extends Mixins(NavigationMixin) {
         return [...names.values()]
     }
 
-    addMemberRecipient(member: Member, recipients:  Map<string, Recipient>) {
+    addMemberRecipient(member: Member | MemberWithRegistrations, recipients:  Map<string, Recipient>, prefix = '') {
         // Minor if no age and registered in a group with max age = 17, or if member has age and is lower than 18
         const isMinor = member.isMinor
+
+        const shared: Replacement[] = []
+        if (this.oneEmailPerMember) {
+            shared.push(Replacement.create({
+                token: "firstNameMember",
+                value: member.firstName
+            }))
+
+            if (member.details.lastName) {
+                shared.push(Replacement.create({
+                    token: "lastNameMember",
+                    value: member.details.lastName
+                }))
+            }
+
+            shared.push(Replacement.create({
+                token: "outstandingBalance",
+                value: Formatter.price(member.outstandingBalance)
+            }))
+        }
 
         for (const parent of member.details.parents) {
             if (!parent.email) {
@@ -1054,28 +1133,25 @@ export default class MailView extends Mixins(NavigationMixin) {
                         token: "email",
                         value: parent.email.toLowerCase()
                     }),
-                    Replacement.create({
-                        token: "outstandingBalance",
-                        value: Formatter.price(member.outstandingBalance)
-                    })
+                    ...shared
                 ],
                 types: ["parent", isMinor ? "minor-parent" : "adult-parent"]
             })
 
-            const existing = recipients.get(recipient.email)
+            const existing = recipients.get(prefix + recipient.email)
 
             if (existing) {
                 existing.merge(recipient)
                 continue
             }
 
-            recipients.set(recipient.email, recipient)
+            recipients.set(prefix + recipient.email, recipient)
         }
 
         if (member.details.email) {
             // Create a loop for convenience (to allow break/contniue)
             for (const email of [member.details.email.toLowerCase()]) {
-                const existing = recipients.get(email)
+                const existing = recipients.get(prefix + email)
 
                 const recipient = Recipient.create({
                     firstName: member.details.firstName,
@@ -1094,10 +1170,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                             token: "email",
                             value: email
                         }),
-                        Replacement.create({
-                            token: "outstandingBalance",
-                            value: Formatter.price(member.outstandingBalance)
-                        })
+                        ...shared
                     ],
                     types: ["member", isMinor ? "minor-member" : "adult-member"]
                 })
@@ -1121,9 +1194,52 @@ export default class MailView extends Mixins(NavigationMixin) {
                 }
 
                 recipients.set(
-                    email, 
+                    prefix + email, 
                     recipient
                 )
+            }
+        }
+
+        if (member instanceof MemberWithRegistrations) {
+            for (const user of member.users) {
+                if (!user.email) {
+                    continue;
+                }
+                
+                const email = user.email.toLowerCase()
+                const existing = recipients.get(prefix + email)
+
+                const recipient = Recipient.create({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email,
+                    replacements: [
+                        Replacement.create({
+                            token: "firstName",
+                            value: user.firstName ?? (isMinor ? "beste ouder" : "beste lid")
+                        }),
+                        Replacement.create({
+                            token: "lastName",
+                            value: user.lastName ?? ""
+                        }),
+                        Replacement.create({
+                            token: "email",
+                            value: email
+                        }),
+                        ...shared
+                    ],
+                    // Create sign-in replacement 'signInUrl'
+                    userId: user.id,
+                    types: ["user", user.hasAccount ? "existing-user" : "pending-user"]
+                })
+
+                if (existing) {
+                    // Link user
+                    existing.merge(recipient)
+                    continue
+                }
+
+                recipients.set(prefix + email, recipient)
             }
         }
     }
@@ -1280,47 +1396,10 @@ export default class MailView extends Mixins(NavigationMixin) {
         }
 
         for (const member of this.members) {
-            this.addMemberRecipient(member, recipients)
+            // One e-mail per member
+            const prefix = this.oneEmailPerMember ? `${member.id}-member-` : ""
 
-            for (const user of member.users) {
-                if (!user.email) {
-                    continue;
-                }
-               
-                const email = user.email.toLowerCase()
-                const existing = recipients.get(email)
-
-                const recipient = Recipient.create({
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email,
-                    replacements: [
-                        Replacement.create({
-                            token: "firstName",
-                            value: user.firstName ?? ""
-                        }),
-                        Replacement.create({
-                            token: "lastName",
-                            value: user.lastName ?? ""
-                        }),
-                        Replacement.create({
-                            token: "email",
-                            value: email
-                        })
-                    ],
-                    // Create sign-in replacement 'signInUrl'
-                    userId: user.id,
-                    types: ["user", user.hasAccount ? "existing-user" : "pending-user"]
-                })
-
-                if (existing) {
-                    // Link user
-                    existing.merge(recipient)
-                    continue
-                }
-
-                recipients.set(email, recipient)
-            }
+            this.addMemberRecipient(member, recipients, prefix)
         }
       
         // TODO: need to validate the recplacements of other recipients
@@ -1401,14 +1480,9 @@ export default class MailView extends Mixins(NavigationMixin) {
             }
         }
 
-        // Filter recipients based on deleteFilterList
-        for (const recipient of recipients.values()) {
-            if (recipient.types.every(t => deleteFilterList.includes(t))) {
-                recipients.delete(recipient.email)
-            }
-        }
-
-        return Array.from(recipients.values())
+        return Array.from(recipients.values()).filter(recipient => {
+            return !recipient.types.every(t => deleteFilterList.includes(t))
+        });
     }
 
     get emails() {

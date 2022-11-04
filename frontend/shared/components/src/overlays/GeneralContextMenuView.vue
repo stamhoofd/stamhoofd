@@ -3,10 +3,13 @@
         <template v-for="(items, groupIndex) of menu.items">
             <ContextMenuLine v-if="groupIndex > 0" :key="groupIndex+'-line'" />
 
-            <ContextMenuItemView v-for="(item, index) of items" :key="groupIndex+'-'+index" v-tooltip="item.disabled" :class="{'disabled': !!item.disabled}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item, $event)">
+            <ContextMenuItemView v-for="(item, index) of items" :key="groupIndex+'-'+index" v-tooltip="item.disabled" :class="{'disabled': !!item.disabled, 'with-description': !!item.description}" :child-context-menu="item.childMenu ? item.childMenu.getComponent() : undefined" @click="handleAction(item, $event)">
                 <Checkbox v-if="item.selected !== null" slot="left" :checked="item.selected" :only-line="true" />
                 <span v-else-if="item.leftIcon !== null" slot="left" :class="'icon '+item.leftIcon" />
-                {{ item.name }}
+                <p>{{ item.name }}</p>
+                <p v-if="item.description" class="description">
+                    {{ item.description }}
+                </p>
                 <span v-if="item.childMenu" slot="right" class="icon arrow-right-small" />
                 <span v-else-if="item.icon !== null" slot="right" :class="'icon '+item.icon" />
                 <span v-else-if="item.rightText !== null" slot="right" class="style-context-menu-item-description">

@@ -85,7 +85,7 @@
                         <span class="icon arrow-down-small" />
                     </button>
                     <div>
-                        <button v-long-press="(e) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
+                        <button v-if="hasWrite" v-long-press="(e) => addRegistration(e)" type="button" class="button icon add gray" @click.prevent="addRegistration" @contextmenu.prevent="addRegistration" />
                     </div>
                 </h2>
 
@@ -96,8 +96,11 @@
                     {{ member.firstName }} was niet ingeschreven
                 </p>
 
-                <STList>
+                <STList v-if="hasWrite">
                     <MemberRegistrationBlock v-for="registration in visibleRegistrations" :key="registration.id" :registration="registration" @edit="(e) => editRegistration(registration, e)" />
+                </STList>
+                <STList v-else>
+                    <MemberRegistrationBlock v-for="registration in visibleRegistrations" :key="registration.id" :registration="registration" />
                 </STList>
             </div>
 

@@ -117,7 +117,7 @@ export class SuggestionBuilder {
                 // Okay to suggest
                 continue;
             }
-            if (suggestion.group && suggestion.group.settings.requireGroupIds.length > 0) {
+            if (suggestion.group && (suggestion.group.settings.requireGroupIds.length > 0 || (suggestion.group.settings.minAge !== null && suggestion.group.settings.maxAge !== null))) {
                 // Okay to suggest
                 continue;
             }

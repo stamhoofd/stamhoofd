@@ -205,7 +205,7 @@ export default class MemberView extends Mixins(NavigationMixin) {
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+            if(group.privateSettings && group.privateSettings.permissions.hasAccess(OrganizationManager.user.permissions, PermissionLevel.Write)) {
                 return true
             }
         }
