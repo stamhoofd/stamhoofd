@@ -4,14 +4,16 @@ import { TextSelection } from 'prosemirror-state'
 export class EditorSmartVariable {
     id: string;
     name: string;
+    description: string | null = null;
     example: string;
     html?: string;
     deleteMessage?: string
 
 
-    constructor(options: { id: string, name: string, example?: string, deleteMessage?: string, html?: string }) {
+    constructor(options: { id: string, name: string, description?: string, example?: string, deleteMessage?: string, html?: string }) {
         this.id = options.id;
         this.name = options.name;
+        this.description = options.description ?? null;
         this.example = options.example ?? options.name;
         this.html = options.html;
         this.deleteMessage = options.deleteMessage;

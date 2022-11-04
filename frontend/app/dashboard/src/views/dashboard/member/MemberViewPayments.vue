@@ -14,7 +14,7 @@
                 </p>
                 
                 <STList>
-                    <STListItem v-for="item in balanceItems" :key="item.id" :selectable="true" @click="editBalanceItem(item)">
+                    <STListItem v-for="item in balanceItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
                         <h3 class="style-title-list">
                             {{ item.description }}
                         </h3>
@@ -52,19 +52,9 @@
                     </STList>
                 </div>
 
-                <button type="button" class="button text" @click="createBalanceItem">
+                <button v-if="hasWrite" type="button" class="button text" @click="createBalanceItem">
                     <span class="icon add" />
                     <span>Bedrag aanrekenen</span>
-                </button>
-
-                <button v-if="false" type="button" class="button text">
-                    <span class="icon card" />
-                    <span>Betaling ontvangen</span>
-                </button>
-
-                <button v-if="false" type="button" class="button text">
-                    <span class="icon email" />
-                    <span>Betaalverzoek versturen</span>
                 </button>
 
                 <template v-if="outstandingBalance.total > 0">
@@ -186,6 +176,25 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         })
     }
 
+    get hasWrite(): boolean {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+
+        if (OrganizationManager.user.permissions.hasFullAccess() || OrganizationManager.user.permissions.canManagePayments(this.organization.privateMeta?.roles ?? []) ) {
+            // Can edit members without groups
+            return true
+        }
+
+        for (const group of this.member.groups) {
+            if(group.privateSettings && group.privateSettings.permissions.hasAccess(OrganizationManager.user.permissions, PermissionLevel.Write)) {
+                return true
+            }
+        }
+        
+        return false
+    }
+
     get payments() {
         const payments = new Map<string, Payment>()
         for (const item of this.balanceItems) {
@@ -259,6 +268,9 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     }
 
     editBalanceItem(balanceItem: MemberBalanceItem) {
+        if (!this.hasWrite) {
+            return
+        }
         const component = new ComponentWithProperties(EditBalanceItemView, {
             balanceItem,
             isNew: false,
@@ -312,30 +324,6 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
 
     getPaymentMethodName(method: PaymentMethod) {
         return PaymentMethodHelper.getNameCapitalized(method);
-    }
-
-    get hasWrite(): boolean {
-        if (!OrganizationManager.user.permissions) {
-            return false
-        }
-
-        if (OrganizationManager.user.permissions.hasFullAccess()) {
-            // Can edit members without groups
-            return true
-        }
-
-        if (OrganizationManager.user.permissions.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])) {
-            // Can edit members without groups
-            return true
-        }
-
-        for (const group of this.member.groups) {
-            if(group.privateSettings && getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)) {
-                return true
-            }
-        }
-        
-        return false
     }
 
     reloadFamily() {
