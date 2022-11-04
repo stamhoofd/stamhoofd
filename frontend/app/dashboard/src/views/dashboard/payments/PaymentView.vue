@@ -42,7 +42,7 @@
                         </p>
                     </STListItem>
 
-                    <STListItem v-if="payment.method == 'Transfer'">
+                    <STListItem v-if="payment.method == 'Transfer' && payment.transferSettings">
                         <h3 class="style-definition-label">
                             Betalen aan
                         </h3>

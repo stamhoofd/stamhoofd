@@ -123,7 +123,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 await order.markValid(payment, [])
 
                 if (order.number) {
-                    balanceItem.description = 'Bestelling ' + order.number.toString() + ' - ' + webshop.meta.name
+                    balanceItem.description = 'Bestelling #' + order.number.toString() + ' - ' + webshop.meta.name
                 }
 
                 // Only now we can update the transfer description, since we need the order number as a reference
@@ -137,7 +137,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 await order.markPaid(payment, organization, webshop)
 
                 if (order.number) {
-                    balanceItem.description = 'Bestelling ' + order.number.toString() + ' - ' + webshop.meta.name
+                    balanceItem.description = 'Bestelling #' + order.number.toString() + ' - ' + webshop.meta.name
                 }
                 
                 balanceItem.status = BalanceItemStatus.Pending;

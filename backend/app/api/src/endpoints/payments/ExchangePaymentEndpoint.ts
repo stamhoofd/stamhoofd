@@ -2,7 +2,7 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Member, MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, Registration, STPendingInvoice } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Member, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Registration, STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, STInvoiceItem } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';

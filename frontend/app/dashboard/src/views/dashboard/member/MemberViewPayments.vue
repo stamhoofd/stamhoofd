@@ -66,6 +66,15 @@
                     <span class="icon email" />
                     <span>Betaalverzoek versturen</span>
                 </button>
+
+                <template v-if="outstandingBalance.total > 0">
+                    <hr>
+                    <h2>Hoe openstaand bedrag betalen?</h2>
+                    <p>Leden kunnen hun openstaand bedrag betalen door naar het ledenportaal te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar het ledenportaal te gaan).</p>
+                    <p v-if="pendingPayments.length > 0" class="style-description">
+                        Opgelet, het deel dat in verwerking is kan niet betaald worden via het ledenportaal. Je kan wel de betalingen die in verwerking zijn annuleren zodat ze via een andere betaalmethode betaald kunnen worden via het ledenportaal. Bijvoorbeeld een overschrijving die al lang niet betaald werd kan je annuleren om vervolgens een nieuw betaalverzoek te versturen van het openstaande bedrag.
+                    </p>
+                </template>
                
                 <template v-if="pendingPayments.length > 0">
                     <hr>

@@ -1,12 +1,9 @@
-import { ArrayDecoder, AutoEncoderPatchType, Data, Decoder, EnumDecoder, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Data, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Order } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
+import { BalanceItem, Order, Payment, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel,PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -186,6 +183,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     })
                 }
 
+                const previousStatus = model.status
+
                 model.status = patch.status ?? model.status
 
                 // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
@@ -200,6 +199,16 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 if (model.status === OrderStatus.Deleted) {
                     model.data.removePersonalData()
+                }
+
+                if (model.status === OrderStatus.Deleted || model.status === OrderStatus.Canceled) {
+                    // Cancel payment if still pending
+                    await BalanceItem.deleteForDeletedOrders([model.id])
+                } else {
+                    if (previousStatus === OrderStatus.Canceled || previousStatus === OrderStatus.Deleted) {
+                        // Undo deletion
+                        await BalanceItem.undoForDeletedOrders([model.id])
+                    }
                 }
 
                 await model.save()

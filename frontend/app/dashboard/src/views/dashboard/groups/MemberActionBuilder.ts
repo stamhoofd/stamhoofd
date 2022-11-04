@@ -355,7 +355,9 @@ export class MemberActionBuilder {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: await LoadComponent(() => import(/* webpackChunkName: "MemberExcelBuilderView"*/ '../member/MemberExcelBuilderView.vue'), {
                 members,
-                group: this.groups.length === 1 ? this.groups[0] : undefined,
+                groups: this.groups,
+                waitingList: this.inWaitingList,
+                cycleOffset: this.cycleOffset
             })
         });
         this.present(displayedComponent.setDisplayStyle("popup"));

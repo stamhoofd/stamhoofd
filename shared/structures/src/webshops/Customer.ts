@@ -14,6 +14,12 @@ export class Customer extends AutoEncoder {
     phone = ""
 
     get name() {
+        if (this.lastName === "") {
+            return this.firstName
+        }
+        if (this.firstName === "") {
+            return this.lastName
+        }
         return this.firstName+" "+this.lastName
     }
 }

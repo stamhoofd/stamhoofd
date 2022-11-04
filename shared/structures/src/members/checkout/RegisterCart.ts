@@ -204,7 +204,7 @@ export class IDRegisterCart extends AutoEncoder {
         errors.throwIfNotEmpty()
     }
 
-    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
-        RegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories)
+    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], forceDate?: Date) {
+        RegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories, forceDate)
     }
 }

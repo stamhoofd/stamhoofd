@@ -97,7 +97,7 @@ export class Order extends Model {
     }
 
     async undoPaymentFailed(this: Order) {
-        if (this.status !== OrderStatus.Deleted) {
+        if (this.status !== OrderStatus.Deleted && this.status !== OrderStatus.Canceled) {
             return
         }
 
@@ -120,7 +120,7 @@ export class Order extends Model {
 
     async onPaymentFailed(this: Order) {
         if (this.shouldIncludeStock()) {
-            this.status = OrderStatus.Deleted
+            this.status = this.number !== null ? OrderStatus.Canceled : OrderStatus.Deleted
             await this.save()
 
             await QueueHandler.schedule("webshop-stock/"+this.webshopId, async () => {

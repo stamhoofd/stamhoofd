@@ -217,7 +217,10 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
         const cols: Column<PaymentGeneral, any>[] = [
             new Column<PaymentGeneral, string>({
                 name: "Naam", 
-                getValue: (payment) => payment.orders.map(o => o.data.customer.name).join(", ") + payment.members.map(r => r.name).join(", "), 
+                getValue: (payment) => {
+                    const names = [...payment.orders.map(o => o.data.customer), ...payment.members.map(r => r.details)]
+                    return Formatter.groupNamesByFamily(names)
+                }, 
                 getStyle: (name) => name == "" ? "gray" : "",
                 format: (name) => name == "" ? "Onbekend" : name,
                 compare: (a, b) => Sorter.byStringValue(a, b),

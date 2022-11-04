@@ -61,8 +61,13 @@ export class Payment extends Model {
     })
     createdAt: Date
 
+    _forceUpdatedAt: Date | null = null
+
     @column({
         type: "datetime", beforeSave() {
+            if (this._forceUpdatedAt) {
+                return this._forceUpdatedAt
+            }
             const date = new Date()
             date.setMilliseconds(0)
             return date
@@ -173,18 +178,12 @@ export class Payment extends Model {
         return (await Payment.getGeneralStructure([this], checkPermissions))[0]
     }
 
-    /**
-     * 
-     * @param payments 
-     * @param checkPermissions Only set to undefined when not returned in the API + not for public use
-     * @returns 
-     */
-    static async getGeneralStructure(payments: Payment[], checkPermissions?: {user: UserWithOrganization, permissionLevel: PermissionLevel}): Promise<PaymentGeneral[]> {
+    static async loadBalanceItems(payments: Payment[]) {
+        if (payments.length === 0) {
+            return {balanceItemPayments: [], balanceItems: []}
+        }
         const {BalanceItemPayment} = await import("./BalanceItemPayment");
         const {BalanceItem} = await import("./BalanceItem");
-        const {Registration} = await import("./Registration");
-        const {Order} = await import("./Order");
-        const {Member} = await import("./Member");
 
         // Load all the related models from the database so we can build the structures
         const balanceItemPayments = await BalanceItemPayment.where({
@@ -195,6 +194,25 @@ export class Payment extends Model {
         })
         const ids = Formatter.uniqueArray(balanceItemPayments.flatMap(p => p.balanceItemId));
         const balanceItems = await BalanceItem.getByIDs(...ids);
+
+        return {balanceItemPayments, balanceItems}
+    }
+
+    /**
+     * 
+     * @param payments 
+     * @param checkPermissions Only set to undefined when not returned in the API + not for public use
+     * @returns 
+     */
+    static async getGeneralStructure(payments: Payment[], checkPermissions?: {user: UserWithOrganization, permissionLevel: PermissionLevel}): Promise<PaymentGeneral[]> {
+        if (payments.length === 0) {
+            return []
+        }
+        const {Registration} = await import("./Registration");
+        const {Order} = await import("./Order");
+        const {Member} = await import("./Member");
+
+        const {balanceItemPayments, balanceItems} = await this.loadBalanceItems(payments)
 
         // Load members and orders
         const registrationIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.registrationId ? [b.registrationId] : []))

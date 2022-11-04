@@ -1,5 +1,7 @@
 import { DateTime } from "luxon";
 
+import { Sorter } from "./Sorter";
+
  function pad(number) {
     if (number < 10) {
         return '0' + number;
@@ -250,5 +252,13 @@ export class Formatter {
         }
 
         return number+"e"
+    }
+
+    static groupNamesByFamily(names: {firstName: string, lastName: string}[]): string {
+        const n = names.slice().sort((a, b) => Sorter.stack(a.lastName.localeCompare(b.lastName), a.firstName.localeCompare(b.firstName)));
+        const firstNames = this.uniqueArray(n.map(n => n.firstName))
+        const lastNames = this.uniqueArray(n.map(n => n.lastName))
+
+        return this.joinLast(firstNames, ", ", " en ") + (lastNames.length > 0 ? (" " + lastNames.join('-')) : '');
     }
 }

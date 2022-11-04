@@ -1,7 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Payment, Token, UserWithOrganization } from "@stamhoofd/models";
-import { PaymentGeneral, PaymentMethod, PermissionLevel } from "@stamhoofd/structures";
+import { PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined
@@ -53,7 +53,24 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await Payment.where({
                 organizationId: user.organizationId, 
                 paidAt: null,
-                method: PaymentMethod.Transfer
+                method: PaymentMethod.Transfer,
+                status: {
+                    sign: '!=',
+                    value: PaymentStatus.Failed
+                }
+            })
+        );
+
+        payments.push(...
+            await Payment.where({
+                organizationId: user.organizationId, 
+                paidAt: null,
+                updatedAt: {
+                    sign: '>', 
+                    value: new Date(Date.now() - (24 * 60 * 60 * 1000 * 7 ))
+                },
+                method: PaymentMethod.Transfer,
+                status: PaymentStatus.Failed
             })
         );
 

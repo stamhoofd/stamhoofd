@@ -218,15 +218,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
             payment.transferSettings = user.organization.mappedTransferSettings
 
-            const memberNames = Formatter.uniqueArray([
-                ...payRegistrations.map(r => r.registration.member.details.firstName),
-                ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details?.firstName).filter(n => n !== undefined)
-            ])
-            const memberLastNames = Formatter.uniqueArray([
-                ...payRegistrations.map(r => r.registration.member.details.lastName),
-                ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details?.lastName).filter(n => n !== undefined)
-            ])
-            payment.generateDescription(user.organization, memberNames.join(", ") + " " + memberLastNames.sort().join("-"))
+            const members = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)]
+            payment.generateDescription(user.organization, Formatter.groupNamesByFamily(members))
         }
         payment.paidAt = null
 
@@ -296,7 +289,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.price = request.body.cart.freeContribution
             balanceItem.description = `Vrije bijdrage`
-            balanceItem.pricePaid = 0;
+            balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? balanceItem.price : 0;
             balanceItem.userId = user.id
             balanceItem.organizationId = organization.id;
 

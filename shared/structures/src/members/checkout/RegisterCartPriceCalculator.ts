@@ -90,7 +90,7 @@ export class RegisterCartPriceCalculator {
      * @param groups All the groups of this organization
      * @param categories All the categories of this organization
      */
-    static calculatePrices(items: RegisterItemWithPrice[], members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
+    static calculatePrices(items: RegisterItemWithPrice[], members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], forceDate?: Date) {
         // Step 1 + 2: 
         // 1. add the group prices
         // 2. group items by items that have a grouped family discount
@@ -101,7 +101,7 @@ export class RegisterCartPriceCalculator {
         const groupedItems: [RegisterItemWithPriceAndGroupPrices[], Map<string, RegisterItemWithPriceAndGroupPrices[]>, Map<string, RegisterItemWithPriceAndGroupPrices[]>]
              = [[], new Map<string, RegisterItemWithPriceAndGroupPrices[]>(), new Map<string, RegisterItemWithPriceAndGroupPrices[]>()]
 
-        const now = new Date()
+        const now = forceDate ?? new Date()
         for (const item of items) {
             item.calculatedPrice = 0
 

@@ -77,7 +77,7 @@ export class Sorter {
     /**
      * Return the first non zero value from a list, or zero if all values are zero
      */
-    static stack(...sortResults: (0 | 1 | -1)[]) {
+    static stack(...sortResults: number[]) {
         while(sortResults.length > 0) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const f = sortResults.shift()!
