@@ -6,7 +6,7 @@ import { Payment, Settlement } from './Payment'
 
 export class PaymentGeneral extends Payment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
-    balanceItemPayments: BalanceItemPaymentDetailed[]
+    balanceItemPayments: BalanceItemPaymentDetailed[] = []
 
     @field({ decoder: StringDecoder, nullable: true })
     iban: string | null = null

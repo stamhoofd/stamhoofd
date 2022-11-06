@@ -9,15 +9,18 @@
                     {{ financialSupportWarningText }}
                 </p>
 
-                <p v-if="balanceItems.length == 0" class="info-box">
+                <p v-if="filteredBalanceItems.length == 0" class="info-box">
                     Geen openstaande rekening
                 </p>
                 
                 <STList>
-                    <STListItem v-for="item in balanceItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
+                    <STListItem v-for="item in filteredBalanceItems" :key="item.id" :selectable="hasWrite" @click="editBalanceItem(item)">
                         <h3 class="style-title-list">
                             {{ item.description }}
                         </h3>
+                        <p v-if="item.memberId && getMember(item.memberId) && multipleMembers" class="style-description-small">
+                            {{ getMember(item.memberId).name }}
+                        </p>
                         <p class="style-description-small">
                             {{ formatDate(item.createdAt) }}
                         </p>
@@ -33,13 +36,20 @@
                     </STListItem>
                 </STList>
 
-                <div class="pricing-box">
+                <div v-if="filteredBalanceItems.length > 0" class="style-pricing-box">
                     <STList>
-                        <STListItem>
+                        <STListItem v-if="outstandingBalance.total >= 0">
                             Totaal te betalen
 
                             <template slot="right">
                                 {{ formatPrice(outstandingBalance.total) }}
+                            </template>
+                        </STListItem>
+                        <STListItem v-else-if="outstandingBalance.totalPending > 0">
+                            Totaal te betalen
+
+                            <template slot="right">
+                                {{ formatPrice(0) }}
                             </template>
                         </STListItem>
                         <STListItem v-if="outstandingBalance.totalPending > 0">
@@ -47,6 +57,14 @@
 
                             <template slot="right">
                                 {{ formatPrice(outstandingBalance.totalPending) }}
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-if="outstandingBalance.total < 0">
+                            Totaal terug te betalen
+
+                            <template slot="right">
+                                {{ formatPrice(outstandingBalance.total) }}
                             </template>
                         </STListItem>
                     </STList>
@@ -57,12 +75,20 @@
                     <span>Bedrag aanrekenen</span>
                 </button>
 
+                <button v-if="hasWrite && ((outstandingBalance.total - outstandingBalance.totalPending) > 0 || outstandingBalance.total < 0)" type="button" class="button text" @click="createPayment">
+                    <span class="icon card" />
+                    <span>Betaling/terugbetaling registreren</span>
+                </button>
+
                 <template v-if="outstandingBalance.total > 0">
                     <hr>
                     <h2>Hoe openstaand bedrag betalen?</h2>
                     <p>Leden kunnen hun openstaand bedrag betalen door naar het ledenportaal te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar het ledenportaal te gaan).</p>
-                    <p v-if="pendingPayments.length > 0" class="style-description">
+                    <p v-if="pendingPayments.length > 0" class="style-description-block">
                         Opgelet, het deel dat in verwerking is kan niet betaald worden via het ledenportaal. Je kan wel de betalingen die in verwerking zijn annuleren zodat ze via een andere betaalmethode betaald kunnen worden via het ledenportaal. Bijvoorbeeld een overschrijving die al lang niet betaald werd kan je annuleren om vervolgens een nieuw betaalverzoek te versturen van het openstaande bedrag.
+                    </p>
+                    <p v-if="(outstandingBalance.total - outstandingBalance.totalPending) !== 0" class="style-description-block">
+                        Je kan zelf ook manueel een betaling toevoegen (bv. als er ter plaatse werd betaald, of via een overschrijving die niet in het systeem is opgenomen) via de knop 'Betaling/terugbetaling registreren' hierboven.
                     </p>
                 </template>
                
@@ -88,18 +114,24 @@
 
                 <template v-if="succeededPayments.length > 0">
                     <hr>
-                    <h2>Ontvangen betalingen</h2>
+                    <h2>Betalingen</h2>
 
                     <STList>
                         <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
                             <h3 class="style-title-list">
                                 {{ getPaymentMethodName(payment.method) }}
+                                <template v-if="payment.price < 0">
+                                    (terugbetaling)
+                                </template>
                             </h3>
-                            <p class="style-description-small">
+                            <p v-if="formatDate(payment.createdAt) !== formatDate(payment.paidAt)" class="style-description-small">
                                 Aangemaakt op {{ formatDate(payment.createdAt) }}
                             </p>
-                            <p class="style-description-small">
+                            <p v-if="payment.price >= 0" class="style-description-small">
                                 Betaald op {{ formatDate(payment.paidAt) }}
+                            </p>
+                            <p v-else class="style-description-small">
+                                Terugbetaald op {{ formatDate(payment.paidAt) }}
                             </p>
 
                             <span slot="right">{{ formatPrice(payment.price) }}</span>
@@ -118,7 +150,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, GlobalEventBus, LoadingButton, Spinner, STErrorsDefault, STList, STListItem, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { FinancialSupportSettings, getPermissionLevelNumber, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
+import { BalanceItemDetailed, FinancialSupportSettings, getPermissionLevelNumber, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -126,6 +158,7 @@ import { FamilyManager } from '../../../classes/FamilyManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
 import PaymentView from '../payments/PaymentView.vue';
 import EditBalanceItemView from './balance/EditBalanceItemView.vue';
+import EditPaymentView from './EditPaymentView.vue';
 
 @Component({ 
     components: { 
@@ -176,6 +209,14 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         })
     }
 
+    getMember(id: string) {
+        return this.familyManager.members.find(m => m.id == id)
+    }
+
+    get multipleMembers() {
+        return this.familyManager.members.length > 1
+    }
+
     get hasWrite(): boolean {
         if (!OrganizationManager.user.permissions) {
             return false
@@ -193,6 +234,10 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
         }
         
         return false
+    }
+
+    get filteredBalanceItems(): MemberBalanceItem[] {
+        return this.balanceItems.filter(b => b.price - b.pricePaid !== 0)
     }
 
     get payments() {
@@ -254,11 +299,45 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,
-                    decoder: new ArrayDecoder(MemberBalanceItem)
+                    decoder: new ArrayDecoder(MemberBalanceItem),
+                    shouldRetry: false
                 });
                 await this.reload();
                 // Also reload member outstanding amount of the whole family
-                await this.reloadFamily();
+                this.reloadFamily();
+            }
+        })
+        this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        })
+    }
+
+    createPayment() {
+        const payment = PaymentGeneral.create({
+            method: PaymentMethod.PointOfSale,
+            status: PaymentStatus.Succeeded,
+            paidAt: new Date()
+        })
+
+        const component = new ComponentWithProperties(EditPaymentView, {
+            payment,
+            balanceItems: this.balanceItems.map(b => BalanceItemDetailed.create({...b, member: b.memberId ? this.getMember(b.memberId) : null})),
+            familyManager: this.familyManager,
+            isNew: true,
+            saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
+                const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+                arr.addPut(payment.patch(patch))
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/organization/payments',
+                    body: arr,
+                    decoder: new ArrayDecoder(PaymentGeneral),
+                    shouldRetry: false
+                });
+                await this.reload();
+                // Also reload member outstanding amount of the whole family
+                this.reloadFamily();
             }
         })
         this.present({
@@ -282,11 +361,12 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
                     method: 'PATCH',
                     path: '/organization/balance',
                     body: arr,
-                    decoder: new ArrayDecoder(MemberBalanceItem)
+                    decoder: new ArrayDecoder(MemberBalanceItem),
+                    shouldRetry: false
                 });
                 await this.reload();
                 // Also reload member outstanding amount of the whole family
-                await this.reloadFamily();
+                this.reloadFamily();
             }
         })
         this.present({
@@ -382,25 +462,3 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.member-payments-view {
-    .pricing-box {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: flex-end;
-
-        > * {
-            flex-basis: 350px;
-        }
-
-        .middle {
-            font-weight: 600;
-        }
-    }
-}
-</style>

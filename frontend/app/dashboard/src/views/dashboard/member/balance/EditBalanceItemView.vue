@@ -48,7 +48,7 @@
             </STList>
         </template>
 
-        <button v-else-if="member" class="button text" type="button" @click="linkRegistration">
+        <button v-else-if="member && false" class="button text" type="button" @click="linkRegistration">
             <span class="icon link" /><span>Koppelen aan inschrijving</span>
         </button>
 
@@ -65,12 +65,25 @@
                 <STListItem v-for="payment of patchedBalanceItem.payments" :key="payment.id" :selectable="true" class="right-stack" @click="openPayment(payment.payment)">
                     <h3 class="style-title-list">
                         {{ getPaymentMethodName(payment.payment.method) }}
+                        <template v-if="payment.payment.price < 0">
+                            (terugbetaling)
+                        </template>
                     </h3>
-                    <p class="style-description-small">
+                    <p v-if="payment.payment.price >= 0" class="style-description-small">
                         Totaalbedrag is {{ formatPrice(payment.payment.price) }}, waarvan {{ formatPrice(payment.price) }} bestemd voor deze aanrekening
                     </p>
-                    <p class="style-description-small">
+                    <p v-else class="style-description-small">
+                        Er werd {{ formatPrice(-payment.payment.price) }} terugbetaald
+                    </p>
+
+                    <p v-if="formatDate(payment.payment.createdAt) !== formatDate(payment.payment.paidAt)" class="style-description-small">
                         Aangemaakt op {{ formatDate(payment.payment.createdAt) }}
+                    </p>
+                    <p v-if="payment.payment.paidAt && payment.payment.price >= 0" class="style-description-small">
+                        Betaald op {{ formatDate(payment.payment.paidAt) }}
+                    </p>
+                    <p v-else-if="payment.payment.paidAt" class="style-description-small">
+                        Terugbetaald op {{ formatDate(payment.payment.paidAt) }}
                     </p>
 
                     <span v-if="payment.payment.isFailed" slot="right" class="style-tag error">Mislukt</span>
@@ -107,6 +120,24 @@
                     </STListItem>
                 </STList>
             </div>
+
+            <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
+                <hr>
+                <h2>Acties</h2>
+
+                <STList>
+                    <STListItem :selectable="true" @click="doDelete">
+                        <h2 class="style-title-list">
+                            Verwijder deze aanrekening
+                        </h2>
+                        <button slot="right" type="button" class="button secundary danger hide-smartphone">
+                            <span class="icon trash" />
+                            <span>Verwijderen</span>
+                        </button>
+                        <button slot="right" type="button" class="button icon trash only-smartphone" />
+                    </STListItem>
+                </STList>
+            </template>
         </template>
     </SaveView>
 </template>
@@ -115,6 +146,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection,ErrorBox, PriceInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { BalanceItemStatus } from '@stamhoofd/structures';
 import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -294,6 +326,29 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
             }
             this.loading = true
             await this.saveHandler(this.patchBalanceItem)
+            this.pop({ force: true })
+        } catch (e) {
+            this.errorBox = new ErrorBox(e);
+        }
+        this.loading = false
+    }
+
+    async doDelete() {
+        if (this.loading) {
+            return
+        }
+        if (!(await CenteredMessage.confirm("Deze aanrekening verwijderen?", "Verwijderen", "Je kan dit niet ongedaan maken."))) {
+            return
+        }
+
+        this.errorBox = null;
+
+        try {
+            this.loading = true
+            await this.saveHandler(MemberBalanceItem.patch({
+                status: BalanceItemStatus.Hidden,
+                price: 0
+            }))
             this.pop({ force: true })
         } catch (e) {
             this.errorBox = new ErrorBox(e);

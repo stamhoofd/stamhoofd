@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, Group, Member, Registration, Token, User, UserWithOrganization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { MemberBalanceItem } from "@stamhoofd/structures";
+import { BalanceItemStatus, MemberBalanceItem } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { ExchangePaymentEndpoint } from '../ExchangePaymentEndpoint';
@@ -58,6 +58,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.price = put.price;
                 model.organizationId = user.organizationId;
                 model.createdAt = put.createdAt;
+                model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Pending;
 
                 if (put.userId) {
                     model.userId = (await this.validateUserId(put.userId, user)).id;
@@ -141,7 +142,15 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 }
                 model.description = patch.description ?? model.description;
                 model.price = patch.price ?? model.price;
-                
+
+                if (patch.status && patch.status === BalanceItemStatus.Hidden) {
+                    if (model.pricePaid === 0) {
+                        model.status = BalanceItemStatus.Hidden
+                    }
+                } else if (patch.status) {
+                    model.status = model.pricePaid >= model.price ? BalanceItemStatus.Paid : BalanceItemStatus.Pending;
+                }
+
                 await model.save();
                 returnedModels.push(model);
             }

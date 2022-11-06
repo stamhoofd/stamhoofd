@@ -693,3 +693,18 @@
 .style-strong {
     font-weight: $font-weight-semibold;
 }
+
+.style-pricing-box {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
+
+    >* {
+        flex-basis: 350px;
+    }
+
+    .middle {
+        font-weight: 600;
+    }
+}
