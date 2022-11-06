@@ -1,4 +1,5 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { SessionManager } from "@stamhoofd/networking";
 import { Group, MemberWithRegistrations, RegisterItem } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 
@@ -69,7 +70,7 @@ export class Suggestion {
 export class SuggestionBuilder {
     static getSuggestions(members: MemberWithRegistrations[]) {
         const suggestions: Suggestion[] = []
-        const groups = OrganizationManager.organization.availableGroups
+        const groups = OrganizationManager.organization.getGroupsForPermissions(SessionManager.currentSession?.user?.permissions)
 
         // Rules for suggesting registrations
         // Multiple registrations possible -> suggest one general item

@@ -51,15 +51,15 @@ export class MemberActionBuilder {
                     name: "Wachtlijst van",
                     groupIndex: 0,
                     childActions: () => [
-                        ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, true))
+                        ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle, true))
                     ]
                 }),
-                ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle, false))
+                ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle, false))
             ]
         }
 
         return [
-            ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.register(members, group, group.cycle - cycleOffset, false))
+            ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.register(members, group, group.cycle - cycleOffset, false))
         ]
     }
 

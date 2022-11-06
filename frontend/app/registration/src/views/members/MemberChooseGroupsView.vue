@@ -76,7 +76,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     }
 
     get hasMore() {
-        return this.tree.getAllGroups().length !== OrganizationManager.organization.getCategoryTree({permissions: SessionManager.currentSession!.user!.permissions}).getAllGroups().length
+        return this.tree.getAllGroups().length !== OrganizationManager.organization.getGroupsForPermissions(SessionManager.currentSession?.user?.permissions).length
     }
 
     showAll() {
