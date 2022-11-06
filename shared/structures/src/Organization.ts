@@ -98,6 +98,28 @@ export class Organization extends AutoEncoder {
         return this.getCategoryTree({admin: true})
     }
 
+    isAcceptingNewMembers(admin: boolean) {
+        const allGroups = this.adminAvailableGroups // we need to check admin groups because required groups could be restricted to internal groups
+        const groups = this.getCategoryTree({admin}).getAllGroups()
+        
+        for (const group of groups) {
+            if (group.closed) {
+                continue;
+            }
+            if (group.settings.requireGroupIds.length > 0 && group.settings.requireGroupIds.find(id => !!allGroups.find(g => g.id === id))) {
+                continue;
+            }
+            if (group.settings.requirePreviousGroupIds.length > 0 && group.settings.requirePreviousGroupIds.find(id => !!allGroups.find(g => g.id === id))) {
+                continue;
+            }
+            if  (group.settings.availableMembers === 0 && !group.settings.waitingListIfFull) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @deprecated
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
@@ -108,6 +130,9 @@ export class Organization extends AutoEncoder {
 
     /**
      * Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
+     * 
+     * For registration members perspective, try to use options.admin instead of options.permissions. 
+     * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
     getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: Permissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)

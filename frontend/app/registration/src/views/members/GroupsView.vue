@@ -51,7 +51,7 @@ export default class GroupsView extends Mixins(NavigationMixin){
     }
 
     get fullTree() {
-        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, permissions: SessionManager.currentSession!.user!.permissions})
+        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: !!SessionManager.currentSession!.user!.permissions, smartCombine: true})
     }
 
     get categories() {

@@ -42,6 +42,16 @@ export class RegisterCartValidator {
             }
         }
 
+        if (group.notYetOpen) {
+            return {
+                closed: true,
+                waitingList: false,
+                message: "Nog niet geopend",
+                description: "De inschrijvingen voor "+group.settings.name+" zijn nog niet geopend.",
+                invited: false
+            }
+        }
+
         if (group.closed) {
             return {
                 closed: true,
@@ -130,16 +140,6 @@ export class RegisterCartValidator {
                     description: "Inschrijven voor "+group.settings.name+" kan enkel als je de vorige keer was ingeschreven voor "+Formatter.joinLast(group.settings.requirePreviousGroupIds.map(id => groups.find(g => g.id === id)?.settings.name ?? "Onbekend"), ", ", " of "),
                     invited: false
                 }
-            }
-        }
-
-        if (group.notYetOpen) {
-            return {
-                closed: true,
-                waitingList: false,
-                message: "Nog niet geopend",
-                description: "De inschrijvingen voor "+group.settings.name+" zijn nog niet geopend.",
-                invited: false
             }
         }
 

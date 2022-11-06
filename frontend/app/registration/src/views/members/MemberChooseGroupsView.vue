@@ -62,7 +62,7 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     get tree() {
         return OrganizationManager.organization.getCategoryTree({
             maxDepth: 1, 
-            permissions: SessionManager.currentSession!.user!.permissions, 
+            admin: !!SessionManager.currentSession!.user!.permissions, 
             smartCombine: true, // don't concat group names with multiple levels if all categories only contain one group
             filterGroups: g => {
                 const canRegister = this.member.canRegister(g, MemberManager.members ?? [], OrganizationManager.organization.meta.categories, CheckoutManager.cart.items);

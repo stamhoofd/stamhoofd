@@ -70,7 +70,7 @@ export class Suggestion {
 export class SuggestionBuilder {
     static getSuggestions(members: MemberWithRegistrations[]) {
         const suggestions: Suggestion[] = []
-        const groups = OrganizationManager.organization.getGroupsForPermissions(SessionManager.currentSession?.user?.permissions)
+        const groups = SessionManager.currentSession?.user?.permissions ? OrganizationManager.organization.adminAvailableGroups : OrganizationManager.organization.availableGroups
 
         // Rules for suggesting registrations
         // Multiple registrations possible -> suggest one general item
