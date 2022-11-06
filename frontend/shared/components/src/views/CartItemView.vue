@@ -79,7 +79,7 @@
             </p>
         </main>
 
-        <STToolbar :sticky="oldItem ? true : false">
+        <STToolbar>
             <button v-if="oldItem" slot="right" class="button primary" type="button" @click="addToCart">
                 <span class="icon basket" />
                 <span>Opslaan</span>

@@ -131,7 +131,7 @@ I18nController.addUrlPrefix = false
 document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 VueGlobalHelper.setup()
 
-Vue.prototype.$isMobile = true
+// Vue.prototype.$isMobile = true
 
 const app = new Vue({
     i18n,

@@ -3,37 +3,39 @@
         <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
 
         <div class="box">
-            <main>
-                <h1>Jouw gegevens</h1>
+            <div class="st-view">
+                <main>
+                    <h1>Jouw gegevens</h1>
 
-                <STErrorsDefault :error-box="errorBox" />
+                    <STErrorsDefault :error-box="errorBox" />
 
-                <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
-                    <div class="input-group">
-                        <div>
-                            <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
+                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+                        <div class="input-group">
+                            <div>
+                                <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
+                            </div>
+                            <div>
+                                <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
+                            </div>
                         </div>
-                        <div>
-                            <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
-                        </div>
-                    </div>
-                </STInputBox>
+                    </STInputBox>
 
-                <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
+                    <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
 
-                <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
+                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
-                <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
-            </main>
+                    <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
+                </main>
 
-            <STToolbar>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" type="submit">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
+                <STToolbar>
+                    <LoadingButton slot="right" :loading="loading">
+                        <button class="button primary" type="submit">
+                            <span>Doorgaan</span>
+                            <span class="icon arrow-right" />
+                        </button>
+                    </LoadingButton>
+                </STToolbar>
+            </div>
         </div>
     </form>
 </template>

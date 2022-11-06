@@ -94,7 +94,7 @@
             </Checkbox>
         </main>
 
-        <STToolbar :sticky="false">
+        <STToolbar>
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" @click.prevent="goNext">

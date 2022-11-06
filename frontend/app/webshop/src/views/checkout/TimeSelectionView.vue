@@ -3,51 +3,53 @@
         <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
 
         <div class="box">
-            <main>
-                <h1 v-if="checkoutMethod.type == 'Takeout'">
-                    Kies je afhaaltijdstip
-                </h1>
-                <h1 v-else-if="checkoutMethod.type == 'Delivery'">
-                    Kies je leveringstijdstip
-                </h1>
-                <h1 v-else-if="checkoutMethod.type == 'OnSite'">
-                    Kies wanneer je komt
-                </h1>
+            <div class="st-view">
+                <main>
+                    <h1 v-if="checkoutMethod.type == 'Takeout'">
+                        Kies je afhaaltijdstip
+                    </h1>
+                    <h1 v-else-if="checkoutMethod.type == 'Delivery'">
+                        Kies je leveringstijdstip
+                    </h1>
+                    <h1 v-else-if="checkoutMethod.type == 'OnSite'">
+                        Kies wanneer je komt
+                    </h1>
 
-                <p v-if="checkoutMethod.type == 'Takeout'">
-                    Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
-                </p>
+                    <p v-if="checkoutMethod.type == 'Takeout'">
+                        Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+                    </p>
 
-                <p v-if="checkoutMethod.type == 'OnSite'">
-                    Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
-                </p>
+                    <p v-if="checkoutMethod.type == 'OnSite'">
+                        Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+                    </p>
                 
-                <STErrorsDefault :error-box="errorBox" />
+                    <STErrorsDefault :error-box="errorBox" />
 
-                <STList>
-                    <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
-                        <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
-                        <h2 class="style-title-list">
-                            {{ slot.date | dateWithDay }}
-                        </h2> 
-                        <p class="style-description">
-                            Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
-                        </p>
+                    <STList>
+                        <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
+                            <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
+                            <h2 class="style-title-list">
+                                {{ slot.date | dateWithDay }}
+                            </h2> 
+                            <p class="style-description">
+                                Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                            </p>
 
-                        <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                        <span v-else-if="slot.listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
-                    </STListItem>
-                </STList>
-            </main>
+                            <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
+                            <span v-else-if="slot.listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                        </STListItem>
+                    </STList>
+                </main>
 
-            <STToolbar>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" type="button" @click="goNext">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
+                <STToolbar>
+                    <LoadingButton slot="right" :loading="loading">
+                        <button class="button primary" type="button" @click="goNext">
+                            <span>Doorgaan</span>
+                            <span class="icon arrow-right" />
+                        </button>
+                    </LoadingButton>
+                </STToolbar>
+            </div>
         </div>
     </div>
 </template>

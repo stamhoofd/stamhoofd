@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="!order" />
-    <div v-else class="st-view order-view">
+    <div v-else class="st-view order-view boxed">
         <STNavigationBar :large="true" :sticky="false">
             <OrganizationLogo slot="left" :organization="organization" />
             <button slot="right" class="text button" type="button" @click="pop">
@@ -8,8 +8,8 @@
             </button>
         </STNavigationBar>
 
-        <main class="limit-width">
-            <section class="white-top view">
+        <div class="box">
+            <div class="st-view">
                 <main>
                     <h1 v-if="success">
                         Jouw bestelling is geplaatst
@@ -26,7 +26,50 @@
                         Deze bestelling werd geannuleerd
                     </p>
 
-                    <template v-if="hasTickets">
+                    <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" id="tickets" class="container">
+                        <hr>
+                        <h2 class="style-with-button">
+                            <div v-if="singleTicket">
+                                Jouw ticket
+                            </div>
+                            <div v-else>
+                                Jouw tickets
+                            </div>
+                            <div class="hover-show">
+                                <button v-if="!loadingTickets" class="button text limit-space" type="button" @click="downloadAllTickets">
+                                    <span class="icon download" />
+                                    <span>Opslaan</span>
+                                </button>
+                            </div>
+                        </h2>
+                        <p v-if="!singleTicket" class="hide-smartphone style-description">
+                            Klik op een ticket om die individueel te downloaden of de QR-code te vergroten. Toon je ticket bij voorkeur op je smartphone.
+                        </p>
+                        <p v-if="!singleTicket" class="only-smartphone style-description">
+                            Tik op een ticket om die individueel te downloaden of de QR-code te tonen.
+                        </p>
+
+                        <p v-if="singleTicket" class="style-description">
+                            Open of download je ticket hieronder. Toon je ticket bij voorkeur op je smartphone.
+                        </p>
+
+                        <Spinner v-if="loadingTickets" />
+                        <template v-else>
+                            <button v-if="publicTickets.length === 1" class="button primary" type="button" @click="openTicket(publicTickets[0])">
+                                <span class="icon qr-code" />
+                                <span>Ticket tonen</span>
+                            </button>
+
+                            <STList v-else>
+                                <TicketListItem v-for="ticket in publicTickets" :key="ticket.id" :ticket="ticket" :webshop="webshop" :order="order" />
+                            </STList>
+                        </template>
+
+                        <hr>
+                        <h2>Overzicht</h2>
+                    </section>
+
+                    <template v-else-if="hasTickets">
                         <hr>
                         <h2 v-if="singleTicket">
                             Jouw ticket
@@ -40,7 +83,7 @@
                                 jouw ticket
                             </template><template v-else>
                                 jouw tickets
-                            </template> via e-mail zodra we jouw overschrijving manueel hebben gemarkeerd als betaald. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Als jouw bedrag te laat op de rekening komt, ontvang je geen tickets en wordt het bedrag teruggestort. Klik onderaan op de knop om de instructies nog eens te tonen.
+                            </template> via e-mail zodra we jouw overschrijving hebben ontvangen. Je kan ze dan ook op deze pagina terugvinden. Zorg er zeker voor dat je meteen betaalt zodat het bedrag op tijd op onze rekening staat. Klik onderaan op de knop om de instructies nog eens te tonen.
                         </p>
                         <p v-else>
                             Je vindt <template v-if="singleTicket">
@@ -211,7 +254,7 @@
                         </STList>
                     </template>
                 </main>
-                <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || !isPaid)">
+                <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || !isPaid)" :sticky="false">
                     <template slot="right">
                         <button v-if="canShare && !hasTickets" class="button secundary" type="button" @click="share">
                             <span class="icon share" />
@@ -223,38 +266,8 @@
                         </button>
                     </template>
                 </STToolbar>
-            </section>
-            <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" class="gray-shadow view">
-                <main id="tickets">
-                    <h2 v-if="singleTicket">
-                        Download ticket
-                    </h2>
-                    <h2 v-else>
-                        Download tickets
-                    </h2>
-
-                    <div class="hide-smartphone">
-                        <p class="success-box icon environment">
-                            Open deze pagina op jouw smartphone om alle tickets digitaal op te slaan. Op die manier hoef je de tickets niet af te drukken. Je kan ook een individueel ticket scannen om enkel dat ticket op te slaan of te delen.
-                        </p>
-                    </div>
-                    <p class="success-box icon environment only-smartphone">
-                        Je hoeft de tickets niet af te drukken, je kan ze ook tonen op jouw smartphone. Sla ze eventueel op zodat je ze niet kwijt geraakt.
-                    </p>
-
-                    <button v-if="!loadingTickets" class="button primary" type="button" @click="downloadAllTickets">
-                        <span class="icon download" />
-                        <span v-if="singleTicket">Download ticket</span>
-                        <span v-else>Download alle tickets</span>
-                    </button>
-
-                    <Spinner v-if="loadingTickets" />
-                    <div v-else>
-                        <TicketBox v-for="ticket in publicTickets" :key="ticket.id" :ticket="ticket" :webshop="webshop" :order="order" />
-                    </div>
-                </main>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -270,6 +283,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import TicketBox from '../products/TicketBox.vue';
+import TicketListItem from '../products/TicketListItem.vue';
+import DetailedTicketView from './DetailedTicketView.vue';
 
 @Component({
     components: {
@@ -284,7 +299,8 @@ import TicketBox from '../products/TicketBox.vue';
         BackButton,
         OrganizationLogo,
         Spinner,
-        TicketBox
+        TicketBox,
+        TicketListItem
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -485,6 +501,19 @@ export default class OrderView extends Mixins(NavigationMixin){
 
         const builder = new TicketBuilder(this.publicTickets, this.webshop, WebshopManager.organization, this.order ?? undefined)
         await builder.download()
+    }
+
+    openTicket(ticket: TicketPublic) {
+        this.present({
+            components: [
+                new ComponentWithProperties(DetailedTicketView, {
+                    ticket: ticket,
+                    order: this.order,
+                    webshop: this.webshop
+                })
+            ],
+            modalDisplayStyle: "sheet"
+        })
     }
 
     imageSrc(cartItem: CartItem) {

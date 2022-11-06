@@ -48,7 +48,8 @@
 
     @media (prefers-color-scheme: dark) {
         &:after {
-            background: rgba(8, 8, 8, 0.7);
+            background: $color-background-shade-darker;
+            opacity: 0.5;
         }
     }
 
@@ -150,7 +151,8 @@
 
     @media (prefers-color-scheme: dark) {
         &:after {
-            background: rgba(8, 8, 8, 0.7);
+            background: $color-background-shade-darker;
+            opacity: 0.5;
         }
     }
 

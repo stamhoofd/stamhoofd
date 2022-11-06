@@ -1438,6 +1438,9 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get recipients(): Recipient[] {
+        if (this.members.length === 0) {
+            return [...this.allRecipients.values()];
+        }
         const recipients: Map<string, Recipient> = new Map(this.allRecipients)
 
         // Filter

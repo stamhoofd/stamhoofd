@@ -62,7 +62,7 @@
             </div>
         </main>
 
-        <STToolbar :sticky="false">
+        <STToolbar>
             <template #left>
                 Het aanmaken van de vereniging kan een tiental seconden duren afhankelijk van de rekenkracht van jouw toestel.
             </template>

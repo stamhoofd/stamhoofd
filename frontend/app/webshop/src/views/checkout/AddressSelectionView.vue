@@ -3,38 +3,40 @@
         <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
 
         <div class="box">
-            <main>
-                <h1>Kies je leveringsadres</h1>
-                <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
-                    Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
-                </div>
+            <div class="st-view">
+                <main>
+                    <h1>Kies je leveringsadres</h1>
+                    <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
+                        Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
+                    </div>
 
-                <p v-if="checkout.deliveryPrice == 0" class="success-box">
-                    Levering is gratis
-                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
-                        vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
-                    </template>
-                </p>
-                <p v-else class="info-box">
-                    De leveringskost bedraagt {{ checkout.deliveryPrice | price }}
-                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === checkout.deliveryPrice" class="info-box">
-                        vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
-                    </template>
-                </p>
+                    <p v-if="checkout.deliveryPrice == 0" class="success-box">
+                        Levering is gratis
+                        <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
+                            vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                        </template>
+                    </p>
+                    <p v-else class="info-box">
+                        De leveringskost bedraagt {{ checkout.deliveryPrice | price }}
+                        <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === checkout.deliveryPrice" class="info-box">
+                            vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+                        </template>
+                    </p>
 
-                <STErrorsDefault :error-box="errorBox" />
+                    <STErrorsDefault :error-box="errorBox" />
 
-                <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
-            </main>
+                    <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
+                </main>
 
-            <STToolbar>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="goNext">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
+                <STToolbar>
+                    <LoadingButton slot="right" :loading="loading">
+                        <button class="button primary" @click="goNext">
+                            <span>Doorgaan</span>
+                            <span class="icon arrow-right" />
+                        </button>
+                    </LoadingButton>
+                </STToolbar>
+            </div>
         </div>
     </div>
 </template>

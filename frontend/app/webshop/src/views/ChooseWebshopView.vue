@@ -14,28 +14,30 @@
         </STNavigationBar>
 
         <div class="box">
-            <main v-if="webshops.length > 0">
-                <h1>Onze webshops</h1>
+            <div class="st-view">
+                <main v-if="webshops.length > 0">
+                    <h1>Onze webshops</h1>
 
-                <STList>
-                    <STListItem v-for="webshop of webshops" :key="webshop.id" element-name="a" :selectable="true" :href="'https://'+webshop.getUrl(organization)">
-                        <h3 class="style-title-list">
-                            {{ webshop.meta.name }}
-                        </h3>
-                        <p class="style-description-small style-limit-lines">
-                            {{ webshop.meta.description }}
-                        </p>
+                    <STList>
+                        <STListItem v-for="webshop of webshops" :key="webshop.id" element-name="a" :selectable="true" :href="'https://'+webshop.getUrl(organization)">
+                            <h3 class="style-title-list">
+                                {{ webshop.meta.name }}
+                            </h3>
+                            <p class="style-description-small style-limit-lines">
+                                {{ webshop.meta.description }}
+                            </p>
 
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-                </STList>
-            </main>
-            <main v-else>
-                <h1>Onze webshops</h1>
-                <p class="info-box">
-                    We organiseren momenteel helaas geen verkopen. Kom later nog eens terug.
-                </p>
-            </main>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+                    </STList>
+                </main>
+                <main v-else>
+                    <h1>Onze webshops</h1>
+                    <p class="info-box">
+                        We organiseren momenteel helaas geen verkopen. Kom later nog eens terug.
+                    </p>
+                </main>
+            </div>
         </div>
 
         <div class="legal-footer">
