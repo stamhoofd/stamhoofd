@@ -77,7 +77,7 @@ export class Organization extends AutoEncoder {
     }
 
     get adminAvailableGroups() {
-        return this.adminAvailableGroups.getAllGroups()
+        return this.adminCategoryTree.getAllGroups()
     }
 
     /**

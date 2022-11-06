@@ -1,7 +1,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from "@stamhoofd/email";
-import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { EmailTemplateType, Recipient, Replacement, STPackageBundle, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { getEmailBuilder } from "../helpers/EmailBuilder";
@@ -172,6 +172,14 @@ export class STPackage extends Model {
         // Remove (= not renewable) if not renewed after 3 months
         pack.removeAt = new Date(pack.validUntil)
         pack.removeAt.setMonth(pack.removeAt.getMonth() + 3)
+
+        // Custom renewals for single webshop:
+        if (this.meta.type === STPackageType.SingleWebshop) {
+            // Disable functions after two months
+            pack.validUntil = new Date(pack.meta.startDate)
+            pack.validUntil.setMonth(pack.validUntil.getMonth() + 2)
+            pack.removeAt = new Date(pack.validUntil)
+        }
 
         return pack
     }

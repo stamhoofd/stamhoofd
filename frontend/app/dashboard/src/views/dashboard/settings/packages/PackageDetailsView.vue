@@ -136,13 +136,13 @@
         <STToolbar v-if="pack.meta.canDeactivate || pack.shouldHintRenew()">
             <template slot="right">
                 <LoadingButton v-if="pack.meta.canDeactivate" :loading="deactivating">
-                    <button class="button secundary" @click="deactivate">
+                    <button class="button secundary" type="button" @click="deactivate">
                         Stopzetten
                     </button>
                 </LoadingButton>
 
                 <LoadingButton v-if="pack.shouldHintRenew()" :loading="loading">
-                    <button class="button primary" @click="extend">
+                    <button class="button primary" type="button" @click="extend">
                         Verlengen
                     </button>
                 </LoadingButton>
