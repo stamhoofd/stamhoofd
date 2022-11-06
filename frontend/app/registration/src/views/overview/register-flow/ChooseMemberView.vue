@@ -19,7 +19,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem class="right-stack" :selectable="true" @click="addNewMember">
+                <STListItem v-if="isAcceptingNewMembers" class="right-stack" :selectable="true" @click="addNewMember">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/account-add.svg">
 
                     <h2 class="style-title-list">
@@ -36,15 +36,15 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
 import { MemberWithRegistrations } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { MemberManager } from "../../../classes/MemberManager";
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import { createMemberComponent } from "../../members/details/createMemberComponent";
-import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } from "../../members/details/EditMemberStepsManager";
 import MemberChooseGroupsView from "../../members/MemberChooseGroupsView.vue";
 
 @Component({
@@ -58,6 +58,10 @@ import MemberChooseGroupsView from "../../members/MemberChooseGroupsView.vue";
 })
 export default class ChooseMemberView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
+
+    get isAcceptingNewMembers() {
+        return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
+    }
 
     get organization() {
         return OrganizationManager.organization

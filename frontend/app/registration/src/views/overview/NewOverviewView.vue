@@ -29,7 +29,11 @@
                         Welkom op het ledenportaal van {{ organization.name }}.
                     </p>
 
-                    <template v-if="members.length == 0">
+                    <p v-if="!isAcceptingNewMembers && members.length == 0" class="warning-box">
+                        Er zijn geen leden verbonden met dit account. Je kan op dit moment geen nieuwe leden inschrijven. Kijk eventueel na of je met het juiste e-mailadres bent ingelogd als je een bestaand lid wilt wijzigen of inschrijven.
+                    </p>
+
+                    <template v-if="members.length == 0 && isAcceptingNewMembers">
                         <button class="button primary" type="button" @click="registerMember">
                             <span class="icon edit" />
                             <span>Schrijf een lid in</span>
@@ -104,18 +108,18 @@
                     <h2>Algemeen</h2>
 
                     <STList class="illustration-list">    
-                        <STListItem :selectable="true" class="left-center" @click="registerMember">
+                        <STListItem v-if="members.length || isAcceptingNewMembers" :selectable="true" class="left-center" @click="registerMember">
                             <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                             <h2 class="style-title-list">
                                 Lid inschrijven
                             </h2>
                             <p class="style-description">
-                                Schrijf een lid in
+                                Schrijf een lid in.
                             </p>
                             <span slot="right" class="icon arrow-right-small gray" />
                         </STListItem>
 
-                        <STListItem :selectable="true" class="left-center" @click="checkData">
+                        <STListItem v-if="members.length" :selectable="true" class="left-center" @click="checkData">
                             <img slot="left" src="~@stamhoofd/assets/images/illustrations/magnifier.svg">
                             <h2 class="style-title-list">
                                 Gegevens en inschrijvingen nakijken
@@ -126,7 +130,7 @@
                             <span slot="right" class="icon arrow-right-small gray" />
                         </STListItem>
 
-                        <STListItem :selectable="true" class="left-center" @click="managePayments(true)">
+                        <STListItem v-if="members.length" :selectable="true" class="left-center" @click="managePayments(true)">
                             <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
                             <h2 class="style-title-list">
                                 Afrekeningen en openstaande rekening
@@ -143,7 +147,7 @@
                                 Account wijzigen
                             </h2>
                             <p class="style-description">
-                                Wijzig jouw wachtwoord, e-mailadres van het account waarmee je inlogt.
+                                Wijzig het wachtwoord of e-mailadres van het account waarmee je inlogt.
                             </p>
                             <span slot="right" class="icon arrow-right-small gray" />
                         </STListItem>
@@ -178,7 +182,7 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { Session, SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { MemberBalanceItem, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -216,6 +220,10 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
 
     get balanceItems() {
         return CheckoutManager.balanceItems ?? []
+    }
+
+    get isAcceptingNewMembers() {
+        return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
     }
 
     mounted() {
