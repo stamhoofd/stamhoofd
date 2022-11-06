@@ -45,7 +45,7 @@ export class RegistrationsFilterDefinition<T> extends FilterDefinition<T, Regist
     getChoices(organization: Organization): RegistrationsFilterChoice[] {
         const choices: RegistrationsFilterChoice[] = []
 
-        for (const group of organization.availableGroups) {
+        for (const group of organization.adminAvailableGroups) {
             choices.push(RegistrationsFilterChoice.create({
                 id: group.id,
                 waitingList: false,

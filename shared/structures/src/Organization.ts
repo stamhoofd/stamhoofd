@@ -72,6 +72,14 @@ export class Organization extends AutoEncoder {
         return this.categoryTree.getAllGroups()
     }
 
+    getGroupsForPermissions(permissions?: Permissions | null) {
+        return this.getCategoryTree({permissions}).getAllGroups()
+    }
+
+    get adminAvailableGroups() {
+        return this.adminAvailableGroups.getAllGroups()
+    }
+
     /**
      * Get all groups that are in a category
      */
@@ -86,6 +94,10 @@ export class Organization extends AutoEncoder {
         return this.getCategoryTree()
     }
 
+    get adminCategoryTree(): GroupCategoryTree {
+        return this.getCategoryTree({admin: true})
+    }
+
     /**
      * @deprecated
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
@@ -97,14 +109,14 @@ export class Organization extends AutoEncoder {
     /**
      * Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
-    getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: Permissions | null, smartCombine?: boolean}): GroupCategoryTree {
+    getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: Permissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
             let tree = GroupCategoryTree.build(root, this.meta.categories, options?.filterGroups ? this.groups.filter(options.filterGroups) : this.groups, options?.permissions, options?.maxDepth, options?.smartCombine)
 
             if (!options?.permissions) {
                 // Hide non public items
-                tree = tree.filterForDisplay(false, this.meta.packages.useActivities)
+                tree = tree.filterForDisplay(options?.admin ?? false, this.meta.packages.useActivities)
             }
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {

@@ -161,7 +161,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             new ChoicesFilterDefinition<PaymentGeneral>({
                 id: "registrations", 
                 name: "Inschrijvingen", 
-                choices: this.organization.availableGroups.map(group => new ChoicesFilterChoice(group.id, group.settings.name)),
+                choices: this.organization.getGroupsForPermissions(OrganizationManager.user?.permissions).map(group => new ChoicesFilterChoice(group.id, group.settings.name)),
                 getValue: (payment) => {
                     return payment.registrations.map(r => r.groupId)
                 },

@@ -135,7 +135,7 @@ export default class EditMemberGroupView extends Mixins(NavigationMixin) {
                     registrations: [],
                     details: this.memberDetails
                 }
-                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, OrganizationManager.organization.availableGroups, OrganizationManager.organization.availableCategories, [])
+                const canRegister = RegisterCartValidator.canRegister(member, g, this.familyManager.members, OrganizationManager.organization.getGroupsForPermissions(OrganizationManager.user?.permissions), OrganizationManager.organization.availableCategories, [])
                 return !canRegister.closed || canRegister.waitingList
             }
         })

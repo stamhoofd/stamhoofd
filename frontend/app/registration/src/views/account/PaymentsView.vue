@@ -208,10 +208,6 @@ export default class PaymentsView extends Mixins(NavigationMixin){
         return OrganizationManager.organization
     }
 
-    get rootCategory() {
-        return this.organization.categoryTree
-    }
-
     getPaymentPeriod(payment: Payment) {
         return Formatter.capitalizeFirstLetter(Formatter.month(payment.createdAt.getMonth() + 1)) + " " + payment.createdAt.getFullYear()
     }

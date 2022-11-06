@@ -180,7 +180,7 @@
             </template>
 
             <hr>
-            <h2>Contactgegevens</h2>
+            <h2>Gegevens</h2>
 
             <STList class="info">
                 <STListItem>
