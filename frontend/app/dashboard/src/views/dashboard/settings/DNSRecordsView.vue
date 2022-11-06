@@ -1,9 +1,6 @@
 <template>
     <div id="dns-records-view" class="st-view">
-        <STNavigationBar title="Instellingen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
-        </STNavigationBar>
+        <STNavigationBar title="Instellingen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

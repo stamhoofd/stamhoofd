@@ -1,11 +1,6 @@
 <template>
     <div class="st-view group-view">
-        <STNavigationBar title="Inschrijven">
-            <template slot="left">
-                <BackButton v-if="canPop" @click="pop" />
-                <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Inschrijven" :dismiss="canDismiss" :pop="canPop" />
         
         <main>
             <h1>Wie wil je inschrijven voor "{{ group.settings.name }}"?</h1>

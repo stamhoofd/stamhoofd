@@ -1,11 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Inschrijvingsperiode beëindigen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <template slot="right">
-                <button v-if="!canPop" class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Inschrijvingsperiode beëindigen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1 v-if="!undo">

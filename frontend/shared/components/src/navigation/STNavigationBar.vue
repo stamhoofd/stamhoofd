@@ -1,7 +1,8 @@
 <template>
     <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle, 'no-title': title.length == 0 }">
         <div>
-            <BackButton v-if="pop || (dismiss && $isAndroid)" @click="$parent.pop" />
+            <BackButton v-if="pop" @click="$parent.pop" />
+            <button v-else-if="dismiss && $isAndroid" class="button navigation icon close" type="button" @click="$parent.dismiss" />
             <slot name="left" />
         </div>
 

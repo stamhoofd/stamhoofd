@@ -1,8 +1,6 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Maak jouw account">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Maak jouw account" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

@@ -27,10 +27,9 @@
 
 
 <script lang="ts">
-import { ComponentWithProperties, FramedComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView,ModalStackEventBus,OrganizationLogo, STNavigationBar } from "@stamhoofd/components"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { FramedComponent, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { OrganizationLogo, STNavigationBar } from "@stamhoofd/components";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../classes/OrganizationManager";
 import { TabBarItem } from "../../classes/TabBarItem";

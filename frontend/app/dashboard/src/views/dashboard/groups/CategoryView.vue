@@ -1,7 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="title">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
+        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
             <template slot="right">
                 <button v-if="canEdit" class="button text" @click="editMe">
                     <span class="icon settings" />

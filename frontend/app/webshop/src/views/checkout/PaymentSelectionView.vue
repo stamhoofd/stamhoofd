@@ -1,8 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar>
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
 
         <div class="box">
             <main v-if="checkout.totalPrice > 0">

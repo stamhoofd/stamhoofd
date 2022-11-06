@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="phone" :error-box="errorBox">
-        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" @change="validate(false)">
+        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" @change="validate(false)" @input="emailRaw = $event.target.value; onTyping();">
     </STInputBox>
 </template>
 
@@ -53,6 +53,11 @@ export default class PhoneInput extends Vue {
         this.phoneRaw = val
     }
 
+    onTyping() {
+        // Silently send value to parents, but don't show visible errors yet
+        this.validate(false, true).catch(console.error)
+    }
+
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
@@ -69,12 +74,14 @@ export default class PhoneInput extends Vue {
         }
     }
 
-    async validate(final: boolean) {
+    async validate(final: boolean, silent = false) {
 
         if (this.phoneRaw.length == 0) {
 
             if (!this.required) {
-                this.errorBox = null
+                if (!silent) {
+                    this.errorBox = null
+                }
 
                 if (this.value !== null) {
                     this.$emit("input", null)
@@ -83,7 +90,9 @@ export default class PhoneInput extends Vue {
             }
 
             if (!final) {
-                this.errorBox = null
+                if (!silent) {
+                    this.errorBox = null
+                }
 
                 if (this.nullable && this.value !== null) {
                     this.$emit("input", null)
@@ -100,19 +109,23 @@ export default class PhoneInput extends Vue {
                     const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, country)
 
                     if (phoneNumber && phoneNumber.isValid()) {
-                        this.errorBox = new ErrorBox(new SimpleError({
-                            "code": "invalid_field",
-                            "message": this.$t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
-                            "field": "phone"
-                        }))
+                        if (!silent) {
+                            this.errorBox = new ErrorBox(new SimpleError({
+                                "code": "invalid_field",
+                                "message": this.$t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
+                                "field": "phone"
+                            }))
+                        }
                         return false
                     }
                 }
-                this.errorBox = new ErrorBox(new SimpleError({
-                    "code": "invalid_field",
-                    "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
-                    "field": "phone"
-                }))
+                if (!silent) {
+                    this.errorBox = new ErrorBox(new SimpleError({
+                        "code": "invalid_field",
+                        "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
+                        "field": "phone"
+                    }))
+                }
                 return false
 
             } else {
@@ -122,16 +135,20 @@ export default class PhoneInput extends Vue {
                 if (this.value !== v) {
                     this.$emit("input", v)
                 }
-                this.errorBox = null
+                if (!silent) {
+                    this.errorBox = null
+                }
                 return true
             }
         } catch (e) {
             console.error(e)
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
-                "field": "phone"
-            }))
+            if (!silent) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    "code": "invalid_field",
+                    "message": this.$t("shared.inputs.mobile.invalidMessage").toString(),
+                    "field": "phone"
+                }))
+            }
             return false
         }
         

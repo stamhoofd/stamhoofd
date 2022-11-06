@@ -1,9 +1,6 @@
 <template>
     <div id="settings-view" class="st-view">
-        <STNavigationBar title="Instellingen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
-        </STNavigationBar>
+        <STNavigationBar title="Domeinnaam kiezen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>
@@ -171,7 +168,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
             this.saving = false
         }
 
-            //this.pop({ force: true })
+        //this.pop({ force: true })
     }
 
     async deleteMe() {

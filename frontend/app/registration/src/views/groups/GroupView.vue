@@ -1,9 +1,6 @@
 <template>
     <div class="st-view group-view">
-        <STNavigationBar :title="group.settings.name">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon gray close" type="button" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar :title="group.settings.name" :dismiss="canDismiss" :pop="canPop" />
         
         <main>
             <h1>

@@ -37,5 +37,5 @@ const app = new Vue({
 });
 
 (window as any).app = app;
-ViewportHelper.setup(false)
+ViewportHelper.setup(true)
 app.$mount("#app")

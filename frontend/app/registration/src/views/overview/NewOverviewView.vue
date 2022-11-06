@@ -19,155 +19,157 @@
         </STNavigationBar>
 
         <div class="box">
-            <main>
-                <h1>Ledenportaal</h1>
-                <p v-if="members.length == 0">
-                    Welkom op het ledenportaal van {{ organization.name }}. Momenteel heb je nog geen leden ingeschreven.
-                </p>
-                <p v-else>
-                    Welkom op het ledenportaal van {{ organization.name }}.
-                </p>
+            <div class="st-view">
+                <main>
+                    <h1>Ledenportaal</h1>
+                    <p v-if="members.length == 0">
+                        Welkom op het ledenportaal van {{ organization.name }}. Momenteel heb je nog geen leden ingeschreven.
+                    </p>
+                    <p v-else>
+                        Welkom op het ledenportaal van {{ organization.name }}.
+                    </p>
 
-                <template v-if="members.length == 0">
-                    <button class="button primary" type="button" @click="registerMember">
-                        <span class="icon edit" />
-                        <span>Schrijf een lid in</span>
-                    </button>
-                </template>
-                <template v-if="cart.count || notYetPaidBalance > 0 || suggestedRegistrations.length">
-                    <hr>
-                    <h2>
-                        Snelle acties
-                    </h2>
+                    <template v-if="members.length == 0">
+                        <button class="button primary" type="button" @click="registerMember">
+                            <span class="icon edit" />
+                            <span>Schrijf een lid in</span>
+                        </button>
+                    </template>
+                    <template v-if="cart.count || notYetPaidBalance > 0 || suggestedRegistrations.length">
+                        <hr>
+                        <h2>
+                            Snelle acties
+                        </h2>
 
-                    <STList>
-                        <STListItem v-if="cart.count" class="left-center right-stack" :selectable="true" @click="openCart(true)">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
-                            <h3 class="style-title-list">
-                                Mandje afrekenen
-                            </h3>
-                            <p v-if="cart.price" class="style-description-small">
-                                Betaal en bevestig je inschrijvingen.
-                            </p>
-                            <p v-else class="style-description-small">
-                                Bevestig je inschrijvingen.
-                            </p>
+                        <STList>
+                            <STListItem v-if="cart.count" class="left-center right-stack" :selectable="true" @click="openCart(true)">
+                                <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg" class="style-illustration-img">
+                                <h3 class="style-title-list">
+                                    Mandje afrekenen
+                                </h3>
+                                <p v-if="cart.price" class="style-description-small">
+                                    Betaal en bevestig je inschrijvingen.
+                                </p>
+                                <p v-else class="style-description-small">
+                                    Bevestig je inschrijvingen.
+                                </p>
 
-                            <span v-if="cart.price" slot="right" class="style-tag">{{ formatPrice(cart.price) }}</span>
-                            <span slot="right" class="icon arrow-right-small gray" />
-                        </STListItem>
+                                <span v-if="cart.price" slot="right" class="style-tag">{{ formatPrice(cart.price) }}</span>
+                                <span slot="right" class="icon arrow-right-small gray" />
+                            </STListItem>
 
-                        <STListItem v-if="notYetPaidBalance > 0" class="left-center" :selectable="true" @click="managePayments(true)">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img">
-                            <h3 class="style-title-list">
-                                Betaal jouw openstaand bedrag
-                            </h3>
-                            <p class="style-description-small">
-                                Je hebt een openstaand bedrag van {{ formatPrice(notYetPaidBalance) }}.
-                            </p>
+                            <STListItem v-if="notYetPaidBalance > 0" class="left-center" :selectable="true" @click="managePayments(true)">
+                                <img slot="left" src="~@stamhoofd/assets/images/illustrations/piggy-bank.svg" class="style-illustration-img">
+                                <h3 class="style-title-list">
+                                    Betaal jouw openstaand bedrag
+                                </h3>
+                                <p class="style-description-small">
+                                    Je hebt een openstaand bedrag van {{ formatPrice(notYetPaidBalance) }}.
+                                </p>
 
-                            <span slot="right" class="icon arrow-right-small gray" />
-                        </STListItem>
+                                <span slot="right" class="icon arrow-right-small gray" />
+                            </STListItem>
 
-                        <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
-                            <img v-if="!suggestion.group" slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
-                            <template v-else slot="left">
-                                <figure v-if="suggestion.group.squareImage" class="registration-image">
-                                    <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
-                                    <div>
-                                        <span v-if="suggestion.waitingList" class="icon gray clock" />
-                                    </div>
-                                </figure>
-                                <figure v-else class="registration-image">
-                                    <figure>
-                                        <span>{{ suggestion.group.settings.name.substr(0, 2) }}</span>
+                            <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
+                                <img v-if="!suggestion.group" slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
+                                <template v-else slot="left">
+                                    <figure v-if="suggestion.group.squareImage" class="registration-image">
+                                        <img :src="suggestion.group.squareImage.getPathForSize(100, 100)">
+                                        <div>
+                                            <span v-if="suggestion.waitingList" class="icon gray clock" />
+                                        </div>
                                     </figure>
-                                    <div>
-                                        <span v-if="suggestion.waitingList" class="icon gray clock" />
-                                    </div>
-                                </figure>
-                            </template>
-                            <h3 class="style-title-list">
-                                {{ suggestion.title }}
-                            </h3>
-                            <p v-if="suggestion.description" class="style-description-small">
-                                {{ suggestion.description }}
-                            </p>
+                                    <figure v-else class="registration-image">
+                                        <figure>
+                                            <span>{{ suggestion.group.settings.name.substr(0, 2) }}</span>
+                                        </figure>
+                                        <div>
+                                            <span v-if="suggestion.waitingList" class="icon gray clock" />
+                                        </div>
+                                    </figure>
+                                </template>
+                                <h3 class="style-title-list">
+                                    {{ suggestion.title }}
+                                </h3>
+                                <p v-if="suggestion.description" class="style-description-small">
+                                    {{ suggestion.description }}
+                                </p>
 
+                                <span slot="right" class="icon arrow-right-small gray" />
+                            </STListItem>
+                        </STList>
+                    </template>
+
+                    <hr>
+                    <h2>Algemeen</h2>
+
+                    <STList class="illustration-list">    
+                        <STListItem :selectable="true" class="left-center" @click="registerMember">
+                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                            <h2 class="style-title-list">
+                                Lid inschrijven
+                            </h2>
+                            <p class="style-description">
+                                Schrijf een lid in
+                            </p>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+
+                        <STListItem :selectable="true" class="left-center" @click="checkData">
+                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/magnifier.svg">
+                            <h2 class="style-title-list">
+                                Gegevens en inschrijvingen nakijken
+                            </h2>
+                            <p class="style-description">
+                                Pas gegevens aan en bekijk alle inschrijvingen.
+                            </p>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+
+                        <STListItem :selectable="true" class="left-center" @click="managePayments(true)">
+                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
+                            <h2 class="style-title-list">
+                                Afrekeningen en openstaande rekening
+                            </h2>
+                            <p class="style-description">
+                                Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.
+                            </p>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+
+                        <STListItem :selectable="true" class="left-center" @click="manageAccount">
+                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
+                            <h2 class="style-title-list">
+                                Account wijzigen
+                            </h2>
+                            <p class="style-description">
+                                Wijzig jouw wachtwoord, e-mailadres van het account waarmee je inlogt.
+                            </p>
                             <span slot="right" class="icon arrow-right-small gray" />
                         </STListItem>
                     </STList>
-                </template>
 
-                <hr>
-                <h2>Algemeen</h2>
-
-                <STList class="illustration-list">    
-                    <STListItem :selectable="true" class="left-center" @click="registerMember">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
-                        <h2 class="style-title-list">
-                            Lid inschrijven
+                    <template v-if="members.length && false">
+                        <hr>
+                        <h2>
+                            Documenten
                         </h2>
-                        <p class="style-description">
-                            Schrijf een lid in
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
+                        <STList>
+                            <STListItem class="left-center hover-box member-registration-block" :selectable="true">
+                                <span slot="left" class="icon file-pdf red" />
+                                <h3 class="style-title-list">
+                                    Fiscaal attest 2021
+                                </h3>
+                                <p class="style-description-small">
+                                    Je kan een belastingvermindering krijgen voor betaald lidgeld via dit attest.
+                                </p>
 
-                    <STListItem :selectable="true" class="left-center" @click="checkData">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/magnifier.svg">
-                        <h2 class="style-title-list">
-                            Gegevens en inschrijvingen nakijken
-                        </h2>
-                        <p class="style-description">
-                            Pas gegevens aan en bekijk alle inschrijvingen.
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="managePayments(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
-                        <h2 class="style-title-list">
-                            Afrekeningen en openstaande rekening
-                        </h2>
-                        <p class="style-description">
-                            Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="manageAccount">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin.svg">
-                        <h2 class="style-title-list">
-                            Account wijzigen
-                        </h2>
-                        <p class="style-description">
-                            Wijzig jouw wachtwoord, e-mailadres van het account waarmee je inlogt.
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-                </STList>
-
-                <template v-if="members.length && false">
-                    <hr>
-                    <h2>
-                        Documenten
-                    </h2>
-                    <STList>
-                        <STListItem class="left-center hover-box member-registration-block" :selectable="true">
-                            <span slot="left" class="icon file-pdf red" />
-                            <h3 class="style-title-list">
-                                Fiscaal attest 2021
-                            </h3>
-                            <p class="style-description-small">
-                                Je kan een belastingvermindering krijgen voor betaald lidgeld via dit attest.
-                            </p>
-
-                            <span slot="right" class="icon download gray" />
-                        </STListItem>
-                    </STList>
-                </template>
-            </main>
+                                <span slot="right" class="icon download gray" />
+                            </STListItem>
+                        </STList>
+                    </template>
+                </main>
+            </div>
         </div>
     </div>
 </template>
@@ -175,7 +177,7 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
+import { CenteredMessage, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { MemberBalanceItem, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -199,7 +201,8 @@ import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
         OrganizationLogo,
         STList,
         STListItem,
-        LoadingView
+        LoadingView,
+        STToolbar
     }
 })
 export default class NewOverviewView extends Mixins(NavigationMixin){

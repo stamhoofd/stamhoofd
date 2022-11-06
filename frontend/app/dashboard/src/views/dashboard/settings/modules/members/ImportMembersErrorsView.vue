@@ -1,9 +1,6 @@
 <template>
     <div id="import-members-errors-view" class="st-view background">
-        <STNavigationBar title="Kijk deze fouten na">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Kijk deze fouten na" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>Kijk deze fouten na</h1>

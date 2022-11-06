@@ -2,14 +2,14 @@
     <form class="editor-view st-view" @submit.prevent="$emit('save')">
         <STNavigationBar :title="title">
             <BackButton v-if="$parent.canPop" slot="left" @click="$parent.pop" />
-            <template v-else-if="$isMobile" slot="left">
+            <template v-else-if="$isMobile || $isIOS || $isAndroid" slot="left">
                 <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
                 <button v-else class="button text selected unbold" type="button" @click="$parent.pop">
                     {{ cancelText }}
                 </button>
             </template>
 
-            <LoadingButton v-if="$isMobile" slot="right" :loading="loading">
+            <LoadingButton v-if="$isMobile || $isIOS || $isAndroid" slot="right" :loading="loading">
                 <button class="button navigation highlight" :disabled="disabled" type="submit">
                     {{ saveText }}
                 </button>
@@ -54,7 +54,7 @@
                 </STList>
             </form>
         </main>
-        <STToolbar v-if="!$isMobile">
+        <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
                     <button v-tooltip="'Toon/verberg tekst opties'" class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" @mousedown.prevent @click.prevent="showTextStyles = !showTextStyles" />

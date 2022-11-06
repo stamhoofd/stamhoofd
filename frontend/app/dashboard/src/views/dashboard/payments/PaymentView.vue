@@ -15,7 +15,7 @@
                 <span v-if="mappedPayment.isFailed" class="style-tag error">Mislukt</span>
             </h1>
 
-            <p v-if="payment.method == 'Transfer' && payment.isFailed" class="error-box">
+            <p v-if="payment && payment.method == 'Transfer' && payment.isFailed" class="error-box">
                 Deze overschrijving werd geannuleerd en is niet langer zichtbaar. Ontvang je toch nog de betaling? Heractiveer de overschrijving dan terug.
             </p>
 

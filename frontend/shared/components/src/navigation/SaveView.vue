@@ -2,26 +2,26 @@
     <form class="st-view" @submit.prevent="$emit('save')">
         <STNavigationBar :title="title">
             <BackButton v-if="$parent.canPop" slot="left" @click="$parent.pop" />
-            <template v-else-if="$isMobile" slot="left">
+            <template v-else-if="$isMobile || $isIOS || $isAndroid" slot="left">
                 <button v-if="$isAndroid" class="button navigation icon close" type="button" @click="$parent.pop" />
                 <button v-else class="button text selected unbold" type="button" @click="$parent.pop">
                     {{ cancelText }}
                 </button>
             </template>
 
-            <slot v-if="!$isMobile" slot="right" name="buttons" />
+            <slot v-if="!$isMobile && !$isIOS" slot="right" name="buttons" />
 
-            <LoadingButton v-if="$isMobile" slot="right" :loading="loading">
+            <LoadingButton v-if="$isMobile || $isIOS || $isAndroid" slot="right" :loading="loading">
                 <button class="button navigation highlight" :disabled="disabled" type="submit">
                     {{ saveText }}
                 </button>
             </LoadingButton>
-            <button v-else-if="$parent.canDismiss" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
+            <button v-else-if="$parent.canDismiss && !$isAndroid" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
         </STNavigationBar>
         <main>
             <slot />
         </main>
-        <STToolbar v-if="!$isMobile">
+        <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <slot name="toolbar" />
                 <button v-if="!$slots.toolbar && ($parent.canPop || $parent.canDismiss) && cancelText !== null" class="button secundary" type="button" @click="$parent.pop">

@@ -13,6 +13,9 @@
     --st-safe-area-bottom: 0px;
     --st-safe-area-bottom: env(safe-area-inset-bottom, 0px);
 
+    --vh: 1vh;
+    --vh: 1dvh; // iOS improved
+
     @media (max-width: 800px) {
         --st-horizontal-padding: 20px;
         --st-vertical-padding: 20px;

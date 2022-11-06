@@ -1,9 +1,6 @@
 <template>
     <div id="members-activated-view" class="st-view background">
-        <STNavigationBar title="Ledenadministratie is actief">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="dismiss" />
-        </STNavigationBar>
+        <STNavigationBar title="Ledenadministratie is actief" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>Yay! 🥳 De ledenadministratie is actief</h1>
@@ -20,7 +17,7 @@
                 In Stamhoofd worden leden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven. Je kan hen daarvoor uitnodigen via e-mail.
             </p>
 
-            <button class="button secundary" @click="manageGroups">
+            <button class="button secundary" type="button" @click="manageGroups">
                 <span class="icon settings" />
                 <span>Instellen</span>
             </button>
@@ -32,7 +29,7 @@
                 Je kan zelf kiezen welke informatie je wilt verzamelen van jouw leden (bv. geboortedatum, emailadres, telefoonnummer, eigen vragen...). Wijzig dit via de knop hieronder, of later via de instellingen.
             </p>
 
-            <button class="button secundary" @click="manageRecords(true)">
+            <button class="button secundary" type="button" @click="manageRecords(true)">
                 <span class="icon settings" />
                 <span>Instellen</span>
             </button>

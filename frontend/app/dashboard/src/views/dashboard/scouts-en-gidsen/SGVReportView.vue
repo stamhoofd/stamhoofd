@@ -1,9 +1,6 @@
 <template>
     <div id="sgv-report-view" class="st-view">
-        <STNavigationBar title="Synchronisatie-rapport">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
-        </STNavigationBar>
+        <STNavigationBar title="Synchronisatie-rapport" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>
