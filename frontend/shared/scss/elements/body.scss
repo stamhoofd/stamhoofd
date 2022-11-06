@@ -14,7 +14,14 @@
     --st-safe-area-bottom: env(safe-area-inset-bottom, 0px);
 
     --vh: 1vh;
-    --vh: 1dvh; // iOS improved
+
+    @supports(width: 1dvh) {
+        --vh: 1dvh; // iOS improved
+    }
+
+    // Support for VirtualKeyboard API (Chrome on Android)
+    --keyboard-height: 0px;
+    --keyboard-height: env(keyboard-inset-height, 0px);
 
     @media (max-width: 800px) {
         --st-horizontal-padding: 20px;

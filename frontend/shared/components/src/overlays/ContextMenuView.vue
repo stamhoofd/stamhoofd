@@ -368,9 +368,7 @@ export default class ContextMenuView extends Vue {
     }
 
     onClickItem(item: ContextMenuItemView, event) {
-        console.log('On click item');
         if (item.clicked) {
-            console.log('Already clicked');
             return;
         }
         item.clicked = true
@@ -398,11 +396,13 @@ export default class ContextMenuView extends Vue {
             }
             return
         }
-        console.log('Emit clicked');
-        item.$emit("click", event);
+
+        // We need to delay click events because otherwise for some unknown reason, it would trigger again on a 'popup' and close it immediately
+        setTimeout(() => {
+            item.$emit("click", event);
+        }, 10)
 
         // Wait to pop to let the browser handle events (e.g. label > checkbox)
-        console.log('Delay pop');
         this.delayPop(true);
     }
 

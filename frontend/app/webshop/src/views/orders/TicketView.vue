@@ -1,30 +1,13 @@
 <template>
     <LoadingView v-if="loading" />
-    <div v-else class="st-view order-view shade">
-        <STNavigationBar :large="true" :sticky="false">
+    <div v-else class="st-view boxed ticket-view">
+        <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
             <OrganizationLogo slot="left" :organization="organization" />
         </STNavigationBar>
 
-        <main>
-            <h1>
-                Jouw ticket
-            </h1>
-
-            <p>
-                Download of deel jouw ticket via deze pagina.
-            </p>
-
-            <div class="hide-smartphone">
-                <p class="success-box icon environment">
-                    Open deze pagina op jouw smartphone om alle tickets digitaal op te slaan. Op die manier hoef je de tickets niet af te drukken. Je kan ook een individueel ticket scannen om enkel dat ticket op te slaan of te delen.
-                </p>
-            </div>
-            <p class="success-box icon environment only-smartphone">
-                Je hoeft de tickets niet af te drukken, je kan ze ook tonen op jouw smartphone. Sla ze eventueel op zodat je ze niet kwijt geraakt.
-            </p>
-
-            <TicketBox v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop="webshop" />
-        </main>
+        <div v-for="ticket in tickets" :key="ticket.id" class="box">
+            <DetailedTicketView :ticket="ticket" :webshop="webshop" :logo="$isMobile" />
+        </div>
     </div>
 </template>
 
@@ -37,7 +20,7 @@ import { TicketPublic } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { WebshopManager } from '../../classes/WebshopManager';
-import TicketBox from '../products/TicketBox.vue';
+import DetailedTicketView from './DetailedTicketView.vue';
 
 
 @Component({
@@ -53,7 +36,7 @@ import TicketBox from '../products/TicketBox.vue';
         BackButton,
         OrganizationLogo,
         Spinner,
-        TicketBox
+        DetailedTicketView
     }
 })
 export default class TicketView extends Mixins(NavigationMixin){
@@ -102,3 +85,12 @@ export default class TicketView extends Mixins(NavigationMixin){
     }
 }
 </script>
+
+<style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+@use "@stamhoofd/scss/base/text-styles.scss" as *;
+
+.ticket-view {
+    --box-width: 400px;
+}
+</style>

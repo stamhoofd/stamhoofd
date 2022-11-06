@@ -3,37 +3,39 @@
         <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
 
         <div class="box">
-            <main v-if="checkout.totalPrice > 0">
-                <h1>Kies je betaalmethode</h1>
+            <div class="st-view">
+                <main v-if="checkout.totalPrice > 0">
+                    <h1>Kies je betaalmethode</h1>
 
-                <p v-if="isTrial" class="warning-box">
-                    Dit is een demo webshop. Bestellingen zijn fictief.
-                </p>
+                    <p v-if="isTrial" class="warning-box">
+                        Dit is een demo webshop. Bestellingen zijn fictief.
+                    </p>
 
-                <STErrorsDefault :error-box="errorBox" />
+                    <STErrorsDefault :error-box="errorBox" />
 
-                <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" :context="paymentContext" />
-            </main>
-            <main v-else>
-                <h1>Bevestig jouw bestelling</h1>
+                    <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" :context="paymentContext" />
+                </main>
+                <main v-else>
+                    <h1>Bevestig jouw bestelling</h1>
 
-                <p v-if="isTrial" class="warning-box">
-                    Dit is een demo webshop. Bestellingen zijn fictief.
-                </p>
+                    <p v-if="isTrial" class="warning-box">
+                        Dit is een demo webshop. Bestellingen zijn fictief.
+                    </p>
                 
-                <p>Jouw bestelling zal worden geplaatst als je verder gaat.</p>
+                    <p>Jouw bestelling zal worden geplaatst als je verder gaat.</p>
 
-                <STErrorsDefault :error-box="errorBox" />
-            </main>
+                    <STErrorsDefault :error-box="errorBox" />
+                </main>
 
-            <STToolbar>
-                <span slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" type="button" @click="goNext">
-                        <span>Bestelling bevestigen</span>
-                    </button>
-                </LoadingButton>
-            </STToolbar>
+                <STToolbar>
+                    <span slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
+                    <LoadingButton slot="right" :loading="loading">
+                        <button class="button primary" type="button" @click="goNext">
+                            <span>Bestelling bevestigen</span>
+                        </button>
+                    </LoadingButton>
+                </STToolbar>
+            </div>
         </div>
     </div>
 </template>

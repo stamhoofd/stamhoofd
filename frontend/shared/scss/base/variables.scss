@@ -96,15 +96,15 @@ $dark-theme-color-background: black;
 
 $color-background-shade-original: #f5f5f5;
 $color-background-shade: var(--color-background-shade, $color-background-shade-original);
-$dark-theme-color-background-shade: hsl(#{$color-primary-hue}, calc(#{$color-primary-saturation} / 4), 4%);
+$dark-theme-color-background-shade: hsl(#{$color-primary-hue}, calc(#{$color-primary-saturation} / 4), 8%);
 
 $color-background-shade-darker-original: #EBEBEB;
 $color-background-shade-darker: var(--color-background-shade-darker, $color-background-shade-darker-original);
-$dark-theme-color-background-shade-darker: hsl(#{$color-primary-hue}, calc(#{$color-primary-saturation} / 4), 8%);
+$dark-theme-color-background-shade-darker: hsl(#{$color-primary-hue}, calc(#{$color-primary-saturation} / 4), 14%);
 
 // Used for segmented control in dark mode: instead of darker, it should become lighter
 $color-background-highlight: var(--color-background-highlight, #ffffff);
-$dark-theme-color-background-highlight: hsl(0deg, 0%, 26%);
+$dark-theme-color-background-highlight: hsl(#{$color-primary-hue}, calc(#{$color-primary-saturation} / 10), 26%);
 
 $color-background-interactive: var(--color-background-interactive, #ffffff);
 $dark-theme-color-background-interactive: $color-dark;

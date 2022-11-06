@@ -67,7 +67,7 @@ function focusNextElement () {
 
 export class VueGlobalHelper {
     static setup() {
-        Vue.prototype.$isMobile = document.documentElement.clientWidth <= 550;
+        Vue.prototype.$isMobile = document.documentElement.clientWidth <= 550 || document.documentElement.clientHeight <= 400;
         Vue.prototype.$focusNext = () => {
             focusNextElement()
         }

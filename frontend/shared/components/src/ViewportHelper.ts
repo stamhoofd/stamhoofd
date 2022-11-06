@@ -36,7 +36,12 @@ export class ViewportHelper {
             return
         }        
         // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
-        this.setVh(document.documentElement.clientHeight)
+        this.setVh(window.innerHeight ?? document.body.clientHeight)
+
+        if ('virtualKeyboard' in navigator) {
+            // The VirtualKeyboard API is supported!
+            (navigator as any).virtualKeyboard.overlaysContent = true;
+        }
 
         const w = window as any;
         if (w.visualViewport) {
@@ -48,7 +53,7 @@ export class ViewportHelper {
                 requestAnimationFrame(() => {
                     pendingUpdate = false;
                     const viewport = event.target;
-                    const height = viewport.height;
+                    const height = w.visualViewport?.height;
 
                     this.setVh(height);
                 });
@@ -61,7 +66,7 @@ export class ViewportHelper {
                 "resize",
                 () => {
                     // We execute the same script as before
-                    this.setVh(document.documentElement.clientHeight);
+                    this.setVh(window.innerHeight ?? document.body.clientHeight);
                 },
                 { passive: true } as EventListenerOptions
             );
@@ -71,7 +76,7 @@ export class ViewportHelper {
                 "focus",
                 () => {
                     // We execute the same script as before
-                    this.setVh(document.documentElement.clientHeight);
+                    this.setVh(window.innerHeight ?? document.body.clientHeight);
                 },
                 { passive: true } as EventListenerOptions
             );
@@ -156,8 +161,6 @@ export class ViewportHelper {
                     clickedElement = null
                 }, { passive: true })
             }
-
-            
         } else {
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             document.body.addEventListener("touchstart", () => { }, { passive: true });
@@ -165,6 +168,7 @@ export class ViewportHelper {
     }
 
     static setVh(viewportHeight: number) {
+        
         const vh = Math.floor(viewportHeight) / 100;
         if (!this.currentVh || vh.toFixed(2) != this.currentVh.toFixed(2)) {
             this.currentVh = vh
@@ -174,27 +178,37 @@ export class ViewportHelper {
             }
         }
 
+        if ('virtualKeyboard' in navigator) {
+            // The VirtualKeyboard API is supported!
+            // AWESOME!!!
+            return;
+        }
+
         // Calculate bottom padding
         // In modern mode, the body is set to 100dvh / 100vh, and we need to calculate the difference between 100vh and the viewport height
         // This can be used to calculate the keyboard height
-        if (window.visualViewport && this.modern) {
-            const bodyHeight = window.innerHeight ?? document.body.clientHeight;
-            const bottomPadding = bodyHeight - window.visualViewport.height
+        if (AppManager.shared.getOS() === "iOS") {
+            if (window.visualViewport && this.modern) {
+                const bodyHeight = window.innerHeight ?? document.body.clientHeight;
+                const bottomPadding = bodyHeight - window.visualViewport.height
 
-            if (bottomPadding > 250) {
-                // We are showing the keyboard
-                document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
-                document.documentElement.style.setProperty("--bottom-padding", `0px`);
+                console.log('set vh', viewportHeight, bodyHeight, bottomPadding)
 
-                document.documentElement.style.setProperty("--keyboard-open", `1`);
-                document.documentElement.style.setProperty("--keyboard-closed", `0`);
+                if (bottomPadding > 200) {
+                    // We are showing the keyboard
+                    document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
+                    document.documentElement.style.setProperty("--bottom-padding", `0px`);
 
-            } else {
-                document.documentElement.style.setProperty("--bottom-padding", `${bottomPadding.toFixed(2)}px`);
-                document.documentElement.style.setProperty("--keyboard-height", `0px`);
+                    document.documentElement.style.setProperty("--keyboard-open", `1`);
+                    document.documentElement.style.setProperty("--keyboard-closed", `0`);
 
-                document.documentElement.style.setProperty("--keyboard-open", `0`);
-                document.documentElement.style.setProperty("--keyboard-closed", `1`);
+                } else {
+                    document.documentElement.style.setProperty("--bottom-padding", `${bottomPadding.toFixed(2)}px`);
+                    document.documentElement.style.setProperty("--keyboard-height", `0px`);
+
+                    document.documentElement.style.setProperty("--keyboard-open", `0`);
+                    document.documentElement.style.setProperty("--keyboard-closed", `1`);
+                }
             }
         }
     }

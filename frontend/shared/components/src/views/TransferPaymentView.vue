@@ -1,174 +1,176 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar title="Overschrijven" :pop="false" :dismiss="isPopup && canDismiss" />
-
         <div class="box">
-            <main>
-                <h1 v-if="created && type == 'order'">
-                    Bestelling geplaatst! Schrijf nu over.
-                </h1>
-                <h1 v-else-if="created">
-                    Gelukt! Schrijf nu het bedrag over
-                </h1>
-                <h1 v-else>
-                    Bedrag overschrijven
-                </h1>
-                <p v-if="payment.price > 0 && payment.status != 'Succeeded' && created">
-                    Voer de overschrijving meteen uit. Vermeld zeker “{{ formattedTransferDescription }}” in je overschrijving.
-                </p>
-                <p v-if="payment.price > 0 && payment.status != 'Succeeded' && !created">
-                    We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
-                </p>
+            <div class="st-view">
+                <STNavigationBar title="Overschrijven" :pop="false" :dismiss="isPopup && canDismiss" />
 
-                <div class="payment-split">
-                    <div class="rectangle">
-                        <div v-if="payment.price > 0" class="rectangle-top hide-smartphone">
-                            Typ het over
-                        </div>
-                        <table class="payment-transfer-table rectangle">
-                            <tbody>
-                                <tr>
-                                    <td>Bedrag</td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100">
-                                        {{ payment.price | price }}
-                                    </td>
-                                </tr>
-                                <tr v-if="payment.price > 0">
-                                    <td>Begunstigde</td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor">
-                                        {{ creditor }}
-                                    </td>
-                                </tr>
-                                <tr v-if="payment.price > 0">
-                                    <td>Rekeningnummer</td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban">
-                                        {{ iban }}
-                                    </td>
-                                </tr>
-                                <tr v-if="payment.price > 0">
-                                    <td v-if="isStructured && isBelgium">
-                                        Gestructureerde mededeling
-                                    </td>
-                                    <td v-else-if="isStructured">
-                                        Betalingskenmerk
-                                    </td>
-                                    <td v-else>
-                                        Mededeling
-                                    </td>
-                                    <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription">
-                                        {{ formattedTransferDescription }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div v-if="payment.price > 0" class="hide-smartphone rectangle">
-                        <div class="rectangle-top">
-                            Of scan met deze apps
-                        </div>
-                        <div class="rectangle-bottom">
-                            <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
-                            <img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
-                        </div>
-                        <img v-if="QRCodeUrl" :src="QRCodeUrl">
-                    </div>
-                </div>
-
-                <div v-if="false && isBelgium && getOS() == 'iOS' && payment.price > 0 && payment.status != 'Succeeded'" class="only-smartphone container">
-                    <hr>
-                    <h2>Snel app openen</h2>
-                    <p>Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.</p>
-
-                    <STList>
-                        <STListItem element-name="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
-                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
-                            <h3 class="style-title-list">
-                                KBC Mobile
-                            </h3>
-                            <p class="style-description">
-                                Gegevens worden automatisch ingevuld
-                            </p>
-                        </STListItem>
-
-                        <STListItem element-name="a" :href="'bepingib://'">
-                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
-                            <h3 class="style-title-list">
-                                ING Banking
-                            </h3>
-                            <p class="style-description">
-                                Kopieer zelf manueel de gegevens bovenaan
-                            </p>
-                        </STListItem>
-
-                        <STListItem element-name="a" :href="'BEPbelfius://'">
-                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
-                            <h3 class="style-title-list">
-                                Belfius Mobile
-                            </h3>
-                            <p class="style-description">
-                                Kopieer zelf manueel de gegevens bovenaan
-                            </p>
-                        </STListItem>
-
-                        <STListItem element-name="a" :href="'easybanking://'">
-                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
-                            <h3 class="style-title-list">
-                                Easy Banking App (BNP Paribas Fortis)
-                            </h3>
-                            <p class="style-description">
-                                Kopieer zelf manueel de gegevens bovenaan
-                            </p>
-                        </STListItem>
-
-                        <STListItem element-name="a" :href="'BEPargenta://'">
-                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
-                            <h3 class="style-title-list">
-                                Argenta-app
-                            </h3>
-                            <p class="style-description">
-                                Kopieer zelf manueel de gegevens bovenaan
-                            </p>
-                        </STListItem>
-
-                        <STListItem element-name="a" :href="'HBApp://'">
-                            <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/hello-bank/app.png">
-                            <h3 class="style-title-list">
-                                Hello Bank! app
-                            </h3>
-                            <p class="style-description">
-                                Kopieer zelf manueel de gegevens bovenaan
-                            </p>
-                        </STListItem>
-                    </STList>
-
-                    <p class="style-description">
-                        Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.
+                <main>
+                    <h1 v-if="created && type == 'order'">
+                        Bestelling geplaatst! Schrijf nu over.
+                    </h1>
+                    <h1 v-else-if="created">
+                        Gelukt! Schrijf nu het bedrag over
+                    </h1>
+                    <h1 v-else>
+                        Bedrag overschrijven
+                    </h1>
+                    <p v-if="payment.price > 0 && payment.status != 'Succeeded' && created">
+                        Voer de overschrijving meteen uit. Vermeld zeker “{{ formattedTransferDescription }}” in je overschrijving.
                     </p>
-                </div>
+                    <p v-if="payment.price > 0 && payment.status != 'Succeeded' && !created">
+                        We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{{ transferDescription }}” in je overschrijving.
+                    </p>
 
-                <p v-if="payment.price > 0 && payment.status == 'Succeeded'" class="success-box">
-                    We hebben de betaling ontvangen.
-                </p>
-                <template v-else-if="payment.price > 0 && created">
-                    <p v-if="isBelgium" class="hide-smartphone info-box">
-                        De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
-                    </p>     
-                    <p v-else class="hide-smartphone info-box">
-                        De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
-                    </p>          
-                </template>
-            </main>
+                    <div class="payment-split">
+                        <div class="rectangle">
+                            <div v-if="payment.price > 0" class="rectangle-top hide-smartphone">
+                                Typ het over
+                            </div>
+                            <table class="payment-transfer-table rectangle">
+                                <tbody>
+                                    <tr>
+                                        <td>Bedrag</td>
+                                        <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100">
+                                            {{ payment.price | price }}
+                                        </td>
+                                    </tr>
+                                    <tr v-if="payment.price > 0">
+                                        <td>Begunstigde</td>
+                                        <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor">
+                                            {{ creditor }}
+                                        </td>
+                                    </tr>
+                                    <tr v-if="payment.price > 0">
+                                        <td>Rekeningnummer</td>
+                                        <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban">
+                                            {{ iban }}
+                                        </td>
+                                    </tr>
+                                    <tr v-if="payment.price > 0">
+                                        <td v-if="isStructured && isBelgium">
+                                            Gestructureerde mededeling
+                                        </td>
+                                        <td v-else-if="isStructured">
+                                            Betalingskenmerk
+                                        </td>
+                                        <td v-else>
+                                            Mededeling
+                                        </td>
+                                        <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription">
+                                            {{ formattedTransferDescription }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-if="payment.price > 0" class="hide-smartphone rectangle">
+                            <div class="rectangle-top">
+                                Of scan met deze apps
+                            </div>
+                            <div class="rectangle-bottom">
+                                <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
+                                <img v-else src="@stamhoofd/assets/images/partners/scan-apps-nl.svg">
+                            </div>
+                            <img v-if="QRCodeUrl" :src="QRCodeUrl">
+                        </div>
+                    </div>
 
-            <STToolbar v-if="!isPopup">
-                <button v-if="payment.price > 0 && payment.status != 'Succeeded'" slot="right" class="button secundary hide-smartphone" type="button" @click="helpMe">
-                    <span class="icon help" />
-                    <span>Het lukt niet</span>
-                </button>
-                <button slot="right" class="button primary" type="button" @click="goNext">
-                    <span>Doorgaan</span>
-                    <span class="icon arrow-right" />
-                </button>
-            </STToolbar>
+                    <div v-if="false && isBelgium && getOS() == 'iOS' && payment.price > 0 && payment.status != 'Succeeded'" class="only-smartphone container">
+                        <hr>
+                        <h2>Snel app openen</h2>
+                        <p>Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.</p>
+
+                        <STList>
+                            <STListItem element-name="a" :href="'com.kbc.mobilesignqrcode://'+qrMessage">
+                                <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
+                                <h3 class="style-title-list">
+                                    KBC Mobile
+                                </h3>
+                                <p class="style-description">
+                                    Gegevens worden automatisch ingevuld
+                                </p>
+                            </STListItem>
+
+                            <STListItem element-name="a" :href="'bepingib://'">
+                                <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
+                                <h3 class="style-title-list">
+                                    ING Banking
+                                </h3>
+                                <p class="style-description">
+                                    Kopieer zelf manueel de gegevens bovenaan
+                                </p>
+                            </STListItem>
+
+                            <STListItem element-name="a" :href="'BEPbelfius://'">
+                                <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
+                                <h3 class="style-title-list">
+                                    Belfius Mobile
+                                </h3>
+                                <p class="style-description">
+                                    Kopieer zelf manueel de gegevens bovenaan
+                                </p>
+                            </STListItem>
+
+                            <STListItem element-name="a" :href="'easybanking://'">
+                                <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
+                                <h3 class="style-title-list">
+                                    Easy Banking App (BNP Paribas Fortis)
+                                </h3>
+                                <p class="style-description">
+                                    Kopieer zelf manueel de gegevens bovenaan
+                                </p>
+                            </STListItem>
+
+                            <STListItem element-name="a" :href="'BEPargenta://'">
+                                <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
+                                <h3 class="style-title-list">
+                                    Argenta-app
+                                </h3>
+                                <p class="style-description">
+                                    Kopieer zelf manueel de gegevens bovenaan
+                                </p>
+                            </STListItem>
+
+                            <STListItem element-name="a" :href="'HBApp://'">
+                                <img slot="left" class="payment-app-logo" src="~@stamhoofd/assets/images/partners/hello-bank/app.png">
+                                <h3 class="style-title-list">
+                                    Hello Bank! app
+                                </h3>
+                                <p class="style-description">
+                                    Kopieer zelf manueel de gegevens bovenaan
+                                </p>
+                            </STListItem>
+                        </STList>
+
+                        <p class="style-description">
+                            Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.
+                        </p>
+                    </div>
+
+                    <p v-if="payment.price > 0 && payment.status == 'Succeeded'" class="success-box">
+                        We hebben de betaling ontvangen.
+                    </p>
+                    <template v-else-if="payment.price > 0 && created">
+                        <p v-if="isBelgium" class="hide-smartphone info-box">
+                            De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
+                        </p>     
+                        <p v-else class="hide-smartphone info-box">
+                            De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
+                        </p>          
+                    </template>
+                </main>
+
+                <STToolbar v-if="!isPopup">
+                    <button v-if="payment.price > 0 && payment.status != 'Succeeded'" slot="right" class="button secundary hide-smartphone" type="button" @click="helpMe">
+                        <span class="icon help" />
+                        <span>Het lukt niet</span>
+                    </button>
+                    <button slot="right" class="button primary" type="button" @click="goNext">
+                        <span>Doorgaan</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                </STToolbar>
+            </div>
         </div>
     </div>
 </template>

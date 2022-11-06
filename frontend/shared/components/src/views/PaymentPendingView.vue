@@ -2,25 +2,27 @@
     <div class="st-view boxed">
         <STNavigationBar title="Betaling" />
         <div class="box">
-            <main v-if="!payment || payment.status != 'Failed'">
-                <h1>Wachten op betaalbevestiging...</h1>
-                <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten.</p>
+            <div class="st-view">
+                <main v-if="!payment || payment.status != 'Failed'">
+                    <h1>Wachten op betaalbevestiging...</h1>
+                    <p>We wachten op de betaalbevestiging van de bank. Dit duurt hooguit 5 minuten.</p>
 
-                <Spinner />
-            </main>
+                    <Spinner />
+                </main>
 
-            <main v-else>
-                <h1>Betaling mislukt</h1>
-                <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
-            </main>
+                <main v-else>
+                    <h1>Betaling mislukt</h1>
+                    <p>De betaling werd geannuleerd of door de bank geweigerd.</p>
+                </main>
 
-            <STToolbar v-if="payment && (payment.status == 'Failed' || payment.method == 'Payconiq')">
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary" @click="retry">
-                        <span>Opnieuw proberen</span>
-                    </button>
-                </LoadingButton>
-            </STToolbar>
+                <STToolbar v-if="payment && (payment.status == 'Failed' || payment.method == 'Payconiq')">
+                    <LoadingButton slot="right" :loading="loading">
+                        <button class="button primary" @click="retry">
+                            <span>Opnieuw proberen</span>
+                        </button>
+                    </LoadingButton>
+                </STToolbar>
+            </div>
         </div>
     </div>
 </template>

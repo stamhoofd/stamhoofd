@@ -164,6 +164,18 @@ body.modern.web-iOS {
         contain: content;
     }
 
+    body.modern .box & {
+        @media (max-width: 800px), (max-height: 700px) {
+            > main:first-child {
+                padding-top: 0;
+            }
+
+            > main:last-child {
+                padding-bottom: 0;
+            }
+        }
+    }
+
 
     > main {
         // We fixed the safe area, no need to recorrect it again
@@ -178,15 +190,19 @@ body.modern.web-iOS {
             flex-grow: 1;
             --st-horizontal-padding: calc((100vw - 900px) / 2);
             --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - 900px) / 2));
+
+            // due to a bug in Safari 16, combining display: flex with children that have a negative margin, we get horizontal scroll errors due to wrong width calculation
+            // We can fix this by disabling overflow-x
+            overflow-x: hidden;
         }
 
         > .view {
             margin: calc(-1 * var(--st-vertical-padding, 20px)) calc(-1 * var(--st-horizontal-padding, 40px));
             padding: var(--st-vertical-padding, 20px) 0;
             flex-grow: 1;
-
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
 
             > main {
                 padding: 0 var(--st-horizontal-padding, 15px) 0 var(--st-horizontal-padding, 15px);
@@ -224,28 +240,28 @@ body.modern.web-iOS {
         }
     }
 
-    body.modern &.boxed {
-        @media (min-width: 801px) and (min-height: 701px) {
-            padding-bottom: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px));
-        }
-        --saved-keyboard-height: var(--keyboard-height, 0px);
-    }
+    body.modern &.boxed:not(.popup .st-view.boxed) {
+        width: 100%;
 
-    &.boxed:not(.popup .st-view.boxed) {
         @media (min-width: 801px) and (min-height: 701px) {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+
             background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
-            
+        
             --navigation-bar-margin: 10px;
             --navigation-bar-horizontal-padding: 15px;
+            padding-bottom: max(var(--st-vertical-padding, 20px), var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px));
+            transition: padding-bottom 0.3s;
         }
-        width: 100%;
+        --saved-keyboard-height: var(--keyboard-height, 0px);
     }
 
     // Box is a container for a different view
     > .box {
         flex-shrink: 1 !important; // required to shrink!
-        flex-grow: 0;
+        flex-grow: 1;
         min-height: 0;
         display: flex;
         flex-direction: column;
@@ -256,31 +272,27 @@ body.modern.web-iOS {
         > .st-view {
             flex-grow: 1;
             flex-shrink: 1;
-            min-height: 0;
-            height: auto;
-            max-height: none;
         }
 
         // the main extend has moved to .box general because CSS stops working (don't know why)
-
         &:not(.popup .st-view > .box) {
-
-            // @media (max-height: 700px)  {
-            //     max-width: 800px;
-            //     margin: 0px auto;
-            //     min-height: auto;
-            //     width: 100%;
-            //     box-sizing: border-box;
-            //     flex-grow: 1;
-            // }
-
             @media (min-width: 801px) and (min-height: 701px)  { 
+                flex-shrink: 0 !important; // don't shrink
+                flex-grow: 0; // don't take full height
+
+                > .st-view {
+                    min-height: 0;
+                    height: auto;
+                    max-height: none;
+                }
+
                 --st-safe-area-top: 0px;
                 --st-safe-area-bottom: 0px;
-                --keyboard-height: calc(var(--saved-keyboard-height, 0px) - var(--st-vertical-padding, 20px) - var(--current-view-safe-area-bottom, 0px));
-                --bottom-padding: calc(var(--bottom-padding, 0px) - var(--st-vertical-padding, 20px) - var(--current-view-safe-area-bottom, 0px));
+                --keyboard-height: 0px;
+                --bottom-padding: 0px;
 
                 max-width: 800px;
+                max-width: var(--box-width, 800px);
                 background: $color-background;
                 --color-current-background: #{$color-background};
                 --color-current-background-shade: #{$color-background-shade};
@@ -290,6 +302,11 @@ body.modern.web-iOS {
                 min-height: auto;
                 width: 100%;
                 box-sizing: border-box;
+                overflow: hidden;
+                
+                &:first-child {
+                    margin-top: var(--st-vertical-padding, 20px);
+                }
 
                 //padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px)0;
                 
