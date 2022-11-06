@@ -324,12 +324,6 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             })
         } else {
             for (const member of allMembers) {
-                if (!member.details) {
-                    throw new SimpleError({
-                        code: "",
-                        message: "We konden niet synchroniseren omdat de gegevens van "+member.firstName+" ontbreken (achternaam ontbreekt ook). Vul dit lid eerst verder aan in Stamhoofd."
-                    })
-                }
                 const sgvMember = this.leden.find((sgvLid) => {
                     return sgvLid.isEqual(member)
                 })
@@ -370,14 +364,25 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         newMembers = newMembers.filter((member) => {
             const sgvMember = this.leden.find((sgvLid) => {
                 return sgvLid.isProbablyEqual(member)
-            }) ?? this.leden.find((sgvLid) => {
-                return sgvLid.isProbablyEqualLastResort(member)
-            })
+            }) 
             if (sgvMember) {
                 probablyEqualList.push({
                     stamhoofd: member,
                     sgv: sgvMember,
                     verify: true
+                })
+                return false
+            }
+
+            const sgvMember2 = this.leden.find((sgvLid) => {
+                return sgvLid.isProbablyEqualLastResort(member)
+            })
+
+            if (sgvMember2) {
+                probablyEqualList.push({
+                    stamhoofd: member,
+                    sgv: sgvMember2,
+                    verify: false
                 })
                 return false
             }
