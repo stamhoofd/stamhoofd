@@ -10,7 +10,7 @@ import { Checkout } from './Checkout';
 import { Customer } from './Customer';
 import { TicketPrivate } from './Ticket';
 import { WebshopPreview } from './Webshop';
-import { CheckoutMethodType } from './WebshopMetaData';
+import { CheckoutMethodType, WebshopTakeoutMethod } from './WebshopMetaData';
 
 export enum OrderStatusV103 {
     Created = "Created",
@@ -236,6 +236,16 @@ export class Order extends AutoEncoder {
                     return order.data.address?.shortString() ?? ""
                 })(this)
             },
+            ...(
+                (this.data.checkoutMethod?.type === CheckoutMethodType.Takeout || this.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((this.data.checkoutMethod as any)?.address) ? [
+                    {
+                        title: 'Adres',
+                        value: ((order) => {
+                            return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? ""
+                        })(this)
+                    }
+                ] : []
+            ),
             {
                 title: "Datum",
                 value: Formatter.capitalizeFirstLetter(this.data.timeSlot?.dateString() ?? "")

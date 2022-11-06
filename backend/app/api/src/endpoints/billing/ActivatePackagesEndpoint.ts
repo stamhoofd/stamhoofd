@@ -1,17 +1,11 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
-import { Column, Database, Model } from '@simonbackx/simple-database';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
-import { MolliePayment, STCredit } from "@stamhoofd/models";
-import { Payment } from "@stamhoofd/models";
-import { Registration } from "@stamhoofd/models";
-import { STInvoice } from "@stamhoofd/models";
-import { STPackage } from "@stamhoofd/models";
-import { STPendingInvoice } from "@stamhoofd/models";
-import { Token } from "@stamhoofd/models";
+import { MolliePayment, Payment, Registration, STCredit, STInvoice, STPackage, STPendingInvoice, Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { Organization as OrganizationStruct, OrganizationPatch,PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem,STInvoiceResponse, STPackage as STPackageStruct,STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version  } from "@stamhoofd/structures";
+import { Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceResponse, STPackage as STPackageStruct, STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version } from "@stamhoofd/structures";
+
 type Params = Record<string, never>;
 type Query = undefined;
 type ResponseBody = STInvoiceResponse;
