@@ -170,7 +170,9 @@ export class STInvoice extends Model {
         }
 
         // Search for all packages and activate them if needed (might be possible that they are already validated)
-        for (const pack of packages) {
+        for (const p of packages) {
+            // It is possible that the meta of the package has changed in the previous loop call, so we need to refetch it otherwise we get 'meta' conflicts
+            const pack = (await STPackage.getByID(p.id)) ?? p
             console.log("Activating package "+pack.id)
 
             // We'll never have multiple invoices for the same package that are awaiting payments

@@ -167,7 +167,7 @@ export class STPackageBundleHelper {
                         type: STPackageType.SingleWebshop,
                         unitPrice: 3900,
                         minimumAmount: 1,
-                        allowRenew: false,
+                        allowRenew: true,
                         pricingType: STPricingType.Fixed,
                         startDate: new Date(date)
                     })
