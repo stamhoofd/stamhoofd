@@ -18,7 +18,7 @@ export class Payment extends AutoEncoder {
         version: 151, 
         downgrade: downgradePaymentMethodV150
     })
-    method: PaymentMethod | null = null
+    method: PaymentMethod
 
     @field({ decoder: new EnumDecoder(PaymentStatus) })
     status: PaymentStatus = PaymentStatus.Created
@@ -27,7 +27,7 @@ export class Payment extends AutoEncoder {
     provider: PaymentProvider | null = null
 
     @field({ decoder: IntegerDecoder })
-    price: number
+    price = 0
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 92 })
     freeContribution: number | null = null
@@ -43,10 +43,10 @@ export class Payment extends AutoEncoder {
     paidAt: Date | null = null
 
     @field({ decoder: DateDecoder })
-    createdAt: Date
+    createdAt: Date = new Date()
 
     @field({ decoder: DateDecoder })
-    updatedAt: Date
+    updatedAt: Date = new Date()
 
     get isPending() {
         return this.status !== PaymentStatus.Succeeded && this.status !== PaymentStatus.Failed

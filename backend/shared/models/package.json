@@ -25,6 +25,6 @@
     },
     "devDependencies": {
         "@types/pdfkit": "^0.12.3",
-        "@simonbackx/simple-database": "^1.22.0"
+        "@simonbackx/simple-database": "^1.22.1"
     }
 }

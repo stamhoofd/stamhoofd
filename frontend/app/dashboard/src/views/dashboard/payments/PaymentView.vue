@@ -43,8 +43,11 @@
                     </STListItem>
 
                     <STListItem v-if="payment.method == 'Transfer' && payment.transferSettings">
-                        <h3 class="style-definition-label">
+                        <h3 v-if="payment.price >= 0" class="style-definition-label">
                             Betalen aan
+                        </h3>
+                        <h3 v-else class="style-definition-label">
+                            Terugbetaald vanaf
                         </h3>
                         <p class="style-definition-text">
                             {{ payment.transferSettings }}
@@ -61,8 +64,11 @@
                     </STListItem>
 
                     <STListItem v-if="payment.paidAt">
-                        <h3 class="style-definition-label">
+                        <h3 v-if="payment.price >= 0" class="style-definition-label">
                             Betaald op
+                        </h3>
+                        <h3 v-else class="style-definition-label">
+                            Terugbetaald op
                         </h3>
                         <p class="style-definition-text">
                             {{ formatDate(payment.paidAt) }}
@@ -114,22 +120,29 @@
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isPending" :selectable="true" @click="markPaid">
-                            <h2 class="style-title-list">
+                            <h2 v-if="payment.price >= 0" class="style-title-list">
                                 Markeer als betaald
+                            </h2>
+                            <h2 v-else class="style-title-list">
+                                Markeer als terugbetaald
                             </h2>
                             <p v-if="mappedPayment.orders.length" class="style-description">
                                 Stuurt mogelijks een automatische e-mail ter bevestiging.
                             </p>
                             <button slot="right" type="button" class="button secundary hide-smartphone">
                                 <span class="icon success" />
-                                <span>Betaald</span>
+                                <span v-if="payment.price >= 0">Betaald</span>
+                                <span v-else>Terugbetaald</span>
                             </button>
                             <button slot="right" type="button" class="button icon success only-smartphone" />
                         </STListItem>
 
                         <STListItem v-if="mappedPayment.isSucceeded" :selectable="true" @click="markPending">
-                            <h2 class="style-title-list">
+                            <h2 v-if="payment.price >= 0" class="style-title-list">
                                 Toch niet betaald
+                            </h2>
+                            <h2 v-else class="style-title-list">
+                                Toch niet terugbetaald
                             </h2>
                             <p v-if="payment.method == 'Transfer'" class="style-description">
                                 Overschrijving per ongeluk gemarkeerd als betaald? Maak dat hiermee ongedaan.
@@ -139,7 +152,8 @@
                             </p>
                             <button slot="right" type="button" class="button secundary hide-smartphone">
                                 <span class="icon undo" />
-                                <span>Niet betaald</span>
+                                <span v-if="payment.price >= 0">Niet betaald</span>
+                                <span v-else>Niet terugbetaald</span>
                             </button>
                             <button slot="right" type="button" class="button icon undo only-smartphone" />
                         </STListItem>
@@ -171,10 +185,17 @@
                             <h3 class="style-title-list">
                                 {{ item.balanceItem.description }}
                             </h3>
+                            <p v-if="item.balanceItem.member" class="style-description-small">
+                                {{ item.balanceItem.member.name }}
+                            </p>
+
                             <p class="style-description-small">
                                 {{ formatDate(item.balanceItem.createdAt) }}
                             </p>
-                            <p v-if="item.price !== item.balanceItem.price" class="style-description-small">
+                            <p v-if="item.price < 0" class="style-description-small">
+                                Terugbetaling van {{ formatPrice(-item.price) }}
+                            </p>
+                            <p v-else-if="item.price !== item.balanceItem.price" class="style-description-small">
                                 Slechts deel van het totaalbedrag, {{ formatPrice(item.price) }} / {{ formatPrice(item.balanceItem.price) }}
                             </p>
                             <template slot="right">

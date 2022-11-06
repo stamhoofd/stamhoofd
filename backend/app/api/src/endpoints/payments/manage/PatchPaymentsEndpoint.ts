@@ -1,15 +1,15 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Payment, Token } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Payment, Token } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Payment as PaymentStruct, PaymentGeneral, PaymentMethod, PermissionLevel } from "@stamhoofd/structures";
+import { Payment as PaymentStruct, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 
 import { ExchangePaymentEndpoint } from '../ExchangePaymentEndpoint';
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = PatchableArrayAutoEncoder<PaymentStruct>
+type Body = PatchableArrayAutoEncoder<PaymentGeneral>
 type ResponseBody = PaymentGeneral[]
 
 /**
@@ -17,7 +17,7 @@ type ResponseBody = PaymentGeneral[]
  */
 
 export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(PaymentStruct as Decoder<PaymentStruct>, PaymentStruct.patchType() as Decoder<AutoEncoderPatchType<PaymentStruct>>, StringDecoder)
+    bodyDecoder = new PatchableArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>, PaymentStruct.patchType() as Decoder<AutoEncoderPatchType<PaymentGeneral>>, StringDecoder)
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "PATCH") {
@@ -46,6 +46,121 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         const changedPayments: PaymentGeneral[] = []
+
+        // Modify payments
+        for (const {put} of request.body.getPuts()) {
+            // Create a new payment
+            if (put.balanceItemPayments.length == 0) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "You need to add at least one balance item payment",
+                    human: "Een betaling moet ten minste één afrekening bevatten voor een openstaande rekening.",
+                    field: "balanceItemPayments"
+                })
+            }
+
+            if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(put.method)) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Invalid payment method",
+                    human: "Je kan zelf geen online betalingen aanmaken",
+                    field: "method"
+                })
+            }
+
+            const payment = new Payment()
+            payment.organizationId = user.organizationId
+            payment.status = PaymentStatus.Created
+            payment.method = put.method
+
+            if (payment.method == PaymentMethod.Transfer) {
+                if (!put.transferSettings) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Transfer settings are required",
+                        human: "Je moet de overschrijvingsdetails invullen",
+                        field: "transferSettings"
+                    })
+                }
+
+                payment.transferSettings = put.transferSettings
+
+                if (!put.transferDescription) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Transfer description is required",
+                        human: "Je moet een mededeling invullen voor de overschrijving",
+                        field: "transferDescription"
+                    })
+                }
+
+                payment.transferDescription = put.transferDescription
+            }
+
+            const balanceItems: BalanceItem[] = []
+            const balanceItemPayments: BalanceItemPayment[] = [];
+
+            for (const item of put.balanceItemPayments) {
+                const balanceItem = await BalanceItem.getByID(item.balanceItem.id)
+                if (!balanceItem || balanceItem.organizationId !== user.organizationId) {
+                    throw new SimpleError({
+                        code: "not_found",
+                        message: "Balance item not found",
+                        human: "Eén van de afrekeningen die je wilde markeren als betaald bestaat niet (meer).",
+                        field: "balanceItem"
+                    })
+                }
+                balanceItems.push(balanceItem)
+
+                // Check permissions
+
+                // Create payment
+                const balanceItemPayment = new BalanceItemPayment()
+                balanceItemPayment.organizationId = user.organizationId
+                balanceItemPayment.balanceItemId = balanceItem.id
+                balanceItemPayment.price = item.price
+                balanceItemPayments.push(balanceItemPayment)
+            }
+
+            // Check permissions
+            await Payment.checkBalanceItemPermissions({user, permissionLevel: PermissionLevel.Write}, balanceItems)
+
+            // Check total price
+            const totalPrice = balanceItemPayments.reduce((total, item) => total + item.price, 0)
+
+            if (totalPrice !== put.price) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Total price doesn't match",
+                    human: "De totale prijs komt niet overeen met de som van de afrekeningen",
+                    field: "price"
+                })
+            }            
+
+            payment.price = totalPrice
+
+            // Save payment
+            await payment.save();
+
+            // Save balance item payments
+            for (const balanceItemPayment of balanceItemPayments) {
+                balanceItemPayment.paymentId = payment.id
+                await balanceItemPayment.save()
+            }
+
+            // Mark paid or failed
+            if (put.status !== PaymentStatus.Created) {
+                await ExchangePaymentEndpoint.handlePaymentStatusUpdate(payment, user.organization, put.status)
+
+                if (put.status === PaymentStatus.Succeeded) {
+                    payment.paidAt = put.paidAt
+                    await payment.save()
+                }
+            }
+
+            const paymentGeneral = await payment.getGeneralStructure();
+            changedPayments.push(paymentGeneral)
+        }
 
         // Modify payments
         for (const patch of request.body.getPatches()) {

@@ -59,6 +59,11 @@ export default class PriceInput extends Vue {
         if (old === val) {
             return
         }
+        const {value: currentValue} = this.stringToValue(this.valueString)
+
+        if (currentValue === val) {
+            return
+        }
 
         if (val === null)  {
             if (this.required) {
@@ -84,34 +89,47 @@ export default class PriceInput extends Vue {
         this.clean()
     }
 
-    @Watch("valueString")
-    onValueChanged(value: string, _oldValue: string) {
+    stringToValue(str: string) {
         // We need the value string here! Vue does some converting to numbers automatically
         // but for our placeholder system we need exactly the same string
-        if (value == "") {
-            this.valid = true;
-
+        if (str == "") {
             if (this.required) {
-                this.internalValue = Math.max(0, this.min ?? 0);
+                return {
+                    value: Math.max(0, this.min ?? 0),
+                    valid: true
+                }
             } else {
-                this.internalValue = null
+                return {
+                    value: null,
+                    valid: true
+                }
             }
         } else {
-            if (!value.includes(".")) {
+            if (!str.includes(".")) {
                 // We do this for all locales since some browsers report the language locale instead of the formatting locale
-                value = value.replace(",", ".");
+                str = str.replace(",", ".");
             }
-            const v = parseFloat(value);
+            const v = parseFloat(str);
             if (isNaN(v)) {
-                this.valid = false;
-                this.internalValue = this.min ?? 0;
+                return {
+                    value: this.min ?? 0,
+                    valid: false
+                }
             } else {
-                this.valid = true;
-
                 // Remove extra decimals
-                this.internalValue = this.constrain(Math.round(v * 100));
+                return {
+                    value: this.constrain(Math.round(v * 100)),
+                    valid: true
+                }
             }
         }
+    }
+
+    @Watch("valueString")
+    onValueChanged(value: string, _oldValue: string) {
+        const {valid, value: newValue} = this.stringToValue(value);
+        this.valid = valid;
+        this.internalValue = newValue;
     }
 
     /// Returns the decimal separator of the system. Might be wrong if the system has a region set different from the language with an unknown combination.

@@ -80,14 +80,14 @@
 
             <template v-if="succeededPayments.length > 0">
                 <hr>
-                <h2>Ontvangen betalingen</h2>
+                <h2>Betalingen</h2>
 
                 <STList>
                     <STListItem v-for="payment of succeededPayments" :key="payment.id" :selectable="true" @click="openPayment(payment)">
                         <h3 class="style-title-list">
                             {{ getPaymentMethodName(payment.method) }}
                         </h3>
-                        <p class="style-description-small">
+                        <p v-if="formatDate(payment.createdAt) !== formatDate(payment.paidAt)" class="style-description-small">
                             Aangemaakt op {{ formatDate(payment.createdAt) }}
                         </p>
                         <p class="style-description-small">

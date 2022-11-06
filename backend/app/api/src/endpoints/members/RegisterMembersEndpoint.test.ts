@@ -40,7 +40,7 @@ describe("Endpoint.RegisterMembersEndpoint", () => {
             paymentMethod: PaymentMethod.Transfer
         });
         checkout.cart.calculatePrices([member.getStructureWithRegistrations()], groups.map(g => g.getStructure()), organization.meta.categories);
-        const request = Request.buildJson("POST", "/v165/members/register", organization.getApiHost(), checkout);
+        const request = Request.buildJson("POST", "/v168/members/register", organization.getApiHost(), checkout);
 
         request.headers.authorization = "Bearer " + token.accessToken
 

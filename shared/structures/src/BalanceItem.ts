@@ -1,11 +1,9 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
 import { Member } from "./members/Member";
 import { Payment } from "./members/Payment";
 import { Registration } from "./members/Registration";
-import { RegistrationWithMember } from "./members/RegistrationWithMember";
-import { PaymentStatus } from "./PaymentStatus";
 import { Order } from "./webshops/Order";
 
 export enum BalanceItemStatus {
@@ -40,6 +38,9 @@ export class BalanceItem extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     createdAt = new Date()
+
+    @field({ decoder: new EnumDecoder(BalanceItemStatus) })
+    status: BalanceItemStatus = BalanceItemStatus.Pending
 
     get isPaid() {
         return this.pricePaid === this.price;
