@@ -43,6 +43,9 @@ const throttle = (func, limit) => {
 
 function setKeyboardHeight(height: number) {
     document.documentElement.style.setProperty("--keyboard-height", `${height}px`);
+    document.documentElement.style.setProperty("--keyboard-open", `${height > 0 ? '1' : '0'}`);
+    document.documentElement.style.setProperty("--keyboard-closed", `${height > 0 ? '0' : '1'}`);
+
     if (height > 0 && Capacitor.getPlatform() === 'android') {
         requestAnimationFrame(() => {
             document.activeElement?.scrollIntoView({ behavior: 'smooth', block: "center", inline: "center" });

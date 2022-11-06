@@ -1,8 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar title="Webshop archief">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Webshop archief" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

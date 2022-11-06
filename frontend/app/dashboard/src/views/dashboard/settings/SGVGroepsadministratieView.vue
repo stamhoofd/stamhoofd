@@ -1,8 +1,6 @@
 <template>
     <div id="sgv-groepsadministratie-view" class="st-view background">
-        <STNavigationBar title="Groepsadministratie synchroniseren">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Groepsadministratie" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>Groepsadministratie synchroniseren</h1>

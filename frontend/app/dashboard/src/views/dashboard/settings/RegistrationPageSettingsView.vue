@@ -1,9 +1,6 @@
 <template>
     <div id="registration-page-settings-view" class="st-view background">
-        <STNavigationBar title="Jouw inschrijvingspagina">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" type="button" @click="dismiss" />
-        </STNavigationBar>
+        <STNavigationBar title="Jouw inschrijvingspagina" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>Jouw inschrijvingspagina</h1>

@@ -96,12 +96,9 @@ module.exports = {
             return middlewares
         },
     },
-    /*optimization: (process.env.NODE_ENV === "production" ? {} : {
-        runtimeChunk: true,
-        removeAvailableModules: false,
-        removeEmptyChunks: false,
-        //splitChunks: false,
-    }),*/
+    optimization: (process.env.NODE_ENV === "production" ? {} : {
+        minimize: false, // prevent webpack removing console logs from dependencies
+    }),
     devtool: "eval",
     module: {
         rules: [

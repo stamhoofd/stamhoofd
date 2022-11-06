@@ -3,6 +3,18 @@ import { AppManager } from "@stamhoofd/networking";
 export class ViewportHelper {
     static currentVh: number | null = null
     static modern = false
+    static supportsDvh = this.checkDvh();
+
+    static checkDvh() {
+        const element = document.createElement("div");
+        element.style.height = "100dvh";
+        //element.inert = true;
+
+        document.body.appendChild(element);
+        const height = parseInt(getComputedStyle(element, null).height, 10);
+        document.body.removeChild(element);
+        return height > 0;
+    }
 
     static getScrollElement(element: HTMLElement): HTMLElement {
         const style = window.getComputedStyle(element);
@@ -156,31 +168,40 @@ export class ViewportHelper {
         const vh = Math.floor(viewportHeight) / 100;
         if (!this.currentVh || vh.toFixed(2) != this.currentVh.toFixed(2)) {
             this.currentVh = vh
-            document.documentElement.style.setProperty("--vh", `${vh.toFixed(2)}px`);
-
-            // Calculate bottom padding
-            // In modern mode, the body is set to 100vh, and we need to calculate the difference between 100vh and the viewport height
-            // This can be used to calculate the keyboard height
-            if (window.visualViewport && this.modern) {
-                const bodyHeight = document.body.clientHeight;
-                const bottomPadding = bodyHeight - window.visualViewport.height
-
-                if (bottomPadding > 250) {
-                    // We are showing the keyboard
-                    document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
-                    document.documentElement.style.setProperty("--bottom-padding", `0px`);
-                } else {
-                    document.documentElement.style.setProperty("--bottom-padding", `${bottomPadding.toFixed(2)}px`);
-                    document.documentElement.style.setProperty("--keyboard-height", `0px`);
-                }
+  
+            if (!this.supportsDvh) {
+                document.documentElement.style.setProperty("--vh", `${vh.toFixed(2)}px`);  
             }
-            
+        }
+
+        // Calculate bottom padding
+        // In modern mode, the body is set to 100dvh / 100vh, and we need to calculate the difference between 100vh and the viewport height
+        // This can be used to calculate the keyboard height
+        if (window.visualViewport && this.modern) {
+            const bodyHeight = window.innerHeight ?? document.body.clientHeight;
+            const bottomPadding = bodyHeight - window.visualViewport.height
+
+            if (bottomPadding > 250) {
+                // We are showing the keyboard
+                document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
+                document.documentElement.style.setProperty("--bottom-padding", `0px`);
+
+                document.documentElement.style.setProperty("--keyboard-open", `1`);
+                document.documentElement.style.setProperty("--keyboard-closed", `0`);
+
+            } else {
+                document.documentElement.style.setProperty("--bottom-padding", `${bottomPadding.toFixed(2)}px`);
+                document.documentElement.style.setProperty("--keyboard-height", `0px`);
+
+                document.documentElement.style.setProperty("--keyboard-open", `0`);
+                document.documentElement.style.setProperty("--keyboard-closed", `1`);
+            }
         }
     }
 
     static getBottomPadding() {
         if (window.visualViewport && this.modern) {
-            const bodyHeight = document.body.clientHeight;
+            const bodyHeight = window.innerHeight ?? document.body.clientHeight;
             const bottomPadding = bodyHeight - window.visualViewport.height
 
             return Math.round(bottomPadding)

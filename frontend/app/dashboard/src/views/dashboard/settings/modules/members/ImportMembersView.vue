@@ -1,9 +1,6 @@
 <template>
     <div id="import-members-settings-view" class="st-view background">
-        <STNavigationBar title="Leden importeren">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" type="button" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Leden importeren" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>Leden importeren</h1>

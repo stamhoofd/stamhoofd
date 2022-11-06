@@ -1,13 +1,6 @@
 <template>
     <form class="st-view filter-editor" @submit.prevent="applyFilter">
-        <STNavigationBar :title="title">
-            <template #left>
-                <BackButton v-if="canPop" @click="pop" />
-            </template>
-            <template #right>
-                <button v-if="canDismiss" type="button" class="button icon close gray" @click="dismiss" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

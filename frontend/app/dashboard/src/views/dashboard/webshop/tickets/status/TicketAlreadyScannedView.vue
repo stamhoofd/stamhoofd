@@ -1,8 +1,6 @@
 <template>
     <div class="st-view ticket-already-scanned-view">
-        <STNavigationBar title="Ticket al gescand">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Ticket al gescand" :pop="canPop" />
 
         <main>
             <h1>

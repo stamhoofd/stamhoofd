@@ -26,6 +26,11 @@ export default class STButtonToolbar extends Vue {
     > div {
         flex-shrink: 0;
         height: 60px;
+
+        .popup & {
+            // Smaller inside a popup
+            height: 45px;
+        }
         box-sizing: content-box;
         border-top: $border-width-thin solid $color-border-shade;
         padding-bottom: var(--st-safe-area-bottom, 0px);

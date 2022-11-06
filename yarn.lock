@@ -1833,11 +1833,6 @@
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.10.0.tgz#f6669e4012a6aec4b1ea8d67a802b880b0cf023c"
   integrity sha512-YVyV/XnSBprBEmGmitUxQmnTVzYSfI1IymxlAh0YjbMoy6i55uX/2RjU6TILbI0gerdolXCNljPHC4xzWYNehQ==
 
-"@simonbackx/vue-app-navigation@1.23.6":
-  version "1.23.6"
-  resolved "https://registry.yarnpkg.com/@simonbackx/vue-app-navigation/-/vue-app-navigation-1.23.6.tgz#7577991989e34b96c123c7fdf3c16bb8e96404d3"
-  integrity sha512-DTE5Tgk+6ZSPql28pX7w1nIeNFAc5ymsocETrf20z/fPCObdrXLV8iJEUS6IUTpbl/PkLjMkHWGJ8FjKg0MA7Q==
-
 "@simonbackx/webfonts-loader@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@simonbackx/webfonts-loader/-/webfonts-loader-0.0.1.tgz#f68497b61c56554c4544ab6235170185bf307252"

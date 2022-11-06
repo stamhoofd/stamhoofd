@@ -1,9 +1,6 @@
 <template>
     <div id="missing-first-name-view" class="st-view background">
-        <STNavigationBar :title="title">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>{{ title }}</h1>

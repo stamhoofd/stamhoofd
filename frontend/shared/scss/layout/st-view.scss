@@ -10,6 +10,7 @@
 html.modern {
     overflow: hidden;
     height: 100vh;
+    height: 100dvh; // iOS: don't include overlays in height
 }
 
 body.modern {
@@ -20,9 +21,11 @@ body.modern {
 
     overflow: hidden;
     height: 100vh;
+    height: 100dvh; // iOS: don't include overlays in height
 
     #app {
         height: 100vh;
+        height: 100dvh; // iOS: don't include overlays in height
     }
 }
 
@@ -36,6 +39,7 @@ body.modern.web-iOS {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100dvh;
     min-height: calc(var(--vh, 1vh) * 100);
     box-sizing: border-box;
     padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px) 0;
@@ -45,9 +49,16 @@ body.modern.web-iOS {
     padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
     transition: padding-bottom 0.2s;
     --current-view-safe-area-top: var(--st-safe-area-top, 0px);
+    --current-view-safe-area-bottom: var(--st-safe-area-bottom, 0px);
 
     body.modern & {
         height: 100vh;
+        height: 100dvh;
+        height: calc(var(--vh, 1vh) * 100);
+        max-height: 100vh;
+        max-height: 100dvh;
+
+        min-height: auto;
         overflow: hidden;
         padding-bottom: 0; //var(--st-safe-area-bottom, 0px);
         padding-top: 0; //var(--st-safe-area-top, 0px);
@@ -140,12 +151,13 @@ body.modern.web-iOS {
     }
 
     body.modern .popup & {
-        height: calc(var(--vh, 1vh) * 100);
-        min-height: 0;
-        max-height: 100vh;
+        // height: calc(var(--vh, 1vh) * 100);
+        // min-height: 0;
+        // max-height: 100vh;
+        // max-height: 100dvh;
     }
 
-    body.modern .sheet & {
+    body.modern .sheet &, body.modern .box & {
         height: auto;
         min-height: 0;
         max-height: calc(var(--vh, 1vh) * 100);
@@ -212,6 +224,13 @@ body.modern.web-iOS {
         }
     }
 
+    body.modern &.boxed {
+        @media (min-width: 801px) and (min-height: 701px) {
+            padding-bottom: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px));
+        }
+        --saved-keyboard-height: var(--keyboard-height, 0px);
+    }
+
     &.boxed:not(.popup .st-view.boxed) {
         @media (min-width: 801px) and (min-height: 701px) {
             background: $color-background-shade;
@@ -223,40 +242,47 @@ body.modern.web-iOS {
         width: 100%;
     }
 
+    // Box is a container for a different view
     > .box {
+        flex-shrink: 1 !important; // required to shrink!
+        flex-grow: 0;
+        min-height: 0;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
 
         --color-current-background: #{$color-background};
 
-        > main {
-            padding: 0 var(--st-horizontal-padding, 15px) 0 var(--st-horizontal-padding, 15px);
+        > .st-view {
+            flex-grow: 1;
+            flex-shrink: 1;
+            min-height: 0;
+            height: auto;
+            max-height: none;
         }
-
-        flex-grow: 1;
 
         // the main extend has moved to .box general because CSS stops working (don't know why)
 
         &:not(.popup .st-view > .box) {
-            flex-grow: 0;
 
-            @media (max-width: 800px) {
-                flex-grow: 1;
-            }
+            // @media (max-height: 700px)  {
+            //     max-width: 800px;
+            //     margin: 0px auto;
+            //     min-height: auto;
+            //     width: 100%;
+            //     box-sizing: border-box;
+            //     flex-grow: 1;
+            // }
 
-            @media (max-height: 700px)  {
-                max-width: 800px;
-                margin: 0px auto;
-                min-height: auto;
-                width: 100%;
-                box-sizing: border-box;
-                flex-grow: 1;
-            }
-
-            @media (min-width: 801px) and (min-height: 701px)  {
+            @media (min-width: 801px) and (min-height: 701px)  { 
                 --st-safe-area-top: 0px;
+                --st-safe-area-bottom: 0px;
+                --keyboard-height: calc(var(--saved-keyboard-height, 0px) - var(--st-vertical-padding, 20px) - var(--current-view-safe-area-bottom, 0px));
+                --bottom-padding: calc(var(--bottom-padding, 0px) - var(--st-vertical-padding, 20px) - var(--current-view-safe-area-bottom, 0px));
+
                 max-width: 800px;
                 background: $color-background;
+                --color-current-background: #{$color-background};
                 --color-current-background-shade: #{$color-background-shade};
                 @include style-side-view-shadow();
                 border-radius: $border-radius;
@@ -265,10 +291,10 @@ body.modern.web-iOS {
                 width: 100%;
                 box-sizing: border-box;
 
-                padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px)0;
+                //padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px)0;
                 
                 // With extra top padding safe area default to 20px
-                padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) 0 var(--st-vertical-padding, 20px) 0;
+                //padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) 0 var(--st-vertical-padding, 20px) 0;
 
                 
             }

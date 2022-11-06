@@ -1,13 +1,11 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Beheerders">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
+        <STNavigationBar title="Beheerders" :dismiss="canDismiss" :pop="canPop">
             <template slot="right">
                 <button v-if="!isNew" class="button text" type="button" @click="deleteMe">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
-                <button class="button icon close gray" type="button" @click="pop" />
             </template>
         </STNavigationBar>
 

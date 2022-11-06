@@ -1,9 +1,6 @@
 <template>
     <div id="referral-view" class="st-view background">
-        <STNavigationBar title="Verdien tegoed">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Verdien tegoed" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

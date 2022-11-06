@@ -1,11 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Toegang tot categorieën aanpassen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <template slot="right">
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Toegang tot categorieën aanpassen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

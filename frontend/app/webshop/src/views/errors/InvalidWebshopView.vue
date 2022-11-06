@@ -54,6 +54,7 @@ export default class InvalidWebshopView extends Mixins(NavigationMixin){
 .invalid-page-view {
     .legal-footer {
         @extend .style-description-small;
+        padding: 15px;
         padding-top: 30px;
         margin-top: auto;
         line-height: 1.6;

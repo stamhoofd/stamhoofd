@@ -12,8 +12,8 @@
                 <input type="file" multiple="multiple" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="changedFile">
                 <span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
             </label>
-            <hr v-if="!$isMobile">
-            <button v-if="!$isMobile" v-tooltip="'Voorbeeld tonen'" class="button icon eye" type="button" @click="openPreview" />
+            <hr v-if="!$isMobile && !$isIOS && !$isAndroid">
+            <button v-if="!$isMobile && !$isIOS && !$isAndroid" v-tooltip="'Voorbeeld tonen'" class="button icon eye" type="button" @click="openPreview" />
         </template>
 
         <!-- List -->

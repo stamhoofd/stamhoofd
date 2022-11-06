@@ -1,9 +1,6 @@
 <template>
     <form class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Functies uitproberen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-if="!canPop && canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
-        </STNavigationBar>
+        <STNavigationBar title="Functies uitproberen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

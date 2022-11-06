@@ -10,15 +10,13 @@
             
             <STErrorsDefault :error-box="errorBox" />
             <EmailInput v-model="email" title="E-mailadres" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :validator="validator" />
-        </main>
-
-        <STFloatingFooter>
-            <LoadingButton :loading="loading">
+        
+            <LoadingButton :loading="loading" class="block bottom">
                 <button class="button primary full" type="submit">
                     Opnieuw instellen
                 </button>
             </LoadingButton>
-        </STFloatingFooter>
+        </main>
     </form>
 </template>
 

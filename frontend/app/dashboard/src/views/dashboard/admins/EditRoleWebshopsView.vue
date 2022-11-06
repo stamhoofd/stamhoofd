@@ -1,11 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Toegang tot webshops aanpassen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <template slot="right">
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Toegang tot webshops aanpassen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>
@@ -41,6 +36,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import WebshopPermissionRow from './WebshopPermissionRow.vue';
 
 @Component({

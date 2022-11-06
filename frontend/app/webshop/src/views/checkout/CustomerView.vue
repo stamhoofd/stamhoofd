@@ -1,8 +1,6 @@
 <template>
     <form class="st-view boxed" @submit.prevent="goNext">
-        <STNavigationBar>
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
 
         <div class="box">
             <main>

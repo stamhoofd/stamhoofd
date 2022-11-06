@@ -16,11 +16,11 @@
                 </BackButton>
             </template>
             <template #right>
-                <template v-if="!isIOS">
+                <template v-if="!isIOS || !isMobile">
                     <button v-for="(action, index) of filteredActions" :key="index" v-tooltip="action.tooltip" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="handleAction(action, $event)" />
                 </template>
 
-                <template v-if="showSelection && isIOS">
+                <template v-if="showSelection && isIOS && canLeaveSelectionMode">
                     <button v-if="canLeaveSelectionMode" key="iOSDone" type="button" class="button navigation highlight" @click="setShowSelection(false)">
                         Gereed
                     </button>
@@ -114,7 +114,7 @@
             </p>
         </main>
 
-        <STButtonToolbar v-if="isIOS">
+        <STButtonToolbar v-if="isIOS && isMobile">
             <button v-for="(action, index) of filteredActions" :key="index" type="button" class="button text small column selected" :disabled="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0" @click="action.needsSelection && (showSelection || !action.allowAutoSelectAll) && cachedSelectionCount == 0 ? undefined : handleAction(action, $event)">
                 <span :class="'icon '+action.icon" />
             </button>
@@ -593,7 +593,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
     }
 
     get canLeaveSelectionMode() {
-        return !(this.wrapColumns && !this.hasClickListener)
+        return this.wrapColumns || !this.hasClickListener
     }
 
     ticking = false
@@ -1231,7 +1231,7 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         if (action.hasChildActions) {
             const el = event.currentTarget;
             const bounds = el.getBoundingClientRect()
-            const isOnTop = !this.isIOS
+            const isOnTop = !(this.isIOS && this.isMobile)
 
             const displayedComponent = new ComponentWithProperties(TableActionsContextMenu, {
                 x: bounds.left,

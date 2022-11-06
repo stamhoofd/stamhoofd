@@ -1,9 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar title="Mijn paketten">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Mijn paketten" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

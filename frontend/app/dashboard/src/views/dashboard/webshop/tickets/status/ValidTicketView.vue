@@ -1,8 +1,6 @@
 <template>
     <div class="st-view valid-ticket-view">
-        <STNavigationBar title="Geldig ticket">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Geldig ticket" :pop="canPop" />
 
         <main v-if="!ticket.itemId">
             <h1>

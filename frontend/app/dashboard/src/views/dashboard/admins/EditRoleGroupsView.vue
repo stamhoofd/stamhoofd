@@ -1,11 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Toegang tot inschrijvingsgroepen aanpassen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <template slot="right">
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Toegang tot inschrijvingsgroepen aanpassen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>
@@ -14,18 +9,14 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <div class="container" v-for="category in tree.categories" :key="category.id">
-                
+            <div v-for="category in tree.categories" :key="category.id" class="container">
                 <hr>
                 <h2>{{ category.settings.name }}</h2>
 
                 <STList v-if="category.groups.length > 0">
                     <GroupPermissionRow v-for="group in category.groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
                 </STList>
-
             </div>
-
-
         </main>
 
         <STToolbar>
@@ -50,6 +41,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import GroupPermissionRow from './GroupPermissionRow.vue';
 
 @Component({

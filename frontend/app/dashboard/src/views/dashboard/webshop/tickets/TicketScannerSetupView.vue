@@ -1,8 +1,6 @@
 <template>
     <div class="st-view">
-        <STNavigationBar title="Tickets scannen">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Tickets scannen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>

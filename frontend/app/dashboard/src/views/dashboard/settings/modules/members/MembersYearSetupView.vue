@@ -1,9 +1,6 @@
 <template>
     <div id="personalize-settings-view" class="st-view background">
-        <STNavigationBar title="Werkjaar">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
-            <button v-else slot="right" class="button icon close gray" @click="pop" />
-        </STNavigationBar>
+        <STNavigationBar title="Werkjaar" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>
