@@ -125,6 +125,10 @@ export class CheckoutManagerStatic {
 
             // Revalidate
             this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories, this.balanceItems!)
+
+            if (OrganizationManager.organization.meta.recordsConfiguration.freeContribution === null) {
+                this.cart.freeContribution = 0
+            }
         } finally {
             try {
                 this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
