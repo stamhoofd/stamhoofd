@@ -378,9 +378,19 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get recordCategories(): RecordCategory[] {
-        return RecordCategory.filterCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission).flatMap(cat => {
+        return RecordCategory.filterCategories(
+            OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
+            new MemberDetailsWithGroups(this.member.details, this.member, []), 
+            MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
+            this.dataPermission
+            
+        ).flatMap(cat => {
             if (cat.childCategories.length > 0) {
-                return cat.filterChildCategories(new MemberDetailsWithGroups(this.member.details, this.member, []), this.dataPermission)
+                return cat.filterChildCategories(
+                    new MemberDetailsWithGroups(this.member.details, this.member, []), 
+                    MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
+                    this.dataPermission
+                )
             }
             return [cat]
         })
@@ -488,6 +498,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             markReviewed: false,
             dataPermission: this.member.details.dataPermissions?.value ?? false,
             filterValue: new MemberDetailsWithGroups(this.member.details, this.member, []),
+            filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
             saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
                 this.member.details.recordAnswers = answers
                 await this.familyManager.patchAllMembersWith(this.member)

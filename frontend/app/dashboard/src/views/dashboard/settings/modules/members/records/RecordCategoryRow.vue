@@ -19,7 +19,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { STListItem } from "@stamhoofd/components";
-import { RecordCategory } from "@stamhoofd/structures"
+import { FilterDefinition,RecordCategory } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditRecordCategoryView from './EditRecordCategoryView.vue';
@@ -39,10 +39,14 @@ export default class RecordCategoryRow extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     categories: RecordCategory[]
 
+    @Prop({ required: true })
+    filterDefinitions!: FilterDefinition[]
+
     editCategory() {
         this.present(new ComponentWithProperties(EditRecordCategoryView, {
             category: this.category,
             parentCategory: this.parentCategory,
+            filterDefinitions: this.filterDefinitions,
             isNew: false,
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                 this.addPatch(patch)

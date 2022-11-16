@@ -99,8 +99,8 @@ export class RecordFactory {
                     filter: new PropertyFilter(
                         new FilterGroup(definitions, [
                             ageFilter
-                        ]), 
-                        new FilterGroup(definitions)
+                        ]).encoded, 
+                        new FilterGroup(definitions).encoded
                     )
                 })
             }
@@ -653,7 +653,7 @@ export class RecordFactory {
                 undefined
                 // Optional
                 : new PropertyFilter(
-                    new FilterGroup(definitions), 
+                    new FilterGroup(definitions).encoded, 
                     null
                 )
         })

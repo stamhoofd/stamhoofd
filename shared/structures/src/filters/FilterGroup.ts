@@ -1,8 +1,33 @@
 
-import { Data, Decoder, EncodeContext, PlainObject } from "@simonbackx/simple-encoding";
+import { Data, Decoder, Encodeable, EncodeContext, ObjectData, PlainObject } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 
 import { Filter,FilterDecoder, FilterDefinition } from "./FilterDefinition";
+
+/**
+ * This is a list of filters, but without the known definitions because we can only decode at a point where the definitions are known.
+ * This allows for more recursive structures in filter definitions.
+ */
+export class FilterGroupEncoded<T> implements Encodeable {
+    data: Data
+
+    constructor(data: Data) {
+        this.data = data
+    }
+
+    decode(definitions: FilterDefinition<T, Filter<T>, any>[]) {
+        const decoder = new FilterGroupDecoder(definitions)
+        return decoder.decode(this.data)
+    }
+
+    encode(context: EncodeContext): PlainObject {
+        return this.data.value
+    }
+
+    static decode<T>(data: Data): FilterGroupEncoded<T> {
+        return new FilterGroupEncoded<T>(data)
+    }
+}
 
 
 export enum GroupFilterMode {
@@ -26,6 +51,10 @@ export class FilterGroup<T> extends Filter<T> {
         this.filters = filters
         this.definition = new FilterGroupDecoder(this.definitions)
         this.mode = mode
+    }
+
+    get encoded() {
+        return new FilterGroupEncoded<T>(new ObjectData(this.encode({ version: 0 }), { version: 0}))
     }
 
     setDefinitions(definitions: FilterDefinition<T, Filter<T>, any>[]) {
@@ -58,7 +87,7 @@ export class FilterGroup<T> extends Filter<T> {
         return {
             filters: this.filters.map(f => f.encode(context)),
             mode: this.mode,
-            definitionId: "FilterGroup"
+            definitionId: this.definition.id
         }
     }
 
@@ -85,7 +114,7 @@ export class FilterGroupDecoder<T> extends FilterDefinition<T, FilterGroup<T>, a
     }
     
     decode(data: Data): FilterGroup<T> {
-        const filterDecoder = new FilterDecoder(this.definitions)
+        const filterDecoder = new FilterDecoder([...this.definitions, this])
         const group = this.createFilter()
         group.filters = data.field("filters").array(filterDecoder)
         group.mode = data.optionalField("mode")?.enum(GroupFilterMode) ?? GroupFilterMode.And

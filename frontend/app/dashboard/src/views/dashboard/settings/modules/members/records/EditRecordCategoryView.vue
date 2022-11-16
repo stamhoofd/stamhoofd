@@ -45,7 +45,7 @@
         </p>
 
         <STList v-if="categories.length > 0">
-            <RecordCategoryRow v-for="c in categories" :key="c.id" :category="c" :categories="categories" :parent-category="patchedCategory" :selectable="true" @patch="addCategoriesPatch" />
+            <RecordCategoryRow v-for="c in categories" :key="c.id" :category="c" :categories="categories" :parent-category="patchedCategory" :selectable="true" :filter-definitions="filterDefinitions" @patch="addCategoriesPatch" />
         </STList>
 
         <STList v-if="records.length > 0">
@@ -75,7 +75,7 @@
             Je kan kiezen op welke leden deze categorie van toepassing is.
         </p>
 
-        <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" />
+        <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" :definitions="filterDefinitions" />
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -95,7 +95,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { MemberDetails, MemberDetailsWithGroups, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures";
+import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
@@ -135,6 +135,9 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
 
+    @Prop({ required: true })
+    filterDefinitions!: FilterDefinition[]
+
     get patchedCategory() {
         return this.category.patch(this.patchCategory)
     }
@@ -167,7 +170,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     get filter() {
-        return this.patchedCategory.filter ?? PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
+        return this.patchedCategory.filter ?? PropertyFilter.createDefault()
     }
 
     set filter(filter: PropertyFilter<MemberDetailsWithGroups> | null) {
@@ -210,6 +213,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
             category,
             isNew: true,
             parentCategory: this.patchedCategory,
+            filterDefinitions: this.filterDefinitions,
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                 // Clear records that were added to the new category
                 const p: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray()

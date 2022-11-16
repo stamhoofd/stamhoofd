@@ -267,7 +267,7 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
                     const categories = organization.meta.recordsConfiguration.recordCategories.flatMap(c => c.childCategories.length > 0 ? c.childCategories : [c])
                     const m = new MemberDetailsWithGroups(member.details, member, [])
                     for (const category of categories) {
-                        const records = category.getAllFilteredRecords(m, member.details.dataPermissions?.value ?? false)
+                        const records = category.getAllFilteredRecords(m, MemberDetailsWithGroups.getBaseFilterDefinitions(), member.details.dataPermissions?.value ?? false)
                         const missingRecord = records.find(r => (r.required || r.type === RecordType.Checkbox || records.length == 1) && !member.details.recordAnswers.find(a => a.settings.id === r.id))
                         if (missingRecord) {
                             missing.push("record-category-"+category.id)

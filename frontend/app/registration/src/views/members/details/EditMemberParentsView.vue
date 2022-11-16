@@ -66,7 +66,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton,CenteredMessage,Checkbox, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
-import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, Parent, RegisterItem, Version } from "@stamhoofd/structures"
+import { FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, Parent, RegisterItem, Version } from "@stamhoofd/structures"
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -116,8 +116,15 @@ export default class EditMemberParentsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     parents: SelectableParent[] = []
 
+    getFilterDefinitionsForProperty(property: string): FilterDefinition[] {
+        if (['parents', 'emergencyContacts'].includes(property)) {
+            return MemberDetailsWithGroups.getBaseFilterDefinitions()
+        }
+        return MemberDetails.getBaseFilterDefinitions()
+    }
+
     get isOptional() {
-        return !OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
+        return !OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('parents')).doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
     }
 
     editParent(parent: Parent) {

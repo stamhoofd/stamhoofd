@@ -1,7 +1,8 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
-import { PropertyFilter, PropertyFilterDecoderFromContext } from "../../filters/PropertyFilter";
+import { FilterDefinition } from "../../filters/FilterDefinition";
+import { PropertyFilter } from "../../filters/PropertyFilter";
 import { RecordSettings } from "./RecordSettings";
 
 export class RecordCategory extends AutoEncoder {
@@ -24,7 +25,7 @@ export class RecordCategory extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordSettings) })
     records: RecordSettings[] = []
 
-    @field({ decoder: new PropertyFilterDecoderFromContext(), version: 126, nullable: true })
+    @field({ decoder: PropertyFilter, version: 126, nullable: true })
     filter: PropertyFilter<any> | null = null
 
     getAllRecords(): RecordSettings[] {
@@ -34,9 +35,9 @@ export class RecordCategory extends AutoEncoder {
         return this.records
     }
 
-    getAllFilteredRecords(filterValue: any, dataPermission: boolean): RecordSettings[] {
+    getAllFilteredRecords<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordSettings[] {
         if (this.childCategories.length > 0) {
-            return this.filterChildCategories(filterValue, dataPermission).flatMap(c => c.getAllFilteredRecords(filterValue, dataPermission))
+            return this.filterChildCategories(filterValue, filterDefinitions, dataPermission).flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission))
         }
         return this.filterRecords(dataPermission)
     }
@@ -48,14 +49,14 @@ export class RecordCategory extends AutoEncoder {
         return this.records.filter(r => !r.sensitive)
     }
 
-    static filterCategories(categories: RecordCategory[], filterValue: any, dataPermission: boolean): RecordCategory[] {
+    static filterCategories<T>(categories: RecordCategory[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
         return categories.filter(category => {
-            if (category.filter && !category.filter.enabledWhen.doesMatch(filterValue)) {
+            if (category.filter && !category.filter.enabledWhen.decode(filterDefinitions).doesMatch(filterValue)) {
                 return false
             }
 
             if (category.childCategories.length > 0) {
-                return category.filterChildCategories(filterValue, dataPermission).length > 0
+                return category.filterChildCategories(filterValue, filterDefinitions, dataPermission).length > 0
             }
 
             if (category.filterRecords(dataPermission).length == 0) {
@@ -66,7 +67,7 @@ export class RecordCategory extends AutoEncoder {
         })
     }
 
-    filterChildCategories(filterValue: any, dataPermission: boolean): RecordCategory[] {
-        return RecordCategory.filterCategories(this.childCategories, filterValue, dataPermission)
+    filterChildCategories<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
+        return RecordCategory.filterCategories(this.childCategories, filterValue, filterDefinitions, dataPermission)
     }
 }

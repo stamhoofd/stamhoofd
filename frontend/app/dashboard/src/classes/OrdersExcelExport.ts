@@ -112,6 +112,7 @@ export class OrdersExcelExport {
         const wsData: (string | number)[][] = [
             [
                 "Bestelnummer",
+                "Besteldatum",
                 "Voornaam",
                 "Achternaam",
                 "E-mail",
@@ -152,6 +153,7 @@ export class OrdersExcelExport {
 
             wsData.push([
                 `${order.number}`,
+                Formatter.dateNumber(order.createdAt)+" "+Formatter.timeIso(order.createdAt),
                 order.data.customer.firstName,
                 order.data.customer.lastName,
                 order.data.customer.email,

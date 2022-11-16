@@ -129,7 +129,7 @@ export default class PhoneInput extends Vue {
                 return false
 
             } else {
-                const v = phoneNumber.formatInternational();
+                const v = silent ? this.phoneRaw : phoneNumber.formatInternational();
                 this.phoneRaw = v
         
                 if (this.value !== v) {

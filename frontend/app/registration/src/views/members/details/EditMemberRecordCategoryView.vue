@@ -1,5 +1,5 @@
 <template>
-    <FillRecordCategoryView :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" :filter-value="filterValue" :data-permission="dataPermission" />
+    <FillRecordCategoryView :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" :filter-value="filterValue" :filter-definitions="filterDefinitions" :data-permission="dataPermission" />
 </template>
 
 <script lang="ts">
@@ -7,6 +7,8 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { FillRecordCategoryView } from '@stamhoofd/components';
 import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, RegisterItem } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 
 /**
  * This component removes any member specific logic from FillRecordCategoryView and puts it separately so we can reuse
@@ -38,6 +40,10 @@ export default class EditMemberCategoryView extends Mixins(NavigationMixin) {
 
     get filterValue() {
         return new MemberDetailsWithGroups(this.details, this.member, this.items)
+    }
+
+    get filterDefinitions() {
+        return MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member, registerItems: this.items})
     }
 
     get dataPermission() {

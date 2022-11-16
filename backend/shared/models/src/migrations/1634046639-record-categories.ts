@@ -42,7 +42,7 @@ export default new Migration(async () => {
 
             if (d.emergencyContact !== AskRequirement.NotAsked) {
                 const definitions = MemberDetailsWithGroups.getBaseFilterDefinitions()
-                d.emergencyContacts = new PropertyFilter(new FilterGroup(definitions), d.emergencyContact === AskRequirement.Required ? new FilterGroup(definitions) : null)
+                d.emergencyContacts = new PropertyFilter(new FilterGroup(definitions).encoded, d.emergencyContact === AskRequirement.Required ? new FilterGroup(definitions).encoded : null)
             } else {
                 d.emergencyContacts = null
             }

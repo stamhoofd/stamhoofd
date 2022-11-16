@@ -104,11 +104,15 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address") {
-        return OrganizationManager.organization.meta.recordsConfiguration[name]?.enabledWhen?.doesMatch(this.details) ?? false
+        return OrganizationManager.organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(
+            MemberDetails.getBaseFilterDefinitions()
+        ).doesMatch(this.details) ?? false
     }
 
     isPropertyRequired(name: "emailAddress" | "birthDay" | "phone" | "address") {
-        return this.isPropertyEnabled(name) && (OrganizationManager.organization.meta.recordsConfiguration[name]?.requiredWhen?.doesMatch(this.details) ?? false)
+        return this.isPropertyEnabled(name) && (OrganizationManager.organization.meta.recordsConfiguration[name]?.requiredWhen?.decode(
+            MemberDetails.getBaseFilterDefinitions()
+        ).doesMatch(this.details) ?? false)
     }
 
     async goNext() {

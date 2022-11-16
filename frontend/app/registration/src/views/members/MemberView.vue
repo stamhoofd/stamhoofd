@@ -277,13 +277,20 @@ export default class MemberView extends Mixins(NavigationMixin){
     }
 
     get recordCategories(): RecordCategory[] {
+        const definitions = MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, { member: this.member, registerItems: this.cartItems })
+
         return RecordCategory.filterCategories(
             OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
             new MemberDetailsWithGroups(this.member.details, this.member, this.cartItems), 
+            definitions,
             this.dataPermission
         ).flatMap(cat => {
             if (cat.childCategories.length > 0) {
-                return cat.filterChildCategories(new MemberDetailsWithGroups(this.member.details, this.member, this.cartItems), this.dataPermission)
+                return cat.filterChildCategories(
+                    new MemberDetailsWithGroups(this.member.details, this.member, this.cartItems), 
+                    definitions,
+                    this.dataPermission
+                )
             }
             return [cat]
         })

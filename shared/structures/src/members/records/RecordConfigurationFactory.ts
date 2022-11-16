@@ -30,8 +30,8 @@ export class RecordConfigurationFactory {
      * Except emergency contacts
      */
     static setDefaultBuiltInFields(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
-        configuration.gender = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
-        configuration.birthDay = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+        configuration.gender = PropertyFilter.createDefault()
+        configuration.birthDay = PropertyFilter.createDefault()
 
         // Every organization types uses these defaults
         const detailsDefinitions = MemberDetails.getBaseFilterDefinitions()
@@ -48,8 +48,8 @@ export class RecordConfigurationFactory {
         plus11Filter.mode = NumberFilterMode.GreaterThan
         plus11Filter.start = 11
 
-        configuration.phone = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus11Filter]), new FilterGroup(detailsDefinitions, [plus18Filter]))
-        configuration.emailAddress = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus11Filter]), new FilterGroup(detailsDefinitions, [plus18Filter]))
+        configuration.phone = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus11Filter]).encoded, new FilterGroup(detailsDefinitions, [plus18Filter]).encoded)
+        configuration.emailAddress = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus11Filter]).encoded, new FilterGroup(detailsDefinitions, [plus18Filter]).encoded)
 
         // Only make address optional for youth and sport organizations for now
         if (type === OrganizationType.Youth || [OrganizationType.Student ,OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
@@ -57,9 +57,9 @@ export class RecordConfigurationFactory {
             plus26Filter.mode = NumberFilterMode.GreaterThan
             plus26Filter.start = 30
 
-            configuration.address = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus18Filter]), new FilterGroup(detailsDefinitions, [plus26Filter]))
+            configuration.address = new PropertyFilter(new FilterGroup(detailsDefinitions, [plus18Filter]).encoded, new FilterGroup(detailsDefinitions, [plus26Filter]).encoded)
         } else {
-            configuration.address = PropertyFilter.createDefault(MemberDetails.getBaseFilterDefinitions())
+            configuration.address = PropertyFilter.createDefault()
         }
 
     }
@@ -83,8 +83,8 @@ export class RecordConfigurationFactory {
             addressMissingFilter.choiceIds = ["address"]
 
             configuration.parents = new PropertyFilter(
-                new FilterGroup(definitions, [minus26Filter]), 
-                new FilterGroup(definitions, [minus18Filter, addressMissingFilter], GroupFilterMode.Or)
+                new FilterGroup(definitions, [minus26Filter]).encoded, 
+                new FilterGroup(definitions, [minus18Filter, addressMissingFilter], GroupFilterMode.Or).encoded
             )
         }
     }
@@ -109,13 +109,13 @@ export class RecordConfigurationFactory {
             parentsMissingFilter.choiceIds = ["parents"]
 
             configuration.emergencyContacts = new PropertyFilter(
-                new FilterGroup(definitions, [minus26Filter]), 
-                new FilterGroup(definitions, [minus18Filter, parentsMissingFilter], GroupFilterMode.Or)
+                new FilterGroup(definitions, [minus26Filter]).encoded, 
+                new FilterGroup(definitions, [minus18Filter, parentsMissingFilter], GroupFilterMode.Or).encoded
             )
         } else if (type === OrganizationType.LGBTQ) {
             // Optional emergency contact
             configuration.emergencyContacts = new PropertyFilter(
-                new FilterGroup(definitions), 
+                new FilterGroup(definitions).encoded, 
                 null
             )
         }

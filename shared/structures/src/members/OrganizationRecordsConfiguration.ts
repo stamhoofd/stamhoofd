@@ -1,15 +1,21 @@
 import { ArrayDecoder, AutoEncoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../filters/ChoicesFilter"
+import { FilterDefinition } from "../filters/FilterDefinition"
 import { NumberFilterDefinition } from "../filters/NumberFilter"
-import { PropertyFilter, PropertyFilterDecoder, SetPropertyFilterDecoder } from "../filters/PropertyFilter"
+import { PropertyFilter } from "../filters/PropertyFilter"
 import { RegistrationsFilterChoice, RegistrationsFilterDefinition } from "../filters/RegistrationsFilter"
+import { StringFilterDefinition } from "../filters/StringFilter"
+import { Group } from "../Group"
+import { Organization } from "../Organization"
 import { RegisterItem } from "./checkout/RegisterItem"
 import { Gender } from "./Gender"
 import { MemberDetails } from "./MemberDetails"
 import { MemberWithRegistrations } from "./MemberWithRegistrations"
 import { LegacyRecordType } from "./records/LegacyRecordType"
+import { RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordTextAnswer } from "./records/RecordAnswer"
 import { RecordCategory } from "./records/RecordCategory"
+import { RecordType } from "./records/RecordSettings"
 
 export enum AskRequirement {
     NotAsked = "NotAsked",
@@ -124,7 +130,96 @@ export class MemberDetailsWithGroups {
         this.registerItems = registerItems
     }
 
-    static getBaseFilterDefinitions() {
+    static getRecordCategoryDefinitions(recordCategories: RecordCategory[]): FilterDefinition<MemberDetailsWithGroups>[] {
+        // Limit depth to 1 category
+        const flattened = recordCategories.flatMap(category => {
+            if (category.childCategories.length > 0) {
+                return category.childCategories
+            }
+            return [category]
+        })
+
+        const definitions: FilterDefinition<MemberDetailsWithGroups>[] = []
+
+        for (const recordCategory of flattened) {
+            for (const record of recordCategory.records) {
+                if (record.type === RecordType.Checkbox) {
+                    const def = new ChoicesFilterDefinition<MemberDetailsWithGroups>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: [
+                            new ChoicesFilterChoice("checked", "Aangevinkt"),
+                            new ChoicesFilterChoice("not_checked", "Niet aangevinkt")
+                        ], 
+                        getValue: (member) => {
+                            const answer: RecordCheckboxAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+                            return answer?.selected ? ["checked"] : ["not_checked"]
+                        },
+                        defaultMode: ChoicesFilterMode.Or
+                    })
+                    definitions.push(def)
+                }
+
+                if (record.type === RecordType.MultipleChoice) {
+                    const def = new ChoicesFilterDefinition<MemberDetailsWithGroups>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                        getValue: (member) => {
+                            const answer: RecordMultipleChoiceAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+
+                            if (!answer) {
+                                return []
+                            }
+
+                            return answer.selectedChoices.map(c => c.id)
+                        },
+                        defaultMode: ChoicesFilterMode.And
+                    })
+                    definitions.push(def)
+                }
+
+                if (record.type === RecordType.ChooseOne) {
+                    const def = new ChoicesFilterDefinition<MemberDetailsWithGroups>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                        getValue: (member) => {
+                            const answer: RecordChooseOneAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+
+                            if (!answer || !answer.selectedChoice) {
+                                return []
+                            }
+
+                            return [answer.selectedChoice.id]
+                        },
+                        defaultMode: ChoicesFilterMode.Or
+                    })
+                    definitions.push(def)
+                }
+
+                if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
+                    const def = new StringFilterDefinition<MemberDetailsWithGroups>({
+                        id: "record_"+record.id, 
+                        name: record.name, 
+                        category: recordCategory.name,
+                        getValue: (member) => {
+                            const answer: RecordTextAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
+                            return answer?.value ?? ""
+                        }
+                    })
+                    definitions.push(def)
+                }
+            }
+        }
+
+        return definitions
+    }
+
+    static getBaseFilterDefinitions(): FilterDefinition<MemberDetailsWithGroups>[] {
         return [
             // TODO: map member filters instead of redefining them
             new NumberFilterDefinition<MemberDetailsWithGroups>({
@@ -224,6 +319,26 @@ export class MemberDetailsWithGroups {
             }),
         ]
     }
+
+    static getFilterDefinitions(organization: Organization, options: {groups?: Group[], member?: MemberWithRegistrations, registerItems?: RegisterItem[]}): FilterDefinition<MemberDetailsWithGroups>[] {
+        // Make a list of all the groups
+        const groups = options.groups ?? []
+        groups.push(...options.member?.groups ?? [])
+        groups.push(...options.member?.waitingGroups ?? [])
+        groups.push(...options.registerItems?.map(i => i.group) ?? [])
+
+        // Remove duplicates
+        const uniqueGroups = groups.filter((group, index, self) => self.findIndex(g => g.id === group.id) === index)
+
+        // Map groups to record categories that are relevant to them
+        // TODO: we should move this from the organization settings to the group and category settings
+        const recordCategories = organization.meta.recordsConfiguration.recordCategories
+        
+        return [
+            ...this.getBaseFilterDefinitions(),
+            ...this.getRecordCategoryDefinitions(recordCategories),
+        ]
+    }
 }
 
 export class OrganizationRecordsConfiguration extends AutoEncoder {
@@ -241,28 +356,28 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     @field({ decoder: DataPermissionsSettings, nullable: true, version: 117 })
     dataPermission: DataPermissionsSettings | null = null
 
-    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 124 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 124 })
     emailAddress: PropertyFilter<MemberDetails> | null = null
 
-    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     phone: PropertyFilter<MemberDetails> | null = null
 
-    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     gender: PropertyFilter<MemberDetails> | null = null
 
-    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     birthDay: PropertyFilter<MemberDetails> | null = null
 
-    @field({ decoder: new PropertyFilterDecoder(MemberDetails.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     address: PropertyFilter<MemberDetails> | null = null
 
-    @field({ decoder: new PropertyFilterDecoder(MemberDetailsWithGroups.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     parents: PropertyFilter<MemberDetailsWithGroups> | null = null
 
-    @field({ decoder: new PropertyFilterDecoder(MemberDetailsWithGroups.getBaseFilterDefinitions()), nullable: true, version: 125 })
+    @field({ decoder: PropertyFilter, nullable: true, version: 125 })
     emergencyContacts: PropertyFilter<MemberDetailsWithGroups> | null = null
 
-    @field({ decoder: new SetPropertyFilterDecoder(new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), MemberDetailsWithGroups.getBaseFilterDefinitions()), version: 117 })
+    @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), version: 117 })
     recordCategories: RecordCategory[] = []
 
     // General configurations
