@@ -8,7 +8,7 @@
             </h1>
             <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
 
-            <PropertyFilterInput v-model="editingConfiguration" :organization="organization" />
+            <PropertyFilterInput v-model="editingConfiguration" :organization="organization" :definitions="definitions" />
         </main>
 
         <STToolbar>
@@ -26,7 +26,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, STNavigationBar } from "@stamhoofd/components";
 import { BackButton, PropertyFilterInput, STToolbar } from "@stamhoofd/components";
-import { Organization, PropertyFilter, Version } from "@stamhoofd/structures";
+import { FilterDefinition, Organization, PropertyFilter, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 
@@ -44,6 +44,9 @@ export default class PropertyFilterView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
     organization: Organization
+
+    @Prop({ required: true })
+    definitions: FilterDefinition[]
 
     @Prop({ required: true })
     configuration!: PropertyFilter<any>

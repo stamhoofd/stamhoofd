@@ -27,7 +27,7 @@ $border-width: 1px;
 $border-width-thin: var(--border-width-thin, 1px);
 
 
-$border-radius: 7px;
+$border-radius: 8px;
 $border-radius-modals: 15px;
 
 @function invertColor($color, $offset: 0) {
@@ -85,6 +85,11 @@ $dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-
 $color-dark-original: #1D2129;// #000716;
 $color-dark: var(--color-dark, $color-dark-original);
 $dark-theme-color-dark: hsl(0deg, 0%, 90%);
+
+$color-dark-light-original: #3e4146;
+
+$color-dark-light: var(--color-dark-light, $color-dark-light-original);
+$dark-theme-color-dark-light: hsl(0deg, 0%, 80%);
 
 // -----------------------------------------------------------------------------
 // -------- Background ---------------------------------------------------------

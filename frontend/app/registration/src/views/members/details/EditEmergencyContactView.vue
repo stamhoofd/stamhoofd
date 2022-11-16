@@ -87,7 +87,7 @@
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, CenteredMessage, ErrorBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
-import { EmergencyContact, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RegisterItem, Version } from '@stamhoofd/structures';
+import { EmergencyContact, FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RegisterItem, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { MemberManager } from '../../../classes/MemberManager';
@@ -133,6 +133,13 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     originalDetails: MemberDetails
 
+    getFilterDefinitionsForProperty(property: string): FilterDefinition[] {
+        if (['parents', 'emergencyContacts'].includes(property)) {
+            return MemberDetailsWithGroups.getBaseFilterDefinitions()
+        }
+        return MemberDetails.getBaseFilterDefinitions()
+    }
+
     async shouldNavigateAway() {
         if (
             JSON.stringify(this.details.encode({ version: Version })) == JSON.stringify(this.originalDetails.encode({ version: Version }))
@@ -174,7 +181,7 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     }
 
     get isOptional() {
-        return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
+        return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('emergencyContacts')).doesMatch(new MemberDetailsWithGroups(this.details, this.member, this.items))
         //return OrganizationManager.organization.meta.recordsConfiguration.emergencyContact !== AskRequirement.Required
     }
 

@@ -228,7 +228,11 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
 
     getCategoryFillStatus(category: RecordCategory) {
         // Check all the properties in this category and check their last review times
-        const records = category.getAllFilteredRecords(new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), this.dataPermissionsValue)
+        const records = category.getAllFilteredRecords(
+            new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), 
+            MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
+            this.dataPermissionsValue
+        )
 
         let hasValue = false
         let hasMissingValue = false
@@ -254,7 +258,12 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     }
 
     filterRecordCategories(categories: RecordCategory[]): RecordCategory[] {
-        return RecordCategory.filterCategories(categories, new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), this.dataPermissionsValue)
+        return RecordCategory.filterCategories(
+            categories, 
+            new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []),
+            MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
+            this.dataPermissionsValue
+        )
     }
 
     editRecordCategory(category: RecordCategory) {
@@ -263,6 +272,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             answers: this.memberDetails.recordAnswers,
             dataPermission: this.dataPermissionsValue,
             filterValue: new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []),
+            filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
             markReviewed: false,
             saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => {
                 this.memberDetails.recordAnswers = answers

@@ -33,7 +33,7 @@
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, Validator } from "@stamhoofd/components";
-import { RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
+import { FilterDefinition, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -44,7 +44,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         RecordAnswerInput
     }
 })
-export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
+export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
     loading = false
 
     @Prop({ required: true })
@@ -66,9 +66,15 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
      * Type of the filters used (category.filter)
      */
     @Prop({ required: true })
-    filterValue!: any
+    filterValue!: T
 
-    editingAnswers = this.answers.map(a => a.clone())
+    /**
+     * Type of the filters used (category.filter)
+     */
+    @Prop({ required: true })
+    filterDefinitions!: FilterDefinition<T>[]
+
+    editingAnswers = this.answers//.map(a => a.clone())
 
     @Prop({ required: true })
     saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => Promise<void>
@@ -81,7 +87,7 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     get childCategories(): RecordCategory[] {
-        return this.category.filterChildCategories(this.filterValue, this.dataPermission)
+        return this.category.filterChildCategories(this.filterValue, this.filterDefinitions, this.dataPermission)
     }
 
     get title() {
@@ -139,7 +145,7 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     get isOptional() {
-        return this.category.filter && (this.category.filter.requiredWhen === null || !this.category.filter.requiredWhen.doesMatch(this.filterValue))
+        return this.category.filter && (this.category.filter.requiredWhen === null || !this.category.filter.requiredWhen.decode(this.filterDefinitions).doesMatch(this.filterValue))
     }
 
     async skipStep() {
@@ -200,7 +206,7 @@ export default class FillRecordCategoryView extends Mixins(NavigationMixin) {
 
             // Mark reviewed
             if (this.markReviewed) {
-                const allRecords = this.category.getAllFilteredRecords(this.filterValue, this.dataPermission)
+                const allRecords = this.category.getAllFilteredRecords(this.filterValue, this.filterDefinitions, this.dataPermission)
 
                 for (const answer of this.editingAnswers) {
                     const record = !!allRecords.find(r => r.id == answer.settings.id)

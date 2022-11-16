@@ -13,7 +13,7 @@ export type FilterDefinitionSettings<T, FilterType extends Filter<T>, ValueType>
 /**
  * Points to a value in a object of type T that is filterable
  */
-export abstract class FilterDefinition<T, FilterType extends Filter<T>, ValueType> implements Decoder<FilterType>{
+export abstract class FilterDefinition<T = any, FilterType extends Filter<T> = Filter<T>, ValueType = any> implements Decoder<FilterType>{
     id: string
     name: string
     description?: string

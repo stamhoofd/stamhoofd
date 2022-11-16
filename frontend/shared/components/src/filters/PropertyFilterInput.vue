@@ -63,7 +63,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { FilterEditor, Radio,STInputBox, STList, STListItem } from '@stamhoofd/components';
-import { FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
+import { FilterDefinition, FilterGroup, Organization, PropertyFilter } from '@stamhoofd/structures';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 @Component({
@@ -84,33 +84,43 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     organization: Organization
 
+    @Prop({ required: true })
+    definitions: FilterDefinition[]
+
     cachedRequiredFilter: FilterGroup<any> | null = null
-    cachedEnabledFilter: FilterGroup<any> | null = null
+    cachedEnabledFilter: FilterGroup<any>
 
-    mounted() {
+    created() {
         this.onConfigurationChange()
-    }
-
-    get definitions() {
-        return this.value.definitions
     }
 
     @Watch('value')
     onConfigurationChange() {
-        if (this.value.requiredWhen && this.value.requiredWhen.filters.length > 0) {
-            this.cachedRequiredFilter = this.value.requiredWhen
+        if (this.value.requiredWhen) {
+            try {
+                this.cachedRequiredFilter = this.value.requiredWhen.decode(this.definitions)
+            } catch (e) {
+                console.error('Error decoding required filter', e)
+                this.cachedRequiredFilter = null
+            }
+        } else {
+            this.cachedRequiredFilter = null
         }
-        if (this.value.enabledWhen.filters.length > 0) {
-            this.cachedEnabledFilter = this.value.enabledWhen
+
+        try {
+            this.cachedEnabledFilter = this.value.enabledWhen.decode(this.definitions)
+        } catch (e) {
+            console.error('Error decoding required filter', e)
+            this.cachedEnabledFilter = new FilterGroup(this.definitions)
         }
     }
 
     isAlwaysEnabled() {
-        return this.value.enabledWhen.filters.length == 0
+        return this.cachedEnabledFilter.filters.length == 0
     }
 
     isAlwaysRequired() {
-        return this.value.requiredWhen && this.value.requiredWhen.filters.length == 0
+        return this.cachedRequiredFilter && this.cachedRequiredFilter.filters.length == 0
     }
 
     isNeverRequired() {
@@ -120,31 +130,21 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     setAlwaysEnabled() {
         this.$emit("input", 
             new PropertyFilter<any>(
-                new FilterGroup(this.definitions),
+                new FilterGroup(this.definitions).encoded,
                 this.value.requiredWhen
             )
         )
     }
 
     setEnabledWhen(useCache = false) {
-        if (useCache && this.cachedEnabledFilter) {
-            this.$emit("input", 
-                new PropertyFilter<any>(
-                    this.cachedEnabledFilter,
-                    this.value.requiredWhen
-                )
-            )
-            return
-        }
-
         this.present(new ComponentWithProperties(FilterEditor, {
             title: "Vragen als...",
-            selectedFilter: this.cachedEnabledFilter ?? this.value.enabledWhen,
+            selectedFilter: this.cachedEnabledFilter,
             organization: this.organization,
-            setFilter: (enabledWhen) => {
+            setFilter: (enabledWhen: FilterGroup<any>) => {
                 this.$emit("input", 
                     new PropertyFilter<any>(
-                        enabledWhen,
+                        enabledWhen.encoded,
                         this.value.requiredWhen
                     )
                 )
@@ -157,7 +157,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         this.$emit("input", 
             new PropertyFilter<any>(
                 this.value.enabledWhen,
-                new FilterGroup(this.definitions)
+                new FilterGroup(this.definitions).encoded
             )
         )
     }
@@ -176,20 +176,20 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             this.$emit("input", 
                 new PropertyFilter<any>(
                     this.value.enabledWhen,
-                    this.cachedRequiredFilter
+                    this.cachedRequiredFilter.encoded
                 )
             )
             return
         }
         this.present(new ComponentWithProperties(FilterEditor, {
             title: "Verplicht als...",
-            selectedFilter: this.cachedRequiredFilter ?? this.value.requiredWhen ?? new FilterGroup(this.definitions),
+            selectedFilter: this.cachedRequiredFilter ?? new FilterGroup(this.definitions),
             organization: this.organization,
-            setFilter: (requiredWhen) => {
+            setFilter: (requiredWhen: FilterGroup<any>) => {
                 this.$emit("input", 
                     new PropertyFilter<any>(
                         this.value.enabledWhen,
-                        requiredWhen
+                        requiredWhen.encoded
                     )
                 )
             },
@@ -198,11 +198,11 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     get enabledText() {
-        return (this.cachedEnabledFilter ?? this.value.enabledWhen).toString()
+        return (this.cachedEnabledFilter).toString()
     }
 
     get requiredText() {
-        return (this.cachedRequiredFilter ?? this.value.requiredWhen ?? "").toString()
+        return (this.cachedRequiredFilter ?? "").toString()
     }
 
 }

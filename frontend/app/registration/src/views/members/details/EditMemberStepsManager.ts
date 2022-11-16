@@ -1,7 +1,7 @@
 import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { AskRequirement, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
+import { AskRequirement, FilterDefinition, MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
 
 import { MemberManager } from '../../../classes/MemberManager';
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -70,10 +70,21 @@ export class RecordCategoryStep implements EditMemberStep {
 
     shouldDelete(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
         // Delete all the information in this category, if this is not asked in the given category
+        const definitions = MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member, registerItems: items})
         if (this.category.filter) {
-            return !this.category.filter.enabledWhen.doesMatch(new MemberDetailsWithGroups(details, member, items)) || this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), details.dataPermissions?.value ?? false).length == 0;
+            return !this.category.filter.enabledWhen.decode(definitions).doesMatch(
+                new MemberDetailsWithGroups(details, member, items)
+            ) || this.category.getAllFilteredRecords(
+                new MemberDetailsWithGroups(details, member, items),
+                definitions,
+                details.dataPermissions?.value ?? false
+            ).length == 0;
         }
-        return this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), details.dataPermissions?.value ?? false).length == 0
+        return this.category.getAllFilteredRecords(
+            new MemberDetailsWithGroups(details, member, items), 
+            definitions,
+            details.dataPermissions?.value ?? false
+        ).length == 0
     }
 
     delete(details: MemberDetails) {
@@ -86,7 +97,8 @@ export class RecordCategoryStep implements EditMemberStep {
     }
 
     shouldReview(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
-        const records = this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), details.dataPermissions?.value ?? false)
+        const definitions = MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member, registerItems: items})
+        const records = this.category.getAllFilteredRecords(new MemberDetailsWithGroups(details, member, items), definitions, details.dataPermissions?.value ?? false)
 
         if (this.forceReview) {
             return records.length > 0
@@ -124,6 +136,13 @@ export class BuiltInEditMemberStep implements EditMemberStep {
         this.forceReview = forceReview
     }
 
+    getFilterDefinitionsForProperty(property: string): FilterDefinition[] {
+        if (['parents', 'emergencyContacts'].includes(property)) {
+            return MemberDetailsWithGroups.getBaseFilterDefinitions()
+        }
+        return MemberDetails.getBaseFilterDefinitions()
+    }
+
     /**
      * 
      * @param member 
@@ -148,19 +167,19 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                 }
 
                 // Check missing information
-                if (!member.details.phone && OrganizationManager.organization.meta.recordsConfiguration.phone?.requiredWhen?.doesMatch(details) === true) {
+                if (!member.details.phone && OrganizationManager.organization.meta.recordsConfiguration.phone?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('phone')).doesMatch(details) === true) {
                     return true
                 }
 
-                if (!member.details.email && OrganizationManager.organization.meta.recordsConfiguration.emailAddress?.requiredWhen?.doesMatch(details) === true) {
+                if (!member.details.email && OrganizationManager.organization.meta.recordsConfiguration.emailAddress?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('email')).doesMatch(details) === true) {
                     return true
                 }
 
-                if (!member.details.address && OrganizationManager.organization.meta.recordsConfiguration.address?.requiredWhen?.doesMatch(details) === true) {
+                if (!member.details.address && OrganizationManager.organization.meta.recordsConfiguration.address?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('address')).doesMatch(details) === true) {
                     return true
                 }
 
-                if (!member.details.birthDay && OrganizationManager.organization.meta.recordsConfiguration.birthDay?.requiredWhen?.doesMatch(details) === true) {
+                if (!member.details.birthDay && OrganizationManager.organization.meta.recordsConfiguration.birthDay?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('birthDay')).doesMatch(details) === true) {
                     return true
                 }
 
@@ -169,7 +188,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
 
             case EditMemberStepType.Parents: {
                 // We still have all the data. Ask everything that is older than 3 months
-                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
+                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('parents')).doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
 
             case EditMemberStepType.EmergencyContact: {
@@ -179,7 +198,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     return false
                 }
 
-                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
+                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('emergencyContacts')).doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
 
             case EditMemberStepType.DataPermissions: {
@@ -215,9 +234,9 @@ export class BuiltInEditMemberStep implements EditMemberStep {
     shouldDelete(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
         switch (this.type) {
             // Delete parents for > 18 and has address, or > 27 (no matter of address)
-            case EditMemberStepType.Parents: return !OrganizationManager.organization.meta.recordsConfiguration.parents?.enabledWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items));
+            case EditMemberStepType.Parents: return !OrganizationManager.organization.meta.recordsConfiguration.parents?.enabledWhen?.decode(this.getFilterDefinitionsForProperty('parents')).doesMatch(new MemberDetailsWithGroups(details, member, items));
 
-            case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.enabledWhen?.doesMatch(new MemberDetailsWithGroups(details, member, items));
+            case EditMemberStepType.EmergencyContact: return !OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.enabledWhen?.decode(this.getFilterDefinitionsForProperty('emergencyContacts')).doesMatch(new MemberDetailsWithGroups(details, member, items));
 
             case EditMemberStepType.DataPermissions: return OrganizationManager.organization.meta.recordsConfiguration.dataPermission === null;
         }

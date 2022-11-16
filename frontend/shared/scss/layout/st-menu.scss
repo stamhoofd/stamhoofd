@@ -3,7 +3,7 @@
 
 .st-menu {
     @media (min-width: 801px) {
-        --st-horizontal-padding: 30px;
+        --st-horizontal-padding: 25px;
     }
 
     #organization-switcher {
@@ -44,6 +44,36 @@
     > .padding-group {
     }
 
+    hr.footer {
+        margin-top: auto;
+    }
+
+    .grouped {
+        padding: 5px 0;
+
+
+        .group-title {
+            color: $color-gray-1;
+            font-size: 14px;
+            font-weight: $font-weight-semibold;
+            min-height: 24px;
+            padding-bottom: 5px;
+
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            > button {
+                margin-left: auto;
+            }
+        }
+    }
+
+    > main {
+        display: flex;
+        flex-direction: column;
+    }
+
     > main > hr, > main > .container > hr {
         height: $border-width-thin;
         border-radius: $border-width-thin/2;
@@ -56,12 +86,12 @@
     .menu-button {
         display: flex;
         flex-direction: row;
-        @extend .style-button-smaller;
-        color: $color-dark;
+        @extend .style-button;
+        color: $color-dark-light;
         align-items: center;
         justify-content: flex-start;
         width: 100%;
-        height: 45px;
+        height: 42px;
         transition: transform 0.2s, background-color 0.2s, color 0.2s;
         text-align: left;
         box-sizing: content-box;
@@ -70,18 +100,52 @@
         vertical-align: middle;
         overflow: hidden;
         white-space: nowrap;
-        padding-left: var(--st-horizontal-padding, 30px);
-        padding-right: var(--st-horizontal-padding, 30px);
-        margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+
+
+        padding-left: 15px;
+        padding-right: 15px;
+        margin: 0 -15px;
+        border-radius: $border-radius;
 
         &, &:active, &:visited, &:link {
             text-decoration: none;
         }
 
         > .icon {
-            padding-right: 10px;
+            padding-right: 15px;
             flex-shrink: 0;
         }
+
+        > .image {
+            margin-right: 15px;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            overflow: hidden;
+
+            img {
+                width: 24px;
+                height: 24px;
+                object-fit: cover;
+            }
+        }
+
+         > .text-icon {
+            margin-right: 15px;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+
+            border-radius: 4px;
+            text-align: center;
+            background: $color-primary-light;
+            color: $color-primary;
+            text-transform: uppercase;
+            line-height: 24px;
+            font-size: 11px;
+            font-weight: bold;
+         }
 
         > span {
             text-overflow: ellipsis;
@@ -110,11 +174,6 @@
             margin-left: auto;
             flex-shrink: 0;
             padding-right: 0
-        }
-
-        &.heading {
-            @extend .style-button-small;
-            color: $color-gray-4;
         }
 
         &.cta {

@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, SplitViewController } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, TabBarController, TabBarItem, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Country, EmailAddressSettings, Token } from '@stamhoofd/structures';
@@ -46,7 +46,13 @@ export default class App extends Vue {
 
                 return new ComponentWithProperties(AuthenticatedView, {
                     root: new ComponentWithProperties(SplitViewController, {
-                        root: AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})
+                        root: new ComponentWithProperties(TabBarController, {
+                            items: [
+                                new TabBarItem("Overzicht", "settings", AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})),
+                                new TabBarItem("Leden", "group", AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})),
+                                new TabBarItem("Webshops", "basket", AsyncComponent(() => import(/* webpackChunkName: "DashboardMenu", webpackPrefetch: true */ './views/dashboard/DashboardMenu.vue'), {})),
+                            ]
+                        })
                     }),
                     loginRoot: new ComponentWithProperties(OrganizationSelectionView),
                     noPermissionsRoot: AsyncComponent(() => import(/* webpackChunkName: "NoPermissionsView" */ './views/login/NoPermissionsView.vue'), {})

@@ -19,7 +19,7 @@
                     {{ $t('shared.inputs.mobile.label') }} (van lid zelf)
                 </p>
                 <p v-if="getEnableFilterConfiguration('phone')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.phone }}
+                    {{ patchedOrganization.meta.recordsConfiguration.phone.getString(getFilterDefinitionsForProperty('phone')) }}
                 </p>
                 <button v-if="getEnableFilterConfiguration('phone')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('phone', $t('shared.inputs.mobile.label'))" />
             </STListItem>
@@ -29,7 +29,7 @@
                     E-mailadres (van lid zelf)
                 </p>
                 <p v-if="getEnableFilterConfiguration('emailAddress')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.emailAddress }}
+                    {{ patchedOrganization.meta.recordsConfiguration.emailAddress.getString(getFilterDefinitionsForProperty('emailAddress')) }}
                 </p>
                 <button v-if="getEnableFilterConfiguration('emailAddress')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emailAddress', 'E-mailadres')" />
             </STListItem>
@@ -39,7 +39,7 @@
                     Geslacht
                 </p>
                 <p v-if="getEnableFilterConfiguration('gender')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.gender }}
+                    {{ patchedOrganization.meta.recordsConfiguration.gender.getString(getFilterDefinitionsForProperty('gender')) }}
                 </p>
                 <button v-if="getEnableFilterConfiguration('gender')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('gender', 'Geslacht')" />
             </STListItem>
@@ -49,7 +49,7 @@
                     Geboortedatum
                 </p>
                 <p v-if="getEnableFilterConfiguration('birthDay')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.birthDay }}
+                    {{ patchedOrganization.meta.recordsConfiguration.birthDay.getString(getFilterDefinitionsForProperty('birthDay')) }}
                 </p>
                 <button v-if="getEnableFilterConfiguration('birthDay')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('birthDay', 'Geboortedatum')" />
             </STListItem>
@@ -59,7 +59,7 @@
                     Adres (van lid zelf)
                 </p>
                 <p v-if="getEnableFilterConfiguration('address')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.address }}
+                    {{ patchedOrganization.meta.recordsConfiguration.address.getString(getFilterDefinitionsForProperty('address')) }}
                 </p>
                 <button v-if="getEnableFilterConfiguration('address')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('address', 'Adres')" />
             </STListItem>
@@ -69,7 +69,7 @@
                     Ouders
                 </p>
                 <p v-if="getEnableFilterConfiguration('parents')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.parents }}
+                    {{ patchedOrganization.meta.recordsConfiguration.parents.getString(getFilterDefinitionsForProperty('parents')) }}
                 </p>
                 <button v-if="getEnableFilterConfiguration('parents')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('parents', 'Ouders')" />
             </STListItem>
@@ -79,7 +79,7 @@
                     Noodcontactpersoon
                 </p>
                 <p v-if="getEnableFilterConfiguration('emergencyContacts')" class="style-description-small">
-                    {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts }}
+                    {{ patchedOrganization.meta.recordsConfiguration.emergencyContacts.getString(getFilterDefinitionsForProperty('emergencyContacts')) }}
                 </p>
                 <button v-if="getEnableFilterConfiguration('emergencyContacts')" slot="right" class="button gray icon settings" type="button" @click="editEnableFilterConfiguration('emergencyContacts', 'Noodcontactpersoon')" />
             </STListItem>
@@ -93,7 +93,7 @@
         </p>
 
         <STList>
-            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" @patch="addCategoriesPatch" />
+            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :filter-definitions="filterDefinitions" @patch="addCategoriesPatch" />
         </STList>
 
         <p>
@@ -202,12 +202,17 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         this.addRecordsConfigurationPatch(p)
     }
 
+    get filterDefinitions() {
+        return MemberDetailsWithGroups.getFilterDefinitions(this.patchedOrganization, {});
+    }
+
     addCategory() {
         const category = RecordCategory.create({})
 
         this.present(new ComponentWithProperties(EditRecordCategoryView, {
             category,
             isNew: true,
+            filterDefinitions: this.filterDefinitions,
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                 this.addCategoriesPatch(patch)
             }
@@ -227,11 +232,18 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             this.patchConfigProperty(
                 property, 
                 // try to resuse the settings if they existed
-                this.organization.meta.recordsConfiguration[property] ?? def[property] ?? PropertyFilter.createDefault(MemberDetailsWithGroups.getBaseFilterDefinitions())
+                this.organization.meta.recordsConfiguration[property] ?? def[property] ?? PropertyFilter.createDefault()
             )
         } else {
             this.patchConfigProperty(property, null)
         }
+    }
+
+    getFilterDefinitionsForProperty(property: string) {
+        if (['parents', 'emergencyContacts'].includes(property)) {
+            return MemberDetailsWithGroups.getBaseFilterDefinitions()
+        }
+        return MemberDetails.getBaseFilterDefinitions()
     }
 
     editEnableFilterConfiguration(property: string, title: string) {
@@ -239,7 +251,8 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             configuration: this.patchedOrganization.meta.recordsConfiguration[property],
             title,
             organization: this.patchedOrganization,
-            setConfiguration: (configuration: PropertyFilter<MemberDetails>) => {
+            definitions: this.getFilterDefinitionsForProperty(property),
+            setConfiguration: (configuration: PropertyFilter<MemberDetails | MemberDetailsWithGroups>) => {
                 this.patchConfigProperty(property, configuration)
             }
         }).setDisplayStyle("popup"))
