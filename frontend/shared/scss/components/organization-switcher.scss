@@ -2,78 +2,30 @@
 @use '../base/text-styles.scss';
 
 .organization-switcher {
-    --block-width: 45px;
     display: grid;
-    grid-template-columns: calc(var(--block-width, 40px) + 15px) 1fr 24px;
-    padding: calc(var(--st-safe-area-top, 0px) + var(--navigation-bar-margin, 10px) + 20px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 20px var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
+    grid-template-columns: calc(var(--block-width, 40px) + 15px) 1fr;
     align-items: center;
+    text-align: left;
+
+    &:active {
+        opacity: 0.4;
+    }
+
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    user-select: none;
+    cursor: pointer;
 
     > figure {
         min-width: 0;
         padding-right: 15px;
-
-        .letter-logo {
-            width: var(--block-width, 40px);
-            height: var(--block-width, 40px);
-            border-radius: 12px;
-            text-align: center;
-            background: $color-primary-background;
-            color: $color-primary;
-            text-transform: uppercase;
-            line-height: var(--block-width, 40px);
-            font-size: 18px;
-            font-weight: bold;
-            position: relative;
-
-            &::after {
-                border-radius: 12px;
-                box-shadow: inset 0px 0px 0px 2px rgba(0, 0, 0, 0.1);
-                content: '';
-                display: block;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                width: 100%;
-        
-                mix-blend-mode: luminosity;
-            }
-        }
-
-        .logo {
-            img {
-                width: var(--block-width, 40px);
-                height: var(--block-width, 40px);
-                object-fit: cover;
-            }
-            width: var(--block-width, 40px);
-            height: var(--block-width, 40px);
-            border-radius: 12px;
-            overflow: hidden;
-            background: $color-primary-light;
-            //box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05), 0px 2px 15px rgba(0, 0, 0, 0.05);
-            position: relative;
-
-            &::after {
-                border-radius: 12px;
-                // inset box shadow doesn't work over img tags
-                box-shadow: inset 0px 0px 0px 2px rgba(0, 0, 0, 0.1);
-                content: '';
-                display: block;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                width: 100%;
-
-                mix-blend-mode: luminosity;
-            }
-        }
     }
 
     > div {
         min-width: 0;
 
         h1 {
-            font-size: 18px;
+            font-size: 17px;
             line-height: 1;
             font-weight: $font-weight-semibold;
             max-width: auto;
@@ -85,19 +37,33 @@
             text-overflow: ellipsis;
             min-width: 0;
             max-width: auto;
-            margin-bottom: 3px;
+
+            @media (max-width: 600px) {
+                font-size: 21px;
+                margin-bottom: 3px;
+            }
         }
 
         h2 {
             color: $color-gray-4;
             font-size: 14px;
             line-height: 1;
-
             overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: auto;
-            min-width: none;
+            display: flex;
+            align-items: center;
+            margin-bottom: -6px; // Fix alignment
+
+            > span:first-child {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-width: auto;
+                min-width: none;
+            }
+
+            > span:last-child {
+                min-width: 24px;
+            }
         }
     }
 }

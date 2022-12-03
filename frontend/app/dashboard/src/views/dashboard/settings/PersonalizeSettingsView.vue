@@ -159,6 +159,11 @@ export default class PersonalizeSettingsView extends Mixins(NavigationMixin) {
                 height: 70*3,
                 width: 70*3,
                 fit: ResolutionFit.Inside
+            }),
+            ResolutionRequest.create({
+                height: 70*3,
+                width: 70*3,
+                fit: ResolutionFit.Inside
             })
         ]
     }

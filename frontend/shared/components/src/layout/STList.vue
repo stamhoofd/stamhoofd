@@ -1,5 +1,5 @@
 <template>
-    <draggable v-if="draggable" v-model="list" handle=".drag" tag="div" class="st-list" animation="200" ghost-class="is-dragging">
+    <draggable v-if="draggable" v-model="list" handle=".drag" tag="div" class="st-list" animation="200" ghost-class="is-dragging" :group="group">
         <slot />
     </draggable>
     <transition-group v-else-if="withAnimation" tag="div" name="list" class="st-list">
@@ -25,6 +25,9 @@ export default class STList extends Vue {
 
     @Prop({ default: false })
     draggable!: boolean;
+
+    @Prop({ default: undefined })
+    group!: string | undefined;
 
     @Prop({ default: false })
     withAnimation!: boolean;

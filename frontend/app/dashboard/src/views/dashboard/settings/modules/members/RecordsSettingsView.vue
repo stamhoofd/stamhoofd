@@ -1,7 +1,7 @@
 <template>
-    <SaveView :loading="saving" title="Kenmerken en gegevens van leden" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" title="Vragenlijsten en gegevens van leden" :disabled="!hasChanges" @save="save">
         <h1>
-            Kenmerken en gegevens van leden
+            Vragenlijsten en gegevens van leden
         </h1>
         <p>Je kan zelf kiezen welke extra informatie je van jouw leden wilt verzamelen. Stamhoofd heeft enkele ingebouwde zaken, maar je kan de informatie die je wilt verzamelen zo veel uitbreiden als je wilt.</p>
             
@@ -89,11 +89,11 @@
         <h2>Vragen tijdens inschrijven</h2>
 
         <p>
-            Voeg zelf kenmerken toe die ingevuld kunnen worden bij het inschrijven. De kenmerken worden onderverdeeld in verschillende categorieën om de structuur te bewaren.
+            Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het inschrijven. Met filters kan je ervoor zorgen dat bepaalde vragenlijsten enkel gevraagd worden voor bepaalde leden.
         </p>
 
-        <STList>
-            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :filter-definitions="filterDefinitions" @patch="addCategoriesPatch" />
+        <STList v-model="categories" :draggable="true">
+            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :filter-definitions="filterDefinitionsForCategories" :filter-value-for-answers="filterValueForAnswers" @patch="addCategoriesPatch" />
         </STList>
 
         <p>
@@ -120,7 +120,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, PropertyFilterView, SaveView, STErrorsDefault, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
+import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager";
@@ -161,6 +161,13 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     get categories() {
         return this.patchedOrganization.meta.recordsConfiguration.recordCategories
+    }
+
+    set categories(categories: RecordCategory[]) {
+        const p = OrganizationRecordsConfiguration.patch({
+            recordCategories: categories as any
+        })
+        this.addRecordsConfigurationPatch(p)
     }
 
     get emergencyContact() {
@@ -204,6 +211,18 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
 
     get filterDefinitions() {
         return MemberDetailsWithGroups.getFilterDefinitions(this.patchedOrganization, {});
+    }
+
+    filterDefinitionsForCategories(categories: RecordCategory[]) {
+        return [
+            ...MemberDetailsWithGroups.getBaseFilterDefinitions(),
+            ...MemberDetailsWithGroups.getRecordCategoryDefinitions(categories),
+        ]
+    }
+
+    filterValueForAnswers(recordAnswers: RecordAnswer[]) {
+        // Return an example member for filtering the examples
+        return new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
     }
 
     addCategory() {

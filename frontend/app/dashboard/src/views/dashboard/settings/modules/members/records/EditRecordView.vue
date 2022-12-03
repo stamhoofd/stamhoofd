@@ -21,78 +21,50 @@
                 </STInputBox>
             </div>
 
-            <div />
+            <div>
+                <STInputBox title="Type" error-fields="type" :error-box="errorBox">
+                    <Dropdown v-model="type">
+                        <optgroup v-for="group in availableTypes" :key="group.name" :label="group.name">
+                            <option v-for="_type in group.values" :key="_type.value" :value="_type.value">
+                                {{ _type.name }}
+                            </option>
+                        </optgroup>
+                    </Dropdown>
+                </STInputBox>
+            </div>
         </div>
 
-        <STInputBox title="Type" error-fields="type" :error-box="errorBox" class="max">
-            <STList>
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.Checkbox" name="type" />
-                    <h3 class="style-title-list">
-                        Aankruisvakje
-                    </h3>
-                    <p class="style-description-small">
-                        Je kan nog een extra opmerking vragen indien aangevinkt
-                    </p>
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.ChooseOne" name="type" />
-                    Kies één uit lijst
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.MultipleChoice" name="type" />
-                    Kies meerdere uit lijst
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.Text" name="type" />
-                    Tekst op één lijn
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.Textarea" name="type" />
-                    Meerdere lijnen tekst
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.Address" name="type" />
-                    Adres
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.Phone" name="type" />
-                    Telefoonnummer
-                </STListItem>
-
-                <STListItem :selectable="true" element-name="label">
-                    <Radio slot="left" v-model="type" :value="RecordType.Email" name="type" />
-                    E-mailadres
-                </STListItem>
-            </STList>
-        </STInputBox>
-
-        <STInputBox v-if="type == RecordType.MultipleChoice || type == RecordType.ChooseOne" title="Keuzemogelijkheden" error-fields="choices" :error-box="errorBox" class="max">
-            <template slot="right">
-                <button class="button text" type="button" @click="addChoice">
-                    <span class="icon add" />
-                    <span>Nieuw</span>
-                </button>
-            </template>
-
-            <STList v-if="patchedRecord.choices.length > 0">
+        <Checkbox v-model="required">
+            {{ requiredText }}
+        </Checkbox>
+        <Checkbox v-if="type == RecordType.Checkbox" v-model="askComments">
+            Voeg tekstvak toe indien aangevinkt
+        </Checkbox>
+        
+        <div v-if="type == RecordType.MultipleChoice || type == RecordType.ChooseOne" class="container">
+            <hr>
+            <h2 class="style-with-button with-list">
+                <div>Keuzeopties</div>
+                <div>
+                    <button class="button text" type="button" @click="addChoice">
+                        <span class="icon add" />
+                        <span>Nieuw</span>
+                    </button>
+                </div>
+            </h2>
+            
+            <STList v-if="patchedRecord.choices.length > 0" v-model="choices" :draggable="true">
                 <RecordChoiceRow v-for="choice in patchedRecord.choices" :key="choice.id" :choice="choice" :parent-record="patchedRecord" :selectable="true" @patch="addChoicesPatch" />
             </STList>
                 
             <p v-else class="info-box">
                 <span>Geen keuzemogelijkheden. Voeg een keuze toe via de <span class="icon add middle" />-knop.</span>
             </p>
-        </STInputBox>
+        </div>
 
         <hr>
         <h2 class="style-with-button">
-            <div>Formulier</div>
+            <div>Beschrijving</div>
             <div>
                 <button class="button text" type="button" @click="openPreview">
                     <span class="icon eye" />
@@ -100,7 +72,7 @@
                 </button>
             </div>
         </h2>
-        <p>Het kenmerk dat je hebt toegevoegd moet natuurlijk op één of andere manier kunnen worden ingesteld. Hier bepaal je hoe dat formulier eruit ziet en welke beschrijving en tekst daarbij staat. Kijk zeker het voorbeeld na om te zien hoe iemand het kenmerk zal kunnen wijzigen of instellen.</p>
+        <p>Bepaal hoe men deze vraag kan beantwoorden door extra verduidelijking te voorzien.</p>
 
         <STInputBox :title="labelTitle" error-fields="label" :error-box="errorBox" class="max">
             <input
@@ -112,9 +84,6 @@
                 enterkeyhint="next"
             >
         </STInputBox>
-        <Checkbox v-model="required">
-            {{ requiredText }}
-        </Checkbox>
 
         <STInputBox :title="descriptionTitle" error-fields="description" :error-box="errorBox" class="max">
             <textarea
@@ -128,10 +97,6 @@
         <p class="style-description-small">
             Gebruik deze tekst voor een langere uitleg bij het instellen van dit kenmerk, enkel indien dat echt nodig is.
         </p>
-
-        <Checkbox v-if="type == RecordType.Checkbox" v-model="askComments">
-            Voeg tekstvak toe indien aangevinkt
-        </Checkbox>
 
         <STInputBox v-if="shouldAskInputPlaceholder" title="Tekst in leeg tekstvak" error-fields="label" :error-box="errorBox" class="max">
             <input
@@ -162,7 +127,7 @@
         <template v-if="canAddWarning">
             <hr>
             <h2>Waarschuwing</h2>
-            <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar als dit kenmerk een bepaalde waarde heeft.</p>
+            <p>Soms wil je dat iets opvalt voor beheerders, dat kan je bereiken met waarschuwingen. Die zijn zichtbaar voor beheerders als dit kenmerk een bepaalde waarde heeft.</p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -262,7 +227,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, Dropdown,ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -281,6 +246,7 @@ import RecordChoiceRow from "./RecordChoiceRow.vue";
         STListItem,
         Radio,
         Checkbox,
+        Dropdown,
         RecordChoiceRow
     },
 })
@@ -292,7 +258,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
     record!: RecordSettings
 
     @Prop({ required: false, default: null })
-    parentCategory!: RecordCategory | null
+    category!: RecordCategory | null
 
     @Prop({ required: true })
     isNew!: boolean
@@ -308,6 +274,53 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     get RecordType() {
         return RecordType
+    }
+
+    get availableTypes() {
+        return [
+            {
+                name: "Tekst",
+                values: [
+                    {
+                        value: RecordType.Text,
+                        name: "Tekstveld (één lijn)"
+                    },
+                    {
+                        value: RecordType.Textarea,
+                        name: "Tekstveld (meerdere lijnen)"
+                    },
+                    {
+                        value: RecordType.Address,
+                        name: "Adres"
+                    },
+                    {
+                        value: RecordType.Email,
+                        name: "E-mailadres"
+                    },
+                    {
+                        value: RecordType.Phone,
+                        name: "Telefoonnummer"
+                    }
+                ]
+            },
+            {
+                name: "Aankruisen",
+                values: [
+                    {
+                        value: RecordType.Checkbox,
+                        name: "Aankruisvakje"
+                    },
+                    {
+                        value: RecordType.ChooseOne,
+                        name: "Keuzemenu (kies één)"
+                    },
+                    {
+                        value: RecordType.MultipleChoice,
+                        name: "Keuzemenu (kies meerdere)"
+                    }
+                ]
+            }
+        ]
     }
 
     get RecordWarningType() {
@@ -334,14 +347,14 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     get title(): string {
         if (this.isNew) {
-            return "Nieuw kenmerk"
+            return "Nieuwe vraag"
         }
-        return "Kenmerk bewerken"
+        return "Vraag bewerken"
     }
 
     get labelTitle(): string {
         if (this.type === RecordType.Checkbox) {
-            return "Titel naast aankruisvakje"
+            return "Tekst naast aankruisvakje"
         }
         if (this.type === RecordType.MultipleChoice) {
             return "Titel boven keuzemenu"
@@ -354,7 +367,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     get descriptionTitle(): string {
         if (this.type === RecordType.Checkbox) {
-            return "Beschrijving onder titel"
+            return "Beschrijving naast aankruisvakje"
         }
         if (this.type === RecordType.MultipleChoice) {
             return "Beschrijving onder keuzemenu"
@@ -387,6 +400,14 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
 
     set required(required: boolean) {
         this.patchRecord = this.patchRecord.patch({ required })
+    }
+
+    get choices() {
+        return this.patchedRecord.choices
+    }
+
+    set choices(choices: RecordChoice[]) {
+        this.patchRecord = this.patchRecord.patch({ choices: choices as any })
     }
 
     get inputPlaceholder() {
@@ -458,6 +479,25 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
             // Set required if choose one and if it wasn't choose one when opening
             required: type === RecordType.ChooseOne && this.record.type !== RecordType.ChooseOne ? true : undefined
         })
+
+        if (type === RecordType.MultipleChoice || type === RecordType.ChooseOne) {
+            if ( this.patchedRecord.choices.length === 0) {
+                if (this.record.choices.length > 0) {
+                    // Revert to original choices
+                    this.patchRecord = this.patchRecord.patch({ choices: this.record.choices as any })
+                } else {
+                    this.patchRecord = this.patchRecord.patch({
+                        choices: [
+                            RecordChoice.create({ name: "Keuze 1" }),
+                            RecordChoice.create({ name: "Keuze 2" }),
+                        ] as any
+                    })
+                }
+            }
+        } else {
+            // Delete choices
+            this.patchRecord = this.patchRecord.patch({ choices: [] as any })
+        }
     }
 
     get description() {
@@ -595,7 +635,7 @@ export default class EditRecordView extends Mixins(NavigationMixin) {
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordChoice>) => {
                 this.addChoicesPatch(patch)
             }
-        }).setDisplayStyle("sheet"))
+        }).setDisplayStyle("popup"))
     }
 
     async save() {

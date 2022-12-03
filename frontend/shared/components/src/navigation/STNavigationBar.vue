@@ -1,18 +1,18 @@
 <template>
-    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle, 'no-title': title.length == 0 }">
-        <div>
+    <div class="st-navigation-bar" :class="{ scrolled, sticky, large, fixed, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
+        <div v-if="hasLeft || hasRight" class="left">
             <BackButton v-if="pop" @click="$parent.pop" />
             <button v-else-if="dismiss && $isAndroid" class="button navigation icon close" type="button" @click="$parent.dismiss" />
             <slot name="left" />
         </div>
 
-        <slot name="middle">
+        <slot v-if="hasMiddle" name="middle">
             <h1>
                 {{ title }}
             </h1>
         </slot>
 
-        <div>
+        <div v-if="hasRight || hasRight" class="right">
             <slot name="right" />
             <button v-if="dismiss && $isIOS" class="button navigation" type="button" @click="$parent.dismiss">
                 Sluiten
@@ -36,7 +36,7 @@ export default class STNavigationBar extends Vue {
     @Prop({ default: "", type: String })
     title!: string;
 
-    @Prop({ default: true, type: Boolean })
+    @Prop({ default: false, type: Boolean })
     sticky!: boolean;
 
     @Prop({ default: true, type: Boolean })
@@ -65,9 +65,37 @@ export default class STNavigationBar extends Vue {
     scrolled = false;
     scrollElement!: HTMLElement | null;
 
+    get hasLeft() {
+        return this.pop || (this.dismiss && (this as any).$isAndroid) || this.$slots['left']
+    }
+
+    get hasRight() {
+        return (this.dismiss && !(this as any).$isAndroid) || this.$slots['right']
+    }
+
+    get hasMiddle() {
+        return this.$slots['middle'] || this.title.length > 0
+    }
+
+    get templateColumns() {
+        if (this.hasMiddle && (this.hasLeft || this.hasRight)) {
+            if ((this as any).$isAndroid) {
+                return "auto 1fr auto"
+            }
+            return "1fr auto 1fr"
+        }
+
+        if (!this.hasMiddle) {
+            return "auto 1fr"
+        }
+
+        return "1fr"
+    }
+
+
     getScrollElement(element: HTMLElement | null = null): HTMLElement {
         // If we are in modern mode, always choose the main element, which is the next sibling
-        if (document.body.className.indexOf("modern") > -1) {
+        if (!this.sticky && document.body.className.indexOf("modern") > -1) {
             return this.$el.nextElementSibling as HTMLElement;
         }
 
@@ -104,17 +132,13 @@ export default class STNavigationBar extends Vue {
     }
 
     mounted() {
-        if (this.sticky) {
-            this.addListener();
-        }
+        this.addListener();
     }
 
     activated() {
         // fix for element not yet in dom
         window.setTimeout(() => {
-            if (this.sticky) {
-                this.addListener();
-            }
+            this.addListener();
         }, 500);
     }
 
@@ -156,6 +180,7 @@ export default class STNavigationBar extends Vue {
     margin: 0;
     margin-top: calc(-1 * var(--st-vertical-padding, 20px) + var(--navigation-bar-margin, 10px) - var(--st-safe-area-top, 0px));
     padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
+
     height: 56px;
     word-break: normal;
 
@@ -168,9 +193,13 @@ export default class STNavigationBar extends Vue {
         height: 42px; // 44px - 2 x border width thin
     }
 
+    &.block-width {
+        height: calc(var(--block-width, 45px) + 20px);
+    }
+
     &.large {
         height: 80px;
-        margin-top: calc(-1 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px));
+        //margin-top: calc(-1 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px));
         margin-bottom: 0px;
         padding: var(--st-safe-area-top, 0px) 20px 0 20px;
 
@@ -180,8 +209,6 @@ export default class STNavigationBar extends Vue {
     }
     -webkit-app-region: drag;
 
-    
-
     &.fixed {
         position: fixed;
         top: 0;
@@ -190,43 +217,39 @@ export default class STNavigationBar extends Vue {
         margin: 0;
     }
 
+    &.sticky {
+        position: sticky;
+        top: calc(-1 * var(--st-vertical-padding, 20px));
+        margin-left: calc(-1 * var(--st-horizontal-padding, 20px));
+        margin-right: calc(-1 * var(--st-horizontal-padding, 20px));
+        margin-top: 0;
+        padding-top: 0;
+        margin-bottom: 10px;
+        //margin-top: calc(-1 * var(--st-vertical-padding, 20px));
+    }
+
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: 15px;
     background: $color-background;
     background: var(--color-current-background, white);
     transition: background-color 0.3s, border-color 0.3s;
     z-index: 200;
-
-    body.web-android &, body.native-android & {
-        // align left on android
-        grid-template-columns: auto 1fr auto;
-    }
-
-    &.no-title {
-        grid-template-columns: auto 1fr;
-
-        & > div:first-child:empty + div {
-            margin-left: -20px;
-        }
-
-        > h1 {
-            display: none;
-        }
-    }
 
     > div {
         display: flex;
         flex-direction: row;
         align-items: center;
 
-        &:first-child {
-            &:empty {
+        &.left{
+            padding-right: 15px;
+
+            &:empty, &.empty {
                 min-width: 0;
                 + h1 {
                     margin-left: -10px;
                 }
+                padding-right: 0px;;
             }
             
             display: flex;
@@ -249,7 +272,13 @@ export default class STNavigationBar extends Vue {
             }
         }
 
-        &:last-child {
+        &.right {
+            padding-left: 15px;
+            &:empty, &.empty {
+                min-width: 0;
+                padding-left: 0px;;
+            }
+
             justify-content: flex-end;
 
             display: flex;
@@ -296,6 +325,12 @@ export default class STNavigationBar extends Vue {
         opacity: 0;
         transition: opacity 0.2s;
         @extend .style-title-small;
+
+        text-align: center;
+
+        body.web-android &, body.native-android & {
+            text-align: left;
+        }
     }
 
     body.web-android &, body.native-android & {
@@ -332,7 +367,6 @@ export default class STNavigationBar extends Vue {
 
         &.large, body.native-android &, body.web-android & {
             box-shadow: 0px 2px 5px $color-shadow;
-            background: $color-background;
             border-bottom-color: transparent;
         }
   

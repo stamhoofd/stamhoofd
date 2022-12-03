@@ -2,12 +2,6 @@ import { HistoryManager } from "@simonbackx/vue-app-navigation"
 import { I18nController } from "@stamhoofd/frontend-i18n"
 
 export class UrlHelper {
-
-    // Load initial paths
-    path: string | null = null
-    href: string | null = null
-    hash: string | null = null
-
     /** 
      * Always remove this prefix when getting an url, and add it when doing setUrl.
      * When you want to host an app in a subdirectory
@@ -22,10 +16,31 @@ export class UrlHelper {
      */
     static initial = new UrlHelper()
 
+    url: URL
+
     constructor() {
-        this.path = window.location.pathname
-        this.href = window.location.href
-        this.hash = window.location.hash
+        this.url = new URL(window.location.href)
+        const state = HistoryManager.states[HistoryManager.states.length-1]
+        if (HistoryManager.active && state && state.url) { 
+            // Make sure we use the actual state (because location might be slower when the historymanager is still updating the url via async handlers)
+            this.url.pathname = state.url
+        }
+    }
+
+    get path() {
+        return this.url.pathname
+    }
+
+    get hash() {
+        return this.url.hash
+    }
+
+    get href() {
+        return this.url.href
+    }
+
+    setPath(path: string) {
+        this.url.pathname = path;
     }
 
     /**
@@ -87,7 +102,7 @@ export class UrlHelper {
     }
 
     getSearchParams() {
-        return new URL(this.href ?? "/", "https://"+window.location.hostname).searchParams
+        return this.url.searchParams
     }
 
     getHashParams() {
@@ -97,9 +112,7 @@ export class UrlHelper {
     }
 
     clear() {
-        this.path = null
-        this.href = null
-        this.hash = null
+        this.url = new URL("/", "https://"+window.location.hostname)
     }
 
     /**
@@ -144,6 +157,7 @@ export class UrlHelper {
      * setURL, but add locale
      */
     static setUrl(url: string) {
+        console.log('urlhelper set url', url)
         const prefix = this.fixedPrefix ? "/"+this.fixedPrefix : ""
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
             if (I18nController.fixedCountry) {

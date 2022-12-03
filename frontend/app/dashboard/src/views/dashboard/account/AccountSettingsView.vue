@@ -143,6 +143,10 @@ export default class AccountSettingsView extends Mixins(NavigationMixin) {
 
         if (this.canPop) {
             this.pop({ force: true })
+        } else {
+            if (this.canDismiss) {
+                this.dismiss({force: true})
+            }
         }
     }
 

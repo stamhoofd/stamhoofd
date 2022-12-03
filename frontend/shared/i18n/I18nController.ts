@@ -43,6 +43,7 @@ export class I18nController {
         this.namespace = namespace
         this.language = language
         this.country = country
+        Vue.prototype.$country = this.country
     }
 
     static getI18n(): VueI18n {
@@ -85,6 +86,8 @@ export class I18nController {
     }
 
     async loadLocale() {
+        Vue.prototype.$country = this.country
+
         const locale = this.locale
         console.info("Loading locale "+locale)
         // If the same language
@@ -153,6 +156,7 @@ export class I18nController {
 
         // 1: check the URL. Does it start with a locale or not?
         const parts = UrlHelper.initial.getParts({ removeLocale: false })
+        console.log(parts);
         if (parts.length >= 1 && this.isValidLocale(parts[0])) {
             const l = parts[0].substr(0, 2).toLowerCase()
             const c = parts[0].substr(3, 2).toUpperCase()

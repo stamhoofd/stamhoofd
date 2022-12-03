@@ -14,7 +14,6 @@
         "@sentry/vue": "^6.13.3",
         "@stamhoofd/assets": "1.0.0",
         "@stamhoofd/components": "1.0.0",
-        "@stamhoofd/logger": "1.0.0",
         "@stamhoofd/scss": "1.0.0",
         "@tiptap/extension-image": "^2.0.0-beta.27",
         "@tiptap/extension-link": "^2.0.0-beta.36",

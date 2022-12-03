@@ -107,7 +107,7 @@ export default class TabBarController extends Mixins(NavigationMixin) {
         for (const item of this.items) {
             // Destroy them one by one
             if (item.component.isKeptAlive) {
-                item.component.destroy();
+                item.component.destroy(item.component.vnode);
             }
         }
     }

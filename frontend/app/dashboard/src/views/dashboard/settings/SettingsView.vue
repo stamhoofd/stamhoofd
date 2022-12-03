@@ -148,7 +148,7 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRecords(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg">
                         <h2 class="style-title-list">
-                            Kenmerken en gegevens van leden
+                            Vragenlijsten en gegevens van leden
                         </h2>
                         <p class="style-description">
                             Kies welke informatie je verzamelt van jouw leden

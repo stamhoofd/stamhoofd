@@ -2,13 +2,12 @@
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div>
         <ComponentWithPropertiesInstance v-if="root" :key="root.key" :component="root" />
-        <LoadingView v-else key="loadingView" />
+        <LoadingView v-else key="promiseLoadingView" />
     </div>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Logger } from '@stamhoofd/logger';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import LoadingView from "./LoadingView.vue"
@@ -26,20 +25,32 @@ export default class PromiseView extends Mixins(NavigationMixin) {
     root: ComponentWithProperties | null = null
 
     created() {
+        console.log("Created promiseview")
         this.run()
     }
 
+    activated() {
+        console.log("activated promiseview")
+    }
+
+    beforeDestroy() {
+        console.log("beforeDestroy promiseview")
+    }
+
     run() {
+        console.log("Running promiseview")
         this.promise.call(this).then((value) => {
-           this.root = value
+            // We need to make a copy, or we risk having the same component twice in the DOM
+            this.root = value.clone()
+            console.log("Done", this.root)
         }).catch(e => {
-            Logger.error(e)
             console.error("Promise error not caught, defaulting to dismiss behaviour in PromiseView")
             this.dismiss({ force: true });
         })
     }
 
     reload() {
+        console.log("Reloading promiseview")
         this.root = null;
         this.run();
     }

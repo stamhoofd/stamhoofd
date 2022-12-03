@@ -30,14 +30,17 @@ export class RecordCategory extends AutoEncoder {
 
     getAllRecords(): RecordSettings[] {
         if (this.childCategories.length > 0) {
-            return this.childCategories.flatMap(c => c.getAllRecords())
+            return [...this.childCategories.flatMap(c => c.getAllRecords()), ...this.records]
         }
         return this.records
     }
 
     getAllFilteredRecords<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordSettings[] {
         if (this.childCategories.length > 0) {
-            return this.filterChildCategories(filterValue, filterDefinitions, dataPermission).flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission))
+            return [
+                ...this.filterChildCategories(filterValue, filterDefinitions, dataPermission).flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission)),
+                ...this.filterRecords(dataPermission)
+            ]
         }
         return this.filterRecords(dataPermission)
     }
@@ -56,18 +59,48 @@ export class RecordCategory extends AutoEncoder {
             }
 
             if (category.childCategories.length > 0) {
-                return category.filterChildCategories(filterValue, filterDefinitions, dataPermission).length > 0
+                if (category.filterChildCategories(filterValue, filterDefinitions, dataPermission).length > 0) {
+                    return true;
+                }
             }
 
-            if (category.filterRecords(dataPermission).length == 0) {
-                return false
+            if (category.filterRecords(dataPermission).length > 0) {
+                return true
             }
 
-            return true
+            return false
         })
     }
 
     filterChildCategories<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
         return RecordCategory.filterCategories(this.childCategories, filterValue, filterDefinitions, dataPermission)
+    }
+
+    /**
+     * Flatten all categories and child categories into a single array
+     */
+    static flattenCategories<T>(categories: RecordCategory[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
+        return RecordCategory.filterCategories(
+            categories,
+            filterValue,
+            filterDefinitions,
+            dataPermission
+        ).flatMap(cat => {
+            if (cat.childCategories.length > 0) {
+                // Make a (not deep!) clone
+                const cat2 = RecordCategory.create(cat)
+                cat2.childCategories = []
+                return [
+                    ...(cat2.records.length > 0 ? [cat2] : []),
+                    ...this.flattenCategories(cat.childCategories, filterValue, filterDefinitions, dataPermission).map(c => {
+                        // Make a (not deep!) clone
+                        const cc = RecordCategory.create(c)
+                        cc.name = cat.name + " → " + c.name
+                        return cc
+                    })
+                ]
+            }
+            return [cat]
+        })
     }
 }

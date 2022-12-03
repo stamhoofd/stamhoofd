@@ -50,7 +50,7 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
     setFilter: (filter: Filter<any>) => void
 
     @Prop({ required: true })
-    definitions!: FilterDefinition<any, any, any>[]
+    definitions!: FilterDefinition[]
 
     @Prop({ required: false })
     organization?: Organization
@@ -65,7 +65,7 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
     }
 
     resetFilter() {
-        this.setFilter(new FilterGroup<MemberWithRegistrations>(this.definitions))
+        this.setFilter(new FilterGroup<any>(this.definitions))
         this.dismiss({ force: true })
     }
 

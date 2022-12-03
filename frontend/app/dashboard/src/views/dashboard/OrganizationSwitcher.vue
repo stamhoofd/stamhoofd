@@ -1,37 +1,36 @@
 <template>
-    <div class="padding-group organization-switcher">
-        <figure>
-            <div v-if="logoSrc" class="logo">
-                <img :src="logoSrc" :srcset="logoSrcSet">
-            </div>
-            <div v-else class="letter-logo">
-                {{ organization.name.substr(0, 1) }}
-            </div>
-        </figure>
+    <button v-long-press="(e) => showContextMenu(e)" class="organization-switcher" type="button" @click="showContextMenu" @contextmenu.prevent="showContextMenu">
+        <OrganizationAvatar :organization="organization" />
         <div>
-            <h1 @click="switchOrganization">
+            <h1>
                 {{ organization.name }}
             </h1>
-            <h2>{{ userName }}</h2>
+            <h2>
+                <span>{{ userName }}</span>
+                <span ref="arrow" class="icon arrow-down-small gray" />
+            </h2>
         </div>
-        <span class="icon arrow-down-small gray" />
-    </div>
+    </button>
 </template>
 
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
-import { SessionManager } from '@stamhoofd/networking';
+import { CenteredMessage, ContextMenu, ContextMenuItem, LoadComponent, LongPressDirective,OrganizationAvatar } from '@stamhoofd/components';
+import { Session, SessionManager } from '@stamhoofd/networking';
+import { Organization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
 
-
 @Component({
-    components: {},
-    directives: {}
+    components: {
+        OrganizationAvatar
+    },
+    directives: {
+        LongPress: LongPressDirective
+    }
 })
 export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
@@ -43,20 +42,6 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
 
     get userName() {
         return SessionManager.currentSession?.user ? (SessionManager.currentSession.user.firstName + ' ' + SessionManager.currentSession.user.lastName):  ""
-    }
-
-    get logoSrc() {
-        if (!this.organization.meta.squareLogo) {
-            return null
-        }
-        return this.organization.meta.squareLogo.getPathForSize(undefined, 50)
-    }
-
-    get logoSrcSet() {
-        if (!this.organization.meta.squareLogo) {
-            return null
-        }
-        return this.organization.meta.squareLogo.getPathForSize(undefined, 50) + " 1x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*2)+" 2x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*3)+" 3x"
     }
 
     switchOrganization() {
@@ -95,6 +80,85 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
             return;
         }
         SessionManager.logout()
+    }
+
+    availableSessions: Session[] = []
+    get defaultOrganizations(): Organization[] {
+        return this.availableSessions.filter(s => !!s.organization).map(s => s.organization!)
+    }
+
+    activated() {
+        this.updateDefault().catch(console.error)
+    }
+
+    async updateDefault() {
+        this.availableSessions = (await SessionManager.availableSessions()).slice(0, 4)
+    }
+
+    showContextMenu(event) {
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Mijn account",
+                    icon: "user",
+                    action: () => {
+                        this.manageAccount().catch(console.error)
+                        return true;
+                    }
+                }),
+
+                new ContextMenuItem({
+                    name: "Instellingen",
+                    icon: "settings",
+                    action: () => {
+                        this.manageSettings().catch(console.error)
+                        return true;
+                    }
+                }),
+            ],
+            [
+                new ContextMenuItem({
+                    name: "Wisselen van vereniging",
+                    icon: "sync",
+                    childMenu: this.defaultOrganizations.length > 1 ? 
+                        new ContextMenu([
+                            [
+                                new ContextMenuItem({
+                                    name: "Zoek vereniging",
+                                    icon: "search",
+                                    action: () => {
+                                        this.switchOrganization()
+                                        return true;
+                                    }
+                                })
+                            ],
+                            this.defaultOrganizations.map(o => new ContextMenuItem({
+                                name: o.name,
+                                description: o.address.city,
+                                action: () => {
+                                    OrganizationManager.switchOrganization(this, o.id).then(() => {
+                                        this.updateDefault().catch(console.error)
+                                    }).catch(console.error)
+                                    return true;
+                                }
+                            }))
+                        ]) : undefined,
+                    action: () => {
+                        this.switchOrganization()
+                        return true;
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Uitloggen",
+                    icon: "logout",
+                    action: () => {
+                        this.logout().catch(console.error)
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ button: this.$el as HTMLElement, xPlacement: "left", yPlacement: "bottom" }).catch(console.error)
     }
 }
 </script>

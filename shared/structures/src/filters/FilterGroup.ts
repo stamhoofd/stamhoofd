@@ -1,7 +1,8 @@
 
-import { Data, Decoder, Encodeable, EncodeContext, ObjectData, PlainObject } from "@simonbackx/simple-encoding";
+import { AnyDecoder, Data, Decoder, Encodeable, EncodeContext, ObjectData, PlainObject, VersionBox, VersionBoxDecoder } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 
+import { Version } from "../Version";
 import { Filter,FilterDecoder, FilterDefinition } from "./FilterDefinition";
 
 /**
@@ -9,23 +10,50 @@ import { Filter,FilterDecoder, FilterDefinition } from "./FilterDefinition";
  * This allows for more recursive structures in filter definitions.
  */
 export class FilterGroupEncoded<T> implements Encodeable {
-    data: Data
+    // Contains an encoded version of a FilterGroup, encoded with version that is stored
+    data: PlainObject
+    version: number
 
-    constructor(data: Data) {
+    constructor(data: PlainObject, version: number) {
         this.data = data
+        this.version = version
     }
 
-    decode(definitions: FilterDefinition<T, Filter<T>, any>[]) {
+    decode(definitions: FilterDefinition<T, Filter<T>, any>[]): FilterGroup<T> {
         const decoder = new FilterGroupDecoder(definitions)
-        return decoder.decode(this.data)
+        const versionBoxDecoder = new VersionBoxDecoder(decoder)
+        return versionBoxDecoder.decode(new ObjectData({
+            data: this.data,
+            version: this.version
+        }, {version: 0})).data
     }
 
     encode(context: EncodeContext): PlainObject {
-        return this.data.value
+        if (context.version < 169) {
+            return this.data
+        }
+        return {
+            data: this.data,
+            version: this.version
+        }
+    }
+
+    static encode<T>(filter: FilterGroup<T>): FilterGroupEncoded<T> {
+        return new FilterGroupEncoded<T>(filter.encode({ version: Version }), Version)
     }
 
     static decode<T>(data: Data): FilterGroupEncoded<T> {
-        return new FilterGroupEncoded<T>(data)
+        if (data.optionalField("version")) {
+            const d = data.field("data").decode(AnyDecoder);
+            const version = data.field("version").integer;
+
+            return new FilterGroupEncoded<T>(d as PlainObject, version)
+        }
+
+        const d = data.decode(AnyDecoder);
+        const version = data.context.version;
+
+        return new FilterGroupEncoded<T>(d as PlainObject, version)
     }
 }
 
@@ -54,7 +82,7 @@ export class FilterGroup<T> extends Filter<T> {
     }
 
     get encoded() {
-        return new FilterGroupEncoded<T>(new ObjectData(this.encode({ version: 0 }), { version: 0}))
+        return FilterGroupEncoded.encode(this)
     }
 
     setDefinitions(definitions: FilterDefinition<T, Filter<T>, any>[]) {
@@ -99,6 +127,26 @@ export class FilterGroup<T> extends Filter<T> {
     }
 }
 
+class FailableDecoder<T> implements Decoder<{value?: T, error?: Error}> {
+    decoder: Decoder<T>
+
+    constructor(decoder: Decoder<T>) {
+        this.decoder = decoder
+    }
+
+    decode(data: Data): {value?: T, error?: Error} {
+        try {
+            return {
+                value: this.decoder.decode(data)
+            }
+        } catch (e) {
+            return {
+                error: e
+            }
+        }
+    }
+}
+
 export class FilterGroupDecoder<T> extends FilterDefinition<T, FilterGroup<T>, any> implements Decoder<FilterGroup<T>> {
     definitions: FilterDefinition<T, Filter<T>, any>[]
 
@@ -116,7 +164,14 @@ export class FilterGroupDecoder<T> extends FilterDefinition<T, FilterGroup<T>, a
     decode(data: Data): FilterGroup<T> {
         const filterDecoder = new FilterDecoder([...this.definitions, this])
         const group = this.createFilter()
-        group.filters = data.field("filters").array(filterDecoder)
+
+        const failableDecoder = new FailableDecoder(filterDecoder)
+        const decodedFilters = data.field("filters").array(failableDecoder)
+        const errors = decodedFilters.flatMap(f => f.error ? [f.error] : [])
+        if (errors.length > 0) {
+            console.warn('Failed to decode FilterGroup completely', errors)
+        }
+        group.filters = decodedFilters.flatMap(f => f.value ? [f.value] : [])
         group.mode = data.optionalField("mode")?.enum(GroupFilterMode) ?? GroupFilterMode.And
         return group
     }

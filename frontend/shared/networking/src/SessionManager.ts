@@ -76,13 +76,16 @@ export class SessionManagerStatic {
         })().catch(console.error)
     }
 
-    async addOrganizationToStorage(organization: Organization) {
+    async addOrganizationToStorage(organization: Organization, options: {updateOnly?: boolean} = {}) {
         const storage = await this.getSessionStorage()
         const index = storage.organizations.map(o => o.id).indexOf(organization.id)
 
-        // TODO: improve this a lot
         if (index !== -1) {
             storage.organizations.splice(index, 1)
+        } else {
+            if (options.updateOnly) {
+                return
+            }
         }
         storage.organizations.unshift(organization)
         this.saveSessionStorage(storage)

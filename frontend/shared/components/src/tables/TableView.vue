@@ -1,6 +1,6 @@
 <template>
     <div class="modern st-view table-view background">
-        <STNavigationBar :sticky="true" :add-shadow="wrapColumns" :title="title">
+        <STNavigationBar :add-shadow="wrapColumns" :title="title">
             <template #left>
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
                 <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="setSelectAll(!cachedAllSelected)">

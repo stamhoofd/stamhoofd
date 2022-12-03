@@ -1,6 +1,6 @@
 <template>
     <div class="st-view boxed">
-        <STNavigationBar :large="true" :sticky="true">
+        <STNavigationBar :large="true">
             <template slot="left">
                 <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <Logo class="responsive" />

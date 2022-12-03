@@ -1,5 +1,5 @@
 <template>
-    <FillRecordCategoryView :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" :filter-value="filterValue" :filter-definitions="filterDefinitions" :data-permission="dataPermission" />
+    <FillRecordCategoryView :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" :filter-value-for-answers="filterValueForAnswers" :filter-definitions="filterDefinitions" :data-permission="dataPermission" />
 </template>
 
 <script lang="ts">
@@ -38,8 +38,11 @@ export default class EditMemberCategoryView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
-    get filterValue() {
-        return new MemberDetailsWithGroups(this.details, this.member, this.items)
+    filterValueForAnswers(answers: RecordAnswer[]) {
+        const details = this.details.patch({
+            recordAnswers: answers as any
+        })
+        return new MemberDetailsWithGroups(details, this.member, this.items)
     }
 
     get filterDefinitions() {

@@ -10,7 +10,7 @@
             </figure>
             <figure v-else class="registration-image">
                 <figure>
-                    <span>{{ group.settings.name.substr(0, 2) }}</span>
+                    <span>{{ group.settings.getShortCode(2) }}</span>
                 </figure>
                 <div>
                     <span v-if="waitingList" class="icon gray clock" />

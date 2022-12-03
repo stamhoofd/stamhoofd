@@ -1,7 +1,0 @@
-{
-    "name": "@stamhoofd/logger",
-    "version": "1.0.0",
-    "private": true,
-    "sideEffects": false,
-    "main": "./index.ts"
-}

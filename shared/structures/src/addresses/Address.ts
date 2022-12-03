@@ -28,6 +28,13 @@ export class Address extends AutoEncoder {
         return this.street + " " + this.number + ", " + this.city
     }
 
+    cityString(currentCountry: string): string {
+        if (this.country == currentCountry) {
+            return this.city
+        }
+        return this.city + ", " + CountryHelper.getName(this.country)
+    }
+
     static createDefault(country = Country.Belgium): Address {
         return Address.create({
             street: "",

@@ -1,15 +1,14 @@
 <template>
-    <STListItem :selectable="true" class="right-stack" @click="editCategory()">
+    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editCategory()" @contextmenu.prevent="showContextMenu">
         <h3 class="style-title-list">
             {{ category.name }}
         </h3>
         <p v-if="category.filter" class="style-description-small">
-            {{ category.filter }}
+            {{ category.filter.getString(filterDefinitionsForCategory()) }}
         </p>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" type="button" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" type="button" @click.stop="moveDown" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -18,18 +17,21 @@
 <script lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STListItem } from "@stamhoofd/components";
-import { FilterDefinition,RecordCategory } from '@stamhoofd/structures';
+import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { FilterDefinition, RecordAnswer, RecordCategory } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import EditRecordCategoryView from './EditRecordCategoryView.vue';
+import EditRecordCategoryQuestionsView from './EditRecordCategoryQuestionsView.vue';
 
 @Component({
     components: {
         STListItem
     },
+    directives: {
+        longPress: LongPressDirective
+    }
 })
-export default class RecordCategoryRow extends Mixins(NavigationMixin) {
+export default class RecordCategoryRow<T> extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     category: RecordCategory
 
@@ -40,13 +42,26 @@ export default class RecordCategoryRow extends Mixins(NavigationMixin) {
     categories: RecordCategory[]
 
     @Prop({ required: true })
-    filterDefinitions!: FilterDefinition[]
+    filterDefinitions!: (categories: RecordCategory[]) => FilterDefinition<T>[]
+
+    @Prop({ required: true })
+    filterValueForAnswers!: (answers: RecordAnswer[]) => T
+
+    filterDefinitionsForCategory() {
+        const rootIndex = this.categories.findIndex(c => c.id === this.category.id)
+        if (rootIndex === -1) {
+            return this.filterDefinitions([])
+        }
+        const rootCategories = this.categories.slice(0, rootIndex + 1)
+        return this.filterDefinitions(rootCategories)
+    }
 
     editCategory() {
-        this.present(new ComponentWithProperties(EditRecordCategoryView, {
-            category: this.category,
-            parentCategory: this.parentCategory,
+        this.present(new ComponentWithProperties(EditRecordCategoryQuestionsView, {
+            categoryId: this.category.id,
+            rootCategories: this.categories,
             filterDefinitions: this.filterDefinitions,
+            filterValueForAnswers: this.filterValueForAnswers,
             isNew: false,
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                 this.addPatch(patch)
@@ -80,6 +95,30 @@ export default class RecordCategoryRow extends Mixins(NavigationMixin) {
         const p: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
         p.addMove(this.category.id, this.categories[moveTo]?.id ?? null)
         this.addPatch(p)
+    }
+
+    showContextMenu(event) {
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Verplaats omhoog",
+                    icon: "arrow-up",
+                    action: () => {
+                        this.moveUp()
+                        return true;
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Verplaats omlaag",
+                    icon: "arrow-down",
+                    action: () => {
+                        this.moveDown()
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ clickEvent: event }).catch(console.error)
     }
 }
 </script>

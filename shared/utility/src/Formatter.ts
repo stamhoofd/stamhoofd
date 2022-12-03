@@ -66,6 +66,18 @@ export class Formatter {
     }
 
     /**
+     * 2020
+     */
+    static year(date: Date): number {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return 0;
+        }
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return datetime.year;
+    }
+
+    /**
      * maandag, 1 januari (2020). Year only in different year
      */
     static dateWithDay(date: Date): string {
@@ -260,5 +272,14 @@ export class Formatter {
         const lastNames = this.uniqueArray(n.map(n => n.lastName))
 
         return this.joinLast(firstNames, ", ", " en ") + (lastNames.length > 0 ? (" " + lastNames.join('-')) : '');
+    }
+
+    static firstLetters(str: string, maxLength: number) {
+        if (maxLength === 1) {
+            return str.substr(0, 1).toLocaleUpperCase()
+        }
+
+        const splitted = Formatter.slug(str).split('-')
+        return splitted.slice(0, maxLength).map(s => s.substr(0, 1).toLocaleUpperCase()).join('')
     }
 }

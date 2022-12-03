@@ -35,7 +35,7 @@ $border-radius-modals: 15px;
 }
 
 @function changeHue($color, $hue) {
-  @return hsl(#{$hue}, color.saturation($color), #{color.lightness($color)});
+  @return hsl(#{$hue}, calc(var(--color-saturation-factor, 1) * color.saturation($color)), #{color.lightness($color)});
 }
 
 @function changeHueInvert($color, $hue, $offset: 0) {

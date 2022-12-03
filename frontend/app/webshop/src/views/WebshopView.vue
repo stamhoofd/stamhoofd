@@ -282,6 +282,8 @@ export default class WebshopView extends Mixins(NavigationMixin){
         const path = UrlHelper.shared.getParts();
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
+
+        console.warn('Mounted webshop view')
         UrlHelper.setUrl("/")
 
         if (path.length == 2 && path[0] == 'order') {

@@ -85,7 +85,7 @@
                                     </figure>
                                     <figure v-else class="registration-image">
                                         <figure>
-                                            <span>{{ suggestion.group.settings.name.substr(0, 2) }}</span>
+                                            <span>{{ suggestion.group.settings.getShortCode(2) }}</span>
                                         </figure>
                                         <div>
                                             <span v-if="suggestion.waitingList" class="icon gray clock" />
