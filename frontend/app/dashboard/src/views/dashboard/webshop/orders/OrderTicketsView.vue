@@ -9,20 +9,23 @@
                 Ticket
             </h1>
 
-            <p v-if="tickets.length > 1" class="info-box selectable icon download" @click="downloadAllTickets">
-                Download alle tickets
-            </p>
-
             <STList>
                 <TicketRow v-for="ticket in tickets" :key="ticket.id" :ticket="ticket" :webshop-manager="webshopManager" :order="order" />
             </STList>
         </main>
+
+        <STToolbar>
+            <button slot="right" class="button primary" type="button" @click="downloadAllTickets">
+                <span class="icon download" />
+                <span>Download</span>
+            </button>
+        </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
+import { ErrorBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { getPermissionLevelNumber, PermissionLevel, PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -34,6 +37,7 @@ import TicketRow from "./TicketRow.vue";
 @Component({
     components: {
         STNavigationBar,
+        STToolbar,
         STList,
         STListItem,
         TicketRow

@@ -1,6 +1,6 @@
 <template>
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
-    <div>
+    <div :key="userId || 'unknown'">
         <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
         <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
         <LoadingView v-else-if="hasToken" key="loadingView" />
@@ -35,6 +35,7 @@ export default class AuthenticatedView extends Vue {
     noPermissionsRoot: ComponentWithProperties | null
 
     loggedIn = false
+    userId: string | null = null
     hasToken = false
     showPermissionsRoot = false
 
@@ -44,7 +45,7 @@ export default class AuthenticatedView extends Vue {
         SessionManager.addListener(this, this.changed.bind(this));
     }
 
-    destroyed() {
+    beforeDestroy() {
         SessionManager.removeListener(this);
     }
 
@@ -53,11 +54,14 @@ export default class AuthenticatedView extends Vue {
             this.loggedIn = (SessionManager.currentSession?.isComplete() ?? false) && !!SessionManager.currentSession!.user && SessionManager.currentSession!.user.permissions != null
             this.hasToken = SessionManager.currentSession?.hasToken() ?? false
             this.showPermissionsRoot = SessionManager.currentSession?.isComplete() ?? false
+            this.userId = SessionManager.currentSession?.user?.id ?? null
         } else {
             this.loggedIn = SessionManager.currentSession?.isComplete() ?? false
             this.hasToken = SessionManager.currentSession?.hasToken() ?? false
             this.showPermissionsRoot = false
+            this.userId = SessionManager.currentSession?.user?.id ?? null
         }
+        console.log('changed', this.loggedIn, this.userId, this.hasToken, this.showPermissionsRoot);
     }
 }
 </script>

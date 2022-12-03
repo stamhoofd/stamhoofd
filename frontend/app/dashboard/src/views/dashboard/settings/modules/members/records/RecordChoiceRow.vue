@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" class="right-stack" @click="editChoice()">
+    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editChoice()" @contextmenu.prevent="showContextMenu">
         <h3 class="style-title-list">
             {{ choice.name }}
         </h3>
@@ -8,8 +8,7 @@
         </p>
 
         <template slot="right">
-            <button class="button icon arrow-up gray" type="button" @click.stop="moveUp" />
-            <button class="button icon arrow-down gray" type="button" @click.stop="moveDown" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -18,7 +17,7 @@
 <script lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STListItem } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/components";
 import { RecordChoice, RecordSettings } from '@stamhoofd/structures';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -48,7 +47,7 @@ export default class ChoiceRow extends Mixins(NavigationMixin) {
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordChoice>) => {
                 this.addPatch(patch)
             }
-        }).setDisplayStyle("sheet"))
+        }).setDisplayStyle("popup"))
     }
 
     addPatch(patch: PatchableArrayAutoEncoder<RecordChoice>) {
@@ -77,6 +76,30 @@ export default class ChoiceRow extends Mixins(NavigationMixin) {
         const p: PatchableArrayAutoEncoder<RecordChoice> = new PatchableArray()
         p.addMove(this.choice.id, this.choices[moveTo]?.id ?? null)
         this.addPatch(p)
+    }
+
+    showContextMenu(event) {
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Verplaats omhoog",
+                    icon: "arrow-up",
+                    action: () => {
+                        this.moveUp()
+                        return true;
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Verplaats omlaag",
+                    icon: "arrow-down",
+                    action: () => {
+                        this.moveDown()
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ clickEvent: event }).catch(console.error)
     }
 }
 </script>

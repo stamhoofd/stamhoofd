@@ -37,6 +37,7 @@
             <template v-else-if="groups.length > 0">
                 <STList>
                     <STListItem v-if="groups.length > 1" :selectable="true" @click="openAll()">
+                        <span slot="left" class="icon group" />
                         Alle leden
 
                         <template slot="right">
@@ -45,7 +46,13 @@
                         </template>
                     </STListItem>
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                        {{ group.settings.name }}
+                        <GroupAvatar slot="left" :group="group" />
+                        <h3 class="style-title-list">
+                            {{ group.settings.name }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ group.settings.dateRangeDescription }}
+                        </p>
 
                         <template slot="right">
                             <span v-if="group.settings.registeredMembers !== null" class="style-description-small">{{ group.settings.registeredMembers }}</span>
@@ -75,9 +82,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,ErrorBox, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton,ErrorBox, GroupAvatar,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, Permissions } from "@stamhoofd/structures"
+import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -94,7 +101,8 @@ import GroupMembersView from "./GroupMembersView.vue";
         STErrorsDefault,
         STList,
         STListItem,
-        BackButton
+        BackButton,
+        GroupAvatar
     },
 })
 export default class CategoryView extends Mixins(NavigationMixin) {

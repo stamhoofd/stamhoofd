@@ -35,6 +35,7 @@ export class ColorHelper {
         element = element ?? document.documentElement
         element.style.setProperty("--color-primary-hue", h+"deg");
         element.style.setProperty("--color-primary-saturation", s+"%");
+        element.style.setProperty("--color-saturation-factor", (s / 100).toFixed(2));
 
         this.primaryColor = color;
         this.hue = h;

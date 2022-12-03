@@ -85,10 +85,10 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     organization: Organization
 
     @Prop({ required: true })
-    definitions: FilterDefinition[]
+    definitions!: FilterDefinition[]
 
     cachedRequiredFilter: FilterGroup<any> | null = null
-    cachedEnabledFilter: FilterGroup<any>
+    cachedEnabledFilter: FilterGroup<any> = new FilterGroup(this.definitions) // need a value to keep this reactive
 
     created() {
         this.onConfigurationChange()
@@ -113,6 +113,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             console.error('Error decoding required filter', e)
             this.cachedEnabledFilter = new FilterGroup(this.definitions)
         }
+        console.log('onConfigurationChange', this.value, this.cachedEnabledFilter, this.cachedRequiredFilter)
     }
 
     isAlwaysEnabled() {

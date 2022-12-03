@@ -1,4 +1,5 @@
 import { ArrayDecoder,AutoEncoder, BooleanDecoder,DateDecoder, EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 
 import { Image } from './files/Image';
 import { GroupGenderType } from './GroupGenderType';
@@ -290,6 +291,23 @@ export class GroupSettings extends AutoEncoder {
             return null;
         }
         return who;
+    }
+
+    getShortCode(maxLength: number) {
+        return Formatter.firstLetters(this.name, maxLength)
+    }
+
+    get dateRangeDescription() {
+        const daysBetween = Math.abs(this.endDate.getTime() - this.startDate.getTime()) / (1000 * 3600 * 24);
+        if (daysBetween < 3 * 30) {
+            return `${Formatter.date(this.startDate)} tot ${Formatter.date(this.endDate)}`
+        }
+        const year1 = Formatter.year(this.startDate);
+        const year2 = Formatter.year(this.endDate);
+        if (year1 !== year2) {
+            return `${year1} - ${year2}`
+        }
+        return `${year1}`
     }
 }
 

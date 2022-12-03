@@ -41,7 +41,7 @@ export default class OrganizationLogo extends Vue {
         return this.organization.meta.squareLogo.getPathForSize(undefined, 50) + " 1x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*2)+" 2x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*3)+" 3x"
     }
 
-     get logoHorizontalSrc() {
+    get logoHorizontalSrc() {
         if (!this.organization.meta.horizontalLogo) {
             return null
         }
@@ -58,7 +58,7 @@ export default class OrganizationLogo extends Vue {
         if (this.organization.meta.expandLogo) {
             return this.organization.meta.horizontalLogo.getPathForSize(undefined, 70) + " 1x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 70*2)+" 2x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 70*3)+" 3x"
         }
-        return this.organization.meta.horizontalLogo.getPathForSize(undefined, 50) + " 1x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 50*2)+" 2x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 50*3)+" 3x"
+        return this.organization.meta.horizontalLogo.getPathForSize(undefined, 40) + " 1x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 40*2)+" 2x, "+this.organization.meta.horizontalLogo.getPathForSize(undefined, 40*3)+" 3x"
     }
 }
 </script>
@@ -71,6 +71,10 @@ export default class OrganizationLogo extends Vue {
         &.expand {
             max-height: 70px;
             max-width: 100px;
+
+            @media (max-width: 300px) {
+                max-width: 30vw;
+            }
         }
 
         &.horizontal {

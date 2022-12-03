@@ -57,6 +57,8 @@ export { default as STList } from "./src/layout/STList.vue"
 export { default as STListItem } from "./src/layout/STListItem.vue"
 
 // Other
+export { default as GroupAvatar } from "./src/GroupAvatar.vue"
+export { default as OrganizationAvatar } from "./src/OrganizationAvatar.vue"
 export { default as OrganizationLogo } from "./src/OrganizationLogo.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"

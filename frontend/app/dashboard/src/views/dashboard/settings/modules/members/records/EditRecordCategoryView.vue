@@ -25,69 +25,21 @@
                 v-model="description"
                 class="input"
                 type="text"
-                placeholder="Beschrijving"
+                placeholder="Optioneel"
                 autocomplete=""
             />
         </STInputBox>
-        <p class="style-description-small">
-            De beschrijving staat onder de titel van de categorie
-        </p>
 
         <hr>
-        <h2 v-if="categories.length == 0">
-            Kenmerken
-        </h2>
-        <h2 v-else>
-            Subcategorieën
-        </h2>
-        <p>
-            In elke categorie kan je kenmerken/vragen onderverdelen. Je kan er ook voor kiezen om een categorie nog eens onder te verdelen in categorieën, wat handig is als je heel wat informatie moet opvragen.
-        </p>
-
-        <STList v-if="categories.length > 0">
-            <RecordCategoryRow v-for="c in categories" :key="c.id" :category="c" :categories="categories" :parent-category="patchedCategory" :selectable="true" :filter-definitions="filterDefinitions" @patch="addCategoriesPatch" />
-        </STList>
-
-        <STList v-if="records.length > 0">
-            <RecordRow v-for="record in records" :key="record.id" :record="record" :records="records" :parent-category="patchedCategory" :selectable="true" @patch="addRecordsPatch" />
-        </STList>
-
-        <p v-if="categories.length == 0">
-            <button class="button text" type="button" @click="addRecord">
-                <span class="icon add" />
-                <span>Nieuw kenmerk/vraag</span>
-            </button>
-        </p>
-
+        <h2>Filters</h2>
         <p v-if="!parentCategory">
-            <button class="button text" type="button" @click="addCategory">
-                <span class="icon add" />
-                <span>Nieuwe subcategorie</span>
-            </button>
-        </p>
-
-        <hr>
-        <h2>Wanneer ingeschakeld?</h2>
-        <p v-if="!parentCategory">
-            Je kan kiezen op welke leden deze categorie van toepassing is, en bij wie deze stap overgeslagen kan worden tijdens het inschrijven.
+            Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.
         </p>
         <p v-else>
-            Je kan kiezen op welke leden deze categorie van toepassing is.
+            Je kan kiezen wanneer deze vragen van toepassing zijn.
         </p>
 
         <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" :definitions="filterDefinitions" />
-
-        <div v-if="!isNew" class="container">
-            <hr>
-            <h2>
-                Categorie verwijderen
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>Verwijderen</span>
-            </button>
-        </div>
     </SaveView>
 </template>
 
@@ -155,6 +107,13 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     }
 
     get title(): string {
+        if (!this.parentCategory) {
+            if (this.isNew) {
+                return "Nieuwe vragenlijst"
+            }
+            return "Vragenlijst bewerken"
+        }
+
         if (this.isNew) {
             return "Nieuwe categorie"
         }
@@ -256,24 +215,6 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
         } else {
             arrayPatch.addPatch(this.patchCategory)
         }
-
-        this.saveHandler(arrayPatch)
-        this.pop({ force: true })
-    }
-
-    async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen", "Alle kenmerken worden hierdoor ook verwijderd.")) {
-            return
-        }
-
-        if (this.isNew) {
-            // do nothing
-            this.pop({ force: true })
-            return
-        }
-
-        const arrayPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
-        arrayPatch.addDelete(this.category.id)
 
         this.saveHandler(arrayPatch)
         this.pop({ force: true })

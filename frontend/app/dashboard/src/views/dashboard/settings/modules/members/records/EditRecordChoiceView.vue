@@ -29,7 +29,7 @@
 
         <hr>
         <h2>Waarschuwing</h2>
-        <p>Soms wil je dat iets opvalt, dat kan je bereiken met waarschuwingen.</p>
+        <p>Soms wil je dat iets opvalt voor beheerders, dat kan je bereiken met waarschuwingen.</p>
 
         <STList>
             <STListItem :selectable="true" element-name="label">
@@ -100,7 +100,7 @@
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
-                Keuzemogelijkheid verwijderen
+                Optie verwijderen
             </h2>
 
             <button class="button secundary danger" type="button" @click="deleteMe">
@@ -156,9 +156,9 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
 
     get title(): string {
         if (this.isNew) {
-            return "Nieuwe keuze"
+            return "Nieuwe optie"
         }
-        return "Keuzemogelijkheid bewerken"
+        return "Optie bewerken"
     }
 
     get name() {
@@ -278,7 +278,7 @@ export default class EditRecordChoiceView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze keuzemogelijkheid wilt verwijderen?", "Verwijderen")) {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze optie wilt verwijderen?", "Verwijderen")) {
             return
         }
 

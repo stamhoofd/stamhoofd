@@ -2,6 +2,8 @@
 @use '../base/text-styles' as *;
 
 .st-menu {
+    --st-vertical-padding: 25px;
+
     @media (min-width: 801px) {
         --st-horizontal-padding: 25px;
     }
@@ -62,9 +64,14 @@
             display: flex;
             flex-direction: row;
             align-items: center;
+            width: 100%; // Required for button elements
 
-            > button {
+            > button, > span:not(:first-child) {
                 margin-left: auto;
+
+                &.icon.arrow-right-small {
+                    margin-right: -9px;
+                }
             }
         }
     }
@@ -72,6 +79,8 @@
     > main {
         display: flex;
         flex-direction: column;
+        overflow-x: hidden; // Fixes Safari 16 bug with negative margins + display flex
+        overflow-x: clip; // Same as above, but prevent scrolling
     }
 
     > main > hr, > main > .container > hr {
@@ -86,7 +95,7 @@
     .menu-button {
         display: flex;
         flex-direction: row;
-        @extend .style-button;
+        @extend .style-button-small;
         color: $color-dark-light;
         align-items: center;
         justify-content: flex-start;
@@ -100,7 +109,6 @@
         vertical-align: middle;
         overflow: hidden;
         white-space: nowrap;
-
 
         padding-left: 15px;
         padding-right: 15px;
@@ -117,35 +125,41 @@
         }
 
         > .image {
-            margin-right: 15px;
+            margin-right: 10px;
             flex-shrink: 0;
-            width: 24px;
-            height: 24px;
+            width: 29px;
+            height: 29px;
             border-radius: 4px;
             overflow: hidden;
 
             img {
-                width: 24px;
-                height: 24px;
+                width: 29px;
+                height: 29px;
                 object-fit: cover;
             }
         }
 
-         > .text-icon {
-            margin-right: 15px;
+        > figure:first-child {
+            margin-right: 10px;
             flex-shrink: 0;
-            width: 24px;
-            height: 24px;
+            --block-width: 29px;
+        }
+
+        > .text-icon {
+            margin-right: 10px;
+            flex-shrink: 0;
+            width: 29px;
+            height: 29px;
 
             border-radius: 4px;
             text-align: center;
             background: $color-primary-light;
             color: $color-primary;
             text-transform: uppercase;
-            line-height: 24px;
+            line-height: 29px;
             font-size: 11px;
             font-weight: bold;
-         }
+        }
 
         > span {
             text-overflow: ellipsis;

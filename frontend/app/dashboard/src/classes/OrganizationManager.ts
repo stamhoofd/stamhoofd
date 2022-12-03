@@ -1,6 +1,13 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
-import { LoginHelper, SessionManager } from '@stamhoofd/networking'
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { Toast } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking'
 import { Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures'
+
+import LoginView from '../views/login/LoginView.vue';
 
 /**
  * Convenient access to the organization of the current session
@@ -78,6 +85,74 @@ export class OrganizationManagerStatic {
             path: "/billing/status",
             decoder: STBillingStatus as Decoder<STBillingStatus>
         })).data
+    }
+
+    async switchOrganization(component, organizationId: string) {
+        if (document.activeElement) {
+            // Blur currently focused element, to prevent from opening the login view multiple times
+            (document.activeElement as HTMLElement).blur()
+        }
+
+        try {
+            let session = await SessionManager.getSessionForOrganization(organizationId)
+            if (!session) {
+                session = new Session(organizationId)
+                await session.loadFromStorage()
+            }
+
+            if (session.canGetCompleted()) {
+                await SessionManager.setCurrentSession(session, false)
+                if (!session.canGetCompleted() && !session.isComplete()) {
+                    // Retry
+                    await this.switchOrganization(component, organizationId)
+                    return
+                }
+                return
+            }
+
+            // Load the organization
+            try {
+                await session.fetchOrganization(false)
+            } catch (e) {
+                if (Request.isNetworkError(e)) {
+                    // ignore if we already have an organization
+                    if (!session.organization) {
+                        throw e;
+                    }
+                    // Show network warning only
+                    Toast.fromError(e).show()
+                } else {
+                    throw e;
+                }
+            }
+
+            if (session.organization) {
+                // Update saved session (only if it was already added to the storage)
+                SessionManager.addOrganizationToStorage(session.organization, {updateOnly: true}).catch(console.error)
+            }
+
+            // Switch locale to other country if needed
+            if (session.organization) {
+                I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
+            }
+
+            component.present(new ComponentWithProperties(NavigationController, { 
+                root: new ComponentWithProperties(LoginView, { 
+                    session 
+                }) 
+            }).setDisplayStyle("sheet"))
+        } catch (e) {
+            if (e.hasCode("invalid_organization")) {
+                // Clear from session storage
+                await SessionManager.removeOrganizationFromStorage(organizationId)
+                throw new SimpleError({
+                    code: "invalid_organization",
+                    message: e.message,
+                    human: "Deze vereniging bestaat niet (meer)"
+                })
+            }
+            throw e;
+        }
     }
 }
 

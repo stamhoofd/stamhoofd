@@ -32,6 +32,22 @@ export class ForwardHandler {
         // Send a new e-mail
         let defaultEmail = "hallo@stamhoofd.be"
         let organizationEmails: { emails: string; private: boolean } | undefined
+        const extraDescription = "Dit bericht werd verstuurd naar "+email+", en werd automatisch doorgestuurd naar alle beheerders. Stel in Stamhoofd de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd."
+        
+        function doBounce() {
+            if (!email) {
+                return
+            }
+
+            // Send back to receiver without including the original message to avoid spam
+            return {
+                from: email ?? "unknown@stamhoofd.be",
+                to: recipients[0],
+                subject: "Ongeldig e-mailadres",
+                text: "Beste,\n\nDe vereniging die je probeert te bereiken via "+email+" is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt."
+            }
+        }
+        
         if (organization) {
             organizationEmails = await organization.getReplyEmails()
             if (!organizationEmails) {
@@ -39,20 +55,17 @@ export class ForwardHandler {
                     // ignore
                 } else {
                     console.error("Missing reply emails for organization "+organization.id)
-                    // Still send to default
                 }
+                return doBounce();
             } else {
                 defaultEmail = organizationEmails.emails
             }
+        } else {
+            return doBounce();
         }
 
         console.log("Forward to "+defaultEmail)       
         
-        let extraDescription = "Dit bericht werd verstuurd naar "+email+", en werd automatisch doorgestuurd. Normaal antwoorden gebruikers rechtstreeks naar het juiste e-mailadres maar enkele e-mail programma's ondersteunen deze standaard functionaliteit niet en sturen antwoorden altijd naar de verstuurder (en wij kunnen niet versturen vanaf jouw e-mailadres, tenzij je jouw domeinnaam instelt in Stamhoofd). Let op dat je zelf ook naar het juiste e-mailadres antwoordt ("+(from ?? "?")+").";
-        if (organization && organizationEmails && organizationEmails.private) {
-            extraDescription = "Dit bericht werd verstuurd naar "+email+", en werd automatisch doorgestuurd naar alle beheerders. Stel in Stamhoofd de e-mailadressen in om ervoor te zorgen dat antwoorden naar een specifiek e-mailadres worden verstuurd."
-        }
-
         let html: string | undefined = undefined
 
         if (parsed.html !== false) {

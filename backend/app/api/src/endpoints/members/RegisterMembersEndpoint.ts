@@ -218,8 +218,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
             payment.transferSettings = user.organization.mappedTransferSettings
 
-            const members = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)]
-            payment.generateDescription(user.organization, Formatter.groupNamesByFamily(members))
+            const m = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)]
+            payment.generateDescription(user.organization, Formatter.groupNamesByFamily(m as any))
         }
         payment.paidAt = null
 

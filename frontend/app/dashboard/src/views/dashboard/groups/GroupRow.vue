@@ -1,12 +1,13 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
-        <template slot="left">
-            <img v-if="imageSrc" :src="imageSrc" class="group-row-image">
-        </template>
+        <GroupAvatar slot="left" :group="group" />
         
         <h2 class="style-title-list">
             {{ group.settings.name }}
         </h2>
+        <p class="style-description-small">
+            {{ group.settings.dateRangeDescription }}
+        </p>
 
         <template slot="right">
             <span class="button icon drag gray" @click.stop @contextmenu.stop />
@@ -18,7 +19,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, GroupAvatar,LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Group, GroupCategory, Organization, OrganizationMetaData } from "@stamhoofd/structures"
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -27,7 +28,8 @@ import EditGroupView from './EditGroupView.vue';
 
 @Component({
     components: {
-        STListItem
+        STListItem,
+        GroupAvatar
     },
     directives: {
         LongPress: LongPressDirective

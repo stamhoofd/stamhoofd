@@ -51,7 +51,7 @@
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" @click="createPDF">
+                    <button class="button primary" type="button" @click="createPDF">
                         <span class="icon download" />
                         <span v-if="!$isNative">Download</span>
                         <span v-else>Opslaan</span>
@@ -584,16 +584,15 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
             doc.end();
         });
 
-
+        const fileName = Formatter.slug(title)+".pdf";
         if (AppManager.shared.downloadFile) {
             const data = buffer.toString('base64')
-            await AppManager.shared.downloadFile(data, Formatter.slug(title)+".pdf")
+            await AppManager.shared.downloadFile(data, fileName)
         } else {
             const blob = new Blob([buffer], {type: "application/pdf"});
             const link = document.createElement('a');
             const href = window.URL.createObjectURL(blob);
             link.href = href        
-            const fileName = Formatter.slug(title)+".pdf";
             link.download = fileName;
             link.click();
         }

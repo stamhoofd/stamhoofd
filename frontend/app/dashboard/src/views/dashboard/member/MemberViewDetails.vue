@@ -378,22 +378,12 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get recordCategories(): RecordCategory[] {
-        return RecordCategory.filterCategories(
+        return RecordCategory.flattenCategories(
             OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
             new MemberDetailsWithGroups(this.member.details, this.member, []), 
             MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
             this.dataPermission
-            
-        ).flatMap(cat => {
-            if (cat.childCategories.length > 0) {
-                return cat.filterChildCategories(
-                    new MemberDetailsWithGroups(this.member.details, this.member, []), 
-                    MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
-                    this.dataPermission
-                )
-            }
-            return [cat]
-        })
+        )
     }
 
     get missingAnswers(): RecordAnswer[] {
@@ -497,8 +487,13 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             answers: this.member.details.recordAnswers,
             markReviewed: false,
             dataPermission: this.member.details.dataPermissions?.value ?? false,
-            filterValue: new MemberDetailsWithGroups(this.member.details, this.member, []),
             filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
+            filterValueForAnswers: (answers) => {
+                const details = this.member.details.patch({
+                    recordAnswers: answers
+                });
+                return new MemberDetailsWithGroups(details, this.member, [])
+            },
             saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
                 this.member.details.recordAnswers = answers
                 await this.familyManager.patchAllMembersWith(this.member)

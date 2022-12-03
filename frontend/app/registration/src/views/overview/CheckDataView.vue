@@ -10,7 +10,7 @@
                 <h2 class="style-with-button">
                     <div>Leden</div>
                     <div>
-                        <button type="button" class="button text gray" @click="addMember">
+                        <button v-if="isAcceptingNewMembers" type="button" class="button text gray" @click="addMember">
                             <span class="icon add" />
                             <span>Nieuw</span>
                         </button>
@@ -102,6 +102,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, OrganizationLogo, STList, STListItem, STNavigationBar } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
 import { Address, MemberWithRegistrations, Parent } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -141,6 +142,10 @@ export default class CheckDataView extends Mixins(NavigationMixin){
 
     get addresses() {
         return this.MemberManager.getAddresses()
+    }
+
+    get isAcceptingNewMembers() {
+        return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
     }
 
     async addMember() {

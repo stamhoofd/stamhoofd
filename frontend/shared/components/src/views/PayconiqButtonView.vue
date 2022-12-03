@@ -14,7 +14,7 @@
         </main>
 
         <STToolbar>
-            <button slot="right" class="button secundary" @click="helpMe">
+            <button slot="right" class="button secundary" type="button" @click="helpMe">
                 <span class="icon help" />
                 <span>Het lukt niet</span>
             </button>
@@ -94,10 +94,10 @@ export default class PayconiqButtonView extends PayconiqBannerView {
     helpMe() {
         if (this.getOS() == "iOS") {
             new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.")
-            .addCloseButton()
-            .show()
+                .addCloseButton()
+                .show()
         } else {
-            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.").addCloseButton().show()
+            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Probeer eventueel opnieuw op een computer (daar kan je de QR-code scannen) of selecteer een andere betaalmethode.").addCloseButton().show()
         }
     }
 }

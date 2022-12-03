@@ -1,6 +1,6 @@
 <template>
     <div class="st-view shade">
-        <STNavigationBar v-if="!isNative" :large="true" :sticky="true">
+        <STNavigationBar v-if="!isNative" :large="true">
             <template slot="left">
                 <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
                     <Logo class="responsive" />
@@ -30,12 +30,15 @@
 
                 <Spinner v-if="loading" class="gray center" />
                 <template v-else>
-                    <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
-                        <h1>{{ organization.name }}</h1>
-                        <p>{{ organization.address }}</p>
-                        <Spinner v-if="loadingSession === organization.id" class="floating" />
-                        <span v-else-if="isSignedInFor(organization.id)" class="icon success floating" />
-                        <span v-else class="icon arrow-right-small floating" />
+                    <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" type="button" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
+                        <OrganizationAvatar :organization="organization" />
+                        <div>
+                            <h1>{{ organization.name }}</h1>
+                            <p>{{ organization.address.cityString($country) }}</p>
+                            <Spinner v-if="loadingSession === organization.id" class="floating" />
+                            <span v-else-if="isSignedInFor(organization.id)" class="icon success-line primary floating" />
+                            <span v-else class="icon arrow-right-small gray floating" />
+                        </div>
                     </button>
                 </template>
 
@@ -43,7 +46,7 @@
                     Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.
                 </p>
 
-                <button class="button text full" @click="help">
+                <button class="button text full" type="button" @click="help">
                     <span class="icon help" />
                     <span>Mijn vereniging staat er niet tussen</span>
                 </button>
@@ -59,16 +62,14 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, Logo, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
-import { I18nController } from '@stamhoofd/frontend-i18n';
+import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationSimple } from '@stamhoofd/structures';
+import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import LoginView from './LoginView.vue';
+import { OrganizationManager } from '../../classes/OrganizationManager';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -97,7 +98,8 @@ const throttle = (func, limit) => {
     components: {
         Spinner,
         STNavigationBar,
-        Logo
+        Logo,
+        OrganizationAvatar
     },
     metaInfo() {
         return {
@@ -116,7 +118,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     loading = false;
     loadingSession: string | null = null;
     q = ""
-    results: OrganizationSimple[] = []
+    results: Organization[] = []
 
     get isNative() {
         return AppManager.shared.isNative
@@ -155,7 +157,6 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         const queryString =  UrlHelper.shared.getSearchParams()
 
         if (parts.length >= 1 && parts[0] == 'aansluiten') {
-            UrlHelper.shared.clear()
             try {
                 const currentCount = localStorage.getItem("what-is-new")
 
@@ -191,7 +192,13 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
             // do not clear url here, so we can pass on the auth to the dashboard menu
             new Toast("Kies een vereniging en log in. Daarna kan je inloggen in het feedback systeem.", "error red").setHide(15*1000).show()
+        } else {
+            UrlHelper.shared.clear()
+
+            // Reset url if we log out
+            UrlHelper.setUrl("/")
         }
+
 
         this.updateDefault().catch(console.error)
     }
@@ -254,7 +261,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             method: "GET",
             path: "/organizations/search",
             query: {query: this.query },
-            decoder: new ArrayDecoder(OrganizationSimple as Decoder<OrganizationSimple>),
+            decoder: new ArrayDecoder(Organization as Decoder<Organization>),
             owner: this
         }).then((response) => {
             if (cachedCount !== this.counter) {
@@ -294,79 +301,15 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             return
         }
         this.loadingSession = organizationId
-
-        if (document.activeElement) {
-            // Blur currently focused element, to prevent from opening the login view multiple times
-            (document.activeElement as HTMLElement).blur()
-        }
-
+        
         try {
-            let session = await SessionManager.getSessionForOrganization(organizationId)
-            if (!session) {
-                session = new Session(organizationId)
-                await session.loadFromStorage()
-            }
-
-            if (session.canGetCompleted()) {
-                this.loadingSession = organizationId
-                await SessionManager.setCurrentSession(session, false)
-                this.loadingSession = null
-                await this.updateDefault()
-                if (!session.canGetCompleted() && !session.isComplete()) {
-                    await this.loginOrganization(organizationId)
-                    return
-                }
-                return
-            }
-
-            // Load the organization
-            try {
-                await session.fetchOrganization(false)
-            } catch (e) {
-                if (Request.isNetworkError(e)) {
-                    // ignore if we already have an organization
-                    if (!session.organization) {
-                        throw e;
-                    }
-                    // Show network warning only
-                    Toast.fromError(e).show()
-                } else {
-                    throw e;
-                }
-            }
-
-            if (session.organization && this.defaultOrganizations.find(o => o.id === organizationId)) {
-                // Update saved session (only if it was already added to the storage)
-                SessionManager.addOrganizationToStorage(session.organization).catch(console.error)
-            }
-
-            // Switch locale to other country if needed
-            if (session.organization) {
-                I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
-            }
-
-            this.loadingSession = null
-            this.present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(LoginView, { 
-                    session 
-                }) 
-            }).setDisplayStyle("sheet"))
+            await OrganizationManager.switchOrganization(this, organizationId)
         } catch (e) {
-            this.loadingSession = null
-            if (e.hasCode("invalid_organization")) {
-                // Clear from session storage
-                await SessionManager.removeOrganizationFromStorage(organizationId)
-                Toast.fromError(new SimpleError({
-                    code: "invalid_organization",
-                    message: e.message,
-                    human: "Deze vereniging bestaat niet (meer)"
-                })).show()
-            } else {
-                Toast.fromError(e).show()
-            }
-            
-            await this.updateDefault()
+            Toast.fromError(e).show()
         }
+
+        this.loadingSession = null;
+        await this.updateDefault()
     }
 
     isSignedInFor(organizationId: string) {
@@ -415,7 +358,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         @extend .style-input-shadow;
         background: $color-background;
         border: $border-width solid $color-border;
-        padding: 20px 20px;
+        padding: 15px 15px;
+        padding-right: 0px;
         border-radius: $border-radius;
         margin: 10px 0;
         transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
@@ -426,23 +370,36 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         width: 100%;
         text-align: left;
         position: relative;
+        display: flex;
+        flex-basis: row;
+        align-items: center;
+        --block-width: 50px;
 
-        > h1 {
-            @extend .style-title-list;
-            line-height: 1.2;
+        > figure {
+            flex-shrink: 0;
+            padding-right: 15px;
         }
 
-        > .floating {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translate(0, -50%);
-            color: $color-gray-text;
-            transition: color 0.2s;
-        }
+        > div {
+            flex-grow: 1;
+            position: relative;
+            padding-right: 40px;
 
-        > p {
-            @extend .style-description-small;
+            > h1 {
+                @extend .style-title-list;
+            }
+
+            > .floating {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translate(0, -50%);
+                transition: color 0.2s;
+            }
+
+            > p {
+                @extend .style-description-small;
+            }
         }
 
         @media (hover: hover) {

@@ -1,7 +1,7 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { Organization } from "@stamhoofd/models";
-import { OrganizationSimple } from "@stamhoofd/structures"; 
+import { Organization as OrganizationStruct,OrganizationSimple } from "@stamhoofd/structures"; 
 
 type Params = Record<string, never>;
 
@@ -11,7 +11,7 @@ class Query extends AutoEncoder {
 }
 
 type Body = undefined;
-type ResponseBody = OrganizationSimple[]
+type ResponseBody = (OrganizationSimple | OrganizationStruct)[]
 
 export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected queryDecoder = Query as Decoder<Query>
@@ -54,6 +54,9 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             ]
         });
         
-        return new Response(organizations.map(o => OrganizationSimple.create(o)));
+        if (request.request.getVersion() < 169) {
+            return new Response(organizations.map(o => OrganizationSimple.create(o)));
+        }
+        return new Response(await Promise.all(organizations.map(o => o.getStructure())));
     }
 }

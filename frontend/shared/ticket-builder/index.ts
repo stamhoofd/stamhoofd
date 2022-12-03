@@ -2,6 +2,7 @@
 import metropolisMediumUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-Medium.woff2'
 import metropolisBoldUrl from '@stamhoofd/assets/fonts/Metropolis/WOFF2/Metropolis-SemiBold.woff2'
 import { I18nController } from "@stamhoofd/frontend-i18n";
+import { AppManager } from '@stamhoofd/networking';
 import { Order, Organization, TicketPublic, Webshop, WebshopOnSiteMethod, WebshopPreview, WebshopTakeoutMethod, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 // PDFKit is used! Wrong warning below!
@@ -82,14 +83,19 @@ export class TicketBuilder {
             }
         });
 
-        const blob = new Blob([buffer], {type: "application/pdf"});
-        const link = document.createElement('a');
-        const href = window.URL.createObjectURL(blob);
-        link.href = href        
-
         const fileName = (this.tickets.length == 1 ? Formatter.fileSlug(this.tickets[0].getTitle() + (this.tickets[0].getIndexText() ? (" "+this.tickets[0].getIndexText()): "")) : Formatter.fileSlug("Tickets "+this.webshop.meta.name)) + ".pdf";
-        link.download = fileName;
-        link.click();
+
+        if (AppManager.shared.downloadFile) {
+            const data = buffer.toString('base64')
+            await AppManager.shared.downloadFile(data, fileName)
+        } else {
+            const blob = new Blob([buffer], {type: "application/pdf"});
+            const link = document.createElement('a');
+            const href = window.URL.createObjectURL(blob);
+            link.href = href        
+            link.download = fileName;
+            link.click();
+        }
     }
 
     async drawItems() {

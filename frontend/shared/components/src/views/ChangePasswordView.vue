@@ -70,7 +70,6 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
         try {
             await LoginHelper.changePassword(SessionManager.currentSession!, this.password)
             this.dismiss({ force: true });
-            UrlHelper.setUrl("/")
             new Toast('Jouw nieuwe wachtwoord is opgeslagen', "success").show()
         } catch (e) {
             this.loading = false;

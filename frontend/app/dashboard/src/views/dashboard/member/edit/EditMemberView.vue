@@ -40,23 +40,8 @@
         <div v-for="category of recordCategories" :key="category.id" class="container">
             <hr>
             <h2>{{ category.name }}</h2>
-
-            <STList v-if="category.childCategories.length > 0">
-                <STListItem v-for="child of filterRecordCategories(category.childCategories)" :key="child.id" :selectable="true" @click="editRecordCategory(child)">
-                    <h3 class="style-title-list">
-                        {{ child.name }}
-                    </h3>
-                    <p v-if="getCategoryFillStatus(child)" class="style-description-small">
-                        {{ getCategoryFillStatus(child) }}
-                    </p>
-
-                    <button slot="right" type="button" class="button text">
-                        <span class="icon edit" />
-                        <span class="hide-small">Bewerken</span>
-                    </button>
-                </STListItem>
-            </STList>
-            <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" v-else :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" :all-optional="true" />
+            
+            <RecordAnswerInput v-for="record of category.filterRecords(dataPermissionsValue)" :key="record.id" :record-settings="record" :record-answers="memberDetails.recordAnswers" :validator="validator" :all-optional="true" />
         </div>
     </SaveView>
 </template>
@@ -223,6 +208,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     }
 
     get recordCategories(): RecordCategory[] {
+        console.log("get recordCategories")
         return this.filterRecordCategories(OrganizationManager.organization.meta.recordsConfiguration.recordCategories)
     }
 
@@ -258,9 +244,9 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     }
 
     filterRecordCategories(categories: RecordCategory[]): RecordCategory[] {
-        return RecordCategory.filterCategories(
+        return RecordCategory.flattenCategories(
             categories, 
-            new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []),
+            new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []), 
             MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
             this.dataPermissionsValue
         )
@@ -271,9 +257,14 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             category,
             answers: this.memberDetails.recordAnswers,
             dataPermission: this.dataPermissionsValue,
-            filterValue: new MemberDetailsWithGroups(this.memberDetails, this.member ?? undefined, []),
             filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
             markReviewed: false,
+            filterValueForAnswers: (answers) => {
+                const details = this.memberDetails.patch({
+                    recordAnswers: answers
+                });
+                return new MemberDetailsWithGroups(details, this.member ?? undefined, [])
+            },
             saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => {
                 this.memberDetails.recordAnswers = answers
                 component.dismiss({ force: true })

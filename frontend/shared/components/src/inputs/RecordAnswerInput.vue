@@ -119,6 +119,7 @@ export default class RecordAnswerInput extends Vue {
     }
 
     setChoiceSelected(choice: RecordChoice, selected: boolean) {
+        console.log("setChoiceSelected", choice, selected)
         if (selected === this.getChoiceSelected(choice)) {
             return
         }
@@ -156,14 +157,16 @@ export default class RecordAnswerInput extends Vue {
             }
             return "Optioneel"
         }
-        return this.answer.settings.inputPlaceholder
+        return this.answer.settings.inputPlaceholder || this.answer.settings.name
     }
 
     get answer(): RecordAnswer {
         const answer = this.recordAnswers.find(a => a.settings.id === this.recordSettings.id)
         const type = RecordAnswerDecoder.getClassForType(this.recordSettings.type)
         if (answer !== undefined && answer instanceof type) {
-            answer.settings = this.recordSettings
+            if (answer.settings !== this.recordSettings) {
+                answer.settings = this.recordSettings
+            }
             return answer
         }
 
@@ -181,6 +184,10 @@ export default class RecordAnswerInput extends Vue {
     set answer(answer: RecordAnswer) {
         const index = this.recordAnswers.findIndex(a => a.settings.id === this.recordSettings.id)
         if (index != -1) {
+            const old = this.recordAnswers[index]
+            if (old === answer) {
+                return
+            }
             this.recordAnswers.splice(index, 1, answer)
         } else {
             this.recordAnswers.push(answer)

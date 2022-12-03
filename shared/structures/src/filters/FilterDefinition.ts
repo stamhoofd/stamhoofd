@@ -41,8 +41,6 @@ export abstract class FilterDefinition<T = any, FilterType extends Filter<T> = F
     abstract createFilter(): FilterType
 }
 
-
-
 /**
  * A filter is an encodebale structure, that is associated with a specific definition
  */

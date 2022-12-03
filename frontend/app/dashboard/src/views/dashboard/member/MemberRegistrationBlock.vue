@@ -8,7 +8,7 @@
         </figure>
         <figure v-else slot="left" class="registration-image">
             <figure>
-                <span>{{ getGroup(registration.groupId).settings.name.substr(0, 2) }}</span>
+                <span>{{ getGroup(registration.groupId).settings.getShortCode(2) }}</span>
             </figure>
             <div>
                 <span v-if="registration.waitingList" class="icon gray clock" />

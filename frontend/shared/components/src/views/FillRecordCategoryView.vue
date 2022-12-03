@@ -66,21 +66,22 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
      * Type of the filters used (category.filter)
      */
     @Prop({ required: true })
-    filterValue!: T
-
-    /**
-     * Type of the filters used (category.filter)
-     */
-    @Prop({ required: true })
     filterDefinitions!: FilterDefinition<T>[]
 
-    editingAnswers = this.answers//.map(a => a.clone())
+    editingAnswers = this.answers.map(a => a.clone())
 
     @Prop({ required: true })
     saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => Promise<void>
 
+    @Prop({ required: true })
+    filterValueForAnswers: (answers: RecordAnswer[]) => T
+
     validator = new Validator()
     errorBox: ErrorBox | null = null
+
+    get filterValue() {
+        return this.filterValueForAnswers(this.editingAnswers)
+    }
 
     get records() {
         return this.category.filterRecords(this.dataPermission)
@@ -107,7 +108,6 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
 
     get hasSavedAnswers() {
         const allRecords = this.category.getAllRecords()
-        console.log("Has saved answers", this.answers)
         return this.answers.find(answer => {
             const record = !!allRecords.find(r => r.id == answer.settings.id)
             if (record) {
@@ -225,6 +225,10 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
     }
 
     async shouldNavigateAway() {
+        if (this.isAllEmpty && !this.hasSavedAnswers) {
+            return true;
+        }
+
         if (
             JSON.stringify(encodeObject(this.answers, { version: Version })) == JSON.stringify(encodeObject(this.editingAnswers, { version: Version }))
         ) {

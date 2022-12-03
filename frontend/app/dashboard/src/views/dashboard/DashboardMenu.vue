@@ -1,10 +1,10 @@
 <template>
-    <div class="st-menu st-view">
-        <!--<STNavigationBar v-if="isNative" :title="organization.name" />-->
+    <div class="st-menu st-view dashboard-menu">
+        <main ref="main">
+            <STNavigationBar :title="organization.name" :sticky="true" class="block-width">
+                <OrganizationSwitcher slot="middle" />
+            </STNavigationBar>
 
-        <OrganizationSwitcher />
-
-        <main>
             <form v-if="false" class="input-icon-container icon search gray">
                 <input class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off">
             </form>
@@ -22,6 +22,11 @@
                 </button>
             </div>-->
 
+            <button v-if="!enableWebshopModule && !enableMemberModule" type="button" class="menu-button button heading cta" @click="openSignupSelection()">
+                <span class="icon flag" />
+                <span>Proefperiode starten</span>
+            </button>
+
             <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" type="button" class="menu-button button heading cta" @click="addWebshop()">
                 <span class="icon add" />
                 <span>Maak je eerste webshop aan</span>
@@ -33,9 +38,9 @@
             </button>
 
 
-            <hr>
+            <hr v-if="(!enableWebshopModule && !enableMemberModule) || (enableWebshopModule && canCreateWebshops && webshops.length == 0) || enableMemberModule && tree.categories.length == 0 && fullAccess">
 
-            <div v-if="enableMemberModule" class="grouped">
+            <!--<div v-if="enableMemberModule" class="grouped">
                 <div class="group-title button">
                     <span>Favorieten</span>
                 </div>
@@ -43,15 +48,15 @@
                 <p class="style-description-small">
                     Voeg inschrijvingsgroepen die je vaak gebruikt toe aan je favorieten. Zo vind je ze snel terug.
                 </p>
-            </div>
+            </div>-->
 
-            <hr>
 
             <template v-if="enableMemberModule">
                 <div v-for="category in tree.categories" :key="category.id" class="container">
                     <div class="grouped">
                         <button class="group-title button" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                             <span>{{ category.settings.name }}</span>
+                            <span class="icon arrow-right-small right-icon" />
                             <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
                         </button>
 
@@ -75,12 +80,7 @@
                             type="button"
                             @click="openGroup(group)"
                         >
-                            <figure v-if="getGroupImageSrc(group)" class="image">
-                                <img :src="getGroupImageSrc(group)">
-                            </figure>
-                            <figure v-else class="text-icon">
-                                <span>{{ group.settings.name.substr(0, 1) }}</span>
-                            </figure>
+                            <GroupAvatar :group="group" />
                             <span>{{ group.settings.name }}</span>
                             <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
                         </button>
@@ -89,28 +89,31 @@
                 </div>
             </template>
 
-            <div v-if="enableWebshopModule && webshops.length > 0" class="grouped">
-                <div class="group-title">
-                    <span>Webshops</span>
-                    <button v-if="canCreateWebshops" type="button" class="button icon add gray" @click="addWebshop()" />
+            <div v-if="enableWebshopModule && webshops.length > 0" class="container">
+                <div class="grouped">
+                    <div class="group-title">
+                        <span>Webshops</span>
+                        <button v-if="canCreateWebshops" type="button" class="button icon add gray" @click="addWebshop()" />
+                    </div>
+
+                    <button
+                        v-for="webshop in webshops"
+                        :key="webshop.id"
+                        type="button"
+                        class="menu-button button"
+                        :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
+                        @click="openWebshop(webshop)"
+                    >
+                        <span class="icon basket" />
+                        <span>{{ webshop.meta.name }}</span>
+
+                        <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon" />
+                    </button>
                 </div>
-
-                <button
-                    v-for="webshop in webshops"
-                    :key="webshop.id"
-                    type="button"
-                    class="menu-button button"
-                    :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
-                    @click="openWebshop(webshop)"
-                >
-                    <span class="icon basket" />
-                    <span>{{ webshop.meta.name }}</span>
-
-                    <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon" />
-                </button>
+                
+                <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             </div>
 
-            <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
 
             <button v-if="enableWebshopModule && hasWebshopArchive" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
                 <span class="icon archive" />
@@ -159,7 +162,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, GlobalEventBus, LoadComponent, Logo, STNavigationBar, TableView, TooltipDirective } from '@stamhoofd/components';
+import { CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
@@ -174,7 +177,8 @@ import OrganizationSwitcher from './OrganizationSwitcher.vue';
     components: {
         Logo,
         STNavigationBar,
-        OrganizationSwitcher
+        OrganizationSwitcher,
+        GroupAvatar
     },
     directives: {
         tooltip: TooltipDirective
@@ -229,6 +233,9 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     mounted() {
+        // First set current url already
+        UrlHelper.setUrl("/")
+
         const parts = UrlHelper.shared.getParts()
 
         let didSet = false
@@ -319,10 +326,9 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         }
 
         if (!didSet && this.fullAccess) {
+            console.log('openSignupSelection')
             if (!this.organization.meta.modules.useMembers && !this.organization.meta.modules.useWebshops) {
-                LoadComponent(() => import(/* webpackChunkName: "SignupModulesView" */ "../signup/SignupModulesView.vue"), {}, { instant: true }).then((component) => {
-                    this.present(component.setDisplayStyle("popup").setAnimated(false))
-                }).catch(console.error)
+                this.openSignupSelection(true).catch(console.error);
             }
         }
 
@@ -354,6 +360,12 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     switchOrganization() {
         SessionManager.deactivateSession()
+    }
+
+    async openSignupSelection(animated = true) {
+        await LoadComponent(() => import(/* webpackChunkName: "SignupModulesView" */ "../signup/SignupModulesView.vue"), {}, { instant: true }).then((component) => {
+            this.present(component.setDisplayStyle("popup").setAnimated(animated))
+        })
     }
 
     async openGroup(group: Group, animated = true) {
@@ -546,3 +558,13 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 }
 </script>
+
+<style lang="scss">
+.dashboard-menu {
+    --block-width: 45px;
+
+    @media (max-width: 600px) {
+        --block-width: 65px;
+    }
+}
+</style>
