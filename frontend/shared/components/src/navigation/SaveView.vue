@@ -11,26 +11,30 @@
 
             <slot v-if="!$isMobile && !$isIOS" slot="right" name="buttons" />
 
-            <LoadingButton v-if="$isMobile || $isIOS || $isAndroid" slot="right" :loading="loading">
+            <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" slot="right" :loading="loading">
                 <button class="button navigation highlight" :disabled="disabled" type="submit">
                     {{ saveText }}
                 </button>
             </LoadingButton>
-            <button v-else-if="$parent.canDismiss && !$isAndroid" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
+            <button v-else-if="$parent.canDismiss && !$isAndroid && !$isMobile && !$isIOS" slot="right" class="button navigation icon close" type="button" @click="$parent.dismiss" />
         </STNavigationBar>
         <main>
             <slot />
         </main>
-        <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
+        <STToolbar v-if="preferLargeButton || (!$isMobile && !$isIOS && !$isAndroid)">
+            <template #left>
+                <slot name="left" />
+            </template>
             <template #right>
                 <slot name="toolbar" />
-                <button v-if="!$slots.toolbar && ($parent.canPop || $parent.canDismiss) && cancelText !== null" class="button secundary" type="button" @click="$parent.pop">
+                <button v-if="!$slots.toolbar && addExtraCancel && ($parent.canPop || $parent.canDismiss) && cancelText !== null" class="button secundary" type="button" @click="$parent.pop">
                     {{ cancelText }}
                 </button>
                 <LoadingButton :loading="loading">
                     <button class="button primary" :disabled="disabled" type="submit">
                         <span v-if="saveIcon" class="icon " :class="saveIcon" />
                         <span>{{ saveText }}</span>
+                        <span v-if="saveIconRight" class="icon " :class="saveIconRight" />
                     </button>
                 </LoadingButton>
             </template>
@@ -77,8 +81,16 @@ export default class SaveView extends Vue {
     @Prop({ default: null })
     saveIcon!: string | null;
 
+    @Prop({ default: null })
+    saveIconRight!: string | null;
+
     @Prop({ default: "Annuleren" })
     cancelText!: string | null;
 
+    @Prop({ default: false })
+    preferLargeButton!: boolean; // Always use large buttons at the bottom on mobile
+
+    @Prop({ default: false })
+    addExtraCancel!: boolean; // Add a large cancel button at the bottom
 }
 </script>

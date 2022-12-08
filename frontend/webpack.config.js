@@ -99,7 +99,7 @@ module.exports = {
     optimization: (process.env.NODE_ENV === "production" ? {} : {
         minimize: false, // prevent webpack removing console logs from dependencies
     }),
-    devtool: "eval",
+    devtool: "source-map",
     module: {
         rules: [
             {

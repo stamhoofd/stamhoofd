@@ -1,52 +1,34 @@
 <template>
-    <div class="st-view boxed">
-        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
+    <SaveView title="Kies je afhaalmethode" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" :prefer-large-button="true" @save="goNext">
+        <h1>Kies je afhaalmethode</h1>
 
-        <div class="box">
-            <div class="st-view">
-                <main>
-                    <h1>Kies je afhaalmethode</h1>
+        <STErrorsDefault :error-box="errorBox" />
 
-                    <STErrorsDefault :error-box="errorBox" />
+        <STList>
+            <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
+                <Radio slot="left" v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
+                <h2 class="style-title-list">
+                    {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
+                </h2>
+                <p class="style-description-small">
+                    {{ checkoutMethod.description || checkoutMethod.address || "" }}
+                </p>
+                <p v-if="checkoutMethod.timeSlots.timeSlots.length == 1" class="style-description-small">
+                    {{ checkoutMethod.timeSlots.timeSlots[0].date | date | capitalizeFirstLetter }} tussen {{ checkoutMethod.timeSlots.timeSlots[0].startTime | minutes }} - {{ checkoutMethod.timeSlots.timeSlots[0].endTime | minutes }}
+                </p>
 
-                    <STList>
-                        <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
-                            <Radio slot="left" v-model="selectedMethod" name="choose-checkout-method" :value="checkoutMethod" />
-                            <h2 class="style-title-list">
-                                {{ getTypeName(checkoutMethod.type) }}: {{ checkoutMethod.name }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ checkoutMethod.description || checkoutMethod.address || "" }}
-                            </p>
-                            <p v-if="checkoutMethod.timeSlots.timeSlots.length == 1" class="style-description-small">
-                                {{ checkoutMethod.timeSlots.timeSlots[0].date | date | capitalizeFirstLetter }} tussen {{ checkoutMethod.timeSlots.timeSlots[0].startTime | minutes }} - {{ checkoutMethod.timeSlots.timeSlots[0].endTime | minutes }}
-                            </p>
-
-                            <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1">
-                                <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                                <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
-                            </template>
-                        </STListItem>
-                    </STList>
-                </main>
-
-                <STToolbar>
-                    <LoadingButton slot="right" :loading="loading">
-                        <button class="button primary" type="button" @click="goNext">
-                            <span>Doorgaan</span>
-                            <span class="icon arrow-right" />
-                        </button>
-                    </LoadingButton>
-                </STToolbar>
-            </div>
-        </div>
-    </div>
+                <template v-if="checkoutMethod.timeSlots.timeSlots.length == 1">
+                    <span v-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
+                    <span v-else-if="checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock }} {{ checkoutMethod.timeSlots.timeSlots[0].remainingPersons !== null ? (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "persoon" : "personen") : (checkoutMethod.timeSlots.timeSlots[0].listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+                </template>
+            </STListItem>
+        </STList>
+    </SaveView>
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { CheckoutMethod, CheckoutMethodType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -58,14 +40,11 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
         Radio,
-        LoadingButton,
         STErrorsDefault,
-        BackButton
+        SaveView
     },
     filters: {
         date: Formatter.dateWithDay.bind(Formatter),
@@ -124,18 +103,7 @@ export default class CheckoutMethodSelectionView extends Mixins(NavigationMixin)
         this.errorBox = null
 
         try {
-            // Force a save if nothing changed (to fix timeSlot + updated data)
-            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Method, true)
-            if (!nextStep) {
-                throw new SimpleError({
-                    code: "missing_config",
-                    message: "Er ging iets mis bij het ophalen van de volgende stap"
-                })
-            }
-            const comp = await nextStep.getComponent()
-
-            this.show(new ComponentWithProperties(comp, {}))
-
+            await CheckoutStepsManager.goNext(CheckoutStepType.Method, this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

@@ -40,7 +40,7 @@
                             <ol>
                                 <li>Log in, of maak een account aan.</li>
                                 <li>Schrijf leden in en vul gegevens aan.</li>
-                                <li>Betaal het lidgeld.</li>
+                                <li>Betalen.</li>
                                 <li>Klaar!</li>
                             </ol>
                         </aside>

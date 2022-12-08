@@ -154,23 +154,26 @@ export class UrlHelper {
     }
 
     /**
-     * setURL, but add locale
+     * Return a transformed url (adds locale and fixed prefix to it)
      */
-    static setUrl(url: string) {
-        console.log('urlhelper set url', url)
+    static transformUrl(url: string) {
         const prefix = this.fixedPrefix ? "/"+this.fixedPrefix : ""
         if (I18nController.shared && I18nController.addUrlPrefix && (I18nController.skipUrlPrefixForLocale === undefined || I18nController.skipUrlPrefixForLocale !== I18nController.shared.locale)) {
             if (I18nController.fixedCountry) {
-                HistoryManager.setUrl("/"+I18nController.shared.language+prefix+url)
-                //console.log("Setting url to", "/"+I18nController.shared.language+prefix+url)
+                return "/"+I18nController.shared.language+prefix+url
             } else {
-                HistoryManager.setUrl("/"+I18nController.shared.locale+prefix+url)
-                //console.log("Setting url to", "/"+I18nController.shared.locale+prefix+url)
+                return "/"+I18nController.shared.locale+prefix+url
             }
         } else {
-            HistoryManager.setUrl(prefix+url)
-            //console.log("Setting url to", prefix+url)
+            return prefix+url
         }
+    }
+
+    /**
+     * setURL, but add locale
+     */
+    static setUrl(url: string) {
+        HistoryManager.setUrl(this.transformUrl(url))
         I18nController.shared?.updateMetaData()
     }
 }

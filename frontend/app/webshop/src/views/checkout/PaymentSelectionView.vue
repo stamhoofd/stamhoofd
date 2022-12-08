@@ -1,50 +1,29 @@
 <template>
-    <div class="st-view boxed">
-        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
+    <SaveView :title="title" :loading="loading" save-text="Bestelling bevestigen" :prefer-large-button="true" @save="goNext">
+        <span slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
 
-        <div class="box">
-            <div class="st-view">
-                <main v-if="checkout.totalPrice > 0">
-                    <h1>Kies je betaalmethode</h1>
+        <h1>{{ title }}</h1>
 
-                    <p v-if="isTrial" class="warning-box">
-                        Dit is een demo webshop. Bestellingen zijn fictief.
-                    </p>
+        <p v-if="isTrial" class="warning-box">
+            Dit is een demo webshop. Bestellingen zijn fictief.
+        </p>
 
-                    <STErrorsDefault :error-box="errorBox" />
-
-                    <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" :context="paymentContext" />
-                </main>
-                <main v-else>
-                    <h1>Bevestig jouw bestelling</h1>
-
-                    <p v-if="isTrial" class="warning-box">
-                        Dit is een demo webshop. Bestellingen zijn fictief.
-                    </p>
-                
-                    <p>Jouw bestelling zal worden geplaatst als je verder gaat.</p>
-
-                    <STErrorsDefault :error-box="errorBox" />
-                </main>
-
-                <STToolbar>
-                    <span slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
-                    <LoadingButton slot="right" :loading="loading">
-                        <button class="button primary" type="button" @click="goNext">
-                            <span>Bestelling bevestigen</span>
-                        </button>
-                    </LoadingButton>
-                </STToolbar>
-            </div>
-        </div>
-    </div>
+        <template v-if="checkout.totalPrice > 0">
+            <STErrorsDefault :error-box="errorBox" />
+            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" :context="paymentContext" />
+        </template>
+        <template v-else>
+            <p>Jouw bestelling zal worden geplaatst als je verder gaat.</p>
+            <STErrorsDefault :error-box="errorBox" />
+        </template>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { ErrorBox, LoadingButton, PaymentHandler, PaymentSelectionList, Radio, SaveView, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { UrlHelper } from '@stamhoofd/networking';
 import { OrderData, OrderResponse, Payment, PaymentMethod } from '@stamhoofd/structures';
@@ -67,7 +46,7 @@ import { CheckoutStepType } from './CheckoutStepsManager';
         LoadingButton,
         STErrorsDefault,
         PaymentSelectionList,
-        BackButton
+        SaveView
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -81,6 +60,13 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
     loading = false
     errorBox: ErrorBox | null = null
     CheckoutManager = CheckoutManager
+
+    get title() {
+        if (this.checkout.totalPrice > 0) {
+            return "Kies je betaalmethode"
+        }
+        return "Bevestig jouw bestelling"
+    }
 
     get selectedPaymentMethod(): PaymentMethod | null {
         return CheckoutManager.checkout.paymentMethod
@@ -119,15 +105,26 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
         return this.webshop.meta.paymentMethods
     }
 
-    goToOrder(id: string) {
-        console.log("Go to order ", id)
-        this.navigationController!.push({
-            components: [
-                new ComponentWithProperties(OrderView, { orderId: id, success: true })
-            ],
-            replace: this.navigationController!.components.length - 1,
-            force: true
-        }).catch(console.error)
+    goToOrder(id: string, component: NavigationMixin) {
+        if (this.modalNavigationController) {
+            // We are not in a popup: on mobile
+            // So replace with a force instead of dimissing
+            component.present({
+                components: [
+                    new ComponentWithProperties(OrderView, { orderId: id, success: true })
+                ],
+                replace: 1,
+                force: true
+            })
+        } else {
+            // Desktop: push
+            component.present({
+                components: [
+                    new ComponentWithProperties(OrderView, { orderId: id, success: true })
+                ]
+            })
+            component.dismiss({force: true})
+        }
     }
    
     async goNext() {
@@ -163,9 +160,9 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     component: this,
                     transferSettings: WebshopManager.webshop.meta.transferSettings,
                     type: "order"
-                }, (payment: Payment) => {
+                }, (payment: Payment, component: NavigationMixin) => {
                     this.loading = false
-                    this.goToOrder(response.data.order.id)
+                    this.goToOrder(response.data.order.id, component)
                 }, (payment: Payment) => {
                     // failure
                     this.loading = false
@@ -175,7 +172,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
 
             // Go to success page
             this.loading = false
-            this.goToOrder(response.data.order.id)
+            this.goToOrder(response.data.order.id, this)
             
         } catch (e) {
             console.error(e)

@@ -45,15 +45,12 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordCategory, RecordSettings, Version } from "@stamhoofd/structures";
+import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
-import EditRecordView from "./EditRecordView.vue";
-import RecordCategoryRow from "./RecordCategoryRow.vue";
-import RecordRow from "./RecordRow.vue";
 
 @Component({
     components: {
@@ -61,8 +58,6 @@ import RecordRow from "./RecordRow.vue";
         STInputBox,
         STErrorsDefault,
         STList,
-        RecordCategoryRow,
-        RecordRow,
         PropertyFilterInput
     },
 })
@@ -92,14 +87,6 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
     get patchedCategory() {
         return this.category.patch(this.patchCategory)
-    }
-
-    get categories() {
-        return this.patchedCategory.childCategories
-    }
-
-    get records() {
-        return this.patchedCategory.records
     }
 
     get organization() {
@@ -146,60 +133,6 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
     addPatch(patch: AutoEncoderPatchType<RecordCategory>) {
         this.patchCategory = this.patchCategory.patch(patch)
-    }
-    
-    addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
-        const p = RecordCategory.patch({
-            childCategories: patch
-        })
-        this.addPatch(p)
-    }
-
-    addRecordsPatch(patch: PatchableArrayAutoEncoder<RecordSettings>) {
-        const p = RecordCategory.patch({
-            records: patch
-        })
-        this.addPatch(p)
-    }
-
-    addCategory() {
-        const currentRecords = this.records
-        const category = RecordCategory.create({
-            records: currentRecords
-        })
-
-        this.present(new ComponentWithProperties(EditRecordCategoryView, {
-            category,
-            isNew: true,
-            parentCategory: this.patchedCategory,
-            filterDefinitions: this.filterDefinitions,
-            saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                // Clear records that were added to the new category
-                const p: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray()
-                for (const record of currentRecords) {
-                    p.addDelete(record.id)
-                }
-                this.addRecordsPatch(p)
-
-                // Add category
-                this.addCategoriesPatch(patch)
-            }
-        }).setDisplayStyle("popup"))
-    }
-
-    addRecord() {
-        const record = RecordSettings.create({
-            sensitive: !!OrganizationManager.organization.meta.recordsConfiguration.dataPermission
-        })
-
-        this.present(new ComponentWithProperties(EditRecordView, {
-            record,
-            isNew: true,
-            parentCategory: this.patchedCategory,
-            saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => {
-                this.addRecordsPatch(patch)
-            }
-        }).setDisplayStyle("popup"))
     }
 
     async save() {

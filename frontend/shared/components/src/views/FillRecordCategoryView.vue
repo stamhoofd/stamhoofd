@@ -33,6 +33,7 @@
 import { encodeObject } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, RecordAnswerInput, SaveView, STErrorsDefault, Validator } from "@stamhoofd/components";
+import { UrlHelper } from '@stamhoofd/networking';
 import { FilterDefinition, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -46,6 +47,9 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
     loading = false
+
+    @Prop({ default: null})
+    url: string
 
     @Prop({ required: true })
     category!: RecordCategory
@@ -69,6 +73,7 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
     filterDefinitions!: FilterDefinition<T>[]
 
     editingAnswers = this.answers.map(a => a.clone())
+    lastSavedAnswers = this.answers
 
     @Prop({ required: true })
     saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => Promise<void>
@@ -78,6 +83,10 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
 
     validator = new Validator()
     errorBox: ErrorBox | null = null
+
+    mounted() {
+        UrlHelper.setUrl(this.url)
+    }
 
     get filterValue() {
         return this.filterValueForAnswers(this.editingAnswers)
@@ -108,7 +117,7 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
 
     get hasSavedAnswers() {
         const allRecords = this.category.getAllRecords()
-        return this.answers.find(answer => {
+        return this.lastSavedAnswers.find(answer => {
             const record = !!allRecords.find(r => r.id == answer.settings.id)
             if (record) {
                 return true
@@ -162,7 +171,6 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
 
         try {
             const allRecords = this.category.getAllRecords()
-            console.log("All Records", allRecords)
 
             // WARNING!
             // We need to make a copy of the array, ore the Vue components will readd the answers again automatically
@@ -178,6 +186,7 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
             })
             this.editingAnswers = editingAnswers.slice()
             await this.saveHandler(editingAnswers, this)
+            this.lastSavedAnswers = editingAnswers
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
@@ -204,20 +213,28 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
                 return
             }
 
-            // Mark reviewed
-            if (this.markReviewed) {
-                const allRecords = this.category.getAllFilteredRecords(this.filterValue, this.filterDefinitions, this.dataPermission)
+            // Delete answers that were filtered out
+            const allRecords = this.category.getAllRecords()
+            const filteredRecords = this.category.getAllFilteredRecords(this.filterValue, this.filterDefinitions, this.dataPermission)
 
-                for (const answer of this.editingAnswers) {
-                    const record = !!allRecords.find(r => r.id == answer.settings.id)
-                    if (record) {
-                        // Mark reviewed
-                        answer.markReviewed()
-                    }
+            const editingAnswers = this.editingAnswers.filter(answer => {
+                const record = !!allRecords.find(r => r.id == answer.settings.id)
+                const filteredRecord = !!filteredRecords.find(r => r.id == answer.settings.id)
+
+                if (record && !filteredRecord) {
+                    console.log('Deleting answer', answer)
+                    return false
                 }
-            }
+
+                if (this.markReviewed && record) {
+                    // Mark reviewed
+                    answer.markReviewed()
+                }
+                return true
+            })
             
-            await this.saveHandler(this.editingAnswers, this)
+            await this.saveHandler(editingAnswers, this)
+            this.lastSavedAnswers = editingAnswers
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
@@ -230,7 +247,7 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
         }
 
         if (
-            JSON.stringify(encodeObject(this.answers, { version: Version })) == JSON.stringify(encodeObject(this.editingAnswers, { version: Version }))
+            JSON.stringify(encodeObject(this.lastSavedAnswers, { version: Version })) == JSON.stringify(encodeObject(this.editingAnswers, { version: Version }))
         ) {
             // Nothing changed
             return true

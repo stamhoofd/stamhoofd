@@ -130,102 +130,6 @@ export class MemberDetailsWithGroups {
         this.registerItems = registerItems
     }
 
-    static getRecordCategoryDefinitions(recordCategories: RecordCategory[]): FilterDefinition<MemberDetailsWithGroups>[] {
-        const definitions: FilterDefinition<MemberDetailsWithGroups>[] = []
-
-        for (const recordCategory of recordCategories) {
-            for (const record of recordCategory.records) {
-                definitions.push(...this.filterDefinitionsFromRecord(record, recordCategory.name))
-            }
-
-            for (const category of recordCategory.childCategories) {
-                for (const record of category.getAllRecords()) {
-                    definitions.push(...this.filterDefinitionsFromRecord(record, recordCategory.name + ' → ' + category.name))
-                }
-            }
-        }
-
-        return definitions
-    }
-
-    static filterDefinitionsFromRecord(record: RecordSettings, category: string): FilterDefinition<MemberDetailsWithGroups>[] {
-        if (record.type === RecordType.Checkbox) {
-            return [
-                new ChoicesFilterDefinition<MemberDetailsWithGroups>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    choices: [
-                        new ChoicesFilterChoice("checked", "Aangevinkt"),
-                        new ChoicesFilterChoice("not_checked", "Niet aangevinkt")
-                    ], 
-                    getValue: (member) => {
-                        const answer: RecordCheckboxAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
-                        return answer?.selected ? ["checked"] : ["not_checked"]
-                    },
-                    defaultMode: ChoicesFilterMode.Or
-                })
-            ]
-        }
-
-        if (record.type === RecordType.MultipleChoice) {
-            return [
-                new ChoicesFilterDefinition<MemberDetailsWithGroups>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
-                    getValue: (member) => {
-                        const answer: RecordMultipleChoiceAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
-
-                        if (!answer) {
-                            return []
-                        }
-
-                        return answer.selectedChoices.map(c => c.id)
-                    },
-                    defaultMode: ChoicesFilterMode.And
-                })
-            ]
-        }
-
-        if (record.type === RecordType.ChooseOne) {
-            return [
-                new ChoicesFilterDefinition<MemberDetailsWithGroups>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
-                    getValue: (member) => {
-                        const answer: RecordChooseOneAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
-
-                        if (!answer || !answer.selectedChoice) {
-                            return []
-                        }
-
-                        return [answer.selectedChoice.id]
-                    },
-                    defaultMode: ChoicesFilterMode.Or
-                })
-            ]
-        }
-
-        if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
-            return [
-                new StringFilterDefinition<MemberDetailsWithGroups>({
-                    id: "record_"+record.id, 
-                    name: record.name, 
-                    category,
-                    getValue: (member) => {
-                        const answer: RecordTextAnswer | undefined = member.details.recordAnswers.find(a => a.settings?.id === record.id) as any
-                        return answer?.value ?? ""
-                    }
-                })
-            ]
-        }
-        return []
-    }
-
     static getBaseFilterDefinitions(): FilterDefinition<MemberDetailsWithGroups>[] {
         return [
             // TODO: map member filters instead of redefining them
@@ -343,7 +247,9 @@ export class MemberDetailsWithGroups {
         
         return [
             ...this.getBaseFilterDefinitions(),
-            ...this.getRecordCategoryDefinitions(recordCategories),
+            ...RecordCategory.getRecordCategoryDefinitions(recordCategories, (member: MemberDetailsWithGroups) => {
+                return member.details.recordAnswers
+            }),
         ]
     }
 }

@@ -94,7 +94,7 @@ export default class App extends Vue {
             const session = new Session(parts[1]);
 
             (this.$refs.modalStack as any).present({
-                url: currentPath,
+                url: UrlHelper.transformUrl(currentPath),
                 adjustHistory: false,
                 components: [
                     new ComponentWithProperties(ForgotPasswordResetView, { initialSession: session, token }).setDisplayStyle("popup").setAnimated(false)

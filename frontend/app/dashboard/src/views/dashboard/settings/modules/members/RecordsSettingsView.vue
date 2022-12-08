@@ -99,7 +99,7 @@
         <p>
             <button class="button text" type="button" @click="addCategory">
                 <span class="icon add" />
-                <span>Nieuwe categorie</span>
+                <span>Nieuwe vragenlijst</span>
             </button>
         </p>
 
@@ -216,7 +216,9 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     filterDefinitionsForCategories(categories: RecordCategory[]) {
         return [
             ...MemberDetailsWithGroups.getBaseFilterDefinitions(),
-            ...MemberDetailsWithGroups.getRecordCategoryDefinitions(categories),
+            ...RecordCategory.getRecordCategoryDefinitions(categories, (member: MemberDetailsWithGroups) => {
+                return member.details.recordAnswers
+            }),
         ]
     }
 

@@ -103,7 +103,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
-import { CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
+import { CheckoutStep, CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
 import TicketView from "./orders/TicketView.vue";
 
@@ -213,13 +213,20 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return CheckoutManager.cart.count
     }
 
-    openCart(animated = true) {
+    openCart(animated = true, components: ComponentWithProperties[] = [], url?: string) {
         this.present({
             animated,
             adjustHistory: animated,
             components: [
-                new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView) }).setDisplayStyle("popup")
-            ]
+                new ComponentWithProperties(NavigationController, { 
+                    initialComponents: [
+                        new ComponentWithProperties(CartView),
+                        ...components
+                    ] 
+                }),
+            ],
+            modalDisplayStyle: "popup",
+            url: UrlHelper.transformUrl(url ?? '/cart')
         })
     }
 
@@ -260,35 +267,16 @@ export default class WebshopView extends Mixins(NavigationMixin){
     }
 
     mounted() {
-        GlobalEventBus.addListener(this, "checkout", async (cartComponent: CartView) => {
-            const nextStep = await CheckoutStepsManager.getNextStep(undefined, true)
-
-            if (!nextStep) {
-                // Not possible
-                new Toast("Bestellen is nog niet mogelijk omdat nog enkele instellingen ontbreken.", "error red").show()
-                return;
-            }
-
-            const comp = await nextStep.getComponent();
-            if (this.visible) {
-                cartComponent.dismiss({ force: true })
-                this.show(new ComponentWithProperties(comp, {}).setAnimated(true))
-            } else {
-                cartComponent.show(new ComponentWithProperties(comp, {}).setAnimated(true))
-            }
-        })
-
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true })
         const path = UrlHelper.shared.getParts();
         const params = UrlHelper.shared.getSearchParams()
         UrlHelper.shared.clear()
 
-        console.warn('Mounted webshop view')
         UrlHelper.setUrl("/")
 
         if (path.length == 2 && path[0] == 'order') {
             const orderId = path[1];
-            this.show({
+            this.present({
                 animated: false,
                 adjustHistory: false,
                 components: [
@@ -297,7 +285,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             })
         } else if (path.length == 2 && path[0] == 'tickets') {
             const secret = path[1];
-            this.show({
+            this.present({
                 animated: false,
                 adjustHistory: false,
                 components: [
@@ -307,7 +295,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         } else if (path.length == 1 && path[0] == 'payment' && params.get("id")) {
             const paymentId = params.get("id")
             const me = this
-            this.show({
+            this.present({
                 adjustHistory: false,
                 animated: false,
                 force: true,
@@ -318,71 +306,54 @@ export default class WebshopView extends Mixins(NavigationMixin){
                         paymentId,
                         finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
                             if (payment && payment.status == PaymentStatus.Succeeded) {
-                                // Can't use this.show, becaus this is deactivated -> no parents
-                                this.navigationController!.push({
+                                this.present({
                                     components: [
                                         new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true })
                                     ],
-                                    animated: false,
-                                    replace: 1,
-                                    force: true
-                                }).catch(console.error)
-                            } else {
-                                this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
-                                new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
-                                me.resumeStep(CheckoutStepType.Payment).catch(e => {
-                                    console.error(e)
+                                    animated: true
                                 })
+                                this.dismiss({force: true})
+                            } else {
+                                this.dismiss({force: true})
+                                new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton(undefined, async () => {
+                                    await me.resumeStep('/checkout/payment');
+                                }).show()
                             }
                         } 
                     })
                 ],
+                modalDisplayStyle: "sheet" // warning: if changing to popup: this.present won't work on mobile devices in the finishedhandler (because this is deactivated -> no parents)!
             })
         } else if (path.length == 2 && path[0] == 'checkout') {
-            const stepName = Formatter.capitalizeFirstLetter(path[1])
-            if (Object.values(CheckoutStepType).includes(stepName as any)) {
-                const step = stepName as CheckoutStepType
-                this.resumeStep(step, false).catch(e => {
-                    console.error(e)
-                })
-            }
+            this.resumeStep('/' + path.join('/'), false).catch(e => {
+                console.error(e)
+            })
         } else if (path.length == 1 && path[0] == 'cart') {
             this.openCart(false)
         }
     }
 
-    async resumeStep(destination: CheckoutStepType, animated = true) {
+    async resumeStep(destination: string, animated = true) {
         // Quickly recreate all steps
-        let step: CheckoutStepType | undefined = undefined
-        const components: Promise<any>[] = []
+        let step: CheckoutStep | undefined = undefined
+        const waitingComponents: Promise<ComponentWithProperties>[] = []
 
-        while (step != destination) {
+        while (!step || step.url !== destination) {
             try {
-                const nextStep = await CheckoutStepsManager.getNextStep(step)
+                const nextStep = await CheckoutStepsManager.getNextStep(step?.id)
                 if (!nextStep) {
                     break;
                 }
-                components.push(nextStep.getComponent())
-                step = nextStep.type
+                waitingComponents.push(nextStep.getComponent())
+                step = nextStep
             } catch (e) {
                 // Possible invalid checkout -> stop here
                 break;
             }
         }
 
-        const comp = await Promise.all(components)
-        if (comp.length == 0) {
-            this.openCart(animated)
-            return;
-        }
-        const replaceWith = comp.map(component => new ComponentWithProperties(component, {}))
-
-        // Can't use show here -> might be deactivated
-        await this.navigationController!.push({
-            components: replaceWith,
-            animated,
-            adjustHistory: animated,
-        })
+        const components = await Promise.all(waitingComponents)
+        this.openCart(animated, components, step?.url)
     }
 
     deactivated() {

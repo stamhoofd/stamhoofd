@@ -278,7 +278,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
                                 } else {
                                     UrlHelper.setUrl("/")
                                     this.dismiss({ force: true })
-                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.", "error").addCloseButton().show()
+                                    new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton().show()
                                 }
                             }
                         })

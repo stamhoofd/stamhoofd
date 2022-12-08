@@ -1,5 +1,9 @@
+import { SimpleError } from '@simonbackx/simple-errors';
+import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, Webshop } from '@stamhoofd/structures';
+import { UrlHelper } from '@stamhoofd/networking';
+import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, RecordAnswer, Webshop } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
@@ -13,47 +17,60 @@ export enum CheckoutStepType {
 }
 
 export class CheckoutStep {
-    type: CheckoutStepType
+    id: string
     active: boolean
-    skipHandler: () => void
+    url: string;
+    skipHandler?: () => void
+    getComponent: () => Promise<ComponentWithProperties>
+    validate: (checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) => void
 
-    constructor(type: CheckoutStepType, active = true , skipHandler: () => void = () => { /* */ }) {
-        this.type = type
-        this.active = active
-        this.skipHandler = skipHandler
+    constructor(data: {
+        id: string,
+        active?: boolean, 
+        url: string,
+        skipHandler?: () => void,
+        getComponent: () => Promise<ComponentWithProperties>,
+        validate: (checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) => void
+    }) {
+        this.id = data.id
+        this.active = data.active ?? true
+        this.skipHandler = data.skipHandler
+        this.getComponent = data.getComponent
+        this.validate = data.validate
+        this.url = data.url
     }
 
-    async getComponent(): Promise<any> {
-        switch (this.type) {
-            case CheckoutStepType.Method: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue')).default;
-            case CheckoutStepType.Address: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue')).default;
-            case CheckoutStepType.Time:return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue')).default;
-            case CheckoutStepType.Payment: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue')).default;
-            case CheckoutStepType.Customer: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue')).default;
-
-            default: {
-                // If you get a compile error here, a type is missing in the switch and you should add it
-                const t: never = this.type
-                throw new Error("Missing component for "+t)
-            }
-        }
-    }
-
-    validate(checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) {
-        switch (this.type) {
-            case CheckoutStepType.Method: checkout.validateCheckoutMethod(webshop, organizationMeta); return;
-            case CheckoutStepType.Address: checkout.validateDeliveryAddress(webshop, organizationMeta); return;
-            case CheckoutStepType.Time: checkout.validateTimeSlot(webshop, organizationMeta); return;
-            case CheckoutStepType.Payment: checkout.validate(webshop, organizationMeta, I18nController.i18n); return;
-            case CheckoutStepType.Customer: checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n); return;
-
-            default: {
-                // If you get a compile error here, a type is missing in the switch and you should add it
-                const t: never = this.type
-                throw new Error("Missing validate for "+t)
-            }
-        }
-    }
+    // async getComponent(): Promise<any> {
+    //     switch (this.type) {
+    //         case CheckoutStepType.Method: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue')).default;
+    //         case CheckoutStepType.Address: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue')).default;
+    //         case CheckoutStepType.Time:return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue')).default;
+    //         case CheckoutStepType.Payment: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue')).default;
+    //         case CheckoutStepType.Customer: return (await import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue')).default;
+// 
+    //         default: {
+    //             // If you get a compile error here, a type is missing in the switch and you should add it
+    //             const t: never = this.type
+    //             throw new Error("Missing component for "+t)
+    //         }
+    //     }
+    // }
+// 
+    // validate(checkout: Checkout, webshop: Webshop, organizationMeta: OrganizationMetaData) {
+    //     switch (this.type) {
+    //         case CheckoutStepType.Method: checkout.validateCheckoutMethod(webshop, organizationMeta); return;
+    //         case CheckoutStepType.Address: checkout.validateDeliveryAddress(webshop, organizationMeta); return;
+    //         case CheckoutStepType.Time: checkout.validateTimeSlot(webshop, organizationMeta); return;
+    //         case CheckoutStepType.Payment: checkout.validate(webshop, organizationMeta, I18nController.i18n); return;
+    //         case CheckoutStepType.Customer: checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n); return;
+// 
+    //         default: {
+    //             // If you get a compile error here, a type is missing in the switch and you should add it
+    //             const t: never = this.type
+    //             throw new Error("Missing validate for "+t)
+    //         }
+    //     }
+    // }
 }
 
 export class CheckoutStepsManager {
@@ -65,23 +82,27 @@ export class CheckoutStepsManager {
         const steps: CheckoutStep[] = []
 
         steps.push(
-            new CheckoutStep(
-                CheckoutStepType.Method,
-                webshop.meta.checkoutMethods.length > 1,
-                () => {
+            new CheckoutStep({
+                id: CheckoutStepType.Method,
+                url: "/checkout/"+CheckoutStepType.Method.toLowerCase(),
+                active: webshop.meta.checkoutMethods.length > 1,
+                skipHandler: () => {
                     // Skip behaviour
                     // Set to the only available checkout method
                     CheckoutManager.checkout.checkoutMethod = WebshopManager.webshop.meta.checkoutMethods.length == 0 ? null : WebshopManager.webshop.meta.checkoutMethods[0]
                     CheckoutManager.saveCheckout()
-                }
-            )
+                },
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CheckoutMethodSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+                validate: (checkout, webshop, organizationMeta) => checkout.validateCheckoutMethod(webshop, organizationMeta)
+            })
         )
 
         steps.push(
-            new CheckoutStep(
-                CheckoutStepType.Time,
-                checkoutMethod !== null && checkoutMethod.timeSlots.timeSlots.length > 1,
-                () => {
+            new CheckoutStep({
+                id: CheckoutStepType.Time,
+                url: "/checkout/"+CheckoutStepType.Time.toLowerCase(),
+                active: checkoutMethod !== null && checkoutMethod.timeSlots.timeSlots.length > 1,
+                skipHandler: () => {
                     // Use default or set to null if none available
                     if (CheckoutManager.checkout.checkoutMethod && CheckoutManager.checkout.checkoutMethod.timeSlots.timeSlots.length == 1) {
                         CheckoutManager.checkout.timeSlot = CheckoutManager.checkout.checkoutMethod.timeSlots.timeSlots[0]
@@ -90,25 +111,91 @@ export class CheckoutStepsManager {
                     }
                     
                     CheckoutManager.saveCheckout()
-                }
-            )
+                },
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './TimeSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+                validate: (checkout, webshop, organizationMeta) => checkout.validateTimeSlot(webshop, organizationMeta)
+            })
         )
 
         steps.push(
-            new CheckoutStep(
-                CheckoutStepType.Address,
-                checkoutMethod !== null && checkoutMethod.type == CheckoutMethodType.Delivery,
-                () => {
+            new CheckoutStep({
+                id: CheckoutStepType.Address,
+                url: "/checkout/"+CheckoutStepType.Address.toLowerCase(),
+                active: checkoutMethod !== null && checkoutMethod.type == CheckoutMethodType.Delivery,
+                skipHandler: () => {
                     // Skip behaviour
                     // Clear address
                     CheckoutManager.checkout.address = null
                     CheckoutManager.saveCheckout()
-                }
-            )
+                },
+                getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './AddressSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+                validate: (checkout, webshop, organizationMeta) => checkout.validateDeliveryAddress(webshop, organizationMeta)
+            })
         )
 
-        steps.push(new CheckoutStep(CheckoutStepType.Customer))
-        steps.push(new CheckoutStep(CheckoutStepType.Payment))
+        steps.push(new CheckoutStep({
+            id: CheckoutStepType.Customer,
+            url: "/checkout/"+CheckoutStepType.Customer.toLowerCase(),
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {})),
+            validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n)
+        }))
+
+        // Now add all the Record Category steps
+        const filterDefinitions = Checkout.getFilterDefinitions(webshop.meta.recordCategories);
+
+        for (const category of webshop.meta.recordCategories) {
+            const id = `category-${category.id}`
+            const url = "/checkout/"+Formatter.slug(category.name)
+
+            steps.push(new CheckoutStep({
+                id,
+                url,
+                active: category.isEnabled(checkout, filterDefinitions, true),
+                getComponent: async () => {
+                    const {FillRecordCategoryView} = await import(/* webpackChunkName: "FillRecordCategoryView", webpackPrefetch: true */ '@stamhoofd/components');
+                    return new ComponentWithProperties(FillRecordCategoryView, {
+                        category,
+                        url,
+                        answers: checkout.recordAnswers,
+                        markReviewed: true,
+                        dataPermission: true,
+                        filterDefinitions,
+                        saveHandler: async (answers: RecordAnswer[], component: NavigationMixin) => {
+                            checkout.recordAnswers = answers
+                            CheckoutManager.saveCheckout()
+
+                            // Force a save if nothing changed (to fix timeSlot + updated data)
+                            await CheckoutStepsManager.goNext(id, component)
+                        },
+                        filterValueForAnswers: (answers: RecordAnswer[]) => {
+                            const checkout = Checkout.create(CheckoutManager.checkout)
+                            checkout.recordAnswers = answers
+                            return checkout;
+                        }
+                    });
+                },
+                validate: (checkout, webshop) => {
+                    checkout.validateRecordAnswersFor(webshop, category)
+                },
+                skipHandler: () => {
+                    for (const record of category.getAllRecords()) {
+                        const index = CheckoutManager.checkout.recordAnswers.findIndex(a => a.settings.id == record.id)
+                        if (index != -1) {
+                            CheckoutManager.checkout.recordAnswers.splice(index, 1)
+                        }
+                    }
+                    CheckoutManager.saveCheckout()
+                }
+            }))
+        }
+
+        // Payment
+        steps.push(new CheckoutStep({
+            id: CheckoutStepType.Payment,
+            url: "/checkout/"+CheckoutStepType.Payment.toLowerCase(),
+            getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './PaymentSelectionView.vue').then(m => new ComponentWithProperties(m.default, {})),
+            validate: (checkout, webshop, organizationMeta) => checkout.validate(webshop, organizationMeta, I18nController.i18n)
+        }))
 
         return steps
     }
@@ -117,20 +204,23 @@ export class CheckoutStepsManager {
         return this.getSteps().filter(s => s.active)
     }
 
-    static async getNextStep(step: CheckoutStepType | undefined, reload = false) {
+    static async getNextStep(stepId: string | undefined, reload = false) {
         if (reload) {
             await WebshopManager.reload()
         }
         CheckoutManager.checkout.validateCart(WebshopManager.webshop, WebshopManager.organization.meta);
 
         const steps = this.getSteps()
-        let next = step === undefined
+        let next = stepId === undefined
         for (const s of steps) {
             if (next) {
                 if (s.active) {
                     return s
                 }
-                s.skipHandler()
+
+                if (s.skipHandler) {
+                    s.skipHandler();
+                }
 
                 // Also validate skipped steps
                 s.validate(CheckoutManager.checkout, WebshopManager.webshop, WebshopManager.organization.meta)
@@ -139,12 +229,28 @@ export class CheckoutStepsManager {
 
             // Validate all steps along the way
             s.validate(CheckoutManager.checkout, WebshopManager.webshop, WebshopManager.organization.meta)
-            if (s.type === step) {
+            if (s.id === stepId) {
                 next = true
             }
         }
 
         // Last step
         return undefined
+    }
+
+    static async goNext(step: string | undefined, component: NavigationMixin) {
+        // Force a save if nothing changed (to fix timeSlot + updated data)
+        const nextStep = await CheckoutStepsManager.getNextStep(step, true)
+        if (!nextStep) {
+            throw new SimpleError({
+                code: "missing_config",
+                message: "Er ging iets mis bij het ophalen van de volgende stap"
+            })
+        }
+        component.show({
+            components: [await nextStep.getComponent()],
+            url: UrlHelper.transformUrl(nextStep.url),
+            animated: true
+        });
     }
 }
