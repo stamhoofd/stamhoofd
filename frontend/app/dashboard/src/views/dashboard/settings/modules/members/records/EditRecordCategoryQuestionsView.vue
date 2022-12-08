@@ -277,7 +277,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
 
     addRecord(parent: RecordCategory = this.patchedCategory) {
         const record = RecordSettings.create({
-            sensitive: !!OrganizationManager.organization.meta.recordsConfiguration.dataPermission
+            sensitive: false
         })
 
         this.present(new ComponentWithProperties(EditRecordView, {

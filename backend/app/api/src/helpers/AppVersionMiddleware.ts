@@ -54,13 +54,23 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
                 if (!error.hasCode("expired_access_token")) {
                     console.error("Request with error in response:\n"+IP+": "+request.method+" "+request.host+request.url+"\n"+JSON.stringify(error))
 
+                    if (Object.keys(request.query).length) {
+                        const json: any = {...request.query}
+                        if (json && json.password) {
+                            json.password = '*******'
+                        }
+                        console.error(IP+": Request query was", json)
+                    }
+
                     request.body.then((body) => {
                         try {
                             const json = JSON.parse(body)
-                            if (json && json.password) {
-                                json.password = '*******'
+                            if (Array.isArray(json) || Object.keys(json).length) {
+                                if (json && json.password) {
+                                    json.password = '*******'
+                                }
+                                console.error(IP+": Request body was", json)
                             }
-                            console.error(IP+": Request body was", json)
                         } catch (e) {
                             console.error(IP+": Request body was\n"+body)
                         }
@@ -69,13 +79,23 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
             } else {
                 console.error("Request with internal error:\n"+IP+": "+request.method+" "+request.host+request.url)
                 console.error(error)
+                if (Object.keys(request.query).length) {
+                    const json: any = {...request.query}
+                    if (json && json.password) {
+                        json.password = '*******'
+                    }
+                    console.error(IP+": Request query was", json)
+                }
+
                 request.body.then((body) => {
                     try {
                         const json = JSON.parse(body)
-                        if (json && json.password) {
-                            json.password = '*******'
+                        if (Array.isArray(json) || Object.keys(json).length) {
+                            if (json && json.password) {
+                                json.password = '*******'
+                            }
+                            console.error(IP+": Request body was", json)
                         }
-                        console.error(IP+": Request body was", json)
                     } catch (e) {
                         console.error(IP+": Request body was\n"+body)
                     }

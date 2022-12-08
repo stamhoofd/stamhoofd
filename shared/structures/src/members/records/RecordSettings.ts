@@ -1,5 +1,8 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
+
+import { RecordAnswer } from "./RecordAnswer";
 
 export enum RecordType {
     /**
@@ -126,7 +129,7 @@ export class RecordSettings extends AutoEncoder {
     // visibleForMembers = true
 
     @field({ decoder: new EnumDecoder(RecordType) })
-    type = RecordType.Checkbox
+    type = RecordType.Text
 
     /**
      * In case of multiple choice: the values you can choose from with optional additional information
@@ -163,4 +166,18 @@ export class RecordSettings extends AutoEncoder {
      */
     @field({ decoder: RecordWarning, version: 122, nullable: true })
     warning: RecordWarning | null = null
+
+    validate(answers: RecordAnswer[]): RecordAnswer | undefined {
+        const answer = answers.find(a => a.settings.id === this.id)
+
+        if (this.required && !answer) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Dit veld is verplicht",
+                field: this.id
+            })
+        }
+
+        return answer;
+    }
 }

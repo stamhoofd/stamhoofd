@@ -152,6 +152,17 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
+                    <STListItem v-if="enableBetaFeatures" :selectable="true" class="left-center" @click="editRecordSettings(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                        <h2 class="style-title-list">
+                            Vragenlijsten
+                        </h2>
+                        <p class="style-description">
+                            Verzamel extra informatie van bestellers bij het afrekenen.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
                     <STListItem :selectable="true" class="left-center" @click="editPermissions(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/lock.svg">
                         <h2 class="style-title-list">
@@ -300,6 +311,7 @@ import EditWebshopPageView from './edit/EditWebshopPageView.vue';
 import EditWebshopPaymentMethodsView from './edit/EditWebshopPaymentMethodsView.vue';
 import EditWebshopPermissionsView from './edit/EditWebshopPermissionsView.vue';
 import EditWebshopProductsView from './edit/EditWebshopProductsView.vue';
+import EditWebshopRecordSettings from './edit/EditWebshopRecordSettings.vue';
 import WebshopOrdersView from './orders/WebshopOrdersView.vue';
 import WebshopStatisticsView from './statistics/WebshopStatisticsView.vue';
 import TicketScannerSetupView from './tickets/TicketScannerSetupView.vue';
@@ -322,6 +334,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
     preview!: WebshopPreview;
 
     webshopManager = new WebshopManager(this.preview)
+
+    get enableBetaFeatures() {
+        return this.organization.meta.enableBetaFeatures
+    }
 
     get isOpen() {
         return !this.webshopManager.preview.isClosed()
@@ -427,6 +443,10 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
 
     editInputFields(animated = true) {
         this.displayEditComponent(EditWebshopInputFieldsView, animated)
+    }
+
+    editRecordSettings(animated = true) {
+        this.displayEditComponent(EditWebshopRecordSettings, animated)
     }
 
     editCheckoutMethods(animated = true) {

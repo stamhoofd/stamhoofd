@@ -65,16 +65,18 @@ export default class STNavigationBar extends Vue {
     scrolled = false;
     scrollElement!: HTMLElement | null;
 
+    $slots;
+
     get hasLeft() {
-        return this.pop || (this.dismiss && (this as any).$isAndroid) || this.$slots['left']
+        return this.pop || (this.dismiss && (this as any).$isAndroid) || !!this.$slots['left']
     }
 
     get hasRight() {
-        return (this.dismiss && !(this as any).$isAndroid) || this.$slots['right']
+        return (this.dismiss && !(this as any).$isAndroid) || !!this.$slots['right']
     }
 
     get hasMiddle() {
-        return this.$slots['middle'] || this.title.length > 0
+        return !!this.$slots['middle'] || this.title.length > 0
     }
 
     get templateColumns() {

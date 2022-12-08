@@ -1,49 +1,32 @@
 <template>
-    <form class="st-view boxed" @submit.prevent="goNext">
-        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
+    <SaveView title="Jouw gegevens" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext">
+        <h1>Jouw gegevens</h1>
 
-        <div class="box">
-            <div class="st-view">
-                <main>
-                    <h1>Jouw gegevens</h1>
+        <STErrorsDefault :error-box="errorBox" />
 
-                    <STErrorsDefault :error-box="errorBox" />
-
-                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
-                            </div>
-                            <div>
-                                <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
-                            </div>
-                        </div>
-                    </STInputBox>
-
-                    <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
-
-                    <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
-
-                    <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
-                </main>
-
-                <STToolbar>
-                    <LoadingButton slot="right" :loading="loading">
-                        <button class="button primary" type="submit">
-                            <span>Doorgaan</span>
-                            <span class="icon arrow-right" />
-                        </button>
-                    </LoadingButton>
-                </STToolbar>
+        <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
+            <div class="input-group">
+                <div>
+                    <input v-model="firstName" class="input" name="fname" type="text" placeholder="Voornaam" required autocomplete="given-name">
+                </div>
+                <div>
+                    <input v-model="lastName" class="input" name="lname" type="text" placeholder="Achternaam" required autocomplete="family-name">
+                </div>
             </div>
-        </div>
-    </form>
+        </STInputBox>
+
+        <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
+
+        <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
+
+        <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, EmailInput, ErrorBox, FieldBox, LoadingButton, PhoneInput, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -52,19 +35,15 @@ import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
-
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
-        LoadingButton,
         STErrorsDefault,
         STInputBox,
         EmailInput,
         PhoneInput,
-        BackButton,
+        SaveView,
         FieldBox
     },
     filters: {
@@ -143,17 +122,7 @@ export default class CustomerView extends Mixins(NavigationMixin){
         // Clear old open fields
 
         try {
-            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Customer, true)
-            if (!nextStep) {
-                throw new SimpleError({
-                    code: "missing_config",
-                    message: "Er ging iets mis bij het ophalen van de volgende stap"
-                })
-            }
-            const comp = await nextStep.getComponent()
-
-            this.show(new ComponentWithProperties(comp, {}))
-            
+            await CheckoutStepsManager.goNext(CheckoutStepType.Customer, this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

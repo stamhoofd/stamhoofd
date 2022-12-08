@@ -60,6 +60,7 @@ import { Component, Mixins } from 'vue-property-decorator';
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
+import { CheckoutStepsManager } from './CheckoutStepsManager';
 
 
 @Component({
@@ -97,7 +98,7 @@ export default class CartView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            await GlobalEventBus.sendEvent("checkout", this)
+            await CheckoutStepsManager.goNext(undefined, this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

@@ -223,7 +223,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     isPopup: boolean
 
     @Prop({ default: null })
-    finishedHandler: ((payment: Payment | null) => void) | null
+    finishedHandler: ((payment: Payment | null, component: NavigationMixin) => void) | null
 
     QRCodeUrl: string | null = null
 
@@ -304,6 +304,13 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         return "Jouw bestelling is al geplaatst! Als je je bestelling gaat aanpassen zal je een tweede bestelling plaatsen!"
     }
 
+    shouldNavigateAway() {
+        if (!this.created) {
+            return true
+        }
+        return false;
+    }
+
     get isBelgium() {
         return this.organization.address.country == Country.Belgium
     }
@@ -359,7 +366,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
     goNext() {
         if (this.finishedHandler) {
-            this.finishedHandler(this.payment)
+            this.finishedHandler(this.payment, this)
             return;
         }
 

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, ConvertArrayToPatchableArray, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, Patchable, PatchableArrayAutoEncoder, PatchableDecoder, PatchType, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
@@ -9,6 +9,7 @@ import { Country, CountryDecoder } from '../addresses/CountryDecoder';
 import { Province } from '../addresses/Province';
 import { DNSRecord, DNSRecordType } from '../DNSRecord';
 import { Image } from '../files/Image';
+import { RecordCategory } from '../members/records/RecordCategory';
 import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
@@ -337,6 +338,12 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 94 })
     allowComments = false
+
+    @field({ decoder: BooleanDecoder, optional: true })
+    phoneEnabled = true
+
+    @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), optional: true })
+    recordCategories: RecordCategory[] = []
 
     @field({ decoder: new ArrayDecoder(WebshopField), version: 94 })
     customFields: WebshopField[] = []

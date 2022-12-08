@@ -169,7 +169,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                     organization = null;
                 }
                 this.present({
-                    url: "/aansluiten",
+                    url: UrlHelper.transformUrl("/aansluiten"),
                     adjustHistory: false,
                     components: [
                         new ComponentWithProperties(NavigationController, {

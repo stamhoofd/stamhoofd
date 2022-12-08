@@ -77,8 +77,8 @@ export class CenteredMessage {
         }
     }
 
-    addCloseButton(text = "Sluiten") {
-        this.buttons.push(new CenteredMessageButton(text, { type: "secundary" }))
+    addCloseButton(text = "Sluiten", action?: (() => Promise<any>) | undefined) {
+        this.buttons.push(new CenteredMessageButton(text, { type: "secundary", action }))
         return this
     }
 

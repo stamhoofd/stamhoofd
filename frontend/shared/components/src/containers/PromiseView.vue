@@ -25,32 +25,21 @@ export default class PromiseView extends Mixins(NavigationMixin) {
     root: ComponentWithProperties | null = null
 
     created() {
-        console.log("Created promiseview")
         this.run()
     }
 
-    activated() {
-        console.log("activated promiseview")
-    }
-
-    beforeDestroy() {
-        console.log("beforeDestroy promiseview")
-    }
-
     run() {
-        console.log("Running promiseview")
         this.promise.call(this).then((value) => {
             // We need to make a copy, or we risk having the same component twice in the DOM
             this.root = value.clone()
-            console.log("Done", this.root)
         }).catch(e => {
+            console.error(e)
             console.error("Promise error not caught, defaulting to dismiss behaviour in PromiseView")
             this.dismiss({ force: true });
         })
     }
 
     reload() {
-        console.log("Reloading promiseview")
         this.root = null;
         this.run();
     }

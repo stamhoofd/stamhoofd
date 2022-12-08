@@ -3,7 +3,10 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { v4 as uuidv4 } from "uuid";
 
 import { ValidatedAddress } from '../addresses/Address';
+import { FilterDefinition } from '../filters/FilterDefinition';
 import { I18n } from '../I18nInterface';
+import { RecordAnswer, RecordAnswerDecoder } from '../members/records/RecordAnswer';
+import { RecordCategory } from '../members/records/RecordCategory';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
@@ -30,6 +33,9 @@ export class Checkout extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(WebshopFieldAnswer), version: 94 })
     fieldAnswers: WebshopFieldAnswer[] = []
+
+    @field({ decoder: new ArrayDecoder(RecordAnswerDecoder), optional: true })
+    recordAnswers: RecordAnswer[] = []
 
     @field({ decoder: Cart })
     cart: Cart = Cart.create({})
@@ -333,12 +339,22 @@ export class Checkout extends AutoEncoder {
         }
     }
 
+    validateRecordAnswersFor(webshop: Webshop, category: RecordCategory) {
+        RecordCategory.validate([category], this.recordAnswers, this, Checkout.getFilterDefinitions(webshop.meta.recordCategories), true)
+    }
+
+    validateRecordAnswers(webshop: Webshop) {
+        const answers = RecordCategory.validate(webshop.meta.recordCategories, this.recordAnswers, this, Checkout.getFilterDefinitions(webshop.meta.recordCategories), true)
+        this.recordAnswers = answers
+    }
+
     validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false) {
         this.validateCart(webshop, organizationMeta, asAdmin)
         this.validateCheckoutMethod(webshop, organizationMeta)
         this.validateDeliveryAddress(webshop, organizationMeta)
         this.validateTimeSlot(webshop, organizationMeta)
         this.validateCustomer(webshop, organizationMeta, i18n)
+        this.validateRecordAnswers(webshop)
 
         if (this.totalPrice != 0 && !asAdmin) {
             this.validatePayment(webshop, organizationMeta)
@@ -360,5 +376,15 @@ export class Checkout extends AutoEncoder {
         }
 
         return this.checkoutMethod
+    }
+
+    static getFilterDefinitions(categories: RecordCategory[]): FilterDefinition<Checkout>[] {
+        const filters = RecordCategory.getRecordCategoryDefinitions(categories, (checkout: Checkout) => {
+            return checkout.recordAnswers
+        })
+
+        // TODO: add some extra filters
+
+        return filters;
     }
 }

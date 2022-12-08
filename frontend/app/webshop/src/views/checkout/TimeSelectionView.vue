@@ -1,65 +1,42 @@
 <template>
-    <div class="st-view boxed">
-        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
+    <SaveView :title="title" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" :prefer-large-button="true" @save="goNext">
+        <h1>
+            {{ title }}
+        </h1>
 
-        <div class="box">
-            <div class="st-view">
-                <main>
-                    <h1 v-if="checkoutMethod.type == 'Takeout'">
-                        Kies je afhaaltijdstip
-                    </h1>
-                    <h1 v-else-if="checkoutMethod.type == 'Delivery'">
-                        Kies je leveringstijdstip
-                    </h1>
-                    <h1 v-else-if="checkoutMethod.type == 'OnSite'">
-                        Kies wanneer je komt
-                    </h1>
+        <p v-if="checkoutMethod.type == 'Takeout'">
+            Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+        </p>
 
-                    <p v-if="checkoutMethod.type == 'Takeout'">
-                        Afhaallocatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
-                    </p>
-
-                    <p v-if="checkoutMethod.type == 'OnSite'">
-                        Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
-                    </p>
+        <p v-if="checkoutMethod.type == 'OnSite'">
+            Locatie: {{ checkoutMethod.name ? checkoutMethod.name + ',' : '' }} {{ checkoutMethod.address }}
+        </p>
                 
-                    <STErrorsDefault :error-box="errorBox" />
+        <STErrorsDefault :error-box="errorBox" />
 
-                    <STList>
-                        <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
-                            <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
-                            <h2 class="style-title-list">
-                                {{ slot.date | dateWithDay }}
-                            </h2> 
-                            <p class="style-description">
-                                Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
-                            </p>
+        <STList>
+            <STListItem v-for="(slot, index) in timeSlots" :key="index" :selectable="true" element-name="label" class="right-stack left-center">
+                <Radio slot="left" v-model="selectedSlot" name="choose-time-slot" :value="slot" />
+                <h2 class="style-title-list">
+                    {{ slot.date | dateWithDay }}
+                </h2> 
+                <p class="style-description">
+                    Tussen {{ slot.startTime | minutes }} - {{ slot.endTime | minutes }}
+                </p>
 
-                            <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
-                            <span v-else-if="slot.listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
-                        </STListItem>
-                    </STList>
-                </main>
-
-                <STToolbar>
-                    <LoadingButton slot="right" :loading="loading">
-                        <button class="button primary" type="button" @click="goNext">
-                            <span>Doorgaan</span>
-                            <span class="icon arrow-right" />
-                        </button>
-                    </LoadingButton>
-                </STToolbar>
-            </div>
-        </div>
-    </div>
+                <span v-if="slot.listedRemainingStock === 0" slot="right" class="style-tag error">Volzet</span>
+                <span v-else-if="slot.listedRemainingStock !== null" slot="right" class="style-tag">Nog {{ slot.listedRemainingStock }} {{ slot.remainingPersons !== null ? (slot.listedRemainingStock == 1 ? "persoon" : "personen") : (slot.listedRemainingStock == 1 ? "plaats" : "plaatsen") }}</span>
+            </STListItem>
+        </STList>
+    </SaveView>
 </template>
 
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ErrorBox, Radio, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethodType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -67,17 +44,13 @@ import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
-
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
         Radio,
-        LoadingButton,
         STErrorsDefault,
-        BackButton
+        SaveView
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
@@ -90,6 +63,19 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
     loading = false
     errorBox: ErrorBox | null = null
     CheckoutManager = CheckoutManager
+
+    get title() {
+        if (this.checkoutMethod.type === CheckoutMethodType.Takeout) {
+            return "Kies je afhaaltijdstip"
+        }
+        if (this.checkoutMethod.type === CheckoutMethodType.Delivery) {
+            return "Kies je leveringstijdstip"
+        }
+        if (this.checkoutMethod.type === CheckoutMethodType.OnSite) {
+            return "Kies wanneer je komt"
+        }
+        return "Kies je tijdstip"
+    }
 
     get checkoutMethod() {
         return CheckoutManager.checkout.checkoutMethod!
@@ -122,17 +108,7 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Time, true)
-            if (!nextStep) {
-                throw new SimpleError({
-                    code: "missing_config",
-                    message: "Er ging iets mis bij het ophalen van de volgende stap"
-                })
-            }
-            const comp = await nextStep.getComponent()
-
-            this.show(new ComponentWithProperties(comp, {}))
-            
+            await CheckoutStepsManager.goNext(CheckoutStepType.Time, this)
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

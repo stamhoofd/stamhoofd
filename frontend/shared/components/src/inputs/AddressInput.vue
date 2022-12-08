@@ -114,7 +114,7 @@ export default class AddressInput extends Vue {
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.isValid(true)
+                return this.isValid(true, false)
             })
         }
 
@@ -188,13 +188,17 @@ export default class AddressInput extends Vue {
                 e.addNamespace("address")
 
                 if (!silent) {
-                    this.pendingErrorBox = new ErrorBox(e)
+                    if (isFinal) {
+                        this.errorBox = new ErrorBox(e)
+                    } else {
+                        this.pendingErrorBox = new ErrorBox(e)
 
-                    setTimeout( () => {
-                        if (!this.hasFocus) {
-                            this.errorBox = this.pendingErrorBox
-                        }
-                    }, 200);
+                        setTimeout( () => {
+                            if (!this.hasFocus) {
+                                this.errorBox = this.pendingErrorBox
+                            }
+                        }, 200);
+                    }
                 }
             }
 

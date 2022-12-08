@@ -1,52 +1,34 @@
 <template>
-    <div class="st-view boxed">
-        <STNavigationBar :dismiss="canDismiss" :pop="canPop" />
-
-        <div class="box">
-            <div class="st-view">
-                <main>
-                    <h1>Kies je leveringsadres</h1>
-                    <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
-                        Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
-                    </div>
-
-                    <p v-if="checkout.deliveryPrice == 0" class="success-box">
-                        Levering is gratis
-                        <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
-                            vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
-                        </template>
-                    </p>
-                    <p v-else class="info-box">
-                        De leveringskost bedraagt {{ checkout.deliveryPrice | price }}
-                        <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === checkout.deliveryPrice" class="info-box">
-                            vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
-                        </template>
-                    </p>
-
-                    <STErrorsDefault :error-box="errorBox" />
-
-                    <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
-                </main>
-
-                <STToolbar>
-                    <LoadingButton slot="right" :loading="loading">
-                        <button class="button primary" @click="goNext">
-                            <span>Doorgaan</span>
-                            <span class="icon arrow-right" />
-                        </button>
-                    </LoadingButton>
-                </STToolbar>
-            </div>
+    <SaveView title="Kies je leveringsadres" :loading="loading" save-icon-right="arrow-right" save-text="Doorgaan" data-submit-last-field @save="goNext">
+        <h1>Kies je leveringsadres</h1>
+        <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== checkout.deliveryPrice" class="info-box">
+            Bestel minimum {{ deliveryMethod.price.minimumPrice | price }} om van een verlaagde leveringskost van {{ deliveryMethod.price.discountPrice | price }} te genieten.
         </div>
-    </div>
+
+        <p v-if="checkout.deliveryPrice == 0" class="success-box">
+            Levering is gratis
+            <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
+                vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+            </template>
+        </p>
+        <p v-else class="info-box">
+            De leveringskost bedraagt {{ checkout.deliveryPrice | price }}
+            <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === checkout.deliveryPrice" class="info-box">
+                vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
+            </template>
+        </p>
+
+        <STErrorsDefault :error-box="errorBox" />
+
+        <AddressInput v-model="address" :required="true" title="Vul het leveringsadres in" :validator="validator" :validate-server="server" />
+    </SaveView>
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, ErrorBox, LoadingButton, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { AddressInput, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { ValidatedAddress } from '@stamhoofd/structures';
+import { Address, ValidatedAddress } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -56,14 +38,11 @@ import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
 
 @Component({
     components: {
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
-        LoadingButton,
         STErrorsDefault,
         AddressInput,
-        BackButton
+        SaveView
     },
     filters: {
         dateWithDay: (d: Date) => Formatter.capitalizeFirstLetter(Formatter.dateWithDay(d)),
@@ -99,10 +78,11 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
         return CheckoutManager.checkout.address
     }
 
-    set address(address: ValidatedAddress | null) {
-        console.log(address)
-        CheckoutManager.checkout.address = address
-        CheckoutManager.saveCheckout()
+    set address(address: ValidatedAddress | Address | null) {
+        if (address instanceof ValidatedAddress) {
+            CheckoutManager.checkout.address = address
+            CheckoutManager.saveCheckout()
+        }
     } 
 
     get server() {
@@ -122,16 +102,7 @@ export default class AddressSelectionView extends Mixins(NavigationMixin){
         this.errorBox = null
 
         try {
-            const nextStep = await CheckoutStepsManager.getNextStep(CheckoutStepType.Address, true)
-            if (!nextStep) {
-                throw new SimpleError({
-                    code: "missing_config",
-                    message: "Er ging iets mis bij het ophalen van de volgende stap"
-                })
-            }
-            const comp = await nextStep.getComponent()
-
-            this.show(new ComponentWithProperties(comp, {}))
+            await CheckoutStepsManager.goNext(CheckoutStepType.Address, this)
             
         } catch (e) {
             console.error(e)

@@ -1,9 +1,13 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from "@simonbackx/simple-encoding";
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../../filters/ChoicesFilter";
 import { FilterDefinition } from "../../filters/FilterDefinition";
 import { PropertyFilter } from "../../filters/PropertyFilter";
-import { RecordSettings } from "./RecordSettings";
+import { StringFilterDefinition } from "../../filters/StringFilter";
+import { RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordTextAnswer } from "./RecordAnswer";
+import { RecordSettings, RecordType } from "./RecordSettings";
 
 export class RecordCategory extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -52,23 +56,27 @@ export class RecordCategory extends AutoEncoder {
         return this.records.filter(r => !r.sensitive)
     }
 
+    isEnabled<T>(filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean) {
+        if (this.filter && !this.filter.enabledWhen.decode(filterDefinitions).doesMatch(filterValue)) {
+            return false
+        }
+
+        if (this.childCategories.length > 0) {
+            if (this.filterChildCategories(filterValue, filterDefinitions, dataPermission).length > 0) {
+                return true;
+            }
+        }
+
+        if (this.filterRecords(dataPermission).length > 0) {
+            return true
+        }
+
+        return false
+    }
+
     static filterCategories<T>(categories: RecordCategory[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean): RecordCategory[] {
         return categories.filter(category => {
-            if (category.filter && !category.filter.enabledWhen.decode(filterDefinitions).doesMatch(filterValue)) {
-                return false
-            }
-
-            if (category.childCategories.length > 0) {
-                if (category.filterChildCategories(filterValue, filterDefinitions, dataPermission).length > 0) {
-                    return true;
-                }
-            }
-
-            if (category.filterRecords(dataPermission).length > 0) {
-                return true
-            }
-
-            return false
+            return category.isEnabled(filterValue, filterDefinitions, dataPermission)
         })
     }
 
@@ -102,5 +110,136 @@ export class RecordCategory extends AutoEncoder {
             }
             return [cat]
         })
+    }
+
+    static getRecordCategoryDefinitions<T>(recordCategories: RecordCategory[], getAnswers: (value: T) => RecordAnswer[]): FilterDefinition<T>[] {
+        const definitions: FilterDefinition<T>[] = []
+
+        for (const recordCategory of recordCategories) {
+            for (const record of recordCategory.records) {
+                definitions.push(...this.filterDefinitionsFromRecord(record, recordCategory.name, getAnswers))
+            }
+
+            for (const category of recordCategory.childCategories) {
+                for (const record of category.getAllRecords()) {
+                    definitions.push(...this.filterDefinitionsFromRecord(record, recordCategory.name + ' → ' + category.name, getAnswers))
+                }
+            }
+        }
+
+        return definitions
+    }
+
+    static filterDefinitionsFromRecord<T>(record: RecordSettings, category: string, getAnswers: (value: T) => RecordAnswer[]): FilterDefinition<T>[] {
+        if (record.type === RecordType.Checkbox) {
+            return [
+                new ChoicesFilterDefinition<T>({
+                    id: "record_"+record.id, 
+                    name: record.name, 
+                    category,
+                    choices: [
+                        new ChoicesFilterChoice("checked", "Aangevinkt"),
+                        new ChoicesFilterChoice("not_checked", "Niet aangevinkt")
+                    ], 
+                    getValue: (v) => {
+                        const answers = getAnswers(v)
+                        const answer = answers.find(a => a.settings?.id === record.id)
+                        if (answer instanceof RecordCheckboxAnswer) {
+                            return answer?.selected ? ["checked"] : ["not_checked"]
+                        }
+                        return ["not_checked"]
+                    },
+                    defaultMode: ChoicesFilterMode.Or
+                })
+            ]
+        }
+
+        if (record.type === RecordType.MultipleChoice) {
+            return [
+                new ChoicesFilterDefinition<T>({
+                    id: "record_"+record.id, 
+                    name: record.name, 
+                    category,
+                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                    getValue: (v) => {
+                        const answers = getAnswers(v)
+                        const answer = answers.find(a => a.settings?.id === record.id) 
+
+                        if (!answer || !(answer instanceof RecordMultipleChoiceAnswer)) {
+                            return []
+                        }
+
+                        return answer.selectedChoices.map(c => c.id)
+                    },
+                    defaultMode: ChoicesFilterMode.And
+                })
+            ]
+        }
+
+        if (record.type === RecordType.ChooseOne) {
+            return [
+                new ChoicesFilterDefinition<T>({
+                    id: "record_"+record.id, 
+                    name: record.name, 
+                    category,
+                    choices: record.choices.map(c => new ChoicesFilterChoice(c.id, c.name)), 
+                    getValue: (v) => {
+                        const answers = getAnswers(v)
+                        const answer = answers.find(a => a.settings?.id === record.id) 
+
+                        if (!answer || !(answer instanceof RecordChooseOneAnswer) || !answer.selectedChoice) {
+                            return []
+                        }
+
+                        return [answer.selectedChoice.id]
+                    },
+                    defaultMode: ChoicesFilterMode.Or
+                })
+            ]
+        }
+
+        if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
+            return [
+                new StringFilterDefinition<T>({
+                    id: "record_"+record.id, 
+                    name: record.name, 
+                    category,
+                    getValue: (v) => {
+                        const answers = getAnswers(v)
+                        const answer = answers.find(a => a.settings?.id === record.id) 
+                        if (answer instanceof RecordTextAnswer) {
+                            return answer?.value ?? ""
+                        }
+                        return ""
+                    }
+                })
+            ]
+        }
+        return []
+    }
+
+    static validate<T>(categories: RecordCategory[], answers: RecordAnswer[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean) {
+        const allRecords = categories.flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission))
+        const cleanedAnswers: RecordAnswer[] = []
+        const errors = new SimpleErrors()
+
+        // Delete all records that are not in the list
+        for (const record of allRecords) {
+            try {
+                const answer = record.validate(answers)
+                if (answer && !cleanedAnswers.includes(answer)) {
+                    cleanedAnswers.push(answer)
+                }
+            } catch (e) {
+                if (isSimpleErrors(e) || isSimpleError(e)) {
+                    errors.addError(e)
+                } else {
+                    throw e;
+                }
+            }
+        }
+
+        errors.throwIfNotEmpty()
+        return cleanedAnswers;
     }
 }

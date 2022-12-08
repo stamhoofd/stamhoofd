@@ -1,6 +1,6 @@
 <template>
     <div class="payconiq-banner-view">
-        <button class="payconiq-close button icon close white" @click="close" />
+        <button class="payconiq-close button icon close white" type="button" @click="close" />
         <h1>Scan en betaal met Payconiq by Bancontact</h1>
 
         <div class="payconiq-logo" />

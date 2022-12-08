@@ -57,11 +57,11 @@ export class PaymentHandler {
         transferSettings: TransferSettings | null;
         component: NavigationMixin; 
         type: "order" | "registration";
-    }, successHandler: (payment: Payment) => void, failedHandler: (payment: Payment | null) => void, transferHandler?: (payment: Payment | null) => void) {
+    }, successHandler: (payment: Payment, component: NavigationMixin) => void, failedHandler: (payment: Payment | null) => void, transferHandler?: (payment: Payment | null) => void) {
         const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings } = settings;
 
         if (payment.method == PaymentMethod.PointOfSale) {
-            successHandler(payment)
+            successHandler(payment, component)
         } else if (payment.method == PaymentMethod.Transfer) {
             if (transferHandler) {
                 transferHandler(payment)
@@ -73,9 +73,9 @@ export class PaymentHandler {
                 organization,
                 payment,
                 settings: transferSettings,
-                finishedHandler: (payment: Payment) => {
+                finishedHandler: (payment: Payment, component: NavigationMixin) => {
                     // Always go to success
-                    successHandler(payment)
+                    successHandler(payment, component)
                 }
             }))
         } else if (payment.provider == PaymentProvider.Payconiq) {
@@ -89,7 +89,7 @@ export class PaymentHandler {
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
                         if (payment && payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment)
+                            successHandler(payment, component) // use component because payconiq closed itself + was a sheet
                         } else {
                             failedHandler(payment)
                         }
@@ -107,7 +107,7 @@ export class PaymentHandler {
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {
                         if (payment && payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment)
+                            successHandler(payment, component) // use component because payconiq closed itself + was a sheet
                         } else {
                             failedHandler(payment)
                         }
