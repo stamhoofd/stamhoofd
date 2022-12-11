@@ -286,14 +286,15 @@ export class STInvoice extends Model {
             if (!refreshed || refreshed.number !== null) {
                 return
             }
-            if (STInvoice.numberCache) {
-                this.number = STInvoice.numberCache + 1
-                await this.save()
-
-                // If save succeeded: increase it
-                STInvoice.numberCache++;
-                return
-            }
+            // Removed the cache because not working across multiple instances
+            // if (STInvoice.numberCache) {
+            //     this.number = STInvoice.numberCache + 1
+            //     await this.save()
+            // 
+            //     // If save succeeded: increase it
+            //     STInvoice.numberCache++;
+            //     return
+            // }
             const lastInvoice = await STInvoice.where({ number: { value: null, sign: "!=" }}, { sort: [{ column: "number", direction: "DESC"}], limit: 1 })
             STInvoice.numberCache = lastInvoice[0]?.number ?? 0
             
