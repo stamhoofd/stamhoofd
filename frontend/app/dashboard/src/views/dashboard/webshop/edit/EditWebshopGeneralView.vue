@@ -62,7 +62,6 @@
                 </STList>
             </template>
         </template>
-        
 
         <hr>
         <h2>Beschikbaarheid</h2>
@@ -77,6 +76,32 @@
             </STInputBox>
             <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
         </div>
+
+        <div v-if="enableBetaFeatures" class="container">
+            <hr>
+            <h2>Nummering</h2>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" />
+                    <h3 class="style-title-list">
+                        Gebruik opeenlopende bestelnummers
+                    </h3>
+                    <p class="style-description">
+                        1, 2, 3, ...
+                    </p>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Random" />
+                    <h3 class="style-title-list">
+                        Gebruik willekeurige bestelnummers
+                    </h3>
+                    <p class="style-description">
+                        964824335, 116455337, 228149715, ...
+                    </p>
+                </STListItem>
+            </STList>
+        </div>
     </SaveView>
 </template>
 
@@ -85,7 +110,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
@@ -148,6 +173,14 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         return WebshopTicketType
     }
 
+    get WebshopNumberingType() {
+        return WebshopNumberingType
+    }
+
+    get enableBetaFeatures() {
+        return this.organization.meta.enableBetaFeatures
+    }
+
     get name() {
         return this.webshop.meta.name
     }
@@ -168,6 +201,15 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     set ticketType(ticketType: WebshopTicketType) {
         const patch = WebshopMetaData.patch({ ticketType })
         this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+    }
+
+    get numberingType() {
+        return this.webshop.privateMeta.numberingType
+    }
+
+    set numberingType(numberingType: WebshopNumberingType) {
+        const patch = WebshopPrivateMetaData.patch({ numberingType })
+        this.addPatch(PrivateWebshop.patch({ privateMeta: patch}) )
     }
 
     get organization() {
