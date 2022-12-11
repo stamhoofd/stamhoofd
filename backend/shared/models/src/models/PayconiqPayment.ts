@@ -77,7 +77,7 @@ export class PayconiqPayment extends Model {
     }
 
 
-    static async createPayment(payment: Payment, organization: Organization, description: string) {
+    static async createPayment(payment: Payment, organization: Organization, description: string, returnUrl?: string, callbackUrl?: string) {
         const apiKey = organization.privateMeta.payconiqApiKey
         if (!apiKey) {
             throw new SimpleError({
@@ -90,17 +90,23 @@ export class PayconiqPayment extends Model {
             reference: payment.id.replace("-", ""), // 36 chars, max length is 35...
             amount: payment.price,
             currency: "EUR",
-            callbackUrl: 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+            callbackUrl: callbackUrl ?? 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+            returnUrl,
             description
-
         }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
 
         const payconiqPayment = new PayconiqPayment()
         payconiqPayment.paymentId = payment.id
         payconiqPayment.payconiqId = response.paymentId
 
-        // Read link
-        const link = response._links.deeplink.href as string;
+        // Read link (currently we use checkout!)
+        let link = response._links.checkout.href as string;
+
+        if (organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production') {
+            // For checkout only!
+            // We get the wrong link in development mode
+            link = link.replace('https://payconiq.com/', 'https://ext.payconiq.com/');
+        }
 
         await payconiqPayment.save();
 

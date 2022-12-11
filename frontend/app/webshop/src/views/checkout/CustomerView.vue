@@ -15,25 +15,27 @@
             </div>
         </STInputBox>
 
-        <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
+        <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" :placeholder="emailPlaceholder" autocomplete="email" />
+        <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
 
-        <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
+        <PhoneInput v-if="phoneEnabled" v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
 
         <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="CheckoutManager.checkout.fieldAnswers" :error-box="errorBox" />
     </SaveView>
 </template>
 
 <script lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { EmailInput, ErrorBox, FieldBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
+import { WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { CheckoutManager } from '../../classes/CheckoutManager';
 import { WebshopManager } from '../../classes/WebshopManager';
 import { CheckoutStepsManager, CheckoutStepType } from './CheckoutStepsManager';
+
 
 @Component({
     components: {
@@ -58,10 +60,27 @@ export default class CustomerView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
     validator = new Validator()
     CheckoutManager = CheckoutManager
-    
 
+    get phoneEnabled() {
+        return this.webshop.meta.phoneEnabled
+    }
+    
     get checkoutMethod() {
         return CheckoutManager.checkout.checkoutMethod!
+    }
+
+    get emailPlaceholder() {
+        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
+            return 'Voor tickets'
+        }
+        return 'Voor bevestigingsemail'
+    }
+
+    get emailDescription() {
+        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
+            return 'Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.'
+        }
+        return null
     }
 
     get fields() {

@@ -78,30 +78,10 @@ export class PaymentHandler {
                     successHandler(payment, component)
                 }
             }))
-        } else if (payment.provider == PaymentProvider.Payconiq) {
+        } else if (payment.provider == PaymentProvider.Payconiq && paymentUrl) {
             if (this.getOS() == "android" || this.getOS() == "iOS") {
-                const url = paymentUrl+"?returnUrl="+encodeURIComponent(returnUrl ? returnUrl : "https://"+window.location.hostname+"/payment?id="+encodeURIComponent(payment.id)) 
-                
-                // only on desktop
+                // we need this view for polling
                 const buttonComponent = new ComponentWithProperties(PayconiqButtonView, { 
-                    paymentUrl: url, 
-                    server,
-                    initialPayment: payment,
-                    finishedHandler: (payment: Payment | null) => {
-                        if (payment && payment.status == PaymentStatus.Succeeded) {
-                            successHandler(payment, component) // use component because payconiq closed itself + was a sheet
-                        } else {
-                            failedHandler(payment)
-                        }
-                    }
-                }).setDisplayStyle("sheet")
-                component.present(buttonComponent)
-                //this.loading = false;
-                return;
-                
-            } else {
-                // only on desktop
-                const bannerComponent = new ComponentWithProperties(PayconiqBannerView, { 
                     paymentUrl, 
                     server,
                     initialPayment: payment,
@@ -113,8 +93,30 @@ export class PaymentHandler {
                         }
                     }
                 }).setDisplayStyle("sheet")
+                component.present(buttonComponent)
+                return;
+                
+            } else {
+                // We need to remove the checkout search params to make the QR-code work.
+                const u = new URL(paymentUrl);
+                u.searchParams.delete('token');
+                u.searchParams.delete('returnUrl');
+                const url = u.toString();
+
+                // only on desktop
+                const bannerComponent = new ComponentWithProperties(PayconiqBannerView, { 
+                    paymentUrl: url, 
+                    server,
+                    initialPayment: payment,
+                    finishedHandler: (payment: Payment | null) => {
+                        if (payment && payment.status == PaymentStatus.Succeeded) {
+                            successHandler(payment, component) // use component because payconiq closed itself + was a sheet
+                        } else {
+                            failedHandler(payment)
+                        }
+                    }
+                }).setDisplayStyle("sheet")
                 component.present(bannerComponent)
-                //this.loading = false;
                 return;
             }
         } else {

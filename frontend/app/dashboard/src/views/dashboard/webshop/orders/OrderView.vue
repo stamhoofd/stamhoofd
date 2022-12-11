@@ -12,6 +12,20 @@
                 Bestelling #{{ order.number }}
             </h1>
 
+            <div v-if="hasWarnings" class="hover-box container">
+                <ul class="member-records">
+                    <li
+                        v-for="warning in sortedWarnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
+                    >
+                        <span :class="'icon '+warning.icon" />
+                        <span class="text">{{ warning.text }}</span>
+                    </li>
+                </ul>
+                <hr>
+            </div>
+
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
@@ -201,7 +215,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem>
+                <STListItem v-if="order.data.customer.phone">
                     <h3 class="style-definition-label">
                         {{ $t("shared.inputs.mobile.label") }}
                     </h3>
@@ -220,6 +234,14 @@
                     </p>
                 </STListItem>
             </STList>
+
+            <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
+                <hr>
+                <h2>
+                    {{ category.name }}
+                </h2>
+                <RecordCategoryAnswersBox :category="category" :answers="recordAnswers" :data-permission="true" />
+            </div>
 
             <div v-if="order.data.comments" class="container">
                 <hr>
@@ -286,9 +308,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, Tooltip, TooltipDirective } from "@stamhoofd/components";
+import { ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, getPermissionLevelNumber, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -309,7 +331,8 @@ import TicketRow from "./TicketRow.vue";
         LoadingButton,
         STErrorsDefault,
         LoadingView,
-        TicketRow
+        TicketRow,
+        RecordCategoryAnswersBox
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -356,6 +379,24 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get tickets() {
         return this.order.tickets
+    }
+
+    get hasWarnings() {
+        return this.warnings.length > 0
+    }
+
+    get warnings(): RecordWarning[] {
+        const warnings: RecordWarning[] = []
+
+        for (const answer of this.recordAnswers) {
+            warnings.push(...answer.getWarnings())
+        }
+
+        return warnings
+    }
+
+    get sortedWarnings() {
+        return this.warnings.slice().sort(RecordWarning.sort)
     }
 
     openTickets() {
@@ -649,6 +690,17 @@ export default class OrderView extends Mixins(NavigationMixin){
                 }
             }
         }).catch(console.error);
+    }
+
+    get recordCategories(): RecordCategory[] {
+        return RecordCategory.flattenCategoriesForAnswers(
+            this.webshop.meta.recordCategories,
+            this.order.data.recordAnswers
+        )
+    }
+
+    get recordAnswers() {
+        return this.order.data.recordAnswers
     }
 }
 </script>

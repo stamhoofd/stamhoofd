@@ -63,6 +63,35 @@ export class RecordWarning extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder })
     inverted = false
+
+    static get sort() {
+        return (warning1: RecordWarning, warning2: RecordWarning) => {
+            const priority1: string = warning1.type
+            const priority2: string = warning2.type
+
+            if (priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Warning ||
+                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Info ||
+                priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Info) {
+                return -1;
+            }
+            else if (priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Warning ||
+                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Error ||
+                priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Error) {
+                return 1;
+            }
+            else {
+                return 0;
+            }
+        };
+    }
+
+    get icon() {
+        switch (this.type) {
+            case RecordWarningType.Error: return " exclamation-two red"
+            case RecordWarningType.Warning: return " exclamation yellow"
+            case RecordWarningType.Info: return " info-text"
+        }
+    }
 }
 
 export class RecordChoice extends AutoEncoder {

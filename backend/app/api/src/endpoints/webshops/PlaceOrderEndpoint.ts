@@ -189,7 +189,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     dbPayment.mollieId = molliePayment.id
                     await dbPayment.save();
                 } else if (payment.provider == PaymentProvider.Payconiq) {
-                    paymentUrl = await PayconiqPayment.createPayment(payment, organization, description)
+                    paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, exchangeUrl)
                 } else if (payment.provider == PaymentProvider.Buckaroo) {
                     // Increase request timeout because buckaroo is super slow
                     request.request.request?.setTimeout(60 * 1000)

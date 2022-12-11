@@ -297,13 +297,17 @@ export class Checkout extends AutoEncoder {
             })
         }
 
-        if (this.customer.phone.length < 6) {
-            throw new SimpleError({
-                code: "invalid_phone",
-                message: "Invalid phone",
-                human: i18n.t('webshop.inputs.phone.invalidMessage').toString(),
-                field: "customer.phone"
-            })
+        if (webshop.meta.phoneEnabled) {
+            if (this.customer.phone.length < 6) {
+                throw new SimpleError({
+                    code: "invalid_phone",
+                    message: "Invalid phone",
+                    human: i18n.t('webshop.inputs.phone.invalidMessage').toString(),
+                    field: "customer.phone"
+                })
+            }
+        } else {
+            this.customer.phone = ""
         }
 
         const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
