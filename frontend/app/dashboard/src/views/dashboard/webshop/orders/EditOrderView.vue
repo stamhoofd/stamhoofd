@@ -32,11 +32,18 @@
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestingsemail" autocomplete="email" />
+            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestigingsemail" autocomplete="email" />
 
-            <PhoneInput v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" />
+            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" :required="phoneEnabed" />
 
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errorBox" />
+
+            <div v-for="category of recordCategories" :key="category.id" class="container">
+                <hr>
+                <h2>{{ category.name }}</h2>
+                
+                <RecordAnswerInput v-for="record of category.records" :key="record.id" :record-settings="record" :record-answers="recordAnswers" :validator="validator" :all-optional="true" />
+            </div>
 
             <template v-if="checkoutMethods.length > 1">
                 <hr>
@@ -177,17 +184,16 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
+import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager } from "@stamhoofd/networking";
-import { CartItem, CheckoutMethod, CheckoutMethodType, Customer, OrderData, PaymentMethod, PrivateOrder, ValidatedAddress, Version, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import { WebshopManager } from "../WebshopManager";
 import AddItemView from "./AddItemView.vue";
-
 
 @Component({
     components: {
@@ -203,7 +209,8 @@ import AddItemView from "./AddItemView.vue";
         PhoneInput,
         AddressInput,
         FieldBox,
-        PaymentSelectionList
+        PaymentSelectionList,
+        RecordAnswerInput
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -238,12 +245,26 @@ export default class EditOrderView extends Mixins(NavigationMixin){
 
     validator = new Validator()
     answersClone = this.order.data.fieldAnswers.map(a => a.clone())
+    recordAnswersClone = this.order.data.recordAnswers.map(a => a.clone())
 
     mounted() {
         if (this.isNew && this.checkoutMethods.length > 0) {
             // Force selection of method
             this.selectedMethod = this.checkoutMethods[0]
         }
+    }
+
+    get recordCategories(): RecordCategory[] {
+        return RecordCategory.flattenCategories(
+            this.webshop.meta.recordCategories, 
+            this.patchedOrder.data, 
+            Checkout.getFilterDefinitions(this.webshop.meta.recordCategories),
+            true
+        )
+    }
+
+    get phoneEnabed() {
+        return this.webshop.meta.phoneEnabled
     }
 
     get title() {
@@ -271,7 +292,8 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     get finalPatch() {
         return this.patchOrder.patch(PrivateOrder.patch({
             data: OrderData.patch({
-                fieldAnswers: this.answersClone
+                fieldAnswers: this.answersClone,
+                recordAnswers: this.recordAnswersClone as any
             })
         }))
     }
@@ -339,11 +361,11 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         return this.patchedOrder.data.customer.phone
     }
 
-    set phone(phone: string) {
+    set phone(phone: string | null) {
         this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
             data: OrderData.patch({
                 customer: Customer.patch({
-                    phone
+                    phone: phone ?? ""
                 })
             })
         }))
@@ -457,6 +479,13 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         }))
     }
 
+    get recordAnswers() {
+        return this.recordAnswersClone
+    }
+
+    set recordAnswers(recordAnswers: RecordAnswer[]) {
+        this.recordAnswersClone = recordAnswers
+    }
 
     // Other
 
@@ -477,7 +506,11 @@ export default class EditOrderView extends Mixins(NavigationMixin){
 
             await this.$nextTick();
 
-            this.patchedOrder.data.validate(this.webshopManager.webshop!, OrganizationManager.organization.meta, I18nController.i18n, true);
+            const orderData = this.patchedOrder.data
+            orderData.validate(this.webshopManager.webshop!, OrganizationManager.organization.meta, I18nController.i18n, true);
+
+            // Save validated record answers (to delete old answers)
+            this.recordAnswersClone = orderData.recordAnswers
 
             this.saving = true
 

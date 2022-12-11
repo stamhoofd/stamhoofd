@@ -8,14 +8,10 @@
                         :key="warning.id"
                         :class="{ [warning.type]: true }"
                     >
-                        <span :class="'icon '+getIcon(warning)" />
+                        <span :class="'icon '+warning.icon" />
                         <span class="text">{{ warning.text }}</span>
                     </li>
                 </ul>
-
-                <p v-if="warnings.length == 0" class="info-box">
-                    Geen waarschuwingen
-                </p>
             </div>
 
             <div class="hover-box container">
@@ -226,14 +222,10 @@
                         :key="warning.id"
                         :class="{ [warning.type]: true }"
                     >
-                        <span :class="'icon '+getIcon(warning)" />
+                        <span :class="'icon '+warning.icon" />
                         <span class="text">{{ warning.text }}</span>
                     </li>
                 </ul>
-
-                <p v-if="warnings.length == 0" class="info-box">
-                    Geen waarschuwingen
-                </p>
 
                 <template v-if="member.users.length > 0">
                     <hr>
@@ -459,26 +451,8 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         return warnings
     }
 
-
     get sortedWarnings() {
-        return this.warnings.slice().sort((warning1, warning2) => {
-            const priority1: string = warning1.type
-            const priority2: string = warning2.type
-
-            if (priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Warning ||
-                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Info ||
-                priority1 == RecordWarningType.Error && priority2 == RecordWarningType.Info) {
-                return -1;
-            }
-            else if (priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Warning ||
-                priority1 == RecordWarningType.Warning && priority2 == RecordWarningType.Error ||
-                priority1 == RecordWarningType.Info && priority2 == RecordWarningType.Error) {
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        } )
+        return this.warnings.slice().sort(RecordWarning.sort)
     }
 
     editRecordCategory(category: RecordCategory) {
@@ -638,14 +612,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             member: member,
         }).setDisplayStyle("popup");
         this.present(component);
-    }
-
-    getIcon(warning: RecordWarning) {
-        switch (warning.type) {
-            case RecordWarningType.Error: return " exclamation-two red"
-            case RecordWarningType.Warning: return " exclamation yellow"
-            case RecordWarningType.Info: return " info-text"
-        }
     }
 
     editContact(contact: EmergencyContact) {

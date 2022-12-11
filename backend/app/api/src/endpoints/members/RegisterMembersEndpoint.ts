@@ -386,7 +386,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 dbPayment.mollieId = molliePayment.id
                 await dbPayment.save();
             } else if (payment.provider === PaymentProvider.Payconiq) {
-                paymentUrl = await PayconiqPayment.createPayment(payment, user.organization, description)
+                paymentUrl = await PayconiqPayment.createPayment(payment, user.organization, description, redirectUrl, webhookUrl)
             } else if (payment.provider == PaymentProvider.Buckaroo) {
                 // Increase request timeout because buckaroo is super slow (in development)
                 request.request.request?.setTimeout(60 * 1000)

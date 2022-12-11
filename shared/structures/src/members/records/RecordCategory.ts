@@ -94,10 +94,13 @@ export class RecordCategory extends AutoEncoder {
             filterDefinitions,
             dataPermission
         ).flatMap(cat => {
+             // Make a (not deep!) clone
+            const cat2 = RecordCategory.create(cat)
+            cat2.childCategories = []
+            cat2.records = cat2.filterRecords(dataPermission)
+
             if (cat.childCategories.length > 0) {
                 // Make a (not deep!) clone
-                const cat2 = RecordCategory.create(cat)
-                cat2.childCategories = []
                 return [
                     ...(cat2.records.length > 0 ? [cat2] : []),
                     ...this.flattenCategories(cat.childCategories, filterValue, filterDefinitions, dataPermission).map(c => {
@@ -108,7 +111,38 @@ export class RecordCategory extends AutoEncoder {
                     })
                 ]
             }
-            return [cat]
+            return (cat2.records.length > 0 ? [cat2] : [])
+        })
+    }
+
+    /**
+     * Get all categories for the given answers
+     */
+    static flattenCategoriesForAnswers(categories: RecordCategory[], answers: RecordAnswer[]): RecordCategory[] {
+        return categories.flatMap(cat => {
+            // Make a (not deep!) clone
+            const cat2 = RecordCategory.create(cat)
+
+            const updatedRecords = cat.records.filter(r => {
+                return !!answers.find(a => a.settings.id == r.id)
+            });
+
+            cat2.records = updatedRecords
+
+            if (cat.childCategories.length > 0) {
+                // Make a (not deep!) clone
+                cat2.childCategories = []
+                return [
+                    ...(cat2.records.length > 0 ? [cat2] : []),
+                    ...this.flattenCategoriesForAnswers(cat.childCategories, answers).map(c => {
+                        // Make a (not deep!) clone
+                        const cc = RecordCategory.create(c)
+                        cc.name = cat.name + " → " + c.name
+                        return cc
+                    })
+                ]
+            }
+            return cat2.records.length > 0 ? [cat2] : []
         })
     }
 

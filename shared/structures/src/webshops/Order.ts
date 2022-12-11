@@ -258,10 +258,12 @@ export class Order extends AutoEncoder {
                 title: "Naam",
                 value: this.data.customer.name
             },
-            {
-                title: "GSM-nummer",
-                value: this.data.customer.phone
-            },
+            ...(this.data.customer.phone ? [
+                {
+                    title: "GSM-nummer",
+                    value: this.data.customer.phone
+                }
+            ] : []),
             ...this.data.fieldAnswers.filter(a => a.answer).map(a => ({
                 title: a.field.name,
                 value: a.answer

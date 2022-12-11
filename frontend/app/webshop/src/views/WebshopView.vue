@@ -299,20 +299,31 @@ export default class WebshopView extends Mixins(NavigationMixin){
                 adjustHistory: false,
                 animated: false,
                 force: true,
-                url: currentPath,
                 components: [
                     new ComponentWithProperties(PaymentPendingView, { 
                         server: WebshopManager.server, 
                         paymentId,
                         finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
                             if (payment && payment.status == PaymentStatus.Succeeded) {
-                                this.present({
-                                    components: [
-                                        new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true })
-                                    ],
-                                    animated: true
-                                })
-                                this.dismiss({force: true})
+                                if (this.modalNavigationController) {
+                                    // We are not in a popup: on mobile
+                                    // So replace with a force instead of dimissing
+                                    this.present({
+                                        components: [
+                                            new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true })
+                                        ],
+                                        replace: 1,
+                                        force: true
+                                    })
+                                } else {
+                                    // Desktop: push
+                                    this.present({
+                                        components: [
+                                            new ComponentWithProperties(OrderView, { paymentId: payment.id, success: true })
+                                        ]
+                                    })
+                                    this.dismiss({force: true})
+                                }
                             } else {
                                 this.dismiss({force: true})
                                 new CenteredMessage("Betaling mislukt", "De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.").addCloseButton(undefined, async () => {
