@@ -1,11 +1,12 @@
+import { WebshopNumberingType } from "@stamhoofd/structures";
 import { WebshopCounter } from "./WebshopCounter";
 
 describe("WebshopCounter", () => {
     test("Create multiple order numbers", async () => {
-        const first = WebshopCounter.getNextNumber("ADGS")
-        const second = WebshopCounter.getNextNumber("ADGS")
-        const other = WebshopCounter.getNextNumber("ZEGQ")
-        const last = WebshopCounter.getNextNumber("ADGS")
+        const first = WebshopCounter.getNextNumber("ADGS", WebshopNumberingType.Continuous)
+        const second = WebshopCounter.getNextNumber("ADGS", WebshopNumberingType.Continuous)
+        const other = WebshopCounter.getNextNumber("ZEGQ", WebshopNumberingType.Continuous)
+        const last = WebshopCounter.getNextNumber("ADGS", WebshopNumberingType.Continuous)
 
         await expect(first).resolves.toEqual(1)
         await expect(second).resolves.toEqual(2)

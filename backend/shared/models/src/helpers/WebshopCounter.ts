@@ -1,10 +1,15 @@
 import { Database } from "@simonbackx/simple-database";
 import { QueueHandler } from "@stamhoofd/queues";
+import { WebshopNumberingType } from "@stamhoofd/structures";
 
 export class WebshopCounter  {
     static numberCache: Map<string, number> = new Map()
 
-    static async getNextNumber(webshopId: string): Promise<number> {
+    static async getNextNumber(webshopId: string, numberingType: WebshopNumberingType): Promise<number> {
+        if (numberingType == WebshopNumberingType.Random) {
+            return Math.floor(Math.random() * 1000000000)
+        }
+        
         // Prevent race conditions: create a queue
         // The queue can only run one at a time for the same webshop (so multiple webshops at the same time are allowed)
         return await QueueHandler.schedule("webshop/numbers-"+webshopId, async () => {

@@ -320,6 +320,11 @@ export enum WebshopStatus {
     "Archived" = "Archived"
 }
 
+export enum WebshopNumberingType {
+    "Continuous" = "Continuous",
+    "Random" = "Random"
+}
+
 export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
@@ -424,6 +429,9 @@ export class WebshopPrivateMetaData extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 163 })
     notificationEmails: string[] = []
+
+    @field({ decoder: new EnumDecoder(WebshopNumberingType), optional: true })
+    numberingType = WebshopNumberingType.Continuous
 
     static buildDNSRecords(domain: string): DNSRecord[] {
         return [

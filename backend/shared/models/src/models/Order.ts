@@ -501,7 +501,7 @@ export class Order extends Model {
         }
         this.validAt = new Date() // will get flattened AFTER calculations
         this.validAt.setMilliseconds(0)
-        this.number = await WebshopCounter.getNextNumber(this.webshopId)
+        this.number = await WebshopCounter.getNextNumber(this.webshopId, this.webshop.privateMeta.numberingType)
         await this.save()
 
         if (this.data.customer.email.length > 0) {
