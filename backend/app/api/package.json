@@ -32,7 +32,7 @@
         "base-x": "^3.0.9",
         "formidable": "^1.2.2",
         "html-to-text": "^5.1.1",
-        "jsonwebtoken": "^8.5.1",
+        "jsonwebtoken": "^9.0.0",
         "libsodium-wrappers-sumo": "^0.7.9",
         "luxon": "^2.2.0",
         "mailparser": "^3.4.0",
