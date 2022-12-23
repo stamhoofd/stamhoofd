@@ -1,5 +1,6 @@
 <template>
     <div class="container field-box">
+        <hr v-if="withTitle">
         <h2 v-if="withTitle">
             {{ field.name || 'Maak een keuze' }}
         </h2>
@@ -7,7 +8,6 @@
             <input v-model="value" :placeholder="field.required ? field.placeholder : 'Optioneel' " class="input">
             <p v-if="field.description" class="style-description-small" v-text="field.description" />
         </STInputBox>
-        <hr v-if="withTitle">
     </div>
 </template>
 

@@ -534,7 +534,7 @@
                         "interval": "1d",
                         "burst": 50
                     },
-                    "ask": "http://127.0.0.1:9091/162/check-domain-cert"
+                    "ask": "http://127.0.0.1:9091/v168/check-domain-cert"
                 }
             }
         }

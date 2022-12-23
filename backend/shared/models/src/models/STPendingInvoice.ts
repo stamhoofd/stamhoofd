@@ -153,6 +153,7 @@ export class STPendingInvoice extends Model {
                 const pendingCount = pendingInvoice ? pendingInvoice.meta.items.reduce((c, item) => c + ((item.package && item.package.id === pack.id) ? item.amount : 0), 0) : 0
                 const item = STInvoiceItem.fromPackage(STPackageStruct.create(pack), membersCount, pendingCount, today)
                 if (item.price > 0) {
+                    console.log('Adding item to pending invoice', item)
                     pendingItems.push(item)
                 }
             } else if ((pack.validUntil === null || pack.validUntil >= today) && pack.meta.paidAmount < pack.meta.minimumAmount) {
@@ -160,8 +161,8 @@ export class STPendingInvoice extends Model {
                 // Check if paid amount matches at least one
                 const pendingCount = pendingInvoice ? pendingInvoice.meta.items.reduce((c, item) => c + ((item.package && item.package.id === pack.id) ? item.amount : 0), 0) : 0
                 const item = STInvoiceItem.fromPackage(STPackageStruct.create(pack), 0, pendingCount, today)
-                console.log(item)
                 if (item.price > 0) {
+                    console.log('Adding item to pending invoice', item)
                     pendingItems.push(item)
                 }
             }

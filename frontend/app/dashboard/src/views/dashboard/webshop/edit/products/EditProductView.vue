@@ -83,7 +83,7 @@
 
         <ProductPriceBox v-if="patchedProduct.prices.length == 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" @patch="addPatch($event)" />
 
-        <STList v-else>
+        <STList v-else v-model="draggablePrices" :draggable="true">
             <ProductPriceRow v-for="price in patchedProduct.prices" :key="price.id" :product-price="price" :product="patchedProduct" @patch="addPatch" @move-up="movePriceUp(price)" @move-down="movePriceDown(price)" />
         </STList>
 
@@ -127,35 +127,139 @@
         
         <hr>
         <h2>
-            Voorraad
+            Beschikbaarheid
             {{ remainingStock !== null ? ('(nog '+ remainingStock +' beschikbaar)') : '' }}
         </h2>
 
-        <Checkbox v-model="disabled">
-            Tijdelijk niet beschikbaar
-        </Checkbox>
+        <STList>
+            <STListItem v-if="enableBetaFeatures || hidden" :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="hidden" />
 
-        <Checkbox v-model="useStock">
-            Beperk het maximaal aantal stuks dat je kan verkopen van dit artikel
-        </Checkbox>
+                <h3 class="style-title-list">
+                    Verbergen op webshop
+                </h3>
+                <p v-if="hidden" class="style-description-small">
+                    Dit artikel wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.
+                </p>
+            </STListItem>
+        
 
-        <div v-if="useStock" class="split-inputs">
-            <STInputBox title="Totaal aantal beschikbare stuks" error-fields="stock" :error-box="errorBox">
-                <NumberInput v-model="stock" />
-            </STInputBox>
-        </div>
+            <template v-if="!hidden">
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" v-model="disabled" />
 
-        <Checkbox v-if="useStock" v-model="resetStock">
-            Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht van de {{ stock }})
-        </Checkbox>
+                    <h3 class="style-title-list">
+                        Onbeschikbaar
+                    </h3>
+                    <p v-if="disabled" class="style-description-small">
+                        Zichtbaar op de webshop, maar niet mogelijk om te bestellen.
+                    </p>
+                </STListItem>
 
-        <STInputBox v-if="useStock && resetStock" title="Verkocht aantal stuks" error-fields="usedStock" :error-box="errorBox">
-            <NumberInput v-model="usedStock" :max="stock" />
-        </STInputBox>
+                <template v-if="!disabled">
+                    <STListItem v-if="enableBetaFeatures" :selectable="true" element-name="label">
+                        <Checkbox slot="left" v-model="useEnableAfter" />
 
-        <p v-if="useStock" class="style-description">
-            Als je een bestelling annuleert of verwijdert zullen we de voorraad ook terug aanvullen (tenzij de bestelling geplaatst werd op een moment dat er geen voorraad maximum was). En als je een geannuleerde bestelling terugzet, zullen we ook terug de voorraad aanpassen.
-        </p>
+                        <h3 class="style-title-list">
+                            Beschikbaar vanaf datum
+                        </h3>
+                        <p v-if="useEnableAfter" class="style-description-small">
+                            Zichtbaar op de webshop, maar pas te bestellen vanaf een bepaalde datum.
+                        </p>
+
+                        <div v-if="useEnableAfter" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="enableAfter" :error-box="errorBox">
+                                <DateSelection v-model="enableAfter" />
+                            </STInputBox>
+                            <TimeInput v-model="enableAfter" title="" :validator="validator" />
+                        </div>
+                    </STListItem>
+
+                    <STListItem v-if="enableBetaFeatures" :selectable="true" element-name="label">
+                        <Checkbox slot="left" v-model="useDisableAfter" />
+
+                        <h3 class="style-title-list">
+                            Onbeschikbaar na datum
+                        </h3>
+                        <p v-if="useDisableAfter" class="style-description-small">
+                            Zichtbaar op de webshop, maar niet meer te bestellen na een bepaalde datum.
+                        </p>
+
+                        <div v-if="useDisableAfter" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="disableAfter" :error-box="errorBox">
+                                <DateSelection v-model="disableAfter" />
+                            </STInputBox>
+                            <TimeInput v-model="disableAfter" title="" :validator="validator" />
+                        </div>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="label">
+                        <Checkbox slot="left" v-model="useStock" />
+
+                        <h3 class="style-title-list">
+                            Beperk het beschikbare aantal stuks (waarvan nu {{ usedStock }} verkocht of gereserveerd)
+                        </h3>
+
+                        <p v-if="useStock" class="style-description-small">
+                            Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                        </p>
+
+                        <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="stock" :error-box="errorBox">
+                                <NumberInput v-model="stock" />
+                            </STInputBox>
+                        </div>
+                    </STListItem>
+
+                    <STListItem v-if="false && useStock" :selectable="true" element-name="label">
+                        <Checkbox slot="left" v-model="resetStock" />
+
+                        <h3 class="style-title-list">
+                            Wijzig aantal verkochte stuks manueel (nu {{ usedStock }} verkocht)
+                        </h3>
+
+                        <div v-if="resetStock" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="usedStock" :error-box="errorBox">
+                                <NumberInput v-model="usedStock" />
+                            </STInputBox>
+                        </div>
+
+                        <p class="style-description">
+                            Geannuleerde en verwijderde bestellingen worden niet meegerekend.
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="enableBetaFeatures || useMaxPerOrder" :selectable="true" element-name="label">
+                        <Checkbox slot="left" v-model="useMaxPerOrder" />
+
+                        <h3 class="style-title-list">
+                            Beperk het maximaal aantal stuks per bestelling
+                        </h3>
+
+                        <p v-if="useMaxPerOrder" class="style-description-small">
+                            Het aantal stuks wordt geteld over alle mogelijke keuzes heen en wordt niet gecommuniceerd tenzij men over de limiet gaat.
+                        </p>
+
+                        <div v-if="useMaxPerOrder" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="maxPerOrder" :error-box="errorBox">
+                                <NumberInput v-model="maxPerOrder" :min="1" />
+                            </STInputBox>
+                        </div>
+                    </STListItem>
+                </template>
+            </template>
+
+            <STListItem v-if="enableBetaFeatures" :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="notAllowMultiple" />
+
+                <h3 class="style-title-list">
+                    Keuze voor aantal stuks verbergen
+                </h3>
+                <p class="style-description-small">
+                    Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.
+                </p>
+            </STListItem>
+        </STList>
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -174,10 +278,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, UploadButton, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, DateSelection, Dropdown, ErrorBox, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton, Validator } from "@stamhoofd/components";
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionFit, ResolutionRequest, Version, WebshopField, WebshopTicketType } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../../../../classes/OrganizationManager';
 import WebshopFieldsBox from "../fields/WebshopFieldsBox.vue";
 import EditOptionMenuView from './EditOptionMenuView.vue';
 import EditProductPriceView from './EditProductPriceView.vue';
@@ -197,12 +302,15 @@ import ProductSelectLocationInput from "./ProductSelectLocationInput.vue";
         UploadButton,
         ProductPriceRow,
         STList,
+        STListItem,
         OptionMenuSection,
         ProductPriceBox,
         WebshopFieldsBox,
         ProductSelectLocationInput,
         ProductSelectDateRangeInput,
-        Dropdown
+        Dropdown,
+        DateSelection,
+        TimeInput
     },
 })
 export default class EditProductView extends Mixins(NavigationMixin) {
@@ -210,13 +318,13 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    product!: Product
+        product!: Product
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-    webshop: PrivateWebshop
+        webshop: PrivateWebshop
 
 
     /// For now only used to update locations and times of other products that are shared
@@ -227,7 +335,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-    saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
+        saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => void;
 
     get isTicket() {
         return this.type === ProductType.Ticket || this.type === ProductType.Voucher || this.webshop.meta.ticketType === WebshopTicketType.Tickets
@@ -239,6 +347,10 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     get patchedProduct() {
         return this.product.patch(this.patchProduct)
+    }
+
+    get enableBetaFeatures() {
+        return OrganizationManager.organization.meta.enableBetaFeatures
     }
 
     get typeName(): string {
@@ -359,6 +471,68 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         this.patchProduct = this.patchProduct.patch({ enabled: !disabled })
     }
 
+    get hidden() {
+        return this.patchedProduct.hidden
+    }
+
+    set hidden(hidden: boolean) {
+        this.patchProduct = this.patchProduct.patch({ hidden })
+    }
+
+    get useDisableAfter() {
+        return this.patchedProduct.disableAfter !== null
+    }
+
+    set useDisableAfter(use: boolean) {
+        if (use == this.useDisableAfter) {
+            return;
+        }
+        if (use) {
+            this.patchProduct = this.patchProduct.patch({ disableAfter: this.patchedProduct.disableAfter ?? this.product.disableAfter ?? new Date() })
+        } else {
+            this.patchProduct = this.patchProduct.patch({ disableAfter: null })
+        }
+    }
+
+    get disableAfter() {
+        return this.patchedProduct.disableAfter ?? this.product.disableAfter ?? new Date()
+    }
+
+    set disableAfter(disableAfter: Date) {
+        this.patchProduct = this.patchProduct.patch({ disableAfter })
+    }
+
+    get useEnableAfter() {
+        return this.patchedProduct.enableAfter !== null
+    }
+
+    set useEnableAfter(use: boolean) {
+        if (use == this.useEnableAfter) {
+            return;
+        }
+        if (use) {
+            this.patchProduct = this.patchProduct.patch({ enableAfter: this.patchedProduct.enableAfter ?? this.product.enableAfter ?? new Date() })
+        } else {
+            this.patchProduct = this.patchProduct.patch({ enableAfter: null })
+        }
+    }
+
+    get enableAfter() {
+        return this.patchedProduct.enableAfter ?? this.product.enableAfter ?? new Date()
+    }
+
+    set enableAfter(enableAfter: Date) {
+        this.patchProduct = this.patchProduct.patch({ enableAfter })
+    }
+
+    get notAllowMultiple() {
+        return !this.patchedProduct.allowMultiple
+    }
+
+    set notAllowMultiple(notAllowMultiple: boolean) {
+        this.patchProduct = this.patchProduct.patch({ allowMultiple: !notAllowMultiple })
+    }
+
     get remainingStock() {
         return this.patchedProduct.remainingStock
     }
@@ -368,15 +542,31 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     }
 
     set useStock(useStock: boolean) {
-        this.patchProduct = this.patchProduct.patch({ stock: useStock ? (this.patchedProduct.stock ?? 0) : null })
+        this.patchProduct = this.patchProduct.patch({ stock: useStock ? (this.patchedProduct.stock ?? this.product.stock ?? (this.product.usedStock || 10)) : null })
     }
 
     get stock() {
-        return this.patchedProduct.stock ?? 0
+        return this.patchedProduct.stock ?? this.product.stock ?? 0
     }
 
     set stock(stock: number) {
         this.patchProduct = this.patchProduct.patch({ stock })
+    }
+
+    get useMaxPerOrder() {
+        return this.patchedProduct.maxPerOrder !== null
+    }
+
+    set useMaxPerOrder(useMaxPerOrder: boolean) {
+        this.patchProduct = this.patchProduct.patch({ maxPerOrder: useMaxPerOrder ? (this.patchedProduct.maxPerOrder ?? this.product.maxPerOrder ?? 1) : null })
+    }
+
+    get maxPerOrder() {
+        return this.patchedProduct.maxPerOrder ?? 1
+    }
+
+    set maxPerOrder(maxPerOrder: number) {
+        this.patchProduct = this.patchProduct.patch({ maxPerOrder })
     }
 
     get resetStock() {
@@ -535,6 +725,22 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         const moveTo = index + 1
         const p = Product.patch({})
         p.prices.addMove(price.id, this.patchedProduct.prices[moveTo].id)
+        this.addPatch(p)
+    }
+
+    get draggablePrices() {
+        return this.patchedProduct.prices
+    }
+
+    set draggablePrices(prices: ProductPrice[]) {
+        if (prices.length != this.patchedProduct.prices.length) {
+            return;
+        }
+
+        const p = Product.patch({})
+        for (const price of prices.slice().reverse()) {
+            p.prices.addMove(price.id, null)
+        }
         this.addPatch(p)
     }
 

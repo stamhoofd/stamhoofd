@@ -83,9 +83,7 @@ export class VueGlobalHelper {
             const element = event.target as HTMLInputElement;
             if (element && (element.tagName === 'INPUT' || element.tagName === 'SELECT') && element.form) {
                 if (event.which === 13) {
-                    console.log("Enter pressed")
                     if (focusNextElement() === true) {
-                        console.log("Prevent default")
                         event.preventDefault();
                     }
                 }

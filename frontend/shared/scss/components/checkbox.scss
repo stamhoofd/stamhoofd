@@ -57,6 +57,7 @@ $checkbox-border-radius: 5px;
     cursor: pointer;
 
     max-width: 100%;
+    width: fit-content; // Prevent clicking on empty space
 
     > input {
         display: none;

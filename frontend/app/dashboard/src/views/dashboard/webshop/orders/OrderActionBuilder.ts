@@ -170,7 +170,7 @@ export class OrderActionBuilder {
                 }
             }),
         
-            new TableAction({
+            ...(this.webshopManager.preview.meta.phoneEnabled ? [new TableAction({
                 name: "SMS'en",
                 icon: "feedback-line",
                 priority: 9,
@@ -179,7 +179,7 @@ export class OrderActionBuilder {
                 handler: async (orders: PrivateOrder[]) => {
                     await this.sms(orders)
                 }
-            }),
+            })] : []),
 
             new TableAction({
                 name: "Exporteer naar Excel",

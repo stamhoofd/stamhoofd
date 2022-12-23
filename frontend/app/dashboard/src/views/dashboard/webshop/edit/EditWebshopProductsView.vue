@@ -6,13 +6,13 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="webshop.categories.length > 0">
-            <STList>
+            <STList v-model="draggableCategories" :draggable="true">
                 <CategoryRow v-for="category in webshop.categories" :key="category.id" :category="category" :webshop="webshop" @patch="addPatch($event)" @move-up="moveCategoryUp(category)" @move-down="moveCategoryDown(category)" />
             </STList>
         </template>
 
         <template v-else-if="webshop.products.length > 0">
-            <STList>
+            <STList v-model="draggableProducts" :draggable="true">
                 <ProductRow v-for="product in webshop.products" :key="product.id" :product="product" :webshop="webshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
             </STList>
         </template>
@@ -154,6 +154,37 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
         p.products.addMove(product.id, this.webshop.products[moveTo].id)
         this.addPatch(p)
     }
-  
+
+    get draggableProducts() {
+        return this.webshop.products;
+    }
+
+    set draggableProducts(products) {
+        if (products.length != this.webshop.products.length) {
+            return;
+        }
+
+        const patch = PrivateWebshop.patch({})
+        for (const p of products.slice().reverse()) {
+            patch.products.addMove(p.id, null)
+        }
+        this.addPatch(patch)
+    }
+
+    get draggableCategories() {
+        return this.webshop.categories;
+    }
+
+    set draggableCategories(categories) {
+        if (categories.length != this.webshop.categories.length) {
+            return;
+        }
+
+        const patch = PrivateWebshop.patch({})
+        for (const c of categories.slice().reverse()) {
+            patch.categories.addMove(c.id, null)
+        }
+        this.addPatch(patch)
+    }
 }
 </script>

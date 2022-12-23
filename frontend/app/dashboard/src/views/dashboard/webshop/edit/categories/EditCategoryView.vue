@@ -37,7 +37,7 @@
         <h2 v-else>
             Artikels
         </h2>
-        <STList>
+        <STList v-model="draggableProducts" :draggable="true">
             <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
         </STList>
 
@@ -235,6 +235,22 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         const p = Category.patch({})
         p.productIds.addMove(product.id, this.patchedCategory.productIds[moveTo])
         this.addCategoryPatch(p)
+    }
+
+    get draggableProducts() {
+        return this.products;
+    }
+
+    set draggableProducts(products) {
+        if (products.length != this.products.length) {
+            return;
+        }
+
+        const patch = Category.patch({})
+        for (const p of products.slice().reverse()) {
+            patch.productIds.addMove(p.id, null)
+        }
+        this.addCategoryPatch(patch)
     }
 
     get hasChanges() {

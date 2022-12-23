@@ -219,7 +219,17 @@ export class Webshop extends AutoEncoder {
     }
 
     isClosed(margin = 0) {
-        if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin)) {
+        if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin) || this.opensInTheFuture()) {
+            return true
+        }
+        return false
+    }
+
+    opensInTheFuture() {
+        if (this.meta.status !== WebshopStatus.Open) {
+            return false;
+        }
+        if (this.meta.openAt && this.meta.openAt.getTime() > new Date().getTime()) {
             return true
         }
         return false

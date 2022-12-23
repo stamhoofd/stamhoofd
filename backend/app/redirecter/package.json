@@ -11,9 +11,10 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
-        "@types/node": "^16.11.17"
+        "@types/node": "^18.11.17"
     },
     "dependencies": {
-        "@simonbackx/simple-endpoints": "^1.10.1"
+        "@simonbackx/simple-endpoints": "^1.11.0",
+        "@simonbackx/simple-logging": "^1.0.0"
     }
 }

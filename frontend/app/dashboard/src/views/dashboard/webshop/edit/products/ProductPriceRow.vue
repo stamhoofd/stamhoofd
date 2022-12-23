@@ -1,13 +1,12 @@
 <template>
-    <STListItem :selectable="true" class="right-description right-stack" @click="editPrice()">
+    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editPrice()" @contextmenu.prevent="showContextMenu">
         {{ productPrice.name || 'Naamloos' }}
         <template slot="right">
-            <template v-if="productPrice.discountPrice">
-                {{ productPrice.discountPrice | price }} /
-            </template>
-            {{ productPrice.price | price }}
-            <button type="button" class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button type="button" class="button icon arrow-down gray" @click.stop="moveDown" />
+            <span><template v-if="productPrice.discountPrice">
+                      {{ productPrice.discountPrice | price }} /
+                  </template>
+                {{ productPrice.price | price }}</span>
+            <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -16,7 +15,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STListItem } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Product, ProductPrice } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -29,14 +28,17 @@ import EditProductPriceView from './EditProductPriceView.vue';
     },
     filters: {
         price: Formatter.price.bind(Formatter)
+    },
+    directives: {
+        LongPress: LongPressDirective
     }
 })
 export default class ProductPriceRow extends Mixins(NavigationMixin) {
     @Prop({})
-    productPrice: ProductPrice
+        productPrice: ProductPrice
 
     @Prop({})
-    product: Product
+        product: Product
 
     editPrice() {
         this.present(new ComponentWithProperties(EditProductPriceView, { product: this.product, productPrice: this.productPrice, isNew: false, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
@@ -52,6 +54,30 @@ export default class ProductPriceRow extends Mixins(NavigationMixin) {
 
     moveDown() {
         this.$emit("move-down")
+    }
+
+    showContextMenu(event) {
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Verplaats omhoog",
+                    icon: "arrow-up",
+                    action: () => {
+                        this.moveUp()
+                        return true;
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Verplaats omlaag",
+                    icon: "arrow-down",
+                    action: () => {
+                        this.moveDown()
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ clickEvent: event }).catch(console.error)
     }
 }
 </script>

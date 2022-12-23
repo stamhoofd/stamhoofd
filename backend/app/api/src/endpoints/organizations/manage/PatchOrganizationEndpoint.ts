@@ -145,7 +145,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.meta.packages = savedPackages
 
                 // check payconiq + mollie
-                if (Array.isArray(request.body.meta.paymentMethods) || request.body.meta.paymentMethods.hasChanges) {
+                if (Array.isArray(request.body.meta.paymentMethods) || request.body.meta.paymentMethods.changes.length) {
                     if (!organization.privateMeta.payconiqApiKey && !organization.privateMeta.buckarooSettings?.paymentMethods.includes(PaymentMethod.Payconiq)) {
                         const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Payconiq)
                         if (i != -1) {

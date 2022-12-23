@@ -1,27 +1,22 @@
 <template>
     <div class="st-view add-item-view">
-        <STNavigationBar :title="'Toevoegen'">
-            <template #right>
-                <button class="button icon close gray" @click="pop" />
-            </template>
-        </STNavigationBar>
+        <STNavigationBar title="Producten" :pop="canPop" :dismiss="canDismiss" />
         <main>
             <h1>
-                Nieuwe producten aan bestelling toevoegen
+                Producten
             </h1>
 
-            <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" />
-            <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" :webshop="webshop" :cart="cart" :save-handler="saveHandler" />
+            <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :is-last="index === webshop.categories.length - 1" :admin="true" />
+            <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :admin="true" />
         </main>
     </div>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CategoryBox, ProductGrid, STErrorsDefault,STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { CategoryBox, ProductGrid, STErrorsDefault, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Cart, CartItem, Webshop } from '@stamhoofd/structures';
-import { Component, Mixins,  Prop } from "vue-property-decorator";
-
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
     components: {
@@ -34,12 +29,12 @@ import { Component, Mixins,  Prop } from "vue-property-decorator";
 })
 export default class AddItemView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    webshop: Webshop
+        webshop: Webshop
 
     @Prop({ required: true })
-    cart: Cart
+        cart: Cart
 
     @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 }
 </script>

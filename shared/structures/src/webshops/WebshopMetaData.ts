@@ -385,6 +385,9 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 43 })
     availableUntil: Date | null = null
 
+    @field({ decoder: DateDecoder, nullable: true, version: 170 })
+    openAt: Date | null = null
+
     /**
      * Manually close a webshop
      */

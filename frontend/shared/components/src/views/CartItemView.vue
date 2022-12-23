@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view cart-item-view">
+    <form class="st-view cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name">
             <BackButton v-if="canPop" slot="left" @click="pop" />
             <span slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | priceFree }}</span>
@@ -14,6 +14,24 @@
                 </div>
             </figure>
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
+
+            <p v-if="!cartItem.product.isEnabled" class="info-box">
+                {{ cartItem.product.isEnabledTextLong }}
+            </p>
+
+            <p v-else-if="cartItem.product.isSoldOut" class="warning-box">
+                Dit artikel is uitverkocht.
+            </p>
+
+            <p v-else-if="!canOrder" class="warning-box">
+                Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel.
+            </p>
+
+            <p v-else-if="cartItem.product.closesSoonText" class="info-box">
+                {{ cartItem.product.closesSoonText }}
+            </p>
+
+            <STErrorsDefault :error-box="errorBox" />
 
             <STList v-if="(cartItem.product.type == 'Ticket' || cartItem.product.type == 'Voucher') && cartItem.product.location" class="info">
                 <STListItem>
@@ -38,9 +56,8 @@
                 </STListItem>
             </STList>
 
-            <hr v-if="cartItem.product.description || imageSrc || (cartItem.product.type == 'Ticket' || cartItem.product.type == 'Voucher')">
-
             <div v-if="cartItem.product.prices.length > 1" class="container">
+                <hr>
                 <STList>
                     <STListItem v-for="price in cartItem.product.prices" :key="price.id" class="no-border right-description" :selectable="true" element-name="label">
                         <Radio slot="left" v-model="cartItem.productPrice" :value="price" :name="cartItem.product.id+'price'" />
@@ -57,39 +74,39 @@
                         </template>
                     </STListItem>
                 </STList>
-                <hr>
             </div>
 
             <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" />
 
-            <STErrorsDefault :error-box="errorBox" />
-
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errorBox" />
 
-            <h2>Aantal</h2>
+            <template v-if="canOrder && canSelectAmount">
+                <hr>
+                <h2>Aantal</h2>
 
-            <p v-if="remainingReduced > 0" class="info-box">
-                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
-            </p>
+                <p v-if="remainingReduced > 0" class="info-box">
+                    Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
+                </p>
 
-            <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
-            <p v-if="maximumRemaining !== null && cartItem.amount + 1 >= maximumRemaining" class="st-list-description">
-                <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
-                Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
-            </p>
+                <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
+                <p v-if="maximumRemainingStock !== null && cartItem.amount + 1 >= maximumRemainingStock" class="st-list-description">
+                    <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
+                    Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
+                </p>
+            </template>
         </main>
 
-        <STToolbar>
-            <button v-if="oldItem" slot="right" class="button primary" type="button" @click="addToCart">
+        <STToolbar v-if="canOrder">
+            <button v-if="oldItem" slot="right" class="button primary" type="submit">
                 <span class="icon basket" />
                 <span>Opslaan</span>
             </button>
-            <button v-else slot="right" class="button primary" type="button" @click="addToCart">
+            <button v-else slot="right" class="button primary" type="submit">
                 <span class="icon basket" />
                 <span>Toevoegen</span>
             </button>
         </STToolbar>
-    </div>
+    </form>
 </template>
 
 
@@ -130,20 +147,23 @@ import OptionMenuBox from './OptionMenuBox.vue';
     }
 })
 export default class CartItemView extends Mixins(NavigationMixin){
+    @Prop({ default: false })
+        admin: boolean
+        
     @Prop({ required: true })
-    cartItem: CartItem
+        cartItem: CartItem
 
     @Prop({ required: true })
-    webshop: Webshop
+        webshop: Webshop
 
     @Prop({ required: true })
-    cart: Cart
+        cart: Cart
 
     @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 
     @Prop({ default: null })
-    oldItem: CartItem | null
+        oldItem: CartItem | null
 
     errorBox: ErrorBox | null = null
 
@@ -227,12 +247,34 @@ export default class CartItemView extends Mixins(NavigationMixin){
         }, 0)  - (this.oldItem?.reservedAmount ?? 0)
     }
 
-    get maximumRemaining() {
+    get maximumRemainingStock() {
         if (this.product.remainingStock === null) {
             return null
         }
 
-        return this.product.remainingStock  + (this.oldItem?.reservedAmount ?? 0) - this.count + this.reservedAmountFromOthers
+        return this.product.remainingStock + (this.oldItem?.reservedAmount ?? 0) - this.count + this.reservedAmountFromOthers
+    }
+
+    get maximumRemainingOrder() {
+        if (this.product.maxPerOrder === null) {
+            return null
+        }
+
+        return this.product.maxPerOrder - this.count
+    }
+
+    get maximumRemaining() {
+        if (this.admin) {
+            return null
+        }
+        
+        if (this.maximumRemainingStock === null) {
+            return this.maximumRemainingOrder
+        }
+        if (this.maximumRemainingOrder === null) {
+            return this.maximumRemainingStock
+        }
+        return Math.min(this.maximumRemainingStock, this.maximumRemainingOrder)
     }
 
     get remainingStock() {
@@ -247,6 +289,13 @@ export default class CartItemView extends Mixins(NavigationMixin){
         return Formatter.capitalizeFirstLetter(dateRange.toString())
     }
 
+    get canOrder() {
+        return this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0) && this.product.isEnabled)
+    }
+
+    get canSelectAmount() {
+        return this.product.maxPerOrder !== 1 && this.product.allowMultiple
+    }
 }
 </script>
 

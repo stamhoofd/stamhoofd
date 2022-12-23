@@ -83,7 +83,7 @@ import { AutoEncoderPatchType, isPatchable, PartialWithoutMethods, PatchableArra
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
-import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version, WebshopPreview,WebshopPrivateMetaData } from "@stamhoofd/structures";
+import { Group, GroupPatch, GroupPrivateSettingsPatch, Organization, OrganizationEmail, OrganizationPatch, OrganizationPrivateMetaData, Version, WebshopPreview, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -108,15 +108,15 @@ class SelectableWebshop {
 
 @Component({
     components: {
-        STInputBox,
-        STErrorsDefault,
-        Checkbox,
-        EmailInput,
-        STList,
-        STListItem,
-        SaveView
-    },
-})
+    STInputBox,
+    STErrorsDefault,
+    Checkbox,
+    EmailInput,
+    STList,
+    STListItem,
+    SaveView
+    }
+    })
 export default class EditEmailView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
@@ -248,7 +248,7 @@ export default class EditEmailView extends Mixins(NavigationMixin) {
             const emails = this.organizationPatch.privateMeta?.emails
             if (emails && isPatchable(emails)) {
                 // Keep only patches with email id
-                this.organizationPatch.privateMeta!.emails = emails.filter(this.emailId)
+                this.organizationPatch.privateMeta!.emails = (emails as PatchableArrayAutoEncoder<OrganizationEmail>).filter(this.emailId)
             }
         }
     }

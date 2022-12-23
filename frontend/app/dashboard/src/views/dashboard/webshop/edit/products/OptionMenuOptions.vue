@@ -1,5 +1,5 @@
 <template>
-    <STList>
+    <STList v-model="draggableOptions" :draggable="true">
         <OptionRow v-for="option in optionMenu.options" :key="option.id" :option-menu="optionMenu" :option="option" @patch="addPatch" @move-up="moveOptionUp(option)" @move-down="moveOptionDown(option)" />
     </STList>
 </template>
@@ -26,7 +26,7 @@ import OptionRow from "./OptionRow.vue"
 })
 export default class OptionMenuOptions extends Mixins(NavigationMixin) {
     @Prop({})
-    optionMenu: OptionMenu
+        optionMenu: OptionMenu
 
     moveOptionUp(option: Option) {
         const index = this.optionMenu.options.findIndex(c => option.id === c.id)
@@ -54,6 +54,22 @@ export default class OptionMenuOptions extends Mixins(NavigationMixin) {
 
     addPatch(patch: AutoEncoderPatchType<OptionMenu>) {
         this.$emit("patch", patch)
+    }
+
+    get draggableOptions() {
+        return this.optionMenu.options;
+    }
+
+    set draggableOptions(options) {
+        if (options.length != this.optionMenu.options.length) {
+            return;
+        }
+
+        const patch = OptionMenu.patch({})
+        for (const p of options.slice().reverse()) {
+            patch.options.addMove(p.id, null)
+        }
+        this.addPatch(patch)
     }
 }
 </script>

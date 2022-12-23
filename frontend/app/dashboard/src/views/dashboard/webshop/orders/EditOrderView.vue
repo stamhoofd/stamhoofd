@@ -32,9 +32,10 @@
                 </div>
             </STInputBox>
 
-            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Voor bevestigingsemail" autocomplete="email" />
+            <EmailInput v-model="email" title="E-mailadres" name="email" :validator="validator" :placeholder="emailPlaceholder" autocomplete="email" />
+            <p v-if="emailDescription" class="style-description-small" v-text="emailDescription" />
 
-            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Voor dringende info" autocomplete="tel" :required="phoneEnabed" />
+            <PhoneInput v-if="phone || phoneEnabed" v-model="phone" :title="$t('shared.inputs.mobile.label' )" name="mobile" :validator="validator" placeholder="Optioneel voor beheerders" autocomplete="tel" :required="false" />
 
             <FieldBox v-for="field in fields" :key="field.id" :with-title="false" :field="field" :answers="answersClone" :error-box="errorBox" />
 
@@ -143,13 +144,6 @@
                     </h3>
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
-                    <p v-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount < cartItem.amount" class="warning-box">
-                        De voorraad van {{ cartItem.product.name }} zal verminderd worden met {{ cartItem.amount - cartItem.reservedAmount }} stuk(s)
-                    </p>
-                    <p v-else-if="cartItem.product.stock && patchedOrder.shouldIncludeStock && cartItem.reservedAmount > cartItem.amount" class="warning-box">
-                        De voorraad van {{ cartItem.product.name }} zal aangevuld worden met {{ cartItem.reservedAmount - cartItem.amount }} stuk(s)
-                    </p>
-
                     <footer>
                         <p class="price">
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(patchedOrder.data.cart) | price }}
@@ -187,7 +181,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { AddressInput, CartItemView, CenteredMessage, EmailInput, ErrorBox, FieldBox, LongPressDirective, PaymentSelectionList, PhoneInput, Radio, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { NetworkManager } from "@stamhoofd/networking";
-import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CartItem, Checkout, CheckoutMethod, CheckoutMethodType, Customer, OrderData, PaymentMethod, PrivateOrder, RecordAnswer, RecordCategory, ValidatedAddress, Version, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -228,13 +222,13 @@ import AddItemView from "./AddItemView.vue";
 })
 export default class EditOrderView extends Mixins(NavigationMixin){
     @Prop({ default: null })
-    initialOrder!: PrivateOrder | null
+        initialOrder!: PrivateOrder | null
     
     @Prop({ required: true })
-    webshopManager!: WebshopManager
+        webshopManager!: WebshopManager
 
     @Prop({ default: '' })
-    mode!: string;
+        mode!: string;
 
     order: PrivateOrder = this.initialOrder ?? PrivateOrder.create({ webshopId: this.webshopManager.preview.id, id: "", payment: null });
     patchOrder: AutoEncoderPatchType<PrivateOrder> = PrivateOrder.patch({})
@@ -265,6 +259,20 @@ export default class EditOrderView extends Mixins(NavigationMixin){
 
     get phoneEnabed() {
         return this.webshop.meta.phoneEnabled
+    }
+
+    get emailPlaceholder() {
+        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
+            return 'Voor tickets'
+        }
+        return 'Voor bevestigingsemail'
+    }
+
+    get emailDescription() {
+        if (this.webshop.meta.ticketType !== WebshopTicketType.None) {
+            return 'De tickets worden verzonden naar dit e-mailadres (na betaling, of meteen als betaalmethode \'Ter plaatse\' gekozen wordt). Kijk het goed na.'
+        }
+        return null
     }
 
     get title() {
@@ -556,7 +564,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                 cart: clone,
                 webshop: webshop,
                 saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
-                    cartItem.validate(webshop, clone)
+                    cartItem.validate(webshop, clone, false, true)
 
                     if (oldItem) {
                         clone.removeItem(oldItem)
@@ -589,12 +597,13 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         }
 
         this.present(new ComponentWithProperties(CartItemView, { 
+            admin: true,
             cartItem: newCartItem, 
             oldItem: cartItem,
             cart: clone,
             webshop: webshop,
             saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
-                cartItem.validate(webshop, clone)
+                cartItem.validate(webshop, clone, false, true)
                 if (oldItem) {
                     clone.removeItem(oldItem)
                 }

@@ -22,11 +22,14 @@
 
                     <footer>
                         <p class="price">
-                            {{ cartItem.amount }} x {{ cartItem.getUnitPrice(cart) | price }}
+                            <template v-if="cartItem.product.allowMultiple">
+                                {{ cartItem.amount }} x
+                            </template> 
+                            {{ cartItem.getUnitPrice(cart) | price }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" type="button" @click="deleteItem(cartItem)" />
-                            <StepperInput v-model="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="cartItem.calculateUnitPrice(cart)" @click.native.stop />
+                            <StepperInput v-if="maximumRemainingFor(cartItem) > 1" v-model="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="cartItem.calculateUnitPrice(cart)" @click.native.stop />
                         </div>
                     </footer>
 
@@ -52,7 +55,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { CartItemView, ErrorBox, GlobalEventBus, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
+import { CartItemView, ErrorBox, LoadingButton, StepperInput, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from '@stamhoofd/components';
 import { UrlHelper } from '@stamhoofd/networking';
 import { CartItem } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -154,12 +157,29 @@ export default class CartView extends Mixins(NavigationMixin){
         }, 0)  - (cartItem.amount ?? 0)
     }
 
-    maximumRemainingFor(cartItem: CartItem) {
+    maximumRemainingStockFor(cartItem: CartItem) {
         if (cartItem.product.remainingStock === null) {
             return null
         }
 
         return cartItem.product.remainingStock - this.countFor(cartItem)
+    }
+
+    maximumRemainingOrderFor(cartItem: CartItem) {
+        if (cartItem.product.maxPerOrder === null) {
+            return null
+        }
+
+        return cartItem.product.maxPerOrder - this.countFor(cartItem)
+    }
+
+    maximumRemainingFor(cartItem: CartItem) {
+        const maxStock = this.maximumRemainingStockFor(cartItem)
+        const maxOrder = this.maximumRemainingOrderFor(cartItem)
+        const maxMultiple = cartItem.product.allowMultiple ? null : 1
+
+        const arr = [maxStock, maxOrder, maxMultiple].filter((v) => v !== null) as number[]
+        return Math.min(...arr)
     }
 }
 </script>

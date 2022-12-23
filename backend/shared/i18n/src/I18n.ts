@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import { countries, languages } from "@stamhoofd/locales"
 import { Country } from '@stamhoofd/structures';
 import path from "path"
+import {logger, StyledText} from "@simonbackx/simple-logging";
 
 export class I18n {
     static loadedLocales: Map<string, Map<string, string>> = new Map()
@@ -10,17 +11,25 @@ export class I18n {
     static defaultCountry = Country.Belgium
 
     static async load() {
-        const directory = path.dirname(require.resolve("@stamhoofd/locales"))+"/backend"
-        const files = (await fs.readdir(directory, { withFileTypes: true }))
-            .filter((dirent) => !dirent.isDirectory())
+        await logger.setContext({
+            prefixes: [
+                new StyledText('[I18n] ').addClass('i18n', 'tag')
+            ],
+            tags: ['i18n']
+        }, async () => {
+            console.log("Loading locales...")
+            const directory = path.dirname(require.resolve("@stamhoofd/locales"))+"/backend"
+            const files = (await fs.readdir(directory, { withFileTypes: true }))
+                .filter((dirent) => !dirent.isDirectory())
 
-        for (const file of files ) {
-            const locale = file.name.substr(0, file.name.length - 5);
-            console.log("loaded locale:" + locale)
+            for (const file of files ) {
+                const locale = file.name.substr(0, file.name.length - 5);
+                console.log("Loaded:" + locale)
 
-            const messages = await import(directory+"/"+file.name)
-            this.loadedLocales.set(locale, this.loadRecursive(messages.default))
-        }
+                const messages = await import(directory+"/"+file.name)
+                this.loadedLocales.set(locale, this.loadRecursive(messages.default))
+            }
+        })
     }
 
     static loadRecursive(messages: any, prefix: string | null =  null): Map<string, string> {

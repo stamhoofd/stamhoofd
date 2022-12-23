@@ -2,7 +2,7 @@
     <div class="st-view background">
         <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
             <template slot="right">
-                <button v-if="canEdit" class="button text" @click="editMe">
+                <button v-if="canEdit" class="button text" type="button" @click="editMe">
                     <span class="icon settings" />
                     <span>Instellingen</span>
                 </button>

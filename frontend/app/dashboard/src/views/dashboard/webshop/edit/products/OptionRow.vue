@@ -1,19 +1,15 @@
 <template>
-    <STListItem :selectable="true" class="right-description right-stack" @click="editOption()">
+    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editOption()" @contextmenu.prevent="showContextMenu">
         <Radio v-if="!optionMenu.multipleChoice" slot="left" v-model="isFirst" :value="true" :disabled="true" />
         <Checkbox v-else slot="left" :disabled="true" />
 
         <h2 class="style-title-list">
             {{ option.name || 'Naamloos' }}
         </h2>
-        <p v-if="false" class="style-description">
-            Standaard geselecteerd - inbegrepen in prijs
-        </p>
 
         <template slot="right">
-            {{ option.price | priceChange }}
-            <button type="button" class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button type="button" class="button icon arrow-down gray" @click.stop="moveDown" />
+            <span>{{ option.price | priceChange }}</span>
+            <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -22,7 +18,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, Radio,STListItem } from "@stamhoofd/components";
+import { Checkbox, ContextMenu, ContextMenuItem, LongPressDirective, Radio,STListItem } from "@stamhoofd/components";
 import { Option, OptionMenu } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -37,14 +33,17 @@ import EditOptionView from './EditOptionView.vue';
     },
     filters: {
         priceChange: Formatter.priceChange.bind(Formatter)
+    },
+    directives: {
+        LongPress: LongPressDirective
     }
 })
 export default class OptionRow extends Mixins(NavigationMixin) {
     @Prop({})
-    optionMenu: OptionMenu
+        optionMenu: OptionMenu
 
     @Prop({})
-    option: Option
+        option: Option
 
     get isFirst() {
         return this.optionMenu.options[0].id === this.option.id
@@ -74,6 +73,30 @@ export default class OptionRow extends Mixins(NavigationMixin) {
 
     moveDown() {
         this.$emit("move-down")
+    }
+
+    showContextMenu(event) {
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Verplaats omhoog",
+                    icon: "arrow-up",
+                    action: () => {
+                        this.moveUp()
+                        return true;
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Verplaats omlaag",
+                    icon: "arrow-down",
+                    action: () => {
+                        this.moveDown()
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ clickEvent: event }).catch(console.error)
     }
 }
 </script>
