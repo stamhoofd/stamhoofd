@@ -67,7 +67,7 @@
         <h2>Beschikbaarheid</h2>
 
         <Checkbox v-model="useAvailableUntil">
-            Stop bestellingen op een bepaalde datum
+            Sluit webshop na een bepaalde datum
         </Checkbox>
 
         <div v-if="useAvailableUntil" class="split-inputs">
@@ -75,6 +75,17 @@
                 <DateSelection v-model="availableUntil" />
             </STInputBox>
             <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
+        </div>
+
+        <Checkbox v-if="enableBetaFeatures" v-model="useOpenAt">
+            Open webshop pas na een bepaalde datum
+        </Checkbox>
+
+        <div v-if="enableBetaFeatures && useOpenAt" class="split-inputs">
+            <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errorBox">
+                <DateSelection v-model="openAt" />
+            </STInputBox>
+            <TimeInput v-model="openAt" title="Om" :validator="validator" /> 
         </div>
 
         <div v-if="enableBetaFeatures" class="container">
@@ -85,7 +96,7 @@
                 <STListItem :selectable="true" element-name="label" class="left-center">
                     <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" />
                     <h3 class="style-title-list">
-                        Gebruik opeenlopende bestelnummers
+                        Gebruik opeenvolgende bestelnummers
                     </h3>
                     <p class="style-description">
                         1, 2, 3, ...
@@ -243,6 +254,37 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         const p = PrivateWebshop.patch({})
         const meta = WebshopMetaData.patch({})
         meta.availableUntil = availableUntil
+        p.meta = meta
+        this.addPatch(p)
+    }
+
+    get useOpenAt() {
+        return this.webshop.meta.openAt !== null
+    }
+
+    set useOpenAt(use: boolean) {
+        if (use === this.useOpenAt) {
+            return;
+        }
+        const p = PrivateWebshop.patch({})
+        const meta = WebshopMetaData.patch({})
+        if (use) {
+            meta.openAt = new Date()
+        } else {
+            meta.openAt = null
+        }
+        p.meta = meta
+        this.addPatch(p)
+    }
+
+    get openAt() {
+        return this.webshop.meta.openAt ?? new Date()
+    }
+
+    set openAt(openAt: Date) {
+        const p = PrivateWebshop.patch({})
+        const meta = WebshopMetaData.patch({})
+        meta.openAt = openAt
         p.meta = meta
         this.addPatch(p)
     }

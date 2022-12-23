@@ -1,4 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
+import { logger, StyledText } from "@simonbackx/simple-logging";
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { EmailAddress } from '@stamhoofd/email';
@@ -10,7 +11,7 @@ import { STInvoice } from '@stamhoofd/models';
 import { STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
-import { Formatter, sleep } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
 
@@ -334,7 +335,6 @@ async function checkBounces() {
 
 async function checkComplaints() {
     if (STAMHOOFD.environment !== "production") {
-        console.log("Skipping complaints checking")
         return
     }
 
@@ -413,7 +413,6 @@ async function checkComplaints() {
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
     if (STAMHOOFD.environment === "development") {
-        console.log("Skipping payments checking")
         return
     }
     
@@ -483,7 +482,6 @@ const startBuckarooDate = new Date(new Date().getTime() - 60*1000*60*24*7*4);
 // Keep checking pending paymetns for 3 days
 async function checkFailedBuckarooPayments() {
     if (STAMHOOFD.environment !== "production") {
-        console.log("Skipping checkFailedBuckarooPayments")
         return
     }
 
@@ -624,21 +622,35 @@ async function checkBilling() {
 //const citySync = AddressValidator.getSlowSync()
 
 // Schedule automatic paynl charges
-export const crons = () => {
+export const crons = async () => {
     if (isRunningCrons) {
         return;
     }
     isRunningCrons = true
-    try {
-        checkSettlements().then(checkFailedBuckarooPayments).then(checkExpirationEmails).then(checkPostmarkBounces).then(checkBilling).then(checkReservedUntil).then(checkComplaints).then(checkReplies).then(checkBounces).then(checkDNS).then(checkWebshopDNS).then(checkPayments).catch(e => {
-            console.error(e)
-        }).finally(() => {
-            isRunningCrons = false
-        })
-    } catch (e) {
-        console.error(e)
-        isRunningCrons = false
-    }
+    await logger.setContext({
+        prefixes: [
+            new StyledText('[Crons] ').addClass('crons', 'tag')
+        ],
+        tags: ['crons']
+    }, async () => {
+        try {
+            await checkSettlements()
+            await checkFailedBuckarooPayments()
+            await checkExpirationEmails()
+            await checkPostmarkBounces()
+            await checkBilling()
+            await checkReservedUntil()
+            await checkComplaints()
+            await checkReplies()
+            await checkBounces()
+            await checkDNS()
+            await checkWebshopDNS()
+            await checkPayments()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+    })
+    isRunningCrons = false
 };
 
 export function areCronsRunning(): boolean {

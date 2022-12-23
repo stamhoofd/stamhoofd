@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="true" class="right-stack" @click="editProduct()">
+    <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
         <template slot="left">
             <img v-if="imageSrc" :src="imageSrc" class="product-row-image">
         </template>
@@ -7,16 +7,20 @@
         <h2 class="style-title-list">
             {{ product.name }}
         </h2>
-        <p v-if="!product.enabled" class="style-description">
-            Tijdelijk niet beschikbaar
+        <p v-if="product.isEnabledTextLong" class="style-description">
+            {{ product.isEnabledTextLong }}
         </p>
-        <p v-else-if="product.isSoldOut" class="style-description">
-            Uitverkocht
+        <p v-if="product.stockText" class="style-description">
+            {{ product.stockText }}
+        </p>
+        <p>
+            <span class="style-tag">
+                {{ price | price }}
+            </span>
         </p>
 
         <template slot="right">
-            <button type="button" class="button icon arrow-up gray" @click.stop="moveUp" />
-            <button type="button" class="button icon arrow-down gray" @click.stop="moveDown" />
+            <span class="button icon drag gray" @click.stop @contextmenu.stop />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -25,8 +29,9 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { STListItem } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/components";
 import { PrivateWebshop, Product } from "@stamhoofd/structures"
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditProductView from './EditProductView.vue';
@@ -35,6 +40,9 @@ import EditProductView from './EditProductView.vue';
     components: {
         STListItem
     },
+    filters: {
+        price: Formatter.price.bind(Formatter)
+    }
 })
 export default class ProductRow extends Mixins(NavigationMixin) {
     @Prop({})
@@ -61,6 +69,34 @@ export default class ProductRow extends Mixins(NavigationMixin) {
 
     moveDown() {
         this.$emit("move-down")
+    }
+
+    get price() {
+        return this.product.prices[0].price
+    }
+
+    showContextMenu(event) {
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: "Verplaats omhoog",
+                    icon: "arrow-up",
+                    action: () => {
+                        this.moveUp()
+                        return true;
+                    }
+                }),
+                new ContextMenuItem({
+                    name: "Verplaats omlaag",
+                    icon: "arrow-down",
+                    action: () => {
+                        this.moveDown()
+                        return true;
+                    }
+                }),
+            ]
+        ])
+        menu.show({ clickEvent: event }).catch(console.error)
     }
 }
 </script>

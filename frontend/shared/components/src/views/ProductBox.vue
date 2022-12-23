@@ -28,7 +28,8 @@
                 <p class="price">
                     {{ price | priceFree }}
 
-                    <span v-if="!product.enabled" class="style-tag error">Tijdelijk onbeschikbaar</span>
+                    <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ product.enableAfter | dateTime }}</span>
+                    <span v-else-if="!product.isEnabled && !admin" class="style-tag error">Onbeschikbaar</span>
                     <span v-else-if="product.isSoldOut" class="style-tag error">Uitverkocht</span>
                     <span v-else-if="product.stockText !== null" class="style-tag warn">{{ product.stockText }}</span>
                 </p>
@@ -62,27 +63,31 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         Checkbox
     },
     filters: {
-        price: Formatter.price,
+        price: Formatter.price.bind(Formatter),
         priceFree: (p: number) => {
             if (p === 0) {
                 return "Gratis"
             }
             return Formatter.price(p);
-        }
+        },
+        dateTime: (d: Date) => Formatter.dateTime(d, true)
     }
 })
 export default class ProductBox extends Mixins(NavigationMixin){
+    @Prop({ default: false })
+        admin: boolean
+
     @Prop({ required: true })
-    product: Product
+        product: Product
     
     @Prop({ required: true })
-    webshop: Webshop
+        webshop: Webshop
 
     @Prop({ required: true })
-    cart: Cart
+        cart: Cart
 
     @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 
     get price() {
         return this.product.prices[0].price
@@ -111,20 +116,30 @@ export default class ProductBox extends Mixins(NavigationMixin){
     }
 
     onClicked() {
-        if (!this.product.enabled) {
-            new Toast("Dit artikel is jammer genoeg tijdelijk onbeschikbaar", "error red").show()
+        /*if (!this.product.enabled) {
+            new Toast("Dit artikel is tijdelijk onbeschikbaar", "error red").show()
+            return;
+        }
+
+        if (!this.product.isEnabled) {
+            if (this.product.enableInFuture && this.product.enableAfter) {
+                new Toast(`Dit artikel is beschikbaar vanaf ${Formatter.dateTime(this.product.enableAfter)}`, "error red").show()
+                return;
+            }
+
+            new Toast("Dit artikel is niet meer beschikbaar.", "error red").show()
             return;
         }
 
         if (this.product.isSoldOut) {
-            new Toast("Dit artikel is jammer genoeg uitverkocht", "error red").show()
+            new Toast("Dit artikel is uitverkocht", "error red").show()
             return;
         }
 
         if (this.product.remainingStock != null && this.product.remainingStock <= this.pendingReservationCount) {
             new Toast("Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel.", "error red").show()
             return;
-        }
+        }*/
 
         const cartItem = CartItem.create({
             product: this.product,
@@ -133,6 +148,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
         if (this.canDismiss) {
             this.show(new ComponentWithProperties(CartItemView, { 
+                admin: this.admin,
                 cartItem,
                 cart: this.cart,
                 webshop: this.webshop,
@@ -140,6 +156,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
             }))
         } else {
             this.present(new ComponentWithProperties(CartItemView, { 
+                admin: this.admin,
                 cartItem,
                 cart: this.cart,
                 webshop: this.webshop,
@@ -258,6 +275,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
                     transform: translateX(-30px);
                     transition: opacity 0.2s;
+                    white-space: nowrap;
                 }
             }
 

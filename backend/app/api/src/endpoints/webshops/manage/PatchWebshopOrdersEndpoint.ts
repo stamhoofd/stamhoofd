@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoderPatchType, Data, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, Order, Payment, Token, Webshop } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
+import { BalanceItemStatus, getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -151,6 +151,24 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                     order.paymentId = payment.id
                     order.setRelation(Order.payment, payment)
+
+                    // Create balance item
+                    const balanceItem = new BalanceItem();
+                    balanceItem.orderId = order.id;
+                    balanceItem.price = totalPrice
+                    balanceItem.description = webshop.meta.name
+                    balanceItem.pricePaid = 0
+                    balanceItem.organizationId = organization.id;
+                    balanceItem.status = BalanceItemStatus.Hidden;
+                    await balanceItem.save();
+
+                    // Create one balance item payment to pay it in one payment
+                    const balanceItemPayment = new BalanceItemPayment()
+                    balanceItemPayment.balanceItemId = balanceItem.id;
+                    balanceItemPayment.paymentId = payment.id;
+                    balanceItemPayment.organizationId = organization.id;
+                    balanceItemPayment.price = balanceItem.price;
+                    await balanceItemPayment.save();
 
                     if (payment.method == PaymentMethod.Transfer) {
                         await order.markValid(payment, [])

@@ -29,24 +29,27 @@
                     <p v-if="isTrial" class="error-box">
                         Dit is een demo webshop
                     </p>
+
+                    <p v-if="showOpenAt" class="info-box">
+                        Bestellen kan vanaf {{ webshop.meta.openAt | dateTime }}
+                    </p>
+                    <p v-else-if="closed" class="info-box">
+                        Bestellingen zijn gesloten
+                    </p>
+                    <p v-else-if="almostClosed" class="info-box">
+                        Bestellen kan tot {{ webshop.meta.availableUntil | time }}
+                    </p>
                 </main>
             </section>
             <section class="gray-shadow view enable-grid">
                 <main>
-                    <p v-if="webshop.categories.length == 0 && webshop.products.length == 0" class="warning-box">
-                        Er zijn nog geen artikels toegevoegd aan deze webshop, kom later eens terug.
+                    <p v-if="categories.length == 0 && products.length == 0" class="info-box">
+                        Momenteel is er niets beschikbaar.
                     </p>
 
-                    <p v-if="closed" class="error-box">
-                        Bestellingen zijn gesloten
-                    </p>
-                    <p v-else-if="almostClosed" class="warning-box">
-                        Bestellen kan tot {{ webshop.meta.availableUntil | time }}
-                    </p>
-
-                    <template v-if="!closed">
-                        <CategoryBox v-for="(category, index) in webshop.categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="onAddItem" :is-last="index === webshop.categories.length - 1" />
-                        <ProductGrid v-if="webshop.categories.length == 0" :products="webshop.products" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
+                    <template v-if="!closed || showOpenAt">
+                        <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
+                        <ProductGrid v-if="categories.length == 0" :products="products" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
                     </template>
                 </main>
                 <div class="legal-footer">
@@ -103,7 +106,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
-import { CheckoutStep, CheckoutStepsManager, CheckoutStepType } from './checkout/CheckoutStepsManager';
+import { CheckoutStep, CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 import OrderView from './orders/OrderView.vue';
 import TicketView from "./orders/TicketView.vue";
 
@@ -122,7 +125,8 @@ import TicketView from "./orders/TicketView.vue";
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-        time: Formatter.time.bind(Formatter)
+        time: Formatter.time.bind(Formatter),
+        dateTime: Formatter.dateTime.bind(Formatter)
     },
     metaInfo() {
         return {
@@ -257,6 +261,27 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get almostClosed() {
         return this.webshop.isClosed(6*60*60*1000) && !this.closed
+    }
+
+    get showOpenAt() {
+        return this.closed && this.webshop.opensInTheFuture()
+    }
+
+    get products() {
+        return this.webshop.products.filter(p => !p.hidden)
+    }
+
+    get categories() {
+        return this.webshop.categories.filter(c => {
+            const products = c.productIds.flatMap(id => {
+                const product = this.webshop.products.find(p => p.id === id)
+                if (product && !product.hidden) {
+                    return [product]
+                }
+                return []
+            })
+            return products.length > 0
+        })
     }
     
     onAddItem(cartItem: CartItem) {

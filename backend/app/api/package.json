@@ -5,10 +5,10 @@
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "build": "rm -rf ./dist/src/migrations && tsc -b",
+        "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/src/seeds && tsc -b",
         "build:full": "yarn clear && yarn build",
         "clear": "rm -rf ./dist",
-        "start": "yarn build && node ./dist/index.js",
+        "start": "yarn build && node --enable-source-maps ./dist/index.js",
         "test": "yarn build && jest",
         "test:reset": "yarn build:full && jest",
         "migrations": "yarn build:full && node ./dist/migrations.js",
@@ -20,16 +20,18 @@
         "@types/libsodium-wrappers-sumo": "^0.7.5",
         "@types/luxon": "^2.0.8",
         "@types/mailparser": "^3.4.0",
-        "@types/node": "^16.11.17"
+        "@types/node": "^18.11.17",
+        "@types/mysql": "^2.15.20"
     },
     "dependencies": {
         "@mollie/api-client": "^3.4.0",
-        "@simonbackx/simple-database": "^1.22.1",
-        "@simonbackx/simple-endpoints": "^1.10.1",
-        "@types/mysql": "^2.15.20",
+        "@simonbackx/simple-database": "^1.23.0",
+        "@simonbackx/simple-endpoints": "^1.11.0",
         "aws-sdk": "^2.885.0",
         "axios": "^0.24.0",
         "base-x": "^3.0.9",
+        "chalk": "^4.1.2",
+        "colors": "^1.4.0",
         "formidable": "^1.2.2",
         "html-to-text": "^5.1.1",
         "jsonwebtoken": "^8.5.1",
@@ -40,6 +42,7 @@
         "mysql": "^2.18.1",
         "node-rsa": "^1.1.1",
         "postmark": "^2.8.1",
-        "sharp": "^0.29.3"
+        "sharp": "^0.29.3",
+        "@simonbackx/simple-logging": "^1.0.0"
     }
 }

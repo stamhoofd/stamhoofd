@@ -54,7 +54,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             const webshopStruct = WebshopStruct.create(webshop)
 
             request.body.validate(webshopStruct, organization.meta, request.i18n)
-            
 
             const order = new Order().setRelation(Order.webshop, webshop)
             order.data = request.body // TODO: validate

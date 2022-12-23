@@ -82,13 +82,7 @@
       }
     }
   },
-  "webshop": {
-    "inputs": {
-      "phone": {
-        "invalidMessage": "Het GSM-nummer dat je hebt opgegeven is ongeldig, corrigeer het voor je verder gaat."
-      }
-    }
-  },
+  "webshop": {},
   "registration": {
     "inputs": {
       "parentPhone": {

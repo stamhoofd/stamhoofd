@@ -1,6 +1,6 @@
 <template>
     <div class="product-grid">
-        <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :cart="cart" :save-handler="saveHandler" />
+        <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :admin="admin" />
     </div>
 </template>
 
@@ -29,17 +29,20 @@ import ProductBox from "./ProductBox.vue"
     }
 })
 export default class ProductGrid extends Mixins(NavigationMixin){
-    @Prop({ required: true })
-    products: Product[]
+    @Prop({ default: false })
+        admin: boolean
 
     @Prop({ required: true })
-    webshop: Webshop
+        products: Product[]
 
     @Prop({ required: true })
-    cart: Cart
+        webshop: Webshop
 
     @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        cart: Cart
+
+    @Prop({ required: true })
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 }
 </script>
 

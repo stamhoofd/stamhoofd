@@ -128,6 +128,35 @@ export class Product extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     enabled = true
 
+    @field({ decoder: BooleanDecoder, version: 172 })
+    hidden = false
+
+    /**
+     * Allow to order multiple pieces of the same product combination
+     */
+    @field({ decoder: BooleanDecoder, version: 173 })
+    allowMultiple = true
+
+    /**
+     * Only allow one piece per product combination
+     */
+    @field({ decoder: BooleanDecoder, version: 173 })
+    unique = false
+
+    @field({ decoder: DateDecoder, nullable: true, version: 172 })
+    enableAfter: Date | null = null
+
+    @field({ decoder: DateDecoder, nullable: true, version: 172 })
+    disableAfter: Date | null = null
+
+    get isEnabled() {
+        return this.enabled && !this.hidden && (!this.enableAfter || this.enableAfter <= new Date()) && (!this.disableAfter || this.disableAfter >= new Date())
+    }
+
+    get enableInFuture() {
+        return this.enabled && !this.hidden && this.enableAfter !== null && this.enableAfter > new Date() && (!this.disableAfter || this.disableAfter >= new Date())
+    }
+
     @field({ decoder: new ArrayDecoder(Image) })
     images: Image[] = []
 
@@ -150,6 +179,12 @@ export class Product extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder })
     askName = false
+
+    /**
+     * Maximum amount per order
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, version: 171 })
+    maxPerOrder: number | null = null
 
     /**
      * Total stock, excluding already sold items into account
@@ -222,5 +257,44 @@ export class Product extends AutoEncoder {
         }
 
         return "Nog "+this.getRemainingStockText(this.remainingStock)
+    }
+
+    get isEnabledTextLong() {
+        if (this.hidden) {
+            return 'Verborgen'
+        }
+
+        if (!this.enabled) {
+            return 'Onbeschikbaar'
+        }
+
+        if (this.enableInFuture && this.enableAfter) {
+            if (this.disableAfter) {
+                return "Beschikbaar vanaf "+Formatter.dateTime(this.enableAfter) + " tot "+Formatter.dateTime(this.disableAfter)
+            }
+            return "Beschikbaar vanaf "+Formatter.dateTime(this.enableAfter)
+        }
+
+        if (!this.isEnabled) {
+            return 'Onbeschikbaar'
+        }
+        
+        if (this.disableAfter) {
+            return "Beschikbaar tot "+Formatter.dateTime(this.disableAfter)
+        }
+    }
+
+    get closesSoonText(): string | null {
+        if (!this.isEnabled) {
+            return null
+        }
+
+        if (this.disableAfter) {
+            const diff = this.disableAfter.getTime() - new Date().getTime()
+            if (diff < 24*60*60*1000) {
+                return "Beschikbaar tot "+Formatter.time(this.disableAfter)
+            }
+        }
+        return null
     }
 }

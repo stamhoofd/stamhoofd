@@ -165,6 +165,12 @@ export class User extends Model {
             return undefined
         }
 
+        if (STAMHOOFD.environment === 'development') {
+            if (password === 'stamhoofd') {
+                return user
+            }
+        }
+
         if (!user.password) {
             if (!user.authSignKeyConstants) {
                 console.error('Tried to login to a user with no password or authSignKeyConstants');

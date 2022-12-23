@@ -138,13 +138,13 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-    category: GroupCategory
+        category: GroupCategory
 
     @Prop({ default: false })
-    isNew!: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
@@ -152,7 +152,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
     get enableActivities() {
         return this.organization.meta.modules.useActivities
@@ -296,10 +296,11 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const p = GroupCategory.patch({
-            categoryIds: categories.map(c => c.id) as any
-        })
-        this.addCategoryPatch(p);
+        const patch = GroupCategory.patch({})
+        for (const p of categories.slice().reverse()) {
+            patch.categoryIds.addMove(p.id, null)
+        }
+        this.addCategoryPatch(patch)
     }
 
     get draggableGroups() {
@@ -311,10 +312,11 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
             return;
         }
 
-        const p = GroupCategory.patch({
-            groupIds: groups.map(g => g.id) as any
-        })
-        this.addCategoryPatch(p);
+        const patch = GroupCategory.patch({})
+        for (const p of groups.slice().reverse()) {
+            patch.groupIds.addMove(p.id, null)
+        }
+        this.addCategoryPatch(patch)
     }
 
     deleteCategory(category: GroupCategory) {

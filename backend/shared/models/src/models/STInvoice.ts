@@ -123,8 +123,6 @@ export class STInvoice extends Model {
             return packages
         }
 
-        console.warn("No connected packages to invoice "+this.id)
-
         return []
     }
 
@@ -165,13 +163,14 @@ export class STInvoice extends Model {
                     // Increase paid amount
                     pack.meta.paidPrice += item.price
                     pack.meta.paidAmount += item.amount
+                    await pack.save();
                 }
             }
         }
 
         // Search for all packages and activate them if needed (might be possible that they are already validated)
         for (const p of packages) {
-            // It is possible that the meta of the package has changed in the previous loop call, so we need to refetch it otherwise we get 'meta' conflicts
+            // It is possible that the meta of the package has changed in the previous loop call (in pack.activate), so we need to refetch it otherwise we get 'meta' conflicts
             const pack = (await STPackage.getByID(p.id)) ?? p
             console.log("Activating package "+pack.id)
 

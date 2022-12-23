@@ -1,8 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
 import { SimpleError } from '@simonbackx/simple-errors';
-
 import { RegisterCode } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
 
 type Params = { code: string };
 type Query = undefined;

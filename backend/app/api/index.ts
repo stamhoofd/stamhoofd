@@ -1,8 +1,9 @@
 require('@stamhoofd/backend-env').load()
-import { Column, Database } from "@simonbackx/simple-database";
+import { Column, Database, Migration } from "@simonbackx/simple-database";
 import { CORSPreflightEndpoint, Router, RouterServer } from "@simonbackx/simple-endpoints";
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
+import {loadLogger} from "@stamhoofd/logging"
 import { Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 
@@ -27,13 +28,21 @@ if (new Date().getTimezoneOffset() != 0) {
     throw new Error("Process should always run in UTC timezone");
 }
 
+const seeds = async () => {
+    try {
+        // Internal
+        await Migration.runAll(__dirname + "/src/seeds");
+    } catch (e) {
+        console.error("Failed to run seeds:")
+        console.error(e)
+    }
+};
 
+const start = async () => {
+    console.log('Running server at v' + Version)
 
-const start = async () => {    
-    console.log("Loading locales...")
+    loadLogger();
     await I18n.load()
-
-    console.log("Initialising server...")
     const router = new Router();
     await router.loadAllEndpoints(__dirname + "/src/endpoints/*");
     await router.loadAllEndpoints(__dirname + "/src/endpoints/*/manage");
@@ -53,9 +62,6 @@ const start = async () => {
         // Default timeout is a bit too short
         routerServer.server.timeout = 15000;
     }
-
-    const cronInterval = setInterval(crons, 5 * 60 * 1000);
-    crons()
 
     const shutdown = async () => {
         console.log("Shutting down...")
@@ -123,6 +129,12 @@ const start = async () => {
             process.exit(1);
         });
     });
+
+    const cronInterval = setInterval(() => {
+        crons().catch(console.error)
+    }, 5 * 60 * 1000);
+    crons().catch(console.error)
+    seeds().catch(console.error);
 };
 
 start().catch(error => {

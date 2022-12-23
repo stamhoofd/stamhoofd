@@ -1,8 +1,7 @@
-import { AutoEncoderPatchType,Decoder, PatchableArray } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Token } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';

@@ -3,7 +3,7 @@
         <h2>{{ category.name }}</h2>
         <p v-if="category.description.length > 0" class="style-description-small" v-text="category.description" />
 
-        <ProductGrid :products="products" :webshop="webshop" :cart="cart" :save-handler="saveHandler" />
+        <ProductGrid :products="products" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :admin="admin" />
         <hr v-if="!isLast">
     </div>
 </template>
@@ -33,25 +33,28 @@ import ProductGrid from "./ProductGrid.vue"
     }
 })
 export default class CategoryBox extends Mixins(NavigationMixin){
-    @Prop({ required: true })
-    category: Category
+    @Prop({ default: false })
+        admin: boolean
 
     @Prop({ required: true })
-    webshop: Webshop
+        category: Category
+
+    @Prop({ required: true })
+        webshop: Webshop
 
     @Prop({ default: false })
-    isLast: boolean
+        isLast: boolean
 
     @Prop({ required: true })
-    cart: Cart
+        cart: Cart
 
     @Prop({ required: true })
-    saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
 
     get products() {
         return this.category.productIds.flatMap(id => {
             const product = this.webshop.products.find(p => p.id === id)
-            if (product) {
+            if (product && !product.hidden) {
                 return [product]
             }
             return []

@@ -157,7 +157,7 @@ export class CartItem extends AutoEncoder {
             descriptions.unshift(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()))
         }
 
-        return descriptions.join("\n")
+        return descriptions.filter(d => !!d).join("\n")
     }
 
     get descriptionWithoutDate(): string {
@@ -176,7 +176,7 @@ export class CartItem extends AutoEncoder {
             }
             descriptions.push(a.field.name+": "+a.answer)
         }
-        return descriptions.join("\n")
+        return descriptions.filter(d => !!d).join("\n")
     }
 
     get description(): string {
@@ -185,7 +185,7 @@ export class CartItem extends AutoEncoder {
         if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
             descriptions.unshift(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()))
         }
-        return descriptions.join("\n")
+        return descriptions.filter(d => !!d).join("\n")
     }
 
     validateAnswers() {
@@ -304,44 +304,78 @@ export class CartItem extends AutoEncoder {
         }
 
         errors.throwIfNotEmpty()
-
-    
-
     }
 
     /**
      * Update self to the newest available data and throw if it was not able to recover
      */
-    validate(webshop: Webshop, cart: Cart, refresh = true) {
+    validate(webshop: Webshop, cart: Cart, refresh = true, asAdmin = false) {
         if (refresh) {
             this.refresh(webshop)
         }
+        const product = this.product
+
+        if (!product.allowMultiple) {
+            this.amount = 1;
+        }
 
         // Check stock
-        const product = this.product
-        if (!product.enabled && this.amount > this.reservedAmount) {
-            throw new SimpleError({
-                code: "product_unavailable",
-                message: "Product unavailable",
-                human: this.product.name+" is niet meer beschikbaar"
-            })
-        }
+        if (!asAdmin) {
+            if (!product.isEnabled && this.amount > this.reservedAmount) {
+                throw new SimpleError({
+                    code: "product_unavailable",
+                    message: "Product unavailable",
+                    human: this.product.name+" is niet meer beschikbaar"
+                })
+            }
 
-        if (product.isSoldOut && this.amount > this.reservedAmount) {
-            throw new SimpleError({
-                code: "product_unavailable",
-                message: "Product unavailable",
-                human: this.product.name+" is uitverkocht"
-            })
-        }
+            if (product.isSoldOut && this.amount > this.reservedAmount) {
+                throw new SimpleError({
+                    code: "product_unavailable",
+                    message: "Product unavailable",
+                    human: this.product.name+" is uitverkocht"
+                })
+            }
 
-        if (product.remainingStock !== null && product.remainingStock < this.amount - this.reservedAmount) {
-            throw new SimpleError({
-                code: "product_unavailable",
-                message: "No remaining stock",
-                // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-                human: "Er zijn nog maar "+product.remainingStock+" stuks beschikbaar van "+this.product.name
-            })
+            // Count the increase in stock for the whole cart and this product
+            const pending = cart.items.reduce((prev, item) => {
+                if (item.product.id != this.product.id) {
+                    return prev
+                }
+                if (item.id >= this.id) { // greater than or equal, so we only compare with items before this item in the cart (we'll check the opposite direction anyway later)
+                    return prev
+                }
+                return prev + item.amount - item.reservedAmount
+            }, 0) + this.amount - this.reservedAmount
+
+            if (product.remainingStock !== null && product.remainingStock < pending) {
+                throw new SimpleError({
+                    code: "product_unavailable",
+                    message: "No remaining stock",
+                    human: product.remainingStock === 1 ? ("Er is nog maar één stuk beschikbaar van " +this.product.name) : ("Er zijn nog maar "+product.remainingStock+" stuks beschikbaar van "+this.product.name)
+                })
+            }
+
+            // Count the total items
+            if (!asAdmin && product.maxPerOrder !== null) {
+                const total = cart.items.reduce((prev, item) => {
+                    if (item.product.id != this.product.id) {
+                        return prev
+                    }
+                    if (item.id >= this.id) { // greater than or equal, so we only compare with items before this item in the cart (we'll check the opposite direction anyway later)
+                        return prev
+                    }
+                    return prev + item.amount
+                }, 0) + this.amount
+
+                if (total > product.maxPerOrder) {
+                    throw new SimpleError({
+                        code: "product_unavailable",
+                        message: "Maximum amount reached",
+                        human: "Je kan niet meer dan "+product.maxPerOrder+" stuks van "+this.product.name+" bestellen"
+                    })
+                }
+            }
         }
 
         // Update prices
@@ -422,12 +456,12 @@ export class Cart extends AutoEncoder {
         errors.throwIfNotEmpty()
     }
 
-    validate(webshop: Webshop) {
+    validate(webshop: Webshop, asAdmin = false) {
         const newItems: CartItem[] = []
         const errors = new SimpleErrors()
         for (const item of this.items) {
             try {
-                item.validate(webshop, this)
+                item.validate(webshop, this, true, asAdmin)
                 newItems.push(item)
             } catch (e) {
                 errors.addError(e)

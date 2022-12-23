@@ -1,5 +1,5 @@
 <template>
-    <draggable v-if="draggable" v-model="list" handle=".drag" tag="div" class="st-list" animation="200" ghost-class="is-dragging" :group="group">
+    <draggable v-if="draggable" v-model="list" handle=".drag" tag="div" class="st-list" animation="200" ghost-class="is-dragging" :group="group" :force-fallback="true">
         <slot />
     </draggable>
     <transition-group v-else-if="withAnimation" tag="div" name="list" class="st-list">

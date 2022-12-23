@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { ValidatedAddress } from '../addresses/Address';
@@ -123,7 +124,7 @@ export class Checkout extends AutoEncoder {
         }
 
         try {
-            this.cart.validate(webshop)
+            this.cart.validate(webshop, asAdmin)
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace("cart")
@@ -136,6 +137,14 @@ export class Checkout extends AutoEncoder {
                 code: "closed",
                 message: "Orders are closed",
                 human: "Helaas! Je bent te laat. De bestellingen zijn gesloten.",
+            })
+        }
+
+        if (!asAdmin && webshop.meta.openAt && webshop.meta.openAt > new Date()) {
+            throw new SimpleError({
+                code: "closed",
+                message: "Orders are closed",
+                human: "Nog even geduld. Bestellen kan vanaf " + Formatter.dateTime(webshop.meta.openAt) + ".",
             })
         }
     }
@@ -278,7 +287,7 @@ export class Checkout extends AutoEncoder {
         this.timeSlot = timeSlot
     }
 
-    validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n) {
+    validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false) {
         if (this.customer.firstName.length < 2) {
             throw new SimpleError({
                 code: "invalid_first_name",
@@ -298,11 +307,11 @@ export class Checkout extends AutoEncoder {
         }
 
         if (webshop.meta.phoneEnabled) {
-            if (this.customer.phone.length < 6) {
+            if (this.customer.phone.length < 6 && !asAdmin) {
                 throw new SimpleError({
                     code: "invalid_phone",
                     message: "Invalid phone",
-                    human: i18n.t('webshop.inputs.phone.invalidMessage').toString(),
+                    human: i18n.t('shared.inputs.mobile.invalidMessage').toString(),
                     field: "customer.phone"
                 })
             }
@@ -357,7 +366,7 @@ export class Checkout extends AutoEncoder {
         this.validateCheckoutMethod(webshop, organizationMeta)
         this.validateDeliveryAddress(webshop, organizationMeta)
         this.validateTimeSlot(webshop, organizationMeta)
-        this.validateCustomer(webshop, organizationMeta, i18n)
+        this.validateCustomer(webshop, organizationMeta, i18n, asAdmin)
         this.validateRecordAnswers(webshop)
 
         if (this.totalPrice != 0 && !asAdmin) {
