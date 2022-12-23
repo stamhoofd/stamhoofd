@@ -128,12 +128,14 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         }
         if (platform === "web") {
             response.headers["X-Platform-Latest-Version"] = Version
-        }   
-        
-        logger.log(
-            ...requestPrefix(request, 'time'),
-            "Finished in "+timeInMs+"ms"
-        )
+        }
+
+        if (request.method !== "OPTIONS") {
+            logger.log(
+                ...requestPrefix(request, 'time'),
+                "Finished in "+timeInMs+"ms"
+            )
+        }
 
         if (error) {
             if (isSimpleError(error) || isSimpleErrors(error)) {
