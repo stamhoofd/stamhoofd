@@ -140,6 +140,40 @@ export default class ProductRow extends Mixins(NavigationMixin) {
                         return true;
                     }
                 }),
+                ...(this.category && this.webshop.categories.length >= 2 ? [
+                    new ContextMenuItem({
+                        name: "Verplaatsen naar",
+                        childMenu: new ContextMenu([
+                            this.webshop.categories.flatMap(c => {
+                                if (!this.category || c.id == this.category.id) {
+                                    return []
+                                }
+                                return [new ContextMenuItem({
+                                    name: c.name,
+                                    action: () => {
+                                        const categoryPatch = Category.patch({
+                                            id: c.id
+                                        })
+                                        categoryPatch.productIds.addPut(this.product.id)
+
+                                        const categoryPatch2 = Category.patch({
+                                            id: this.category!.id
+                                        })
+                                        categoryPatch2.productIds.addDelete(this.product.id)
+                                        
+                                        const webshopPatch = PrivateWebshop.patch({
+                                            id: this.webshop.id,
+                                        })
+                                        webshopPatch.categories.addPatch(categoryPatch)
+                                        webshopPatch.categories.addPatch(categoryPatch2)
+                                        this.$emit("patch", webshopPatch)
+                                        return true;
+                                    }
+                                })]
+                            })
+                        ])
+                    }),
+                ] : [])
             ]
         ])
         menu.show({ clickEvent: event }).catch(console.error)
