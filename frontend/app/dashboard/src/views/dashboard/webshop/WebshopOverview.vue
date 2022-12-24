@@ -141,7 +141,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editInputFields(true)">
+                    <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
                             Vrije invoervelden
@@ -152,7 +152,7 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem v-if="enableBetaFeatures" :selectable="true" class="left-center" @click="editRecordSettings(true)">
+                    <STListItem v-else :selectable="true" class="left-center" @click="editRecordSettings(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
                             Vragenlijsten en gegevens
@@ -334,10 +334,6 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         preview!: WebshopPreview;
 
     webshopManager = new WebshopManager(this.preview)
-
-    get enableBetaFeatures() {
-        return this.organization.meta.enableBetaFeatures
-    }
 
     get isOpen() {
         return !this.webshopManager.preview.isClosed()

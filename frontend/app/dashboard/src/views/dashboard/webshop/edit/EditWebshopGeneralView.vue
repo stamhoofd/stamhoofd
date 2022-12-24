@@ -77,20 +77,23 @@
             <TimeInput v-model="availableUntil" title="Om" :validator="validator" /> 
         </div>
 
-        <Checkbox v-if="enableBetaFeatures" v-model="useOpenAt">
+        <Checkbox v-model="useOpenAt">
             Open webshop pas na een bepaalde datum
         </Checkbox>
 
-        <div v-if="enableBetaFeatures && useOpenAt" class="split-inputs">
+        <div v-if="useOpenAt" class="split-inputs">
             <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errorBox">
                 <DateSelection v-model="openAt" />
             </STInputBox>
             <TimeInput v-model="openAt" title="Om" :validator="validator" /> 
         </div>
 
-        <div v-if="enableBetaFeatures" class="container">
+        <div v-if="isNew" class="container">
             <hr>
             <h2>Nummering</h2>
+            <p class="info-box">
+                Je kan dit achteraf niet meer wijzigen.
+            </p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">
@@ -186,10 +189,6 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
 
     get WebshopNumberingType() {
         return WebshopNumberingType
-    }
-
-    get enableBetaFeatures() {
-        return this.organization.meta.enableBetaFeatures
     }
 
     get name() {

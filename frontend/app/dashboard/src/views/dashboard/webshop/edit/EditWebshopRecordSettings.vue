@@ -24,10 +24,6 @@
         <hr>
         <h2>Vragenlijsten tijdens afrekenen</h2>
 
-        <p>
-            Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het afrekenen.
-        </p>
-
         <STList v-model="categories" :draggable="true">
             <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" />
         </STList>

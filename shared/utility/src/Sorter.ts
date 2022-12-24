@@ -44,7 +44,7 @@ export class Sorter {
         return 1
     }
 
-    static byEnumValue<T>( a: string, b: string, enumObject: T) {
+    static byEnumValue<T extends {}>( a: string, b: string, enumObject: T) {
         return Object.values(enumObject).indexOf(a) - Object.values(enumObject).indexOf(b)
     }
 

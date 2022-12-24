@@ -132,7 +132,7 @@
         </h2>
 
         <STList>
-            <STListItem v-if="enableBetaFeatures || hidden" :selectable="true" element-name="label">
+            <STListItem :selectable="true" element-name="label">
                 <Checkbox slot="left" v-model="hidden" />
 
                 <h3 class="style-title-list">
@@ -157,7 +157,7 @@
                 </STListItem>
 
                 <template v-if="!disabled">
-                    <STListItem v-if="enableBetaFeatures" :selectable="true" element-name="label">
+                    <STListItem :selectable="true" element-name="label">
                         <Checkbox slot="left" v-model="useEnableAfter" />
 
                         <h3 class="style-title-list">
@@ -175,7 +175,7 @@
                         </div>
                     </STListItem>
 
-                    <STListItem v-if="enableBetaFeatures" :selectable="true" element-name="label">
+                    <STListItem :selectable="true" element-name="label">
                         <Checkbox slot="left" v-model="useDisableAfter" />
 
                         <h3 class="style-title-list">
@@ -229,7 +229,7 @@
                         </p>
                     </STListItem>
 
-                    <STListItem v-if="enableBetaFeatures || useMaxPerOrder" :selectable="true" element-name="label">
+                    <STListItem :selectable="true" element-name="label">
                         <Checkbox slot="left" v-model="useMaxPerOrder" />
 
                         <h3 class="style-title-list">
@@ -249,7 +249,7 @@
                 </template>
             </template>
 
-            <STListItem v-if="enableBetaFeatures" :selectable="true" element-name="label">
+            <STListItem :selectable="true" element-name="label">
                 <Checkbox slot="left" v-model="notAllowMultiple" />
 
                 <h3 class="style-title-list">
@@ -347,10 +347,6 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     get patchedProduct() {
         return this.product.patch(this.patchProduct)
-    }
-
-    get enableBetaFeatures() {
-        return OrganizationManager.organization.meta.enableBetaFeatures
     }
 
     get typeName(): string {
