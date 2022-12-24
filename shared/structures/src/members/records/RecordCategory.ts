@@ -9,6 +9,16 @@ import { StringFilterDefinition } from "../../filters/StringFilter";
 import { RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordTextAnswer } from "./RecordAnswer";
 import { RecordSettings, RecordType } from "./RecordSettings";
 
+export class RecordEditorSettings<T> {
+    dataPermission = false
+    filterDefinitions: (categories: RecordCategory[]) => FilterDefinition<T>[]
+    filterValueForAnswers: (answers: RecordAnswer[]) => T
+
+    constructor(options: Partial<RecordEditorSettings<T>>) {
+        Object.assign(this, options)
+    }
+}
+
 export class RecordCategory extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string

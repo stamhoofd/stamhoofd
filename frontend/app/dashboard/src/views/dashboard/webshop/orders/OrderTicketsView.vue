@@ -48,10 +48,10 @@ export default class OrderTicketsView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
 
     @Prop({ required: true })
-    initialOrder!: PrivateOrderWithTickets
+        initialOrder!: PrivateOrderWithTickets
 
     @Prop({ required: true })
-    webshopManager!: WebshopManager
+        webshopManager!: WebshopManager
 
     get webshop() {
         return this.webshopManager.preview

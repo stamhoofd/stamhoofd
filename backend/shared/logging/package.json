@@ -14,6 +14,6 @@
         "build:full": "rm -rf ./dist && yarn build"
     },
     "dependencies": {
-        "@simonbackx/simple-logging": "^1.0.0"
+        "@simonbackx/simple-logging": "^1.0.1"
     }
 }

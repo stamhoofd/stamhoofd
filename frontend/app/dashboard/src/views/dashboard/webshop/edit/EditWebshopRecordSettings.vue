@@ -29,7 +29,7 @@
         </p>
 
         <STList v-model="categories" :draggable="true">
-            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :filter-definitions="filterDefinitionsForCategories" :filter-value-for-answers="filterValueForAnswers" @patch="addCategoriesPatch" />
+            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" />
         </STList>
 
         <p>
@@ -46,6 +46,7 @@ import { PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { Checkout } from "@stamhoofd/structures";
+import { RecordEditorSettings } from "@stamhoofd/structures";
 import { PrivateWebshop, RecordCategory, WebshopMetaData } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -89,25 +90,25 @@ export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) 
         }))
     }
 
+    get editorSettings() {
+        return new RecordEditorSettings({
+            dataPermission: false,
+            filterDefinitions: (categories: RecordCategory[]) => Checkout.getFilterDefinitions(this.webshop, categories),
+            filterValueForAnswers: (answers) => Checkout.create({recordAnswers: answers})
+        })
+    }
+
     addCategory() {
         const category = RecordCategory.create({})
 
         this.present(new ComponentWithProperties(EditRecordCategoryView, {
             category,
             isNew: true,
-            filterDefinitions: this.filterDefinitionsForCategories(this.categories),
+            filterDefinitions: this.editorSettings.filterDefinitions(this.categories),
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
                 this.addCategoriesPatch(patch)
             }
         }).setDisplayStyle("popup"))
-    }
-
-    filterDefinitionsForCategories(categories: RecordCategory[]) {
-        return Checkout.getFilterDefinitions(categories)
-    }
-
-    filterValueForAnswers(answers) {
-        return Checkout.create({recordAnswers: answers})
     }
 
     addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {

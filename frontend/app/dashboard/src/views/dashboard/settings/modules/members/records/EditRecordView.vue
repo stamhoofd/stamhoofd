@@ -197,18 +197,20 @@
             </STInputBox>
         </template>
 
-        <hr>
-        <h2>Opslag en beveiliging</h2>
-        <p>
-            Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a :href="'https://'+$t('shared.domains.marketing')+'/docs/toestemming-gegevens-verzamelen'" class="inline-link" target="_blank" rel="noopener">
-                Lees onze gids
-            </a>
-        </p>
+        <template v-if="settings.dataPermission">
+            <hr>
+            <h2>Opslag en beveiliging</h2>
+            <p>
+                Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a :href="'https://'+$t('shared.domains.marketing')+'/docs/toestemming-gegevens-verzamelen'" class="inline-link" target="_blank" rel="noopener">
+                    Lees onze gids
+                </a>
+            </p>
 
 
-        <Checkbox v-model="sensitive">
-            Ik heb toestemming nodig om deze informatie te verzamelen, of de antwoorden zijn (of bevatten mogelijks) gevoelige informatie
-        </Checkbox>
+            <Checkbox v-model="sensitive">
+                Ik heb toestemming nodig om deze informatie te verzamelen, of de antwoorden zijn (of bevatten mogelijks) gevoelige informatie
+            </Checkbox>
+        </template>
 
         <div v-if="!isNew" class="container">
             <hr>
@@ -228,6 +230,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, Dropdown,ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { RecordEditorSettings } from '@stamhoofd/structures';
 import { RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, Version } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -250,23 +253,26 @@ import RecordChoiceRow from "./RecordChoiceRow.vue";
         RecordChoiceRow
     },
 })
-export default class EditRecordView extends Mixins(NavigationMixin) {
+export default class EditRecordView<T> extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
     @Prop({ required: true })
-    record!: RecordSettings
+        record!: RecordSettings
 
     @Prop({ required: false, default: null })
-    category!: RecordCategory | null
+        category!: RecordCategory | null
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     patchRecord: AutoEncoderPatchType<RecordSettings> = RecordSettings.patch({ id: this.record.id })
 
     @Prop({ required: true })
-    saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
+        saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => void;
+
+    @Prop({ required: true })
+        settings: RecordEditorSettings<T>
 
     get patchedRecord() {
         return this.record.patch(this.patchRecord)

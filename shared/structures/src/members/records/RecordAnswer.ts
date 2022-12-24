@@ -47,6 +47,13 @@ export class RecordAnswer extends AutoEncoder {
         return "Onbekend"
     }
 
+    get excelValue() {
+        return {
+            value: this.stringValue,
+            format: null
+        }
+    }
+
     getWarnings(): RecordWarning[] {
         return []
     }
@@ -143,6 +150,13 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     get stringValue() {
         return this.selected ? "Aangevinkt" : "Niet aangevinkt"
+    }
+
+    get excelValue() {
+        return {
+            value: this.selected ? (this.comments ? this.comments : "Ja") : "Nee",
+            format: null
+        }
     }
 
     override validate() {

@@ -57,8 +57,9 @@
                     <span v-if="hasWrite" slot="right" class="icon arrow-down-small gray" />
                 </STListItem>
 
-                <STListItem v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
-                            @click="openPayment" @contextmenu.prevent="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null"
+                <STListItem
+                    v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    @click="openPayment" @contextmenu.prevent="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null"
                 >
                     <h3 class="style-definition-label">
                         Betaling
@@ -352,10 +353,10 @@ export default class OrderView extends Mixins(NavigationMixin){
     errorBox: ErrorBox | null = null
 
     @Prop({ required: true })
-    initialOrder!: PrivateOrderWithTickets
+        initialOrder!: PrivateOrderWithTickets
 
     @Prop({ required: true })
-    webshopManager!: WebshopManager
+        webshopManager!: WebshopManager
 
     get webshop() {
         return this.webshopManager.preview
@@ -365,10 +366,10 @@ export default class OrderView extends Mixins(NavigationMixin){
     loadingTickets = false
     
     @Prop({ default: null })
-    getNextOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
+        getNextOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
 
     @Prop({ default: null })
-    getPreviousOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
+        getPreviousOrder!: (order: PrivateOrderWithTickets) => PrivateOrderWithTickets | null;
 
     @Watch("order.payment.status")
     onChangePaymentStatus(n: string, old: string) {

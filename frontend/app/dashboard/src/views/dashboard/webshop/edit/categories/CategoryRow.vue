@@ -24,7 +24,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Category, PrivateWebshop } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -34,13 +34,16 @@ import EditCategoryView from './EditCategoryView.vue';
     components: {
         STListItem
     },
+    directives: {
+        LongPress: LongPressDirective,
+    }
 })
 export default class CategoryRow extends Mixins(NavigationMixin) {
     @Prop({})
-    category: Category
+        category: Category
 
     @Prop({})
-    webshop: PrivateWebshop
+        webshop: PrivateWebshop
 
     editCategory() {
         this.present(new ComponentWithProperties(EditCategoryView, { category: this.category, webshop: this.webshop, isNew: false, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {

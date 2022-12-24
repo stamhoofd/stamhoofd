@@ -29,9 +29,11 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, STListItem } from "@stamhoofd/components";
+import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { Category } from '@stamhoofd/structures';
 import { PrivateWebshop, Product } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import EditProductView from './EditProductView.vue';
@@ -42,14 +44,20 @@ import EditProductView from './EditProductView.vue';
     },
     filters: {
         price: Formatter.price.bind(Formatter)
+    },
+    directives: {
+        LongPress: LongPressDirective,
     }
 })
 export default class ProductRow extends Mixins(NavigationMixin) {
-    @Prop({})
-    product: Product
+    @Prop({required: true})
+        product: Product
 
-    @Prop({})
-    webshop: PrivateWebshop
+    @Prop({required: false, default: null})
+        category: Category | null
+
+    @Prop({required: true})
+        webshop: PrivateWebshop
 
     get imageSrc() {
         return this.product.images[0]?.getPathForSize(80, 80)
@@ -69,6 +77,34 @@ export default class ProductRow extends Mixins(NavigationMixin) {
 
     moveDown() {
         this.$emit("move-down")
+    }
+
+    duplicate() {
+        const duplicatedProduct = this.product.clone()
+        duplicatedProduct.id = uuidv4()
+
+        // while name is in use
+        // Remove and get number at end of duplicated product, default to 1
+        let counter = 0;
+        while (this.webshop.products.find(p => p.name == duplicatedProduct.name) && counter < 100) {
+            const endNumber = parseInt(duplicatedProduct.name.match(/\d+$/)?.[0] ?? "1")
+            duplicatedProduct.name = duplicatedProduct.name.replace(/\d+$/, "") + (endNumber + 1)
+            counter++
+        }
+
+        const webshopPatch = PrivateWebshop.patch({
+            id: this.webshop.id,
+        })
+        webshopPatch.products.addPut(duplicatedProduct, this.product.id)
+
+        if (this.category) {
+            const categoryPatch = Category.patch({
+                id: this.category.id
+            })
+            categoryPatch.productIds.addPut(duplicatedProduct.id, this.product.id)
+            webshopPatch.categories.addPatch(categoryPatch)
+        }
+        this.$emit("patch", webshopPatch)
     }
 
     get price() {
@@ -91,6 +127,16 @@ export default class ProductRow extends Mixins(NavigationMixin) {
                     icon: "arrow-down",
                     action: () => {
                         this.moveDown()
+                        return true;
+                    }
+                }),
+            ],
+            [
+                new ContextMenuItem({
+                    name: "Dupliceren",
+                    icon: "copy",
+                    action: () => {
+                        this.duplicate()
                         return true;
                     }
                 }),

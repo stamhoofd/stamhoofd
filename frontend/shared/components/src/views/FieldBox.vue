@@ -5,7 +5,7 @@
             {{ field.name || 'Maak een keuze' }}
         </h2>
         <STInputBox :title="withTitle ? undefined : (field.name || 'Maak een keuze')" :error-box="errorBox" :error-fields="'fieldAnswers.'+field.id" :class="{'no-padding': withTitle}">
-            <input v-model="value" :placeholder="field.required ? field.placeholder : 'Optioneel' " class="input">
+            <input v-model="value" :placeholder="field.required ? (field.placeholder || field.name) : 'Optioneel' " class="input">
             <p v-if="field.description" class="style-description-small" v-text="field.description" />
         </STInputBox>
     </div>
@@ -24,16 +24,16 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class FieldBox extends Mixins(NavigationMixin){
     @Prop({ default: true })
-    withTitle: boolean
+        withTitle: boolean
 
     @Prop({ required: true })
-    field: WebshopField
+        field: WebshopField
 
     @Prop({ required: true })
-    errorBox: ErrorBox
+        errorBox: ErrorBox
 
     @Prop({ required: true })
-    answers: WebshopFieldAnswer[]
+        answers: WebshopFieldAnswer[]
 
     get value() {
         return this.answers.find(a => a.field.id === this.field.id)?.answer ?? ""

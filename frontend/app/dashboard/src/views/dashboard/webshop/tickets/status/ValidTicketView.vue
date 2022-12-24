@@ -5,7 +5,7 @@
         <main v-if="!ticket.itemId">
             <h1>
                 <span class="icon green success" />
-                <span>Bestelling {{ order.number }}</span>
+                <span>Bestelling #{{ order.number }}</span>
             </h1>
 
             <p v-if="order.payment && order.payment.status != 'Succeeded'" class="warning-box">
@@ -18,6 +18,21 @@
             <p v-if="order.status == 'Canceled'" class="error-box">
                 Deze bestelling werd geannuleerd
             </p>
+
+            <div v-if="hasWarnings" class="hover-box container">
+                <hr>
+                <ul class="member-records">
+                    <li
+                        v-for="warning in sortedWarnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
+                    >
+                        <span :class="'icon '+warning.icon" />
+                        <span class="text">{{ warning.text }}</span>
+                    </li>
+                </ul>
+                <hr>
+            </div>
 
             <STList>
                 <STListItem v-for="cartItem in order.data.cart.items" :key="cartItem.id" class="cart-item-row">
@@ -35,126 +50,198 @@
             </STList>
 
             <hr>
+            <h2>Informatie</h2>
 
             <STList>
-                <STListItem class="right-description">
-                    Naam
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Totaalbedrag
+                    </h3>
+                    <p class="style-definition-text">
+                        <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+                        {{ order.data.totalPrice | price }}<template v-if="order.payment && (order.payment.price != order.data.totalPrice || !order.payment && order.data.totalPrice > 0)">*</template>
+                    </p>
+                </STListItem>
 
-                    <template slot="right">
-                        {{ order.data.customer.name }}
-                    </template>
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Geplaatst op
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
+                    </p>
                 </STListItem>
 
                 <STListItem v-long-press="(e) => (hasWrite ? markAs(e) : null)" class="right-description right-stack" :selectable="hasWrite" @click="hasWrite ? markAs($event) : null">
-                    Status
-
-                    <template slot="right">
-                        <span :class="'style-tag '+statusColor">{{ statusName }}</span>
-                        <span v-if="hasWrite" class="icon arrow-down-small" />
-                    </template>
+                    <h3 :class="'style-definition-label '+statusColor">
+                        Status
+                    </h3>
+                    <p class="style-definition-text">
+                        <span>{{ statusName }}</span>
+                        <span v-if="isCanceled" class="icon canceled" />
+                    </p>
+                    <span v-if="hasWrite" slot="right" class="icon arrow-down-small gray" />
                 </STListItem>
 
-                
-                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
-                    {{ a.field.name }}
-
-                    <template slot="right">
-                        {{ a.answer || "/" }}
-                    </template>
-                </STListItem>
-                <STListItem v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" class="right-description right-stack" :selectable="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')" @click="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null">
-                    Betaalmethode
-
-                    <template slot="right">
+                <STListItem
+                    v-if="order.payment" v-long-press="(e) => (hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus(e) : null)" :selectable="hasPaymentsWrite" 
+                    @click="openPayment" @contextmenu.prevent="hasPaymentsWrite && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale') ? changePaymentStatus($event) : null"
+                >
+                    <h3 class="style-definition-label">
+                        Betaling
+                    </h3>
+                    <p class="style-definition-text">
                         <span>{{ getName(order.payment.method) }}</span>
-                        <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
+                        <span v-if="order.payment.status == 'Succeeded'" class="icon primary success" />
                         <span v-else class="icon clock" />
-                        <span v-if="hasPaymentsWrite && ((order.payment && (order.payment.method == 'Transfer' || order.payment.method == 'PointOfSale')))" class="icon arrow-down-small" />
-                    </template>
-                </STListItem>
-                <STListItem v-if="order.validAt" class="right-description">
-                    Geplaatst op
-                    <template slot="right">
-                        {{ order.validAt | dateTime | capitalizeFirstLetter }}
-                    </template>
-                </STListItem>
-                <template v-if="order.data.checkoutMethod">
-                    <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
-                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
-                            Afhaallocatie
-                        </template>
-                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
-                            Locatie
-                        </template>
-                        <template v-else>
-                            Leveringsmethode
-                        </template>
+                    </p>
 
-                        <template slot="right">
-                            {{ order.data.checkoutMethod.name }}
-                        </template>
-                    </STListItem>
-                    <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
-                        Adres
-
-                        <template slot="right">
-                            {{ order.data.checkoutMethod.address }}
-                        </template>
-                    </STListItem>
-                    <STListItem v-if="order.data.address" class="right-description">
-                        Leveringsadres
-
-                        <template slot="right">
-                            {{ order.data.address }}
-                        </template>
-                    </STListItem>
-                    <STListItem v-if="order.data.timeSlot" class="right-description">
-                        <template v-if="order.data.checkoutMethod.type == 'Takeout'">
-                            Wanneer afhalen?
-                        </template>
-                        <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
-                            Wanneer?
-                        </template>
-                        <template v-else>
-                            Wanneer leveren?
-                        </template>
-
-                        <template slot="right">
-                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
-                        </template>
-                    </STListItem>
-                </template>
-                <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
-                    Leveringskost
-
-                    <template slot="right">
-                        {{ order.data.deliveryPrice | price }}
-                    </template>
-                </STListItem>
-                <STListItem class="right-description">
-                    Totaal
-
-                    <template slot="right">
-                        {{ order.data.totalPrice | price }}
-                    </template>
-                </STListItem>
-
-                <STListItem class="right-description">
-                    GSM-nummer
-
-                    <template slot="right">
-                        <p>{{ order.data.customer.phone }}</p>
-                    </template>
-                </STListItem>
-
-                <STListItem class="right-description">
-                    E-mailadres
-
-                    <template slot="right">
-                        {{ order.data.customer.email }}
-                    </template>
+                    <span v-if="hasPaymentsWrite" slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>
+
+            <template v-if="order.data.checkoutMethod">
+                <hr>
+                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                    Afhalen
+                </h2>
+                <h2 v-else-if="order.data.checkoutMethod.type == 'Delivery'">
+                    Levering
+                </h2>
+                <h2 v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                    Ter plaatse consumeren
+                </h2>
+                <h2 v-else>
+                    Onbekende methode
+                </h2>
+
+                <STList class="info">
+                    <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
+                        <h3 class="style-definition-label">
+                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                Afhaallocatie
+                            </template>
+                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                Locatie
+                            </template>
+                            <template v-else>
+                                Leveringsmethode
+                            </template>
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ order.data.checkoutMethod.name }}
+                        </p>
+                    </STListItem>
+                    <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
+                        <h3 class="style-definition-label">
+                            Adres
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ order.data.checkoutMethod.address }}
+                        </p>
+                    </STListItem>
+                    <STListItem v-if="order.data.address" class="right-description">
+                        <h3 class="style-definition-label">
+                            Leveringsadres
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ order.data.address }}
+                        </p>
+                    </STListItem>
+                    <STListItem v-if="order.data.timeSlot" class="right-description">
+                        <h3 class="style-definition-label">
+                            <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                Wanneer afhalen?
+                            </template>
+                            <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                Wanneer?
+                            </template>
+                            <template v-else>
+                                Wanneer leveren?
+                            </template>
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
+                        </p>
+                    </STListItem>
+                    <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
+                        <h3 class="style-definition-label">
+                            Leveringskost
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ order.data.deliveryPrice | price }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <hr>
+            <h2>Gegevens</h2>
+
+            <STList class="info">
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Naam
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.data.customer.name }}
+                    </p>
+                </STListItem>
+
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        E-mailadres
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.data.customer.email }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="order.data.customer.phone">
+                    <h3 class="style-definition-label">
+                        {{ $t("shared.inputs.mobile.label") }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ order.data.customer.phone }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id">
+                    <h3 class="style-definition-label">
+                        {{ a.field.name }}
+                    </h3>
+
+                    <p class="style-definition-text">
+                        {{ a.answer || "/" }}
+                    </p>
+                </STListItem>
+            </STList>
+
+            <div v-if="order.data.comments" class="container">
+                <hr>
+                <h2>
+                    Notities
+                </h2>
+
+                <p class="pre-wrap" v-text="order.data.comments" />
+            </div>
+
+            <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
+                <hr>
+                <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
+                    Afhaalopmerkingen
+                </h2>
+                <h2 v-else>
+                    Leveringsopmerkingen
+                </h2>
+
+                <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
+            </div>
         </main>
 
         <main v-else-if="item">
@@ -216,13 +303,10 @@
         </main>
 
         <STToolbar>
-            <button v-if="!ticket.scannedAt" slot="right" class="button secundary" @click="cancelScan">
-                Niet markeren
-            </button>
-            <button v-else slot="right" class="button secundary" @click="cancelScan">
+            <button v-if="ticket.scannedAt" slot="right" class="button secundary" type="button" @click="cancelScan">
                 Markering ongedaan maken
             </button>
-            <button slot="right" class="button primary" @click="markScanned">
+            <button slot="right" class="button primary" type="button" @click="markScanned">
                 <span class="icon qr-code" />
                 <span>Markeer als gescand</span>
             </button>
@@ -234,11 +318,13 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,ColorHelper,LongPressDirective,Spinner,STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { getPermissionLevelNumber, Order, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures";
+import { OrderStatus } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, Order, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+import PaymentView from "../../../payments/PaymentView.vue";
 import { OrderActionBuilder } from "../../orders/OrderActionBuilder";
 import OrderView from "../../orders/OrderView.vue";
 import { WebshopManager } from "../../WebshopManager";
@@ -267,13 +353,39 @@ import { WebshopManager } from "../../WebshopManager";
 })
 export default class ValidTicketView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    webshopManager!: WebshopManager
+        webshopManager!: WebshopManager
 
     @Prop({ required: true })
-    ticket!: TicketPrivate
+        ticket!: TicketPrivate
 
     @Prop({ required: true })
-    order!: PrivateOrder
+        order!: PrivateOrder
+
+    get recordAnswers() {
+        return this.order.data.recordAnswers
+    }
+
+    get hasWarnings() {
+        return this.warnings.length > 0
+    }
+
+    get warnings(): RecordWarning[] {
+        const warnings: RecordWarning[] = []
+
+        for (const answer of this.recordAnswers) {
+            warnings.push(...answer.getWarnings())
+        }
+
+        return warnings
+    }
+
+    get sortedWarnings() {
+        return this.warnings.slice().sort(RecordWarning.sort)
+    }
+
+    get isCanceled() {
+        return this.order.status === OrderStatus.Canceled
+    }
 
     get item() {
         return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
@@ -319,6 +431,20 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
             return true
         }
         return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+    }
+
+    openPayment() {
+        if (!this.hasPaymentsWrite) {
+            return;
+        }
+        this.present({
+            components: [
+                new ComponentWithProperties(PaymentView, {
+                    initialPayment: this.order.payment
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
 
     markAs(event) {
@@ -396,15 +522,14 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .valid-ticket-view {
-    background: $color-success-background;
-    --color-current-background: #{$color-success-background};
+    // background: $color-success-background;
+    // --color-current-background: #{$color-success-background};
     //--color-current-background-shade: #{$color-success-background-shade};
 
-    color: $color-success-dark;
+    // color: $color-success-dark;
 
     > main {
         > h1 {
-            color: $color-success-dark;
             text-align: center;
             padding-bottom: 0 !important;
 

@@ -18,7 +18,7 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <STList :draggable="true" :value="getDraggableRecords(patchedCategory)" group="records" @input="setDraggableRecords(patchedCategory, $event)">
-            <RecordRow v-for="record in records" :key="record.id" :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" @patch="addRootCategoriesPatch" />
+            <RecordRow v-for="record in records" :key="record.id" :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" />
         </STList>
 
         <p>
@@ -49,7 +49,7 @@
 
                 
             <STList :draggable="true" :value="getDraggableRecords(c)" group="records" @input="setDraggableRecords(c, $event)">
-                <RecordRow v-for="record in c.records" :key="record.id" :record="record" :category="c" :root-categories="patchedRootCategories" :selectable="true" @patch="addRootCategoriesPatch" />
+                <RecordRow v-for="record in c.records" :key="record.id" :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" />
             </STList>
             <p v-if="c.records.length === 0" class="info-box">
                 Deze categorie bevat nog geen vragen.
@@ -88,6 +88,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
+import { RecordEditorSettings } from '@stamhoofd/structures';
 import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordAnswer, RecordCategory, RecordSettings } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -111,10 +112,10 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
     validator = new Validator()
 
     @Prop({ required: true })
-    categoryId!: string
+        categoryId!: string
 
     @Prop({ required: true })
-    rootCategories!: RecordCategory[]
+        rootCategories!: RecordCategory[]
 
     //patchCategory: AutoEncoderPatchType<RecordCategory> = RecordCategory.patch({ id: this.category.id })
     patchRootCategories: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
@@ -123,21 +124,18 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
      * Pass along the changes of the array (so we can also delete with the save handler)
      */
     @Prop({ required: true })
-    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
+        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
 
     @Prop({ required: true })
-    filterValueForAnswers: (answers: RecordAnswer[]) => T
-
-    @Prop({ required: true })
-    filterDefinitions!: (categories: RecordCategory[]) => FilterDefinition<T>[]
+        settings: RecordEditorSettings<T>
 
     filterDefinitionsForCategory() {
         const rootIndex = this.patchedRootCategories.findIndex(c => c.id === this.categoryId)
         if (rootIndex === -1) {
-            return this.filterDefinitions([])
+            return this.settings.filterDefinitions([])
         }
         const rootCategories = this.patchedRootCategories.slice(0, rootIndex + 1)
-        return this.filterDefinitions(rootCategories)
+        return this.settings.filterDefinitions(rootCategories)
     }
 
     editCategory(category: RecordCategory = this.patchedCategory) {
@@ -284,6 +282,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
             record,
             isNew: true,
             parentCategory: parent,
+            settings: this.settings,
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => {
                 if (parent.id === this.categoryId) {
                     this.addRecordsPatch(patch)
@@ -346,7 +345,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
             filterDefinitions: this.filterDefinitionsForCategory(),
             markReviewed: false,
             filterValueForAnswers: (answers: RecordAnswer[]) => {
-                return this.filterValueForAnswers(answers)
+                return this.settings.filterValueForAnswers(answers)
             },
             saveHandler: (_, component: NavigationMixin) => {
                 component.dismiss({ force: true })

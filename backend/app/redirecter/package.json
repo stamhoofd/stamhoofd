@@ -15,6 +15,6 @@
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "^1.11.0",
-        "@simonbackx/simple-logging": "^1.0.0"
+        "@simonbackx/simple-logging": "^1.0.1"
     }
 }
