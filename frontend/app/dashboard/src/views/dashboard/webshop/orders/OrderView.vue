@@ -284,13 +284,6 @@
                     </h3>
                     <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
 
-                    <p v-if="cartItem.product.stock && order.shouldIncludeStock && cartItem.reservedAmount < cartItem.amount" class="warning-box">
-                        De voorraad van {{ cartItem.product.name }} zal verminderd worden met {{ cartItem.amount - cartItem.reservedAmount }} stuk(s)
-                    </p>
-                    <p v-else-if="cartItem.product.stock && order.shouldIncludeStock && cartItem.reservedAmount > cartItem.amount" class="warning-box">
-                        De voorraad van {{ cartItem.product.name }} zal aangevuld worden met {{ cartItem.reservedAmount - cartItem.amount }} stuk(s)
-                    </p>
-
                     <footer>
                         <p class="price">
                             {{ cartItem.amount }} x {{ cartItem.getUnitPrice(order.data.cart) | price }}
