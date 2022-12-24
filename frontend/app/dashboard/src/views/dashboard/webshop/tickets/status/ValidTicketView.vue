@@ -222,6 +222,14 @@
                 </STListItem>
             </STList>
 
+            <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
+                <hr>
+                <h2>
+                    {{ category.name }}
+                </h2>
+                <RecordCategoryAnswersBox :category="category" :answers="recordAnswers" :data-permission="true" />
+            </div>
+
             <div v-if="order.data.comments" class="container">
                 <hr>
                 <h2>
@@ -316,10 +324,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,ColorHelper,LongPressDirective,Spinner,STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
+import { BackButton, Checkbox, ColorHelper, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { OrderStatus } from "@stamhoofd/structures";
-import { getPermissionLevelNumber, Order, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
+import { getPermissionLevelNumber, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -338,6 +345,7 @@ import { WebshopManager } from "../../WebshopManager";
         STToolbar,
         Spinner,
         Checkbox,
+        RecordCategoryAnswersBox
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -497,6 +505,13 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         }
 
         this.pop({ force: true })
+    }
+
+    get recordCategories(): RecordCategory[] {
+        return RecordCategory.flattenCategoriesForAnswers(
+            this.webshop.meta.recordCategories,
+            this.order.data.recordAnswers
+        )
     }
 
     openOrder() {
