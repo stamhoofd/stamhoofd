@@ -38,7 +38,7 @@
             Artikels
         </h2>
         <STList v-model="draggableProducts" :draggable="true">
-            <ProductRow v-for="product in products" :key="product.id" :product="product" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
+            <ProductRow v-for="product in products" :key="product.id" :product="product" :category="patchedCategory" :webshop="patchedWebshop" @patch="addPatch($event)" @move-up="moveProductUp(product)" @move-down="moveProductDown(product)" />
         </STList>
 
         <p>
@@ -87,13 +87,13 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    category: Category
+        category: Category
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     @Prop({ required: true })
-    webshop: PrivateWebshop
+        webshop: PrivateWebshop
     
     patchWebshop: AutoEncoderPatchType<PrivateWebshop> = PrivateWebshop.patch({})
 
@@ -101,7 +101,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
      * If we can immediately save this product, then you can create a save handler and pass along the changes.
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<PrivateWebshop>) => void);
+        saveHandler: ((patch: AutoEncoderPatchType<PrivateWebshop>) => void);
 
     get patchedWebshop() {
         return this.webshop.patch(this.patchWebshop)

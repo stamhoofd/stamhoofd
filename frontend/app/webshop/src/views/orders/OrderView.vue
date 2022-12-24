@@ -216,6 +216,14 @@
                         </STListItem>
                     </STList>
 
+                    <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
+                        <hr>
+                        <h2>
+                            {{ category.name }}
+                        </h2>
+                        <RecordCategoryAnswersBox :category="category" :answers="recordAnswers" :data-permission="true" />
+                    </div>
+
                     <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                         <hr>
                         <h2 v-if="order.data.checkoutMethod.type == 'Takeout'">
@@ -274,8 +282,9 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, ErrorBox, LoadingButton, LoadingView, OrganizationLogo, Radio, RecordCategoryAnswersBox, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast, TransferPaymentView } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
+import { RecordCategory } from '@stamhoofd/structures';
 import { CartItem, Order, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, ProductType, TicketOrder, TicketPublic, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -300,7 +309,8 @@ import DetailedTicketView from './DetailedTicketView.vue';
         OrganizationLogo,
         Spinner,
         TicketBox,
-        TicketListItem
+        TicketListItem,
+        RecordCategoryAnswersBox
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -317,16 +327,16 @@ export default class OrderView extends Mixins(NavigationMixin){
     CheckoutManager = CheckoutManager
 
     @Prop({ default: null })
-    orderId: string | null
+        orderId: string | null
 
     @Prop({ default: null })
-    paymentId: string | null
+        paymentId: string | null
 
     @Prop({ default: null })
-    initialOrder!: Order | null
+        initialOrder!: Order | null
 
     @Prop({ default: false })
-    success: boolean
+        success: boolean
 
     order: Order | null = this.initialOrder
 
@@ -379,6 +389,20 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get publicTickets() {
         return this.tickets
+    }
+
+    get recordCategories(): RecordCategory[] {
+        if (!this.order) {
+            return []
+        }
+        return RecordCategory.flattenCategoriesForAnswers(
+            this.webshop.meta.recordCategories,
+            this.order.data.recordAnswers
+        )
+    }
+
+    get recordAnswers() {
+        return this.order?.data.recordAnswers ?? []
     }
 
     share() {

@@ -93,7 +93,7 @@
         </p>
 
         <STList v-model="categories" :draggable="true">
-            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :filter-definitions="filterDefinitionsForCategories" :filter-value-for-answers="filterValueForAnswers" @patch="addCategoriesPatch" />
+            <RecordCategoryRow v-for="category in categories" :key="category.id" :category="category" :categories="categories" :selectable="true" :settings="editorSettings" @patch="addCategoriesPatch" />
         </STList>
 
         <p>
@@ -120,7 +120,7 @@ import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, PropertyFilterView, SaveView, STErrorsDefault, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, Version } from "@stamhoofd/structures";
+import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager";
@@ -209,22 +209,23 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
         this.addRecordsConfigurationPatch(p)
     }
 
+    get editorSettings() {
+        return new RecordEditorSettings({
+            dataPermission: true,
+            filterDefinitions: (categories: RecordCategory[]) => {
+                return [
+                    ...MemberDetailsWithGroups.getBaseFilterDefinitions(),
+                    ...RecordCategory.getRecordCategoryDefinitions(categories, (member: MemberDetailsWithGroups) => {
+                        return member.details.recordAnswers
+                    }),
+                ]
+            },
+            filterValueForAnswers: (recordAnswers: RecordAnswer[]) => new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
+        })
+    }
+
     get filterDefinitions() {
         return MemberDetailsWithGroups.getFilterDefinitions(this.patchedOrganization, {});
-    }
-
-    filterDefinitionsForCategories(categories: RecordCategory[]) {
-        return [
-            ...MemberDetailsWithGroups.getBaseFilterDefinitions(),
-            ...RecordCategory.getRecordCategoryDefinitions(categories, (member: MemberDetailsWithGroups) => {
-                return member.details.recordAnswers
-            }),
-        ]
-    }
-
-    filterValueForAnswers(recordAnswers: RecordAnswer[]) {
-        // Return an example member for filtering the examples
-        return new MemberDetailsWithGroups(MemberDetails.create({recordAnswers}), undefined, [])
     }
 
     addCategory() {

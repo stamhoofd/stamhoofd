@@ -3,6 +3,7 @@ import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/c
 import { SessionManager } from "@stamhoofd/networking"
 import { OrderStatus, OrderStatusHelper, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PrivateOrder, PrivateOrderWithTickets, TicketPrivate } from "@stamhoofd/structures"
 
+import { OrganizationManager } from "../../../../classes/OrganizationManager"
 import { WebshopManager } from "../WebshopManager"
 
 export class OrderActionBuilder {
@@ -158,6 +159,22 @@ export class OrderActionBuilder {
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 childActions: this.getPaymentActions()
+            }),
+
+            new TableAction({
+                name: "Kopieer link naar bestelling",
+                icon: "copy",
+                priority: 0,
+                groupIndex: 2,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                singleSelection: true,
+                handler: async (orders: PrivateOrder[]) => {
+                    const order = orders[0]
+                    // copy the link to clipboard
+                    await navigator.clipboard.writeText(this.webshopManager.preview.getUrl(OrganizationManager.organization)+"/order/"+order!.id)
+                    new Toast("Link gekopieerd naar klembord", 'success').show()
+                }
             }),
 
             new TableAction({

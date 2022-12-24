@@ -66,13 +66,13 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    category!: RecordCategory
+        category!: RecordCategory
 
     @Prop({ required: false, default: null })
-    parentCategory!: RecordCategory | null
+        parentCategory!: RecordCategory | null
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     patchCategory: AutoEncoderPatchType<RecordCategory> = RecordCategory.patch({ id: this.category.id })
 
@@ -80,10 +80,10 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
      * Pass along the changes of the array (so we can also delete with the save handler)
      */
     @Prop({ required: true })
-    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
+        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
 
     @Prop({ required: true })
-    filterDefinitions!: FilterDefinition[]
+        filterDefinitions!: FilterDefinition[]
 
     get patchedCategory() {
         return this.category.patch(this.patchCategory)

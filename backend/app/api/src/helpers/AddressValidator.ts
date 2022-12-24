@@ -75,7 +75,12 @@ export class AddressValidatorStatic {
             if (streets.length == 0 && STAMHOOFD.environment === "development") {
                 console.log("Forcing sync of city")
                 const c = await City.getByID(city.parentCityId ?? city.id)
-                await this.syncCity(c!)
+                try {
+                    await this.syncCity(c!)
+                } catch (e) {
+                    console.error('Ignored error while syncing city')
+                    console.error(e)
+                }
                 streets = await Street.where({ cityId: city.parentCityId ?? city.id })
             }
 

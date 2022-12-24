@@ -27,6 +27,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { RecordEditorSettings } from '@stamhoofd/structures';
 import { RecordCategory, RecordSettings, RecordType } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -40,19 +41,22 @@ import EditRecordView from './EditRecordView.vue';
         longPress: LongPressDirective
     }
 })
-export default class RecordRow extends Mixins(NavigationMixin) {
+export default class RecordRow<T> extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    record: RecordSettings
+        record: RecordSettings
 
     @Prop({ required: true })
-    category: RecordCategory
+        category: RecordCategory
 
     @Prop({ required: false, default: null })
-    parentCategory: RecordCategory | null
+        parentCategory: RecordCategory | null
 
     // This is needed so we can move a record to a totally new category via the context menu
     @Prop({ required: true })
-    rootCategories: RecordCategory[]
+        rootCategories: RecordCategory[]
+
+    @Prop({ required: true })
+        settings: RecordEditorSettings<T>
 
     get records() {
         return this.category.records
@@ -93,6 +97,7 @@ export default class RecordRow extends Mixins(NavigationMixin) {
             record: this.record,
             category: this.category,
             isNew: false,
+            settings: this.settings,
             saveHandler: (patch: PatchableArrayAutoEncoder<RecordSettings>) => {
                 this.addPatch(patch)
             }

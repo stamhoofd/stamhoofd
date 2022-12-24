@@ -155,7 +155,7 @@
                     <STListItem v-if="enableBetaFeatures" :selectable="true" class="left-center" @click="editRecordSettings(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
-                            Vragenlijsten
+                            Vragenlijsten en gegevens
                         </h2>
                         <p class="style-description">
                             Verzamel extra informatie van bestellers bij het afrekenen.
@@ -331,7 +331,7 @@ import { WebshopManager } from './WebshopManager';
 })
 export default class WebshopOverview extends Mixins(NavigationMixin) {
     @Prop()
-    preview!: WebshopPreview;
+        preview!: WebshopPreview;
 
     webshopManager = new WebshopManager(this.preview)
 

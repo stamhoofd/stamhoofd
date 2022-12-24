@@ -141,7 +141,7 @@ export class CheckoutStepsManager {
         }))
 
         // Now add all the Record Category steps
-        const filterDefinitions = Checkout.getFilterDefinitions(webshop.meta.recordCategories);
+        const filterDefinitions = Checkout.getFilterDefinitions(webshop, webshop.meta.recordCategories);
 
         for (const category of webshop.meta.recordCategories) {
             const id = `category-${category.id}`

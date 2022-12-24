@@ -4,6 +4,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
 import { ValidatedAddress } from '../addresses/Address';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from '../filters/ChoicesFilter';
 import { FilterDefinition } from '../filters/FilterDefinition';
 import { I18n } from '../I18nInterface';
 import { RecordAnswer, RecordAnswerDecoder } from '../members/records/RecordAnswer';
@@ -12,7 +13,7 @@ import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
 import { Cart } from './Cart';
 import { Customer } from './Customer';
-import { Webshop } from './Webshop';
+import { Webshop, WebshopPreview } from './Webshop';
 import { WebshopFieldAnswer } from './WebshopField';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData';
 
@@ -353,11 +354,11 @@ export class Checkout extends AutoEncoder {
     }
 
     validateRecordAnswersFor(webshop: Webshop, category: RecordCategory) {
-        RecordCategory.validate([category], this.recordAnswers, this, Checkout.getFilterDefinitions(webshop.meta.recordCategories), true)
+        RecordCategory.validate([category], this.recordAnswers, this, Checkout.getFilterDefinitions(webshop, webshop.meta.recordCategories), true)
     }
 
     validateRecordAnswers(webshop: Webshop) {
-        const answers = RecordCategory.validate(webshop.meta.recordCategories, this.recordAnswers, this, Checkout.getFilterDefinitions(webshop.meta.recordCategories), true)
+        const answers = RecordCategory.validate(webshop.meta.recordCategories, this.recordAnswers, this, Checkout.getFilterDefinitions(webshop, webshop.meta.recordCategories), true)
         this.recordAnswers = answers
     }
 
@@ -391,12 +392,60 @@ export class Checkout extends AutoEncoder {
         return this.checkoutMethod
     }
 
-    static getFilterDefinitions(categories: RecordCategory[]): FilterDefinition<Checkout>[] {
+    static getFilterDefinitions(webshop: Webshop, categories: RecordCategory[]): FilterDefinition<Checkout>[] {
         const filters = RecordCategory.getRecordCategoryDefinitions(categories, (checkout: Checkout) => {
             return checkout.recordAnswers
         })
 
-        // TODO: add some extra filters
+        if (webshop.meta.checkoutMethods.length) {
+            filters.push(new ChoicesFilterDefinition<Checkout>({
+                id: "order_checkoutMethod",
+                name: "Afhaal/leveringsmethode",
+                choices: (webshop.meta.checkoutMethods ?? []).flatMap(method => {
+                    // TODO: also add checkout methods that are not valid anymore from existing orders
+                    const choices: ChoicesFilterChoice[] = []
+
+                    if (method.timeSlots.timeSlots.length == 0) {
+                        choices.push(
+                            new ChoicesFilterChoice(method.id, method.type+": "+method.name)
+                        )
+                    }
+                    
+                    for (const time of method.timeSlots.timeSlots) {
+                        choices.push(
+                            new ChoicesFilterChoice(method.id+"-"+time.id, method.type+": "+method.name, time.toString())
+                        )
+                    }
+                    return choices
+                }),
+                defaultMode: ChoicesFilterMode.Or,
+                getValue: (checkout) => {
+                    const ids: string[] = []
+                    if (checkout.checkoutMethod) {
+                        ids.push(checkout.checkoutMethod.id)
+                        
+                        if (checkout.timeSlot) {
+                            ids.push(checkout.checkoutMethod.id+"-"+checkout.timeSlot.id)
+                        }
+                    }
+                    return ids
+                }
+            }))
+        }
+
+        filters.push(
+            new ChoicesFilterDefinition<Checkout>({
+                id: "order_products",
+                name: "Bestelde artikels",
+                choices: (webshop.products ?? []).map(product => {
+                    return new ChoicesFilterChoice(product.id, product.name+(product.dateRange ? " ("+product.dateRange.toString()+")" : ""))
+                }),
+                defaultMode: ChoicesFilterMode.Or,
+                getValue: (checkout) => {
+                    return checkout.cart.items.flatMap(i => i.product.id)
+                }
+            })
+        )
 
         return filters;
     }

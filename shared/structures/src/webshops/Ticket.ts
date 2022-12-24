@@ -76,6 +76,10 @@ export class TicketPublic extends Ticket {
             -1 * Sorter.byNumberValue(a.index, b.index) as any,
         )
     }
+
+    get isValid() {
+        return this.items.length > 0
+    }
 }
 
 /**

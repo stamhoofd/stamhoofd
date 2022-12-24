@@ -101,6 +101,9 @@ export class TicketBuilder {
     async drawItems() {
         let isFirst = true
         for (const ticket of this.tickets) {
+            if (!ticket.isValid) {
+                continue
+            }
             const remainingHeight = PAGE_HEIGHT - this.document.y - PAGE_MARGIN + (isFirst ? 10*MM : 0)
             const neededHeight = await this.drawItem(ticket, true)
 
@@ -185,22 +188,24 @@ export class TicketBuilder {
         this.document.fontSize(8);
         this.document.font('Metropolis-Medium');
 
-        if (this.webshop.meta.ticketType === WebshopTicketType.Tickets || !this.order) {
-            const location = ticket.items[0].product.location
-            if (location) {
-                if (!dryRun) {
-                    this.document.text(location.name+(location.address ? "\n"+location.address : ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+        if (this.webshop.meta.ticketType === WebshopTicketType.Tickets || !this.order) {
+            if (ticket.items[0]) {
+                const location = ticket.items[0].product.location
+                if (location) {
+                    if (!dryRun) {
+                        this.document.text(location.name+(location.address ? "\n"+location.address : ""), PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM , lineGap: 2, paragraphGap: 2 })
+                    }
+                    height += this.document.heightOfString(location.name+(location.address ? "\n"+location.address : ""), { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
                 }
-                height += this.document.heightOfString(location.name+(location.address ? "\n"+location.address : ""), { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
-            }
 
-            const dateRange = ticket.items[0].product.dateRange
-            if (dateRange) {
-                const str = Formatter.capitalizeFirstLetter(dateRange.toString())
-                if (!dryRun) {
-                    this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+                const dateRange = ticket.items[0].product.dateRange
+                if (dateRange) {
+                    const str = Formatter.capitalizeFirstLetter(dateRange.toString())
+                    if (!dryRun) {
+                        this.document.text(str, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
+                    }
+                    height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
                 }
-                height += this.document.heightOfString(str, { align: 'left', width: COLUMN_MAX_WIDTH  - 5*MM, lineGap: 2, paragraphGap: 2 })
             }
         } else {
             if (!dryRun) {
@@ -246,7 +251,7 @@ export class TicketBuilder {
         MAX_COLUMN_HEIGHT = height - initialColumnHeight
 
         // SECOND COLUMN
-        const description = this.webshop.meta.ticketType === WebshopTicketType.SingleTicket ? ticket.items.map(item => item.amount+"x "+item.product.name+(item.descriptionWithoutDate ? ("\n"+item.descriptionWithoutDate) : "")).join("\n") : ticket.items[0].descriptionWithoutDate
+        const description = ticket.items.map(item => item.amount+"x "+item.product.name+(item.descriptionWithoutDate ? ("\n"+item.descriptionWithoutDate) : "")).join("\n")
 
         if (description) {
             // Second column

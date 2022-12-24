@@ -4,6 +4,17 @@ import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelpe
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
+type RowValue = (string | number | Date | {value: string | number | Date, format: null | string});
+
+function transformRowValues(row: RowValue[][]): (string | number | Date)[][] {
+    return row.map(r => r.map(c => {
+        if (typeof c === "object" && !(c instanceof Date)) {
+            return c.value
+        }
+        return c
+    }))
+}
+
 export class OrdersExcelExport {
 
     /**
@@ -24,9 +35,19 @@ export class OrdersExcelExport {
                 }
             }
         }
+
+        // todo: First add record settings in order
+        for (const order of orders) {
+            for (const a of order.data.recordAnswers) {
+                if (!answerColumns.has(a.settings.id)) {
+                    answerColumns.set(a.settings.id, answerColumns.size)
+                    answerNames.push(a.settings.name)
+                }
+            }
+        }
         
         // Columns
-        const wsData = [
+        const wsData: RowValue[][] = [
             [
                 "Bestelnummer",
                 "Voornaam",
@@ -35,13 +56,15 @@ export class OrdersExcelExport {
                 "GSM-nummer",
                 ...answerNames,
                 "Aantal",
+                "Stukprijs",
+                "Prijs",
                 "Product (terugloop aanzetten!)",
             ],
         ];
 
         for (const order of orders) {
             for (const [index, item] of order.data.cart.items.entries()) {
-                const answers = answerNames.map(a => "")
+                const answers: RowValue[] = answerNames.map(a => "")
 
                 for (const a of order.data.fieldAnswers) {
                     const index = answerColumns.get(a.field.id)
@@ -50,21 +73,46 @@ export class OrdersExcelExport {
                     }
                 }
 
+                for (const a of order.data.recordAnswers) {
+                    const index = answerColumns.get(a.settings.id)
+                    if (index !== undefined) {
+                        answers[index] = a.excelValue
+                    }
+                }
+
                 const showDetails = index == 0 || repeat
                 wsData.push([
-                    showDetails ? `${order.number}` : "",
+                    showDetails ? {
+                        value: order.number ?? 0,
+                        format: '0'
+                    } : "",
                     showDetails ? order.data.customer.firstName : "",
                     showDetails ? order.data.customer.lastName : "",
                     showDetails ? order.data.customer.email : "",
                     showDetails ? order.data.customer.phone : "",
                     ...answers,
-                    `${item.amount}`,
+                    {
+                        value: item.amount,
+                        format: '0'
+                    },
+                    {
+                        value: (item.getUnitPrice(order.data.cart) ?? 0) / 100,
+                        format: '€0.00'
+                    },
+                    {
+                        value: (item.getPrice(order.data.cart) ?? 0) / 100,
+                        format: '€0.00'
+                    },
                     `${item.product.name}${item.description ? "\r\n"+item.description : ""}`,
                 ]);
             }
         }
 
-        this.deleteEmptyColumns(wsData)
+        return this.buildWorksheet(wsData, {
+            defaultColumnWidth: 13
+        })
+
+        /*this.deleteEmptyColumns(wsData)
 
         const ws = XLSX.utils.aoa_to_sheet(wsData, { cellStyles: true });
         this.wrapColumn(5 + answerNames.length, ws)
@@ -89,7 +137,7 @@ export class OrdersExcelExport {
             }
         }
 
-        return ws
+        return ws*/
     }
 
     /**
@@ -107,9 +155,19 @@ export class OrdersExcelExport {
                 }
             }
         }
+
+        // todo: First add record settings in order
+        for (const order of orders) {
+            for (const a of order.data.recordAnswers) {
+                if (!answerColumns.has(a.settings.id)) {
+                    answerColumns.set(a.settings.id, answerColumns.size)
+                    answerNames.push(a.settings.name)
+                }
+            }
+        }
         
         // Columns
-        const wsData: (string | number)[][] = [
+        const wsData: RowValue[][] = [
             [
                 "Bestelnummer",
                 "Besteldatum",
@@ -142,7 +200,7 @@ export class OrdersExcelExport {
                 address = order.data.address?.toString() ?? "??"
             }
 
-            const answers = answerNames.map(a => "")
+            const answers: RowValue[] = answerNames.map(a => "")
 
             for (const a of order.data.fieldAnswers) {
                 const index = answerColumns.get(a.field.id)
@@ -151,9 +209,22 @@ export class OrdersExcelExport {
                 }
             }
 
+            for (const a of order.data.recordAnswers) {
+                const index = answerColumns.get(a.settings.id)
+                if (index !== undefined) {
+                    answers[index] = a.excelValue
+                }
+            }
+
             wsData.push([
-                `${order.number}`,
-                Formatter.dateNumber(order.createdAt)+" "+Formatter.timeIso(order.createdAt),
+                {
+                    value: order.number ?? 0,
+                    format: '0'
+                },
+                {
+                    value: order.createdAt,
+                    format: 'dd/mm/yyyy hh:mm'
+                },
                 order.data.customer.firstName,
                 order.data.customer.lastName,
                 order.data.customer.email,
@@ -163,8 +234,14 @@ export class OrdersExcelExport {
                 address,
                 order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : "/",
                 order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime)+" - "+Formatter.minutes(order.data.timeSlot.endTime) : "/",
-                order.data.deliveryPrice / 100,
-                order.data.totalPrice / 100,
+                {
+                    value: order.data.deliveryPrice / 100,
+                    format: "€0.00"
+                },
+                {
+                    value: order.data.totalPrice / 100,
+                    format: "€0.00"
+                },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
                 order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald",
                 OrderStatusHelper.getName(order.status),
@@ -175,45 +252,10 @@ export class OrdersExcelExport {
             ]);
         }
 
-        // Delete after
-        this.deleteEmptyColumns(wsData, shouldIncludeSettements ? 2 : 0)
-
-        const ws = XLSX.utils.aoa_to_sheet(wsData, { cellStyles: true });
-        const offset = shouldIncludeSettements ? 2 : 0
-        this.formatColumn(wsData[0].length - 4 - offset, "€0.00", ws)
-        this.formatColumn(wsData[0].length - 5 - offset, "€0.00", ws)
-
-        if (shouldIncludeSettements) {
-            this.formatColumn(wsData[0].length - 1, "€0.00", ws)
-        }
-
-
-        // Set column width
-        ws['!cols'] = []
-        for (const column of wsData[0]) {
-            if (typeof column != "string") {
-                continue
-            }
-            if (column.toLowerCase().startsWith("naam")) {
-                ws['!cols'].push({width: 20});
-            } else if (column.toLowerCase().includes("naam")) {
-                ws['!cols'].push({width: 13});
-            } else if (column.toLowerCase().includes("e-mail")) {
-                ws['!cols'].push({width: 25});
-            } else if (column.toLowerCase().includes("adres")) {
-                ws['!cols'].push({width: 30});
-            } else if (column.toLowerCase().includes("gsm")) {
-                ws['!cols'].push({width: 16});
-            } else if (column.toLowerCase().includes("product")) {
-                ws['!cols'].push({width: 40});
-            } else if (column.toLowerCase().includes("uitbetaling")) {
-                ws['!cols'].push({width: 25});
-            } else {
-                ws['!cols'].push({width: 13});
-            }
-        }
-
-        return ws
+        return this.buildWorksheet(wsData, {
+            keepLastColumns: shouldIncludeSettements ? 2 : 0,
+            defaultColumnWidth: 13
+        })
     }
 
     /**
@@ -222,7 +264,7 @@ export class OrdersExcelExport {
     static createSettlements(orders: PrivateOrder[]): XLSX.WorkSheet {
         
         // Columns
-        const wsData: (string | number)[][] = [
+        const wsData: RowValue[][] = [
             [
                 "Mededeling",
                 "Datum",
@@ -262,30 +304,20 @@ export class OrdersExcelExport {
             wsData.push([
                 item.reference,
                 Formatter.capitalizeFirstLetter(Formatter.dateWithDay(item.settledAt)),
-                item.total / 100,
-                item.amount / 100
+                {
+                    value: item.total / 100,
+                    format: "€0.00"
+                },
+                {
+                    value: item.amount / 100,
+                    format: "€0.00"
+                }
             ]);
         }
 
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-        this.formatColumn(wsData[0].length - 1, "€0.00", ws)
-        this.formatColumn(wsData[0].length - 2, "€0.00", ws)
-
-        // Set column width
-        ws['!cols'] = []
-        for (const column of wsData[0]) {
-            if (typeof column != "string") {
-                continue
-            }
-            if (column.toLowerCase().includes("totaal") || column.toLowerCase().includes("datum")) {
-                ws['!cols'].push({width: 25});
-            } else {
-                ws['!cols'].push({width: 20});
-            }
-        }
-
-        return ws
+        return this.buildWorksheet(wsData, {
+            defaultColumnWidth: 20
+        })
     }
 
     /**
@@ -294,7 +326,7 @@ export class OrdersExcelExport {
     static createProducts(orders: PrivateOrder[]): XLSX.WorkSheet {
         
         // Columns
-        const wsData: (string | number)[][] = [
+        const wsData: RowValue[][] = [
             [
                 "Product",
                 "Variant",
@@ -325,13 +357,35 @@ export class OrdersExcelExport {
             wsData.push([
                 item.name,
                 item.variant,
-                item.amount
+                {
+                    value: item.amount,
+                    format: "0"
+                }
             ]);
         }
 
-        this.deleteEmptyColumns(wsData)
+        return this.buildWorksheet(wsData, {
+            defaultColumnWidth: 13
+        })
+    }
 
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
+    static buildWorksheet(wsData: RowValue[][], options: {keepLastColumns?: number, defaultColumnWidth?: number}) {
+        // Delete after
+        this.deleteEmptyColumns(wsData, options?.keepLastColumns)
+
+        const ws = XLSX.utils.aoa_to_sheet(transformRowValues(wsData), { cellStyles: true, cellDates: true });
+
+        // Format columns based on format option in wsData
+        if (wsData[1]) {
+            for (const [index, col] of wsData[1].entries()) {
+                if (typeof col !== "object" || (col instanceof Date)) {
+                    continue
+                }
+                if (col.format) {
+                    this.formatColumn(index, col.format, ws)
+                }
+            }
+        }
 
         // Set column width
         ws['!cols'] = []
@@ -339,10 +393,12 @@ export class OrdersExcelExport {
             if (typeof column != "string") {
                 continue
             }
-            if (column.toLowerCase().startsWith("naam")) {
+            if (column.toLowerCase().includes("totaal") || column.toLowerCase().includes("datum")) {
+                ws['!cols'].push({width: 25});
+            } else if (column.toLowerCase().startsWith("naam")) {
                 ws['!cols'].push({width: 20});
             } else if (column.toLowerCase().includes("naam")) {
-                ws['!cols'].push({width: 15});
+                ws['!cols'].push({width: 13});
             } else if (column.toLowerCase().includes("e-mail")) {
                 ws['!cols'].push({width: 25});
             } else if (column.toLowerCase().includes("adres")) {
@@ -351,8 +407,10 @@ export class OrdersExcelExport {
                 ws['!cols'].push({width: 16});
             } else if (column.toLowerCase().includes("product")) {
                 ws['!cols'].push({width: 40});
+            } else if (column.toLowerCase().includes("uitbetaling")) {
+                ws['!cols'].push({width: 25});
             } else {
-                ws['!cols'].push({width: 13});
+                ws['!cols'].push({width: options?.defaultColumnWidth ?? 13});
             }
         }
 
@@ -367,9 +425,10 @@ export class OrdersExcelExport {
             /* if the particular row did not contain data for the column, the cell will not be generated */
             if(!worksheet[ref]) continue;
             /* `.t == "n"` for number cells */
-            if(worksheet[ref].t != 'n') continue;
+            if(worksheet[ref].t != 'n' && worksheet[ref].t != 'd') continue;
             /* assign the `.z` number format */
             worksheet[ref].z = fmt;
+            delete worksheet[ref].w;
         }
     }
 
@@ -384,13 +443,27 @@ export class OrdersExcelExport {
         }
     }
 
-    static deleteEmptyColumns(wsData: (string | number)[][], skipLast = 0) {
+    static deleteEmptyColumns(wsData: RowValue[][], skipLast = 0) {
         // Delete empty columns
         for (let index = wsData[0].length - 1 - skipLast; index >= 0; index--) {
             let empty = true
             for (const row of wsData.slice(1)) {
-                const value = row[index]
-                if (typeof value != "string") {
+                let value = row[index]
+
+                if (typeof value === 'object' && !(value instanceof Date)) {
+                    if (value == null) {
+                        continue;
+                    }
+                    value = value.value
+                }
+
+                if (value instanceof Date) {
+                    empty = false
+                    break
+                }
+
+                if (typeof value !== "string") {
+                    
                     if (value == 0) {
                         // If all zero: empty
                         continue;

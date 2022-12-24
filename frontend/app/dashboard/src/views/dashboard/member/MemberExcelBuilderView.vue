@@ -139,16 +139,16 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     @Prop({ default: [] })
-    groups!: Group[];
+        groups!: Group[];
 
     @Prop({ default: false })
-    waitingList!: boolean;
+        waitingList!: boolean;
 
     @Prop({ default: 0 })
-    cycleOffset!: number;
+        cycleOffset!: number;
 
     @Prop()
-    members!: MemberWithRegistrations[];
+        members!: MemberWithRegistrations[];
 
     propertyGroups: ExcelMemberPropertyGroup[] = [
         new ExcelMemberPropertyGroup("Persoonsgegevens", undefined, [
@@ -175,10 +175,10 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 width: 10
             }),
             new ExcelMemberProperty({
-                name: "GSM-nummer",
+                name: this.$i18n.t("shared.inputs.mobile.label").toString(),
                 getValue: (member: MemberWithRegistrations) => member.details.phone ?? "",
                 width: 20,
-                description: OrganizationManager.organization.meta.recordsConfiguration.parents === null ? undefined : "GSM-nummer van lid zelf, niet van een ouder"
+                description: OrganizationManager.organization.meta.recordsConfiguration.parents === null ? undefined : "Nummer van lid zelf, niet van een ouder"
             }),
             new ExcelMemberProperty({
                 name: "E-mailadres",
@@ -398,15 +398,7 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                         if (!answer) {
                             return ""
                         }
-                        if (record.type === RecordType.Checkbox) {
-                            if (answer instanceof RecordCheckboxAnswer) {
-                                return answer.selected ? ((answer.comments?.length ?? 0) > 0 ? answer.comments : "Ja") : "";
-                            } else {
-                                return ""
-                            }
-                        }
-
-                        return answer.stringValue;
+                        return answer.excelValue;
                     },
                     width: 30,
                 });

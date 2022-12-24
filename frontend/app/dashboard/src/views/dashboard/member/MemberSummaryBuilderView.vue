@@ -181,10 +181,10 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
 
     @Prop({ default: null })
-    group: Group | null;
+        group: Group | null;
 
     @Prop()
-    members!: MemberWithRegistrations[];
+        members!: MemberWithRegistrations[];
 
     memberProperties = [
         new SummaryMemberProperty({
@@ -192,17 +192,31 @@ export default class MemberSummaryBuilderView extends Mixins(NavigationMixin) {
             getValue: (member) => member.details.birthDayFormatted
         }),
         new SummaryMemberProperty({
-            name: "GSM", 
+            name: this.$i18n.t("shared.inputs.mobile.label").toString(), 
             getValue: (member) => member.details.phone
         }),
-        new SummaryMemberProperty({
-            name: "Ouders", 
-            getValues: (member) => {
-                return new Map(member.details.parents.map(parent => {
-                    return [ParentTypeHelper.getName(parent.type), parent.name+(parent.phone ? ("\n"+parent.phone) : "")]
-                }))
-            }
-        }),
+        ...(OrganizationManager.organization.meta.recordsConfiguration.parents !== null ?  [
+            new SummaryMemberProperty({
+                name: "Ouders", 
+                getValues: (member) => {
+                    return new Map(member.details.parents.map(parent => {
+                        return [ParentTypeHelper.getName(parent.type), parent.name+(parent.phone ? ("\n"+parent.phone) : "")]
+                    }))
+                }
+            })
+        ] : []),
+        ...(OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts !== null ?  [
+            new SummaryMemberProperty({
+                name: "Noodcontact", 
+                getValues: (member) => {
+                    return new Map(member.details.emergencyContacts.map(contact => {
+                        return [
+                            contact.title, contact.name+(contact.phone ? ("\n"+contact.phone) : "")
+                        ]
+                    }))
+                }
+            }),
+        ] : []),
         new SummaryMemberProperty({
             name: "Adres", 
             getValues: (member) => {

@@ -1834,6 +1834,13 @@
   dependencies:
     chalk "^4.1.2"
 
+"@simonbackx/simple-logging@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-logging/-/simple-logging-1.0.1.tgz#a03e0dae8b4478d84fea439ca4a41cd3e7651a0e"
+  integrity sha512-lGtENJtcATVXoWulIFzbyr4F77dDaqef6nxMdbXOGSGwx1yinhQFV+Hn2GjYbzuLbIGWBQpZ07UFmBCmGKzSEQ==
+  dependencies:
+    chalk "^4.1.2"
+
 "@simonbackx/simple-networking@^1.11.0":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.11.0.tgz#b2dab7bf92f3dd6383e87b75dc3cdffca9881a70"
