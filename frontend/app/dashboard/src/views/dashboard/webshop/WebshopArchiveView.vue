@@ -6,7 +6,7 @@
             <h1>
                 Webshop archief
             </h1>
-            <p>Deze webshops werden gearchiveerd en zijn niet langer actief. Ze tellen ook niet mee voor de webshop limiet.</p>
+            <p>Deze webshops werden gearchiveerd en zijn niet langer actief.</p>
           
             <STList>
                 <STListItem v-for="webshop in webshops" :key="webshop.id" :selectable="true" @click="openWebshop(webshop)">

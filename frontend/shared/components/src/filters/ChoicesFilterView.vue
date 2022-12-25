@@ -29,7 +29,7 @@ import { Component, Prop,Vue } from "vue-property-decorator";
 })
 export default class ChoicesFilterView extends Vue {
     @Prop({ required: true }) 
-    filter: ChoicesFilter<any>
+        filter: ChoicesFilter<any>
 
     get choices() {
         return this.filter.definition.choices

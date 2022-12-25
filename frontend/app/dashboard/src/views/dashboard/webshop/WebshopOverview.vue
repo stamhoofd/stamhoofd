@@ -201,20 +201,6 @@
                 <h2>Acties</h2>
 
                 <STList>
-                    <STListItem v-if="isOpen" :selectable="true" @click="duplicateWebshop()">
-                        <h2 class="style-title-list">
-                            Webshop dupliceren
-                        </h2>
-                        <p class="style-description">
-                            Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.
-                        </p>
-                        <button slot="right" type="button" class="button secundary hide-smartphone">
-                            <span class="icon copy" />
-                            <span>Dupliceren</span>
-                        </button>
-                        <button slot="right" type="button" class="button icon copy only-smartphone" />
-                    </STListItem>
-
                     <STListItem v-if="isOpen" :selectable="true" @click="closeWebshop()">
                         <h2 class="style-title-list">
                             Webshop sluiten
@@ -269,6 +255,20 @@
                             <span>Terugzetten</span>
                         </button>
                         <button slot="right" type="button" class="button icon undo only-smartphone" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" @click="duplicateWebshop()">
+                        <h2 class="style-title-list">
+                            Webshop dupliceren
+                        </h2>
+                        <p class="style-description">
+                            Maak een nieuwe webshop met dezelfde instellingen, maar met een andere naam en link.
+                        </p>
+                        <button slot="right" type="button" class="button secundary hide-smartphone">
+                            <span class="icon copy" />
+                            <span>Dupliceren</span>
+                        </button>
+                        <button slot="right" type="button" class="button icon copy only-smartphone" />
                     </STListItem>
 
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
