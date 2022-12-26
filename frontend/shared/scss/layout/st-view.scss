@@ -107,7 +107,11 @@ body.modern.web-iOS {
             scroll-padding-bottom: calc(30px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
 
             &:first-child {
-                padding-top: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px));
+                padding-top: calc(var(--st-vertical-padding, 20px) + var(--current-view-safe-area-top, 0px));
+
+                &.sticky-navigation-bar {
+                    padding-top: 0;
+                }
             }
 
             &:last-child {
