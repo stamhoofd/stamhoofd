@@ -75,7 +75,6 @@ module.exports = {
         assetModuleFilename: process.env.NODE_ENV === "production" ? 'images/[name].[contenthash][ext][query]' : 'images/[name].[contenthash][ext][query]'
     },
     devServer: {
-        // contentBase: './dist',
         host: '0.0.0.0',
         port: 8080,
         client: {
@@ -305,7 +304,8 @@ module.exports = {
 
         new CopyPlugin({
             patterns: [
-                { from: "../../public/.well-known" },
+                { from: "../../public/.well-known/assetlinks.json", to: ".well-known/" }, // wildcards not working for some reason?
+                { from: "../../public/.well-known/apple-app-site-association", to: ".well-known/" },
                 { from: "../../public/out-of-date.html" },
                 { from: "../../public/robots.txt" },
             ],
