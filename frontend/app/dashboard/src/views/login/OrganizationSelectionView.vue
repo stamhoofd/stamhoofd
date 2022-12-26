@@ -13,7 +13,7 @@
                 </a>
             </template>
         </STNavigationBar>
-        <STNavigationBar v-else :sticky="true" title="Kies jouw vereniging" />
+        <STNavigationBar v-else title="Kies jouw vereniging" />
         <main class="limit-width">
             <div class="organization-selection-view" :class="{native: isNative}">
                 <a v-if="!isNative" class="button text" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
@@ -25,7 +25,12 @@
                     <input ref="input" v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
                 </form>
                 <p v-if="!loading && filteredResults.length == 0 && !query">
-                    Zoek en selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
+                    <template v-if="isNative">
+                        Zoek en selecteer de vereniging waar je wilt inloggen of maak een vereniging aan via de website.
+                    </template>
+                    <template v-else>
+                        Zoek en selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
+                    </template>
                 </p>
 
                 <Spinner v-if="loading" class="gray center" />

@@ -34,33 +34,33 @@ import BackButton from ".//BackButton.vue";
 })
 export default class STNavigationBar extends Vue {
     @Prop({ default: "", type: String })
-    title!: string;
+        title!: string;
 
     @Prop({ default: false, type: Boolean })
-    sticky!: boolean;
+        sticky!: boolean;
 
     @Prop({ default: true, type: Boolean })
-    addShadow!: boolean;
+        addShadow!: boolean;
 
     /**
      * Also show the title when not scrolled
      */
     @Prop({ default: false, type: Boolean })
-    showTitle!: boolean;
+        showTitle!: boolean;
 
     @Prop({ default: false, type: Boolean })
-    fixed!: boolean;
+        fixed!: boolean;
 
     @Prop({ default: false, type: Boolean })
-    large!: boolean;
+        large!: boolean;
 
     /// Add dismiss button (location depending on the OS)
     @Prop({ default: false, type: Boolean })
-    dismiss!: boolean;
+        dismiss!: boolean;
 
     /// Add pop button (location depending on the OS)
     @Prop({ default: false, type: Boolean })
-    pop!: boolean;
+        pop!: boolean;
 
     scrolled = false;
     scrollElement!: HTMLElement | null;
@@ -197,6 +197,11 @@ export default class STNavigationBar extends Vue {
 
     &.block-width {
         height: calc(var(--block-width, 45px) + 20px);
+
+        body.native-iOS & {
+            // Override
+            height: calc(var(--block-width, 45px) + 20px);
+        }
     }
 
     &.large {
@@ -225,7 +230,7 @@ export default class STNavigationBar extends Vue {
         margin-left: calc(-1 * var(--st-horizontal-padding, 20px));
         margin-right: calc(-1 * var(--st-horizontal-padding, 20px));
         margin-top: 0;
-        padding-top: 0;
+        padding-top: calc(var(--st-vertical-padding, 20px) + var(--current-view-safe-area-top, 0px)); 
         margin-bottom: 10px;
         //margin-top: calc(-1 * var(--st-vertical-padding, 20px));
     }
