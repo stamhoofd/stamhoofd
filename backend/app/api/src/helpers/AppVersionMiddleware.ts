@@ -59,8 +59,7 @@ function requestOneLiner(request: Request): (StyledText | string)[]  {
 
 function requestPrefix(request: Request, ...classes: string[]): (StyledText | string)[] {
     return [
-        new StyledText(`[R${((request as any)._uniqueIndex as number).toString().padStart(4, "0")}]`).addClass('request', 'tag', ...classes),
-        ' '
+        new StyledText(`[R${((request as any)._uniqueIndex as number).toString().padStart(4, "0")}] `).addClass('request', 'tag', ...classes),
     ]
 }
 

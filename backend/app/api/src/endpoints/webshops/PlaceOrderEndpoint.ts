@@ -2,7 +2,7 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@molli
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, MolliePayment } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
@@ -11,8 +11,11 @@ import { Payment } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
+import Stripe from 'stripe';
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
+import { StripeHelper } from '../../helpers/StripeHelper';
 type Params = { id: string };
 type Query = undefined;
 type Body = OrderData
@@ -86,7 +89,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             // Determine the payment provider
             // Throws if invalid
-            payment.provider = organization.getPaymentProviderFor(payment.method)
+            const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, webshop.privateMeta.providerConfiguration)
+            payment.provider = provider
+            payment.stripeAccountId = stripeAccount?.id ?? null
 
             await payment.save()
 
@@ -96,6 +101,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             // Save order to get the id
             await order.save()
+
+            const balanceItemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = []
 
             // Create balance item
             const balanceItem = new BalanceItem();
@@ -114,6 +121,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             balanceItemPayment.organizationId = organization.id;
             balanceItemPayment.price = balanceItem.price;
             await balanceItemPayment.save();
+            balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
 
             let paymentUrl: string | null = null
             const description = webshop.meta.name+" - "+payment.id
@@ -144,9 +152,32 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 await payment.save()
             } else {
                 const redirectUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)
+                const cancelUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)+"&cancel=true"
                 const exchangeUrl = 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
 
-                if (payment.provider === PaymentProvider.Mollie) {
+                if (payment.provider === PaymentProvider.Stripe) {
+                    const stripeResult = await StripeHelper.createPayment({
+                        payment,
+                        stripeAccount,
+                        redirectUrl,
+                        cancelUrl,
+                        statementDescriptor: webshop.meta.name,
+                        metadata: {
+                            order: order.id,
+                            organization: organization.id,
+                            webshop: webshop.id,
+                            payment: payment.id,
+                        },
+                        i18n: request.i18n,
+                        lineItems: balanceItemPayments,
+                        organization,
+                        customer: {
+                            name: order.data.customer.name,
+                            email: order.data.customer.email,
+                        }
+                    });
+                    paymentUrl = stripeResult.paymentUrl
+                } else if (payment.provider === PaymentProvider.Mollie) {
                     // Mollie payment
                     const token = await MollieToken.getTokenFor(webshop.organizationId)
                     if (!token) {

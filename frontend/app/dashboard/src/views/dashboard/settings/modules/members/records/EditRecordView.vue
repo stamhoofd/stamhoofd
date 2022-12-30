@@ -228,6 +228,7 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, Dropdown,ErrorBox, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { RecordEditorSettings } from '@stamhoofd/structures';
@@ -648,6 +649,15 @@ export default class EditRecordView<T> extends Mixins(NavigationMixin) {
         const isValid = await this.validator.validate()
         if (!isValid) {
             return
+        }
+
+        if (this.name.length < 2) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: 'Vul een naam in',
+                field: 'name'
+            }))
+            return;
         }
 
         const arrayPatch: PatchableArrayAutoEncoder<RecordSettings> = new PatchableArray()

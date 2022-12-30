@@ -1,84 +1,109 @@
 <template>
     <SaveView :loading="saving" title="Betaalmethodes" :disabled="!hasChanges" @save="save">
         <h1>
-            Betaalmethodes
+            Betaalaccounts
         </h1>
 
         <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">deze pagina</a>.</p>
         
         <STErrorsDefault :error-box="errorBox" />
 
-        <template v-if="enableMemberModule">
+        <template v-if="!getFeatureFlag('stripe')">
             <hr>
-            <h2>Betaalmethodes voor inschrijvingen</h2>
+            <h2>
+                Online betalingen activeren
+            </h2>
 
-            <EditPaymentMethodsBox :methods="organization.meta.paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
-
-            <hr>
-        </template>
-
-        <h2>Overschrijvingen</h2>
-
-        <IBANInput v-model="iban" title="Bankrekeningnummer" :validator="validator" :required="false" />
-
-        <template v-if="enableMemberModule">
-            <hr>
-            <h2>Overschrijvingen, specifiek voor inschrijvingen</h2>
-
-            <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
-                <input
-                    v-model="creditor"
-                    class="input"
-                    type="text"
-                    :placeholder="organization.name"
-                    autocomplete=""
-                >
-            </STInputBox>
-
-            <STInputBox title="Soort mededeling" error-fields="transferSettings.type" :error-box="errorBox" class="max">
-                <RadioGroup>
-                    <Radio v-for="_type in transferTypes" :key="_type.value" v-model="transferType" :value="_type.value">
-                        {{ _type.name }}
-                    </Radio>
-                </RadioGroup>
-            </STInputBox>
-            <p class="style-description-small">
-                {{ transferTypeDescription }}
+            <p v-if="isBuckarooActive" class="success-box">
+                Online betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethodsString }}
             </p>
 
-            <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
-                <input
-                    v-model="prefix"
-                    class="input"
-                    type="text"
-                    placeholder="bv. Inschrijving"
-                    autocomplete=""
-                >
-            </STInputBox>
-            <p class="style-description-small">
-                Voorbeeld: “{{ transferExample }}”
+            <p v-if="!isBuckarooActive" class="st-list-description">
+                {{ $t('dashboard.settings.paymentMethods.buckaroo.description') }}
+            </p>
+
+            <p v-if="!isBuckarooActive">
+                <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-betaalprovider/'" target="_blank">
+                    <span>Aansluiten</span>
+                    <span class="icon arrow-right" />
+                </a>
             </p>
         </template>
 
-        <hr>
-        <h2>
-            Online betalingen activeren
-        </h2>
+        <template v-if="getFeatureFlag('stripe')">
+            <hr>
+            <h2>
+                Online betalingen via Stripe
+            </h2>
 
-        <p v-if="isBuckarooActive" class="success-box">
-            Online betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethodsString }}
-        </p>
+            <p class="info-box">
+                Lees eerst onze gids voor je begint, je zal het je anders beklagen! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt. 
+            </p>
 
-        <p v-if="!isBuckarooActive" class="st-list-description">
-            {{ $t('dashboard.settings.paymentMethods.buckaroo.description') }}
-        </p>
+            <div class="style-button-bar">
+                <a class="button primary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
+                    <span>Lees de gids</span>
+                    <span class="icon arrow-right" />
+                </a>
 
-        <p v-if="!isBuckarooActive">
-            <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-betaalprovider/'" target="_blank">
-                <span>Aansluiten</span>
-                <span class="icon arrow-right" />
-            </a>
-        </p>
+                <LoadingButton v-if="stripeAccounts.length === 0 || creatingStripeAccount || getFeatureFlag('stripe-multiple')" :loading="creatingStripeAccount">
+                    <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
+                        <span v-if="stripeAccounts.length > 0" class="icon add" />
+                        <span v-if="stripeAccounts.length > 0">Extra account</span>
+                        <span v-else>Aansluiten bij Stripe</span>
+                    </button>
+                </LoadingButton>
+            </div>
+            
+            <Spinner v-if="loadingStripeAccounts && stripeAccounts.length === 0" />
+            <div v-for="account in stripeAccounts" :key="account.id" class="container">
+                <hr>
+                <h2>
+                    Stripe account <code>{{ account.accountId }}</code>
+                </h2>
+                <p v-if="account.meta.bank_account_last4" class="style-description-small">
+                    Gekoppeld aan jouw bankrekening die eindigt op {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
+                </p>
+                <p v-if="account.meta.company" class="style-description-small">
+                    Op naam van {{ account.meta.business_profile.name }} / {{ account.meta.company.name }}
+                </p>
+                <p v-else-if="account.meta.business_profile.name" class="style-description-small">
+                    Op naam van {{ account.meta.business_profile.name }}
+                </p>
+
+                <p v-if="account.warning" class="warning-box">
+                    {{ account.warning }}
+                </p>
+
+                <p v-if="!account.meta.charges_enabled" class="info-box">
+                    Je hebt jouw Stripe account nog niet vervolledigd. Je kan nog geen betalingen ontvangen.
+                </p>
+
+                <p v-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="info-box">
+                    Je kan al betalingen ontvangen via Stripe, maar uitbetalingen zijn nog niet geactiveerd. Kijk na of je nog gegevens moet aanvullen om wettelijk in orde te zijn om uitbetalingen te ontvangen.
+                </p>
+
+                <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled" class="success-box">
+                    Betalingen en uitbetalingen via Stripe zijn geactiveerd. Hou in de gaten als je in de toekomst nog extra gegevens moet aanvullen.
+                </p>
+
+                <div class="style-button-bar">
+                    <button v-if="!account.meta.charges_enabled || !account.meta.payouts_enabled" type="button" class="button primary" :disabled="creatingStripeAccount" @click="openStripeAccountLink(account.id)">
+                        <span>Vervolledig gegevens</span>
+                        <span class="icon arrow-right" />
+                    </button>
+
+                    <button v-else type="button" class="button secundary" :disabled="creatingStripeAccount" @click="loginStripeAccount(account.id)">
+                        <span>Open Stripe Dashboard</span>
+                    </button>
+
+                    <button v-if="isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
+                        <span class="icon trash" />
+                        <span>Verwijder</span>
+                    </button>
+                </div>
+            </div>
+        </template>
 
         <template v-if="payconiqApiKey || forcePayconiq">
             <hr>
@@ -171,6 +196,14 @@
                 Payconiq koppeling toestaan
             </Checkbox>
 
+            <Checkbox :checked="getFeatureFlag('stripe')" @change="setFeatureFlag('stripe', !!$event)">
+                Stripe koppeling toestaan
+            </Checkbox>
+
+            <Checkbox :checked="getFeatureFlag('stripe-multiple')" @change="setFeatureFlag('stripe-multiple', !!$event)">
+                Meerdere Stripe accounts toestaan
+            </Checkbox>
+
             <Checkbox v-if="!enableBuckaroo" v-model="forceMollie">
                 Mollie koppeling toestaan
             </Checkbox>
@@ -210,12 +243,13 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder, AutoEncoderPatchType, Decoder, PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, PatchableArray, patchContainsChanges, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { BuckarooSettings, Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
+import { BuckarooSettings, Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, StripeAccount, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -234,7 +268,8 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         STList,
         STListItem,
         Checkbox,
-        EditPaymentMethodsBox
+        EditPaymentMethodsBox,
+        Spinner
     },
 })
 export default class PaymentSettingsView extends Mixins(NavigationMixin) {
@@ -243,6 +278,9 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     saving = false
     temp_organization = OrganizationManager.organization
     loadingMollie = false
+    loadingStripeAccounts = false
+    creatingStripeAccount = false
+    stripeAccounts: StripeAccount[] = []
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
@@ -255,7 +293,11 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get isStamhoofd() {
-        return OrganizationManager.user.email.endsWith("@stamhoofd.be")
+        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
+    }
+
+    formatDateUnix(date: number) {
+        return Formatter.date(new Date(date * 1000))
     }
 
     patchPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
@@ -437,13 +479,21 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get forcePayconiq() {
-        return this.organization.privateMeta?.featureFlags.includes('forcePayconiq') ?? false
+        return this.getFeatureFlag('forcePayconiq')
     }
 
     set forcePayconiq(forcePayconiq: boolean) {
-        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== 'forcePayconiq') ?? []
-        if (forcePayconiq) {
-            featureFlags.push('forcePayconiq')
+        this.setFeatureFlag('forcePayconiq', forcePayconiq)
+    }
+
+    getFeatureFlag(flag: string) {
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+    }
+
+    setFeatureFlag(flag: string, value: boolean) {
+        const featureFlags = this.organization.privateMeta?.featureFlags.filter(f => f !== flag) ?? []
+        if (value) {
+            featureFlags.push(flag)
         }
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta:  OrganizationPrivateMetaData.patch({
@@ -560,7 +610,9 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "POST",
                     path: "/mollie/disconnect",
-                    decoder: Organization as Decoder<Organization>
+                    decoder: Organization as Decoder<Organization>,
+                    owner: this,
+                    shouldRetry: false
                 })
 
                 SessionManager.currentSession!.setOrganization(response.data)
@@ -589,7 +641,9 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 body: {
                     code
                 },
-                decoder: Organization as Decoder<Organization>
+                decoder: Organization as Decoder<Organization>,
+                owner: this,
+                shouldRetry: false
             })
 
             SessionManager.currentSession!.setOrganization(response.data)
@@ -603,9 +657,13 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
     }
 
+    lastAddedStripeAccount: string | null = null
+
     mounted() {
         const parts = UrlHelper.shared.getParts()
         const urlParams = UrlHelper.shared.getSearchParams()
+
+        console.log(urlParams);
 
         // We can clear now
         UrlHelper.shared.clear()
@@ -629,6 +687,161 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             }
         }
         UrlHelper.setUrl("/settings/payments")
+        this.lastAddedStripeAccount = urlParams.get('recheck-stripe-account')
+        this.doRefresh()
+        this.refreshOnReturn()
+    }
+
+    doRefresh() {
+        this.loadStripeAccounts(this.lastAddedStripeAccount).catch(console.error)
+    }
+
+    refreshOnReturn() {
+        document.addEventListener("visibilitychange", this.doRefresh);
+    }
+
+    async loadStripeAccounts(recheckStripeAccount: string | null) {
+        try {
+            this.loadingStripeAccounts = true
+            if (recheckStripeAccount) {
+                try {
+                    await SessionManager.currentSession!.authenticatedServer.request({
+                        method: "POST",
+                        path: "/stripe/accounts/" + encodeURIComponent(recheckStripeAccount),
+                        decoder: StripeAccount as Decoder<StripeAccount>,
+                        owner: this
+                    })
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "GET",
+                path: "/stripe/accounts",
+                decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
+                owner: this
+            })
+            this.stripeAccounts = response.data
+        } catch (e) {
+            console.error(e)
+        }
+        this.loadingStripeAccounts = false
+    }
+
+    async createStripeAccount() {
+        let tab: Window | null = null;
+        try {
+            tab = tab ?? (AppManager.shared.isNative ? null : window.open('about:blank'));
+            this.creatingStripeAccount = true
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/stripe/connect",
+                decoder: StripeAccount as Decoder<StripeAccount>,
+                shouldRetry: false,
+                owner: this
+            })
+            const account = response.data
+            this.stripeAccounts.push(account)
+
+            // Open connect url
+            await this.openStripeAccountLink(account.id, tab)
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+            tab?.close()
+        }
+        this.creatingStripeAccount = false
+    }
+
+    async openStripeAccountLink(accountId: string, initialTab?: Window | null) {
+        let tab: Window | null = initialTab ?? null;
+        try {
+            tab = tab ?? (AppManager.shared.isNative ? null : window.open('about:blank'));
+
+            const helper = new UrlHelper()
+            helper.setPath(UrlHelper.transformUrl('/settings/payments'))
+            helper.getSearchParams().append('recheck-stripe-account', accountId)
+            this.lastAddedStripeAccount = accountId
+
+            class ResponseBody extends AutoEncoder {
+                @field({ decoder: StringDecoder })
+                    url: string
+            }
+
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                body: {
+                    accountId: accountId,
+                    returnUrl: helper.getFullHref(),
+                    refreshUrl: helper.getFullHref(),
+                },
+                path: "/stripe/account-link",
+                decoder: ResponseBody as Decoder<ResponseBody>,
+                owner: this
+            })
+
+            if (tab) {
+                tab.location = response.data.url;
+                tab.focus();
+            } else {
+                window.location.href = response.data.url;
+            }
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+            tab?.close();
+        }
+    }
+
+    async deleteStripeAccount(accountId: string) {
+        if (!(await CenteredMessage.confirm('Dit account verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
+            return;
+        }
+        try {
+            await SessionManager.currentSession!.authenticatedServer.request({
+                method: "DELETE",
+                path: "/stripe/accounts/" + encodeURIComponent(accountId),
+                owner: this
+            })
+            this.stripeAccounts = this.stripeAccounts.filter(a => a.id !== accountId)
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+        }
+    }
+
+    async loginStripeAccount(accountId: string) {
+        let tab: Window | null = null;
+        try {
+            // Immediately open a new tab (otherwise blocked!)
+            tab = (AppManager.shared.isNative ? null : window.open('about:blank'));
+
+            class ResponseBody extends AutoEncoder {
+                @field({ decoder: StringDecoder })
+                    url: string
+            }
+
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                body: {
+                    accountId: accountId
+                },
+                path: "/stripe/login-link",
+                decoder: ResponseBody as Decoder<ResponseBody>,
+                owner: this
+            })
+
+            if (tab) {
+                tab.location = response.data.url;
+                tab.focus();
+            } else {
+                window.location.href = response.data.url;
+            }
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show();
+            tab?.close()
+        }
     }
 
     async updateMollie() {
@@ -637,7 +850,8 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 method: "POST",
                 path: "/mollie/check",
                 decoder: Organization as Decoder<Organization>,
-                shouldRetry: false
+                shouldRetry: false,
+                owner: this
             })
            
             SessionManager.currentSession!.setOrganization(response.data)
@@ -665,7 +879,8 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             const url = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "GET",
                 path: "/mollie/dashboard",
-                shouldRetry: false
+                shouldRetry: false,
+                owner: this
             })
             console.log(url.data)
 
@@ -682,6 +897,11 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
         
         this.loadingMollie = false;
+    }
+
+    beforeDestroy() {
+        Request.cancelAll(this)
+        document.removeEventListener("visibilitychange", this.doRefresh)
     }
 
 }

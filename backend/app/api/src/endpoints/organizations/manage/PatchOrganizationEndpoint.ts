@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Group, PayconiqPayment, Token, User, Webshop } from '@stamhoofd/models';
+import { Group, PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
 import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
@@ -114,6 +114,20 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         }
                     }
                 }
+
+                if (request.body.privateMeta.registrationProviderConfiguration?.stripeAccountId !== undefined) {
+                    if (request.body.privateMeta.registrationProviderConfiguration.stripeAccountId !== null) {
+                        const account = await StripeAccount.getByID(request.body.privateMeta.registrationProviderConfiguration.stripeAccountId)
+                        if (!account || account.organizationId !== organization.id) {
+                            throw new SimpleError({
+                                code: "invalid_field",
+                                message: "Het Stripe account dat je hebt gekozen bestaat niet (meer)",
+                                field: "registrationProviderConfiguration.stripeAccountId"
+                            })
+                        }
+                    }
+                    organization.privateMeta.registrationProviderConfiguration.stripeAccountId = request.body.privateMeta.registrationProviderConfiguration.stripeAccountId
+                }
             }
 
             // Allow admin patches (permissions only atm). No put atm
@@ -159,7 +173,22 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     // check payconiq + mollie
                     if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
-                        const i = organization.meta.paymentMethods.findIndex(p => (p == PaymentMethod.Bancontact || p == PaymentMethod.iDEAL || p == PaymentMethod.CreditCard) && !organization.privateMeta.buckarooSettings?.paymentMethods.includes(p))
+                        let stripe: StripeAccount | undefined = undefined
+                        if (organization.privateMeta.registrationProviderConfiguration.stripeAccountId) {
+                            stripe = await StripeAccount.getByID(organization.privateMeta.registrationProviderConfiguration.stripeAccountId)
+                        }
+
+                        const i = organization.meta.paymentMethods.findIndex(p => {
+                            if (p === PaymentMethod.Payconiq) return
+                            if (p === PaymentMethod.Transfer) return
+                            if (p === PaymentMethod.PointOfSale) return
+
+                            if (!organization.privateMeta.buckarooSettings?.paymentMethods.includes(p)) {
+                                if (!stripe?.meta.paymentMethods.includes(p)) {
+                                    return true
+                                }
+                            }
+                        })
                         if (i != -1) {
                             throw new SimpleError({
                                 code: "invalid_field",

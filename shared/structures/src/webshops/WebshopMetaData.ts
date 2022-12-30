@@ -13,6 +13,7 @@ import { RecordCategory } from '../members/records/RecordCategory';
 import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
+import { PaymentProviderConfiguration } from '../StripeAccount';
 import { TransferSettings } from './TransferSettings';
 import { WebshopField } from './WebshopField';
 
@@ -367,6 +368,10 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Policy), version: 116 })
     policies: Policy[] = []
 
+    /**
+     * @deprecated
+     * Should move to private
+     */
     @field({ decoder: StringDecoder, nullable: true, version: 42, field: "iban" })
     @field({ 
         decoder: TransferSettings, 
@@ -445,6 +450,9 @@ export class WebshopPrivateMetaData extends AutoEncoder {
             })
         ]
     }
+
+    @field({ decoder: PaymentProviderConfiguration, version: 175 })
+    providerConfiguration = PaymentProviderConfiguration.create({})
 }
 
 export class WebshopServerMetaData extends AutoEncoder {

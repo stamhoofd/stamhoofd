@@ -92,10 +92,10 @@
                 <STListItem :selectable="true" class="left-center" @click="openPayment(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
                     <h2 class="style-title-list">
-                        {{ $t('dashboard.settings.menu.paymentMethods.title') }}
+                        {{ $t('dashboard.settings.menu.paymentAccounts.title') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('dashboard.settings.menu.paymentMethods.description') }}
+                        {{ $t('dashboard.settings.menu.paymentAccounts.description') }}
                     </p>
                     <template slot="right">
                         <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
@@ -119,6 +119,20 @@
                         </p>
 
                         <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="openRegistrationPayment(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/creditcards.svg">
+                        <h2 class="style-title-list">
+                            {{ $t('dashboard.settings.menu.paymentMethods.title') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('dashboard.settings.menu.paymentMethods.description') }}
+                        </p>
+                        <template slot="right">
+                            <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
@@ -298,6 +312,7 @@ import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
 import ReferralView from './ReferralView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
+import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 
 
 
@@ -411,6 +426,19 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(PaymentSettingsView, {})
+                })
+            ]
+        })
+    }
+
+    openRegistrationPayment(animated = true) {
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(RegistrationPaymentSettingsView, {})
                 })
             ]
         })
@@ -569,8 +597,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         const parts = UrlHelper.shared.getParts()
         const params = UrlHelper.shared.getSearchParams()
 
-        console.log(parts, params)
-
+        // First set current url already, to fix back
+        UrlHelper.setUrl("/settings")
         document.title = "Stamhoofd - Instellingen"
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') {
@@ -578,12 +606,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPayment(false)
             return
         }
-
-        // We can clear now
-        UrlHelper.shared.clear()
-
-        // First set current url already, to fix back
-        UrlHelper.setUrl("/settings")
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
             // Open mollie settings
@@ -593,6 +615,14 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'payments') {
             // Open mollie settings
             this.openPayment(false)
+        } else {
+            // We can clear now
+            UrlHelper.shared.clear()
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'registration-payments') {
+            // Open mollie settings
+            this.openRegistrationPayment(false)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'privacy') {

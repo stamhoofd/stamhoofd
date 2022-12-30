@@ -31,6 +31,10 @@ export class Payment extends Model {
     @column({ type: "string", nullable: true })
     userId: string | null = null;
 
+    // Link a user for debugging
+    @column({ type: "string", nullable: true })
+    stripeAccountId: string | null = null;
+
     /**
      * Total price
      */

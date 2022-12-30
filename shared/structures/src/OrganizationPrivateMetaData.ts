@@ -5,6 +5,7 @@ import { OrganizationEmail } from './OrganizationEmail';
 import { PaymentMethod } from './PaymentMethod';
 import { PaymentProvider } from './PaymentProvider';
 import { PermissionRoleDetailed } from './Permissions';
+import { PaymentProviderConfiguration, StripeAccount, StripeMetaData } from './StripeAccount';
 
 export class CreditItem extends AutoEncoder {
     /**
@@ -133,6 +134,9 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: BuckarooSettings, nullable: true, version: 152 })
     buckarooSettings: BuckarooSettings | null = null
 
+    @field({ decoder: PaymentProviderConfiguration, version: 176 })
+    registrationProviderConfiguration = PaymentProviderConfiguration.create({})
+
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 161})
     featureFlags: string[] = []
 
@@ -162,13 +166,19 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 86 })
     VATNumber: string | null = null
 
-    getPaymentProviderFor(method: PaymentMethod): PaymentProvider | null  {
+    getPaymentProviderFor(method: PaymentMethod, stripeAccountMeta?: StripeMetaData | null): PaymentProvider | null  {
         if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {
             return null
         }
 
         if (this.payconiqApiKey && method === PaymentMethod.Payconiq) {
             return PaymentProvider.Payconiq
+        }
+
+        if (stripeAccountMeta) {
+            if (stripeAccountMeta.paymentMethods.includes(method)) {
+                return PaymentProvider.Stripe
+            }
         }
 
         // Is Buckaroo setup?

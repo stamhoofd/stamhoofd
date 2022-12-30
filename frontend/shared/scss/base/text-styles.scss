@@ -392,6 +392,14 @@
     font-size: 15px;
 }
 
+.style-button-bar {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+
+    align-items: center;
+}
+
 .style-with-button {
     display: flex;
     flex-direction: row;

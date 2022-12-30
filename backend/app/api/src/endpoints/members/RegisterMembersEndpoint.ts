@@ -8,6 +8,7 @@ import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, MemberBalanceIte
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
+import { StripeHelper } from '../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../payments/ExchangePaymentEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
@@ -231,10 +232,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Determine the payment provider
         // Throws if invalid
-        payment.provider = organization.getPaymentProviderFor(payment.method)
+        const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationProviderConfiguration)
+        payment.provider = provider
+        payment.stripeAccountId = stripeAccount?.id ?? null
 
         await payment.save()
         const items: BalanceItem[] = []
+        const itemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = []
 
         // Save registrations and add extra data if needed
         for (const bundle of payRegistrations) {
@@ -282,8 +286,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await balanceItemPayment.save();
 
             items.push(balanceItem)
+            itemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
         }
-
+        
+        const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0]
         if (request.body.cart.freeContribution) {
             // Create balance item
             const balanceItem = new BalanceItem();
@@ -294,7 +300,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItem.organizationId = organization.id;
 
             // Connect this to the oldest member
-            const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0]
+            
             if (oldestMember) {
                 balanceItem.memberId = oldestMember.id;
             }
@@ -310,6 +316,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             await balanceItemPayment.save();
 
             items.push(balanceItem)
+            itemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
         }
 
         // Create a payment pending balance item
@@ -321,6 +328,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItemPayment.organizationId = organization.id;
             balanceItemPayment.price = item.price;
             await balanceItemPayment.save();
+
+            const balanceItem = balanceItems.find(i => i.id === item.item.id)
+            if (!balanceItem) {
+                throw new Error('Balance item not found')
+            }
+            itemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
         }
         items.push(...balanceItems)
         await ExchangePaymentEndpoint.updateOutstanding(items)
@@ -343,9 +356,30 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const description = 'Inschrijving '+user.organization.name
         if (payment.status != PaymentStatus.Succeeded) {
             const redirectUrl = "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id)
+            const cancelUrl = "https://"+user.organization.getHost()+'/payment?id='+encodeURIComponent(payment.id) + '&cancel=true'
             const webhookUrl = 'https://'+user.organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
 
-            if (payment.provider === PaymentProvider.Mollie) {
+            if (payment.provider === PaymentProvider.Stripe) {
+                const stripeResult = await StripeHelper.createPayment({
+                    payment,
+                    stripeAccount,
+                    redirectUrl,
+                    cancelUrl,
+                    statementDescriptor: user.organization.name,
+                    metadata: {
+                        organization: organization.id,
+                        user: user.id,
+                    },
+                    i18n: request.i18n,
+                    lineItems: itemPayments,
+                    organization,
+                    customer: {
+                        name: user.firstName ? user.firstName : (user.lastName ? user.lastName : (oldestMember ? oldestMember.details.name : "")),
+                        email: user.email,
+                    }
+                });
+                paymentUrl = stripeResult.paymentUrl
+            } else if (payment.provider === PaymentProvider.Mollie) {
                 
                 // Mollie payment
                 const token = await MollieToken.getTokenFor(user.organizationId)

@@ -14,7 +14,7 @@
         "build:full": "rm -rf ./dist && yarn build"
     },
     "peerDependencies": {
-        "@simonbackx/simple-encoding": "^2.8.1",
+        "@simonbackx/simple-encoding": "^2.8.2",
         "@simonbackx/simple-errors": "^1.4"
     },
     "devDependencies": {

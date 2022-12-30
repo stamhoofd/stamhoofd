@@ -45,10 +45,16 @@ import { Component, Mixins,  Prop } from "vue-property-decorator";
 })
 export default class PaymentPendingView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    paymentId: string;
+        paymentId: string;
+
+    /**
+     * Try to cancel the payment if still possible
+     */
+    @Prop({ default: false })
+        cancel: boolean;
 
     @Prop({ required: true })
-    server: Server
+        server: Server
 
     payment: Payment | null = null
     loading = false
@@ -58,12 +64,13 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
     pollCount = 0
     timer: any = null
+    didFinish = false
 
     @Prop({ required: true })
-    finishedHandler: (payment: Payment | null) => void
+        finishedHandler: (payment: Payment | null) => void
 
     mounted() {
-        this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
+        this.timer = setTimeout(this.poll.bind(this), 200);
     }
 
     retry() {
@@ -81,23 +88,39 @@ export default class PaymentPendingView extends Mixins(NavigationMixin){
 
     poll() {
         this.timer = null;
+
+        if (this.didFinish) {
+            return;
+        }
         const paymentId = this.paymentId
         this.server
             .request({
                 method: "POST",
                 path: "/payments/" +paymentId,
                 decoder: Payment as Decoder<Payment>,
+                query: {
+                    cancel: this.cancel
+                }
             }).then(response => {
                 const payment = response.data
                 this.payment = payment
 
                 this.pollCount++;
+
+                if (this.didFinish) {
+                    return;
+                }
                 if (this.payment && (this.payment.status == PaymentStatus.Succeeded || this.payment.status == PaymentStatus.Failed)) {
+                    this.didFinish = true
                     this.finishedHandler.call(this, this.payment);
                     return;
                 }
                 this.timer = setTimeout(this.poll.bind(this), 3000 + Math.min(10*1000, this.pollCount*1000));
             }).catch(e => {
+                if (this.didFinish) {
+                    return;
+                }
+                this.didFinish = true
                 this.finishedHandler.call(this, this.payment);
             })
     }

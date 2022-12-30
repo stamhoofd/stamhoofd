@@ -141,7 +141,7 @@ export class Organization extends AutoEncoder {
 
             if (!options?.permissions) {
                 // Hide non public items
-                tree = tree.filterForDisplay(options?.admin ?? false, this.meta.packages.useActivities)
+                tree = tree.filterForDisplay(options?.admin ?? false, this.meta.packages.useActivities || options?.admin)
             }
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {

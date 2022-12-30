@@ -246,6 +246,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
             UrlHelper.shared.clear()
 
             const paymentId = searchParams.get("id")
+            const cancel = searchParams.get("cancel") === "true"
 
             const session = SessionManager.currentSession!
             const component = new ComponentWithProperties(NavigationController, { 
@@ -255,6 +256,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
                         return new ComponentWithProperties(PaymentPendingView, {
                             server: session.authenticatedServer,
                             paymentId,
+                            cancel,
                             finishedHandler: async function(this: NavigationMixin, payment: Payment | null) {
                                 if (payment && payment.status == PaymentStatus.Succeeded) {
                                     const RegistrationSuccessView = (await import(/* webpackChunkName: "Checkout" */ "../checkout/RegistrationSuccessView.vue")).default

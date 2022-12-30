@@ -5,7 +5,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <EditPaymentMethodsBox :methods="paymentMethods" :organization="organization" @patch="patchPaymentMethods" />
+        <EditPaymentMethodsBox :methods="paymentMethods" :organization="organization" :provider-config="providerConfig" @patch="patchPaymentMethods" @patch:providerConfig="patchProviderConfiguration($event)" />
 
         <p v-if="isAnyTicketType" class="warning-box">
             Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddelijk.
@@ -58,7 +58,7 @@
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { IBANInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Country, PaymentMethod, PrivateWebshop, TransferDescriptionType, TransferSettings, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { Country, PaymentMethod, PaymentProviderConfiguration, PrivateWebshop, TransferDescriptionType, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
@@ -82,6 +82,18 @@ export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMix
 
     get isAnyTicketType() {
         return (this.webshop.meta.ticketType !== WebshopTicketType.None)
+    }
+
+    get providerConfig() {
+        return this.webshop.privateMeta.providerConfiguration
+    }
+
+    patchProviderConfiguration(patch: PaymentProviderConfiguration) {
+        const p = PrivateWebshop.patch({})
+        p.privateMeta = WebshopPrivateMetaData.patch({
+            providerConfiguration: patch
+        })
+        this.addPatch(p)
     }
 
     get organization() {
