@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
+import { BalanceItemStatus, getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentProviderConfiguration, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -143,9 +143,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     payment.price = totalPrice
                     payment.paidAt = null
 
-                    // Determine the payment provider
-                    // Throws if invalid
-                    payment.provider = organization.getPaymentProviderFor(payment.method)
+                    // Determine the payment provider (always null because no online payments here)
+                    payment.provider = null
 
                     await payment.save()
 

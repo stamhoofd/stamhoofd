@@ -86,7 +86,10 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
     }
 
     get selectedSlot(): WebshopTimeSlot {
-        return CheckoutManager.checkout.timeSlot ?? this.timeSlots[0]
+        if (CheckoutManager.checkout.timeSlot) {
+            return this.timeSlots.find(t => t.id == CheckoutManager.checkout.timeSlot!.id) ?? this.timeSlots[0]
+        }
+        return this.timeSlots[0]
     }
 
     set selectedSlot(timeSlot: WebshopTimeSlot) {
@@ -118,6 +121,9 @@ export default class TimeSelectionView extends Mixins(NavigationMixin){
 
     mounted() {
         UrlHelper.setUrl("/checkout/"+CheckoutStepType.Time.toLowerCase())
+
+        // Force minimum selection
+        this.selectedSlot = this.selectedSlot as any
     }
 }
 </script>

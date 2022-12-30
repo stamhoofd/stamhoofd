@@ -91,18 +91,18 @@ export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-    initialGroupIds!: string[]
+        initialGroupIds!: string[]
 
     @Prop({ required: false, default: false })
-    undo!: boolean
+        undo!: boolean
 
     groupIds = this.initialGroupIds.slice()
 
     get categoryTree() {
         if (this.undo) {
-            return OrganizationManager.organization.getCategoryTreeWithDepth(1).filter(g => g.cycle > 0)
+            return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: true}).filter(g => g.cycle > 0)
         }
-        return OrganizationManager.organization.getCategoryTreeWithDepth(1).filterForDisplay(true, true)
+        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: true})
     }
 
     getSelectedGroup(group: Group): boolean {

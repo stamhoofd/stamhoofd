@@ -1812,15 +1812,15 @@
     colors "^1.4.0"
     mysql "^2.18.1"
 
-"@simonbackx/simple-encoding@^2.8.1":
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.8.1.tgz#67a888ce15dcda98630897541c77fcd273a6810c"
-  integrity sha512-4pBePYfsI3W4p5d2bZsxjbJ7pQeEGqEMhqaEAxaYhWH1VyGrHZTSYb6wkewX6etgN82dLvKk0rweLLRWH01hWg==
+"@simonbackx/simple-encoding@^2.8.2":
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-encoding/-/simple-encoding-2.8.2.tgz#885b7a8d046324d9414d718f2489eb095e5b0731"
+  integrity sha512-h2kqhvqfh0uVuq7XhH1OjoR03RWllzMDAGc7HXODDQNkMJTL/wPT6mpSiLbq5zQuljRPqWHhFfkfa9nln2+qZQ==
 
-"@simonbackx/simple-endpoints@^1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.11.0.tgz#498e0e299b1a85854c88d9eb6577f3248859b3a1"
-  integrity sha512-qauCdMaAw5jQM8CFkcp7jha2haIbWz50VMyXyVSt5iZzDsTMXEFbpfa70owh+TGXD4GNwKgQXDvowy1URs1bJQ==
+"@simonbackx/simple-endpoints@^1.11.2":
+  version "1.11.2"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-endpoints/-/simple-endpoints-1.11.2.tgz#8d111a3080e68e2431814eb4780d1c53edef525f"
+  integrity sha512-ZJ6t59a3WvJkwfJZgxjQMSW1C6s+K/i7Tt9LIpZMi5md1XurZ4MQYBTGqCkLU6z3Ygq2BYaqzoVFyhYzqVkfPA==
 
 "@simonbackx/simple-errors@^1.4", "@simonbackx/simple-errors@^1.4.0":
   version "1.4.0"
@@ -2293,6 +2293,11 @@
   version "18.11.17"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.17.tgz#5c009e1d9c38f4a2a9d45c0b0c493fe6cdb4bcb5"
   integrity sha512-HJSUJmni4BeDHhfzn6nF0sVmd1SMezP7/4F0Lq+aXzmp2xm9O7WXrUtHW/CHlYVtZUbByEvWidHqRtcJXGF2Ng==
+
+"@types/node@>=8.1.0":
+  version "18.11.18"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.18.tgz#8dfb97f0da23c2293e554c5a50d61ef134d7697f"
+  integrity sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==
 
 "@types/nodemailer@^6.4.4":
   version "6.4.4"
@@ -9481,6 +9486,13 @@ qs@6.9.6:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.6.tgz#26ed3c8243a431b2924aca84cc90471f35d5a0ee"
   integrity sha512-TIRk4aqYLNoJUbd+g2lEdz5kLWIuTMRagAXxl78Q0RiVjAOugHmeKNGdd3cwo/ktpf9aL9epCfFqWDEKysUlLQ==
 
+qs@^6.11.0:
+  version "6.11.0"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.0.tgz#fd0d963446f7a65e1367e01abd85429453f0c37a"
+  integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
+  dependencies:
+    side-channel "^1.0.4"
+
 qs@~6.5.2:
   version "6.5.2"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
@@ -10584,6 +10596,14 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
   integrity sha1-PFMZQukIwml8DsNEhYwobHygpgo=
+
+stripe@^11.5.0:
+  version "11.5.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-11.5.0.tgz#c50728f3bc6c78f4cac097852a95be1a86d6b0b7"
+  integrity sha512-yjTqnzeUk2wg1yIeYWOAH6CL5qu9fINzOhqkibXfbyeWSBEBauQrfCoB8shMmREoK2qdkScz1HjahF9qUg+X3g==
+  dependencies:
+    "@types/node" ">=8.1.0"
+    qs "^6.11.0"
 
 style-loader@^3.3.1:
   version "3.3.1"

@@ -265,6 +265,25 @@
                 Opgelet: deze bestelling werd nog niet betaald.
             </p>
 
+            <p v-if="order.status == 'Canceled'" class="error-box">
+                Deze bestelling werd geannuleerd
+            </p>
+
+            <div v-if="hasWarnings" class="hover-box container">
+                <hr>
+                <ul class="member-records">
+                    <li
+                        v-for="warning in sortedWarnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
+                    >
+                        <span :class="'icon '+warning.icon" />
+                        <span class="text">{{ warning.text }}</span>
+                    </li>
+                </ul>
+                <hr>
+            </div>
+
             <STList class="info">
                 <STListItem :selectable="true" @click="openOrder">
                     <h3 class="style-definition-label">

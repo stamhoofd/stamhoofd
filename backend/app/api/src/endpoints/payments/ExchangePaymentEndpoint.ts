@@ -8,11 +8,18 @@ import { Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentPr
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../helpers/BuckarooHelper';
+import { StripeHelper } from '../../helpers/StripeHelper';
 
 type Params = {id: string};
 class Query extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     exchange = false
+
+    /**
+     * If possible, cancel the payment if it is not yet paid/pending
+     */
+    @field({ decoder: BooleanDecoder, optional: true })
+    cancel = false
 }
 type Body = undefined
 type ResponseBody = PaymentStruct | undefined;
@@ -41,7 +48,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = await Organization.fromApiHost(request.host);
         
         // Not method on payment because circular references (not supprted in ts)
-        const payment = await ExchangePaymentEndpoint.pollStatus(request.params.id, organization)
+        const payment = await ExchangePaymentEndpoint.pollStatus(request.params.id, organization, request.query.cancel)
         if (!payment) {
             throw new SimpleError({
                 code: "",
@@ -170,7 +177,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
     /**
      * ID of payment is needed because of race conditions (need to fetch payment in a race condition save queue)
      */
-    static async pollStatus(paymentId: string, organization: Organization): Promise<Payment | undefined> {
+    static async pollStatus(paymentId: string, organization: Organization, cancel = false): Promise<Payment | undefined> {
         // Prevent polling the same payment multiple times at the same time: create a queue to prevent races
         return await QueueHandler.schedule("payments/"+paymentId, async () => {
             // Get a new copy of the payment (is required to prevent concurreny bugs)
@@ -180,8 +187,23 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status == PaymentStatus.Failed)) {
-                
-                if (payment.provider === PaymentProvider.Mollie) {
+                if (payment.provider === PaymentProvider.Stripe) {
+                    try {
+                        let status = await StripeHelper.getStatus(payment, cancel)
+                        if (this.isManualExpired(status, payment)) {
+                            console.error('Manually marking Stripe payment as expired', payment.id)
+                            status = PaymentStatus.Failed
+                        }
+
+                        await this.handlePaymentStatusUpdate(payment, organization, status)
+                    } catch (e) {
+                        console.error('Payment check failed Stripe', payment.id, e);
+                        if (this.isManualExpired(payment.status, payment)) {
+                            console.error('Manually marking Stripe payment as expired', payment.id)
+                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed)
+                        }
+                    }
+                } else if (payment.provider === PaymentProvider.Mollie) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
                     if (molliePayments.length == 1) {

@@ -3,14 +3,14 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PaymentProviderConfiguration, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuidv4 } from "uuid";
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { Group, Webshop } from "./";
+import { Group, StripeAccount, Webshop } from "./";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -739,12 +739,23 @@ export class Organization extends Model {
         }
     }
 
-    getPaymentProviderFor(method: PaymentMethod): PaymentProvider | null  {
-        const provider = this.privateMeta.getPaymentProviderFor(method)
+    async getPaymentProviderFor(method: PaymentMethod, config: PaymentProviderConfiguration): Promise<{
+        provider: PaymentProvider | null,
+        stripeAccount: StripeAccount | null
+    }>  {
+        let stripeAccount = (config.stripeAccountId ? (await StripeAccount.getByID(config.stripeAccountId)) : null) ?? null
+        if (stripeAccount && stripeAccount.organizationId !== this.id) {
+            console.warn('Stripe account '+stripeAccount.id+' is not linked to organization '+this.id);
+            stripeAccount = null
+        }
+        const provider = this.privateMeta.getPaymentProviderFor(method, stripeAccount?.meta)
         if (provider === null && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(method)) {
             throw new Error("No payment provider configured for "+method)
         }
-        return provider
+        return {
+            provider,
+            stripeAccount
+        }
     }
 
 }

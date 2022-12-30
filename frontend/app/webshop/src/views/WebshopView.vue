@@ -319,6 +319,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             })
         } else if (path.length == 1 && path[0] == 'payment' && params.get("id")) {
             const paymentId = params.get("id")
+            const cancel = params.get("cancel") === "true"
             const me = this
             this.present({
                 adjustHistory: false,
@@ -328,6 +329,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
                     new ComponentWithProperties(PaymentPendingView, { 
                         server: WebshopManager.server, 
                         paymentId,
+                        cancel,
                         finishedHandler: function(this: NavigationMixin, payment: Payment | null) {
                             if (payment && payment.status == PaymentStatus.Succeeded) {
                                 if (this.modalNavigationController) {

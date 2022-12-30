@@ -17,11 +17,11 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "peerDependencies": {
-        "@simonbackx/simple-encoding": "^2.8.1",
+        "@simonbackx/simple-encoding": "^2.8.2",
         "@simonbackx/simple-errors": "^1.4"
     },
     "devDependencies": {
-        "@simonbackx/simple-encoding": "^2.8.1",
+        "@simonbackx/simple-encoding": "^2.8.2",
         "@simonbackx/simple-errors": "^1.4",
         "@types/libsodium-wrappers-sumo": "0.7.5"
     },

@@ -30,8 +30,12 @@
     "settings": {
       "menu": {
         "paymentMethods": {
-          "description": "Bankrekeningnummer, Payconiq, Bancontact...",
-          "title": "Betaalmethodes"
+          "description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",
+          "title": "Betaalmethodes voor inschrijvingen"
+        },
+        "paymentAccounts": {
+          "title": "Betaalaccounts",
+          "description": "Sluit aan bij een online betaalprovider zodat je online geld kan ontvangen."
         }
       },
       "paymentMethods": {

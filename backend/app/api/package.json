@@ -20,13 +20,14 @@
         "@types/libsodium-wrappers-sumo": "^0.7.5",
         "@types/luxon": "^2.0.8",
         "@types/mailparser": "^3.4.0",
-        "@types/node": "^18.11.17",
-        "@types/mysql": "^2.15.20"
+        "@types/mysql": "^2.15.20",
+        "@types/node": "^18.11.17"
     },
     "dependencies": {
         "@mollie/api-client": "^3.4.0",
         "@simonbackx/simple-database": "^1.23.0",
-        "@simonbackx/simple-endpoints": "^1.11.0",
+        "@simonbackx/simple-endpoints": "^1.11.2",
+        "@simonbackx/simple-logging": "^1.0.1",
         "aws-sdk": "^2.885.0",
         "axios": "^0.24.0",
         "base-x": "^3.0.9",
@@ -43,6 +44,6 @@
         "node-rsa": "^1.1.1",
         "postmark": "^2.8.1",
         "sharp": "^0.29.3",
-        "@simonbackx/simple-logging": "^1.0.1"
+        "stripe": "^11.5.0"
     }
 }
