@@ -174,7 +174,7 @@ export class StripeHelper {
                 payment_method: paymentMethod.id,
                 payment_method_types: [payment.method.toLowerCase()],
                 statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
-                application_fee_amount: (payment.method === PaymentMethod.iDEAL ? 21 : 24) + Math.round(totalPrice * 2 / 10 / 100), // € 0,24 + 0,2%
+                application_fee_amount: fee,
                 on_behalf_of: stripeAccount.accountId,
                 confirm: true,
                 return_url: redirectUrl,

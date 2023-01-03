@@ -210,6 +210,10 @@ export class Organization extends AutoEncoder {
     get registerUrl() {
         return "https://"+this.resolvedRegisterDomain
     }
+
+    get dashboardDomain(): string {
+        return STAMHOOFD.domains.dashboard
+    }
 }
 
 export class OrganizationWithWebshop extends AutoEncoder {
