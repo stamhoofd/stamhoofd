@@ -8,7 +8,7 @@
         
         <STErrorsDefault :error-box="errorBox" />
 
-        <template v-if="!getFeatureFlag('stripe')">
+        <template v-if="isBuckarooActive">
             <hr>
             <h2>
                 Online betalingen activeren
@@ -30,7 +30,7 @@
             </p>
         </template>
 
-        <template v-if="getFeatureFlag('stripe')">
+        <template v-if="!isBuckarooActive">
             <hr>
             <h2>
                 Online betalingen via Stripe

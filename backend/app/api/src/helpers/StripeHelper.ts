@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
-import { PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
+import { calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 
@@ -137,12 +137,22 @@ export class StripeHelper {
         const totalPrice = payment.price;
 
         let fee = 0;
+        const vat = calculateVATPercentage(organization.address, organization.meta.VATNumber)
+        function calculateFee(fixed: number, percentageTimes100: number) {
+            return Math.round(Math.round(fixed + Math.max(1, totalPrice * percentageTimes100 / 100 / 100)) * (100 + vat) / 100); // € 0,21 + 0,2%
+        }
+
         if (payment.method === PaymentMethod.iDEAL) {
-            fee = 21 + Math.round(totalPrice * 2 / 10 / 100); // € 0,21 + 0,2%
+            fee = calculateFee(21, 20); // € 0,21 + 0,2%
         } else if (payment.method === PaymentMethod.Bancontact) {
-            fee = 24 + Math.round(totalPrice * 2 / 10 / 100); // € 0,24 + 0,2%
+            fee = calculateFee(24, 20); // € 0,24 + 0,2%
         } else {
-            fee = 15 + Math.round(totalPrice * 1 / 100); // € 0,15 + 1%
+            fee = calculateFee(15, 100); // € 0,15 + 1%
+        }
+
+        const fullMetadata = {
+            ...(metadata ?? {}),
+            organizationVATNumber: organization.meta.VATNumber
         }
 
         const stripe = StripeHelper.getInstance()
@@ -171,7 +181,7 @@ export class StripeHelper {
                 transfer_data: {
                     destination: stripeAccount.accountId,
                 },
-                metadata,
+                metadata: fullMetadata,
                 payment_method_options: {bancontact: {preferred_language: ['nl', 'fr', 'de', 'en'].includes(i18n.language) ? i18n.language as 'en' : 'nl'}},
             });
 
@@ -238,11 +248,11 @@ export class StripeHelper {
                     transfer_data: {
                         destination: stripeAccount.accountId,
                     },
-                    metadata,
+                    metadata: fullMetadata,
                     statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
                 },
                 customer_email: customer.email,
-                metadata,
+                metadata: fullMetadata,
                 expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // Expire in 30 minutes
             });
             console.log("Stripe session", session)
