@@ -227,6 +227,10 @@ export class Organization extends Model {
         return this.uri + "." + defaultDomain;
     }
 
+    get marketingDomain(): string {
+        return STAMHOOFD.domains.marketing[this.address.country] ?? STAMHOOFD.domains.marketing[""];
+    }
+
     getApiHost(): string {
         const defaultDomain = STAMHOOFD.domains.api;
         if (!defaultDomain) {
@@ -374,21 +378,19 @@ export class Organization extends Model {
             organization.serverMeta.firstInvalidDNSRecords = undefined
 
             const didSendDomainSetupMail = organization.serverMeta.didSendDomainSetupMail
-            organization.serverMeta.didSendDomainSetupMail = true
-
             const didSendWarning = organization.serverMeta.DNSRecordWarningCount > 0
             organization.serverMeta.DNSRecordWarningCount = 0
 
             const wasActive = this.privateMeta.mailDomainActive
-
-            if (!wasActive) {
-                await this.updateAWSMailIdenitity()
-            }
+            await this.updateAWSMailIdenitity()
 
             // yay! Do not Save until after doing AWS changes
             await organization.save()
 
             if (!wasActive && this.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning)) {
+                organization.serverMeta.didSendDomainSetupMail = true
+                await organization.save()
+
                 // Became valid -> send an e-mail to the organization admins
                 const to = await this.getAdminToEmails() ?? "hallo@stamhoofd.be"
 

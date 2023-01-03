@@ -2,7 +2,7 @@
 import { AnyDecoder,AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, StripeAccount, StripePaymentIntent, Token } from '@stamhoofd/models';
+import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent, Token } from '@stamhoofd/models';
 
 import { StripeHelper } from '../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../payments/ExchangePaymentEndpoint';
@@ -103,6 +103,24 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     }
                 } else {
                     console.warn("Could not find stripe payment intent with id", intentId)
+                }
+                break;
+            }
+            case "checkout.session.async_payment_failed":
+            case "checkout.session.async_payment_succeeded":
+            case "checkout.session.completed":
+            case "checkout.session.expired": {
+                const checkoutId = request.body.data.object.id;
+                const [model] = await StripeCheckoutSession.where({stripeSessionId: checkoutId}, {limit: 1})
+                if (model && model.organizationId) {
+                    const organization = await Organization.getByID(model.organizationId)
+                    if (organization) {
+                        await ExchangePaymentEndpoint.pollStatus(model.paymentId, organization)
+                    } else {
+                        console.warn("Could not find organization with id", model.organizationId)
+                    }
+                } else {
+                    console.warn("Could not find stripe checkout session with id", checkoutId)
                 }
                 break;
             }
