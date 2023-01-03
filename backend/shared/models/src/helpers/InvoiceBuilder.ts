@@ -465,6 +465,10 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_GRAY)
         this.document.font('Metropolis-Medium')
         this.document.fontSize(3 * MM);
+        let suffix = ''
+        if (this.invoice.meta.VATPercentage == 0) {
+            suffix = ' - BTW verlegd'
+        }
         this.document.text(this.invoice.id+"", PAGE_MARGIN, PAGE_HEIGHT - PAGE_MARGIN, { align: 'left', baseline: "bottom", lineBreak: false, width: (PAGE_WIDTH - PAGE_MARGIN*2)/2, height: 10*MM })
         this.document.text("Pagina "+this.page, PAGE_WIDTH - PAGE_MARGIN - 31*MM, PAGE_HEIGHT - PAGE_MARGIN, { align: 'right', baseline: "bottom", width: 30*MM, lineBreak: false, height: 10*MM })
     }

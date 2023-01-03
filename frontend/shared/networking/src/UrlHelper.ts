@@ -43,6 +43,11 @@ export class UrlHelper {
         this.url.pathname = path;
     }
 
+    setDomain(domain: string, protocol = 'https') {
+        this.url.host = domain;
+        this.url.protocol = protocol
+    }
+
     /**
      * Get full path, with the locale removed by default
      * /your-path/test?q=t#hash
