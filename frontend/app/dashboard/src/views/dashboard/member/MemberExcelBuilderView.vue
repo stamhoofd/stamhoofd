@@ -65,6 +65,16 @@ import XLSX from "xlsx";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
+type RowValue = (string | number | Date | {value: string | number | Date, format: null | string});
+
+function transformRowValues(row: RowValue[][]): (string | number | Date)[][] {
+    return row.map(r => r.map(c => {
+        if (typeof c === "object" && !(c instanceof Date)) {
+            return c.value
+        }
+        return c
+    }))
+}
 
 class ExcelMemberPropertyGroup {
     name: string;
@@ -96,14 +106,14 @@ class ExcelMemberProperty {
 
     name = ""
     width = 10
-    getValue: (member: MemberWithRegistrations) => any
+    getValue: (member: MemberWithRegistrations) => RowValue
     format?: string
     description?: string
 
     constructor(settings: {
         name: string, 
         selected?: boolean,
-        getValue: (member: MemberWithRegistrations) => any,
+        getValue: (member: MemberWithRegistrations) => RowValue,
         format?: string,
         width?: number,
         description?: string
@@ -477,7 +487,7 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
             /* if the particular row did not contain data for the column, the cell will not be generated */
             if(!worksheet[ref]) continue;
             /* `.t == "n"` for number cells */
-            if(worksheet[ref].t != 'n') continue;
+            if(worksheet[ref].t != 'n' && worksheet[ref].t != 'd') continue;
             /* assign the `.z` number format */
             worksheet[ref].z = fmt;
         }
@@ -488,7 +498,7 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
         const wb = XLSX.utils.book_new();
 
         /* make worksheet */
-        const wsData: any[][] = [
+        const wsData: RowValue[][] = [
             columns.map(c => c.name),
         ];
 
@@ -496,7 +506,19 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
             wsData.push(columns.map(c => c.getValue(member)))
         }
 
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        const ws = XLSX.utils.aoa_to_sheet(transformRowValues(wsData), { cellDates: true });
+
+        // Format columns based on format option in wsData
+        if (wsData[1]) {
+            for (const [index, col] of wsData[1].entries()) {
+                if (typeof col !== "object" || (col instanceof Date)) {
+                    continue
+                }
+                if (col.format) {
+                    this.formatColumn(index, col.format, ws)
+                }
+            }
+        }
 
         // Set column width
         ws['!cols'] = []
