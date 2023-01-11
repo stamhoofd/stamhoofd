@@ -263,7 +263,8 @@ export class RecordCategory extends AutoEncoder {
     }
 
     static validate<T>(categories: RecordCategory[], answers: RecordAnswer[], filterValue: T, filterDefinitions: FilterDefinition<T>[], dataPermission: boolean) {
-        const allRecords = categories.flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission))
+        const filteredCategories = RecordCategory.filterCategories(categories, filterValue, filterDefinitions, dataPermission)
+        const allRecords = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue, filterDefinitions, dataPermission))
         const cleanedAnswers: RecordAnswer[] = []
         const errors = new SimpleErrors()
 
