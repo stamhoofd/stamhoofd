@@ -18,7 +18,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Checkbox, ContextMenu, ContextMenuItem, LongPressDirective, Radio,STListItem } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ContextMenu, ContextMenuItem, LongPressDirective, Radio,STListItem } from "@stamhoofd/components";
 import { Option, OptionMenu } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -75,6 +75,15 @@ export default class OptionRow extends Mixins(NavigationMixin) {
         this.$emit("move-down")
     }
 
+    async delete() {
+        if (!(await CenteredMessage.confirm('Deze keuze verwijderen?', 'Verwijderen'))) {
+            return
+        }
+        const p = OptionMenu.patch({ id: this.optionMenu.id })
+        p.options.addDelete(this.option.id)
+        this.$emit("patch", p)
+    }
+
     showContextMenu(event) {
         const menu = new ContextMenu([
             [
@@ -91,6 +100,17 @@ export default class OptionRow extends Mixins(NavigationMixin) {
                     icon: "arrow-down",
                     action: () => {
                         this.moveDown()
+                        return true;
+                    }
+                }),
+            ],
+            [
+                new ContextMenuItem({
+                    name: "Verwijderen",
+                    icon: "trash",
+                    disabled: this.optionMenu.options.length <= 1,
+                    action: () => {
+                        this.delete().catch(console.error)
                         return true;
                     }
                 }),

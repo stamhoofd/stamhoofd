@@ -7,12 +7,28 @@
                 Domeinnaam kiezen
             </h1>
 
-            <p v-if="isOk" class="success-box">
-                Jouw domeinnaam is correct ingesteld
-            </p>
-            <p v-else class="warning-box">
+            <p v-if="!isMailOk && !isRegisterOk" class="warning-box">
                 Je moet jouw domeinnaam al in bezit hebben voor je deze kan instellen. Contacteer ons gerust via {{ $t('shared.emails.general') }} als je hulp nodig hebt.
             </p>
+            <template v-else>
+                <p v-if="isMailOk" class="success-box">
+                    Jouw domeinnaam is correct ingesteld voor het versturen van e-mails. <template v-if="!organization.privateMeta.mailDomainActive">
+                        Maar je moet nog even geduld hebben voor deze kan gebruikt worden.
+                    </template>
+                </p>
+                <p v-else class="warning-box">
+                    Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf dat domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Stamhoofd. Stamhoofd zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.
+                </p>
+
+                <template v-if="enableMemberModule">
+                    <p v-if="isRegisterOk" class="success-box">
+                        Jouw domeinnaam is correct ingesteld voor jouw inschrijvingsportaal (op {{ organization.registerDomain }})
+                    </p>
+                    <p v-else class="warning-box">
+                        Jouw domeinnaam wordt nog niet gebruikt voor jullie inschrijvingsportaal. Klik door naar 'Volgende' om die ook te configureren.
+                    </p>
+                </template>
+            </template>
         
             <STErrorsDefault :error-box="errorBox" />
 
@@ -31,16 +47,25 @@
             <p v-else-if="mailDomain" class="st-list-description">
                 Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.
             </p>
+
+            <template v-if="isStamhoofd">
+                <hr>
+                <h2>Geavanceerd</h2>
+
+                <Checkbox v-model="useDkim1024bit">
+                    Gebruik 1024 bit DKIM sleutel bij aanmaken nieuwe sleutels
+                </Checkbox>
+            </template>
         </main>
 
         <STToolbar>
             <template slot="right">
-                <button v-if="isAlreadySet" class="button secundary" @click="deleteMe">
+                <button v-if="isAlreadySet" class="button secundary" type="button" @click="deleteMe">
                     <span class="icon trash" />
                     <span>Verwijderen</span>
                 </button>
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
+                    <button class="button primary" type="button" @click="save">
                         Volgende
                     </button>
                 </LoadingButton>
@@ -76,6 +101,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
+    useDkim1024bit = false
 
     mailDomain = OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain ?? ""
     
@@ -87,8 +113,16 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         return true
     }
 
-    get isOk() {
-        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.privateMeta?.mailDomain !== null
+    get isStamhoofd() {
+        return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
+    }
+
+    get isMailOk() {
+        return this.organization.privateMeta?.pendingMailDomain === null && this.organization.privateMeta?.mailDomain !== null
+    } 
+
+    get isRegisterOk() {
+        return this.organization.privateMeta?.pendingRegisterDomain === null && this.organization.registerDomain !== null
     } 
 
     get organization() {
@@ -150,12 +184,14 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
+            const registerDomain = "inschrijven."+this.mailDomain;
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/organization/domain",
                 body: OrganizationDomains.create({
                     mailDomain: this.mailDomain,
-                    registerDomain: "inschrijven."+this.mailDomain
+                    registerDomain: (this.enableMemberModule || this.organization.registerDomain === registerDomain || this.organization.privateMeta?.pendingRegisterDomain === registerDomain) ? registerDomain : null,
+                    useDkim1024bit: this.useDkim1024bit
                 }),
                 decoder: Organization as Decoder<Organization>
             })

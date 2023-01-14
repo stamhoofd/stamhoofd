@@ -40,7 +40,6 @@ const seeds = async () => {
 
 const start = async () => {
     console.log('Running server at v' + Version)
-
     loadLogger();
     await I18n.load()
     const router = new Router();

@@ -15,7 +15,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Product, ProductPrice } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -55,6 +55,15 @@ export default class ProductPriceRow extends Mixins(NavigationMixin) {
     moveDown() {
         this.$emit("move-down")
     }
+    
+    async delete() {
+        if (!(await CenteredMessage.confirm('Deze prijs verwijderen?', 'Verwijderen'))) {
+            return
+        }
+        const p = Product.patch({ id: this.product.id })
+        p.prices.addDelete(this.productPrice.id)
+        this.$emit("patch", p)
+    }
 
     showContextMenu(event) {
         const menu = new ContextMenu([
@@ -72,6 +81,16 @@ export default class ProductPriceRow extends Mixins(NavigationMixin) {
                     icon: "arrow-down",
                     action: () => {
                         this.moveDown()
+                        return true;
+                    }
+                }),
+            ],
+            [
+                new ContextMenuItem({
+                    name: "Verwijderen",
+                    icon: "trash",
+                    action: () => {
+                        this.delete().catch(console.error)
                         return true;
                     }
                 }),
