@@ -24,7 +24,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Category, PrivateWebshop } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -62,6 +62,22 @@ export default class CategoryRow extends Mixins(NavigationMixin) {
         this.$emit("move-down")
     }
 
+    async delete(keepArticles = false) {
+        if (!(await CenteredMessage.confirm(keepArticles ? 'Deze categorie verwijderen en alle artikels erin behouden?' : 'Deze categorie en artikels verwijderen?', 'Verwijderen'))) {
+            return
+        }
+        const p = PrivateWebshop.patch({ id: this.webshop.id })
+        p.categories.addDelete(this.category.id)
+
+        if (!keepArticles) {
+            for (const id of this.category.productIds) {
+                p.products.addDelete(id)
+            }
+        }
+
+        this.$emit("patch", p)
+    }
+
     showContextMenu(event) {
         const menu = new ContextMenu([
             [
@@ -78,6 +94,25 @@ export default class CategoryRow extends Mixins(NavigationMixin) {
                     icon: "arrow-down",
                     action: () => {
                         this.moveDown()
+                        return true;
+                    }
+                }),
+            ],
+            [
+                ...(this.webshop.categories.length === 1 ? [
+                    new ContextMenuItem({
+                        name: "Verwijder en behoud artikels",
+                        action: () => {
+                            this.delete(true).catch(console.error)
+                            return true;
+                        }
+                    }),
+                ] : []),
+                new ContextMenuItem({
+                    name: "Verwijderen",
+                    icon: "trash",
+                    action: () => {
+                        this.delete(false).catch(console.error)
                         return true;
                     }
                 }),

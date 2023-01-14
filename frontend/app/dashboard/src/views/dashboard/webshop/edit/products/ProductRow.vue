@@ -29,7 +29,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
+import { CenteredMessage, ContextMenu, ContextMenuItem, LongPressDirective, STListItem } from "@stamhoofd/components";
 import { Category } from '@stamhoofd/structures';
 import { PrivateWebshop, Product } from "@stamhoofd/structures"
 import { Formatter } from '@stamhoofd/utility';
@@ -107,6 +107,25 @@ export default class ProductRow extends Mixins(NavigationMixin) {
         this.$emit("patch", webshopPatch)
     }
 
+    async delete() {
+        if (!(await CenteredMessage.confirm('Dit artikel verwijderen?', 'Verwijderen'))) {
+            return
+        }
+        const webshopPatch = PrivateWebshop.patch({
+            id: this.webshop.id,
+        })
+        webshopPatch.products.addDelete(this.product.id)
+
+        if (this.category) {
+            const categoryPatch = Category.patch({
+                id: this.category.id
+            })
+            categoryPatch.productIds.addDelete(this.product.id)
+            webshopPatch.categories.addPatch(categoryPatch)
+        }
+        this.$emit("patch", webshopPatch)
+    }
+
     get price() {
         return this.product.prices[0].price
     }
@@ -174,6 +193,16 @@ export default class ProductRow extends Mixins(NavigationMixin) {
                         ])
                     }),
                 ] : [])
+            ],
+            [
+                new ContextMenuItem({
+                    name: "Verwijderen",
+                    icon: "trash",
+                    action: () => {
+                        this.delete().catch(console.error)
+                        return true;
+                    }
+                }),
             ]
         ])
         menu.show({ clickEvent: event }).catch(console.error)

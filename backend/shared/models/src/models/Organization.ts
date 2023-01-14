@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, PaymentMethod, PaymentProvider, PaymentProviderConfiguration, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PaymentProviderConfiguration, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
@@ -239,9 +239,8 @@ export class Organization extends Model {
         return this.id+"." + defaultDomain;
     }
 
-    async getStructure(): Promise<OrganizationStruct> {
-        const Group = (await import("./Group")).Group
-        const groups = await Group.getAll(this.id)
+    async getStructure({emptyGroups} = {emptyGroups: false}): Promise<OrganizationStruct> {
+        const groups = emptyGroups ? [] : (await (await import("./Group")).Group.getAll(this.id))
 
         const struct = OrganizationStruct.create({
             id: this.id,
@@ -260,8 +259,15 @@ export class Organization extends Model {
             struct.groups = struct.categoryTree.categories[0]?.groups ?? []
         }
 
+        if (emptyGroups) {
+            // Reduce data
+            struct.meta = struct.meta.clone()
+            struct.meta.categories = []
+            struct.meta.recordsConfiguration = OrganizationRecordsConfiguration.create({})
+
+        }
+
         return struct
-        
     }
 
     async getPrivateStructure(permissions: Permissions): Promise<OrganizationStruct> {

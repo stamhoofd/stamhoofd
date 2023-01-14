@@ -75,7 +75,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 })
             }
 
-            const oldMailDomain = organization.privateMeta.mailDomain ?? organization.privateMeta.pendingMailDomain
+            const oldMailDomain = organization.privateMeta.mailDomain
 
             organization.privateMeta.pendingRegisterDomain = request.body.registerDomain?.toLowerCase() ?? null
             organization.privateMeta.pendingMailDomain = request.body.mailDomain?.toLowerCase() ?? null
@@ -102,10 +102,11 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             organization.privateMeta.dnsRecords = []
 
             if (organization.privateMeta.pendingMailDomain !== null) {
+                const defaultFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
                 if (organization.privateMeta.pendingRegisterDomain === null) {
                     // We set a custom domainname for webshops already
                     // This is not used at this moment
-                    organization.privateMeta.mailFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
+                    organization.privateMeta.mailFromDomain = defaultFromDomain;
                 } else {
                     // CNAME domain: for SPF + MX + A record
                     organization.privateMeta.mailFromDomain = organization.privateMeta.pendingRegisterDomain;
@@ -123,7 +124,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 let pub: string
 
                 if (!organization.serverMeta.privateDKIMKey || !organization.serverMeta.publicDKIMKey ) {
-                    const key = new NodeRSA({ b: 2048 });
+                    const key = new NodeRSA({ b: request.body.useDkim1024bit ? 1024 : 2048 });
                     const privArr = (key.exportKey('private') as string).split("\n")
                     priv = privArr.splice(1, privArr.length - 2).join("");
 

@@ -28,7 +28,7 @@
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="validate">
+                    <button class="button primary" type="button" @click="validate">
                         Verifieer
                     </button>
                 </LoadingButton>
@@ -82,7 +82,6 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
         if (this.saving) {
             return;
         }
-
     
         this.saving = true
 
@@ -92,7 +91,7 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
                 path: "/organization/domain",
                 body: OrganizationDomains.create({
                     mailDomain: this.mailDomain,
-                    registerDomain: "inschrijven."+this.mailDomain
+                    registerDomain: OrganizationManager.organization.privateMeta?.pendingRegisterDomain ?? OrganizationManager.organization.registerDomain
                 }),
                 decoder: Organization as Decoder<Organization>
             })
@@ -100,7 +99,7 @@ export default class DNSRecordsView extends Mixins(NavigationMixin) {
             OrganizationManager.organization.set(response.data)
             this.saving = false
 
-            if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null) {
+            if (response.data.privateMeta && response.data.privateMeta.mailDomain && response.data.privateMeta.pendingMailDomain === null && response.data.privateMeta.pendingRegisterDomain === null) {
                 this.show(new ComponentWithProperties(DNSRecordsDoneView, {}))
             }
         } catch (e) {
