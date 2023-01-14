@@ -89,9 +89,7 @@ export class BalanceItem extends Model {
             if (registration) {
                 // 1. Mark registration as being valid
                 if (registration.registeredAt === null) {
-                    registration.registeredAt = new Date()
-                    registration.reservedUntil = null
-                    await registration.save();
+                    await registration.markValid()
 
                     const {Group} = await import("./Group");
 
