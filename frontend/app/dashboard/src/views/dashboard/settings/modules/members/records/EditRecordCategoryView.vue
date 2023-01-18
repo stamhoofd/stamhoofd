@@ -40,6 +40,18 @@
         </p>
 
         <PropertyFilterInput v-model="filter" :allow-optional="!parentCategory" :organization="organization" :definitions="filterDefinitions" />
+
+        <div v-if="!isNew" class="container">
+            <hr>
+            <h2>
+                Acties
+            </h2>
+
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
     </SaveView>
 </template>
 
@@ -149,6 +161,17 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
             arrayPatch.addPatch(this.patchCategory)
         }
 
+        this.saveHandler(arrayPatch)
+        this.pop({ force: true })
+    }
+
+    async deleteMe() {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
+            return
+        }
+
+        const arrayPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
+        arrayPatch.addDelete(this.category.id)
         this.saveHandler(arrayPatch)
         this.pop({ force: true })
     }
