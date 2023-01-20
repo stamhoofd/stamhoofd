@@ -4,6 +4,9 @@ export class OrganizationDomains extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     registerDomain: string | null = null;
 
+    /**
+     * Used for sending emails. Use of subdomain is discouraged, because that sends emails from @sub.domain.com instead of @domain.com
+     */
     @field({ decoder: StringDecoder, nullable: true })
     mailDomain: string | null = null;
 

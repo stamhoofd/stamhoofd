@@ -42,7 +42,7 @@
                 >
             </STInputBox>
             <p v-if="mailDomain && enableMemberModule" class="st-list-description">
-                Jouw inschrijvingspagina zal bereikbaar zijn op inschrijven.{{ mailDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
+                Jouw inschrijvingspagina zal bereikbaar zijn op {{ usedRegisterDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
             </p>
             <p v-else-if="mailDomain" class="st-list-description">
                 Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.
@@ -53,9 +53,27 @@
                 <h2>Geavanceerd</h2>
 
                 <Checkbox v-model="useDkim1024bit">
-                    Gebruik 1024 bit DKIM sleutel bij aanmaken nieuwe sleutels
+                    Gebruik kortere 1024 bit DKIM sleutel (in plaats van 2048 bit)
+                </Checkbox>
+
+                <Checkbox v-model="allowSubdomain">
+                    Subdomeinnaam toestaan
+                </Checkbox>
+
+                <Checkbox v-if="enableMemberModule" v-model="customRegisterDomain">
+                    Andere domeinnaam voor registratie
                 </Checkbox>
             </template>
+
+            <STInputBox v-if="enableMemberModule && customRegisterDomain" title="Registratie domein" error-fields="registerDomain" :error-box="errorBox">
+                <input
+                    v-model="registerDomain"
+                    class="input"
+                    type="text"
+                    :placeholder="'inschrijven.' + $t('dashboard.settings.domain.domainPlaceholder')"
+                    @change="registerDomainChanged"
+                >
+            </STInputBox>
         </main>
 
         <STToolbar>
@@ -102,15 +120,35 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
     validator = new Validator()
     saving = false
     useDkim1024bit = false
-
+    registerDomain = OrganizationManager.organization.privateMeta?.pendingRegisterDomain ?? OrganizationManager.organization.registerDomain ?? ""
     mailDomain = OrganizationManager.organization.privateMeta?.pendingMailDomain ?? OrganizationManager.organization.privateMeta?.mailDomain ?? ""
-    
+    customRegisterDomain = this.registerDomain && this.mailDomain && (this.registerDomain !== 'inschrijven.' + this.mailDomain)
+    allowSubdomain = !!this.mailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/)
+
     validateDomain() {
         const d = this.mailDomain;
-        if (!(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/.exec(d))) {
+        if (this.allowSubdomain) {
+            if (!d.match(/^([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+                return false;
+            }
+            return true;
+        }
+        if (!d.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
             return false
         }
         return true
+    }
+
+    validateRegisterDomain() {
+        const d = this.registerDomain;
+        if (!d.match(/^([a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
+            return false;
+        }
+        return true;
+    }
+
+    get usedRegisterDomain() {
+        return this.customRegisterDomain ? this.registerDomain : ("inschrijven."+this.mailDomain);
     }
 
     get isStamhoofd() {
@@ -151,6 +189,21 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
             this.errorBox = null
         }
     }
+
+    registerDomainChanged() {
+        const errors = new SimpleErrors()
+       
+        if (!this.validateRegisterDomain()) {
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "De domeinnaam die je hebt ingevuld is niet geldig",
+                field: "registerDomain"
+            }))
+            this.errorBox = new ErrorBox(errors)
+        } else {
+            this.errorBox = null
+        }
+    }
   
     async save() {
         if (this.saving) {
@@ -164,6 +217,14 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
                 code: "invalid_field",
                 message: "De domeinnaam die je hebt ingevuld is niet geldig",
                 field: "mailDomain"
+            }))
+        }
+
+        if (this.customRegisterDomain && !this.validateRegisterDomain()) {
+            errors.addError(new SimpleError({
+                code: "invalid_field",
+                message: "De domeinnaam die je hebt ingevuld is niet geldig",
+                field: "registerDomain"
             }))
         }
 
@@ -184,7 +245,7 @@ export default class DomainSettingsView extends Mixins(NavigationMixin) {
         this.saving = true
 
         try {
-            const registerDomain = "inschrijven."+this.mailDomain;
+            const registerDomain = this.usedRegisterDomain;
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/organization/domain",
