@@ -26,7 +26,7 @@
                 Standaard e-mailadres
             </h3>
             <p class="style-description-small">
-                Voor algemene e-mails of voor binnenkomende e-mails van leden die (onbewust) naar een no-reply Stamhoofd e-mailadres mailen (bv. als antwoord op een wachtwoord vergeten e-mail).
+                Voor algemene e-mails of voor antwoorden op automatische e-mails als domeinnaam niet ingesteld is (bv. als antwoord op bestelbevestiging).
             </p>
         </Checkbox>
 
@@ -108,31 +108,31 @@ class SelectableWebshop {
 
 @Component({
     components: {
-    STInputBox,
-    STErrorsDefault,
-    Checkbox,
-    EmailInput,
-    STList,
-    STListItem,
-    SaveView
+        STInputBox,
+        STErrorsDefault,
+        Checkbox,
+        EmailInput,
+        STList,
+        STListItem,
+        SaveView
     }
-    })
+})
 export default class EditEmailView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
 
     @Prop()
-    emailId!: string;
+        emailId!: string;
 
     @Prop({ default: false })
-    isNew!: boolean;
+        isNew!: boolean;
 
     /**
      * Pass some patches from outside, and also save these patches when saving the e-mail (e.g. creating an email)
      */
     @Prop({ default: null })
-    initialPatch!: AutoEncoderPatchType<Organization> | null;
+        initialPatch!: AutoEncoderPatchType<Organization> | null;
     
     organizationPatch = this.initialPatch ? this.initialPatch : OrganizationManager.getPatch()
 
