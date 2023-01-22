@@ -102,19 +102,14 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             organization.privateMeta.dnsRecords = []
 
             if (organization.privateMeta.pendingMailDomain !== null) {
-                if (organization.privateMeta.pendingMailDomain.match(/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]+$/)) {
-                    // Already a subdomain used for sending emails
-                    organization.privateMeta.mailFromDomain = organization.privateMeta.pendingMailDomain;
+                const defaultFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
+                if (organization.privateMeta.pendingRegisterDomain === null || !organization.privateMeta.pendingRegisterDomain.endsWith('.' + organization.privateMeta.pendingMailDomain)) {
+                    // We set a custom domainname for webshops already
+                    // This is not used at this moment
+                    organization.privateMeta.mailFromDomain = defaultFromDomain;
                 } else {
-                    const defaultFromDomain = "stamhoofd." + organization.privateMeta.pendingMailDomain;
-                    if (organization.privateMeta.pendingRegisterDomain === null) {
-                        // We set a custom domainname for webshops already
-                        // This is not used at this moment
-                        organization.privateMeta.mailFromDomain = defaultFromDomain;
-                    } else {
-                        // CNAME domain: for SPF + MX + A record
-                        organization.privateMeta.mailFromDomain = organization.privateMeta.pendingRegisterDomain;
-                    }
+                    // CNAME domain: for SPF + MX + A record
+                    organization.privateMeta.mailFromDomain = organization.privateMeta.pendingRegisterDomain;
                 }
 
                 if (organization.privateMeta.mailFromDomain !== organization.privateMeta.pendingRegisterDomain) {
