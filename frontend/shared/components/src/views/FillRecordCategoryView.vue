@@ -49,43 +49,45 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
     loading = false
 
     @Prop({ default: null})
-    url: string
+        url: string
 
     @Prop({ required: true })
-    category!: RecordCategory
+        category!: RecordCategory
 
     /**
      * Unaltered record answers
      */
     @Prop({ required: true })
-    answers!: RecordAnswer[]
+        answers!: RecordAnswer[]
 
     @Prop({ default: false })
-    markReviewed!: boolean
+        markReviewed!: boolean
 
     @Prop({ required: true })
-    dataPermission!: boolean
+        dataPermission!: boolean
 
     /**
      * Type of the filters used (category.filter)
      */
     @Prop({ required: true })
-    filterDefinitions!: FilterDefinition<T>[]
+        filterDefinitions!: FilterDefinition<T>[]
 
     editingAnswers = this.answers.map(a => a.clone())
     lastSavedAnswers = this.answers
 
     @Prop({ required: true })
-    saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => Promise<void>
+        saveHandler: (answers: RecordAnswer[], component: NavigationMixin) => Promise<void>
 
     @Prop({ required: true })
-    filterValueForAnswers: (answers: RecordAnswer[]) => T
+        filterValueForAnswers: (answers: RecordAnswer[]) => T
 
     validator = new Validator()
     errorBox: ErrorBox | null = null
 
     mounted() {
-        UrlHelper.setUrl(this.url)
+        if (this.url) {
+            UrlHelper.setUrl(this.url)
+        }
     }
 
     get filterValue() {

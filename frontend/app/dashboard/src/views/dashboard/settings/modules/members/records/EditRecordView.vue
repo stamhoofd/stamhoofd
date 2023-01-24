@@ -307,6 +307,10 @@ export default class EditRecordView<T> extends Mixins(NavigationMixin) {
                     {
                         value: RecordType.Phone,
                         name: "Telefoonnummer"
+                    },
+                    {
+                        value: RecordType.Date,
+                        name: "Datum"
                     }
                 ]
             },

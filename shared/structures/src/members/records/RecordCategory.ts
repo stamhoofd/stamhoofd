@@ -128,13 +128,13 @@ export class RecordCategory extends AutoEncoder {
     /**
      * Get all categories for the given answers
      */
-    static flattenCategoriesForAnswers(categories: RecordCategory[], answers: RecordAnswer[]): RecordCategory[] {
+    static flattenCategoriesWith(categories: RecordCategory[], filter: (record: RecordSettings) => boolean): RecordCategory[] {
         return categories.flatMap(cat => {
             // Make a (not deep!) clone
             const cat2 = RecordCategory.create(cat)
 
             const updatedRecords = cat.records.filter(r => {
-                return !!answers.find(a => a.settings.id == r.id)
+                return filter(r)
             });
 
             cat2.records = updatedRecords
@@ -144,7 +144,7 @@ export class RecordCategory extends AutoEncoder {
                 cat2.childCategories = []
                 return [
                     ...(cat2.records.length > 0 ? [cat2] : []),
-                    ...this.flattenCategoriesForAnswers(cat.childCategories, answers).map(c => {
+                    ...this.flattenCategoriesWith(cat.childCategories, filter).map(c => {
                         // Make a (not deep!) clone
                         const cc = RecordCategory.create(c)
                         cc.name = cat.name + " → " + c.name
@@ -154,6 +154,15 @@ export class RecordCategory extends AutoEncoder {
             }
             return cat2.records.length > 0 ? [cat2] : []
         })
+    }
+
+    /**
+     * Get all categories for the given answers
+     */
+    static flattenCategoriesForAnswers(categories: RecordCategory[], answers: RecordAnswer[]): RecordCategory[] {
+        return this.flattenCategoriesWith(categories, r => {
+            return !!answers.find(a => a.settings.id == r.id)
+        });
     }
 
     static getRecordCategoryDefinitions<T>(recordCategories: RecordCategory[], getAnswers: (value: T) => RecordAnswer[]): FilterDefinition<T>[] {

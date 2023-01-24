@@ -40,6 +40,8 @@ export enum RecordType {
 
     Phone = "Phone",
     Email = "Email",
+
+    Date = "Date",
 }
 
 export enum RecordWarningType {
