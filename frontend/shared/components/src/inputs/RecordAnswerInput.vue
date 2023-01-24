@@ -43,6 +43,10 @@
         <AddressInput v-else-if="answer.settings.type == RecordType.Address" v-model="answer.address" :title="label" :required="required" :validator="validator" :nullable="true" />
         <PhoneInput v-else-if="answer.settings.type == RecordType.Phone" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
         <EmailInput v-else-if="answer.settings.type == RecordType.Email" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
+        <STInputBox v-else-if="answer.settings.type == RecordType.Date" :title="label" error-fields="input" :error-box="errorBox">
+            <DateSelection v-model="answer.dateValue" :title="label" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+        </STInputBox>
+        
         <p v-else class="error-box">
             Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
         </p>
@@ -67,7 +71,7 @@
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,EmailInput, ErrorBox, PhoneInput,Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
+import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, PhoneInput,Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -81,24 +85,25 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         AddressInput,
         STErrorsDefault,
         EmailInput,
-        PhoneInput
+        PhoneInput,
+        DateSelection
     }
 })
 export default class RecordAnswerInput extends Vue {
     @Prop({ required: true }) 
-    recordSettings: RecordSettings
+        recordSettings: RecordSettings
 
     /**
      * We'll update the record answers in this array
      */
     @Prop({ required: true }) 
-    recordAnswers: RecordAnswer[]
+        recordAnswers: RecordAnswer[]
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     @Prop({ default: false }) 
-    allOptional: boolean
+        allOptional: boolean
 
     errorBox: ErrorBox | null = null
 
@@ -119,7 +124,6 @@ export default class RecordAnswerInput extends Vue {
     }
 
     setChoiceSelected(choice: RecordChoice, selected: boolean) {
-        console.log("setChoiceSelected", choice, selected)
         if (selected === this.getChoiceSelected(choice)) {
             return
         }

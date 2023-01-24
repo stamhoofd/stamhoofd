@@ -36,3 +36,6 @@ export * from "./addresses/Province"
 export * from "./StripeAccount"
 export * from "./StripePaymentIntent"
 export * from "./StripeCheckoutSession"
+
+export * from "./Document"
+export * from "./DocumentTemplate"

@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors";
+import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
@@ -47,6 +48,13 @@ export class RecordAnswer extends AutoEncoder {
         return "Onbekend"
     }
 
+    /**
+     * Include both the setting and the value
+     */
+    get descriptionValue() {
+        return this.settings.name+": "+this.stringValue
+    }
+
     get excelValue() {
         return {
             value: this.stringValue,
@@ -88,6 +96,7 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
             case RecordType.MultipleChoice: return RecordMultipleChoiceAnswer
             case RecordType.ChooseOne: return RecordChooseOneAnswer
             case RecordType.Address: return RecordAddressAnswer
+            case RecordType.Date: return RecordDateAnswer
         }
         throw new SimpleError({
             code: "not_supported",
@@ -287,5 +296,28 @@ export class RecordAddressAnswer extends RecordAnswer {
 
     get isEmpty() {
         return this.address === null
+    }
+}
+
+export class RecordDateAnswer extends RecordAnswer {
+    @field({ decoder: DateDecoder, nullable: true })
+    dateValue: Date | null = null
+
+    get stringValue() {
+        return this.dateValue ? Formatter.dateIso(this.dateValue) : "/"
+    }
+
+    override validate() {
+        if (this.settings.required && this.dateValue === null) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Verplicht in te vullen",
+                field: "input"
+            })
+        }
+    }
+
+    get isEmpty() {
+        return this.dateValue === null
     }
 }

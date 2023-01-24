@@ -15,7 +15,7 @@
                 </h1>
                 <button type="button" class="button icon gray arrow-right" @click="nextMonth" />
             </header>
-            <div>
+            <div class="days">
                 <div class="days">
                     <div>Ma</div>
                     <div>Di</div>
@@ -31,6 +31,14 @@
                     </button>
                 </div>
             </div>
+            <footer>
+                <button v-if="allowClear" type="button" class="button text" @click="clear">
+                    Leegmaken
+                </button>
+                <button type="button" class="button text" @click="setToday">
+                    Vandaag
+                </button>
+            </footer>
         </aside>
     </ContextMenuView>
 </template>
@@ -54,14 +62,17 @@ import ContextMenuView from "./ContextMenuView.vue";
 })
 export default class DateSelectionView extends Mixins(NavigationMixin) {
     @Prop()
-    setDate!: (date: Date) => void;
+        setDate!: (date: Date | null) => void;
 
-    @Prop({ default: null })
-    selectedDay!: Date | null
+    @Prop({ required: true })
+        selectedDay!: Date
     currentMonth: Date = new Date((this.selectedDay ?? new Date()).getTime())
     weeks: any = null
     monthTitle = ""
     yearTitle = ""
+
+    @Prop({ default: false })
+        allowClear!: boolean
 
     created() {
         this.weeks = this.generateDays()
@@ -104,6 +115,20 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
             }
         }
         return weeks
+    }
+
+    clear() {
+        this.setDate(null)
+        this.pop();
+    }
+
+    setToday() {
+        const selectedDay = this.selectedDay
+        selectedDay.setTime(Date.now())
+        this.currentMonth = new Date(selectedDay.getTime())
+        this.weeks = this.generateDays()
+        this.updateMonthTitle()
+        this.setDate(new Date())
     }
 
     updateMonthTitle() {
@@ -271,6 +296,13 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         }
     }
 
+    > footer{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
     .title-button {
         display: inline-flex;
         flex-direction: row;
@@ -282,7 +314,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         }
     }
 
-    > div {
+    > .days {
         padding-bottom: 10px;
 
         > .days {

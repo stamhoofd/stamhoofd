@@ -1,6 +1,6 @@
 <template>
-    <div class="input-icon-container right icon arrow-down-small gray">
-        <div class="input selectable" @click="openContextMenu">
+    <div class="date-selection-container input-icon-container right icon arrow-down-small gray">
+        <div class="input selectable" :class="{placeholder: value === null}" @click="openContextMenu">
             {{ dateText }}
         </div>
     </div>
@@ -20,10 +20,16 @@ export default class DateSelection extends Mixins(NavigationMixin) {
         d.setHours(0, 0, 0, 0)
         return d
     } })
-    value: Date
+        value: Date | null
+
+    @Prop({ default: true })
+        required!: boolean
+
+    @Prop({ default: "Kies een datum" })
+        placeholder!: string
 
     get dateText() {
-        return Formatter.date(this.value, true)
+        return this.value ? Formatter.date(this.value, true) : this.placeholder
     }
 
     openContextMenu(event) {
@@ -34,10 +40,19 @@ export default class DateSelection extends Mixins(NavigationMixin) {
             wrapHeight: el.offsetHeight - 4,
             xPlacement: 'left',
             //preferredWidth: el.offsetWidth, 
-            selectedDay: new Date(this.value),
-            setDate: (value: Date) => {
+            selectedDay: this.value ? new Date(this.value) : new Date(),
+            allowClear: !this.required,
+            setDate: (value: Date | null) => {
+                if (!value) {
+                    this.$emit("input", null)
+                    return
+                }
                 const d = new Date(value.getTime())
-                d.setHours(this.value.getHours(), this.value.getMinutes(), 0, 0)
+                if (this.value) {
+                    d.setHours(this.value.getHours(), this.value.getMinutes(), 0, 0)
+                } else {
+                    d.setHours(12, 0, 0, 0)
+                }
                 this.$emit("input", d)
             }
         });
@@ -45,3 +60,15 @@ export default class DateSelection extends Mixins(NavigationMixin) {
     }
 }
 </script>
+
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style lang="scss">
+@use "~@stamhoofd/scss/base/variables.scss" as *;
+
+.date-selection-container {
+    .input.placeholder {
+        color: $color-gray-5;
+    }
+}
+</style>

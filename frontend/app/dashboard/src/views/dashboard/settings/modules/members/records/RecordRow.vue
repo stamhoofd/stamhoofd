@@ -7,6 +7,7 @@
         <img v-else-if="record.type === 'MultipleChoice'" slot="left" src="~@stamhoofd/assets/images/illustrations/multiple-choice-input.svg" class="style-illustration-img">
         <img v-else-if="record.type === 'Email'" slot="left" src="~@stamhoofd/assets/images/illustrations/email-input.svg" class="style-illustration-img">
         <img v-else-if="record.type === 'Address'" slot="left" src="~@stamhoofd/assets/images/illustrations/address-input.svg" class="style-illustration-img">
+        <img v-else-if="record.type === 'Date'" slot="left" src="~@stamhoofd/assets/images/illustrations/date-input.svg" class="style-illustration-img">
         <img v-else slot="left" src="~@stamhoofd/assets/images/illustrations/text-input.svg" class="style-illustration-img">
 
         <h3 class="style-title-list">
@@ -83,6 +84,9 @@ export default class RecordRow<T> extends Mixins(NavigationMixin) {
         }
         if (this.record.type === RecordType.Phone) {
             return 'Telefoonnummer'
+        }
+        if (this.record.type === RecordType.Date) {
+            return 'Datum'
         }
 
         if (this.record.type === RecordType.Textarea) {

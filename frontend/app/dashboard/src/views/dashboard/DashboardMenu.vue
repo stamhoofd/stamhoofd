@@ -131,7 +131,12 @@
                     <span>Instellingen</span>
                 </button>
 
-                <button v-if="isSGV" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
+                <button v-if="enableMemberModule && isBelgium && documentsBeta" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
+                    <span class="icon file" />
+                    <span>Documenten</span>
+                </button>
+
+                <button v-if="enableMemberModule && isSGV" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
                     <span class="icon sync" />
                     <span>Groepsadministratie</span>
                 </button>
@@ -164,7 +169,7 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { Country, Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -204,6 +209,14 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     get isSGV() {
         return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
+    }
+
+    get isBelgium() {
+        return this.organization.address.country == Country.Belgium
+    }
+
+    get documentsBeta() {
+        return this.organization.privateMeta?.featureFlags.includes('documentsBeta') ?? false
     }
 
     get tree() {
@@ -265,6 +278,13 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
                 didSet = true
             }
         }
+
+        if ((parts.length >= 1 && parts[0] == 'documents')) {
+            if (this.fullAccess && this.isBelgium && this.enableMemberModule) {
+                this.openDocuments(false).catch(console.error)
+                didSet = true
+            }
+        }        
 
         if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
             this.gotoFeedback(true).catch(console.error).finally(() => UrlHelper.shared.clear())
@@ -499,7 +519,20 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView", webpackPrefetch: true */'./settings/SGVGroepsadministratieView.vue'), {}, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */'./settings/SGVGroepsadministratieView.vue'), {}, { instant: !animated })
+                })
+            ]
+        });
+    }
+
+    async openDocuments(animated = true) {
+        this.currentlySelected = "documents"
+        this.showDetail({
+            adjustHistory: animated,
+            animated,
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: await LoadComponent(() => import(/* webpackChunkName: "DocumentTemplatesView" */'./documents/DocumentTemplatesView.vue'), {}, { instant: !animated })
                 })
             ]
         });
