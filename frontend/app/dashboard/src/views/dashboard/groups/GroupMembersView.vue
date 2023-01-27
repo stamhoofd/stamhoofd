@@ -26,9 +26,9 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Column, GlobalEventBus, LoadingButton, SegmentedControl, Spinner, STNavigationBar, STNavigationTitle, STToolbar, TableAction, TableView, Toast, TooltipDirective as Tooltip } from "@stamhoofd/components";
+import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, Registration, StringFilterDefinition } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -36,41 +36,30 @@ import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
-import BillingWarningBox from "../settings/packages/BillingWarningBox.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import EditGroupView from "./EditGroupView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
 
 @Component({
     components: {
-        Checkbox,
-        STNavigationBar,
-        STNavigationTitle,
-        STToolbar,
-        BackButton,
-        Spinner,
-        LoadingButton,
-        SegmentedControl,
-        BillingWarningBox,
         TableView
-    },
-    directives: { Tooltip },
+    }
 })
 export default class GroupMembersView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    group!: Group | null;
+        group!: Group | null;
 
     @Prop({ default: null })
-    category!: GroupCategoryTree | null;
+        category!: GroupCategoryTree | null;
 
     @Prop({ default: 0 })
-    initialCycleOffset!: number
+        initialCycleOffset!: number
 
     loading = true
     cycleOffset = this.initialCycleOffset
 
     @Prop({ default: false })
-    waitingList!: boolean;
+        waitingList!: boolean;
 
     allValues: MemberWithRegistrations[] = []
 

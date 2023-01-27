@@ -212,20 +212,23 @@ export class MemberDetails extends AutoEncoder {
         return year - birthDay.year;
     }
 
-    get age(): number | null {
+    ageOnDate(date: Date): number | null {
         if (!this.birthDay) {
             return null
         }
 
         // For now calculate based on Brussels timezone (we'll need to correct this later)
-        const today = new Date();
         const birthDay = Formatter.luxon(this.birthDay);
-        let age = today.getFullYear() - birthDay.year;
-        const m = today.getMonth() - (birthDay.month - 1)
-        if (m < 0 || (m === 0 && today.getDate() < birthDay.day)) {
+        let age = date.getFullYear() - birthDay.year;
+        const m = date.getMonth() - (birthDay.month - 1)
+        if (m < 0 || (m === 0 && date.getDate() < birthDay.day)) {
             age--;
         }
         return age;
+    }
+
+    get age(): number | null {
+        return this.ageOnDate(new Date);
     }
 
     /**

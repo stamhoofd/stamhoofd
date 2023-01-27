@@ -3,14 +3,29 @@ import { v4 as uuidv4 } from "uuid";
 
 import { RecordAnswer, RecordAnswerDecoder } from "./members/records/RecordAnswer"
 import { RecordCategory } from "./members/records/RecordCategory"
-import { RecordSettings, RecordType } from "./members/records/RecordSettings"
 
 export enum DocumentStatus {
-    Draft = "draft",
+    Draft = "Draft",
     MissingData = "MissingData",
     Published = "published",
 }
+export class DocumentStatusHelper {
+    static getName(status: DocumentStatus): string {
+        switch (status) {
+            case DocumentStatus.Draft: return "Klad"
+            case DocumentStatus.MissingData: return "Onvolledig"
+            case DocumentStatus.Published: return "Gepubliceerd"
+        }
+    }
 
+    static getColor(status: DocumentStatus): string {
+        switch (status) {
+            case DocumentStatus.Draft: return "info"
+            case DocumentStatus.MissingData: return "error"
+            case DocumentStatus.Published: return "tertiary"
+        }
+    }
+}
 export class DocumentSettings extends AutoEncoder {
     @field({ decoder: NumberDecoder, nullable: true })
     maxAge: number | null = null
@@ -21,6 +36,9 @@ export class DocumentSettings extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
     fieldAnswers: RecordAnswer[] = []
 
+    /**
+     * Defines where to automatically find the answer for a given question
+     */
     @field({ decoder: new MapDecoder(StringDecoder, StringDecoder) })
     linkedFields: Map<string, string> = new Map()
 }
@@ -38,8 +56,11 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordCategory) })
     groupFieldCategories: RecordCategory[] = []
 
-    @field({ decoder: new ArrayDecoder(RecordSettings) })
-    linkedFields: RecordSettings[] = []
+    /**
+     * Questions that are different for each document. They can be linked to specific fields of members later on for automatic linking.
+     */
+    @field({ decoder: new ArrayDecoder(RecordCategory) })
+    documentFieldCategories: RecordCategory[] = []
 
     @field({ decoder: NumberDecoder, nullable: true, optional: true })
     defaultMaxAge: number | null = null
@@ -101,12 +122,14 @@ export class DocumentData extends AutoEncoder {
     name = ""
     
     /**
-     * Contains all the key values for the data used to generate the template
+     * Contains a snapshot of all the answers
      */
-    @field({ decoder: new RecordDecoder(StringDecoder, AnyDecoder) })
-    data: Record<string, any> = {}
+    @field({ decoder: new ArrayDecoder(RecordAnswerDecoder) })
+    fieldAnswers: RecordAnswer[] = []
 
-    // todo: other possible fields such as title
+    matchQuery(query: string) {
+        return !!this.fieldAnswers.find(a => a.matchQuery(query))
+    }
 }
 
 export class Document extends AutoEncoder {
@@ -124,4 +147,8 @@ export class Document extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt = new Date()
+
+    matchQuery(query: string) {
+        return this.data.matchQuery(query)
+    }
 }

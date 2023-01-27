@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Attest Nr. 281</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <style>
+            body, html {
+                padding: 0;
+                margin: 0;
+                font-family: Arial, sans-serif;
+                line-height: normal;
+                font-size: 14.66px;
+                overflow-wrap: break-word;
+                font-weight: 400;
+                font-style: normal;
+                font-variant-caps: normal;
+                font-variant-ligatures: normal;
+                font-variant-numeric: normal;
+                font-variant-east-asian: normal;
+            }
+
+            /* Targets all the pages */
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+
+            .page-box { 
+                /*height: 100vh; not needed */
+                width:100vw; 
+                page-break-after: always;
+                border: 1px solid black;
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+
+                /* TEMPORARY */
+                width: 641.312px;
+            }
+
+            p, h1, div, h2, h3, h4 {
+                margin: 0;
+                padding: 0;
+            }
+
+            header {
+                border-bottom: 1px solid black;
+                padding: 0 4.5px;
+            }
+
+            header p {
+                font-size: 16px;
+                padding-top: 18px;
+                padding-bottom: 15px;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            header h1 {
+                font-size: 16px;
+                font-weight: bold;
+                text-align: center;
+                text-decoration: underline;
+            }
+
+            .form-box {
+                padding: 16px 10px 16px 52.5px;
+            }
+
+            .override {
+                font-weight: bold;
+            }
+
+            .form-line {
+            }
+
+            .page-box > p, .page-box > h1, .page-box > h2, .page-box > h3, .page-box > h4 {
+                padding: 0 4.5px;
+            }
+
+            h2 {
+                font-size: inherit;
+                font-weight: bold;
+            }
+            h2 span {
+                font-weight: normal;
+                text-decoration: none;
+            }
+
+            .space {
+                height: 16px;
+            }
+
+            .checklist {
+                padding-left: 24.5px;
+                position: relative;
+            }
+
+            .checklist::before {
+                content: "□";
+                position: absolute;
+                left: 5.5px;
+            }
+            .checklist.selected::before {
+                content: "■";
+            }
+        </style>
+    </head>
+    <body>
+        <div class="page-box">
+            <header>
+                <h1>ATTEST NR. 281.86   (JAAR VAN DE UITGAVEN {{year}})</h1>
+                <p>Dit attest geldt als jaarlijks attest
+                    uitgereikt overeenkomstig artikel 63<sup>18/8</sup>, van het koninklijk
+                    besluit tot uitvoering van het Wetboek van de inkomstenbelastingen 1992
+                    (KB/WIB 92), met het oog op de toekenning van de belastingvermindering voor
+                    kinderoppas (1)
+                </p>
+            </header>
+            <div class="form-box">
+                <p>Naam van de instantie of de persoon (hierna ‘de instantie’) <strong>die instaat voor de opvang</strong> (2): <br><span class="override">{{organization.name}}</span></p>
+                <p>KBO nr. (facultatief): <span class="override">{{organization.companyNumber}}</span></p>
+                <p>Straat: <span class="override">{{organization.address.street}}</span>  Nr: <span class="override">{{organization.address.number}}</span></p>
+                <p>Postcode: <span class="override">{{organization.address.postalCode}}</span>  Gemeente: <span class="override">{{organization.address.city}}</span></p>
+            </div>
+            <h2><u>Vak I</u><span> (dit vak moet niet altijd worden ingevuld – zie bericht)</span></h2>
+            <div class="space"></div>
+            <p>De instantie die instaat voor de opvang verklaart dat zij (aankruisen wat van toepassing is):</p>
+            <div class="space"></div>
+            <div class="checklist{{#if (eq certification.type 'kind-en-gezin')}} selected{{/if}}">
+                is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van of een kwaliteitslabel heeft ontvangen van Kind en Gezin / Opgroeien regie, het ‘Office de la Naissance et de l’Enfance’ of de regering van de Duitstalige Gemeenschap
+            </div>
+            <div class="checklist{{#if (eq certification.type 'authorities')}} selected{{/if}}">
+                is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten
+            </div>
+            <div class="checklist{{#if (eq certification.type 'foreign')}} selected{{/if}}">
+                is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van buitenlandse openbare instellingen gevestigd in een andere lidstaat van de Europese Economische Ruimte
+            </div>
+            <div class="checklist{{#if (eq certification.type 'schools')}} selected{{/if}}">
+                is verbonden met een school gevestigd in de Europese Economische Ruimte of met de inrichtende macht van een school gevestigd in de Europese Economische Ruimte,
+            </div>
+            <div class="space"></div>
+            <p>in de zin van art. 145<sup>35</sup>, tweede lid, 3°, van het Wetboek van de inkomstenbelastingen 1992. Wat hiervoor is verklaard, is geldig voor de periode van <s>… / … / 20… tot … / … / 20 …(3)</s></p>
+            <div class="space"></div>
+            <div class="space"></div>
+            <div class="space"></div>
+            <p>Naam en volledig adres van de ‘certificeringsinstantie’ (4) die de opvanginstantie heeft vergund, erkend, gesubsidieerd, er een kwaliteitslabel heeft aan toegekend of die deze controleert of er toezicht op houdt of die is verbonden met de opvanginstantie in het geval van scholen of hun inrichtende machten:</p>
+            <div class="form-box">
+                <p>Naam: <span class="override">{{certification.name}}</span></p>
+                <p>KBO nr. (facultatief): <span class="override">{{certification.companyNumber}}</span></p>
+                <p>Straat: <span class="override">{{certification.address.street}}</span>  Nr: <span class="override">{{certification.address.number}}</span></p>
+                <p>Postcode: <span class="override">{{certification.address.postalCode}}</span>  Gemeente: <span class="override">{{certification.address.city}}</span></p>
+            </div>
+            <div class="space"></div>
+            <div class="space"></div>
+            <div class="space"></div>
+        </div>
+        <div class="page-box">
+            Page 2
+        </div>
+        <div class="page-box">
+            Page 3
+        </div>
+    </body>
+</html>

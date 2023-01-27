@@ -12,7 +12,7 @@
             </p>
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center">
+                <STListItem :selectable="true" class="left-center" @click="openDocuments">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/agreement.svg">
                     <h2 class="style-title-list">
                         Documenten
@@ -93,6 +93,7 @@ import { SessionManager } from "@stamhoofd/networking";
 import { DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import DocumentsView from "./DocumentsView.vue";
 import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";
 
 
@@ -113,6 +114,16 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
 
     deleting = false
     publishing = false
+
+    openDocuments() {
+        this.show({
+            components: [
+                new ComponentWithProperties(DocumentsView, {
+                    template: this.template
+                })
+            ]
+        })
+    }
 
     editSettings() {
         this.present({
