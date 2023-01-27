@@ -1,11 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Document, Token } from "@stamhoofd/models";
+import { Document, DocumentTemplate, Token } from "@stamhoofd/models";
+import { Document as DocumentStruct } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined
-type ResponseBody = Buffer
+type ResponseBody = DocumentStruct[]
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -17,7 +18,7 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/documents/@id/download", { id: String});
+        const params = Endpoint.parseParameters(request.url, "/organization/document-templates/@id/documents", { id: String});
 
         if (params) {
             return [true, params as Params];
@@ -36,31 +37,18 @@ export class GetGroupMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             })
         }
 
-        const document = await Document.getByID(request.params.id)
-        if (!document || document.organizationId != user.organizationId) {
+        const template = await DocumentTemplate.getByID(request.params.id)
+        if (!template || template.organizationId != user.organizationId) {
             throw new SimpleError({
                 code: "not_found",
                 message: "Onbekend document"
             })
         }
 
-        const html = await document.getRenderedHtml();
-        if (!html) {
-            throw new SimpleError({
-                code: "failed_generating_pdf",
-                message: "Er ging iets mis bij het aanmaken van het document. Probleem later opnieuw en neem contact met ons op als het probleem blijft herhalen."
-            })
-        }
-        const pdf = await Document.htmlToPdf(html);
-        if (pdf === null) {
-            throw new SimpleError({
-                code: "failed_generating_pdf",
-                message: "Er ging iets mis bij het aanmaken van het document. Probleem later opnieuw en neem contact met ons op als het probleem blijft herhalen."
-            })
-        }
-        const response = new Response(pdf)
-        response.headers["Content-Type"] = "application/pdf"
-        response.headers["Content-Length"] = pdf.byteLength.toString()
-        return response
+        const documents = await Document.where({ templateId: template.id });
+
+        return new Response(
+            documents.map(t => t.getStructure())
+        );
     }
 }

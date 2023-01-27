@@ -31,12 +31,12 @@
             </div>
 
             <!-- Display all the required linking -->
-            <template v-if="patchedDocument.privateSettings.templateDefinition.linkedFields.length">
+            <div v-for="category of documentFieldCategories" :key="category.id" class="container">
                 <hr>
-                <h2>Benodigde gegevens</h2>
-                <p>Elk slim document bevat enkele invulvelden waarin automatisch bepaalde gegevens van leden ingevuld zullen worden. Aangezien je in Stamhoofd volledig zelf kan bepalen welke gegevens je van leden verzamelt, moet je hier aangeven met welke vragenlijst gegevens (= die je zelf hebt ingesteld bij Instellingen > Vragenlijsten) je die wilt koppelen. Ingebouwde gegevens (zoals de naam van een lid) hoef je niet te koppelen. Stamhoofd suggereert automatisch suggesties op basis van de naam, maar kan fout zijn. Kijk dus goed na.</p>
-            
-                <STInputBox v-for="field of patchedDocument.privateSettings.templateDefinition.linkedFields" :key="field.id" :title="field.name" :error-fields="field.id" :error-box="errorBox">
+                <h2>{{ category.name }}</h2>
+                <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
+
+                <STInputBox v-for="field of category.getAllRecords()" :key="field.id" :title="field.name" :error-fields="field.id" :error-box="errorBox">
                     <Dropdown :value="getLinkedFieldLink(field)" @change="setLinkedFieldLink(field, $event)">
                         <option v-if="isLinkedFieldDefault(field)" :value="null">
                             Gebruik ingebouwde gegevens
@@ -44,14 +44,14 @@
                         <option :value="null" disabled>
                             Maak een keuze
                         </option>
-                        <optgroup v-for="category in recordCategoriesFor(field)" :key="category.id" :label="category.name">
-                            <option v-for="record in category.getAllRecords()" :key="record.id" :value="record.id">
+                        <optgroup v-for="c in recordCategoriesFor(field)" :key="c.id" :label="c.name">
+                            <option v-for="record in c.getAllRecords()" :key="record.id" :value="record.id">
                                 {{ record.name }}
                             </option>
                         </optgroup>
                     </Dropdown>
                 </STInputBox>
-            </template>
+            </div>
 
             <hr>
             <h2>Inschrijvingsgroepen</h2>
@@ -84,12 +84,15 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Dropdown, ErrorBox, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Dropdown, ErrorBox, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordSettings, RecordType } from "@stamhoofd/structures";
+import { RecordAnswerDecoder } from "@stamhoofd/structures";
+import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
+import { FilterGroupEncoded, GroupFilterMode, PropertyFilter, Version } from "@stamhoofd/structures";
+import { DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordChoice, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { StringCompare } from "@stamhoofd/utility";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -126,8 +129,24 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         return this.document.patch(this.patchDocument)
     }
 
+    get definitions() {
+        return RecordCategory.getRecordCategoryDefinitions(this.patchedDocument.privateSettings.templateDefinition.fieldCategories, () => this.editingAnswers)
+    }
+
     get fieldCategories() {
-        return this.patchedDocument.privateSettings.templateDefinition.fieldCategories
+        return RecordCategory.flattenCategories(this.patchedDocument.privateSettings.templateDefinition.fieldCategories, {} as any, this.definitions, true)
+    }
+
+    get documentFieldCategories() {
+        return this.patchedDocument.privateSettings.templateDefinition.documentFieldCategories
+    }
+
+    mounted() {
+        // temporary!
+        if (!this.isNew) {
+            // Force update of html etc
+            this.editingType = 'fiscal';
+        }
     }
 
     @Watch("editingAnswers")
@@ -157,6 +176,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                     })
                 })
                 this.autoLink();
+                this.loadHtml().catch(console.error)
             }
         }
     }
@@ -193,7 +213,20 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     }
 
     autoLink() {
-        for (const field of this.patchedDocument.privateSettings.templateDefinition.linkedFields) {
+        const globalData = this.getDefaultGlobalData()
+        for (const field of this.patchedDocument.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
+            if (this.editingAnswers.find(a => a.settings.id === field.id)) {
+                continue;
+            }
+            const d = globalData[field.id]
+            if (d && d instanceof RecordAnswerDecoder.getClassForType(field.type)) {
+                // add answer
+                d.settings = field
+                this.editingAnswers.push(d)
+            }
+        }
+
+        for (const field of this.patchedDocument.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
             if (this.getLinkedFieldLink(field)) {
                 // Already linked
                 continue
@@ -241,7 +274,39 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             "member.lastName",
             "member.address",
             "member.birthDay",
+            "member.address",
         ];
+    }
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    getDefaultGlobalData() {
+        return {
+            "organization.name": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: this.organization.name
+            }),
+            "organization.companyNumber": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: this.organization.meta.companyNumber
+            }),
+            "organization.address": RecordAddressAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                address: this.organization.address
+            }),
+        }
+    }
+
+    async loadHtml() {
+        const imported = ((await import(/* webpackChunkName: "attest-html" */ "!!raw-loader!./templates/attest.html")).default)
+        if (typeof imported !== "string") {
+            throw new Error("Imported attest html is not a string")
+        }
+        this.patchDocument = this.patchDocument.patch({
+            html: imported
+        })
     }
 
     get availableTypes() {
@@ -253,6 +318,64 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                     defaultMaxAge: 14,
                     fieldCategories: [
                         RecordCategory.create({
+                            name: "Vereniging",
+                            description: "Gegevens van de vereniging of persoon die instaat voor de opvang.",
+                            records: [
+                                RecordSettings.create({
+                                    id: "organization.name",
+                                    name: "Naam",
+                                    required: true,
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "organization.companyNumber",
+                                    name: "KBO nummer",
+                                    required: false,
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "organization.address",
+                                    name: "Adres",
+                                    required: true,
+                                    type: RecordType.Address
+                                }),
+                                RecordSettings.create({
+                                    id: "certification.type",
+                                    name: "Vergunningstype",
+                                    description: "Vergunningstype bepaalt het type van vergunning in Vak I.",
+                                    required: true,
+                                    type: RecordType.ChooseOne,
+                                    choices: [
+                                        RecordChoice.create({
+                                            id: "exception",
+                                            name: "Vak I niet van toepassing",
+                                            description: 'Voldoet aan de voorwaarden vermeld in puntje 2 van de document opmerkingen.'
+                                        }),
+                                        RecordChoice.create({
+                                            id: "kind-en-gezin",
+                                            name: "Kind en Gezin / Opgroeien regie",
+                                            description: 'is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van of een kwaliteitslabel heeft ontvangen van Kind en Gezin / Opgroeien regie, het ‘Office de la Naissance et de l’Enfance’ of de regering van de Duitstalige Gemeenschap'
+                                        }),
+                                        RecordChoice.create({
+                                            id: "authorities",
+                                            name: "Gemeenten, gemeenschappen of gewesten",
+                                            description: 'is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten'
+                                        }),
+                                        RecordChoice.create({
+                                            id: "foreign",
+                                            name: "Buitenlandse instellingen",
+                                            description: 'is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van buitenlandse openbare instellingen gevestigd in een andere lidstaat van de Europese Economische Ruimte'
+                                        }),
+                                        RecordChoice.create({
+                                            id: "schools",
+                                            name: "Scholen",
+                                            description: 'is verbonden met een school gevestigd in de Europese Economische Ruimte of met de inrichtende macht van een school gevestigd in de Europese Economische Ruimte,'
+                                        })
+                                    ]
+                                })
+                            ]
+                        }),
+                        RecordCategory.create({
                             name: "Certificeringsautoriteit",
                             description: "De instantie die de opvangsinstantie heeft vergund, erkend, gesubsidieerd, er een kwaliteitslabel heeft aan toegekend of die deze controleert of er toezicht op houdt of die is verbonden met de opvanginstantie in het geval van scholen of hun inrichtende machten.",
                             records: [
@@ -262,6 +385,47 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     required: true,
                                     type: RecordType.Text
                                 }),
+                                RecordSettings.create({
+                                    id: "certification.companyNumber",
+                                    name: "KBO nummer",
+                                    required: false,
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "certification.address",
+                                    name: "Adres",
+                                    required: true,
+                                    type: RecordType.Address
+                                })
+                            ],
+                            filter: new PropertyFilter(new FilterGroupEncoded({
+                                id: 'filter_group',
+                                filters: [
+                                    {
+                                        definitionId: 'record_certification.type',
+                                        choiceIds: ['kind-en-gezin', 'authorities', 'foreign', 'schools'],
+                                        mode: ChoicesFilterMode.Or
+                                    }
+                                ],
+                                mode: GroupFilterMode.And
+                            }, Version), null)
+                        }),
+                        RecordCategory.create({
+                            name: "Ondertekening",
+                            description: "Persoon die de documenten ondertekent.",
+                            records: [
+                                RecordSettings.create({
+                                    id: "signature.name",
+                                    name: "Naam",
+                                    required: true,
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "signature.function",
+                                    name: "Hoedanigheid",
+                                    required: true,
+                                    type: RecordType.Text
+                                })
                             ]
                         })
                     ],
@@ -285,42 +449,63 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                             ]
                         })
                     ],
-                    linkedFields: [
-                        RecordSettings.create({
-                            id: "member.nationalRegistryNumber",
-                            name: "Rijksregisternummer lid",
-                            type: RecordType.Text
+                    documentFieldCategories: [
+                        RecordCategory.create({
+                            name: "Schuldenaar",
+                            description: "Hier komt nog wat extra informatie over wie de schuldenaar is.",
+                            records: [
+                                RecordSettings.create({
+                                    id: "debtor.firstName",
+                                    name: "Voornaam",
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "debtor.lastName",
+                                    name: "Achternaam",
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "debtor.nationalRegistryNumber",
+                                    name: "Rijksregisternummer",
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "debtor.address",
+                                    name: "Adres",
+                                    type: RecordType.Address
+                                })
+                            ]
                         }),
-                        RecordSettings.create({
-                            id: "debtor.nationalRegistryNumber",
-                            name: "Rijksregisternummer schuldenaar",
-                            type: RecordType.Text
-                        }),
-                        RecordSettings.create({
-                            id: "debtor.firstName",
-                            name: "Voornaam schuldenaar",
-                            type: RecordType.Text
-                        }),
-                        RecordSettings.create({
-                            id: "debtor.lastName",
-                            name: "Achternaam schuldenaar",
-                            type: RecordType.Text
-                        }),
-                        RecordSettings.create({
-                            id: "debtor.address",
-                            name: "Adres schuldenaar",
-                            type: RecordType.Address
-                        }),
-                        // Supported fields in Stamhoofd (todo: we'll catch this)
-                        RecordSettings.create({
-                            id: "member.firstName",
-                            name: "Voornaam lid",
-                            type: RecordType.Text
-                        }),
-                        RecordSettings.create({
-                            id: "member.lastName",
-                            name: "Achternaam lid",
-                            type: RecordType.Text
+                        RecordCategory.create({
+                            name: "Gegevens lid",
+                            description: "Deze gegevens zijn allemaal standaard beschikbaar in Stamhoofd, met uitzondering van het rijksregisternummer.",
+                            records: [
+                                RecordSettings.create({
+                                    id: "member.nationalRegistryNumber",
+                                    name: "Rijksregisternummer",
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "member.firstName",
+                                    name: "Voornaam",
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "member.lastName",
+                                    name: "Achternaam",
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "member.birthDay",
+                                    name: "Geboortedatum",
+                                    type: RecordType.Date
+                                }),
+                                RecordSettings.create({
+                                    id: "member.addres",
+                                    name: "Adres",
+                                    type: RecordType.Address
+                                })
+                            ]
                         }),
                     ]
                 })
@@ -334,8 +519,16 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     }
 
     get hasChanges() {
-        return false
+        return patchContainsChanges(this.patchDocument, this.document, { version: Version })
     }
+
+    async shouldNavigateAway() {
+        if (!this.hasChanges) {
+            return true
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    }
+
 
     addGroup() {
         this.present({

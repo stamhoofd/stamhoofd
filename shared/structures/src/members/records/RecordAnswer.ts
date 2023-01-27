@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Formatter } from "@stamhoofd/utility";
+import { Formatter, StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
@@ -48,6 +48,10 @@ export class RecordAnswer extends AutoEncoder {
         return "Onbekend"
     }
 
+    get objectValue(): string | number | boolean | null | Date | object {
+        return this.stringValue;
+    }
+
     /**
      * Include both the setting and the value
      */
@@ -76,6 +80,10 @@ export class RecordAnswer extends AutoEncoder {
      */
     get isEmpty() {
         return false
+    }
+
+    matchQuery(query: string) {
+        return StringCompare.contains(this.stringValue, query)
     }
 }
 
@@ -161,6 +169,10 @@ export class RecordCheckboxAnswer extends RecordAnswer {
         return this.selected ? "Aangevinkt" : "Niet aangevinkt"
     }
 
+    get objectValue() {
+        return this.selected;
+    }
+
     get excelValue() {
         return {
             value: this.selected ? (this.comments ? this.comments : "Ja") : "Nee",
@@ -189,6 +201,10 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
 
     get stringValue() {
         return this.selectedChoices.map(c => c.name).join(", ")
+    }
+
+    get objectValue() {
+        return this.selectedChoices.map(c => c.id);
     }
 
     getWarnings(): RecordWarning[] {
@@ -238,6 +254,10 @@ export class RecordChooseOneAnswer extends RecordAnswer {
         return this.selectedChoice?.name ?? "/"
     }
 
+    get objectValue() {
+        return this.selectedChoice?.id ?? null;
+    }
+
     getWarnings(): RecordWarning[] {
         if (this.selectedChoice === null) {
             // TODO: show warning if inverted
@@ -284,6 +304,10 @@ export class RecordAddressAnswer extends RecordAnswer {
         return this.address?.toString() ?? "/"
     }
 
+    get objectValue() {
+        return this.address?.encode({version: 0}) ?? null;
+    }
+
     override validate() {
         if (this.settings.required && this.address === null) {
             throw new SimpleError({
@@ -305,6 +329,10 @@ export class RecordDateAnswer extends RecordAnswer {
 
     get stringValue() {
         return this.dateValue ? Formatter.dateIso(this.dateValue) : "/"
+    }
+
+    get objectValue() {
+        return this.dateValue;
     }
 
     override validate() {
