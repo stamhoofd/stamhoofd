@@ -126,7 +126,7 @@ export class RecordCategory extends AutoEncoder {
     }
 
     /**
-     * Get all categories for the given answers
+     * Get a flat array with record categories whose records match the filter
      */
     static flattenCategoriesWith(categories: RecordCategory[], filter: (record: RecordSettings) => boolean): RecordCategory[] {
         return categories.flatMap(cat => {
@@ -153,6 +153,24 @@ export class RecordCategory extends AutoEncoder {
                 ]
             }
             return cat2.records.length > 0 ? [cat2] : []
+        })
+    }
+
+    /**
+     * Remove (child) categories that don't have a record that matches the filter
+     */
+    static filterRecordsWith(categories: RecordCategory[], filter: (record: RecordSettings) => boolean): RecordCategory[] {
+        return categories.flatMap(cat => {
+            // Make a (not deep!) clone
+            const cat2 = RecordCategory.create(cat)
+
+            const updatedRecords = cat.records.filter(r => {
+                return filter(r)
+            });
+
+            cat2.records = updatedRecords
+            cat2.childCategories = this.filterRecordsWith(cat.childCategories, filter)
+            return cat2.records.length > 0 || cat2.childCategories.length > 0 ? [cat2] : []
         })
     }
 

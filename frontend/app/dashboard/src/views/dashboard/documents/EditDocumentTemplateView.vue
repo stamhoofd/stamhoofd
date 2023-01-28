@@ -33,24 +33,14 @@
             <!-- Display all the required linking -->
             <div v-for="category of documentFieldCategories" :key="category.id" class="container">
                 <hr>
-                <h2>{{ category.name }}</h2>
+                <h2>Koppelen: {{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
-                <STInputBox v-for="field of category.getAllRecords()" :key="field.id" :title="field.name" :error-fields="field.id" :error-box="errorBox">
-                    <Dropdown :value="getLinkedFieldLink(field)" @change="setLinkedFieldLink(field, $event)">
-                        <option v-if="isLinkedFieldDefault(field)" :value="null">
-                            Gebruik ingebouwde gegevens
-                        </option>
-                        <option :value="null" disabled>
-                            Maak een keuze
-                        </option>
-                        <optgroup v-for="c in recordCategoriesFor(field)" :key="c.id" :label="c.name">
-                            <option v-for="record in c.getAllRecords()" :key="record.id" :value="record.id">
-                                {{ record.name }}
-                            </option>
-                        </optgroup>
-                    </Dropdown>
-                </STInputBox>
+                <p class="info-box">
+                    Deze invoervelden zijn nodig op elk document, maar je moet hier instellen welke gegevens je uit Stamhoofd daarin wilt invullen. Koppel je met meerdere gegevens uit Stamhoofd, dan gaan we de eerste beschikbare op het document invullen. Bv. als er bij het lid zelf geen adres werd ingevuld, neem dan het adres van de eerste ouder.
+                </p>
+                
+                <MultiSelectInput v-for="field of category.getAllRecords()" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errorBox" :values="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" placeholder="Niet gekoppeld" @input="setLinkedFields(field, $event)" />
             </div>
 
             <hr>
@@ -87,9 +77,9 @@
 import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Dropdown, ErrorBox, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Dropdown, ErrorBox, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { RecordAnswerDecoder } from "@stamhoofd/structures";
+import { RecordAnswerDecoder, RecordWarning, RecordWarningType } from "@stamhoofd/structures";
 import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
 import { FilterGroupEncoded, GroupFilterMode, PropertyFilter, Version } from "@stamhoofd/structures";
 import { DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordChoice, RecordSettings, RecordType } from "@stamhoofd/structures";
@@ -108,7 +98,8 @@ import ChooseDocumentTemplateGroup from "./ChooseDocumentTemplateGroup.vue";
         Dropdown,
         RecordAnswerInput,
         NumberInput,
-        STErrorsDefault
+        STErrorsDefault,
+        MultiSelectInput
     }
 })
 export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
@@ -172,7 +163,8 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                         templateDefinition: definition
                     }),
                     settings: DocumentSettings.patch({
-                        maxAge: definition.defaultMaxAge
+                        maxAge: definition.defaultMaxAge,
+                        minPrice: definition.defaultMinPrice,
                     })
                 })
                 this.autoLink();
@@ -193,10 +185,10 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         })
     }
 
-    setLinkedFieldLink(linkedField: RecordSettings, recordId: string | null) {
-        const linkedFields = new Map<string, string>(this.patchedDocument.settings.linkedFields)
-        if (recordId) {
-            linkedFields.set(linkedField.id, recordId)
+    setLinkedFields(linkedField: RecordSettings, recordIds: string[]) {
+        const linkedFields = new Map<string, string[]>(this.patchedDocument.settings.linkedFields)
+        if (recordIds) {
+            linkedFields.set(linkedField.id, recordIds)
         } else {
             linkedFields.delete(linkedField.id)
         }
@@ -208,8 +200,103 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         })
     }
 
-    getLinkedFieldLink(linkedField: RecordSettings) {
-        return this.patchedDocument.settings.linkedFields.get(linkedField.id) ?? null
+    getLinkedFieldsChoices(field: RecordSettings) {
+        const categories = this.recordCategoriesFor(field)
+        const choices: {value: string, label: string, categories?: string[]}[] = []
+
+        // Default values
+
+        // Registration
+        choices.push({
+            value: 'registration.price',
+            label: 'Te betalen bedrag',
+            categories: ['Inschrijving']
+        })
+        choices.push({
+            value: 'registration.pricePaid',
+            label: 'Betaald bedrag',
+            categories: ['Inschrijving']
+        })
+
+        // todo: filter by type
+        choices.push({
+            value: 'member.firstName',
+            label: 'Voornaam',
+            categories: ['Lid']
+        })
+        choices.push({
+            value: 'member.lastName',
+            label: 'Achternaam',
+            categories: ['Lid']
+        })
+        choices.push({
+            value: 'member.address',
+            label: 'Adres',
+            categories: ['Lid']
+        })
+        choices.push({
+            value: 'member.birthDay',
+            label: 'Geboortedatum',
+            categories: ['Lid']
+        })
+
+        // Parents
+        choices.push({
+            value: 'parents[0].firstName',
+            label: 'Voornaam',
+            categories: ['Ouder 1']
+        })
+        choices.push({
+            value: 'parents[0].lastName',
+            label: 'Achternaam',
+            categories: ['Ouder 1']
+        })
+        choices.push({
+            value: 'parents[0].address',
+            label: 'Adres',
+            categories: ['Ouder 1']
+        })
+
+        choices.push({
+            value: 'parents[1].firstName',
+            label: 'Voornaam',
+            categories: ['Ouder 2']
+        })
+        choices.push({
+            value: 'parents[1].lastName',
+            label: 'Achternaam',
+            categories: ['Ouder 2']
+        })
+        choices.push({
+            value: 'parents[1].address',
+            label: 'Adres',
+            categories: ['Ouder 2']
+        })
+
+        for (const category of categories) {
+            for (const record of category.records) {
+                choices.push({
+                    value: record.id,
+                    label: record.name,
+                    categories: [category.name]
+                })
+            }
+
+            for (const childCat of category.childCategories) {
+                for (const record of childCat.records) {
+                    choices.push({
+                        value: record.id,
+                        label: record.name,
+                        categories: [category.name, childCat.name]
+                    })
+                }
+            }
+        }
+        return choices
+    }
+
+    getLinkedFields(linkedField: RecordSettings) {
+        return this.patchedDocument.settings.linkedFields.get(linkedField.id) ?? []
     }
 
     autoLink() {
@@ -227,32 +314,27 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         }
 
         for (const field of this.patchedDocument.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
-            if (this.getLinkedFieldLink(field)) {
+            if (this.getLinkedFields(field).length) {
                 // Already linked
                 continue
             }
-            if (this.isLinkedFieldDefault(field)) {
-                // Already default
-                continue
-            }
-            const categories = this.recordCategoriesFor(field)
-            for (const category of categories) {
-                const record = category.getAllRecords().find(r => {
-                    // Return the first record which category name and record name all contain each word of the field label
-                    const haystack = (category.name + " " + r.name + " " + r.description);
-                    const split = field.name.trim().split(" ")
-                    if (split.length === 0) {
-                        return false;
+            const choices = this.getLinkedFieldsChoices(field)
+            for (const choice of choices) {
+                if (choice.value === field.id) {
+                    this.setLinkedFields(field, [choice.value])
+                    break
+                }
+                // Return the first record which category name and record name all contain each word of the field label
+                const haystack = (choice.categories ?? []).join(' ') + ' ' + choice.label
+                const split = field.name.trim().split(" ")
+                if (split.length === 0) {
+                    continue;
+                }
+                for (const part of split) {
+                    if (!StringCompare.contains(haystack, part)) {
+                        this.setLinkedFields(field, [choice.value]);
+                        break;
                     }
-                    for (const part of split) {
-                        if (!StringCompare.contains(haystack, part)) {
-                            return false
-                        }
-                    }
-                    return true;
-                })
-                if (record) {
-                    this.setLinkedFieldLink(field, record.id)
                 }
             }
         }
@@ -273,8 +355,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             "member.firstName",
             "member.lastName",
             "member.address",
-            "member.birthDay",
-            "member.address",
+            "member.birthDay"
         ];
     }
 
@@ -316,6 +397,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 definition: DocumentTemplateDefinition.create({
                     name: "Fiscaal attest kinderopvang (281.86)",
                     defaultMaxAge: 14,
+                    defaultMinPrice: 1,
                     fieldCategories: [
                         RecordCategory.create({
                             name: "Vereniging",
@@ -457,21 +539,31 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                 RecordSettings.create({
                                     id: "debtor.firstName",
                                     name: "Voornaam",
+                                    required: true,
                                     type: RecordType.Text
                                 }),
                                 RecordSettings.create({
                                     id: "debtor.lastName",
                                     name: "Achternaam",
+                                    required: true,
                                     type: RecordType.Text
                                 }),
                                 RecordSettings.create({
                                     id: "debtor.nationalRegistryNumber",
                                     name: "Rijksregisternummer",
-                                    type: RecordType.Text
+                                    required: false,
+                                    type: RecordType.Text,
+                                    warning: RecordWarning.create({
+                                        id: 'missing.debtor.nationalRegistryNumber',
+                                        text: 'Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
+                                        type: RecordWarningType.Warning,
+                                        inverted: true
+                                    })
                                 }),
                                 RecordSettings.create({
                                     id: "debtor.address",
                                     name: "Adres",
+                                    required: true,
                                     type: RecordType.Address
                                 })
                             ]
@@ -483,30 +575,53 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                 RecordSettings.create({
                                     id: "member.nationalRegistryNumber",
                                     name: "Rijksregisternummer",
-                                    type: RecordType.Text
+                                    required: false,
+                                    type: RecordType.Text,
+                                    warning: RecordWarning.create({
+                                        id: 'missing.member.nationalRegistryNumber',
+                                        text: 'Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
+                                        type: RecordWarningType.Warning,
+                                        inverted: true
+                                    })
                                 }),
                                 RecordSettings.create({
                                     id: "member.firstName",
                                     name: "Voornaam",
+                                    required: true,
                                     type: RecordType.Text
                                 }),
                                 RecordSettings.create({
                                     id: "member.lastName",
                                     name: "Achternaam",
+                                    required: true,
                                     type: RecordType.Text
                                 }),
                                 RecordSettings.create({
                                     id: "member.birthDay",
                                     name: "Geboortedatum",
+                                    required: true,
                                     type: RecordType.Date
                                 }),
                                 RecordSettings.create({
-                                    id: "member.addres",
+                                    id: "member.address",
                                     name: "Adres",
+                                    required: true,
                                     type: RecordType.Address
                                 })
                             ]
                         }),
+                        RecordCategory.create({
+                            name: "Prijs",
+                            description: "Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit Stamhoofd gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.",
+                            records: [
+                                RecordSettings.create({
+                                    id: "registration.price",
+                                    name: "Prijs",
+                                    required: true,
+                                    type: RecordType.Price
+                                })
+                            ]
+                        })
                     ]
                 })
             }
@@ -515,7 +630,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
     recordCategoriesFor(field: RecordSettings) {
         const type = field.type
-        return RecordCategory.flattenCategoriesWith(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, (record) => record.type == type)
+        return RecordCategory.filterRecordsWith(OrganizationManager.organization.meta.recordsConfiguration.recordCategories, (record) => record.type == type)
     }
 
     get hasChanges() {
@@ -528,7 +643,6 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
-
 
     addGroup() {
         this.present({

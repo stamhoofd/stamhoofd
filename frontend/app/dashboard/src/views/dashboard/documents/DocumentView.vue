@@ -9,8 +9,29 @@
         </STNavigationBar>
         <main>
             <h1>
-                Document #{{ document.id }}
+                Document
             </h1>           
+
+            <p v-if="unlinkedAnswers.length" class="info-box">
+                De velden {{ unlinkedAnswersText }} werden manueel aangepast en zijn niet meer automatisch gelinkt met de waarden in Stamhoofd.
+                <button class="button text" type="button" @click="resetDocument">
+                    Reset
+                </button>
+            </p>
+
+            <div v-if="hasWarnings" class="hover-box container">
+                <ul class="member-records">
+                    <li
+                        v-for="warning in sortedWarnings"
+                        :key="warning.id"
+                        :class="{ [warning.type]: true }"
+                    >
+                        <span :class="'icon '+warning.icon" />
+                        <span class="text">{{ warning.text }}</span>
+                    </li>
+                </ul>
+                <hr>
+            </div>
 
             <STList class="info">
                 <STListItem>
@@ -55,7 +76,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LongPressDirective,RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, TableActionsContextMenu, TooltipDirective } from "@stamhoofd/components";
-import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory } from "@stamhoofd/structures";
+import { Document, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory, RecordWarning } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -93,6 +114,42 @@ export default class DocumentView extends Mixins(NavigationMixin){
 
     @Prop({ default: null })
         getPrevious!: (document: Document) => Document | null;
+
+    get hasWarnings() {
+        return this.warnings.length > 0
+    }
+
+    get warnings(): RecordWarning[] {
+        const warnings: RecordWarning[] = []
+
+        for (const answer of this.usedAnswers) {
+            warnings.push(...answer.getWarnings())
+        }
+
+        return warnings
+    }
+
+    get sortedWarnings() {
+        return this.warnings.slice().sort(RecordWarning.sort)
+    }
+
+    get usedAnswers() {
+        return this.document.data.fieldAnswers.filter(a => {
+            return !!this.recordCategories.find(c => {
+                return !!c.getAllRecords().find(r => {
+                    return r.id === a.settings.id
+                });
+            })
+        })
+    }
+
+    get unlinkedAnswers() {
+        return this.usedAnswers.filter(a => !!a.reviewedAt)
+    }
+
+    get unlinkedAnswersText() {
+        return Formatter.joinLast(this.unlinkedAnswers.map(a => a.settings.name), ", ", " en ")
+    }
 
     get hasNext(): boolean {
         if (!this.getNext || !this.document) {
@@ -140,6 +197,10 @@ export default class DocumentView extends Mixins(NavigationMixin){
 
     editDocument() {
         //this.actionBuilder.editOrder(this.document).catch(console.error)
+    }
+
+    resetDocument() {
+        this.actionBuilder.resetDocuments([this.document]).catch(console.error)
     }
 
     goBack() {

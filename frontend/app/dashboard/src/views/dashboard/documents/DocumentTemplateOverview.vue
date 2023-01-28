@@ -10,6 +10,9 @@
             <p v-if="isDraft" class="warning-box">
                 Dit document is nog een kladversie. Nu kan je alles nog wijzigen, maar ze is nog niet zichtbaar voor leden. Publiceer het document via de knop onderaan nadat je alles hebt nagekeken.
             </p>
+            <p v-else class="success-box">
+                Dit document is zichtbaar in het ledenportaal.
+            </p>
 
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openDocuments">
@@ -34,6 +37,14 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
             </STList>
+
+            <hr>
+            <h2>Automatische wijzigingen</h2>
+            <p>Stamhoofd kan de inhoud van documenten automatisch wijzigen als de daarbij horende gegevens wijzigen, en nieuwe documenten aanmaken als er nieuwe inschrijvingen bij komen (ook na publicatie). Dat is ideaal om bijvoorbeeld ontbrekende of foute gegevens door leden nog te laten invullen via het ledenportaal. Op het moment dat je documenten officiëel hebt ingedient (indien van toepassing), zet je dit best uit.</p>
+
+            <Checkbox :checked="template.updatesEnabled" :disabled="settingUpdatesEnabled" @change="toggleUpdatesEnabled">
+                Documenten automatisch wijzigen
+            </Checkbox>
 
             <hr>
             <h2>Acties</h2>
@@ -88,7 +99,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Spinner, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, Spinner, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -102,7 +113,8 @@ import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";
         STNavigationBar,
         STList,
         STListItem,
-        Spinner
+        Spinner,
+        Checkbox
     },
     directives: {
         tooltip: TooltipDirective
@@ -141,15 +153,18 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
         return this.template.status === DocumentStatus.Draft
     }
 
-    async publishTemplate() {
+    publishTemplate() {
         if (this.publishing) {
             return
         }
 
+        new Toast('Nog niet mogelijk tijdens proefperiode', 'error red').show();
+        /*
+
         if (!(await CenteredMessage.confirm("Ben je zeker dat je alle documenten wilt publiceren?", "Publiceren", "Je kan de documenten hierna niet meer bewerken, en ze zijn zichtbaar voor alle leden."))) {
             return
         }
-        await this.changeStatus(DocumentStatus.Published)
+        await this.changeStatus(DocumentStatus.Published)*/
     }
 
     async draftTemplate() {
@@ -161,6 +176,44 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
             return
         }
         await this.changeStatus(DocumentStatus.Draft)
+    }
+    settingUpdatesEnabled = false;
+
+    async toggleUpdatesEnabled() {
+        if (this.settingUpdatesEnabled) {
+            return
+        }
+        const updatesEnabled = !this.template.updatesEnabled
+        if (!(await CenteredMessage.confirm(updatesEnabled ? "Automatische wijzigingen aanzetten?" : "Automatische wijzigingen uitzetten?", updatesEnabled ? "Aanzetten" : "Uitzetten", updatesEnabled ? "Alle documenten zullen meteen worden bijgewerkt." : "Alle documenten zullen niet langer aangepast worden."))) {
+            return
+        }
+
+        this.settingUpdatesEnabled = true
+
+        const patch: PatchableArrayAutoEncoder<DocumentTemplatePrivate> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplatePrivate>
+        patch.addPatch(DocumentTemplatePrivate.patch({
+            id: this.template.id,
+            updatesEnabled
+        }))
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "PATCH",
+                path: "/organization/document-templates",
+                body: patch,
+                decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
+                shouldRetry: false,
+                owner: this
+            })
+            const documentTemplates = response.data
+            const template = documentTemplates.find(t => t.id == this.template.id)
+            if (template) {
+                this.template.set(template)
+            }
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+        this.settingUpdatesEnabled = false
     }
 
     async changeStatus(status: DocumentStatus) {

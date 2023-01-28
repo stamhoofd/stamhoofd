@@ -1,7 +1,8 @@
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { Request } from "@simonbackx/simple-networking"
-import { LoadComponent, TableAction, Toast } from "@stamhoofd/components"
+import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
-import { Document, DocumentTemplatePrivate } from "@stamhoofd/structures"
+import { Document, DocumentData, DocumentTemplatePrivate } from "@stamhoofd/structures"
 
 export class DocumentActionBuilder {
     component: any
@@ -77,6 +78,41 @@ export class DocumentActionBuilder {
             console.log(response);
             const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
             saveAs(response.data, document.id + ".pdf")
+        } catch (e) {
+            if (!Request.isNetworkError(e)) {
+                Toast.fromError(e).show()
+            }
+        }
+    }
+
+    async resetDocuments(documents: Document[]) {
+        if (!(await CenteredMessage.confirm(documents.length == 1 ? "Dit document resetten?" : "Weet je zeker dat je de documenten wilt resetten?", "Resetten"))) {
+            return;
+        }
+        try {
+            const arr: PatchableArrayAutoEncoder<Document> = new PatchableArray()
+            for (const document of documents) {
+                arr.addPatch(Document.patch(({
+                    id: document.id,
+                    data: DocumentData.patch({
+                        fieldAnswers: [] as any
+                    })
+                })))
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "PATCH",
+                path: "/organization/documents",
+                body: arr,
+                decoder: new ArrayDecoder(Document as Decoder<Document>)
+            })
+            for (const d of response.data) {
+                const originalDocument = documents.find(d2 => d2.id == d.id)
+                if (originalDocument) {
+                    originalDocument.set(d)
+                }
+            }
         } catch (e) {
             if (!Request.isNetworkError(e)) {
                 Toast.fromError(e).show()

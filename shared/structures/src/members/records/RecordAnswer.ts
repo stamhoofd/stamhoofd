@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder,field, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder,field, IntegerDecoder, NumberDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Formatter, StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
@@ -85,6 +85,20 @@ export class RecordAnswer extends AutoEncoder {
     matchQuery(query: string) {
         return StringCompare.contains(this.stringValue, query)
     }
+
+    isReviewedAfter(answer: RecordAnswer) {
+        if (this.reviewedAt && answer.reviewedAt) {
+            return this.reviewedAt > answer.reviewedAt
+        }
+        if (this.reviewedAt && !answer.reviewedAt) {
+            return true
+        }
+        if (!this.reviewedAt && answer.reviewedAt) {
+            return false
+        }
+        // Both null
+        return false
+    }
 }
 
 export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
@@ -105,6 +119,7 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
             case RecordType.ChooseOne: return RecordChooseOneAnswer
             case RecordType.Address: return RecordAddressAnswer
             case RecordType.Date: return RecordDateAnswer
+            case RecordType.Price: return RecordPriceAnswer;
         }
         throw new SimpleError({
             code: "not_supported",
@@ -347,5 +362,38 @@ export class RecordDateAnswer extends RecordAnswer {
 
     get isEmpty() {
         return this.dateValue === null
+    }
+}
+
+export class RecordPriceAnswer extends RecordAnswer {
+    @field({ decoder: IntegerDecoder, nullable: true })
+    value: number | null = null
+
+    get stringValue() {
+        return this.value ? Formatter.price(this.value) : "/"
+    }
+
+    getWarnings(): RecordWarning[] {
+        if (!this.settings.warning) {
+            return []
+        }
+        if (this.settings.warning.inverted) {
+            return this.value === null || this.value === 0 ? [this.settings.warning] : []
+        }
+        return this.value !== null && this.value !== 0 ? [this.settings.warning] : []
+    }
+
+    override validate() {
+        if (this.settings.required && (this.value === null)) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Dit veld is verplicht",
+                field: "input"
+            })
+        }
+    }
+
+    get isEmpty() {
+        return (this.value === null)
     }
 }

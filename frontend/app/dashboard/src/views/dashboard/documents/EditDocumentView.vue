@@ -69,6 +69,13 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
 
     @Watch("editingAnswers")
     saveAnswers() {
+        for (const answer of this.editingAnswers) {
+            const previousAnswer = this.document.data.fieldAnswers.find(a => a.settings.id === answer.settings.id)
+            if (!previousAnswer || previousAnswer.stringValue !== answer.stringValue) {
+                answer.markReviewed()
+            }
+        }
+
         this.patchDocument = this.patchDocument.patch({
             data: DocumentData.patch({
                 fieldAnswers: this.editingAnswers as any
