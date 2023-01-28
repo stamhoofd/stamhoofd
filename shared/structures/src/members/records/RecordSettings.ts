@@ -42,6 +42,7 @@ export enum RecordType {
     Email = "Email",
 
     Date = "Date",
+    Price = "Price"
 }
 
 export enum RecordWarningType {

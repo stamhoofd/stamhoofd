@@ -1,8 +1,8 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder,NumberDecoder, RecordDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { v4 as uuidv4 } from "uuid";
 
-import { RecordAnswer, RecordAnswerDecoder } from "./members/records/RecordAnswer"
-import { RecordCategory } from "./members/records/RecordCategory"
+import { RecordAnswer, RecordAnswerDecoder } from "./members/records/RecordAnswer";
+import { RecordCategory } from "./members/records/RecordCategory";
 
 export enum DocumentStatus {
     Draft = "Draft",
@@ -27,8 +27,11 @@ export class DocumentStatusHelper {
     }
 }
 export class DocumentSettings extends AutoEncoder {
-    @field({ decoder: NumberDecoder, nullable: true })
+    @field({ decoder: IntegerDecoder, nullable: true })
     maxAge: number | null = null
+
+    @field({ decoder: IntegerDecoder, nullable: true })
+    minPrice: number | null = null
 
     /**
      * Fields defined by the template that can be set.
@@ -39,8 +42,8 @@ export class DocumentSettings extends AutoEncoder {
     /**
      * Defines where to automatically find the answer for a given question
      */
-    @field({ decoder: new MapDecoder(StringDecoder, StringDecoder) })
-    linkedFields: Map<string, string> = new Map()
+    @field({ decoder: new MapDecoder(StringDecoder, new ArrayDecoder(StringDecoder)) })
+    linkedFields: Map<string, string[]> = new Map()
 }
 
 export class DocumentTemplateDefinition extends AutoEncoder {
@@ -62,8 +65,11 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordCategory) })
     documentFieldCategories: RecordCategory[] = []
 
-    @field({ decoder: NumberDecoder, nullable: true, optional: true })
+    @field({ decoder: IntegerDecoder, nullable: true })
     defaultMaxAge: number | null = null
+
+    @field({ decoder: IntegerDecoder, nullable: true })
+    defaultMinPrice: number | null = null
 }
 
 export class DocumentTemplateGroup extends AutoEncoder {
@@ -97,6 +103,9 @@ export class DocumentTemplatePrivate extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(DocumentStatus) })
     status: DocumentStatus = DocumentStatus.Draft
+
+    @field({ decoder: BooleanDecoder })
+    updatesEnabled = true
 
     @field({ decoder: StringDecoder })
     html = ""

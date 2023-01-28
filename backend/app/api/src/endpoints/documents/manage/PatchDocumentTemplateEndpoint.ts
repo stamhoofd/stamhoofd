@@ -51,6 +51,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             template.settings = put.settings
             template.status = put.status
             template.html = put.html
+            template.updatesEnabled = put.updatesEnabled
             template.organizationId = user.organizationId
             await template.save();
 
@@ -81,6 +82,10 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
 
             if (patch.status) {
                 template.status = patch.status
+            }
+
+            if (patch.updatesEnabled !== undefined) {
+                template.updatesEnabled = patch.updatesEnabled
             }
 
             if (patch.html) {

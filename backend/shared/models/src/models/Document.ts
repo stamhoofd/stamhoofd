@@ -87,6 +87,29 @@ export class Document extends Model {
         return data;
     }
 
+    async updateData(): Promise<void> {
+        if (!this.registrationId) {
+            return
+        }
+        const DocumentTemplate = (await import("./DocumentTemplate")).DocumentTemplate
+        const template = await DocumentTemplate.getByID(this.templateId)
+        if (!template) {
+            return
+        }
+
+        if (!template.updatesEnabled) {
+            return
+        }
+
+        const Member = (await import("./Member")).Member
+        const [registration] = await Member.getRegistrationWithMembersByIDs([this.registrationId])
+        if (!registration) {
+            return
+        }
+
+        await template.updateDocumentFor(this, registration)
+    }
+
     // Rander handlebars template
     async getRenderedHtml(): Promise<string | null> {
         const DocumentTemplate = (await import("./DocumentTemplate")).DocumentTemplate

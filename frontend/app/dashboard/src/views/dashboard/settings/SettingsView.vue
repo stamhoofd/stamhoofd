@@ -273,6 +273,17 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="openLabs(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/experiment.svg">
+                        <h2 class="style-title-list">
+                            Experimenten
+                        </h2>
+                        <p class="style-description">
+                            Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
                 </STList>
 
                 <hr>
@@ -298,6 +309,7 @@ import AdminsView from '../admins/AdminsView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
+import LabsView from './LabsView.vue';
 import DataPermissionSettingsView from './modules/members/DataPermissionSettingsView.vue';
 import FinancialSupportSettingsView from './modules/members/FinancialSupportSettingsView.vue';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
@@ -363,6 +375,19 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(GeneralSettingsView, {})
+                })
+            ]
+        })
+    }
+
+    openLabs(animated = true) {
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(LabsView, {})
                 })
             ]
         })
@@ -618,6 +643,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         } else {
             // We can clear now
             UrlHelper.shared.clear()
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'labs') {
+            // Open mollie settings
+            this.openLabs(false)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'registration-payments') {

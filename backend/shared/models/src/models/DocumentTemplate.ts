@@ -1,6 +1,6 @@
 
 import { column, Model } from "@simonbackx/simple-database";
-import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, MemberWithRegistrations, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
+import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, MemberWithRegistrations, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Document } from "./Document";
@@ -25,6 +25,9 @@ export class DocumentTemplate extends Model {
 
     @column({ type: "string" })
     status = DocumentStatus.Draft
+
+    @column({ type: "boolean" })
+    updatesEnabled = true
 
     /**
      * Settings of the smart document. This information is public
@@ -66,11 +69,16 @@ export class DocumentTemplate extends Model {
         const defaultData = {
             //"registration.startDate": registration.group.settings.startDate,
             //"registration.endDate": registration.group.settings.endDate,
-            "registration.price":  // TODO!: ADD PRICE TYPE!
-            RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.price?.toString()
-            }),
+            "registration.price": 
+                RecordPriceAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.price
+                }),
+            "registration.pricePaid": 
+                RecordPriceAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.pricePaid
+                }),
             "member.firstName": RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.firstName
@@ -81,11 +89,35 @@ export class DocumentTemplate extends Model {
             }),
             "member.address": RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
-                address: registration.member.details.address ?? registration.member.details.parents[0]?.address ?? null
+                address: registration.member.details.address ?? null
             }),
             "member.birthDay": RecordDateAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 dateValue: registration.member.details.birthDay
+            }),
+            "parents[0].firstName": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[0]?.firstName
+            }),
+            "parents[0].lastName": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[0]?.lastName
+            }),
+            "parents[0].address": RecordAddressAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                address: registration.member.details.parents[0]?.address ?? null
+            }),
+            "parents[1].firstName": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[1]?.firstName
+            }),
+            "parents[1].lastName": RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: registration.member.details.parents[1]?.lastName
+            }),
+            "parents[1].address": RecordAddressAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                address: registration.member.details.parents[1]?.address ?? null
             }),
         }
 
@@ -95,25 +127,53 @@ export class DocumentTemplate extends Model {
             // - Could either return an id of a recordSetting connected to member
             // - or an idea of defaultData that is supported by default
             // The result is always a recordAnswer whose type should match the type of the linkedField
-            const linkedToMemberAnswerSettingsId = this.settings.linkedFields.get(field.id)
-            if (linkedToMemberAnswerSettingsId) {
-                const answer = registration.member.details.recordAnswers.find(a => a.settings.id === linkedToMemberAnswerSettingsId);
-                if (answer) {
-                    // We need to link it with the settings in the template
-                    const clone = answer.clone()
-                    clone.settings = field
-                    clone.reviewedAt = null // All linked fields are not reviewed. Unless they are manually changed by an admin later
-                    // -> we'll always use the answer that has been reviewed if we have a conflict
-                    fieldAnswers.push(clone)
-                    continue;
-                } 
+            const linkedToMemberAnswerSettingsIds = this.settings.linkedFields.get(field.id)
+
+            let found = false;
+
+            if (linkedToMemberAnswerSettingsIds) {
+                for (const linkedToMemberAnswerSettingsId of linkedToMemberAnswerSettingsIds) {
+                    if (linkedToMemberAnswerSettingsId) {
+                        const answer = registration.member.details.recordAnswers.find(a => a.settings.id === linkedToMemberAnswerSettingsId);
+                        if (answer && !answer.isEmpty && answer.settings.type === field.type) {  
+                            // We need to link it with the settings in the template
+                            const clone = answer.clone()
+                            clone.settings = field
+                            clone.reviewedAt = null // All linked fields are not reviewed. Unless they are manually changed by an admin later
+                        
+                            found = true
+                            fieldAnswers.push(clone)
+                            break;
+                        }
+
+                        // Check if supported by default
+                        if (defaultData[linkedToMemberAnswerSettingsId] && !defaultData[linkedToMemberAnswerSettingsId].isEmpty) {
+                            if (defaultData[linkedToMemberAnswerSettingsId] instanceof RecordAnswerDecoder.getClassForType(field.type)) {
+                                // We need to clone here, because the same default data can be used in multiple places
+                                const clone = defaultData[linkedToMemberAnswerSettingsId].clone()
+                                clone.settings = field
+
+                                found = true
+                                fieldAnswers.push(clone)
+                                break;
+                            } else {
+                                console.warn("Found type mismatch for default data: " + linkedToMemberAnswerSettingsId + " - " + field.id)
+                            }
+                        }
+                    }
+                }
             }
-            // Check if supported by default
-            if (defaultData[field.id] && !defaultData[field.id].isEmpty) {
-                defaultData[field.id].settings = field
-                fieldAnswers.push(defaultData[field.id])
-            } else {
-                missingData = true
+
+            if (!found && field.required) {
+                missingData = true;
+            }
+
+            if (!found) {
+                // Add placeholder (so we have proper warnings)
+                const clone = RecordAnswerDecoder.getClassForType(field.type).create({
+                    settings: field,
+                })
+                fieldAnswers.push(clone)
             }
         }
 
@@ -145,10 +205,7 @@ export class DocumentTemplate extends Model {
         const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, {limit: 1})
         if (existingDocuments.length > 0) {
             const document = existingDocuments[0]
-            // TODO: maybe merge instead of override the data in case administrators manually changed something
-            document.data.fieldAnswers = fieldAnswers
-            document.status = missingData ? DocumentStatus.MissingData : (document.status === DocumentStatus.MissingData ? DocumentStatus.Draft : document.status)
-            await document.save()
+            await this.updateDocumentFor(document, registration)
             return document;
         } else {
             const document = new Document()
@@ -187,21 +244,45 @@ export class DocumentTemplate extends Model {
                     return false;
                 }
 
-                if (age <= this.settings.maxAge) {
-                    return true;
+                if (age > this.settings.maxAge) {
+                    return false;
                 }
-                return false;
-
             } else {
                 console.warn("Missing registration.startDate in fieldAnswers when checking maxAge")
             }
         }
+
+        if (this.settings.minPrice !== null) {
+            const fieldId = 'registration.price';
+            let price: null | number = null;
+
+            for (const answer of fieldAnswers) {
+                if (answer instanceof RecordPriceAnswer) {
+                    if (answer.settings.id === fieldId && !answer.isEmpty) {
+                        price = answer.value;
+                        break;
+                    }
+                }
+            }
+
+            if (price) {
+                if (price < this.settings.minPrice) {
+                    return false;
+                }
+            } else {
+                console.warn("Missing registration.price in fieldAnswers when checking minPrice")
+            }
+        }
+        
         return true;
     }
 
     async buildAll() {
-        console.log('Building all documents for template', this.id)
+        if (!this.updatesEnabled) {
+            return
+        }
         
+        console.log('Building all documents for template', this.id)
         for (const groupDefinition of this.privateSettings.groups) {
             // Get the registrations for this group with this cycle
             const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId, groupDefinition.cycle)
@@ -210,5 +291,55 @@ export class DocumentTemplate extends Model {
                 await this.generateForRegistration(registration)
             }
         }
+    }
+
+    areAnswersComplete(answers: RecordAnswer[]) {
+        for (const field of this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
+            const answer = answers.find(a => a.settings.id === field.id)
+            if (!answer) {
+                return false;
+            }
+            // Update settings
+            answer.settings = field
+            try {
+                answer.validate()
+            } catch (e) {
+                // Invalid
+                return false;
+            }
+        }
+        return true;
+    }
+
+    async updateDocumentFor(document: Document, registration: RegistrationWithMember) {
+        const {fieldAnswers} = this.buildAnswers(registration)
+        const existingAnswers = document.data.fieldAnswers
+
+        const newAnswers: RecordAnswer[] = existingAnswers.slice()
+
+        for (const addAnswer of fieldAnswers) {
+            const existingIndex = newAnswers.findIndex(a => a.settings.id === addAnswer.settings.id)
+            const existing = existingIndex !== -1 ? newAnswers[existingIndex] : null
+            if (existing) {
+                // We already have an answer for this field, we'll only update it if addAnswer is reviewed later
+                if (!existing.isReviewedAfter(addAnswer)) {
+                    newAnswers[existingIndex] = addAnswer
+                }
+            } else {
+                newAnswers.push(addAnswer)
+            }
+        }
+
+        document.data.fieldAnswers = newAnswers
+        const complete = this.areAnswersComplete(newAnswers)
+
+        if (!complete) {
+            document.status = DocumentStatus.MissingData
+        } else {
+            if (document.status === DocumentStatus.MissingData) {
+                document.status = this.status
+            }
+        }
+        await document.save()
     }
 }

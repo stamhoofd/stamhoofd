@@ -126,14 +126,14 @@
             </button>
 
             <div v-if="fullAccess">
-                <button type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
-                    <span class="icon settings" />
-                    <span>Instellingen</span>
-                </button>
-
                 <button v-if="enableMemberModule && isBelgium && documentsBeta" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
                     <span class="icon file" />
                     <span>Documenten</span>
+                </button>
+
+                <button type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
+                    <span class="icon settings" />
+                    <span>Instellingen</span>
                 </button>
 
                 <button v-if="enableMemberModule && isSGV" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
@@ -216,7 +216,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get documentsBeta() {
-        return this.organization.privateMeta?.featureFlags.includes('documentsBeta') ?? false
+        return this.organization.privateMeta?.featureFlags.includes('documents') ?? false
     }
 
     get tree() {

@@ -111,7 +111,32 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
                 },
                 minimumWidth: 100,
                 recommendedWidth: 120,
-            })
+            }),
+
+            new Column<Document, number>({
+                name: "Waarschuwingen", 
+                getValue: (document) => {
+                    return document.data.fieldAnswers.reduce((c, answer) => c + answer.getWarnings().length, 0)
+                },
+                format: (count) => {
+                    if (count === 1) {
+                        return 'Waarschuwing'
+                    }
+                    if (count > 1) {
+                        return `${count} waarschuwingen`
+                    }
+                    return 'Geen'
+                },
+                compare: Sorter.byNumberValue, 
+                getStyle: (count) => {
+                    if (count > 0) {
+                        return 'warn'
+                    }
+                    return 'gray'
+                },
+                minimumWidth: 100,
+                recommendedWidth: 150,
+            }),
         ]
 
         return cols

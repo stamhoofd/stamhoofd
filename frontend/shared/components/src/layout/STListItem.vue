@@ -23,10 +23,10 @@ import { Component, Prop,Vue } from "vue-property-decorator";
 @Component({})
 export default class STListItem extends Vue {
     @Prop({ default: 'article', type: String })
-    elementName!: string;
+        elementName!: string;
 
     @Prop({ default: false, type: Boolean })
-    selectable!: boolean;
+        selectable!: boolean;
 }
 </script>
 
@@ -60,9 +60,9 @@ a.st-list-item {
     >.left {
         flex-shrink: 0;
 
-        padding-top: 15px;
+        padding-top: var(--st-list-padding, 15px);
         padding-right: 15px;
-        padding-bottom: 15px;
+        padding-bottom: var(--st-list-padding, 15px);
         min-width: 0; // flexbox disable becoming bigger than parent
 
         &:empty {
@@ -170,8 +170,8 @@ a.st-list-item {
             flex-grow: 1;
 
             > .middle {
-                padding-top: 15px;
-                padding-bottom: 15px;
+                padding-top: var(--st-list-padding, 15px);
+                padding-bottom: var(--st-list-padding, 15px);
                 flex-grow: 1;
                 min-width: 0; // flexbox disable becoming bigger than parent
             }
@@ -181,8 +181,8 @@ a.st-list-item {
                 min-width: 0; // flexbox disable becoming bigger than parent
                 flex-shrink: 0;
 
-                padding-top: 10px;
-                padding-bottom: 10px;
+                padding-top: var(--st-list-padding-right, var(--st-list-padding, 10px));
+                padding-bottom: var(--st-list-padding-right, var(--st-list-padding, 10px));
                 padding-left: 15px;
 
                 &:empty {
@@ -227,7 +227,7 @@ a.st-list-item {
 
     &:last-child, &.no-border {
         > .main > hr {
-            visibility: hidden;
+            display: none;
         }
     }
 
