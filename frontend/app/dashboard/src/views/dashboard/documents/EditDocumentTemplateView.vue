@@ -562,7 +562,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                     documentFieldCategories: [
                         RecordCategory.create({
                             name: "Schuldenaar",
-                            description: "Hier komt nog wat extra informatie over wie de schuldenaar is.",
+                            description: "Persoon die heeft betaald, bij voorkeur de ouder die het kind fiscaal ten laste heeft (beide ouders hebben meestal het kind fiscaal ten laste, tenzij men niet getrouwd of niet wettelijk samenwonend is).",
                             records: [
                                 RecordSettings.create({
                                     id: "debtor.firstName",
