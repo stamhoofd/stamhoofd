@@ -12,11 +12,11 @@
         <h2>Extra betaalproviders</h2>
 
         <Checkbox v-model="forcePayconiq">
-            Payconiq koppeling mogelijk maken
+            Payconiq (via API-key)
         </Checkbox>
 
         <Checkbox v-if="!enableBuckaroo" key="mollie" v-model="forceMollie">
-            Mollie koppeling toestaan
+            Mollie
         </Checkbox>
 
         <hr>

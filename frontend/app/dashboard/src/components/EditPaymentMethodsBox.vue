@@ -149,45 +149,45 @@ export default class EditPaymentMethodsBox extends Vue {
     }
     
     providerText(provider: PaymentProvider | null, map: {[key: string]: string}): string {
-        if (provider == null || !Object.prototype.hasOwnProperty.call(map, provider)) {
-            return Object.values(map).join("\n")
+        if (provider == null) {
+            return ""
         } else {
             return map[provider]
         }
     }
 
     getDescription(paymentMethod: PaymentMethod): string {
-        const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta) ?? PaymentProvider.Buckaroo
+        const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta) ?? PaymentProvider.Stripe
 
         switch (paymentMethod) {
-            case PaymentMethod.Transfer: return "Gratis, maar je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
+            case PaymentMethod.Transfer: return "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
             case PaymentMethod.Payconiq: 
                 return this.providerText(provider, {
-                    [PaymentProvider.Payconiq]: "€ 0,20 / transactie via Payconiq zelf",
-                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie  via Buckaroo"
+                    [PaymentProvider.Payconiq]: "Via Payconiq (rechtstreeks)",
+                    [PaymentProvider.Buckaroo]: "Via Buckaroo"
                 })
             case PaymentMethod.Bancontact: 
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
-                    [PaymentProvider.Mollie]: "€ 0,31 / transactie via Mollie",
-                    [PaymentProvider.Stripe]: "€ 0,24 + 0,2% / transactie via Stripe",
+                    [PaymentProvider.Buckaroo]: "Via Buckaroo",
+                    [PaymentProvider.Mollie]: "Via Mollie",
+                    [PaymentProvider.Stripe]: "Via Stripe",
                 })
             
             case PaymentMethod.iDEAL:  
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "€ 0,25 / transactie via Buckaroo",
-                    [PaymentProvider.Mollie]: "€ 0,29 / transactie via Mollie",
-                    [PaymentProvider.Stripe]: "€ 0,24 + 0,2% / transactie via Stripe",
+                    [PaymentProvider.Buckaroo]: "Via Buckaroo",
+                    [PaymentProvider.Mollie]: "Via Mollie",
+                    [PaymentProvider.Stripe]: "Via Stripe",
                 })
             case PaymentMethod.CreditCard: 
                 return this.providerText(provider, {
-                    [PaymentProvider.Buckaroo]: "€ 0,25 + 1,8% voor gewone kaarten (Europese Unie)\n€ 0,25 + 2,8% voor business of buiten-EU kaarten",
-                    [PaymentProvider.Mollie]: "€ 0,25 + 1,8% voor gewone kaarten (Europese Unie)\n€ 0,25 + 2,8% voor business of buiten-EU kaarten",
-                    [PaymentProvider.Stripe]: "€ 0,15 + 1% voor gewone kaarten (Europese Unie)\n€ 0,15 + 2,8% voor business of buiten-EU kaarten"
-                });
+                    [PaymentProvider.Buckaroo]: "Via Buckaroo",
+                    [PaymentProvider.Mollie]: "Via Mollie",
+                    [PaymentProvider.Stripe]: "Via Stripe",
+                })
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""
-            case PaymentMethod.PointOfSale: return "Gratis, maar minder handig."
+            case PaymentMethod.PointOfSale: return "De betaling loopt niet via Stamhoofd"
         }
     }
 
