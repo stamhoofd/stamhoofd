@@ -26,8 +26,8 @@
         "build:locales": "cd shared/locales && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
         "upgrade:internal": "yarn upgrade --scope simonbackx",
-        "caddy:development": "export $(cat .env | xargs) && caddy run --resume",
-        "caddy:development:config": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json",
+        "caddy": "export $(cat .env | xargs) && caddy run --resume",
+        "caddy:update": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json",
         "get-version": "node -e 'process.stdout.write(require(\"./package.json\").version);'",
         "version": "yarn workspaces run -s version --no-git-tag-version --new-version \"$npm_package_version\" 2>&1 >/dev/null",
         "ptest": "yarn workspaces run -s publish --tag dev"

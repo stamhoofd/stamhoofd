@@ -29,6 +29,15 @@ export class NetworkManagerStatic implements RequestMiddleware {
         return server
     }
 
+    /**
+     * Normal, non authenticated requests
+     */
+    get rendererServer() {
+        const server = new Server("https://"+STAMHOOFD.domains.rendererApi)
+        server.middlewares.push(this)
+        return server
+    }
+
     onBeforeRequest(request: Request<any>): Promise<void> {
         request.version = Version;
         (request as any).retryCount = ((request as any).retryCount ?? 0) + 1

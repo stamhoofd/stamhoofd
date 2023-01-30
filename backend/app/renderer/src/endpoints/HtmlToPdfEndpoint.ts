@@ -1,6 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { QueueHandler } from "@stamhoofd/queues";
+import formidable from 'formidable';
 import puppeteer, { Browser } from "puppeteer";
 
 type Params = Record<string, never>;
@@ -14,7 +15,7 @@ type ResponseBody = Buffer
 
 export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
-        if (request.method != "GET") {
+        if (request.method != "POST") {
             return [false];
         }
 
@@ -27,9 +28,27 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const form = formidable({ maxFileSize: 20 * 1024 * 1024, keepExtensions: true });
+        const html = await new Promise<string>((resolve, reject) => {
+            form.parse(request.request.request, (err, fields) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                if (!fields.html || typeof fields.html !== "string") {
+                    reject(new SimpleError({
+                        code: "missing_field",
+                        message: "Field html is required",
+                        field: "html"
+                    }))
+                }
+                resolve(fields.html as string)
+            });
+        });
+
         let pdf: Buffer | null = null
         try {
-            pdf = await this.htmlToPdf("<html><body><h1>Test</h1><p>Hello world</p></body></html>", {retryCount: 2, startDate: new Date()})
+            pdf = await this.htmlToPdf(html, {retryCount: 2, startDate: new Date()})
         } catch (e) {
             console.error(e)
         }

@@ -59,6 +59,34 @@
                             "match": [
                                 {
                                     "host": [
+                                        "renderer.stamhoofd.dev"
+                                    ]
+                                }
+                            ],
+                            "handle": [
+                                {
+                                    "handler": "reverse_proxy",
+                                    "upstreams": [
+                                        {
+                                            "dial": "127.0.0.1:9093"
+                                        }
+                                    ],
+                                    "headers": {
+                                        "request": {
+                                            "set": {
+                                                "x-real-ip": [
+                                                    "{http.request.remote}"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "match": [
+                                {
+                                    "host": [
                                         "api.stamhoofd.dev",
                                         "*.api.stamhoofd.dev"
                                     ]

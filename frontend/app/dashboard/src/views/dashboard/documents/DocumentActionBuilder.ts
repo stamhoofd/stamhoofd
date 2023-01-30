@@ -1,7 +1,7 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { Request } from "@simonbackx/simple-networking"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
-import { SessionManager } from "@stamhoofd/networking"
+import { NetworkManager, SessionManager } from "@stamhoofd/networking"
 import { Document, DocumentData, DocumentTemplatePrivate } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
 
@@ -59,19 +59,32 @@ export class DocumentActionBuilder {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "GET",
-                path: "/organization/documents/" + encodeURIComponent(document.id) + "/download",
+                path: "/organization/documents/" + encodeURIComponent(document.id) + "/html",
+                shouldRetry: false,
+                timeout: 60 * 1000,
+                owner: this,
+                responseType: "text"
+            })
+
+            const html = response.data as string
+            const form = new FormData()
+            form.append("html", html)
+            
+            // Convert to PDF
+            const pdfResponse = await NetworkManager.rendererServer.request({
+                method: "POST",
+                path: "/html-to-pdf",
+                body: form as FormData,
                 shouldRetry: false,
                 timeout: 60 * 1000,
                 owner: this,
                 responseType: "blob"
-            } as any)
-            console.log(response);
+            })
+
             const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
-            saveAs(response.data, Formatter.fileSlug(document.data.name + " - " + document.data.description) + ".pdf")
+            saveAs(pdfResponse.data, Formatter.fileSlug(document.data.name + " - " + document.data.description) + ".pdf")
         } catch (e) {
-            if (!Request.isNetworkError(e)) {
-                Toast.fromError(e).show()
-            }
+            Toast.fromError(e).show()
         }
     }
 
@@ -104,9 +117,7 @@ export class DocumentActionBuilder {
                 }
             }
         } catch (e) {
-            if (!Request.isNetworkError(e)) {
-                Toast.fromError(e).show()
-            }
+            Toast.fromError(e).show()
         }
     }
 }
