@@ -1,17 +1,16 @@
 {
-    "name": "@stamhoofd/backend",
+    "name": "@stamhoofd/backend-renderer",
     "version": "1.0.0",
     "main": "index.ts",
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/src/seeds && tsc -b",
+        "build": "tsc -b",
         "build:full": "yarn clear && yarn build",
         "clear": "rm -rf ./dist",
         "start": "yarn build && node --enable-source-maps ./dist/index.js",
         "test": "yarn build && jest",
         "test:reset": "yarn build:full && jest",
-        "migrations": "yarn build:full && node ./dist/migrations.js",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
@@ -21,24 +20,17 @@
         "@types/node": "^18.11.17"
     },
     "dependencies": {
-        "@mollie/api-client": "^3.4.0",
-        "@simonbackx/simple-database": "^1.23.0",
         "@simonbackx/simple-endpoints": "^1.12.0",
         "@simonbackx/simple-logging": "^1.0.1",
         "aws-sdk": "^2.885.0",
         "axios": "^0.24.0",
         "base-x": "^3.0.9",
-        "formidable": "^1.2.2",
-        "handlebars": "^4.7.7",
-        "html-to-text": "^5.1.1",
-        "jsonwebtoken": "^8.5.1",
         "luxon": "^2.2.0",
         "mailparser": "^3.4.0",
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
         "node-rsa": "^1.1.1",
         "postmark": "^2.8.1",
-        "sharp": "^0.29.3",
-        "stripe": "^11.5.0"
+        "puppeteer": "^19.6.0"
     }
 }

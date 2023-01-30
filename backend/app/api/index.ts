@@ -2,14 +2,13 @@ require('@stamhoofd/backend-env').load()
 import { Column, Database, Migration } from "@simonbackx/simple-database";
 import { CORSPreflightEndpoint, Router, RouterServer } from "@simonbackx/simple-endpoints";
 import { I18n } from "@stamhoofd/backend-i18n";
+import { CORSMiddleware, LogMiddleware, VersionMiddleware } from "@stamhoofd/backend-middleware";
 import { Email } from "@stamhoofd/email";
-import {loadLogger} from "@stamhoofd/logging"
+import { loadLogger } from "@stamhoofd/logging";
 import { Version } from '@stamhoofd/structures';
 import { sleep } from "@stamhoofd/utility";
 
 import { areCronsRunning, crons } from './src/crons';
-import { AppVersionMiddleware } from "./src/helpers/AppVersionMiddleware";
-import { CORSMiddleware } from "./src/helpers/CORSMiddleware";
 
 process.on("unhandledRejection", (error: Error) => {
     console.error("unhandledRejection");
@@ -50,10 +49,24 @@ const start = async () => {
     const routerServer = new RouterServer(router);
     routerServer.verbose = false
     
-    // Send the app version along
-    routerServer.addResponseMiddleware(AppVersionMiddleware)
+    // Log requests and errors
+    routerServer.addRequestMiddleware(LogMiddleware)
+    routerServer.addResponseMiddleware(LogMiddleware)
+
+    // Add version headers and minimum version
+    const versionMiddleware = new VersionMiddleware({
+        latestVersions: {
+            android: STAMHOOFD.LATEST_ANDROID_VERSION,
+            ios: STAMHOOFD.LATEST_IOS_VERSION,
+            web: Version
+        },
+        minimumVersion: 168
+    })
+    routerServer.addRequestMiddleware(versionMiddleware)
+    routerServer.addResponseMiddleware(versionMiddleware)
+
+    // Add CORS headers
     routerServer.addResponseMiddleware(CORSMiddleware)
-    routerServer.addRequestMiddleware(AppVersionMiddleware)
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 

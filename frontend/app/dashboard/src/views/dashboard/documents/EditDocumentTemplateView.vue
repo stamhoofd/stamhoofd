@@ -5,7 +5,7 @@
         </h1>
 
         <p v-if="isNew" class="info-box">
-            Momenteel is het enkel mogelijk om fiscale attesten voor kinderopvang te genereren. Lees alle informatie na via www.stamhoofd.be/docs/fiscaal-attest-kinderopvang/
+            <span>Momenteel is het enkel mogelijk om fiscale attesten voor kinderopvang te genereren. Lees alle informatie na via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/fiscaal-attest-kinderopvang/'" target="_blank">deze pagina</a></span>
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
@@ -424,7 +424,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 value: "fiscal",
                 definition: DocumentTemplateDefinition.create({
                     name: "Fiscaal attest kinderopvang (281.86)",
-                    defaultMaxAge: 14,
+                    defaultMaxAge: 13,
                     defaultMinPrice: 1,
                     fieldCategories: [
                         RecordCategory.create({
@@ -708,7 +708,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         const groups = OrganizationManager.organization.groups
         const g = groups.find(g => g.id == group.groupId)
         const currentCycle = g?.cycle ?? 0
-        const cycleOffset = group.cycle - currentCycle
+        const cycleOffset = currentCycle - group.cycle
 
         let period = cycleOffset + ' inschrijvingperiodes geleden'
         if (cycleOffset === 0) {
