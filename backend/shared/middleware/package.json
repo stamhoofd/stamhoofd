@@ -1,0 +1,21 @@
+{
+    "name": "@stamhoofd/backend-middleware",
+    "version": "1.0.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "license": "UNLICENCED",
+    "sideEffects": false,
+    "files": [
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc -b",
+        "build:full": "rm -rf ./dist && yarn build"
+    },
+    "dependencies": {
+        "@simonbackx/simple-endpoints": "^1.12.0",
+        "@simonbackx/simple-logging": "^1.0.1",
+        "@simonbackx/simple-errors": "^1.4"
+    }
+}

@@ -1,7 +1,6 @@
 import { EncodedResponse, Request, RequestMiddleware,ResponseMiddleware } from "@simonbackx/simple-endpoints";
-import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors } from "@simonbackx/simple-errors";
 import { logger, StyledText } from "@simonbackx/simple-logging";
-import { Version } from "@stamhoofd/structures";
 let requestCounter = 0;
 
 function logRequestDetails(request: Request) {
@@ -63,7 +62,7 @@ function requestPrefix(request: Request, ...classes: string[]): (StyledText | st
     ]
 }
 
-export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
+export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
     handleRequest(request: Request) {
         (request as any)._uniqueIndex = requestCounter++
         (request as any)._startTime = process.hrtime();
@@ -82,27 +81,6 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
             ...requestPrefix(request),
             ...requestOneLiner(request)
         )
-
-        const platform = request.headers["x-platform"];
-        const version = request.getVersion()
-        if (version < 168) {
-            // WARNING: update caddy config for on demand certificates, because we don't want to throw errors over there!
-            if (platform === "web" || platform === undefined) {
-                throw new SimpleError({
-                    code: "client_update_required",
-                    statusCode: 400,
-                    message: "Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.",
-                    human: "Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser."
-                })
-            } else {
-                throw new SimpleError({
-                    code: "client_update_required",
-                    statusCode: 400,
-                    message: "Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!",
-                    human: "Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!"
-                })
-            }
-        }
     },
 
     wrapRun<T>(run: () => Promise<T>, request: Request) {
@@ -116,18 +94,6 @@ export const AppVersionMiddleware: ResponseMiddleware & RequestMiddleware = {
         const endTime = process.hrtime();
         const startTime = (request as any)._startTime ?? endTime;
         const timeInMs = Math.round((endTime[0] - startTime[0]) * 1000 + (endTime[1] - startTime[1]) / 1000000);
-
-        const platform = request.headers["x-platform"];
-
-        if (platform === "android" && STAMHOOFD.LATEST_ANDROID_VERSION) {
-            response.headers["X-Platform-Latest-Version"] = STAMHOOFD.LATEST_ANDROID_VERSION
-        }
-        if (platform === "ios" && STAMHOOFD.LATEST_IOS_VERSION) {
-            response.headers["X-Platform-Latest-Version"] = STAMHOOFD.LATEST_IOS_VERSION
-        }
-        if (platform === "web") {
-            response.headers["X-Platform-Latest-Version"] = Version
-        }
 
         if (request.method !== "OPTIONS") {
             logger.log(

@@ -1,9 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { KeychainItemHelper } from '@stamhoofd/crypto';
 import { Email, EmailInterfaceBase } from '@stamhoofd/email';
-import { EmailVerificationCode, KeychainItem, Organization, RegisterCode, STCredit, UsedRegisterCode, User } from '@stamhoofd/models';
+import { EmailVerificationCode, Organization, RegisterCode, STCredit, UsedRegisterCode, User } from '@stamhoofd/models';
 import { CreateOrganization, PermissionLevel, Permissions, SignupResponse } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 

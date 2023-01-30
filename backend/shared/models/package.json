@@ -15,13 +15,13 @@
         "test": "yarn build:full && jest"
     },
     "peerDependencies": {
-        "@stamhoofd/crypto": "*",
         "@stamhoofd/email": "*",
         "@stamhoofd/queues": "*",
         "@simonbackx/simple-database": "*"
     },
     "dependencies": {
-        "pdfkit": "^0.13.0"
+        "pdfkit": "^0.13.0",
+        "@stamhoofd/crypto": "*"
     },
     "devDependencies": {
         "@types/pdfkit": "^0.12.3",

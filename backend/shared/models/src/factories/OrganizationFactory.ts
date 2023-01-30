@@ -1,5 +1,4 @@
 import { Factory } from "@simonbackx/simple-database";
-import { Sodium } from "@stamhoofd/crypto";
 import { Address,Country,OrganizationMetaData, OrganizationType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility"; 
 

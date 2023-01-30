@@ -1,6 +1,6 @@
 import fs from "fs"
 
-export function load(settings?: { path?: string, service?: "redirecter" | "api" | "admin" }) {
+export function load(settings?: { path?: string, service?: "redirecter" | "api" | "admin" | "renderer" }) {
     // Read environment from file: .env.json
     (global as any).STAMHOOFD = JSON.parse(fs.readFileSync(settings?.path ?? ".env.json", "utf-8"))
 
@@ -10,8 +10,11 @@ export function load(settings?: { path?: string, service?: "redirecter" | "api" 
     if (settings?.service === "redirecter") {
         return
     }
+    if (settings?.service === "renderer") {
+        return
+    }
 
-    if (!STAMHOOFD.domains.registration) {
+    if (!STAMHOOFD.domains || !STAMHOOFD.domains.registration) {
         throw new Error("Expected environment variable domains.registration")
     }
 

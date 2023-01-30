@@ -133,6 +133,17 @@ declare global {
         readonly PORT: number
         readonly domains: string[]
     }
+
+    /** 
+     * The environment that is available everywhere: frontend, backend and shared
+     */ 
+    type RendererEnvironment = {
+        /**
+         * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
+         */
+        readonly environment: "production" | "development" | "staging" | "test"
+        readonly PORT: number
+    }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment
 }
