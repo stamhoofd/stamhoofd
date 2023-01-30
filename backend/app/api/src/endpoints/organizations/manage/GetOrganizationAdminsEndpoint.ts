@@ -33,7 +33,10 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         }
 
         // Get all admins
-        const admins = await User.where({ organizationId: user.organizationId, permissions: { sign: "!=", value: null }})
+        let admins = await User.where({ organizationId: user.organizationId, permissions: { sign: "!=", value: null }})
+
+        // Hide internal users
+        admins = admins.filter(a => a.id === user.id || !((a.email.endsWith('@stamhoofd.be') || a.email.endsWith('@stamhoofd.nl')) && a.firstName == 'Stamhoofd'))
 
         return new Response(OrganizationAdmins.create({
             users: admins.map(a => UserStruct.create({...a, hasAccount: a.hasAccount()})),
