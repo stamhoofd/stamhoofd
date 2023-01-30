@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 import puppeteer from "puppeteer";
 import Handlebars from "handlebars";
 import { QueueHandler } from "@stamhoofd/queues";
+import { Formatter } from "@stamhoofd/utility";
+import { Interval } from "luxon";
 
 export class Document extends Model {
     static table = "documents";
@@ -126,6 +128,46 @@ export class Document extends Model {
         try {
             const context = this.buildContext()
             Handlebars.registerHelper('eq', (a, b) => a == b);
+            Handlebars.registerHelper('formatPrice', (a) => Formatter.price(a));
+            Handlebars.registerHelper('formatDate', (a, options) => {
+                if (!(a instanceof Date)) {
+                    return ""
+                }
+                return Formatter.dateNumber(a, true)
+            });
+            Handlebars.registerHelper('year', (a, options) => {
+                if (!(a instanceof Date)) {
+                    return ""
+                }
+                return Formatter.year(a)
+            });
+            Handlebars.registerHelper('days', (a, b) => {
+                if (!(a instanceof Date) || !(b instanceof Date)) {
+                    return 0;
+                }
+                // Calculate absolute amount of days between a and b
+                const start = Formatter.luxon(a).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                const end = Formatter.luxon(b).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                const diff = Interval.fromDateTimes(start, end);
+                const days = diff.length('days');
+                if (isNaN(days)) {
+                    return 0;
+                }
+                return days + 1;
+            });
+            Handlebars.registerHelper('div', (a, b, options) => {
+                if (typeof a !== "number" || typeof b !== "number") {
+                    return 0;
+                }
+                if (b == 0) {
+                    return 0;
+                }
+                if (options.hash.round) {
+                    return Math.round(a / b);
+                }
+                return a / b;
+            });
+
             const template = Handlebars.compile(htmlTemplate);
             const renderedHtml = template(context);
             return renderedHtml;

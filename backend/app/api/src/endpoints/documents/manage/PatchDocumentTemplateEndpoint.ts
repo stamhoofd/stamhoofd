@@ -101,6 +101,19 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             updatedTemplates.push(template.getPrivateStructure())
         }
 
+        for (const id of request.body.getDeletes()) {
+            const template = await DocumentTemplate.getByID(id)
+            if (!template || template.organizationId != user.organizationId) {
+                throw new SimpleError({
+                    code: "not_found",
+                    message: "Template not found",
+                    human: "Template niet gevonden"
+                })
+            }
+
+            await template.delete()
+        }
+
         return new Response(
             updatedTemplates
         );

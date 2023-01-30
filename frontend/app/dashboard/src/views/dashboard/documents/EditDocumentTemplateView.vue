@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!patchedDocument.html" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -109,6 +109,9 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         document!: DocumentTemplatePrivate
 
+    @Prop({ required: false, default: null })
+        callback!: ((template: DocumentTemplatePrivate) => void) | null
+
     type: string | null = null
 
     patchDocument = DocumentTemplatePrivate.patch({})
@@ -207,88 +210,109 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         // Default values
 
         // Registration
-        choices.push({
-            value: 'registration.price',
-            label: 'Te betalen bedrag',
-            categories: ['Inschrijving']
-        })
-        choices.push({
-            value: 'registration.pricePaid',
-            label: 'Betaald bedrag',
-            categories: ['Inschrijving']
-        })
+        if (field.type === RecordType.Price) {
+            choices.push({
+                value: 'registration.price',
+                label: 'Te betalen bedrag',
+                categories: ['Inschrijving']
+            })
+            choices.push({
+                value: 'registration.pricePaid',
+                label: 'Betaald bedrag',
+                categories: ['Inschrijving']
+            })
+        }
 
         // todo: filter by type
-        choices.push({
-            value: 'member.firstName',
-            label: 'Voornaam',
-            categories: ['Lid']
-        })
-        choices.push({
-            value: 'member.lastName',
-            label: 'Achternaam',
-            categories: ['Lid']
-        })
-        choices.push({
-            value: 'member.address',
-            label: 'Adres',
-            categories: ['Lid']
-        })
-        choices.push({
-            value: 'member.birthDay',
-            label: 'Geboortedatum',
-            categories: ['Lid']
-        })
+        if (field.type === RecordType.Text) {
+            choices.push({
+                value: 'member.firstName',
+                label: 'Voornaam',
+                categories: ['Lid']
+            })
+            choices.push({
+                value: 'member.lastName',
+                label: 'Achternaam',
+                categories: ['Lid']
+            })
+        }
+        if (field.type === RecordType.Address) {
+            choices.push({
+                value: 'member.address',
+                label: 'Adres',
+                categories: ['Lid']
+            })
+        }
+        if (field.type === RecordType.Date) {
+            choices.push({
+                value: 'member.birthDay',
+                label: 'Geboortedatum',
+                categories: ['Lid']
+            })
+        }
 
         // Parents
-        choices.push({
-            value: 'parents[0].firstName',
-            label: 'Voornaam',
-            categories: ['Ouder 1']
-        })
-        choices.push({
-            value: 'parents[0].lastName',
-            label: 'Achternaam',
-            categories: ['Ouder 1']
-        })
-        choices.push({
-            value: 'parents[0].address',
-            label: 'Adres',
-            categories: ['Ouder 1']
-        })
+        if (field.type === RecordType.Text) {
+            choices.push({
+                value: 'parents[0].firstName',
+                label: 'Voornaam',
+                categories: ['Ouder 1']
+            })
+            choices.push({
+                value: 'parents[0].lastName',
+                label: 'Achternaam',
+                categories: ['Ouder 1']
+            })
+        }
+        if (field.type === RecordType.Address) {
+            choices.push({
+                value: 'parents[0].address',
+                label: 'Adres',
+                categories: ['Ouder 1']
+            })
+        }
 
-        choices.push({
-            value: 'parents[1].firstName',
-            label: 'Voornaam',
-            categories: ['Ouder 2']
-        })
-        choices.push({
-            value: 'parents[1].lastName',
-            label: 'Achternaam',
-            categories: ['Ouder 2']
-        })
-        choices.push({
-            value: 'parents[1].address',
-            label: 'Adres',
-            categories: ['Ouder 2']
-        })
+        if (field.type === RecordType.Text) {
+            choices.push({
+                value: 'parents[1].firstName',
+                label: 'Voornaam',
+                categories: ['Ouder 2']
+            })
+            choices.push({
+                value: 'parents[1].lastName',
+                label: 'Achternaam',
+                categories: ['Ouder 2']
+            })
+        }
+
+        if (field.type === RecordType.Address) {
+            choices.push({
+                value: 'parents[1].address',
+                label: 'Adres',
+                categories: ['Ouder 2']
+            })
+        }
 
         for (const category of categories) {
             for (const record of category.records) {
-                choices.push({
-                    value: record.id,
-                    label: record.name,
-                    categories: [category.name]
-                })
+                if (record.type === field.type) {
+                    choices.push({
+                        value: record.id,
+                        label: record.name,
+                        categories: [category.name]
+                    })
+                }
             }
 
             for (const childCat of category.childCategories) {
                 for (const record of childCat.records) {
-                    choices.push({
-                        value: record.id,
-                        label: record.name,
-                        categories: [category.name, childCat.name]
-                    })
+                    if (record.type === field.type) {
+                        choices.push({
+                            value: record.id,
+                            label: record.name,
+                            categories: [category.name, childCat.name]
+                        })
+                    }
                 }
             }
         }
@@ -330,11 +354,15 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 if (split.length === 0) {
                     continue;
                 }
+                let found = true;
                 for (const part of split) {
                     if (!StringCompare.contains(haystack, part)) {
-                        this.setLinkedFields(field, [choice.value]);
+                        found = false;
                         break;
                     }
+                }
+                if (found) {
+                    this.setLinkedFields(field, [choice.value]);
                 }
             }
         }
@@ -503,7 +531,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     type: RecordType.Text
                                 }),
                                 RecordSettings.create({
-                                    id: "signature.function",
+                                    id: "signature.capacity",
                                     name: "Hoedanigheid",
                                     required: true,
                                     type: RecordType.Text
@@ -555,7 +583,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     type: RecordType.Text,
                                     warning: RecordWarning.create({
                                         id: 'missing.debtor.nationalRegistryNumber',
-                                        text: 'Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
+                                        text: 'Rijksregisternummer schuldenaar ontbreekt. Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
                                         type: RecordWarningType.Warning,
                                         inverted: true
                                     })
@@ -579,7 +607,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     type: RecordType.Text,
                                     warning: RecordWarning.create({
                                         id: 'missing.member.nationalRegistryNumber',
-                                        text: 'Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
+                                        text: 'Rijksregisternummer lid ontbreekt. Er is een uitzondering waardoor je het rijksregisternummer nog niet moet invullen voor aanslagjaar 2023. Maar we raden wel al aan om deze te verzamelen, en enkel leeg te laten waar je de gegevens niet op tijd hebt ontvangen.',
                                         type: RecordWarningType.Warning,
                                         inverted: true
                                     })
@@ -618,7 +646,13 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     id: "registration.price",
                                     name: "Prijs",
                                     required: true,
-                                    type: RecordType.Price
+                                    type: RecordType.Price,
+                                    warning: RecordWarning.create({
+                                        id: 'missing.registration.price',
+                                        text: 'Het betaalde bedrag ontbreekt. Dit is essentieel om een geldig document af te leveren.',
+                                        type: RecordWarningType.Error,
+                                        inverted: true
+                                    })
                                 })
                             ]
                         })
@@ -747,6 +781,9 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             
             // TODO: open document
             this.dismiss({ force: true })
+            if (this.callback) {
+                this.callback(this.document);
+            }
         } catch (e) {
             console.error(e)
             this.errorBox = new ErrorBox(e)

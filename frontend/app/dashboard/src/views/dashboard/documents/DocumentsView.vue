@@ -12,9 +12,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { RecordCategory, RecordSettings } from "@stamhoofd/structures";
-import { DocumentStatus, DocumentStatusHelper } from "@stamhoofd/structures";
-import { Document, DocumentTemplatePrivate, MemberWithRegistrations } from '@stamhoofd/structures';
+import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -93,8 +91,8 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
             }),
 
             new Column<Document, string>({
-                name: "Naam", 
-                getValue: (v) => v.data.fieldAnswers.find(a => a.settings.id.includes('member.firstName'))?.stringValue || "", 
+                name: "Beschrijving", 
+                getValue: (v) => v.data.description, 
                 compare: (a, b) => Sorter.byStringValue(a, b),
                 minimumWidth: 100,
                 recommendedWidth: 320,

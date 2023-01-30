@@ -36,6 +36,24 @@
             <STList class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
+                        Naam
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ document.data.name }}
+                    </p>
+                </STListItem>
+
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Beschrijving
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ document.data.description }}
+                    </p>
+                </STListItem>
+
+                <STListItem>
+                    <h3 class="style-definition-label">
                         Volgnummer
                     </h3>
                     <p class="style-definition-text">

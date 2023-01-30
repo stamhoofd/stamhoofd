@@ -370,7 +370,11 @@ export class RecordPriceAnswer extends RecordAnswer {
     value: number | null = null
 
     get stringValue() {
-        return this.value ? Formatter.price(this.value) : "/"
+        return this.value !== null ? Formatter.price(this.value) : "/"
+    }
+
+    get objectValue() {
+        return this.value;
     }
 
     getWarnings(): RecordWarning[] {

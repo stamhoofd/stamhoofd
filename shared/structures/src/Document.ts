@@ -129,6 +129,9 @@ export class DocumentTemplatePrivate extends AutoEncoder {
 export class DocumentData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
+
+    @field({ decoder: StringDecoder })
+    description = ""
     
     /**
      * Contains a snapshot of all the answers

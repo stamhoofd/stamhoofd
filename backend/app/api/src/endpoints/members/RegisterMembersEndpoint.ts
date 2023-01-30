@@ -389,7 +389,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
                     })
                 }
-                const profileId = await token.getProfileId()
+                const profileId = await token.getProfileId(organization.getHost())
                 if (!profileId) {
                     throw new SimpleError({
                         code: "",

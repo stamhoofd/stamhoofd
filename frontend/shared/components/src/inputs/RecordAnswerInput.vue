@@ -44,7 +44,10 @@
         <PhoneInput v-else-if="answer.settings.type == RecordType.Phone" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
         <EmailInput v-else-if="answer.settings.type == RecordType.Email" v-model="answer.value" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="validator" :nullable="true" />
         <STInputBox v-else-if="answer.settings.type == RecordType.Date" :title="label" error-fields="input" :error-box="errorBox">
-            <DateSelection v-model="answer.dateValue" :title="label" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+            <DateSelection v-model="answer.dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+        </STInputBox>
+        <STInputBox v-else-if="answer.settings.type == RecordType.Price" :title="label" error-fields="input" :error-box="errorBox">
+            <PriceInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
         
         <p v-else class="error-box">
@@ -71,7 +74,7 @@
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, PhoneInput,Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
+import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, PhoneInput,PriceInput, Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -86,7 +89,8 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         STErrorsDefault,
         EmailInput,
         PhoneInput,
-        DateSelection
+        DateSelection,
+        PriceInput
     }
 })
 export default class RecordAnswerInput extends Vue {

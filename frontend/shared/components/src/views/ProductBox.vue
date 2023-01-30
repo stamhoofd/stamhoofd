@@ -26,7 +26,7 @@
                 <p v-else-if="product.description" class="description" v-text="product.description" />
 
                 <p class="price">
-                    {{ price | priceFree }}
+                    {{ priceString }}
 
                     <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ product.enableAfter | dateTime }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">Onbeschikbaar</span>
@@ -91,6 +91,19 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
     get price() {
         return this.product.prices[0].price
+    }
+
+    get priceString() {
+        const priceRanges = Formatter.uniqueArray(this.product.prices.map(p => p.price))
+        if (priceRanges.length == 1) {
+            if (priceRanges[0] === 0) {
+                return "Gratis"
+            }
+            return Formatter.price(priceRanges[0])
+        }
+        const minimum = Math.min(...priceRanges)
+        const maximum = Math.max(...priceRanges)
+        return Formatter.price(minimum, true) + " - " + Formatter.price(maximum, true)
     }
 
     get count() {

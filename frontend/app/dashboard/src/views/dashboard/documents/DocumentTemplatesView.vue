@@ -75,6 +75,10 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
         this.loadTemplates().catch(console.error)
     }
 
+    activated() {
+        this.loadTemplates().catch(console.error)
+    }
+
     beforeDestroy() {
         Request.cancelAll(this)
     }
@@ -105,7 +109,11 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(EditDocumentTemplateView, {
                     isNew: true,
-                    document: DocumentTemplatePrivate.create({})
+                    document: DocumentTemplatePrivate.create({}),
+                    callback: (template: DocumentTemplatePrivate) => {
+                        this.templates.push(template)
+                        this.openTemplate(template)
+                    }
                 })
             ],
             modalDisplayStyle: "popup"

@@ -4,6 +4,7 @@ import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Document } from "./Document";
+import { Group } from "./Group";
 import { Member, RegistrationWithMember } from "./Member";
 
 export class DocumentTemplate extends Model {
@@ -202,10 +203,28 @@ export class DocumentTemplate extends Model {
             return null
         }
 
+        const fieldId = 'registration.startDate';
+        let startDate: null | Date = null;
+
+        for (const answer of fieldAnswers) {
+            if (answer instanceof RecordDateAnswer) {
+                if (answer.settings.id === fieldId && !answer.isEmpty) {
+                    startDate = answer.dateValue;
+                    break;
+                }
+            }
+        }
+
+        const group = await Group.getByID(registration.groupId)
+        const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}${startDate ? ' ' + Formatter.year(startDate) : ''}`;
+
         const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, {limit: 1})
         if (existingDocuments.length > 0) {
             const document = existingDocuments[0]
             await this.updateDocumentFor(document, registration)
+            document.data.name = this.privateSettings.templateDefinition.name
+            document.data.description = description
+            await document.save()
             return document;
         } else {
             const document = new Document()
@@ -213,6 +232,8 @@ export class DocumentTemplate extends Model {
             document.templateId = this.id
             document.status = missingData ? DocumentStatus.MissingData : DocumentStatus.Draft
             document.data = DocumentData.create({
+                name: this.privateSettings.templateDefinition.name,
+                description,
                 fieldAnswers
             })
             document.memberId = registration.member.id
@@ -340,6 +361,5 @@ export class DocumentTemplate extends Model {
                 document.status = this.status
             }
         }
-        await document.save()
     }
 }
