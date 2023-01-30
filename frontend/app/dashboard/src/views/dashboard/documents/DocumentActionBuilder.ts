@@ -3,6 +3,7 @@ import { Request } from "@simonbackx/simple-networking"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { SessionManager } from "@stamhoofd/networking"
 import { Document, DocumentData, DocumentTemplatePrivate } from "@stamhoofd/structures"
+import { Formatter } from "@stamhoofd/utility"
 
 export class DocumentActionBuilder {
     component: any
@@ -27,17 +28,6 @@ export class DocumentActionBuilder {
                 singleSelection: true,
                 handler: async (documents: Document[]) => {
                     await this.downloadDocument(documents[0])
-                }
-            }),
-
-            new TableAction({
-                name: "Document toevoegen",
-                icon: "add",
-                priority: 1,
-                groupIndex: 2,
-                needsSelection: false,
-                handler: async () => {
-                    //await this.createOrder()
                 }
             }),
 
@@ -77,7 +67,7 @@ export class DocumentActionBuilder {
             } as any)
             console.log(response);
             const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
-            saveAs(response.data, document.id + ".pdf")
+            saveAs(response.data, Formatter.fileSlug(document.data.name + " - " + document.data.description) + ".pdf")
         } catch (e) {
             if (!Request.isNetworkError(e)) {
                 Toast.fromError(e).show()

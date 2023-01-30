@@ -292,8 +292,26 @@ export class MollieToken extends Model {
         }
     }
 
-    async getProfileId(): Promise<string | null> {
-        const response = await this.authRequest("GET", "/v2/profiles")
+    async getProfileId(website?: string): Promise<string | null> {
+        const response = await this.authRequest("GET", "/v2/profiles?limit=250")
+        const profiles = response._embedded.profiles;
+
+        // Search profile with Stamhoofd as name
+        if (website) {
+            for (const profile of profiles) {
+                if (profile.website.toLowerCase().includes(website)) {
+                    return profile.id
+                }
+            }
+        }
+
+        // Search profile with Stamhoofd as name
+        for (const profile of profiles) {
+            if (profile.name.toLowerCase().includes("stamhoofd")) {
+                return profile.id
+            }
+        }
+
         return response._embedded.profiles[0]?.id ?? null
 
     }
@@ -330,5 +348,5 @@ export class MollieToken extends Model {
                 }
             })
         }
-           }
+    }
 }

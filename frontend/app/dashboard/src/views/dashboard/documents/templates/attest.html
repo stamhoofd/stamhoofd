@@ -28,16 +28,17 @@
 
             .page-box { 
                 /*height: 100vh; not needed */
-                width:100vw; 
+                width:100%; 
                 page-break-after: always;
                 border: 1px solid black;
                 box-sizing: border-box;
                 margin: 0;
                 padding: 0;
                 overflow: hidden;
+            }
 
-                /* TEMPORARY */
-                width: 641.312px;
+            .page-box:last-child {
+                border: 0;
             }
 
             p, h1, div, h2, h3, h4 {
@@ -73,7 +74,9 @@
                 font-weight: bold;
             }
 
-            .form-line {
+            .form-box p.flex {
+                display: flex;
+                gap: 30px;
             }
 
             .page-box > p, .page-box > h1, .page-box > h2, .page-box > h3, .page-box > h4 {
@@ -106,12 +109,43 @@
             .checklist.selected::before {
                 content: "■";
             }
+
+            table {
+                border-collapse: collapse;
+                width: calc(100% - 40px);
+                margin: 10px;
+            }
+            table td, table th {
+                border: 1px solid black;
+                padding: 2px 7px;
+                text-align: left;
+                vertical-align: top;
+                min-height: 36px;
+            }
+            table th, table td:first-child {
+                font-weight: bold;
+                font-size: 16px;
+            }
+
+            .signature-box {
+                width: 59%;
+                margin-left: auto;
+            }
+
+            ol > li {
+                padding: 5px 0 5px 20px;
+            }
+
+            ol > li > ul {
+                padding: 14px 0 14px 15px;
+                list-style-type: '-  ';
+            }
         </style>
     </head>
     <body>
         <div class="page-box">
             <header>
-                <h1>ATTEST NR. 281.86   (JAAR VAN DE UITGAVEN {{year}})</h1>
+                <h1>ATTEST NR. 281.86   (JAAR VAN DE UITGAVEN {{ year registration.startDate }})</h1>
                 <p>Dit attest geldt als jaarlijks attest
                     uitgereikt overeenkomstig artikel 63<sup>18/8</sup>, van het koninklijk
                     besluit tot uitvoering van het Wetboek van de inkomstenbelastingen 1992
@@ -122,8 +156,8 @@
             <div class="form-box">
                 <p>Naam van de instantie of de persoon (hierna ‘de instantie’) <strong>die instaat voor de opvang</strong> (2): <br><span class="override">{{organization.name}}</span></p>
                 <p>KBO nr. (facultatief): <span class="override">{{organization.companyNumber}}</span></p>
-                <p>Straat: <span class="override">{{organization.address.street}}</span>  Nr: <span class="override">{{organization.address.number}}</span></p>
-                <p>Postcode: <span class="override">{{organization.address.postalCode}}</span>  Gemeente: <span class="override">{{organization.address.city}}</span></p>
+                <p class="flex"><span>Straat: <span class="override">{{organization.address.street}}</span></span><span>Nr: <span class="override">{{organization.address.number}}</span></span></p>
+                <p class="flex"><span>Postcode: <span class="override">{{organization.address.postalCode}}</span></span><span>Gemeente: <span class="override">{{organization.address.city}}</span></span></p>
             </div>
             <h2><u>Vak I</u><span> (dit vak moet niet altijd worden ingevuld – zie bericht)</span></h2>
             <div class="space"></div>
@@ -150,18 +184,201 @@
             <div class="form-box">
                 <p>Naam: <span class="override">{{certification.name}}</span></p>
                 <p>KBO nr. (facultatief): <span class="override">{{certification.companyNumber}}</span></p>
-                <p>Straat: <span class="override">{{certification.address.street}}</span>  Nr: <span class="override">{{certification.address.number}}</span></p>
-                <p>Postcode: <span class="override">{{certification.address.postalCode}}</span>  Gemeente: <span class="override">{{certification.address.city}}</span></p>
+                <p class="flex"><span>Straat: <span class="override">{{certification.address.street}}</span></span><span>Nr: <span class="override">{{certification.address.number}}</span></span></p>
+                <p class="flex"><span>Postcode: <span class="override">{{certification.address.postalCode}}</span></span><span>Gemeente: <span class="override">{{certification.address.city}}</span></span></p>
             </div>
             <div class="space"></div>
             <div class="space"></div>
             <div class="space"></div>
         </div>
         <div class="page-box">
-            Page 2
+            <h2><u>Vak II</u></h2>
+            <div class="space"></div>
+            <p>1. Volgnummer van het attest: <span class="override">{{id}}</span></p>
+            <div class="space"></div>
+            <p>2. Gegevens van de schuldenaar van de uitgaven voor kinderoppas:</p>
+            <div class="form-box">
+                <p>Naam: <span class="override">{{debtor.lastName}}</span></p>
+                <p>Voornaam: <span class="override">{{debtor.firstName}}</span></p>
+                <p>Identificatienummer van het Rijksregister of, in voorkomend geval, het identificatienummer van de KSZ: <span class="override">{{debtor.nationalRegistryNumber}}</span></p>
+                <p class="flex"><span>Straat: <span class="override">{{debtor.address.street}}</span></span><span>Nr: <span
+                        class="override">{{debtor.address.number}}</span></span></p>
+                <p class="flex"><span>Postcode: <span class="override">{{debtor.address.postalCode}}</span></span><span>Gemeente: <span
+                        class="override">{{debtor.address.city}}</span></span></p>
+            </div>
+            <p>3. Gegevens van het kind:</p>
+            <div class="form-box">
+                <p>Naam: <span class="override">{{member.lastName}}</span></p>
+                <p>Voornaam: <span class="override">{{member.firstName}}</span></p>
+                <p>Identificatienummer van het Rijksregister of, in voorkomend geval, het identificatienummer van de KSZ: <span
+                        class="override">{{member.nationalRegistryNumber}}</span></p>
+                <p>Geboortedatum: <span class="override">{{ formatDate member.birthDay }}</span></p>
+                <p class="flex"><span>Straat: <span class="override">{{member.address.street}}</span></span><span>Nr: <span
+                        class="override">{{member.address.number}}</span></span></p>
+                <p class="flex"><span>Postcode: <span class="override">{{member.address.postalCode}}</span></span><span>Gemeente: <span
+                        class="override">{{member.address.city}}</span></span></p>
+            </div>
+            <p>4. Periode waarin het kind is opgevangen (5):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            Periode
+                        </th>
+                        <th>
+                            van dd/mm/jjjj tot dd/mm/jjjj
+                        </th>
+                        <th>
+                            Aantal dagen
+                        </th>
+                        <th>
+                            Dagtarief <span>(6)</span>
+                        </th>
+                        <th>
+                            Ontvangen bedrag
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            Periode 1
+                        </td>
+                        <td>{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</td>
+                        <td>{{ days registration.startDate registration.endDate }}</td>
+                        <td>{{ formatPrice (div registration.price (days registration.startDate registration.endDate) round=true) }}</td>
+                        <td>{{ formatPrice registration.price }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Periode 2
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Periode 3
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Periode 4
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4">
+                            Totaal
+                        </td>
+                        <td>{{ formatPrice registration.price }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="space"></div>
+            <p>Ondergetekende bevestigt de juistheid van de hierboven vermelde inlichtingen.</p>
+            <div class="space"></div>
+            <div class="signature-box">
+                <p>Gedaan te {{organization.address.city}}, {{ formatDate created_at }}</p>
+                <div class="form-box">
+                    <p>Persoon die gemachtigd is <strong>de opvanginstantie of persoon die instaat voor de opvang</strong> (2) te verbinden (7).</p>
+                    <div class="space"></div>
+                    <p>Naam: {{signature.name}}</p>
+                    <p>Hoedanigheid: {{signature.capacity}}</p>
+                    <p>Handtekening:</p>
+                    <div class="space"></div>
+                    <div class="space"></div>
+                    <div class="space"></div>
+                    <div class="space"></div>
+                </div>
+            </div>
         </div>
         <div class="page-box">
-            Page 3
+            <h2>Verduidelijkingen</h2>
+            <ol>
+                <li>
+                    Dit attest, dat slechts in één exemplaar moet worden ingevuld, moet ter beschikking gehouden worden van de administratie
+                    door de schuldenaar van de uitgaven voor kinderoppas. De schuldenaar is de persoon die normaal gezien gehouden is tot de
+                    betaling van de uitgaven voor kinderoppas en die de uitgaven betaalt of draagt. De schuldenaar die op het attest wordt
+                    vermeld, zal enkel recht hebben op de belastingvermindering indien hij het kind fiscaal ten laste heeft of indien hij de
+                    helft van het fiscaal voordeel voor kinderen ten laste krijgt (fiscaal co-ouderschap), en indien ook aan alle andere
+                    wettelijke voorwaarden is voldaan.
+                </li>
+                <li>
+                    Het gaat om:
+                    <ul>
+                        <li>
+                            de instelling, de opvangvoorziening, het kinderdagverblijf, het onthaalgezin, de school, gevestigd in de Europese
+                            Economische Ruimte
+                        </li>
+                        <li>
+                            de inrichtende macht van de school gevestigd in de Europese Economische Ruimte
+                        </li>
+                        <li>
+                            het lokale openbare bestuur, het openbare bestuur van de gemeenschap of het gewest
+                        </li>
+                        <li>
+                            de buitenlandse openbare instelling gevestigd in een andere lidstaat van de Europese Economische Ruimte
+                        </li>
+                        <li>
+                            de organisatie gevestigd in de Europese Economische Ruimte die thuisopvang voor zieke kinderen door professionele
+                            oppassers organiseert
+                        </li>
+                        <li>
+                            de zelfstandige oppasser die een ziek kind oppast in het kader van de beroepsactiviteit die hij (zij) uitoefent in de
+                            Europese Economische Ruimte.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    Enkel in te vullen wanneer de instantie die instaat voor de opvang slechts gedurende een deel van het jaar waarvoor het
+                    attest wordt opgesteld is vergund, erkend, gesubsidieerd,…
+                </li>
+                <li>
+                    Het gaat om:
+                    <ul>
+                        <li>
+                            ofwel Kind en Gezin / Opgroeien regie of het ‘Office de la Naissance et de l’Enfance’ of de regering van de Duitstalige
+                            Gemeenschap
+                        </li>
+                        <li>
+                            ofwel de lokale openbare besturen of openbare besturen van de gemeenschappen of de gewesten
+                        </li>
+                        <li>
+                            ofwel buitenlandse openbare instellingen gevestigd in een andere lidstaat van de Europese Economische Ruimte
+                        </li>
+                        <li>
+                            ofwel de school gevestigd in de Europese Economische Ruimte of de inrichtende macht van de school gevestigd in de
+                            Europese Economische Ruimte waaraan instellingen of opvangvoorzieningen zijn verbonden.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    De op het attest vermelde gegevens mogen enkel betrekking hebben op het gedeelte van het jaar dat de 14e verjaardag van
+                    het kind, of de 21e verjaardag van het kind met een zware handicap, voorafgaat.
+                </li>
+                <li>
+                    Indien meerdere tarieven van toepassing zijn, moet een detail van het aantal opvangdagen per tarief worden verstrekt.
+                    Het dagtarief moet evenwel alleen worden ingevuld indien het maximumbedrag per oppasdag wordt overschreden. Dit bedrag
+                    wordt geïndexeerd.
+                </li>
+                <li>
+                    Indien gevolmachtigde, de handtekening laten voorafgaan door ‘bij volmacht’.<br>
+                    De handtekening is niet verplicht voor de elektronische verzending van een kopie naar de administratie via de toepassing
+                    Belcotax-on-web, aangezien de gebruiker zich moet registreren om de toepassing te gebruiken.
+                </li>
+            </ol>
         </div>
     </body>
 </html>

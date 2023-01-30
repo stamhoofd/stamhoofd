@@ -10,12 +10,13 @@
         </div>
         <div v-else class="multi-select-container">
             <div class="input">
-                <STList v-model="draggableValues" :draggable="true" :group="'multi-select'">
-                    <STListItem v-for="value of values" :key="value">
+                <STList v-model="draggableValues" :draggable="true">
+                    <STListItem v-for="value of values" :key="value" :selectable="true" @click="openContextMenu($event, value)">
                         <span v-for="(label, index) of getValueLabels(value)" :key="index" :title="label" v-text="label" />
 
                         <template slot="right">
-                            <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                            <span class="button icon arrow-down-small gray" />
+                            <span v-if="draggableValues.length > 1" class="button icon drag gray" @click.stop @contextmenu.stop />
                             <button class="button icon trash gray" type="button" @click="deleteValue(value)" />
                         </template>
                     </STListItem>
@@ -62,6 +63,9 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
     }
 
     set draggableValues(arr: T[]) {
+        if (arr.length != this.values.length) {
+            return;
+        }
         this.$emit('input', arr)
     }
 
@@ -76,14 +80,23 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
         ]
     }
 
-    openContextMenu(event: TouchEvent | MouseEvent) {        
-        const menu = this.generateMenu(this.choices)
+    openContextMenu(event: TouchEvent | MouseEvent, replace?: T) {        
+        const menu = this.generateMenu(this.choices, replace)
         menu.show({
             clickEvent: event
         }).catch(console.error)
     }
 
-    addValue(value: T) {
+    addValue(value: T, replace?: T) {
+        if (replace) {
+            const index = this.values.findIndex(v => v === replace)
+            if (index !== -1) {
+                const arr = [...this.values]
+                arr[index] = value;
+                this.$emit('input', arr)
+                return;
+            }
+        }
         const arr = [...this.values, value]
         this.$emit('input', arr)
     }
@@ -93,7 +106,7 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
         this.$emit('input', arr)
     }
 
-    generateMenu(choices: {value: T, label: string, categories?: string[]}[]): ContextMenu {
+    generateMenu(choices: {value: T, label: string, categories?: string[]}[], replace?: T): ContextMenu {
         const rootCategories = Formatter.uniqueArray(choices.map(c => c.categories?.[0]).filter(c => !!c)).sort(Sorter.byStringValue)
 
         return new ContextMenu([
@@ -106,7 +119,7 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
                 })
                 return new ContextMenuItem({
                     name: category,
-                    childMenu: this.generateMenu(subChoices)
+                    childMenu: this.generateMenu(subChoices, replace)
                 })
             }),
             choices.filter(c => !c.categories?.[0]).map(choice => {
@@ -114,7 +127,7 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
                     name: choice.label,
                     action: () => {
                         // Add a new value
-                        this.addValue(choice.value)
+                        this.addValue(choice.value, replace)
                         return true;
                     }
                 })

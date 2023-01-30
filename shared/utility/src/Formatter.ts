@@ -26,7 +26,7 @@ export class Formatter {
     }
 
     static fileSlug(name: string): string {
-        return this.removeAccents(name).replace(/[^A-Za-z0-9]+/g, " ").trim()
+        return this.removeAccents(name).replace(/[^A-Za-z0-9-]+/g, " ").trim()
     }
 
     /**
@@ -177,13 +177,18 @@ export class Formatter {
         return this.date(date) + " om "+this.time(date)
     }
 
-    static price(value: number): string {
+    static price(value: number, removeZeroDecimals = true): string {
         const formatted = new Intl.NumberFormat("nl-BE", {
             style: "currency",
             currency: "EUR",
         }).format(Math.abs(value) / 100);
 
-        return (value < 0 ? "- " : "")+formatted.replace(new RegExp("EUR", "ig"), '€');
+        const v = (value < 0 ? "- " : "")+formatted.replace(new RegExp("EUR", "ig"), '€');
+        if (removeZeroDecimals && (v.endsWith(",00") || v.endsWith(".00"))) {
+            return v.substring(0, v.length-3)
+        }
+
+        return v;
     }
 
     static priceChange(value: number): string {

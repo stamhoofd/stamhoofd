@@ -181,12 +181,12 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     // Mollie payment
                     const token = await MollieToken.getTokenFor(webshop.organizationId)
                     if (!token) {
-                        throw new SimpleError({
+                        throw new SimpleError({ 
                             code: "",
                             message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
                         })
                     }
-                    const profileId = await token.getProfileId()
+                    const profileId = await token.getProfileId(webshop.getHost())
                     if (!profileId) {
                         throw new SimpleError({
                             code: "",
@@ -206,8 +206,10 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         redirectUrl,
                         webhookUrl: exchangeUrl,
                         metadata: {
-                            paymentId: payment.id,
-                            orderId: order.id
+                            order: order.id,
+                            organization: organization.id,
+                            webshop: webshop.id,
+                            payment: payment.id
                         },
                     });
                     console.log(molliePayment)
