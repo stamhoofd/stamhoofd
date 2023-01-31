@@ -140,6 +140,25 @@
                 padding: 14px 0 14px 15px;
                 list-style-type: '-  ';
             }
+
+            .signature {
+                max-height: 150px;
+                max-width: 100%;
+                display: block;
+                height: auto;
+            }
+
+            /* Hide broken images */
+            img {
+                position: relative;
+            }
+            img::before {
+                content: '';
+                width: 100%;
+                height: 100%;
+                background-color: white;
+                position: absolute;
+            }
         </style>
     </head>
     <body>
@@ -297,10 +316,7 @@
                     <p>Naam: {{signature.name}}</p>
                     <p>Hoedanigheid: {{signature.capacity}}</p>
                     <p>Handtekening:</p>
-                    <div class="space"></div>
-                    <div class="space"></div>
-                    <div class="space"></div>
-                    <div class="space"></div>
+                    <img src="{{src signature.image height=150}}" alt="" width="{{src-width signature.image height=150}}" height="{{src-width signature.image height=150}}" class="signature" />
                 </div>
             </div>
         </div>

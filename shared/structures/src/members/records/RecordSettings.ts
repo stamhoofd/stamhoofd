@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDe
 import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
+import { ResolutionRequest } from "../../files/ResolutionRequest";
 import { RecordAnswer } from "./RecordAnswer";
 
 export enum RecordType {
@@ -42,7 +43,8 @@ export enum RecordType {
     Email = "Email",
 
     Date = "Date",
-    Price = "Price"
+    Price = "Price",
+    Image = "Image"
 }
 
 export enum RecordWarningType {
@@ -198,6 +200,12 @@ export class RecordSettings extends AutoEncoder {
      */
     @field({ decoder: RecordWarning, version: 122, nullable: true })
     warning: RecordWarning | null = null
+
+    /**
+     * Only for images
+     */
+    @field({ decoder: new ArrayDecoder(ResolutionRequest), optional: true })
+    resolutions?: ResolutionRequest[]
 
     validate(answers: RecordAnswer[]): RecordAnswer | undefined {
         const answer = answers.find(a => a.settings.id === this.id)

@@ -4,6 +4,7 @@ import { Formatter, StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
+import { Image } from "../../files/Image";
 import { RecordChoice, RecordSettings,RecordType, RecordWarning } from "./RecordSettings"
 
 
@@ -120,6 +121,7 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
             case RecordType.Address: return RecordAddressAnswer
             case RecordType.Date: return RecordDateAnswer
             case RecordType.Price: return RecordPriceAnswer;
+            case RecordType.Image: return RecordImageAnswer;
         }
         throw new SimpleError({
             code: "not_supported",
@@ -399,5 +401,32 @@ export class RecordPriceAnswer extends RecordAnswer {
 
     get isEmpty() {
         return (this.value === null)
+    }
+}
+
+export class RecordImageAnswer extends RecordAnswer {
+    @field({ decoder: Image, nullable: true })
+    image: Image | null = null
+
+    get stringValue() {
+        return this.image?.getPublicPath() ?? "/"
+    }
+
+    get objectValue() {
+        return this.image?.encode({version: 0}) ?? null;
+    }
+
+    override validate() {
+        if (this.settings.required && this.image === null) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Verplicht in te vullen",
+                field: "input"
+            })
+        }
+    }
+
+    get isEmpty() {
+        return this.image === null
     }
 }

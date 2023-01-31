@@ -33,6 +33,14 @@ export class Image extends Model {
             })
         }
 
+        let fileType = 'png';
+        if (fileType == "image/jpeg" || fileType == "image/jpg") {
+            fileType = "jpg";
+        }
+        if (fileType === "image/svg+xml" || fileType === "image/svg") {
+            fileType = "svg";
+        }
+
         const neededResolutions: sharp.ResizeOptions[] = resolutions.map((r) => {
             return {
                 width: r.width ?? undefined,
@@ -42,31 +50,32 @@ export class Image extends Model {
             }
         })
 
-        const png = type == "image/png" || type == "image/svg+xml"
-
-        let sharpStream = sharp(fileContent).rotate(); 
-        if (!png) {
-            sharpStream = sharpStream.flatten({background: {r: 255, g: 255, b: 255}});
-        }
-
+        const supportsTransparency = fileType == "png" || fileType == "svg"
         const promises: Promise<{data: Buffer;info: sharp.OutputInfo}>[] = [];
 
-        for(const size of neededResolutions) {
-            // Generate the image data
-            if (!png) {
-                promises.push(sharpStream
-                    .resize(size)
-                    .jpeg({
-                        quality: 80,
-                    })
-                    .toBuffer({ resolveWithObject: true }));
-            } else {
-                promises.push(sharpStream
-                    .resize(size)
-                    .png()
-                    .toBuffer({ resolveWithObject: true }));
+        if (neededResolutions.length) {
+            let sharpStream = sharp(fileContent, fileType === 'svg' ? {density: 600} : {}).rotate(); 
+            if (!supportsTransparency) {
+                sharpStream = sharpStream.flatten({background: {r: 255, g: 255, b: 255}});
             }
-            
+
+            for(const size of neededResolutions) {
+                // Generate the image data
+                if (!supportsTransparency) {
+                    promises.push(sharpStream
+                        .resize(size)
+                        .jpeg({
+                            quality: 80,
+                        })
+                        .toBuffer({ resolveWithObject: true }));
+                } else {
+                    promises.push(sharpStream
+                        .resize(size)
+                        .png()
+                        .toBuffer({ resolveWithObject: true }));
+                }
+                
+            }
         }
 
         const files = await Promise.all(promises);
@@ -89,12 +98,12 @@ export class Image extends Model {
         for (const f of files) {
             const fileId = uuidv4();
 
-            const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+image.id+"/"+fileId+(!png ? '.jpg' : '.png');
+            const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+image.id+"/"+fileId+(!supportsTransparency ? '.jpg' : '.png');
             const params = {
                 Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: key,
                 Body: f.data,
-                ContentType: !png ? 'image/jpeg' : 'image/png',
+                ContentType: !supportsTransparency ? 'image/jpeg' : 'image/png',
                 ACL: "public-read"
             };
 
@@ -117,7 +126,7 @@ export class Image extends Model {
 
         // Also include the source, in private mode
         const fileId = uuidv4();
-        const uploadExt = png ? 'png' : 'jpg'
+        const uploadExt = fileType
         const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+image.id+"/"+fileId+"."+uploadExt;
         const params = {
             Bucket: STAMHOOFD.SPACES_BUCKET,

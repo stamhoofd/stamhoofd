@@ -111,7 +111,6 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 // Create a new page
                 const page = await browser.newPage();
                 await page.setJavaScriptEnabled(false);
-                await page.setOfflineMode(true);
                 await page.emulateMediaType('screen');
                 await page.setContent(html, { waitUntil: 'load' })
 

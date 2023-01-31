@@ -32,8 +32,9 @@ export class Image extends AutoEncoder {
     getResolutionForSize(width: number | undefined, height: number | undefined): Resolution {
         let bestResolution: Resolution | undefined
 
-        const w: any = (window as any);
-        const ratio = (w ? w.devicePixelRatio : 1) ?? 1;
+        const ratio = (
+            (typeof window !== "undefined") ? ((window as any).devicePixelRatio ? (window as any).devicePixelRatio : 1) : 1
+            ) ?? 1;
         if (ratio >= 2 && width) {
             width = ratio * width;
         }
