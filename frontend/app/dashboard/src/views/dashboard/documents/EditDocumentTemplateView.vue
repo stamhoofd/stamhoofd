@@ -79,7 +79,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Dropdown, ErrorBox, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { RecordAnswerDecoder, RecordWarning, RecordWarningType } from "@stamhoofd/structures";
+import { RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
 import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
 import { FilterGroupEncoded, GroupFilterMode, PropertyFilter, Version } from "@stamhoofd/structures";
 import { DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordChoice, RecordSettings, RecordType } from "@stamhoofd/structures";
@@ -535,6 +535,18 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     name: "Hoedanigheid",
                                     required: true,
                                     type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "signature.image",
+                                    name: "Handtekening",
+                                    description: "Upload je handtekening op een witte achtergrond, met geen of weinig witruimte rondom. Tip: gebruik http://szimek.github.io/signature_pad/",
+                                    required: true,
+                                    type: RecordType.Image,
+                                    resolutions: [
+                                        ResolutionRequest.create({
+                                            height: 200
+                                        })
+                                    ]
                                 })
                             ]
                         })

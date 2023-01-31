@@ -5,7 +5,7 @@
 
             <Spinner v-if="uploading" />
             <span v-else-if="value == null" class="icon upload" />
-            <img v-else :src="src">
+            <img v-else :src="src" :width="shownResolution.width" :height="shownResolution.height">
             <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
         </label>
     </STInputBox>
@@ -28,19 +28,19 @@ import Spinner from "../Spinner.vue";
 })
 export default class ImageInput extends Mixins(NavigationMixin) {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     @Prop({ default: null })
-    resolutions: ResolutionRequest[] | null
+        resolutions: ResolutionRequest[] | null
     
     @Prop({ default: null })
-    value: Image | null;
+        value: Image | null;
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     errorBox: ErrorBox | null = null
 
@@ -54,7 +54,11 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     }
 
     get src() {
-        return this.value!.getPathForSize(undefined, 64)
+        return this.shownResolution.file.getPublicPath()
+    }
+
+    get shownResolution() {
+        return this.value!.getResolutionForSize(undefined, 220)
     }
 
     onClick(event) {
@@ -119,7 +123,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     background: $color-background;
     border-radius: $border-radius;
     padding: 5px 15px;
-    height: 60px;
+    height: 120px;
     margin: 0;
     box-sizing: border-box;
     display: flex;
@@ -144,7 +148,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     }
 
     &.square {
-        width: 60px;
+        width: 120px;
     }
 
     .file-upload {
@@ -153,8 +157,9 @@ export default class ImageInput extends Mixins(NavigationMixin) {
 
     img {
         position: absolute; // fix max width
-        max-height: 33px;
-        max-width: 100%;
+        max-height: 110px;
+        max-width: calc(100% - 10px);
+        height: auto;
     }
 
     .icon.trash {

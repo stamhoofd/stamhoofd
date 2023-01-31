@@ -1,12 +1,13 @@
 
 import { column, Model } from "@simonbackx/simple-database";
-import { DocumentStatus, DocumentData, Document as DocumentStruct } from '@stamhoofd/structures';
+import { Image, DocumentStatus, DocumentData, Document as DocumentStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 import puppeteer from "puppeteer";
 import Handlebars from "handlebars";
 import { QueueHandler } from "@stamhoofd/queues";
 import { Formatter } from "@stamhoofd/utility";
 import { Interval } from "luxon";
+import { ObjectData } from "@simonbackx/simple-encoding";
 
 export class Document extends Model {
     static table = "documents";
@@ -166,6 +167,42 @@ export class Document extends Model {
                     return Math.round(a / b);
                 }
                 return a / b;
+            });
+            Handlebars.registerHelper('src', (a, options) => {
+                const width = options.hash.width || undefined;
+                const height = options.hash.height || undefined;
+                try {
+                    const image = Image.decode(new ObjectData(a, {version: 0}));
+                    const resolution = image.getResolutionForSize(width, height);
+                    return resolution.file.getPublicPath()
+                } catch (e) {
+                    console.error('src helper:', e);
+                    return "";
+                }
+            });
+            Handlebars.registerHelper('src-width', (a, options) => {
+                const width = options.hash.width || undefined;
+                const height = options.hash.height || undefined;
+                try {
+                    const image = Image.decode(new ObjectData(a, {version: 0}));
+                    const resolution = image.getResolutionForSize(width, height);
+                    return resolution.width;
+                } catch (e) {
+                    console.error('src-width helper:', e);
+                    return 0;
+                }
+            });
+            Handlebars.registerHelper('src-height', (a, options) => {
+                const width = options.hash.width || undefined;
+                const height = options.hash.height || undefined;
+                try {
+                    const image = Image.decode(new ObjectData(a, {version: 0}));
+                    const resolution = image.getResolutionForSize(width, height);
+                    return resolution.height;
+                } catch (e) {
+                    console.error('src-height helper:', e);
+                    return 0;
+                }
             });
 
             const template = Handlebars.compile(htmlTemplate);

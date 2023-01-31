@@ -49,6 +49,7 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.Price" :title="label" error-fields="input" :error-box="errorBox">
             <PriceInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
+        <ImageInput v-else-if="answer.settings.type == RecordType.Image" v-model="answer.image" :title="label" :required="required" :validator="validator" :resolutions="recordSettings.resolutions" :placeholder="inputPlaceholder" />
         
         <p v-else class="error-box">
             Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
@@ -74,7 +75,7 @@
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, PhoneInput,PriceInput, Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
+import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, ImageInput, PhoneInput,PriceInput, Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -90,7 +91,8 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         EmailInput,
         PhoneInput,
         DateSelection,
-        PriceInput
+        PriceInput,
+        ImageInput
     }
 })
 export default class RecordAnswerInput extends Vue {
