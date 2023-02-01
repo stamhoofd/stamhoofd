@@ -1,20 +1,23 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
-import { Request } from "@simonbackx/simple-networking"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
 import { NetworkManager, SessionManager } from "@stamhoofd/networking"
-import { Document, DocumentData, DocumentTemplatePrivate } from "@stamhoofd/structures"
+import { Document, DocumentData, DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures"
 import { Formatter } from "@stamhoofd/utility"
+import { v4 as uuidv4 } from "uuid"
 
 export class DocumentActionBuilder {
     component: any
     template: DocumentTemplatePrivate
+    addDocument?: (document: Document) => void
 
     constructor(settings: {
         component: any,
-        template: DocumentTemplatePrivate
+        template: DocumentTemplatePrivate,
+        addDocument?: (document: Document) => void
     }) {
         this.component = settings.component
         this.template = settings.template
+        this.addDocument = settings.addDocument
     }
 
     getActions() {
@@ -22,7 +25,7 @@ export class DocumentActionBuilder {
             new TableAction({
                 name: "Downloaden",
                 icon: "download",
-                priority: 1,
+                priority: 5,
                 groupIndex: 2,
                 needsSelection: true,
                 singleSelection: true,
@@ -32,14 +35,39 @@ export class DocumentActionBuilder {
             }),
 
             new TableAction({
-                name: "Wijzig...",
+                name: "Wijzig",
                 icon: "edit",
-                priority: 1,
-                groupIndex: 2,
+                priority: 0,
+                groupIndex: 1,
                 needsSelection: true,
                 singleSelection: true,
                 handler: async (documents: Document[]) => {
                     await this.editDocument(documents[0])
+                }
+            }),
+
+            new TableAction({
+                name: "Dupliceren",
+                icon: "copy",
+                priority: 1,
+                groupIndex: 2,
+                needsSelection: true,
+                singleSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (documents: Document[]) => {
+                    await this.duplicateDocument(documents[0])
+                }
+            }),
+
+            new TableAction({
+                name: "Verwijderen",
+                icon: "trash",
+                priority: 1,
+                groupIndex: 3,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (documents: Document[]) => {
+                    await this.deleteDocuments(documents)
                 }
             })
         ]
@@ -54,6 +82,74 @@ export class DocumentActionBuilder {
         this.component.present(displayedComponent.setDisplayStyle("popup"));
     }
 
+    async deleteDocuments(documents: Document[]) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? `${documents.length} documenten verwijderen?` : "Dit document verwijderen?", "Verwijderen"))) {
+            return;
+        }
+        try {
+            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>
+            for (const document of documents) {
+                patch.addPatch(Document.patch({
+                    id: document.id,
+                    status: DocumentStatus.Deleted
+                }))
+            }
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "PATCH",
+                body: patch,
+                path: "/organization/documents",
+                shouldRetry: false,
+                owner: this.component,
+                decoder: new ArrayDecoder(Document as Decoder<Document>)
+            })
+            for (const d of response.data) {
+                const originalDocument = documents.find(d2 => d2.id == d.id)
+                if (originalDocument) {
+                    originalDocument.set(d)
+                }
+            }
+            new Toast(documents.length === 1 ? "Document verwijderd" : `${documents.length} documenten verwijderd`, 'success').show()
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+    }
+
+    async duplicateDocument(document: Document) {
+        if (!(await CenteredMessage.confirm("Dit document dupliceren?", "Dupliceren", "Gebruik dit als je hetzelfde attest in verschillende versies wilt beschikbaar maken aan hetzelfde lid."))) {
+            return;
+        }
+        try {
+            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>
+            patch.addPut(document.clone().patch({
+                id: uuidv4(),
+                data: DocumentData.patch({
+                    description: document.data.description + " (2)",
+                }),
+                status: DocumentStatus.Draft,
+            }))
+
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "PATCH",
+                body: patch,
+                path: "/organization/documents",
+                shouldRetry: false,
+                owner: this.component,
+                decoder: new ArrayDecoder(Document as Decoder<Document>)
+            })
+            const duplicatedDocument = response.data[0]
+            if (duplicatedDocument) {
+                this.addDocument?.(duplicatedDocument)
+                this.editDocument(duplicatedDocument).catch(console.error)
+                
+                new Toast(`Nieuw document aangemaakt. Pas de naam en gegevens aan.`, 'success').show()
+            } else {
+                new Toast(`Er ging iets mis bij het dupliceren van het document`, 'error red').show()
+            }
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+    }
+
     async downloadDocument(document: Document) {
         try {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -62,7 +158,7 @@ export class DocumentActionBuilder {
                 path: "/organization/documents/" + encodeURIComponent(document.id) + "/html",
                 shouldRetry: false,
                 timeout: 60 * 1000,
-                owner: this,
+                owner: this.component,
                 responseType: "text"
             })
 
@@ -77,7 +173,7 @@ export class DocumentActionBuilder {
                 body: form as FormData,
                 shouldRetry: false,
                 timeout: 60 * 1000,
-                owner: this,
+                owner: this.component,
                 responseType: "blob"
             })
 
@@ -108,7 +204,8 @@ export class DocumentActionBuilder {
                 method: "PATCH",
                 path: "/organization/documents",
                 body: arr,
-                decoder: new ArrayDecoder(Document as Decoder<Document>)
+                decoder: new ArrayDecoder(Document as Decoder<Document>),
+                owner: this.component
             })
             for (const d of response.data) {
                 const originalDocument = documents.find(d2 => d2.id == d.id)

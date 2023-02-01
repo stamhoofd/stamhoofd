@@ -10,6 +10,14 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
+        <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox">
+            <input
+                v-model="description"
+                class="input"
+                type="text"
+            >
+        </STInputBox>
+
         <div v-for="category of fieldCategories" :key="category.id" class="container">
             <hr>
             <h2>{{ category.name }}</h2>
@@ -60,11 +68,11 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
     }
 
     get definitions() {
-        return RecordCategory.getRecordCategoryDefinitions(this.template.privateSettings.templateDefinition.documentFieldCategories, () => this.editingAnswers)
+        return RecordCategory.getRecordCategoryDefinitions([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories], () => this.editingAnswers)
     }
 
     get fieldCategories() {
-        return RecordCategory.flattenCategories(this.template.privateSettings.templateDefinition.documentFieldCategories, {} as any, this.definitions, true)
+        return RecordCategory.flattenCategories([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories], {} as any, this.definitions, true)
     }
 
     @Watch("editingAnswers")
@@ -85,6 +93,18 @@ export default class EditDocumentView extends Mixins(NavigationMixin) {
 
     get title() {
         return this.isNew ? "Nieuw document" : "Document bewerken"
+    }
+
+    get description() {
+        return this.patchedDocument.data.description
+    }
+
+    set description(value: string) {
+        this.patchDocument = this.patchDocument.patch({
+            data: DocumentData.patch({
+                description: value
+            })
+        })
     }
 
     get hasChanges() {

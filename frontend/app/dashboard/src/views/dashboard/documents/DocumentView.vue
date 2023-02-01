@@ -291,7 +291,7 @@ export default class DocumentView extends Mixins(NavigationMixin){
    
     get recordCategories(): RecordCategory[] {
         return RecordCategory.flattenCategoriesForAnswers(
-            this.template.privateSettings.templateDefinition.documentFieldCategories,
+            [...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories],
             this.document.data.fieldAnswers
         )
     }

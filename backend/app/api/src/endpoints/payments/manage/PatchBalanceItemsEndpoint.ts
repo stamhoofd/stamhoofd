@@ -157,7 +157,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         });
 
         await Member.updateOutstandingBalance(Formatter.uniqueArray(memberIds))
-        await Registration.updateOutstandingBalance(Formatter.uniqueArray(registrationIds))
+        await Registration.updateOutstandingBalance(Formatter.uniqueArray(registrationIds), user.organizationId)
 
          return new Response(
             await BalanceItem.getMemberStructure(returnedModels)

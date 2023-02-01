@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
 import { BalanceItemStatus, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 type Params = Record<string, never>;
@@ -166,6 +166,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
             
             await member.save();
+
+            // Update documents
+            await Document.updateForMember(member.id)
 
             // Update registrations
             for (const patchRegistration of patch.registrations.getPatches()) {
@@ -375,9 +378,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         await Member.updateOutstandingBalance(Formatter.uniqueArray(balanceItemMemberIds))
-        await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds))
+        await Registration.updateOutstandingBalance(Formatter.uniqueArray(balanceItemRegistrationIds), user.organizationId)
         
-
         // Loop all groups and update occupancy if needed
         for (const group of updateGroups.values()) {
             await group.updateOccupancy()

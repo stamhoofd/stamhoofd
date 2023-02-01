@@ -1,10 +1,10 @@
-import { column, Database, Model } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation, Model } from '@simonbackx/simple-database';
 import { Email } from '@stamhoofd/email';
 import { EmailTemplateType, getPermissionLevelNumber, PaymentMethod, PaymentMethodHelper, PermissionLevel, Recipient, Registration as RegistrationStructure, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 import { getEmailBuilder } from '../helpers/EmailBuilder';
-import { EmailTemplate, Organization, User, UserWithOrganization } from './';
+import { Document, EmailTemplate, Organization, User, UserWithOrganization } from './';
 
 export class Registration extends Model {
     static table = "registrations"
@@ -116,7 +116,7 @@ export class Registration extends Model {
     /**
      * Update the outstanding balance of multiple members in one go (or all members)
      */
-    static async updateOutstandingBalance(registrationIds: string[] | 'all') {
+    static async updateOutstandingBalance(registrationIds: string[] | 'all', organizationId: string) {
         if (registrationIds !== 'all' && registrationIds.length == 0) {
             return
         }
@@ -150,6 +150,10 @@ export class Registration extends Model {
         ${secondWhere}`
         
         await Database.update(query, params)
+
+        if (registrationIds !== 'all') {
+            await Document.updateForRegistrations(registrationIds, organizationId)
+        }
     }
 
     /**
@@ -185,6 +189,14 @@ export class Registration extends Model {
         await this.sendEmailTemplate({
             type: EmailTemplateType.RegistrationConfirmation
         });
+
+        const {Member} = await import('./Member');
+        const member = await Member.getByID(this.memberId);
+        if (member) {
+            const registrationMemberRelation = new ManyToOneRelation(Member, "member")
+            registrationMemberRelation.foreignKey = Member.registrations.foreignKey
+            await Document.updateForRegistration(this.setRelation(registrationMemberRelation, member) as any)
+        }
 
         return true;
     }

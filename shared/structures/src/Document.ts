@@ -7,7 +7,8 @@ import { RecordCategory } from "./members/records/RecordCategory";
 export enum DocumentStatus {
     Draft = "Draft",
     MissingData = "MissingData",
-    Published = "published",
+    Published = "Published",
+    Deleted = "Deleted"
 }
 export class DocumentStatusHelper {
     static getName(status: DocumentStatus): string {
@@ -15,14 +16,16 @@ export class DocumentStatusHelper {
             case DocumentStatus.Draft: return "Klad"
             case DocumentStatus.MissingData: return "Onvolledig"
             case DocumentStatus.Published: return "Gepubliceerd"
+            case DocumentStatus.Deleted: return "Verwijderd"
         }
     }
 
     static getColor(status: DocumentStatus): string {
         switch (status) {
             case DocumentStatus.Draft: return "info"
-            case DocumentStatus.MissingData: return "error"
-            case DocumentStatus.Published: return "tertiary"
+            case DocumentStatus.MissingData: return "tertiary"
+            case DocumentStatus.Published: return "secundary"
+            case DocumentStatus.Deleted: return "error"
         }
     }
 }
@@ -163,4 +166,13 @@ export class Document extends AutoEncoder {
     matchQuery(query: string) {
         return this.data.matchQuery(query)
     }
+
+    @field({ decoder: StringDecoder, nullable: true })
+    memberId: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true })
+    registrationId: string | null = null
+
+    @field({ decoder: StringDecoder })
+    templateId: string
 }

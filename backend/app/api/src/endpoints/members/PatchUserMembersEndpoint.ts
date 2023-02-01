@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member, Token } from '@stamhoofd/models';
+import { Document, Member, Token } from '@stamhoofd/models';
 import { EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -138,6 +138,9 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     }
                 }
             }
+
+            // Update documents
+            await Document.updateForMember(member.id)
         }
 
         return new Response(new KeychainedResponse({
