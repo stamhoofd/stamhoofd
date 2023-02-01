@@ -8,6 +8,7 @@ import { QueueHandler } from "@stamhoofd/queues";
 import { Formatter } from "@stamhoofd/utility";
 import { Interval } from "luxon";
 import { ObjectData } from "@simonbackx/simple-encoding";
+import { RegistrationWithMember } from "./Member";
 
 export class Document extends Model {
     static table = "documents";
@@ -92,25 +93,79 @@ export class Document extends Model {
 
     async updateData(): Promise<void> {
         if (!this.registrationId) {
+            console.log('No registration id, skipping update')
             return
         }
         const DocumentTemplate = (await import("./DocumentTemplate")).DocumentTemplate
         const template = await DocumentTemplate.getByID(this.templateId)
         if (!template) {
+            console.log('No template, skipping update')
             return
         }
 
         if (!template.updatesEnabled) {
+            console.log('No updatesEnabled, skipping update')
             return
         }
 
         const Member = (await import("./Member")).Member
         const [registration] = await Member.getRegistrationWithMembersByIDs([this.registrationId])
         if (!registration) {
+            console.log('No registration, skipping update')
             return
         }
 
         await template.updateDocumentFor(this, registration)
+    }
+
+    static async updateForMember(memberId: string) {
+        try {
+            console.log('Updating documents for member', memberId)
+            const documents = await this.where({ memberId })
+            for (const document of documents) {
+                await document.updateData()
+                await document.save()
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    static async updateForRegistration(registration: RegistrationWithMember) {
+        try {
+            console.log('Updating documents for registration', registration.id)
+
+            const DocumentTemplate = (await import("./DocumentTemplate")).DocumentTemplate
+            const templates = await DocumentTemplate.where({updatesEnabled: 1, organizationId: registration.member.organizationId})
+
+            for (const template of templates) {
+                await template.createForRegistrationIfNeeded(registration)
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    static async updateForRegistrations(registrationIds: string[], organizationId: string) {
+        try {
+            console.log('Updating documents for updateForRegistrations', registrationIds)
+
+            const DocumentTemplate = (await import("./DocumentTemplate")).DocumentTemplate
+            const templates = await DocumentTemplate.where({updatesEnabled: 1, organizationId})
+
+            if (templates.length) {
+                const Member = (await import("./Member")).Member
+                const registrations = await Member.getRegistrationWithMembersByIDs(registrationIds)
+
+                for (const template of templates) {
+                    for (const registration of registrations) {
+                        await template.createForRegistrationIfNeeded(registration)
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     // Rander handlebars template
@@ -212,39 +267,5 @@ export class Document extends Model {
             console.error('Failed to render document html', e)
             return null;
         }
-    }
-
-    /**
-     * This will move to a different external service
-     */
-    static async htmlToPdf(html: string): Promise<Buffer | null> {
-        return await QueueHandler.schedule("htmlToPdf", async () => {
-            try {
-                const browser = await puppeteer.launch();
-            
-                // Create a new page
-                const page = await browser.newPage();
-                await page.setJavaScriptEnabled(false);
-                await page.setOfflineMode(true);
-                await page.emulateMediaType('screen');
-                await page.setContent(html, { waitUntil: 'load' })
-
-                // const directory = os.tmpdir();
-
-                // Downlaod the PDF
-                const pdf = await page.pdf({
-                    // path: directory + this.id + '.pdf',
-                    margin: { top: '50px', right: '50px', bottom: '50px', left: '50px' },
-                    printBackground: true,
-                    format: 'A4',
-                    preferCSSPageSize: true,
-                    displayHeaderFooter: false
-                });
-                return pdf;
-            } catch (e) {
-                console.error('Failed to render document pdf', e)
-                return null;
-            }
-        })
     }
 }

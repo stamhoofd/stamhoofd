@@ -75,13 +75,13 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         );
     }
     
-    static async updateOutstanding(items: BalanceItem[]) {
+    static async updateOutstanding(items: BalanceItem[], organizationId: string) {
         // Update outstanding amount of related members and registrations
         const memberIds: string[] = Formatter.uniqueArray(items.map(p => p.memberId).filter(id => id !== null)) as any
         await Member.updateOutstandingBalance(memberIds)
 
         const registrationIds: string[] = Formatter.uniqueArray(items.map(p => p.registrationId).filter(id => id !== null)) as any
-        await Registration.updateOutstandingBalance(registrationIds)
+        await Registration.updateOutstandingBalance(registrationIds, organizationId)
     }
 
     static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
@@ -104,7 +104,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await balanceItemPayment.markPaid(organization);
                 }
 
-                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
+                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem), organization.id)
             })
 
             if (!wasPaid && payment.provider === PaymentProvider.Buckaroo && payment.method) {
@@ -138,7 +138,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await balanceItemPayment.undoPaid(organization);
                 }
 
-                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
+                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem), organization.id)
             })
         }
         
@@ -152,7 +152,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     await balanceItemPayment.markFailed(organization);
                 }
 
-                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem))
+                await this.updateOutstanding(balanceItemPayments.map(p => p.balanceItem), organization.id)
             })
         }
 

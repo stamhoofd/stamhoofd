@@ -1,11 +1,12 @@
 
-import { column, Model } from "@simonbackx/simple-database";
+import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, MemberWithRegistrations, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Document } from "./Document";
 import { Group } from "./Group";
 import { Member, RegistrationWithMember } from "./Member";
+import { Registration } from "./Registration";
 
 export class DocumentTemplate extends Model {
     static table = "document_templates";
@@ -181,12 +182,14 @@ export class DocumentTemplate extends Model {
         // Add global answers (same for each document)
         for (const anwer of this.settings.fieldAnswers) {
             // todo: check duplicate
+            anwer.reviewedAt = null
             fieldAnswers.push(anwer)
         }
 
         // Add group based answers (same for each group)
         for (const anwer of this.privateSettings.groups.find(g => g.groupId === registration.groupId && g.cycle === registration.cycle)?.fieldAnswers ?? []) {
             // todo: check duplicate
+            anwer.reviewedAt = null
             fieldAnswers.push(anwer)
         }
 
@@ -196,7 +199,19 @@ export class DocumentTemplate extends Model {
         }
     }
 
-    async generateForRegistration(registration: RegistrationWithMember) {
+    async createForRegistrationIfNeeded(registration: RegistrationWithMember) {
+        // Check group and cycle
+        for (const groupDefinition of this.privateSettings.groups) {
+            if (groupDefinition.groupId === registration.groupId && groupDefinition.cycle === registration.cycle) {
+                const document = await this.generateForRegistration(registration)
+                if (document) {
+                    await document.save()
+                }
+            }
+        }
+    }
+
+    private async generateForRegistration(registration: RegistrationWithMember) {
         const {fieldAnswers, missingData} = this.buildAnswers(registration)
 
         if (!this.checkIncluded(registration, fieldAnswers)) {
@@ -279,14 +294,14 @@ export class DocumentTemplate extends Model {
 
             for (const answer of fieldAnswers) {
                 if (answer instanceof RecordPriceAnswer) {
-                    if (answer.settings.id === fieldId && !answer.isEmpty) {
+                    if (answer.settings.id === fieldId && answer.value !== null) {
                         price = answer.value;
                         break;
                     }
                 }
             }
 
-            if (price) {
+            if (price !== null) {
                 if (price < this.settings.minPrice) {
                     return false;
                 }
@@ -304,12 +319,25 @@ export class DocumentTemplate extends Model {
         }
         
         console.log('Building all documents for template', this.id)
+        const documentSet: Set<string> = new Set()
+
         for (const groupDefinition of this.privateSettings.groups) {
             // Get the registrations for this group with this cycle
             const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId, groupDefinition.cycle)
 
             for (const registration of registrations) {
-                await this.generateForRegistration(registration)
+                const document = await this.generateForRegistration(registration)
+                if (document) {
+                    documentSet.add(document.id)
+                }
+            }
+        }
+
+        // Delete documents that no longer match
+        const documents = await Document.where({ templateId: this.id })
+        for (const document of documents) {
+            if (!documentSet.has(document.id)) {
+                await document.delete()
             }
         }
     }
@@ -354,11 +382,13 @@ export class DocumentTemplate extends Model {
         document.data.fieldAnswers = newAnswers
         const complete = this.areAnswersComplete(newAnswers)
 
-        if (!complete) {
-            document.status = DocumentStatus.MissingData
-        } else {
-            if (document.status === DocumentStatus.MissingData) {
-                document.status = this.status
+        if (document.status !== DocumentStatus.Deleted) {
+            if (!complete) {
+                document.status = DocumentStatus.MissingData
+            } else {
+                if (document.status === DocumentStatus.MissingData) {
+                    document.status = this.status
+                }
             }
         }
     }

@@ -3,7 +3,7 @@ import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, Registration, Token } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Document, Group, Member, MolliePayment, MollieToken, PayconiqPayment, Payment, Registration, Token } from '@stamhoofd/models';
 import { BalanceItemStatus, IDRegisterCheckout, IDRegisterItem, MemberBalanceItem, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, RegisterResponse, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
@@ -336,7 +336,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             itemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
         }
         items.push(...balanceItems)
-        await ExchangePaymentEndpoint.updateOutstanding(items)
+        await ExchangePaymentEndpoint.updateOutstanding(items, organization.id)
 
         // Update occupancy
         for (const group of groups) {

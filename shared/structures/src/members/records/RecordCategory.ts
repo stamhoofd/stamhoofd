@@ -3,10 +3,12 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simon
 import { v4 as uuidv4 } from "uuid";
 
 import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode } from "../../filters/ChoicesFilter";
+import { DateFilterDefinition } from "../../filters/DateFilter";
 import { FilterDefinition } from "../../filters/FilterDefinition";
+import { NumberFilterDefinition } from "../../filters/NumberFilter";
 import { PropertyFilter } from "../../filters/PropertyFilter";
 import { StringFilterDefinition } from "../../filters/StringFilter";
-import { RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordTextAnswer } from "./RecordAnswer";
+import { RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer } from "./RecordAnswer";
 import { RecordSettings, RecordType } from "./RecordSettings";
 
 export class RecordEditorSettings<T> {
@@ -282,6 +284,45 @@ export class RecordCategory extends AutoEncoder {
                             return answer?.value ?? ""
                         }
                         return ""
+                    }
+                })
+            ]
+        }
+
+        if (record.type === RecordType.Price) {
+            return [
+                new NumberFilterDefinition<T>({
+                    id: "record_"+record.id, 
+                    name: record.name, 
+                    currency: true,
+                    floatingPoint: true,
+                    category,
+                    getValue: (v) => {
+                        const answers = getAnswers(v)
+                        const answer = answers.find(a => a.settings?.id === record.id)
+                        if (answer instanceof RecordPriceAnswer) {
+                            return answer.value ?? 0
+                        }
+                        return 0
+                    }
+                })
+            ]
+        }
+
+        if (record.type === RecordType.Date) {
+            return [
+                new DateFilterDefinition<T>({
+                    id: "record_"+record.id, 
+                    name: record.name, 
+                    time: false,
+                    category,
+                    getValue: (v) => {
+                        const answers = getAnswers(v)
+                        const answer = answers.find(a => a.settings?.id === record.id)
+                        if (answer instanceof RecordDateAnswer) {
+                            return answer.dateValue ?? new Date(1900)
+                        }
+                        return new Date(1900)
                     }
                 })
             ]

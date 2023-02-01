@@ -1,5 +1,5 @@
 <template>
-    <TableView ref="table" :organization="organization" :title="title" :column-configuration-id="'documents-' + template.id" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openDocument">
+    <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :column-configuration-id="'documents-' + template.id" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openDocument">
         <template #empty>
             Er zijn nog geen documenten aangemaakt. Controleer of er wel leden zijn die aan de voorwaarden voor dit document voldoen.
         </template>
@@ -12,6 +12,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { RecordWarning, RecordWarningType } from "@stamhoofd/structures";
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordCategory } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -61,6 +62,9 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
         const builder = new DocumentActionBuilder({
             template: this.template,
             component: this,
+            addDocument: (document: Document) => {
+                this.allValues.push(document)
+            }
         })
         return [
             ...builder.getActions(),
@@ -111,23 +115,26 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
                 recommendedWidth: 120,
             }),
 
-            new Column<Document, number>({
+            new Column<Document, RecordWarning[]>({
                 name: "Waarschuwingen", 
                 getValue: (document) => {
-                    return document.data.fieldAnswers.reduce((c, answer) => c + answer.getWarnings().length, 0)
+                    return document.data.fieldAnswers.reduce((c, answer) => [...c, ...answer.getWarnings()], [])
                 },
-                format: (count) => {
-                    if (count === 1) {
+                format: (warnings) => {
+                    if (warnings.length === 1) {
                         return 'Waarschuwing'
                     }
-                    if (count > 1) {
-                        return `${count} waarschuwingen`
+                    if (warnings.length > 1) {
+                        return `${warnings.length} waarschuwingen`
                     }
                     return 'Geen'
                 },
-                compare: Sorter.byNumberValue, 
-                getStyle: (count) => {
-                    if (count > 0) {
+                compare: (a, b) => -Sorter.byNumberValue(a.length, b.length), 
+                getStyle: (warnings) => {
+                    if (warnings.length > 0) {
+                        if (warnings.find(w => w.type === RecordWarningType.Error)) {
+                            return 'error'
+                        }
                         return 'warn'
                     }
                     return 'gray'
@@ -141,6 +148,11 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     }
 
     allColumns = this.getColumns()
+
+    get defaultSortColumn() {
+        return this.allColumns[1]
+    }
+
 
     get title() {
         return "Documenten"
@@ -166,7 +178,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     }
 
     get filterDefinitions() {
-        return RecordCategory.getRecordCategoryDefinitions(this.template.privateSettings.templateDefinition.documentFieldCategories, (document: Document) => {
+        return RecordCategory.getRecordCategoryDefinitions([...this.template.privateSettings.templateDefinition.documentFieldCategories, ...this.template.privateSettings.templateDefinition.groupFieldCategories, ...this.template.privateSettings.templateDefinition.fieldCategories], (document: Document) => {
             return document.data.fieldAnswers
         });
     }

@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Document, DocumentTemplate, Token } from '@stamhoofd/models';
+import { Document, DocumentTemplate, Member, Registration, Token } from '@stamhoofd/models';
 import { Document as DocumentStruct, DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
@@ -66,10 +66,57 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
                 document.data.patchOrPut(patch.data)
             }          
 
-            if (patch.status && document.status !== DocumentStatus.MissingData) {
+            if (patch.status && (document.status !== DocumentStatus.MissingData || patch.status === DocumentStatus.Deleted)) {
                 document.status = patch.status
             }
             
+            await document.updateData();
+            await document.save();
+
+            // Return in response
+            updatedDocuments.push(document.getStructure())
+        }
+
+        for (const {put} of request.body.getPuts()) {
+            // Create a new document
+            const template = await DocumentTemplate.getByID(put.templateId)
+            if (!template || template.organizationId != user.organizationId) {
+                throw new SimpleError({
+                    code: "not_found",
+                    message: "Document template not found",
+                    human: "Document template niet gevonden"
+                })
+            }
+            const document = new Document();
+            document.organizationId = user.organizationId
+            document.templateId = template.id
+            document.status = put.status
+            document.data = put.data
+
+            if (put.registrationId) {
+                const registration = await Registration.getByID(put.registrationId)
+                if (!registration) {
+                    throw new SimpleError({
+                        code: "not_found",
+                        message: "Registration not found",
+                        human: "Inschrijving niet gevonden"
+                    })
+                }
+                document.registrationId = put.registrationId
+                put.memberId = registration.memberId
+            }
+            if (put.memberId) {
+                const member = await Member.getByID(put.memberId)
+                if (!member || member.organizationId != user.organizationId) {
+                    throw new SimpleError({
+                        code: "not_found",
+                        message: "Member not found",
+                        human: "Lid niet gevonden"
+                    })
+                }
+                document.memberId = put.memberId
+            }
+
             await document.updateData();
             await document.save();
 

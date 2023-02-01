@@ -345,7 +345,7 @@ export class RecordDateAnswer extends RecordAnswer {
     dateValue: Date | null = null
 
     get stringValue() {
-        return this.dateValue ? Formatter.dateIso(this.dateValue) : "/"
+        return this.dateValue ? Formatter.dateNumber(this.dateValue, true) : "/"
     }
 
     get objectValue() {
