@@ -80,6 +80,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { CenteredMessage, Dropdown, ErrorBox, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
+import { ResolutionFit } from "@stamhoofd/structures";
 import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
 import { FilterGroupEncoded, GroupFilterMode, PropertyFilter, Version } from "@stamhoofd/structures";
 import { DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordChoice, RecordSettings, RecordType } from "@stamhoofd/structures";
@@ -544,7 +545,8 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     type: RecordType.Image,
                                     resolutions: [
                                         ResolutionRequest.create({
-                                            height: 200
+                                            height: 200,
+                                            fit: ResolutionFit.Inside
                                         })
                                     ]
                                 })

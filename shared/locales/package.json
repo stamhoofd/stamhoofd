@@ -12,7 +12,7 @@
     ],
     "scripts": {
         "build": "tsc -b . esm && node build.mjs",
-        "build:full": "rm -r ./dist && rm -r ./esm/dist && yarn build"
+        "build:full": "rm -rf ./dist && rm -rf ./esm/dist && yarn build"
     },
     "devDependencies": {},
     "dependencies": {}

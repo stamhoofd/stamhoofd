@@ -12,7 +12,7 @@
     ],
     "scripts": {
         "build": " tsc -b . esm",
-        "build:full": "rm -r ./dist && rm -r ./esm/dist && tsc -b . esm",
+        "build:full": "rm -rf ./dist && rm -rf ./esm/dist && tsc -b . esm",
         "test": "yarn build:full && jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
