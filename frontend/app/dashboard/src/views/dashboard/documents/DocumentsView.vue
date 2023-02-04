@@ -201,7 +201,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
             })
             this.allValues = response.data
         } catch (e) {
-            if (!Request.isNetworkError(e)) {
+            if (!Request.isNetworkError(e) || visibleReload) {
                 Toast.fromError(e).show()
             }
         }

@@ -110,6 +110,16 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
         const rootCategories = Formatter.uniqueArray(choices.map(c => c.categories?.[0]).filter(c => !!c)).sort(Sorter.byStringValue)
 
         return new ContextMenu([
+            choices.filter(c => !c.categories?.[0]).map(choice => {
+                return new ContextMenuItem({
+                    name: choice.label,
+                    action: () => {
+                        // Add a new value
+                        this.addValue(choice.value, replace)
+                        return true;
+                    }
+                })
+            }),
             rootCategories.map(category => {
                 const subChoices = choices.filter(c => c.categories?.[0] === category).map(c => {
                     return {
@@ -120,16 +130,6 @@ export default class MultiSelectInput<T> extends Mixins(NavigationMixin) {
                 return new ContextMenuItem({
                     name: category,
                     childMenu: this.generateMenu(subChoices, replace)
-                })
-            }),
-            choices.filter(c => !c.categories?.[0]).map(choice => {
-                return new ContextMenuItem({
-                    name: choice.label,
-                    action: () => {
-                        // Add a new value
-                        this.addValue(choice.value, replace)
-                        return true;
-                    }
                 })
             })
         ])

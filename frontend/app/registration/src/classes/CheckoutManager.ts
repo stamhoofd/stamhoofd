@@ -83,7 +83,7 @@ export class CheckoutManagerStatic {
         const items = [...this.cart.items.filter(i => i.memberId === item.member.id), item]
 
         const stepManager = new EditMemberStepsManager(
-            EditMemberStepsManager.getAllSteps(items, item.member, false), 
+            EditMemberStepsManager.getAllSteps(items, item.member, false, false), 
             items,
             item.member,
             (c: NavigationMixin) => {

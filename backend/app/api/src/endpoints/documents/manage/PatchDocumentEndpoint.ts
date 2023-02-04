@@ -69,6 +69,10 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             if (patch.status && (document.status !== DocumentStatus.MissingData || patch.status === DocumentStatus.Deleted)) {
                 document.status = patch.status
             }
+
+            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                document.status = template.status
+            }
             
             await document.updateData();
             await document.save();
@@ -92,6 +96,10 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             document.templateId = template.id
             document.status = put.status
             document.data = put.data
+
+            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                document.status = template.status
+            }
 
             if (put.registrationId) {
                 const registration = await Registration.getByID(put.registrationId)

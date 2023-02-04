@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Document, Token } from "@stamhoofd/models";
+import { Document, Member, Token } from "@stamhoofd/models";
 
 type Params = { id: string };
 type Query = undefined;
@@ -17,7 +17,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/organization/documents/@id/html", { id: String});
+        const params = Endpoint.parseParameters(request.url, "/documents/@id/html", { id: String});
 
         if (params) {
             return [true, params as Params];
@@ -29,13 +29,6 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "Je hebt geen toegang tot documenten"
-            })
-        }
-
         const document = await Document.getByID(request.params.id)
         if (!document || document.organizationId != user.organizationId) {
             throw new SimpleError({
@@ -43,6 +36,18 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
                 message: "Onbekend document"
             })
         }
+
+        if (!user.permissions || !user.permissions.hasFullAccess()) {
+            // Get members
+            const members = !document.memberId ? [] : (await Member.getMembersWithRegistrationForUser(user))
+            if (!document.memberId || !members.find(m => m.id == document.memberId)) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "Je hebt geen toegang tot documenten"
+                })
+            }
+        }
+
 
         const html = await document.getRenderedHtml();
         if (!html) {

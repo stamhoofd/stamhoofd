@@ -45,7 +45,7 @@ import { MemberManager } from '../../classes/MemberManager';
 })
 export default class RegistrationSuccessView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    registrations: RegistrationWithMember[]
+        registrations: RegistrationWithMember[]
 
     MemberManager = MemberManager
     step = 4
@@ -102,14 +102,16 @@ export default class RegistrationSuccessView extends Mixins(NavigationMixin){
 
         // Switch to register tab
         GlobalEventBus.sendEvent("checkout-complete", undefined).catch(e => console.error(e))
+
+        MemberManager.loadMembers().catch(console.error)
+        MemberManager.loadDocuments().catch(console.error)
     }
 
-    async close() {
+    close() {
         if (this.loading) {
             return;
         }
         this.loading = true;
-        await MemberManager.loadMembers()
         this.dismiss({ force: true })
         this.loading = false;
     }

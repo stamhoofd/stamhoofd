@@ -1,10 +1,10 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="template.privateSettings.templateDefinition.name" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar :title="template.settings.name" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1 class="style-navigation-title">
-                {{ template.privateSettings.templateDefinition.name }}
+                {{ template.settings.name }}
             </h1>
 
             <p v-if="isDraft" class="warning-box">
@@ -40,7 +40,7 @@
 
             <hr>
             <h2>Automatische wijzigingen</h2>
-            <p>Stamhoofd kan de inhoud van documenten automatisch wijzigen als de daarbij horende gegevens wijzigen, en nieuwe documenten aanmaken als er nieuwe inschrijvingen bij komen (ook na publicatie). Dat is ideaal om bijvoorbeeld ontbrekende of foute gegevens door leden nog te laten invullen via het ledenportaal. Op het moment dat je documenten officiëel hebt ingedient (indien van toepassing), zet je dit best uit.</p>
+            <p>Stamhoofd kan de inhoud van documenten automatisch wijzigen als de daarbij horende gegevens wijzigen, en nieuwe documenten aanmaken als er nieuwe inschrijvingen bij komen (ook na publicatie). Dat is ideaal om bijvoorbeeld ontbrekende of foute gegevens door leden nog te laten invullen via het ledenportaal. Op het moment dat je documenten officiëel hebt ingedient (indien van toepassing), zet je dit best uit. Als dit uit staat zullen onvolledige documenten niet langer zichtbaar zijn voor leden.</p>
 
             <Checkbox :checked="template.updatesEnabled" :disabled="settingUpdatesEnabled" @change="toggleUpdatesEnabled">
                 Documenten automatisch wijzigen
@@ -153,18 +153,15 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
         return this.template.status === DocumentStatus.Draft
     }
 
-    publishTemplate() {
+    async publishTemplate() {
         if (this.publishing) {
             return
         }
 
-        new Toast('Nog niet mogelijk tijdens proefperiode', 'error red').show();
-        /*
-
         if (!(await CenteredMessage.confirm("Ben je zeker dat je alle documenten wilt publiceren?", "Publiceren", "Je kan de documenten hierna niet meer bewerken, en ze zijn zichtbaar voor alle leden."))) {
             return
         }
-        await this.changeStatus(DocumentStatus.Published)*/
+        await this.changeStatus(DocumentStatus.Published)
     }
 
     async draftTemplate() {

@@ -121,10 +121,10 @@ export class Document extends Model {
     static async updateForMember(memberId: string) {
         try {
             console.log('Updating documents for member', memberId)
-            const documents = await this.where({ memberId })
-            for (const document of documents) {
-                await document.updateData()
-                await document.save()
+            const Member = (await import("./Member")).Member
+            const member = await Member.getWithRegistrations(memberId)
+            if (member) {
+                await this.updateForRegistrations(member.registrations.map(r => r.id), member.organizationId)
             }
         } catch (e) {
             console.error(e)

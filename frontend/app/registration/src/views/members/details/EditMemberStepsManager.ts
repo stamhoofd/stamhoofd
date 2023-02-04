@@ -49,15 +49,17 @@ export class RecordCategoryStep implements EditMemberStep {
      * Force that we review this step (e.g. when validating it)
      */
     forceReview = false
+    onlyReviewIfMissing = false
 
     /**
      * Time in ms for when to force a review because the infomration is outdated
      */
     outdatedTime = 60*1000*60*24*31*3
 
-    constructor(category: RecordCategory, forceReview = false) {
+    constructor(category: RecordCategory, forceReview = false, onlyReviewIfMissing = false) {
         this.category = category
         this.forceReview = forceReview
+        this.onlyReviewIfMissing = onlyReviewIfMissing
     }
 
     async getComponentClass(): Promise<any> {
@@ -107,8 +109,20 @@ export class RecordCategoryStep implements EditMemberStep {
         // Check all the properties in this category and check their last review times
         for (const record of records) {
             const answer = details.recordAnswers.find(a => a.settings.id === record.id)
-            if (!answer || answer.isOutdated(this.outdatedTime)) {
+            if (!answer) {
                 // This was never answered
+                return true
+            }
+
+            if (!this.onlyReviewIfMissing && answer.isOutdated(this.outdatedTime)) {
+                // This answer is outdated
+                return true
+            }
+
+            try {
+                answer.validate()
+            } catch (e) {
+                // This answer is not valid anymore
                 return true
             }
         }
@@ -125,15 +139,17 @@ export class BuiltInEditMemberStep implements EditMemberStep {
      * Force that we review this step (e.g. when validating it)
      */
     forceReview = false
+    onlyReviewIfMissing = false
 
     /**
      * Time in ms for when to force a review because the infomration is outdated
      */
     outdatedTime = 60*1000*60*24*31*3
 
-    constructor(type: EditMemberStepType, forceReview = false) {
+    constructor(type: EditMemberStepType, forceReview = false, onlyReviewIfMissing = false) {
         this.type = type
         this.forceReview = forceReview
+        this.onlyReviewIfMissing = onlyReviewIfMissing
     }
 
     getFilterDefinitionsForProperty(property: string): FilterDefinition[] {
@@ -141,6 +157,18 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             return MemberDetailsWithGroups.getBaseFilterDefinitions()
         }
         return MemberDetails.getBaseFilterDefinitions()
+    }
+
+    isPropertyEnabled(details: MemberDetails, name: "emailAddress" | "birthDay" | "phone" | "address") {
+        return OrganizationManager.organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(
+            MemberDetails.getBaseFilterDefinitions()
+        ).doesMatch(details) ?? false
+    }
+
+    isPropertyRequired(details: MemberDetails, name: "emailAddress" | "birthDay" | "phone" | "address") {
+        return this.isPropertyEnabled(details, name) && (OrganizationManager.organization.meta.recordsConfiguration[name]?.requiredWhen?.decode(
+            MemberDetails.getBaseFilterDefinitions()
+        ).doesMatch(details) ?? false)
     }
 
     /**
@@ -162,24 +190,24 @@ export class BuiltInEditMemberStep implements EditMemberStep {
         switch (this.type) {
             case EditMemberStepType.Details: {
                 // We still have all the data. Ask everything that is older than 3 months
-                if (member.details.reviewTimes.isOutdated("details", this.outdatedTime)) {
+                if (!this.onlyReviewIfMissing && member.details.reviewTimes.isOutdated("details", this.outdatedTime)) {
                     return true
                 }
 
                 // Check missing information
-                if (!member.details.phone && OrganizationManager.organization.meta.recordsConfiguration.phone?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('phone')).doesMatch(details) === true) {
+                if (!member.details.phone && this.isPropertyRequired(details, 'phone')) {
                     return true
                 }
 
-                if (!member.details.email && OrganizationManager.organization.meta.recordsConfiguration.emailAddress?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('email')).doesMatch(details) === true) {
+                if (!member.details.email && this.isPropertyRequired(details, 'emailAddress')) {
                     return true
                 }
 
-                if (!member.details.address && OrganizationManager.organization.meta.recordsConfiguration.address?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('address')).doesMatch(details) === true) {
+                if (!member.details.address && this.isPropertyRequired(details, 'address')) {
                     return true
                 }
 
-                if (!member.details.birthDay && OrganizationManager.organization.meta.recordsConfiguration.birthDay?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('birthDay')).doesMatch(details) === true) {
+                if (!member.details.birthDay && this.isPropertyRequired(details, 'birthDay')) {
                     return true
                 }
 
@@ -188,7 +216,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
 
             case EditMemberStepType.Parents: {
                 // We still have all the data. Ask everything that is older than 3 months
-                return member.details.reviewTimes.isOutdated("parents", this.outdatedTime) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('parents')).doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
+                return (!this.onlyReviewIfMissing && member.details.reviewTimes.isOutdated("parents", this.outdatedTime)) || (member.details.parents.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.parents?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('parents')).doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
 
             case EditMemberStepType.EmergencyContact: {
@@ -198,11 +226,11 @@ export class BuiltInEditMemberStep implements EditMemberStep {
                     return false
                 }
 
-                return member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('emergencyContacts')).doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
+                return (!this.onlyReviewIfMissing && member.details.reviewTimes.isOutdated("emergencyContacts", this.outdatedTime)) || (member.details.emergencyContacts.length == 0 && OrganizationManager.organization.meta.recordsConfiguration.emergencyContacts?.requiredWhen?.decode(this.getFilterDefinitionsForProperty('emergencyContacts')).doesMatch(new MemberDetailsWithGroups(details, member, items)) === true)
             }
 
             case EditMemberStepType.DataPermissions: {
-                return (member.details.dataPermissions?.value ?? false) == false || !member.details.dataPermissions || member.details.dataPermissions.isOutdated(this.outdatedTime)
+                return (member.details.dataPermissions?.value ?? false) == false || !member.details.dataPermissions || (!this.onlyReviewIfMissing && member.details.dataPermissions.isOutdated(this.outdatedTime))
             }
 
             default: {
@@ -290,16 +318,16 @@ export class EditMemberStepsManager {
     finishHandler: (component: NavigationMixin) => Promise<void>;
     lastSaveHandler?: (details: MemberDetails) => Promise<void>;
 
-    static getAllSteps(items: RegisterItem[] = [], member?: MemberWithRegistrations, forceReview = false): EditMemberStep[] {
+    static getAllSteps(items: RegisterItem[] = [], member?: MemberWithRegistrations, forceReview = false, onlyReviewIfMissing = false): EditMemberStep[] {
         const base: EditMemberStep[] = [
-            new BuiltInEditMemberStep(EditMemberStepType.Details, forceReview),
-            new BuiltInEditMemberStep(EditMemberStepType.Parents, forceReview),
-            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, forceReview),
-            new BuiltInEditMemberStep(EditMemberStepType.DataPermissions, forceReview),
+            new BuiltInEditMemberStep(EditMemberStepType.Details, forceReview, onlyReviewIfMissing),
+            new BuiltInEditMemberStep(EditMemberStepType.Parents, forceReview, onlyReviewIfMissing),
+            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, forceReview, onlyReviewIfMissing),
+            new BuiltInEditMemberStep(EditMemberStepType.DataPermissions, forceReview, onlyReviewIfMissing),
         ]
 
         for (const category of OrganizationManager.organization.meta.recordsConfiguration.recordCategories) {
-            base.push(new RecordCategoryStep(category, forceReview))
+            base.push(new RecordCategoryStep(category, forceReview, onlyReviewIfMissing))
         }
 
         // TODO: categories that are bound to a single group (thats why we need items and member already)
@@ -398,6 +426,10 @@ export class EditMemberStepsManager {
 
     async getFirstComponent(): Promise<ComponentWithProperties | undefined> {
         return this.getNextComponent(undefined, this.cloneDetails())
+    }
+
+    hasSteps(): boolean {
+        return !!this.getNextStep(undefined, this.cloneDetails())
     }
 
     /**

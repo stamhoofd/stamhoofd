@@ -94,6 +94,11 @@ export default class App extends Vue {
                 root: new ComponentWithProperties(PromiseView, {
                     promise: async () => {
                         await MemberManager.loadMembers();
+                        try {
+                            await MemberManager.loadDocuments();
+                        } catch (e) {
+                            console.error(e)
+                        }
 
                         return new ComponentWithProperties(ModalStackComponent, {
                             root: new ComponentWithProperties(NavigationController, { 

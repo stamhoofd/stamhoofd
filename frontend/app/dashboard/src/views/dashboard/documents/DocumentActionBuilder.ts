@@ -1,8 +1,8 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding"
 import { CenteredMessage, LoadComponent, TableAction, Toast } from "@stamhoofd/components"
-import { NetworkManager, SessionManager } from "@stamhoofd/networking"
+import { downloadDocuments } from "@stamhoofd/document-helper"
+import { SessionManager } from "@stamhoofd/networking"
 import { Document, DocumentData, DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures"
-import { Formatter } from "@stamhoofd/utility"
 import { v4 as uuidv4 } from "uuid"
 
 export class DocumentActionBuilder {
@@ -28,9 +28,9 @@ export class DocumentActionBuilder {
                 priority: 5,
                 groupIndex: 2,
                 needsSelection: true,
-                singleSelection: true,
-                handler: async (documents: Document[]) => {
-                    await this.downloadDocument(documents[0])
+                allowAutoSelectAll: true,
+                handler: (documents: Document[]) => {
+                    this.downloadDocuments(documents).catch(console.error)
                 }
             }),
 
@@ -68,6 +68,18 @@ export class DocumentActionBuilder {
                 allowAutoSelectAll: false,
                 handler: async (documents: Document[]) => {
                     await this.deleteDocuments(documents)
+                }
+            }),
+
+            new TableAction({
+                name: "Terugzetten",
+                icon: "undo",
+                priority: 1,
+                groupIndex: 3,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (documents: Document[]) => {
+                    await this.undoDocuments(documents)
                 }
             })
         ]
@@ -114,6 +126,38 @@ export class DocumentActionBuilder {
         }
     }
 
+    async undoDocuments(documents: Document[]) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? `${documents.length} documenten uit prullenmand terug halen?` : "Dit document uit prullenmand terug halen?", "Terugzetten"))) {
+            return;
+        }
+        try {
+            const patch: PatchableArrayAutoEncoder<Document> = new PatchableArray() as PatchableArrayAutoEncoder<Document>
+            for (const document of documents) {
+                patch.addPatch(Document.patch({
+                    id: document.id,
+                    status: DocumentStatus.Draft
+                }))
+            }
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "PATCH",
+                body: patch,
+                path: "/organization/documents",
+                shouldRetry: false,
+                owner: this.component,
+                decoder: new ArrayDecoder(Document as Decoder<Document>)
+            })
+            for (const d of response.data) {
+                const originalDocument = documents.find(d2 => d2.id == d.id)
+                if (originalDocument) {
+                    originalDocument.set(d)
+                }
+            }
+            new Toast(documents.length === 1 ? "Document teruggezet" : `${documents.length} documenten teruggezet`, 'success').show()
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+    }
+
     async duplicateDocument(document: Document) {
         if (!(await CenteredMessage.confirm("Dit document dupliceren?", "Dupliceren", "Gebruik dit als je hetzelfde attest in verschillende versies wilt beschikbaar maken aan hetzelfde lid."))) {
             return;
@@ -150,37 +194,15 @@ export class DocumentActionBuilder {
         }
     }
 
-    async downloadDocument(document: Document) {
-        try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "GET",
-                path: "/organization/documents/" + encodeURIComponent(document.id) + "/html",
-                shouldRetry: false,
-                timeout: 60 * 1000,
-                owner: this.component,
-                responseType: "text"
-            })
-
-            const html = response.data as string
-            const form = new FormData()
-            form.append("html", html)
-            
-            // Convert to PDF
-            const pdfResponse = await NetworkManager.rendererServer.request({
-                method: "POST",
-                path: "/html-to-pdf",
-                body: form as FormData,
-                shouldRetry: false,
-                timeout: 60 * 1000,
-                owner: this.component,
-                responseType: "blob"
-            })
-
-            const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
-            saveAs(pdfResponse.data, Formatter.fileSlug(document.data.name + " - " + document.data.description) + ".pdf")
-        } catch (e) {
-            Toast.fromError(e).show()
+    async downloadDocuments(documents: Document[]) {
+        // Filter invalid documents
+        const invalidDocuments = documents.filter(d => d.status === DocumentStatus.MissingData)
+        if (invalidDocuments.length > 0) {
+            new Toast(`${invalidDocuments.length} ${invalidDocuments.length === 1 ? 'onvolledig document kan niet gedownload worden' : 'onvolledige documenten kunnen niet gedownload worden'}`, invalidDocuments.length === documents.length ? 'error red' : 'warning yellow').show()
+        }
+        const validDocuments = documents.filter(d => d.status !== DocumentStatus.MissingData)
+        if (validDocuments.length) {
+            await downloadDocuments(validDocuments, this.component)
         }
     }
 

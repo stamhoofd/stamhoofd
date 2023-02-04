@@ -231,23 +231,26 @@ export class DocumentTemplate extends Model {
         }
 
         const group = await Group.getByID(registration.groupId)
-        const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}${startDate ? ' ' + Formatter.year(startDate) : ''}`;
+        const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}`;
 
         const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, {limit: 1})
         if (existingDocuments.length > 0) {
             const document = existingDocuments[0]
             await this.updateDocumentFor(document, registration)
-            document.data.name = this.privateSettings.templateDefinition.name
+            document.data.name = this.settings.name
             document.data.description = description
+            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                document.status = this.status;
+            }
             await document.save()
             return document;
         } else {
             const document = new Document()
             document.organizationId = this.organizationId
             document.templateId = this.id
-            document.status = missingData ? DocumentStatus.MissingData : DocumentStatus.Draft
+            document.status = missingData ? DocumentStatus.MissingData : this.status;
             document.data = DocumentData.create({
-                name: this.privateSettings.templateDefinition.name,
+                name: this.settings.name,
                 description,
                 fieldAnswers
             })
@@ -315,6 +318,14 @@ export class DocumentTemplate extends Model {
 
     async buildAll() {
         if (!this.updatesEnabled) {
+            // Check status
+            const documents = await Document.where({ templateId: this.id })
+            for (const document of documents) {
+                if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                    document.status = this.status;
+                    await document.save();
+                }
+            }
             return
         }
         
