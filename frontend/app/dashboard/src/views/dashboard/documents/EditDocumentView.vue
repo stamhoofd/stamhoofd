@@ -15,6 +15,7 @@
                 v-model="description"
                 class="input"
                 type="text"
+                placeholder="Beschrijving document"
             >
         </STInputBox>
 

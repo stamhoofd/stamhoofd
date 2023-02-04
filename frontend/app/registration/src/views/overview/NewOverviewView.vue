@@ -39,7 +39,7 @@
                             <span>Schrijf een lid in</span>
                         </button>
                     </template>
-                    <template v-if="cart.count || notYetPaidBalance > 0 || suggestedRegistrations.length">
+                    <template v-if="cart.count || notYetPaidBalance > 0 || suggestedRegistrations.length || membersWithMissingData.length">
                         <hr>
                         <h2>
                             Snelle acties
@@ -59,6 +59,18 @@
                                 </p>
 
                                 <span v-if="cart.price" slot="right" class="style-tag">{{ formatPrice(cart.price) }}</span>
+                                <span slot="right" class="icon arrow-right-small gray" />
+                            </STListItem>
+
+                            <STListItem v-for="member of membersWithMissingData" :key="'missing'+member.id" class="left-center" :selectable="true" @click="fillInMemberMissingData(member)">
+                                <img slot="left" src="~@stamhoofd/assets/images/illustrations/health-data.svg" class="style-illustration-img">
+                                <h3 class="style-title-list">
+                                    Vul ontbrekende gegevens aan van {{ member.details.firstName }}
+                                </h3>
+                                <p class="style-description-small">
+                                    Enkele gegevens van {{ member.details.firstName }} ontbreken. Vul ze hier in.
+                                </p>
+
                                 <span slot="right" class="icon arrow-right-small gray" />
                             </STListItem>
 
@@ -153,22 +165,24 @@
                         </STListItem>
                     </STList>
 
-                    <template v-if="members.length && false">
+                    <template v-if="documents.length">
                         <hr>
                         <h2>
                             Documenten
                         </h2>
                         <STList>
-                            <STListItem class="left-center hover-box member-registration-block" :selectable="true">
+                            <STListItem v-for="document of documents" :key="document.id" class="left-center hover-box member-registration-block" :selectable="true" @click="downloadDocument(document)">
                                 <span slot="left" class="icon file-pdf red" />
                                 <h3 class="style-title-list">
-                                    Fiscaal attest 2021
+                                    {{ document.data.name }}
                                 </h3>
                                 <p class="style-description-small">
-                                    Je kan een belastingvermindering krijgen voor betaald lidgeld via dit attest.
+                                    {{ document.data.description }}
                                 </p>
+                                <span v-if="document.status === 'MissingData'" class="style-tag error">Onvolledig</span>
 
-                                <span slot="right" class="icon download gray" />
+                                <Spinner v-if="isDocumentDownloading(document)" slot="right" class="gray" />
+                                <span v-else slot="right" class="icon download gray" />
                             </STListItem>
                         </STList>
                     </template>
@@ -181,8 +195,10 @@
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingView, OrganizationLogo, PromiseView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { Session, SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { CenteredMessage, LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { downloadDocument } from "@stamhoofd/document-helper"
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { Document, DocumentStatus, MemberWithRegistrations } from "@stamhoofd/structures";
 import { MemberBalanceItem, Payment, PaymentStatus, PaymentWithRegistrations } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -195,9 +211,9 @@ import AccountSettingsView from "../account/AccountSettingsView.vue";
 import PaymentsView from "../account/PaymentsView.vue";
 import CartView from "../checkout/CartView.vue";
 import { createMemberComponent } from "../members/details/createMemberComponent";
+import { EditMemberStepsManager } from "../members/details/EditMemberStepsManager";
 import CheckDataView from "./CheckDataView.vue";
 import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
-
 
 @Component({
     components: {
@@ -206,7 +222,8 @@ import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
         STList,
         STListItem,
         LoadingView,
-        STToolbar
+        STToolbar,
+        Spinner
     }
 })
 export default class NewOverviewView extends Mixins(NavigationMixin){
@@ -224,6 +241,10 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
 
     get isAcceptingNewMembers() {
         return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
+    }
+
+    get documents() {
+        return this.MemberManager.documents ?? []
     }
 
     mounted() {
@@ -319,6 +340,39 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
             return MemberManager.members
         }
         return []
+    }
+
+    get membersWithMissingData() {
+        return this.members.filter(member => member.activeRegistrations.length && this.getStepsManagerMissingData(member).hasSteps())
+    }
+
+    getStepsManagerMissingData(member: MemberWithRegistrations) {
+        const items = CheckoutManager.cart.items.filter(item => item.memberId === member.id)
+        const steps = EditMemberStepsManager.getAllSteps(items, member, false, true)
+
+        const stepManager = new EditMemberStepsManager(
+            steps, 
+            items,
+            member,
+            async (component: NavigationMixin) => {
+                component.dismiss({ force: true })
+                return Promise.resolve()
+            }
+        )
+        return stepManager
+    }
+
+    async fillInMemberMissingData(member: MemberWithRegistrations) {
+        const stepManager = this.getStepsManagerMissingData(member)
+        const component = await stepManager.getFirstComponent()
+
+        if (!component) {
+            // Weird
+        } else {
+            this.present(new ComponentWithProperties(NavigationController, {
+                root: component
+            }).setDisplayStyle("popup"))
+        }
     }
 
     get cart() {
@@ -426,6 +480,29 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
             modalDisplayStyle: "popup",
             animated
         })
+    }
+
+    downloadingDocuments: Document[] = []
+
+    async downloadDocument(document: Document) {
+        if (this.isDocumentDownloading(document)) {
+            return
+        }
+        if (document.status === DocumentStatus.MissingData) {
+            new Toast('Dit document kan niet gedownload worden omdat er nog gegevens ontbreken. Vul eerst alle ontbrekende gegevens aan en contacteer ons indien het probleem nog niet is verholpen.', 'error').show()
+            return
+        }
+        this.downloadingDocuments.push(document)
+        try {
+            await downloadDocument(document);
+        } catch (e) {
+            console.error(e);
+        }
+        this.downloadingDocuments = this.downloadingDocuments.filter(d => d.id != document.id)
+    }
+
+    isDocumentDownloading(document: Document) {
+        return !!this.downloadingDocuments.find(d => d.id == document.id)
     }
 }
 </script>

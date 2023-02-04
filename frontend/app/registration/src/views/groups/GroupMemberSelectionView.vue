@@ -62,7 +62,7 @@ import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } fro
 })
 export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    group!: Group
+        group!: Group
 
     MemberManager = MemberManager
     CheckoutManager = CheckoutManager
@@ -100,8 +100,8 @@ export default class GroupMemberSelectionView extends Mixins(NavigationMixin){
         // We'll ask the other things when selecting the details
         const stepManager = new EditMemberStepsManager(
             [
-                new BuiltInEditMemberStep(EditMemberStepType.Details, true),
-                new BuiltInEditMemberStep(EditMemberStepType.Parents, true)
+                new BuiltInEditMemberStep(EditMemberStepType.Details, true, false),
+                new BuiltInEditMemberStep(EditMemberStepType.Parents, true, false)
             ], 
             [],
             undefined,

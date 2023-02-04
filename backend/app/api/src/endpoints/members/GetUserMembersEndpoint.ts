@@ -1,7 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Member } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
+import { Member, Token } from '@stamhoofd/models';
 import { EncryptedMemberWithRegistrations, KeychainedResponse } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;

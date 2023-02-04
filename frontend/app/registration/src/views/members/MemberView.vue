@@ -246,13 +246,13 @@ import MemberChooseGroupsView from "./MemberChooseGroupsView.vue";
 })
 export default class MemberView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    member!: MemberWithRegistrations
+        member!: MemberWithRegistrations
 
     async editGeneral() {
         await this.openSteps(
             [
-                new BuiltInEditMemberStep(EditMemberStepType.Details, true), 
-                new BuiltInEditMemberStep(EditMemberStepType.Parents, true)
+                new BuiltInEditMemberStep(EditMemberStepType.Details, true, false), 
+                new BuiltInEditMemberStep(EditMemberStepType.Parents, true, false)
             ],
             false
         )
@@ -260,19 +260,19 @@ export default class MemberView extends Mixins(NavigationMixin){
 
     async editParents() {
         await this.openSteps([
-            new BuiltInEditMemberStep(EditMemberStepType.Parents, true)
+            new BuiltInEditMemberStep(EditMemberStepType.Parents, true, false)
         ])
     }
 
     async editEmergencyContact() {
         await this.openSteps([
-            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, true)
+            new BuiltInEditMemberStep(EditMemberStepType.EmergencyContact, true, false)
         ])
     }
 
     async editRecordCategory(category: RecordCategory) {
         await this.openSteps([
-            new RecordCategoryStep(category, true)
+            new RecordCategoryStep(category, true, false)
         ])
     }
 
@@ -302,14 +302,7 @@ export default class MemberView extends Mixins(NavigationMixin){
 
     async fullCheck() {
         const items = CheckoutManager.cart.items.filter(item => item.memberId === this.member.id)
-        await this.openSteps(EditMemberStepsManager.getAllSteps(items, this.member, true), false, async (details: MemberDetails) => {
-            // Do basic check if information is okay
-            if (details.lastName && details.isRecovered) {
-                details.isRecovered = false
-            }
-            
-            return Promise.resolve()
-        })
+        await this.openSteps(EditMemberStepsManager.getAllSteps(items, this.member, true, false), false)
     }
 
     async openSteps(steps: EditMemberStep[], force = true, lastSaveHandler?: (details: MemberDetails) => Promise<void>) {

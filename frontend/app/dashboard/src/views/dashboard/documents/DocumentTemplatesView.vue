@@ -19,7 +19,7 @@
             <STList v-else-if="templates.length">
                 <STListItem v-for="template of templates" :key="template.id" :selectable="true" class="right-stack" @click="openTemplate(template)">
                     <h2 class="style-title-list">
-                        {{ template.privateSettings.templateDefinition.name }}
+                        {{ template.settings.name }}
                     </h2>
                     <p class="style-description-small">
                         Aangemaakt op {{ formatDate(template.createdAt) }}

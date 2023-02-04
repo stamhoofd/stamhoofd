@@ -30,6 +30,9 @@ export class DocumentStatusHelper {
     }
 }
 export class DocumentSettings extends AutoEncoder {
+    @field({ decoder: StringDecoder, version: 178 })
+    name = ""
+
     @field({ decoder: IntegerDecoder, nullable: true })
     maxAge: number | null = null
 

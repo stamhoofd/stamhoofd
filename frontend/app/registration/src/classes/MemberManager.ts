@@ -3,7 +3,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Keychain, MemberManagerBase, SessionManager } from '@stamhoofd/networking';
-import { Address, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
+import { Address, Document, EmergencyContact, EncryptedMemberWithRegistrations, KeychainedMembers, KeychainedResponse, KeychainedResponseDecoder, Member, MemberDetails, MemberWithRegistrations, Parent } from '@stamhoofd/structures';
 import { Vue } from "vue-property-decorator";
 
 import { OrganizationManager } from './OrganizationManager';
@@ -14,6 +14,7 @@ import { OrganizationManager } from './OrganizationManager';
 export class MemberManagerStatic extends MemberManagerBase {
     /// Currently saved members
     members: MemberWithRegistrations[] | null = null
+    documents: Document[] | null = null
 
     /**
      * Set the members, but keep all the existing member references
@@ -44,6 +45,10 @@ export class MemberManagerStatic extends MemberManagerBase {
         Vue.set(this, "members", s)
     }
 
+    setDocuments(documents: Document[]) {
+        Vue.set(this, "documents", documents)
+    }
+
     async loadMembers() {
         const session = SessionManager.currentSession!
         const response = await session.authenticatedServer.request({
@@ -52,6 +57,16 @@ export class MemberManagerStatic extends MemberManagerBase {
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
         this.setMembers(response.data)
+    }
+
+    async loadDocuments() {
+        const session = SessionManager.currentSession!
+        const response = await session.authenticatedServer.request({
+            method: "GET",
+            path: "/documents",
+            decoder: new ArrayDecoder(Document as Decoder<Document>)
+        })
+        this.setDocuments(response.data)
     }
 
     async addMember(memberDetails: MemberDetails): Promise<MemberWithRegistrations | null> {
@@ -89,6 +104,7 @@ export class MemberManagerStatic extends MemberManagerBase {
         })
 
         MemberManager.setMembers(response.data)
+        this.loadDocuments().catch(console.error)
         return this.members?.find(m => m.id == member.id) ?? null
     }
 
@@ -122,6 +138,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             decoder: new KeychainedResponseDecoder(new ArrayDecoder(EncryptedMemberWithRegistrations as Decoder<EncryptedMemberWithRegistrations>))
         })
         this.setMembers(response.data)
+        this.loadDocuments().catch(console.error)
     }
 
     /**

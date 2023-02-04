@@ -21,6 +21,15 @@
             </Dropdown>
         </STInputBox>
         <template v-if="editingType || !isNew">
+            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                <input
+                    v-model="name"
+                    class="input"
+                    type="text"
+                    placeholder="Naam document"
+                >
+            </STInputBox>
+
             <!-- Depending on the selected definition, we'll display all the required fields here -->
             <div v-for="category of fieldCategories" :key="category.id" class="container">
                 <hr>
@@ -75,6 +84,7 @@
 
 <script lang="ts">
 import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from "@simonbackx/simple-encoding";
+import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Dropdown, ErrorBox, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
@@ -167,6 +177,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                         templateDefinition: definition
                     }),
                     settings: DocumentSettings.patch({
+                        name: this.patchedDocument.settings.name || definition.name,
                         maxAge: definition.defaultMaxAge,
                         minPrice: definition.defaultMinPrice,
                     })
@@ -320,14 +331,42 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         return choices
     }
 
+    getAutoLinkingSuggestions(id: string) {
+        // Force a mapping of certain fields to multiple or other fields
+        const map = {
+            "member.address": [
+                "member.address",
+                "parents[0].address",
+                "parents[1].address"
+            ],
+            "debtor.firstName": [
+                "parents[0].firstName",
+                "parents[1].firstName"
+            ],
+            "debtor.lastName": [
+                "parents[0].lastName",
+                "parents[1].lastName"
+            ],
+            "debtor.address": [
+                "parents[0].address",
+                "parents[1].address"
+            ]
+        }
+        if (map[id]) {
+            return map[id]
+        }
+        return [id]
+    }
+
     getLinkedFields(linkedField: RecordSettings) {
         return this.patchedDocument.settings.linkedFields.get(linkedField.id) ?? []
     }
 
     autoLink() {
+        const linkedInside: Set<string> = new Set()
         const globalData = this.getDefaultGlobalData()
         for (const field of this.patchedDocument.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
-            if (this.editingAnswers.find(a => a.settings.id === field.id)) {
+            if (this.editingAnswers.find(a => a.settings.id === field.id) && !linkedInside.has(field.id)) {
                 continue;
             }
             const d = globalData[field.id]
@@ -335,35 +374,48 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 // add answer
                 d.settings = field
                 this.editingAnswers.push(d)
+                linkedInside.add(field.id)
             }
         }
 
-        for (const field of this.patchedDocument.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
-            if (this.getLinkedFields(field).length) {
-                // Already linked
-                continue
-            }
-            const choices = this.getLinkedFieldsChoices(field)
-            for (const choice of choices) {
-                if (choice.value === field.id) {
-                    this.setLinkedFields(field, [choice.value])
-                    break
+        for (const category of this.patchedDocument.privateSettings.templateDefinition.documentFieldCategories) {
+            for (const field of category.getAllRecords()) {
+                const existing = this.getLinkedFields(field);
+                if (existing.length && !linkedInside.has(field.id)) {
+                    // Already linked
+                    continue
                 }
-                // Return the first record which category name and record name all contain each word of the field label
-                const haystack = (choice.categories ?? []).join(' ') + ' ' + choice.label
-                const split = field.name.trim().split(" ")
-                if (split.length === 0) {
-                    continue;
-                }
-                let found = true;
-                for (const part of split) {
-                    if (!StringCompare.contains(haystack, part)) {
-                        found = false;
-                        break;
+                const choices = this.getLinkedFieldsChoices(field)
+
+                for (const choice of choices) {
+                    // Return the first record which category name and record name all contain each word of the field label
+                    const haystack = (choice.categories ?? []).join(' ') + ' ' + choice.label;
+                    const split = (category.name.trim() + " " + field.name.trim()).split(" ")
+                    if (split.length === 0) {
+                        continue;
+                    }
+                    let found = true;
+                    for (const part of split) {
+                        if (!StringCompare.contains(haystack, part)) {
+                            found = false;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        this.setLinkedFields(field, [...this.getLinkedFields(field), choice.value]);
+                        linkedInside.add(field.id)
                     }
                 }
-                if (found) {
-                    this.setLinkedFields(field, [choice.value]);
+                const suggestions = this.getAutoLinkingSuggestions(field.id);
+
+                for (const id of suggestions) {
+                    for (const choice of choices) {
+                        if (choice.value === id) {
+                            this.setLinkedFields(field, [...this.getLinkedFields(field), choice.value])
+                            linkedInside.add(field.id)
+                            break
+                        }
+                    }
                 }
             }
         }
@@ -371,6 +423,18 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
     get title() {
         return this.isNew ? "Nieuw document" : "Document bewerken"
+    }
+
+    get name() {
+        return this.patchedDocument.settings.name
+    }
+
+    set name(name: string) {
+        this.patchDocument = this.patchDocument.patch({
+            settings: DocumentSettings.patch({
+                name
+            })
+        })
     }
 
     isLinkedFieldDefault(field: RecordSettings) {
@@ -743,8 +807,18 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         })
     }
 
-    async validate() {
-        // todo: validate information before continueing
+    validate() {
+        const errors = new SimpleErrors()
+
+        if (this.patchedDocument.settings.name.length == 0) {
+            errors.addError(new SimpleError({
+                code: 'invalid_field',
+                field: 'name',
+                message: 'Vul een naam in voor het document'
+            }))
+        }
+
+        errors.throwIfNotEmpty()
     }
 
     beforeDestroy() {
@@ -757,6 +831,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         }
 
         this.saving = true
+        this.errorBox = null;
 
         try {
             // Make sure answers are updated
@@ -767,8 +842,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 return
             }
 
-            await this.validate()
-
+            this.validate()
             const patch: PatchableArrayAutoEncoder<DocumentTemplatePrivate> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplatePrivate>
 
             if (this.isNew) {

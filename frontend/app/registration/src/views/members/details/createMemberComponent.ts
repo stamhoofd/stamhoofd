@@ -5,7 +5,7 @@ import { BuiltInEditMemberStep, EditMemberStepsManager, EditMemberStepType } fro
 export async function createMemberComponent() {
     const stepManager = new EditMemberStepsManager(
         [
-            new BuiltInEditMemberStep(EditMemberStepType.Details, true)
+            new BuiltInEditMemberStep(EditMemberStepType.Details, true, false)
         ], 
         [],
         undefined,
