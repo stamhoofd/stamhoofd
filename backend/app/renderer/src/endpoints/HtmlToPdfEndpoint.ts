@@ -1,12 +1,16 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { verifyInternalSignature } from "@stamhoofd/backend-env";
 import { QueueHandler } from "@stamhoofd/queues";
 import formidable from 'formidable';
+import { promises as fs } from "fs";
 import puppeteer, { Browser } from "puppeteer";
 
+import { FileCache } from "../helpers/FileCache";
+
 type Params = Record<string, never>;
-type Query = undefined;
-type Body = undefined
+type Body = undefined;
+type Query = undefined
 type ResponseBody = Buffer
 
 /**
@@ -28,23 +32,77 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const form = formidable({ maxFileSize: 20 * 1024 * 1024, keepExtensions: true });
-        const html = await new Promise<string>((resolve, reject) => {
-            form.parse(request.request.request, (err, fields) => {
+        const form = formidable({ 
+            maxTotalFileSize: 20 * 1024 * 1024, 
+            keepExtensions: true
+        });
+        const {html, cacheId, timestamp, signature} = await new Promise<{html: string, cacheId: string, timestamp: Date, signature: string}>((resolve, reject) => {
+            form.parse(request.request.request, async (err, fields, files) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-                if (!fields.html || typeof fields.html !== "string") {
+                if (!files.html) {
                     reject(new SimpleError({
                         code: "missing_field",
                         message: "Field html is required",
                         field: "html"
                     }))
+                    return
                 }
-                resolve(fields.html as string)
+                if (!fields.signature || typeof fields.signature !== "string") {
+                    reject(new SimpleError({
+                        code: "missing_field",
+                        message: "Field signature is required",
+                        field: "signature"
+                    }))
+                    return
+                }
+                if (!fields.cacheId || typeof fields.cacheId !== "string") {
+                    reject(new SimpleError({
+                        code: "missing_field",
+                        message: "Field cacheId is required",
+                        field: "cacheId"
+                    }))
+                    return
+                }
+                if (!fields.timestamp || typeof fields.timestamp !== "string") {
+                    reject(new SimpleError({
+                        code: "missing_field",
+                        message: "Field timestamp is required",
+                        field: "timestamp"
+                    }))
+                    return
+                }
+
+                let html;
+                try {
+                    html = await fs.readFile(files.html.filepath as string , 'utf8')
+                } catch (e) {
+                    reject(new SimpleError({
+                        code: "invalid_field",
+                        message: "Could not read html",
+                        field: "html"
+                    }))
+                    return
+                }
+
+                resolve({
+                    html,
+                    signature: fields.signature,
+                    cacheId: fields.cacheId,
+                    timestamp: new Date(parseInt(fields.timestamp as string))
+                })
             });
         });
+
+        // Verify signature first
+        if (!verifyInternalSignature(signature, cacheId, timestamp.getTime().toString(), html)) {
+            throw new SimpleError({
+                code: "invalid_signature",
+                message: "Invalid signature"
+            })
+        }
 
         let pdf: Buffer | null = null
         try {
@@ -58,13 +116,14 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 message: "Could not generate pdf"
             })
         }
+        await FileCache.write(cacheId, timestamp, pdf)
         const response = new Response(pdf)
         response.headers["Content-Type"] = "application/pdf"
         response.headers["Content-Length"] = pdf.byteLength.toString()
         return response;
     }
 
-    browsers: ({browser: Browser, count: number}|null)[] = [null, null]
+    browsers: ({browser: Browser, count: number}|null)[] = [null, null, null, null]
     nextBrowserIndex = 0
 
     async useBrowser<T>(callback: (browser: Browser) => Promise<T>): Promise<T> {

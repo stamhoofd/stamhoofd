@@ -1,11 +1,11 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
+import { signInternal } from "@stamhoofd/backend-env";
 import { Document, Member, Token } from "@stamhoofd/models";
-
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined
-type ResponseBody = string
+type ResponseBody = Buffer
 
 /**
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
@@ -56,16 +56,13 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
                 message: "Er ging iets mis bij het aanmaken van het document. Probleem later opnieuw en neem contact met ons op als het probleem blijft herhalen."
             })
         }
-        /*const pdf = await Document.htmlToPdf(html);
-        if (pdf === null) {
-            throw new SimpleError({
-                code: "failed_generating_pdf",
-                message: "Er ging iets mis bij het aanmaken van het document. Probleem later opnieuw en neem contact met ons op als het probleem blijft herhalen."
-            })
-        }*/
-        const response = new Response(html)
-        response.headers["Content-Type"] = "text/plain" // avoid JS execution
-        response.headers["Content-Length"] = html.length
+
+        const response = new Response(Buffer.from(html, 'utf8'))
+        response.headers["content-type"] = "text/plain; charset=utf-8" // avoid JS execution
+        response.headers["content-length"] = Buffer.byteLength(html, 'utf8').toString()
+        response.headers["x-cache-id"] = 'document-' + document.id;
+        response.headers["x-cache-timestamp"] = document.updatedAt.getTime().toString();
+        response.headers["x-cache-signature"] = signInternal('document-' + document.id, document.updatedAt.getTime().toString(), html)
         return response
     }
 }

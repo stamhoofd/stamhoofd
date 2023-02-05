@@ -213,8 +213,14 @@ export class DocumentTemplate extends Model {
 
     private async generateForRegistration(registration: RegistrationWithMember) {
         const {fieldAnswers, missingData} = this.buildAnswers(registration)
+        const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, {limit: 1})
 
         if (!this.checkIncluded(registration, fieldAnswers)) {
+            if (existingDocuments.length > 0) {
+                for (const document of existingDocuments) {
+                    await document.delete()
+                }
+            }
             return null
         }
 
@@ -233,17 +239,17 @@ export class DocumentTemplate extends Model {
         const group = await Group.getByID(registration.groupId)
         const description = `${registration.member.details.name}, ${group ? group.settings.name : ''}`;
 
-        const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, {limit: 1})
         if (existingDocuments.length > 0) {
-            const document = existingDocuments[0]
-            await this.updateDocumentFor(document, registration)
-            document.data.name = this.settings.name
-            document.data.description = description
-            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
-                document.status = this.status;
+            for (const document of existingDocuments) {
+                await this.updateDocumentFor(document, registration)
+                document.data.name = this.settings.name
+                document.data.description = description
+                if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                    document.status = this.status;
+                }
+                await document.save()
+                return document;
             }
-            await document.save()
-            return document;
         } else {
             const document = new Document()
             document.organizationId = this.organizationId

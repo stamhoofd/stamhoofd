@@ -8,7 +8,11 @@ export const CORSMiddleware: ResponseMiddleware = {
         response.headers["Access-Control-Max-Age"] = "86400"; // Cache 24h
         
         if (request.method !== "OPTIONS") {
-            response.headers["Access-Control-Expose-Headers"] = "X-Platform-Latest-Version"
+            // Expose all headers
+            const exposeHeaders = Object.keys(response.headers).map(h => h.toLowerCase()).filter(h => !['content-length', 'cache-control', 'content-language', 'content-type', 'expires', 'last-modified', 'pragma'].includes(h)).join(", ");
+            if (exposeHeaders) {
+                response.headers["Access-Control-Expose-Headers"] = exposeHeaders
+            }
         }
         
         // Not needed

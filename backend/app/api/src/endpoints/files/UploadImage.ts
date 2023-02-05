@@ -91,6 +91,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                         message: "Field resolutions is required",
                         field: "resolutions"
                     }))
+                    return;
                 }
                 try {   
                     const resolutions = new ObjectData(JSON.parse(fields.resolutions), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>)

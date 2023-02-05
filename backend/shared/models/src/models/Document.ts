@@ -2,9 +2,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { Image, DocumentStatus, DocumentData, Document as DocumentStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
-import puppeteer from "puppeteer";
 import Handlebars from "handlebars";
-import { QueueHandler } from "@stamhoofd/queues";
 import { Formatter } from "@stamhoofd/utility";
 import { Interval } from "luxon";
 import { ObjectData } from "@simonbackx/simple-encoding";
