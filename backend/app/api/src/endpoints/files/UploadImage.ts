@@ -1,7 +1,7 @@
 
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { SimpleError } from '@simonbackx/simple-errors'
-import { Image as ImageStruct, ResolutionRequest,Version } from '@stamhoofd/structures';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Image as ImageStruct, ResolutionRequest } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from "fs";
 
@@ -10,9 +10,8 @@ type Query = {};
 type Body = undefined
 type ResponseBody = ImageStruct
 
-import { Decoder,field, ObjectData } from '@simonbackx/simple-encoding';
-import { Image } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
+import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
+import { Image, Token } from '@stamhoofd/models';
 
 interface FormidableFile {
   // The size of the uploaded file in bytes.
@@ -22,20 +21,13 @@ interface FormidableFile {
 
   // The path this file is being written to. You can modify this in the `'fileBegin'` event in
   // case you are unhappy with the way formidable generates a temporary path for your files.
-  path: string;
+  filepath: string;
 
   // The name this file had according to the uploading client.
   name: string | null;
 
   // The mime type of this file, according to the uploading client.
-  type: string | null;
-
-  // A Date object (or `null`) containing the time this file was last written to.
-  // Mostly here for compatibility with the [W3C File API Draft](http://dev.w3.org/2006/webapi/FileAPI/).
-  lastModifiedDate: Date | null;
-
-  // If `options.hash` calculation was set, you can read the hex digest out of this var.
-  hash: string | 'sha1' | 'md5' | 'sha256' | null;
+  mimetype: string | null;
 }
 
 export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {    
@@ -78,9 +70,9 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new Error("Not supported without real request")
         }
 
-        const form = formidable({ maxFileSize: 20 * 1024 * 1024, keepExtensions: true });
+        const form = formidable({ maxFileSize: 20 * 1024 * 1024, keepExtensions: true, maxFiles: 1 });
         const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
-            form.parse(request.request.request, (err, fields, file: {file: FormidableFile}) => {
+            form.parse(request.request.request, (err, fields, files) => {
                 if (err) {
                     reject(err);
                     return;
@@ -93,17 +85,25 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                     }))
                     return;
                 }
+                if (!files.file) {
+                    reject(new SimpleError({
+                        code: "missing_field",
+                        message: "Missing file",
+                        field: "file"
+                    }))
+                    return;
+                }
                 try {   
                     const resolutions = new ObjectData(JSON.parse(fields.resolutions), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>)
-                    resolve([file.file, resolutions]);
+                    resolve([files.file, resolutions]);
                 } catch (e) {
                     reject(e)
                 }
             });
         });
 
-        const fileContent = await fs.readFile(file.path);
-        const image = await Image.create(fileContent, file.type ?? undefined, resolutions)
+        const fileContent = await fs.readFile(file.filepath);
+        const image = await Image.create(fileContent, file.mimetype ?? undefined, resolutions)
         return new Response(ImageStruct.create(image));
     }
 }

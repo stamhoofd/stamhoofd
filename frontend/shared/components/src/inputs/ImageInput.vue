@@ -160,6 +160,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         max-height: 110px;
         max-width: calc(100% - 10px);
         height: auto;
+        width: auto;
     }
 
     .icon.trash {

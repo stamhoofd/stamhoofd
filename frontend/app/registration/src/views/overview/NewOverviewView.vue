@@ -489,7 +489,7 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
             return
         }
         if (document.status === DocumentStatus.MissingData) {
-            new Toast('Dit document kan niet gedownload worden omdat er nog gegevens ontbreken. Vul eerst alle ontbrekende gegevens aan en contacteer ons indien het probleem nog niet is verholpen.', 'error').show()
+            new Toast('Dit document kan niet gedownload worden omdat er nog gegevens ontbreken. Vul eerst alle ontbrekende gegevens aan en contacteer ons indien het probleem nog niet is verholpen.', 'error red').show()
             return
         }
         this.downloadingDocuments.push(document)
