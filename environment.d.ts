@@ -111,6 +111,9 @@ declare global {
         // Stripe
         readonly STRIPE_SECRET_KEY: string
         readonly STRIPE_ENDPOINT_SECRET: string
+
+        // Communication with other internal services
+        readonly INTERNAL_SECRET_KEY: string
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment
@@ -144,6 +147,10 @@ declare global {
          */
         readonly environment: "production" | "development" | "staging" | "test"
         readonly PORT: number
+        readonly CACHE_PATH: string
+
+        // Communication with other internal services
+        readonly INTERNAL_SECRET_KEY: string
     }
     
     type FrontendEnvironment = SharedEnvironment & FrontendSpecificEnvironment

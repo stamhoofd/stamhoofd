@@ -1,4 +1,5 @@
 import fs from "fs"
+import crypto from 'crypto';
 
 export function load(settings?: { path?: string, service?: "redirecter" | "api" | "admin" | "renderer" }) {
     // Read environment from file: .env.json
@@ -28,4 +29,13 @@ export function load(settings?: { path?: string, service?: "redirecter" | "api" 
     process.env.AWS_ACCESS_KEY_ID = STAMHOOFD.AWS_ACCESS_KEY_ID+""
     process.env.AWS_SECRET_ACCESS_KEY = STAMHOOFD.AWS_SECRET_ACCESS_KEY+""
     process.env.AWS_REGION = STAMHOOFD.AWS_REGION+""
+}
+
+export function signInternal(...content: string[]) {
+    return crypto.createHmac('sha256', Buffer.from(STAMHOOFD.INTERNAL_SECRET_KEY, 'base64')).update(content.join(';')).digest('base64');
+}
+
+export function verifyInternalSignature(signature: string, ...content: string[]) {
+    const newSignature = signInternal(...content)
+    return crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(newSignature, 'base64'))
 }
