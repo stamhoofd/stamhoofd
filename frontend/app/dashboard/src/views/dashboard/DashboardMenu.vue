@@ -126,7 +126,7 @@
             </button>
 
             <div v-if="fullAccess">
-                <button v-if="enableMemberModule && isBelgium && documentsBeta" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
+                <button v-if="enableMemberModule && isBelgium" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
                     <span class="icon file" />
                     <span>Documenten</span>
                 </button>
@@ -213,10 +213,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     get isBelgium() {
         return this.organization.address.country == Country.Belgium
-    }
-
-    get documentsBeta() {
-        return this.organization.privateMeta?.featureFlags.includes('documents') ?? false
     }
 
     get tree() {

@@ -19,7 +19,7 @@
             Mollie
         </Checkbox>
 
-        <hr>
+        <!--<hr>
         <h2>Nieuwe functies</h2>
 
         <STList>
@@ -33,7 +33,7 @@
                 </p>
             </STListItem>
         </STList>
-        
+        -->
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>

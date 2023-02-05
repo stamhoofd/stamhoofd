@@ -28,7 +28,7 @@
             Logo groter weergeven
         </Checkbox>
         <p class="st-list-description">
-            Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten (want dan wordt het lomp). Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.
+            Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten. Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.
         </p>
 
         <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" />

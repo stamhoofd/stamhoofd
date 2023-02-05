@@ -28,17 +28,21 @@ export class FileCache {
             // ignore
         }
 
-        const files = await fs.readdir(folder);
-        for (const file of files) {
-            const fileTimestamp = parseInt(file.substring(0, file.length - 4));
-            if (fileTimestamp >= timestamp.getTime()) {
-                try {
-                    const data = await fs.readFile(folder + "/" + file)
-                    return data;
-                } catch {
-                    // ignore
+        try {
+            const files = await fs.readdir(folder);
+            for (const file of files) {
+                const fileTimestamp = parseInt(file.substring(0, file.length - 4));
+                if (fileTimestamp >= timestamp.getTime()) {
+                    try {
+                        const data = await fs.readFile(folder + "/" + file)
+                        return data;
+                    } catch {
+                        // ignore
+                    }
                 }
             }
+        } catch {
+            // ignore
         }
 
         return null;
