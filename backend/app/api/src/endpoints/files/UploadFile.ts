@@ -1,7 +1,9 @@
 
-import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints'
-import { SimpleError } from '@simonbackx/simple-errors'
-import { File,Image as ImageStruct, ResolutionRequest,Version } from '@stamhoofd/structures';
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Token } from '@stamhoofd/models';
+import { File } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import formidable from 'formidable';
 import { promises as fs } from "fs";
@@ -12,9 +14,6 @@ type Query = {};
 type Body = undefined
 type ResponseBody = File
 
-import { Decoder,field, ObjectData } from '@simonbackx/simple-encoding';
-import { Image } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
 
 interface FormidableFile {
   // The size of the uploaded file in bytes.
@@ -24,20 +23,13 @@ interface FormidableFile {
 
   // The path this file is being written to. You can modify this in the `'fileBegin'` event in
   // case you are unhappy with the way formidable generates a temporary path for your files.
-  path: string;
+  filepath: string;
 
   // The name this file had according to the uploading client.
-  name: string | null;
+  originalFilename: string | null;
 
   // The mime type of this file, according to the uploading client.
-  type: string | null;
-
-  // A Date object (or `null`) containing the time this file was last written to.
-  // Mostly here for compatibility with the [W3C File API Draft](http://dev.w3.org/2006/webapi/FileAPI/).
-  lastModifiedDate: Date | null;
-
-  // If `options.hash` calculation was set, you can read the hex digest out of this var.
-  hash: string | 'sha1' | 'md5' | 'sha256' | null;
+  mimetype: string | null;
 }
 
 export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {    
@@ -101,7 +93,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             })
         }
 
-        const fileContent = await fs.readFile(file.path);
+        const fileContent = await fs.readFile(file.filepath);
 
         const s3 = new AWS.S3({
             endpoint: STAMHOOFD.SPACES_ENDPOINT,
@@ -116,13 +108,14 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         
         // Also include the source, in private mode
         const fileId = uuidv4();
-        const uploadExt = file.type == "application/pdf" ? "pdf" : "pdf"
-        const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+fileId+"/"+(file.name ?? (fileId+"."+uploadExt));
+        const uploadExt = file.mimetype == "application/pdf" ? "pdf" : "pdf"
+        const filenameWithoutExt = file.originalFilename?.split(".").slice(0, -1).join(".") ?? fileId
+        const key = prefix+(STAMHOOFD.environment ?? "development")+"/"+fileId+"/" + (Formatter.slug(filenameWithoutExt) +"."+uploadExt);
         const params = {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
             Body: fileContent, // TODO
-            ContentType: file.type ?? "application/pdf",
+            ContentType: file.mimetype ?? "application/pdf",
             ACL: "public-read"
         };
 
@@ -131,7 +124,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             server: "https://"+STAMHOOFD.SPACES_BUCKET+"."+STAMHOOFD.SPACES_ENDPOINT,
             path: key,
             size: fileContent.length,
-            name: file.name
+            name: file.originalFilename
         });
 
         await s3.putObject(params).promise();

@@ -1,6 +1,8 @@
 
+import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Image, Token } from '@stamhoofd/models';
 import { Image as ImageStruct, ResolutionRequest } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from "fs";
@@ -9,9 +11,6 @@ type Params = Record<string, never>;
 type Query = {};
 type Body = undefined
 type ResponseBody = ImageStruct
-
-import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
-import { Image, Token } from '@stamhoofd/models';
 
 interface FormidableFile {
   // The size of the uploaded file in bytes.
@@ -24,7 +23,7 @@ interface FormidableFile {
   filepath: string;
 
   // The name this file had according to the uploading client.
-  name: string | null;
+  originalFilename: string | null;
 
   // The mime type of this file, according to the uploading client.
   mimetype: string | null;
