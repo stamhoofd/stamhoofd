@@ -57,7 +57,7 @@
             <p>Kies de inschrijvingsgroepen waarvoor je dit attest wil aanmaken.</p>
             
             <STList v-if="patchedDocument.privateSettings.groups.length">
-                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.id">
+                <STListItem v-for="group of patchedDocument.privateSettings.groups" :key="group.id" :selectable="true" @click="updateGroupAnswers(group)">
                     <h2 class="style-list-title">
                         {{ getGroupName(group) }}
                     </h2>
@@ -87,9 +87,9 @@ import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder, patchC
 import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Dropdown, ErrorBox, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
+import { RecordAnswer, RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
 import { ResolutionFit } from "@stamhoofd/structures";
 import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
 import { FilterGroupEncoded, GroupFilterMode, PropertyFilter, Version } from "@stamhoofd/structures";
@@ -483,6 +483,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         })
     }
 
+
     get availableTypes() {
         return [
             {
@@ -633,6 +634,14 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                     name: "Einddatum",
                                     required: true,
                                     type: RecordType.Date
+                                }),
+                                RecordSettings.create({
+                                    id: "registration.days",
+                                    name: "Aantal dagen",
+                                    description: 'Laat leeg om automatisch te berekenen. Vul in als het aantal dagen minder is dan het aantal dagen van de start tot einddatum (inclusief beide).',
+                                    required: false,
+                                    inputPlaceholder: 'Automatisch',
+                                    type: RecordType.Integer
                                 }),
                             ]
                         })
@@ -798,6 +807,57 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         // Append answers
         return period + (group.fieldAnswers.length ? ("\n" + group.fieldAnswers.map(a => a.descriptionValue).join("\n")): "")
     }
+
+    updateGroupAnswers(group: DocumentTemplateGroup) {
+        const c = this.gotoRecordCategory(group, 0);
+        if (!c) {
+            return;
+        }
+        return this.present({
+            components: [c],
+            modalDisplayStyle: "sheet"
+        });
+    }
+
+    gotoRecordCategory(group: DocumentTemplateGroup, index: number) {
+        if (index >= this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories.length) {
+            const groups = this.patchedDocument.privateSettings.groups.filter(g => g.groupId !== group.groupId)
+            groups.push(group)
+            
+            this.patchDocument = this.patchDocument.patch({
+                privateSettings: DocumentPrivateSettings.patch({
+                    groups
+                })
+            })
+            return
+        }
+
+        const category = this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories[index]
+        return new ComponentWithProperties(FillRecordCategoryView, {
+            category,
+            answers: group.fieldAnswers,
+            markReviewed: true,
+            dataPermission: true,
+            filterDefinitions: [],
+            saveHandler: (fieldAnswers: RecordAnswer[], component: NavigationMixin) => {
+                const g = group.patch({
+                    fieldAnswers: fieldAnswers as any
+                })
+                const c = this.gotoRecordCategory(g, index+1)
+                if (!c) {
+                    component.dismiss({force: true})
+                    return
+                }
+                component.show(c)
+            },
+            filterValueForAnswers: (fieldAnswers: RecordAnswer[]) => {
+                return group.patch({
+                    fieldAnswers: fieldAnswers as any
+                })
+            },
+        })
+    }
+
 
     removeGroup(group: DocumentTemplateGroup) {
         this.patchDocument = this.patchDocument.patch({

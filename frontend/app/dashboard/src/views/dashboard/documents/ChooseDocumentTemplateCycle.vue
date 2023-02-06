@@ -70,7 +70,15 @@ export default class ChooseDocumentTemplateCycle extends Mixins(NavigationMixin)
             name: "Twee inschrijvingsperiodes geleden",
             description: "Bezig met info ophalen...",
             loading: true
-        }
+        },
+        ...new Array(Math.max(this.group.cycle - 2, 0)).fill(0).map((_, index) => {
+            return {
+                cycle: this.group.cycle - 3 - index,
+                name: (index + 3) + " inschrijvingsperiodes geleden",
+                description: "Bezig met info ophalen...",
+                loading: true
+            }
+        })
     ]
 
     canceled = false

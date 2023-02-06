@@ -50,7 +50,10 @@
             <PriceInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
         <ImageInput v-else-if="answer.settings.type == RecordType.Image" v-model="answer.image" :title="label" :required="required" :validator="validator" :resolutions="recordSettings.resolutions" :placeholder="inputPlaceholder" />
-        
+        <STInputBox v-else-if="answer.settings.type == RecordType.Integer" :title="label" error-fields="input" :error-box="errorBox">
+            <NumberInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
+        </STInputBox>
+
         <p v-else class="error-box">
             Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.
         </p>
@@ -75,7 +78,7 @@
 
 
 <script lang="ts">
-import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, ImageInput, PhoneInput,PriceInput, Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
+import { AddressInput,Checkbox,DateSelection, EmailInput, ErrorBox, ImageInput, NumberInput, PhoneInput,PriceInput, Radio,STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components"
 import { RecordAnswer, RecordAnswerDecoder, RecordChoice, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from "@stamhoofd/structures";
 import { Component, Prop,Vue } from "vue-property-decorator";
 
@@ -92,7 +95,8 @@ import { Component, Prop,Vue } from "vue-property-decorator";
         PhoneInput,
         DateSelection,
         PriceInput,
-        ImageInput
+        ImageInput,
+        NumberInput
     }
 })
 export default class RecordAnswerInput extends Vue {
@@ -163,6 +167,9 @@ export default class RecordAnswerInput extends Vue {
     get inputPlaceholder() {
         if (!this.required) {
             if (this.answer.settings.inputPlaceholder.length > 0) {
+                if (this.recordSettings.type === RecordType.Integer) {
+                    return this.answer.settings.inputPlaceholder
+                }
                 return "Optioneel. "+this.answer.settings.inputPlaceholder
             }
             return "Optioneel"

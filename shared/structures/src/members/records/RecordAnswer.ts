@@ -122,6 +122,7 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
             case RecordType.Date: return RecordDateAnswer
             case RecordType.Price: return RecordPriceAnswer;
             case RecordType.Image: return RecordImageAnswer;
+            case RecordType.Integer: return RecordIntegerAnswer;
         }
         throw new SimpleError({
             code: "not_supported",
@@ -367,12 +368,12 @@ export class RecordDateAnswer extends RecordAnswer {
     }
 }
 
-export class RecordPriceAnswer extends RecordAnswer {
+export class RecordIntegerAnswer extends RecordAnswer {
     @field({ decoder: IntegerDecoder, nullable: true })
     value: number | null = null
 
     get stringValue() {
-        return this.value !== null ? Formatter.price(this.value) : "/"
+        return this.value !== null ? this.value.toString() : "/"
     }
 
     get objectValue() {
@@ -401,6 +402,12 @@ export class RecordPriceAnswer extends RecordAnswer {
 
     get isEmpty() {
         return (this.value === null)
+    }
+}
+
+export class RecordPriceAnswer extends RecordIntegerAnswer {
+    get stringValue() {
+        return this.value !== null ? Formatter.price(this.value) : "/"
     }
 }
 

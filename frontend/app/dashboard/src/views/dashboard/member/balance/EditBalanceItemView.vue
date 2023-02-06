@@ -48,7 +48,7 @@
             </STList>
         </template>
 
-        <button v-else-if="member && false" class="button text" type="button" @click="linkRegistration">
+        <button v-else-if="member" class="button text" type="button" @click="linkRegistration">
             <span class="icon link" /><span>Koppelen aan inschrijving</span>
         </button>
 
@@ -175,15 +175,15 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    balanceItem: MemberBalanceItem
+        balanceItem: MemberBalanceItem
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
     
     patchBalanceItem: AutoEncoderPatchType<MemberBalanceItem> = MemberBalanceItem.patch({})
 
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<MemberBalanceItem>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<MemberBalanceItem>) => Promise<void>);
 
     familyManager = new FamilyManager([]);
 
@@ -229,10 +229,11 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
                     }
                 })
             ],
-            member.activeRegistrations.map(r => {
+            member.registrations.map(r => {
                 const group = OrganizationManager.organization.groups.find(g => g.id === r.groupId)
                 return new ContextMenuItem({
                     name: group?.settings.name ?? '?',
+                    description: r.cycle === group?.cycle ? 'Huidige periode' : ((group?.cycle ?? 0) - r.cycle) + " periode(s) geleden",
                     action: () => {
                         this.addPatch({
                             registration: r

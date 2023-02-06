@@ -195,6 +195,11 @@ export class Document extends Model {
                 }
                 return Formatter.year(a)
             });
+            
+            Handlebars.registerHelper('coalesce', (...args) => {
+                return args.find(a => a !== null && a !== undefined) ?? null
+            });
+
             Handlebars.registerHelper('days', (a, b) => {
                 if (!(a instanceof Date) || !(b instanceof Date)) {
                     return 0;
