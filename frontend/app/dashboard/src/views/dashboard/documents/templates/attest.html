@@ -264,8 +264,8 @@
                             Periode 1
                         </td>
                         <td>{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</td>
-                        <td>{{ days registration.startDate registration.endDate }}</td>
-                        <td>{{ formatPrice (div registration.price (days registration.startDate registration.endDate) round=true) }}</td>
+                        <td>{{ coalesce registration.days (days registration.startDate registration.endDate) }}</td>
+                        <td>{{ formatPrice (div registration.price (coalesce registration.days (days registration.startDate registration.endDate)) round=true) }}</td>
                         <td>{{ formatPrice registration.price }}</td>
                     </tr>
                     <tr>

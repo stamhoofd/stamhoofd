@@ -44,7 +44,8 @@ export enum RecordType {
 
     Date = "Date",
     Price = "Price",
-    Image = "Image"
+    Image = "Image",
+    Integer = "Integer"
 }
 
 export enum RecordWarningType {
