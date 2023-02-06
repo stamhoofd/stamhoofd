@@ -28,7 +28,7 @@ import OrderView from './OrderView.vue';
 })
 export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     @Prop()
-    webshopManager: WebshopManager
+        webshopManager: WebshopManager
 
     get preview() {
         return this.webshopManager.preview
@@ -599,7 +599,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         const paymentMethod = new ChoicesFilterDefinition<PrivateOrder>({
             id: "order_paymentMethod",
             name: "Betaalmethode",
-            choices: [PaymentMethod.Transfer, PaymentMethod.Payconiq, PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard, PaymentMethod.Unknown].map(method => {
+            choices: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard, PaymentMethod.Transfer, PaymentMethod.PointOfSale,  PaymentMethod.Unknown].map(method => {
                 return new ChoicesFilterChoice(method, Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(method)))
             }),
             defaultMode: ChoicesFilterMode.Or,
