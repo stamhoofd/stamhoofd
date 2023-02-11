@@ -291,11 +291,12 @@
 </template>
 
 <script lang="ts">
+import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { getPermissionLevelNumber, PermissionLevel, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { getPermissionLevelNumber, PermissionLevel, PrivateWebshop, Product, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -529,13 +530,24 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                     try {
                         // Make sure we have an up to date webshop
                         const webshop = await this.webshopManager.loadWebshopIfNeeded(false)
-                        const duplicate = PrivateWebshop.create({
+                        let duplicate = PrivateWebshop.create({
                             ...webshop,
                             id: undefined, 
                         }).patch({
                             meta: WebshopMetaData.patch({
                                 status: WebshopStatus.Open,
                             })
+                        })
+                        // Set usedStock to 0
+                        const patch: PatchableArrayAutoEncoder<Product> = new PatchableArray()
+                        for (const product of duplicate.products) {
+                            patch.addPatch(Product.patch({
+                                id: product.id,
+                                usedStock: 0
+                            }))
+                        }
+                        duplicate = duplicate.patch({
+                            products: patch
                         })
                         return new ComponentWithProperties(EditWebshopGeneralView, {
                             initialWebshop: duplicate
