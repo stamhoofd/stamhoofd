@@ -1841,10 +1841,10 @@
   dependencies:
     chalk "^4.1.2"
 
-"@simonbackx/simple-networking@^1.14.1":
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.14.1.tgz#9f27b11c4c69443f8cfb9a2d86a42f2b37b02df3"
-  integrity sha512-nn8a2bYuFH2DddcTz4ynfCFn7Dk/MhM9S+9nrrZPNdRw8ZmJup26xpSWARxtHMJ4M4fUzA9YCmnk7lPJOQiIsA==
+"@simonbackx/simple-networking@^1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-networking/-/simple-networking-1.14.2.tgz#3337b4d721617cbe828d4352482e1ecd8f4e5471"
+  integrity sha512-plkVQOxLZwjLyuUxNXNajmlO1aaGbli0Tz5+MtYNFn5WnwEhzoE+wkVftT8XXlQLj2XG1KU8tt6XYRsWyWLgXQ==
 
 "@simonbackx/vue-app-navigation@^1.24.1":
   version "1.24.1"

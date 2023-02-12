@@ -54,15 +54,15 @@ import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 })
 export default class LoginView extends Mixins(NavigationMixin){
     @Prop({ required: true})
-    session!: Session
+        session!: Session
 
     loading = false
 
     @Prop({ default: ""})
-    initialEmail!: string
+        initialEmail!: string
 
     @Prop({ default: null})
-    lock!: string | null
+        lock!: string | null
 
     email = this.initialEmail
     password = ""
@@ -78,7 +78,7 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     @Ref("emailInput")
-    emailInput: EmailInput
+        emailInput: EmailInput
 
     mounted() {
         this.email = this.initialEmail ? this.initialEmail : (this.session.user?.email ?? "");
@@ -100,7 +100,7 @@ export default class LoginView extends Mixins(NavigationMixin){
     }
 
     help() {
-        new CenteredMessage("Geen account", "Vraag aan een beheerder om jou een uitnodiging te sturen. Alleen zo kan je een account aanmaken.").addCloseButton("Sluiten").show()
+        new CenteredMessage("Geen account", "Deze site is enkel voor beheerders van verenigingen. Ben je zelf een beheerder? Vraag aan een beheerder om jou een uitnodiging te sturen. Alleen zo kan je een account aanmaken. Ben je een ouder/lid? Dan moet je inloggen via het ledenportaal van jouw vereniging, vraag die link na bij jouw vereniging of kijk op hun website.").addCloseButton("Sluiten").show()
     }
 
     gotoPasswordForgot() {

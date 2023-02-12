@@ -1,11 +1,8 @@
 
 import { column, Model } from "@simonbackx/simple-database";
-import { Image, DocumentStatus, DocumentData, Document as DocumentStruct } from '@stamhoofd/structures';
+import { Document as DocumentStruct, DocumentData, DocumentStatus } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
-import Handlebars from "handlebars";
-import { Formatter } from "@stamhoofd/utility";
-import { Interval } from "luxon";
-import { ObjectData } from "@simonbackx/simple-encoding";
+import { render } from "../helpers/Handlebars";
 import { RegistrationWithMember } from "./Member";
 
 export class Document extends Model {
@@ -38,6 +35,12 @@ export class Document extends Model {
     status = DocumentStatus.Draft
 
     /**
+     * Assigned when exporting the document
+     */
+    @column({ type: "integer", nullable: true })
+    number: number | null = null
+
+    /**
      * Settings of the document. This information is public
      */
     @column({ type: "json", decoder: DocumentData })
@@ -64,6 +67,7 @@ export class Document extends Model {
         // Convert the field answers in a simplified javascript object
         const data = {
             "id": this.id,
+            "number": this.number,
             "created_at": this.createdAt
         };
 
@@ -181,90 +185,7 @@ export class Document extends Model {
     private getRenderedHtmlForTemplate(htmlTemplate: string): string | null {
         try {
             const context = this.buildContext()
-            Handlebars.registerHelper('eq', (a, b) => a == b);
-            Handlebars.registerHelper('formatPrice', (a) => Formatter.price(a));
-            Handlebars.registerHelper('formatDate', (a, options) => {
-                if (!(a instanceof Date)) {
-                    return ""
-                }
-                return Formatter.dateNumber(a, true)
-            });
-            Handlebars.registerHelper('year', (a, options) => {
-                if (!(a instanceof Date)) {
-                    return ""
-                }
-                return Formatter.year(a)
-            });
-            
-            Handlebars.registerHelper('coalesce', (...args) => {
-                return args.find(a => a !== null && a !== undefined) ?? null
-            });
-
-            Handlebars.registerHelper('days', (a, b) => {
-                if (!(a instanceof Date) || !(b instanceof Date)) {
-                    return 0;
-                }
-                // Calculate absolute amount of days between a and b
-                const start = Formatter.luxon(a).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-                const end = Formatter.luxon(b).set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-                const diff = Interval.fromDateTimes(start, end);
-                const days = diff.length('days');
-                if (isNaN(days)) {
-                    return 0;
-                }
-                return days + 1;
-            });
-            Handlebars.registerHelper('div', (a, b, options) => {
-                if (typeof a !== "number" || typeof b !== "number") {
-                    return 0;
-                }
-                if (b == 0) {
-                    return 0;
-                }
-                if (options.hash.round) {
-                    return Math.round(a / b);
-                }
-                return a / b;
-            });
-            Handlebars.registerHelper('src', (a, options) => {
-                const width = options.hash.width || undefined;
-                const height = options.hash.height || undefined;
-                try {
-                    const image = Image.decode(new ObjectData(a, {version: 0}));
-                    const resolution = image.getResolutionForSize(width, height);
-                    return resolution.file.getPublicPath()
-                } catch (e) {
-                    console.error('src helper:', e);
-                    return "";
-                }
-            });
-            Handlebars.registerHelper('src-width', (a, options) => {
-                const width = options.hash.width || undefined;
-                const height = options.hash.height || undefined;
-                try {
-                    const image = Image.decode(new ObjectData(a, {version: 0}));
-                    const resolution = image.getResolutionForSize(width, height);
-                    return resolution.width;
-                } catch (e) {
-                    console.error('src-width helper:', e);
-                    return 0;
-                }
-            });
-            Handlebars.registerHelper('src-height', (a, options) => {
-                const width = options.hash.width || undefined;
-                const height = options.hash.height || undefined;
-                try {
-                    const image = Image.decode(new ObjectData(a, {version: 0}));
-                    const resolution = image.getResolutionForSize(width, height);
-                    return resolution.height;
-                } catch (e) {
-                    console.error('src-height helper:', e);
-                    return 0;
-                }
-            });
-
-            const template = Handlebars.compile(htmlTemplate);
-            const renderedHtml = template(context);
+            const renderedHtml = render(htmlTemplate, context);
             return renderedHtml;
         } catch (e) {
             console.error('Failed to render document html', e)

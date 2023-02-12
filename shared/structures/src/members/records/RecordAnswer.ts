@@ -141,6 +141,10 @@ export class RecordTextAnswer extends RecordAnswer {
         return this.value ?? "/"
     }
 
+    get objectValue() {
+        return this.value;
+    }
+
     getWarnings(): RecordWarning[] {
         if (!this.settings.warning) {
             return []

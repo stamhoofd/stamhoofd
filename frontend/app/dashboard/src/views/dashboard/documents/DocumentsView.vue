@@ -94,6 +94,23 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
                 grow: false,
             }),
 
+            new Column<Document, number | null>({
+                name: "Nummer", 
+                getValue: (v) => v.number, 
+                compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
+                format: (n) => n ? n.toString() : "Niet toegekend",
+                getStyle: (status) => {
+                    if (status === null) {
+                        return 'gray'
+                    }
+                    return '';
+                },
+                minimumWidth: 100,
+                recommendedWidth: 200,
+                grow: false,
+                enabled: false
+            }),
+
             new Column<Document, string>({
                 name: "Beschrijving", 
                 getValue: (v) => v.data.description, 

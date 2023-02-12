@@ -130,6 +130,11 @@ export class Organization extends Model {
         if (["hallo@stamhoofd.be", "hallo@stamhoofd.nl"].includes(email)) {
             return
         }
+        if (email.startsWith('noreply-')) {
+            // Trim
+            email = email.substring("noreply-".length)
+        }
+        
         if (email.endsWith("@stamhoofd.email")) {
             const uri = email.substring(0, email.length - "@stamhoofd.email".length)
             return await Organization.getByURI(uri)
@@ -664,7 +669,7 @@ export class Organization extends Model {
      * Return default e-mail address for important e-mails that should have the highest deliverability
      */
     getStrongEmail(i18n: I18n) {
-        return '"'+this.name.replace("\"", "\\\"")+'" <'+ (this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
+        return '"'+this.name.replace("\"", "\\\"")+'" <'+ ('noreply-' + this.uri+"@"+i18n.$t("shared.domains.email")) +'>'
     }
 
     getEmail(id: string | null): { from: string; replyTo: string | undefined } {

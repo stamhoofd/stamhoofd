@@ -53,7 +53,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         if (!html) {
             throw new SimpleError({
                 code: "failed_generating",
-                message: "Er ging iets mis bij het aanmaken van het document. Probleem later opnieuw en neem contact met ons op als het probleem blijft herhalen."
+                message: "Er ging iets mis bij het aanmaken van het document. Probeer later opieuw en neem contact met ons op als het probleem blijft herhalen."
             })
         }
 
