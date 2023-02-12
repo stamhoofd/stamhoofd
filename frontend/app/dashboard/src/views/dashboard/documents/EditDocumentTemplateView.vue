@@ -761,7 +761,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                     exportFieldCategories: [
                         RecordCategory.create({
                             name: "Exporteren naar XML voor Belcotax",
-                            description: "De XML-export is complex, en je moet zorvuldig de documentatie doorlezen voor je hier aan begint. Stamhoofd is op geen enkele manier verantwoordelijk voor foutief gebruik van de XML-export functie, en zal geen ondersteuning bieden uit fouten die daaruit voortvloeien.",
+                            description: "De XML-export is complex, en je moet zorvuldig de documentatie (https://www.stamhoofd.be/docs/fiscaal-attest-kinderopvang/) doorlezen voor je hier aan begint.",
                             records: [
                                 RecordSettings.create({
                                     id: "confirmation",
