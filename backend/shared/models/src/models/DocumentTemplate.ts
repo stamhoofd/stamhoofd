@@ -195,6 +195,18 @@ export class DocumentTemplate extends Model {
             fieldAnswers.push(anwer)
         }
 
+        // Verify answers
+        if (!missingData) {
+            for (const answer of fieldAnswers) {
+                try {
+                    answer.validate()
+                } catch (e) {
+                    missingData = true
+                    break;
+                }
+            }
+        }
+
         return {
             fieldAnswers,
             missingData

@@ -1,11 +1,11 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder,field, IntegerDecoder, NumberDecoder, StringDecoder } from "@simonbackx/simple-encoding"
-import { SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, SimpleError } from "@simonbackx/simple-errors";
 import { Formatter, StringCompare } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
 import { Address } from "../../addresses/Address";
 import { Image } from "../../files/Image";
-import { RecordChoice, RecordSettings,RecordType, RecordWarning } from "./RecordSettings"
+import { RecordChoice, RecordSettings,RecordType, RecordWarning, RecordWarningType } from "./RecordSettings"
 
 
 export class RecordAnswer extends AutoEncoder {
@@ -68,6 +68,22 @@ export class RecordAnswer extends AutoEncoder {
     }
 
     getWarnings(): RecordWarning[] {
+        if (!this.isEmpty) {
+            try {
+                this.validate()
+            } catch (e) {
+                if (isSimpleError(e)) {
+                    return [
+                        RecordWarning.create({
+                            id: 'validation-warning-'+this.id,
+                            text: e.getHuman(),
+                            type: RecordWarningType.Error
+                        })
+                    ]
+                }
+                // ignore
+            }
+        }
         return []
     }
 
@@ -133,6 +149,21 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
 }
 export const RecordAnswerDecoder = new RecordAnswerDecoderStatic()
 
+function verifyBelgianNationalNumber(text: string) {
+    const trimmed = text.replace(/[^A-Za-z0-9]+/g, "") // keep A-Z for validation
+    if (trimmed.length != 11) {
+        return false;
+    }
+    const toCheck = parseInt(trimmed.substring(0, trimmed.length - 2))
+    const checksum = parseInt(trimmed.substring(trimmed.length - 2))
+
+    // we calculate the expected checksum. again
+    const realChecksum = 97 - (toCheck % 97); // Dates before 2000
+    const realChecksum2 = 97 - ((2000000000 + toCheck) % 97); // Dates after 2000
+
+    return checksum === realChecksum || checksum === realChecksum2
+}
+
 export class RecordTextAnswer extends RecordAnswer {
     @field({ decoder: StringDecoder, nullable: true })
     value: string | null = null
@@ -146,13 +177,14 @@ export class RecordTextAnswer extends RecordAnswer {
     }
 
     getWarnings(): RecordWarning[] {
+        const base = super.getWarnings();
         if (!this.settings.warning) {
-            return []
+            return base
         }
         if (this.settings.warning.inverted) {
-            return this.value === null || this.value.length == 0 ? [this.settings.warning] : []
+            return this.value === null || this.value.length == 0 ? [this.settings.warning, ...base] : base
         }
-        return this.value !== null && this.value.length > 0 ? [this.settings.warning] : []
+        return this.value !== null && this.value.length > 0 ? [this.settings.warning, ...base] : base
     }
 
     override validate() {
@@ -162,6 +194,16 @@ export class RecordTextAnswer extends RecordAnswer {
                 message: "Dit veld is verplicht",
                 field: "input"
             })
+        }
+
+        if (this.value && this.settings.name.toLocaleLowerCase().includes('rijksregisternummer')) {
+            if (!verifyBelgianNationalNumber(this.value)) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "'" + (this.value) + "' is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
+                    field: "input"
+                })
+            }
         }
     }
 
@@ -178,13 +220,14 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     comments?: string
 
     getWarnings(): RecordWarning[] {
+        const base = super.getWarnings();
         if (!this.settings.warning) {
-            return []
+            return base
         }
         if (this.settings.warning.inverted) {
-            return !this.selected ? [this.settings.warning] : []
+            return !this.selected ? [this.settings.warning, ...base] : base
         }
-        return this.selected ? [this.settings.warning] : []
+        return this.selected ? [this.settings.warning, ...base] : base
     }
 
     get stringValue() {
@@ -230,11 +273,12 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
     }
 
     getWarnings(): RecordWarning[] {
+        const base = super.getWarnings();
         if (this.selectedChoices.length == 0) {
-            return []
+            return base
         }
 
-        const warnings: RecordWarning[] = []
+        const warnings: RecordWarning[] = base
 
         for (const choice of this.selectedChoices) {
             if (choice.warning && !choice.warning.inverted) {
@@ -281,12 +325,13 @@ export class RecordChooseOneAnswer extends RecordAnswer {
     }
 
     getWarnings(): RecordWarning[] {
+        const base = super.getWarnings();
         if (this.selectedChoice === null) {
             // TODO: show warning if inverted
-            return []
+            return base
         }
 
-        const warnings: RecordWarning[] = []
+        const warnings: RecordWarning[] = base
 
         if (this.selectedChoice.warning && !this.selectedChoice.warning.inverted) {
             warnings.push(this.selectedChoice.warning)
@@ -385,13 +430,14 @@ export class RecordIntegerAnswer extends RecordAnswer {
     }
 
     getWarnings(): RecordWarning[] {
+        const base = super.getWarnings();
         if (!this.settings.warning) {
-            return []
+            return base
         }
         if (this.settings.warning.inverted) {
-            return this.value === null || this.value === 0 ? [this.settings.warning] : []
+            return this.value === null || this.value === 0 ? [this.settings.warning, ...base] : base
         }
-        return this.value !== null && this.value !== 0 ? [this.settings.warning] : []
+        return this.value !== null && this.value !== 0 ? [this.settings.warning, ...base] : base
     }
 
     override validate() {
