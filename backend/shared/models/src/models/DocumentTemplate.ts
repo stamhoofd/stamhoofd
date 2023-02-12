@@ -9,6 +9,7 @@ import { Member, RegistrationWithMember } from "./Member";
 import { Registration } from "./Registration";
 import { render } from "../helpers/Handlebars";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
+import { QueueHandler } from "@stamhoofd/queues";
 
 export class DocumentTemplate extends Model {
     static table = "document_templates";
@@ -337,61 +338,63 @@ export class DocumentTemplate extends Model {
     }
 
     async buildAll({generateNumbers = false} = {}) {
-        if (!this.updatesEnabled) {
-            // Check status
+        return await QueueHandler.schedule("documents-build-all/"+this.id, async () => {
+            if (!this.updatesEnabled) {
+                // Check status
+                const documents = await Document.where({ templateId: this.id })
+                for (const document of documents) {
+                    if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                        document.status = this.status;
+                        await document.save();
+                    }
+                }
+                return documents
+            }
+            
+            console.log('Building all documents for template', this.id)
+            const documentSet: Map<string, Document> = new Map()
+
+            for (const groupDefinition of this.privateSettings.groups) {
+                // Get the registrations for this group with this cycle
+                const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId, groupDefinition.cycle)
+
+                for (const registration of registrations) {
+                    const document = await this.generateForRegistration(registration)
+                    if (document) {
+                        documentSet.set(document.id, document)
+                    }
+                }
+            }
+
+            // Delete documents that no longer match and don't have a number yet
             const documents = await Document.where({ templateId: this.id })
             for (const document of documents) {
-                if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
-                    document.status = this.status;
-                    await document.save();
+                if (!documentSet.has(document.id)) {
+                    if (document.number === null) {
+                        await document.delete()
+                    } else {
+                        document.status = DocumentStatus.Deleted;
+                        await document.save();
+                    }
                 }
             }
-            return documents
-        }
-        
-        console.log('Building all documents for template', this.id)
-        const documentSet: Map<string, Document> = new Map()
 
-        for (const groupDefinition of this.privateSettings.groups) {
-            // Get the registrations for this group with this cycle
-            const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.groupId, groupDefinition.cycle)
+            const allDocuments = [...documentSet.values()]
 
-            for (const registration of registrations) {
-                const document = await this.generateForRegistration(registration)
-                if (document) {
-                    documentSet.set(document.id, document)
+            // Generate numbers for all documents
+            if (generateNumbers) {
+                let nextNumber = Math.max(0, ...allDocuments.map(d => d.number).filter(n => n !== null) as number[]) + 1
+                for (const document of allDocuments) {
+                    if (document.number === null && document.status === DocumentStatus.Published) {
+                        document.number = nextNumber;
+                        await document.save();
+                        nextNumber++;
+                    }
                 }
             }
-        }
 
-        // Delete documents that no longer match and don't have a number yet
-        const documents = await Document.where({ templateId: this.id })
-        for (const document of documents) {
-            if (!documentSet.has(document.id)) {
-                if (document.number === null) {
-                    await document.delete()
-                } else {
-                    document.status = DocumentStatus.Deleted;
-                    await document.save();
-                }
-            }
-        }
-
-        const allDocuments = [...documentSet.values()]
-
-        // Generate numbers for all documents
-        if (generateNumbers) {
-            let nextNumber = Math.max(0, ...documents.map(d => d.number).filter(n => n !== null) as number[]) + 1
-            for (const document of documents) {
-                if (document.number === null && document.status === DocumentStatus.Published) {
-                    document.number = nextNumber;
-                    await document.save();
-                    nextNumber++;
-                }
-            }
-        }
-
-        return allDocuments
+            return allDocuments
+        });
     }
 
     private async buildContext() {

@@ -95,7 +95,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             await template.save();
 
             // Update documents
-            template.buildAll().catch(console.error)
+            await template.buildAll()
 
             // Return in response
             updatedTemplates.push(template.getPrivateStructure())
