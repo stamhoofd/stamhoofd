@@ -219,7 +219,7 @@
             <div class="form-box">
                 <p>Naam: <span class="override">{{debtor.lastName}}</span></p>
                 <p>Voornaam: <span class="override">{{debtor.firstName}}</span></p>
-                <p>Identificatienummer van het Rijksregister of, in voorkomend geval, het identificatienummer van de KSZ: <span class="override">{{debtor.nationalRegistryNumber}}</span></p>
+                <p>Identificatienummer van het Rijksregister of, in voorkomend geval, het identificatienummer van de KSZ: <span class="override">{{ coalesce debtor.nationalRegistryNumber "/"}}</span></p>
                 <p class="flex"><span>Straat: <span class="override">{{debtor.address.street}}</span></span><span>Nr: <span
                         class="override">{{debtor.address.number}}</span></span></p>
                 <p class="flex"><span>Postcode: <span class="override">{{debtor.address.postalCode}}</span></span><span>Gemeente: <span
@@ -230,7 +230,7 @@
                 <p>Naam: <span class="override">{{member.lastName}}</span></p>
                 <p>Voornaam: <span class="override">{{member.firstName}}</span></p>
                 <p>Identificatienummer van het Rijksregister of, in voorkomend geval, het identificatienummer van de KSZ: <span
-                        class="override">{{member.nationalRegistryNumber}}</span></p>
+                        class="override">{{coalesce member.nationalRegistryNumber "/"}}</span></p>
                 <p>Geboortedatum: <span class="override">{{ formatDate member.birthDay }}</span></p>
                 <p class="flex"><span>Straat: <span class="override">{{member.address.street}}</span></span><span>Nr: <span
                         class="override">{{member.address.number}}</span></span></p>

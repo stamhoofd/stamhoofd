@@ -57,7 +57,7 @@
                         Volgnummer
                     </h3>
                     <p class="style-definition-text">
-                        {{ document.id }}
+                        {{ document.id }} ({{ document.number || 'Zonder nummer' }})
                     </p>
                 </STListItem>
 

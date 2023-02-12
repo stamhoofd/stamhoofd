@@ -1,12 +1,14 @@
 
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, MemberWithRegistrations, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
-import { Formatter } from "@stamhoofd/utility";
+import { Formatter, Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Document } from "./Document";
 import { Group } from "./Group";
 import { Member, RegistrationWithMember } from "./Member";
 import { Registration } from "./Registration";
+import { render } from "../helpers/Handlebars";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 
 export class DocumentTemplate extends Model {
     static table = "document_templates";
@@ -322,7 +324,7 @@ export class DocumentTemplate extends Model {
         return true;
     }
 
-    async buildAll() {
+    async buildAll({generateNumbers = false} = {}) {
         if (!this.updatesEnabled) {
             // Check status
             const documents = await Document.where({ templateId: this.id })
@@ -332,11 +334,11 @@ export class DocumentTemplate extends Model {
                     await document.save();
                 }
             }
-            return
+            return documents
         }
         
         console.log('Building all documents for template', this.id)
-        const documentSet: Set<string> = new Set()
+        const documentSet: Map<string, Document> = new Map()
 
         for (const groupDefinition of this.privateSettings.groups) {
             // Get the registrations for this group with this cycle
@@ -345,17 +347,102 @@ export class DocumentTemplate extends Model {
             for (const registration of registrations) {
                 const document = await this.generateForRegistration(registration)
                 if (document) {
-                    documentSet.add(document.id)
+                    documentSet.set(document.id, document)
                 }
             }
         }
 
-        // Delete documents that no longer match
+        // Delete documents that no longer match and don't have a number yet
         const documents = await Document.where({ templateId: this.id })
         for (const document of documents) {
             if (!documentSet.has(document.id)) {
-                await document.delete()
+                if (document.number === null) {
+                    await document.delete()
+                } else {
+                    document.status = DocumentStatus.Deleted;
+                    await document.save();
+                }
             }
+        }
+
+        const allDocuments = [...documentSet.values()]
+
+        // Generate numbers for all documents
+        if (generateNumbers) {
+            let nextNumber = Math.max(0, ...documents.map(d => d.number).filter(n => n !== null) as number[]) + 1
+            for (const document of documents) {
+                if (document.number === null && document.status === DocumentStatus.Published) {
+                    document.number = nextNumber;
+                    await document.save();
+                    nextNumber++;
+                }
+            }
+        }
+
+        return allDocuments
+    }
+
+    private async buildContext() {
+        // Convert the field answers in a simplified javascript object
+        const documents = (await this.buildAll({generateNumbers: true})).filter(d => d.status === DocumentStatus.Published && !!d.number).sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0))
+
+        // Check numbers are strictly increasing
+        let lastNumber = 0;
+        for (const document of documents) {
+            if (document.number !== lastNumber + 1) {
+                throw new SimpleError({
+                    code: "invalid_document_number",
+                    message: 'Expected document number to be ' + (lastNumber + 1) + ' but got ' + document.number,
+                    human: "Er ging iets mis bij het nummeren van de documenten (ben je zeker dat je geen documenten hebt verwijderd of toegevoegd sinds de vorige export?). Als je de export nog niet hebt gebruikt in Belcotax kan je de nummering resetten en de export opnieuw proberen.",
+                })
+            }
+            lastNumber = document.number;
+        }
+
+        const data = {
+            "id": this.id,
+            "created_at": this.createdAt,
+            "documents": documents.map(d => d.buildContext()),
+        };
+
+        for (const field of this.settings.fieldAnswers) {
+            const keys = field.settings.id.split('.')
+            let current = data
+            const lastKey = keys.pop()!
+            if (!lastKey) {
+                throw new Error("Invalid field id")
+            }
+            for (const key of keys) {
+                if (!current[key]) {
+                    current[key] = {}
+                }
+                current = current[key]
+
+                if (typeof current !== "object") {
+                    throw new Error("Invalid field type")
+                }
+            }
+            current[lastKey] = field.objectValue
+        }
+
+        return data;
+    }
+
+    async getRenderedXml() {
+        if (!this.privateSettings.templateDefinition.xmlExport) {
+            return null;
+        }
+        
+        try {
+            const context = await this.buildContext()
+            const renderedHtml = render(this.privateSettings.templateDefinition.xmlExport, context);
+            return renderedHtml;
+        } catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                throw e;
+            }
+            console.error('Failed to render document html', e)
+            return null;
         }
     }
 

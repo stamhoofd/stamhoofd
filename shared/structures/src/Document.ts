@@ -76,6 +76,15 @@ export class DocumentTemplateDefinition extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true })
     defaultMinPrice: number | null = null
+
+    @field({ decoder: new ArrayDecoder(RecordCategory), version: 179 })
+    exportFieldCategories: RecordCategory[] = []
+
+    @field({ decoder: StringDecoder, nullable: true, version: 179 })
+    xmlExport: string | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 179 })
+    xmlExportDescription: string | null = null
 }
 
 export class DocumentTemplateGroup extends AutoEncoder {
@@ -153,6 +162,9 @@ export class DocumentData extends AutoEncoder {
 export class Document extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
+
+    @field({ decoder: NumberDecoder, nullable: true, version: 179 })
+    number: number | null = null;
     
     @field({ decoder: new EnumDecoder(DocumentStatus) })
     status: DocumentStatus = DocumentStatus.Draft

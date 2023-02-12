@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="saving" :disabled="!patchedDocument.html" @save="save">
+    <SaveView :title="title" :loading="saving" :disabled="!patchedDocument.html || !patchedDocument.privateSettings.templateDefinition.xmlExport" @save="save">
         <h1>
             {{ title }}
         </h1>
@@ -184,6 +184,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 })
                 this.autoLink();
                 this.loadHtml().catch(console.error)
+                this.loadXML().catch(console.error)
             }
         }
     }
@@ -483,6 +484,19 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         })
     }
 
+    async loadXML() {
+        const imported = ((await import(/* webpackChunkName: "attest-html" */ "!!raw-loader!./templates/attest.xml")).default)
+        if (typeof imported !== "string") {
+            throw new Error("Imported attest xml is not a string")
+        }
+        this.patchDocument = this.patchDocument.patch({
+            privateSettings: DocumentPrivateSettings.patch({
+                templateDefinition: DocumentTemplateDefinition.patch({
+                    xmlExport: imported
+                })
+            })
+        })
+    }
 
     get availableTypes() {
         return [
@@ -743,7 +757,55 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                                 })
                             ]
                         })
-                    ]
+                    ],
+                    exportFieldCategories: [
+                        RecordCategory.create({
+                            name: "Exporteren naar XML voor Belcotax",
+                            description: "De XML-export is complex, en je moet zorvuldig de documentatie doorlezen voor je hier aan begint. Stamhoofd is op geen enkele manier verantwoordelijk voor foutief gebruik van de XML-export functie, en zal geen ondersteuning bieden uit fouten die daaruit voortvloeien.",
+                            records: [
+                                RecordSettings.create({
+                                    id: "confirmation",
+                                    name: "Bevestiging",
+                                    label: "Ik bevestig dat ik de documentatie over de XML-export heb gelezen en alle stappen nauwkeurig heb gevolgd.",
+                                    required: true,
+                                    type: RecordType.Checkbox
+                                })
+                            ]
+                        }),
+                        RecordCategory.create({
+                            name: "Bijkomende informatie",
+                            description: "We hebben nog enkele gegevens nodig die we moeten opnemen in de XML. Vul deze accuraat in.",
+                            records: [
+                                RecordSettings.create({
+                                    id: "organization.contactName",
+                                    name: "Naam contactpersoon",
+                                    required: true,
+                                    type: RecordType.Text
+                                }),
+                                RecordSettings.create({
+                                    id: "organization.phone",
+                                    name: "Telefoonnummer",
+                                    required: true,
+                                    type: RecordType.Phone
+                                }),
+                                RecordSettings.create({
+                                    id: "organization.email",
+                                    name: "E-mailadres",
+                                    required: true,
+                                    type: RecordType.Email,
+                                    description: "Op dit emailadres ontvang je de bevestiging/update van de aangifte."
+                                }),
+                                RecordSettings.create({
+                                    id: "organization.companyNumber",
+                                    name: "Ondernemingsnummer of refertenummer",
+                                    required: true,
+                                    type: RecordType.Text,
+                                    description: "Is jouw vereniging een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd."
+                                })
+                            ]
+                        })
+                    ],
+                    xmlExportDescription: "Het XML-document voor het indienen van de aangifte in Belcotax.",
                 })
             }
         ]
@@ -814,7 +876,11 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             return;
         }
         return this.present({
-            components: [c],
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: c
+                })
+            ],
             modalDisplayStyle: "sheet"
         });
     }

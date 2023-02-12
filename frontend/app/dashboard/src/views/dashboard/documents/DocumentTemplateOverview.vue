@@ -26,13 +26,24 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem v-if="isDraft" :selectable="true" class="left-center" @click="editSettings">
+                <STListItem v-if="isDraft || template.updatesEnabled" :selectable="true" class="left-center" @click="editSettings">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                     <h2 class="style-title-list">
                         Instellingen
                     </h2>
                     <p class="style-description">
                         Wijzig de invulvelden en de instellingen van het document.
+                    </p>
+                    <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+
+                <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/code-export.svg">
+                    <h2 class="style-title-list">
+                        Exporteren naar XML
+                    </h2>
+                    <p class="style-description">
+                        {{ xmlExportDescription }}
                     </p>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
@@ -97,11 +108,13 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder,PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, Spinner, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder,PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { Request } from "@simonbackx/simple-networking";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, Checkbox, FillRecordCategoryView, Spinner, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { DocumentStatus, DocumentTemplatePrivate } from "@stamhoofd/structures";
+import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, RecordAnswer } from "@stamhoofd/structures";
+import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import DocumentsView from "./DocumentsView.vue";
@@ -176,6 +189,30 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
     }
     settingUpdatesEnabled = false;
 
+    async patchTemplate(patch: AutoEncoderPatchType<DocumentTemplatePrivate>) {
+        const arr: PatchableArrayAutoEncoder<DocumentTemplatePrivate> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplatePrivate>
+        patch.id = this.template.id
+        arr.addPatch(patch)
+
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "PATCH",
+                path: "/organization/document-templates",
+                body: arr,
+                decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
+                shouldRetry: false,
+                owner: this
+            })
+            const documentTemplates = response.data
+            const template = documentTemplates.find(t => t.id == this.template.id)
+            if (template) {
+                this.template.set(template)
+            }
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+    }
+
     async toggleUpdatesEnabled() {
         if (this.settingUpdatesEnabled) {
             return
@@ -187,58 +224,19 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
 
         this.settingUpdatesEnabled = true
 
-        const patch: PatchableArrayAutoEncoder<DocumentTemplatePrivate> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplatePrivate>
-        patch.addPatch(DocumentTemplatePrivate.patch({
-            id: this.template.id,
+        await this.patchTemplate(DocumentTemplatePrivate.patch({
             updatesEnabled
-        }))
-
-        try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "PATCH",
-                path: "/organization/document-templates",
-                body: patch,
-                decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
-                shouldRetry: false,
-                owner: this
-            })
-            const documentTemplates = response.data
-            const template = documentTemplates.find(t => t.id == this.template.id)
-            if (template) {
-                this.template.set(template)
-            }
-        } catch (e) {
-            Toast.fromError(e).show()
-        }
+        }));
         this.settingUpdatesEnabled = false
     }
 
     async changeStatus(status: DocumentStatus) {
         this.publishing = true
 
-        const patch: PatchableArrayAutoEncoder<DocumentTemplatePrivate> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplatePrivate>
-        patch.addPatch(DocumentTemplatePrivate.patch({
-            id: this.template.id,
+        await this.patchTemplate(DocumentTemplatePrivate.patch({
             status
-        }))
+        }));
 
-        try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "PATCH",
-                path: "/organization/document-templates",
-                body: patch,
-                decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
-                shouldRetry: false,
-                owner: this
-            })
-            const documentTemplates = response.data
-            const template = documentTemplates.find(t => t.id == this.template.id)
-            if (template) {
-                this.template.set(template)
-            }
-        } catch (e) {
-            Toast.fromError(e).show()
-        }
         this.publishing = false
     }
 
@@ -269,6 +267,86 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
             Toast.fromError(e).show()
         }
         this.deleting = false
+    }
+
+    exportXml() {
+        // Start firing questions
+        const c = this.gotoRecordCategory(0);
+        if (c) {
+            return this.present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: c
+                    })
+                ],
+                modalDisplayStyle: "sheet"
+            });
+        }
+    }
+
+    async generateXML(): Promise<Blob> {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/document-templates/" + encodeURIComponent(this.template.id) + "/xml",
+            shouldRetry: true,
+            timeout: 60 * 1000,
+            owner: this,
+            responseType: "blob"
+        })
+
+        return response.data as Blob
+    }
+
+    async downloadXml() {
+        try {
+            const buffer = await this.generateXML()
+            const saveAs = (await import(/* webpackChunkName: "file-saver" */ 'file-saver')).default.saveAs;
+            saveAs(buffer, Formatter.fileSlug(this.template.settings.name) + ".xml")
+        } catch (e) {
+            if (!Request.isAbortError(e)) {
+                Toast.fromError(e).show()
+            } else {
+                new Toast('Downloaden geannuleerd', 'info').show()
+            }
+        }
+    }
+
+    gotoRecordCategory(index: number) {
+        if (index >= this.template.privateSettings.templateDefinition.exportFieldCategories.length) {
+            this.downloadXml().catch(console.error);
+            return
+        }
+
+        const category = this.template.privateSettings.templateDefinition.exportFieldCategories[index]
+        return new ComponentWithProperties(FillRecordCategoryView, {
+            category,
+            answers: this.template.settings.fieldAnswers,
+            markReviewed: true,
+            dataPermission: true,
+            filterDefinitions: [],
+            saveHandler: async (fieldAnswers: RecordAnswer[], component: NavigationMixin) => {
+                await this.patchTemplate(DocumentTemplatePrivate.patch({
+                    settings: DocumentSettings.patch({
+                        fieldAnswers: fieldAnswers as any
+                    })
+                }));
+
+                const c = this.gotoRecordCategory(index+1)
+                if (!c) {
+                    component.dismiss({force: true})
+                    return
+                }
+                component.show(c)
+            },
+            filterValueForAnswers: (fieldAnswers: RecordAnswer[]) => {
+                return this.template
+            },
+        })
+    }
+
+    get xmlExportDescription() {
+        return this.template.privateSettings.templateDefinition.xmlExportDescription
     }
     
 }

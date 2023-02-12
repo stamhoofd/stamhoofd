@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Verzendingen>
+	<!-- Documentatie: https://financien.belgium.be/sites/default/files/downloads/161-belcotax-brochure-2022-20221209-nl.pdf -->
+	<Verzending>
+		<v0002_inkomstenjaar>{{ year documents.0.registration.startDate }}</v0002_inkomstenjaar>
+		<v0010_bestandtype>BELCOTAX</v0010_bestandtype>
+		<v0011_aanmaakdatum>{{ formatDate (now) format="DD-MM-YYYY" }}</v0011_aanmaakdatum>
+
+        <!-- de naam van de afzender -->
+		<v0014_naam>{{organization.name}}</v0014_naam>
+		<v0015_adres>{{organization.address.street}} {{organization.address.number}}</v0015_adres>
+		<v0016_postcode>{{filterString organization.address.postalCode}}</v0016_postcode>
+		<v0017_gemeente>{{organization.address.city}}</v0017_gemeente>
+		<v0018_telefoonnummer>{{filterString organization.phone type="phone"}}</v0018_telefoonnummer> <!-- ook verplicht -->
+
+        <!-- de naam van de contactpersoon bij de afzender -->
+		<v0021_contactpersoon>{{organization.contactName}}</v0021_contactpersoon>
+		<v0022_taalcode>1</v0022_taalcode> <!-- 1 = NL -->
+		<v0023_emailadres>{{organization.email}}</v0023_emailadres>
+		<v0024_nationaalnr>{{filterString organization.companyNumber}}</v0024_nationaalnr> <!-- ondernemingsnummer -->
+        
+		<v0025_typeenvoi>0</v0025_typeenvoi> <!-- 0=originele verzending, 1= gegroepeerde verbeteringen -->
+		<v0028_landwoonplaats>0</v0028_landwoonplaats>
+
+		<Aangiften>
+			<Aangifte>
+				<a1002_inkomstenjaar>{{ year documents.0.registration.startDate }}</a1002_inkomstenjaar>
+				<a1005_registratienummer>{{filterString organization.companyNumber}}</a1005_registratienummer>
+				<a1011_naamnl1>{{organization.name}}</a1011_naamnl1>
+				<a1013_adresnl>{{organization.address.street}} {{organization.address.number}}</a1013_adresnl>
+				<a1014_postcodebelgisch>{{organization.address.postalCode}}</a1014_postcodebelgisch>
+				<a1015_gemeente>{{organization.address.city}}</a1015_gemeente>
+				<a1016_landwoonplaats>0</a1016_landwoonplaats>
+				<a1020_taalcode>1</a1020_taalcode>
+                <Opgaven>
+					<Opgave32586>
+                        {{#each documents}}
+                        <Fiche28186>
+                            <!-- Inkomstenjaar -->
+                            <f2002_inkomstenjaar>{{ year registration.startDate }}</f2002_inkomstenjaar>
+
+                            <!-- KBO nummer vereniging -->
+							<f2005_registratienummer>{{filterString organization.companyNumber}}</f2005_registratienummer>
+							<f2007_division/> <!-- nvt -->
+
+                            <!-- Fishe type is fiscaal attest kinderopvang -->
+							<f2008_typefiche>28186</f2008_typefiche>
+
+                            <!-- Volgnummer -->
+							<f2009_volgnummer>{{number}}</f2009_volgnummer>
+
+                            <!-- Onduidelijk? -->
+							<!--<f2010_referentie>test-1</f2010_referentie>-->
+
+                            <!-- Rijksregisternummer schuldenaar -->
+							<f2011_nationaalnr>{{filterString debtor.nationalRegistryNumber}}</f2011_nationaalnr>
+
+                            <!-- Achternaam van de schuldenaar -->
+							<f2013_naam>{{debtor.lastName}}</f2013_naam>
+
+                            <!-- De straat en het nummer van de schuldenaar -->
+							<f2015_adres>{{debtor.address.street}} {{debtor.address.number}}</f2015_adres>
+
+                            <!-- Postcode van de schuldenaar -->
+							<f2016_postcodebelgisch>{{filterString debtor.address.postalCode}}</f2016_postcodebelgisch>
+
+                            <!-- Gemeente van de schuldenaar -->
+							<f2017_gemeente>{{debtor.address.city}}</f2017_gemeente>
+
+                            <!-- Land van de schuldenaar nul indien België -->
+							<f2018_landwoonplaats>0</f2018_landwoonplaats>
+
+                            <!-- 
+                                aard van de fiche:
+                                0 = gewoon
+                                1 = wijziging
+                                2 = toevoeging
+                                3 = annulatie
+                            -->
+							<f2028_typetraitement>0</f2028_typetraitement>
+
+							<f2029_enkelopgave325>0</f2029_enkelopgave325> <!-- 1 niet van toepassing op 281.86 -->
+
+							<!-- Voornaam schuldenaar -->
+							<f2114_voornamen>{{debtor.firstName}}</f2114_voornamen>
+
+                            <!-- 
+                                0 : niet van toepassing
+                                1 : Kind & Gezin 
+                                2 : overheid
+                                3 : buitenland
+                                4 : school
+                            -->
+                            {{#if (eq certification.type 'exception')}}
+							    <f86_2031_certificationautorisation>0</f86_2031_certificationautorisation>
+                            {{/if}}
+                            {{#if (eq certification.type 'kind-en-gezin')}}
+							    <f86_2031_certificationautorisation>1</f86_2031_certificationautorisation>
+                            {{/if}}
+                            {{#if (eq certification.type 'authorities')}}
+							    <f86_2031_certificationautorisation>2</f86_2031_certificationautorisation>
+                            {{/if}}
+                            {{#if (eq certification.type 'foreign')}}
+							    <f86_2031_certificationautorisation>3</f86_2031_certificationautorisation>
+                            {{/if}}
+                            {{#if (eq certification.type 'schools')}}
+							    <f86_2031_certificationautorisation>4</f86_2031_certificationautorisation>
+                            {{/if}}
+
+							  <!-- Start + einde periode 1 -->
+							<f86_2055_begindate1>{{ formatDate registration.startDate format="DD-MM-YYYY"  }}</f86_2055_begindate1>
+							<f86_2056_enddate1>{{ formatDate registration.endDate format="DD-MM-YYYY"  }}</f86_2056_enddate1>
+							
+							<!-- controletotaal (totaal van de zones 2.060 tot en met 2.088). -->
+							<f86_2059_totaalcontrole>{{ sum registration.price registration.price }}</f86_2059_totaalcontrole>
+                            <f86_2060_amount1>{{ registration.price }}</f86_2060_amount1> <!-- Bedrag in centen -->
+
+                            <!-- Totaal bedrag -->
+							<f86_2064_totalamount>{{ registration.price }}</f86_2064_totalamount>
+
+
+                            {{#if (neq certification.type 'exception')}}
+							    <f86_2100_certifierpostnr>{{filterString certification.address.postalCode}}</f86_2100_certifierpostnr>
+                            {{/if}}
+							<f86_2101_childcountry>0</f86_2101_childcountry> <!-- Land 0 = België -->
+
+
+							<f86_2102_childaddress>{{member.address.street}} {{member.address.number}}</f86_2102_childaddress>
+							
+							<!-- Voornaam en naam kind -->
+							<f86_2106_childname>{{member.lastName}}</f86_2106_childname>
+                            <f86_2107_childfirstname>{{member.firstName}}</f86_2107_childfirstname>
+
+							{{#if (neq certification.type 'exception')}}
+                                <f86_2109_certifiercbenumber>{{certification.companyNumber}}</f86_2109_certifiercbenumber> <!-- KBO -->
+                            {{/if}}
+
+							<f86_2110_numberofday1>{{ coalesce registration.days (days registration.startDate registration.endDate) }}</f86_2110_numberofday1> <!-- Dagen -->
+							<f86_2111_dailytariff1>{{ div registration.price (coalesce registration.days (days registration.startDate registration.endDate)) round=true }}</f86_2111_dailytariff1> <!-- Dagtarief -->
+
+							<f86_2139_childpostnr>{{filterString member.address.postalCode}}</f86_2139_childpostnr>
+							<f86_2140_childmunicipality>{{member.address.city}}</f86_2140_childmunicipality>
+
+							<f86_2153_nnchild>{{filterString member.nationalRegistryNumber}}</f86_2153_nnchild>  <!-- Rijksregisternummer -->
+
+							{{#if (neq certification.type 'exception')}}
+                                <f86_2154_certifiermunicipality>{{certification.address.city}}</f86_2154_certifiermunicipality>
+								<f86_2155_certifiername>{{certification.name}}</f86_2155_certifiername>
+                                <f86_2156_certifieradres>{{certification.address.street}} {{certification.address.number}}</f86_2156_certifieradres>
+                            {{/if}}
+							
+							<f86_2163_childbirthdate>{{ formatDate member.birthDay format="DD-MM-YYYY"  }}</f86_2163_childbirthdate>
+                        </Fiche28186>
+                        {{/each}}
+                    </Opgave32586>
+				</Opgaven>
+
+				<r8002_inkomstenjaar>{{ year documents.0.registration.startDate }}</r8002_inkomstenjaar>
+				<r8005_registratienummer>{{filterString organization.companyNumber}}</r8005_registratienummer>
+				<r8007_division/>
+				<r8010_aantalrecords>{{ sum documents.length 2 }}</r8010_aantalrecords> <!-- aantal fiches in de aangifte +2 -->
+				<r8011_controletotaal>{{ arraySum documents "number" }}</r8011_controletotaal> <!-- = som van de volgnummers van de fiches (zones 2.009) in de aangifte -->
+				<r8012_controletotaal>{{ mul (arraySum documents "registration.price") 2 }}</r8012_controletotaal> <!-- Som van de zones 2.059 van het gegevensbestand -->
+				<r8013_totaalvoorheffingen>0</r8013_totaalvoorheffingen>
+			</Aangifte>
+		</Aangiften>
+		<r9002_inkomstenjaar>{{ year documents.0.registration.startDate }}</r9002_inkomstenjaar>
+		<r9010_aantallogbestanden>3</r9010_aantallogbestanden> <!-- Aantal aangiftes + 2 -->
+		<r9011_totaalaantalrecords>{{ sum documents.length 4 }}</r9011_totaalaantalrecords> <!-- = (som velden 8.010) + 2 -->
+		<r9012_controletotaal>{{ arraySum documents "number" }}</r9012_controletotaal> <!-- Controletotaal (totaal van de zones 8.011) -->
+		<r9013_controletotaal>{{ mul (arraySum documents "registration.price") 2 }}</r9013_controletotaal> <!-- Controletotaal (totaal van de zones 8.012) -->
+		<r9014_controletotaal>0</r9014_controletotaal> <!-- Controletotaal (totaal van de zones 8.013) -->
+	</Verzending>
+</Verzendingen>
