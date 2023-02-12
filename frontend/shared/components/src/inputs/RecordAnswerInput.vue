@@ -149,8 +149,8 @@ export default class RecordAnswerInput extends Vue {
 
     mounted() {
         if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.isValid()
+            this.validator.addValidation(this, async () => {
+                return await this.isValid()
             })
         }
 
@@ -212,7 +212,7 @@ export default class RecordAnswerInput extends Vue {
     }
 
     async isValid(): Promise<boolean> {
-        if (this.allOptional) {
+        if (this.allOptional && this.answer.isEmpty) {
             return Promise.resolve(true)
         }
         try {

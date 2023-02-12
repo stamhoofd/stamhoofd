@@ -67,12 +67,13 @@
                                 <button type="button" @mouseup.left="toggleSort(column)" @mousedown.left="columnDragStart($event, column)" @touchstart="columnDragStart($event, column)">
                                     <span>{{ column.name }}</span>
 
-                                    <span v-if="sortBy === column"
-                                          class="sort-arrow icon"
-                                          :class="{
-                                              'arrow-up-small': sortDirection == 'ASC',
-                                              'arrow-down-small': sortDirection == 'DESC',
-                                          }"
+                                    <span
+                                        v-if="sortBy === column"
+                                        class="sort-arrow icon"
+                                        :class="{
+                                            'arrow-up-small': sortDirection == 'ASC',
+                                            'arrow-down-small': sortDirection == 'DESC',
+                                        }"
                                     />
                                 </button>
                                 <span v-if="index < columns.length - 1" class="drag-handle-container"><span class="drag-handle" @mousedown="handleDragStart($event, column)" @touchstart="handleDragStart($event, column)" /></span>
@@ -173,10 +174,10 @@ enum SortDirection {
 
 class EnabledColumnConfiguration extends AutoEncoder {
     @field({ decoder: StringDecoder })
-    id: string
+        id: string
 
     @field({ decoder: NumberDecoder })
-    width: number
+        width: number
 }
 
 /**
@@ -184,16 +185,16 @@ class EnabledColumnConfiguration extends AutoEncoder {
  */
 class ColumnConfiguration extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EnabledColumnConfiguration) })
-    columns: EnabledColumnConfiguration[] = []
+        columns: EnabledColumnConfiguration[] = []
 
     @field({ decoder: BooleanDecoder, optional: true })
-    canCollapse = false
+        canCollapse = false
 
     @field({ decoder: StringDecoder, optional: true })
-    sortColumnId?: string
+        sortColumnId?: string
 
     @field({ decoder: new EnumDecoder(SortDirection), optional: true })
-    sortDirection:  SortDirection = SortDirection.Ascending
+        sortDirection:  SortDirection = SortDirection.Ascending
 }
 
 @Component({
@@ -210,51 +211,51 @@ class ColumnConfiguration extends AutoEncoder {
 })
 export default class TableView<Value extends TableListable> extends Mixins(NavigationMixin) {
     @Prop({ required: true})
-    title!: string
+        title!: string
 
     @Prop({ required: false})
-    backHint?: string
+        backHint?: string
 
     @Prop({ default: "" })
-    description!: string
+        description!: string
 
     // This contains the data we want to show
     @Prop({ required: true})
-    allValues!: Value[]
+        allValues!: Value[]
 
     @Prop({ required: false, default: () => [] })
-    actions!: TableAction<Value>[]
+        actions!: TableAction<Value>[]
 
     @Prop({ required: false, default: null })
-    estimatedRows!: number | null
+        estimatedRows!: number | null
 
     @Prop({ required: true})
-    filterDefinitions!: FilterDefinition<Value, any, any>[]
+        filterDefinitions!: FilterDefinition<Value, any, any>[]
 
     selectedFilter: Filter<Value> | null = null
     searchQuery = ""
 
     // Where to store the latest column configuration, so we can reload it instead of switching to the defaults each time
     @Prop({ required: true})
-    columnConfigurationId!: string
+        columnConfigurationId!: string
 
     @Prop({ required: true})
-    allColumns!: Column<Value, any>[]
+        allColumns!: Column<Value, any>[]
 
     @Prop({ required: false })
-    organization?: Organization
+        organization?: Organization
 
     /**
      * Prefix column in wrapped state
      */
     @Prop({ required: false, default: null })
-    prefixColumn!: Column<Value, any> | null
+        prefixColumn!: Column<Value, any> | null
 
     @Prop({ required: false, default: null })
-    defaultSortColumn!: Column<Value, any> | null
+        defaultSortColumn!: Column<Value, any> | null
 
     @Prop({ required: false, default: null })
-    defaultSortDirection!: SortDirection | null
+        defaultSortDirection!: SortDirection | null
 
     get showPrefix() {
         return this.prefixColumn !== null && this.wrapColumns && this.prefixColumn.enabled
