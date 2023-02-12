@@ -984,6 +984,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                 body: patch,
                 decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
                 shouldRetry: false,
+                timeout: 5 * 60 * 1000,
                 owner: this
             })
             const updatedDocument = response.data[0]

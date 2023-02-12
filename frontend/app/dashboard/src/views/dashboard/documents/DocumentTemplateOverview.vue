@@ -201,6 +201,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
                 body: arr,
                 decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
                 shouldRetry: false,
+                timeout: 5 * 60 * 1000,
                 owner: this
             })
             const documentTemplates = response.data
@@ -260,6 +261,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
                 body: patch,
                 decoder: new ArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>),
                 shouldRetry: false,
+                timeout: 60 * 1000,
                 owner: this
             })
             this.pop({force: true})
@@ -290,7 +292,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
             method: "GET",
             path: "/organization/document-templates/" + encodeURIComponent(this.template.id) + "/xml",
             shouldRetry: true,
-            timeout: 60 * 1000,
+            timeout: 5 * 60 * 1000,
             owner: this,
             responseType: "blob"
         })
@@ -314,7 +316,10 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
 
     gotoRecordCategory(index: number) {
         if (index >= this.template.privateSettings.templateDefinition.exportFieldCategories.length) {
-            this.downloadXml().catch(console.error);
+            const pendingToast = new Toast("Aanmaken...", "spinner").setProgress(0).setHide(null).show()
+            this.downloadXml().catch(console.error).finally(() => {
+                pendingToast.hide()
+            });
             return
         }
 
