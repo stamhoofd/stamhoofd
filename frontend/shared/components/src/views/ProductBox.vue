@@ -3,7 +3,7 @@
         <svg width="100%" height="100%" class="maskingSvg">
             <defs>
                 <mask :id="'ProductBoxMask-'+product.id">
-                    <rect x="0" y="0" width="100%" height="100%" fill="white" rx="5px" />
+                    <rect x="0" y="0" width="100%" height="100%" fill="white" rx="5px" style="width: 100%; height: 100%; display: block;" />
                     <circle cx="0" cy="50%" r="15px" fill="black" />
                 </mask>
             </defs>
@@ -347,14 +347,16 @@ export default class ProductBox extends Mixins(NavigationMixin){
         padding: 15px 0 15px 15px;
 
         img {
-            width: 70px;
-            height: 70px;
+            width: auto;
+            height: auto;
+            max-width: 70px;
+            max-height: 70px;
             border-radius: $border-radius;
             display: block;
 
             @media (min-width: 340px) {
-                width: 80px;
-                height: 80px;
+                max-width: 80px;
+                max-height: 80px;
             }
         }
     }
@@ -389,8 +391,10 @@ export default class ProductBox extends Mixins(NavigationMixin){
             padding: 15px 15px 15px 15px;
 
             img {
-                width: 100px;
-                height: 100px;
+                width: auto;
+                height: auto;
+                max-width: 100px;
+                max-height: 100px;
             }
         }
 
@@ -399,6 +403,8 @@ export default class ProductBox extends Mixins(NavigationMixin){
                 display: block;
                 z-index: -1;
                 position: absolute;
+                height: 100%;
+                width: 100%;
             }
             
             background: none;

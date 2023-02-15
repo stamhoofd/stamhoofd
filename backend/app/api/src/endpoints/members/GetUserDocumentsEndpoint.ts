@@ -34,6 +34,10 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         const memberIds = members.map(m => m.id)
         const templateIds = templates.map(t => t.id)
 
+        if (memberIds.length == 0) {
+            return new Response([]);
+        }
+
         const documents = (await Document.where({ 
             memberId: {
                 sign: 'IN',

@@ -188,7 +188,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
             }
         }
 
-        if (this.mollieOnboarding?.canReceivePayments && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
+        if ((this.mollieOnboarding?.canReceivePayments || this.useTestPayments) && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
             return PaymentProvider.Mollie
         }
 

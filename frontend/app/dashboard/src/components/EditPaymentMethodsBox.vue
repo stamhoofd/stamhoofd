@@ -253,7 +253,7 @@ export default class EditPaymentMethodsBox extends Vue {
             case PaymentMethod.iDEAL:
             case PaymentMethod.CreditCard:
             case PaymentMethod.Bancontact: {
-                if (!this.organization.privateMeta?.mollieOnboarding || !this.organization.privateMeta.mollieOnboarding.canReceivePayments) {
+                if (!this.organization.privateMeta?.mollieOnboarding || (!this.organization.privateMeta.mollieOnboarding.canReceivePayments && !this.organization.privateMeta.useTestPayments)) {
                     return "Je kan "+PaymentMethodHelper.getName(paymentMethod)+" niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts."
                 }
                 break
