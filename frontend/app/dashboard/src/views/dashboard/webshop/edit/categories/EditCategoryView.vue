@@ -156,7 +156,7 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
         cp.productIds.addPut(product.id)
         p.categories.addPatch(cp)
         
-        this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.webshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
+        this.present(new ComponentWithProperties(EditProductView, { product, webshop: this.patchedWebshop.patch(p), isNew: true, saveHandler: (patch: AutoEncoderPatchType<PrivateWebshop>) => {
             // Merge both patches
             this.addPatch(p.patch(patch))
 
