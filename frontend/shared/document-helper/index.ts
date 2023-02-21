@@ -107,7 +107,7 @@ export async function downloadDocuments(documents: Document[], owner?: any) {
         const promises = new Array(maxConcurrency).fill(0).map(async () => {
             for (const [index, document] of entries) {
                 const buffer = await getDocumentPdfBuffer(document, owner)
-                zip.file(Formatter.fileSlug(document.data.name + " - " + document.data.description) + ".pdf", buffer)
+                zip.file(Formatter.fileSlug(document.id + " - " + document.data.name + " - " + document.data.description) + ".pdf", buffer)
                 pendingToast?.setProgress((index + 1) / documents.length)
             }
         })
