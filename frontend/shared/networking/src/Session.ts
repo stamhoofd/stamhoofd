@@ -1,5 +1,5 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
-import { SimpleErrors } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { KeychainedResponseDecoder, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator"
@@ -354,11 +354,16 @@ export class Session implements RequestMiddleware {
                 await this.token.refresh(this.server, () => request.shouldRetry)
                 console.log("Retrying request...")
             } catch (e) {
-                if (Request.isNetworkError(e)) {
-                    this.temporaryLogout()
-                } else {
-                    this.logout();
+                if (isSimpleError(e) || isSimpleErrors(e)) { 
+                    if (e.hasCode("invalid_refresh_token")) {
+                        console.log("Refresh token is invalid, logout")
+                        this.logout();
+                        return false;
+                    }
                 }
+                
+                // Something went wrong
+                this.temporaryLogout()
                 return false;
             }
             return true

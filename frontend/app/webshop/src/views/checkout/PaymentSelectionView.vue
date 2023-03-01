@@ -174,10 +174,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
             this.loading = false
             this.goToOrder(response.data.order.id, this)
             
-        } catch (e) {
-            console.error(e)
-            
-
+        } catch (e) {            
             let error = e
 
             if (isSimpleError(e)) {
@@ -189,20 +186,28 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     // A cart error: force a reload and go back to the cart.
                     await WebshopManager.reload()
                     
-                    this.present(new ComponentWithProperties(NavigationController, { root: new ComponentWithProperties(CartView, {})}).setDisplayStyle("popup"))
-                    this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                    if (this.webshop.meta.cartEnabled) {
+                        this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                    } else {
+                        this.dismiss({ force: true })
+                    }
+                    Toast.fromError(e).show()
                 } else if (error.hasFieldThatStartsWith("fieldAnswers")) {
                     // A cart error: force a reload and go back to the cart.
                     await WebshopManager.reload()
-                    this.pop({ force: true })
+
+                    if (this.webshop.meta.cartEnabled) {
+                        this.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                    } else {
+                        this.dismiss({ force: true })
+                    }
+
                     Toast.fromError(e).show()
                 }
 
 
             }
             this.errorBox = new ErrorBox(e)
-
-            
         }
         this.loading = false
     }

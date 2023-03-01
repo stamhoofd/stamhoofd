@@ -98,6 +98,11 @@
     }
 }
 
+.style-title-2-larger {
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: $font-weight-semibold;
+}
 
 .style-title-2 {
     font-size: 18px;
@@ -307,6 +312,19 @@
     @media (max-width: 400px) {
         // Fix zoom on mobile devices
         font-size: 16px;
+    }
+}
+
+.style-input-box {
+    border: $border-width solid $color-border;
+    background: $color-background;
+    border-radius: $border-radius;
+    transition: border-color 0.2s;
+
+    &:focus,
+    &:focus-within {
+        border-color: $color-primary;
+        box-shadow: 0 0 0 1px $color-primary;
     }
 }
 
@@ -605,6 +623,11 @@
             padding-bottom: 15px;
         }
 
+        > h2.larger {
+            @extend .style-title-2-larger;
+            padding-bottom: 15px;
+        }
+
         > h2.style-with-button {
             > *:first-child {
                 padding-bottom: 15px;
@@ -714,5 +737,93 @@
 
     .middle {
         font-weight: 600;
+    }
+}
+
+.style-wysiwyg {
+    strong {
+        font-weight: bold;
+
+        p:not([class]) & {
+            color: $color-dark;
+        }
+    }
+
+    em {
+        font-style: italic;
+    }
+
+    p:not([class]) {
+        font-size: 16px;
+        font-weight: $font-weight-default;
+        line-height: 1.5;
+        color: $color-gray-text;
+    }
+
+    p:empty::after {
+        content: "\200B";
+        visibility: hidden;
+    }
+
+    p.warning-box, p.info-box {
+        display: block !important;
+    }
+
+    h2 {
+        @extend .style-title-2;
+        color: $color-dark;
+        padding: 5px 0;
+    }
+
+    h3 {
+        @extend .style-title-3;
+        color: $color-dark;
+        padding: 5px 0;
+    }
+
+    a {
+        &, &:link, &:visited {
+            color: $color-primary;
+            font-weight: $font-weight-semibold;
+            text-decoration: underline;
+        }
+    }
+
+    ul, ol {
+        padding-left: 25px;
+
+        li {
+            margin: 4px 0;
+            
+            font-size: 16px;
+            font-weight: $font-weight-default;
+            line-height: 1.5;
+            color: $color-gray-text;
+        }
+    }
+
+    hr {
+        // Override selection area
+        padding: 15px 0;
+        margin: 0;
+        background: none;
+        display: block;
+        border: 0;
+    
+        &:after {
+            content: "";
+            display: block;
+            height: 1px;
+            background: $color-border;
+            width: 100%;
+        }
+    
+        &.ProseMirror-selectednode {
+            &:after {
+                background: $color-primary;
+                box-shadow: 0 0 0 1px $color-primary;
+                border-radius: 4px;
+            }
+        }
     }
 }

@@ -35,7 +35,7 @@
                 </p>
             </div>
             <figure v-if="imageSrc">
-                <img :src="imageSrc">
+                <img :src="imageSrc" :width="imgWidth" :height="imgHeight" :alt="product.name">
             </figure>
             <figure v-else>
                 <span class="icon arrow-right-small gray" />
@@ -123,38 +123,28 @@ export default class ProductBox extends Mixins(NavigationMixin){
             return prev + item.amount - item.reservedAmount
         }, 0)
     }
+
+    get imageResolution() {
+        return this.product.images[0]?.getResolutionForSize(100, 100)
+    }
     
     get imageSrc() {
-        return this.product.images[0]?.getPathForSize(100, 100)
+        return this.imageResolution?.file.getPublicPath()
+    }
+
+    get imgWidth() {
+        return this.imageResolution?.width
+    }
+
+    get imgHeight() {
+        return this.imageResolution?.height
     }
 
     onClicked() {
-        /*if (!this.product.enabled) {
-            new Toast("Dit artikel is tijdelijk onbeschikbaar", "error red").show()
-            return;
-        }
+        const editExisting = this.product.isUnique
+        const oldItem = editExisting ? this.cart.items.find(i => i.product.id == this.product.id) : undefined
 
-        if (!this.product.isEnabled) {
-            if (this.product.enableInFuture && this.product.enableAfter) {
-                new Toast(`Dit artikel is beschikbaar vanaf ${Formatter.dateTime(this.product.enableAfter)}`, "error red").show()
-                return;
-            }
-
-            new Toast("Dit artikel is niet meer beschikbaar.", "error red").show()
-            return;
-        }
-
-        if (this.product.isSoldOut) {
-            new Toast("Dit artikel is uitverkocht", "error red").show()
-            return;
-        }
-
-        if (this.product.remainingStock != null && this.product.remainingStock <= this.pendingReservationCount) {
-            new Toast("Je hebt het maximaal aantal stuks bereikt dat je nog kan bestellen van dit artikel.", "error red").show()
-            return;
-        }*/
-
-        const cartItem = CartItem.create({
+        const cartItem = oldItem?.clone() ?? CartItem.create({
             product: this.product,
             productPrice: this.product.prices[0]
         })
@@ -163,6 +153,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
             this.show(new ComponentWithProperties(CartItemView, { 
                 admin: this.admin,
                 cartItem,
+                oldItem,
                 cart: this.cart,
                 webshop: this.webshop,
                 saveHandler: this.saveHandler,
@@ -171,6 +162,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
             this.present(new ComponentWithProperties(CartItemView, { 
                 admin: this.admin,
                 cartItem,
+                oldItem,
                 cart: this.cart,
                 webshop: this.webshop,
                 saveHandler: this.saveHandler,
@@ -347,16 +339,16 @@ export default class ProductBox extends Mixins(NavigationMixin){
         padding: 15px 0 15px 15px;
 
         img {
-            width: auto;
+            //width: auto; // breaks layout shift on load
             height: auto;
             max-width: 70px;
-            max-height: 70px;
+            // max-height: 70px; // breaks aspect ratio
             border-radius: $border-radius;
             display: block;
 
             @media (min-width: 340px) {
                 max-width: 80px;
-                max-height: 80px;
+                // max-height: 80px; // breaks aspect ratio
             }
         }
     }
@@ -367,7 +359,10 @@ export default class ProductBox extends Mixins(NavigationMixin){
         background: $color-background;
         border-radius: $border-radius;
         margin: 0;
-        @include style-side-view-shadow();
+        
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.05), 0px 20px 50px $color-shadow, inset 0px 0px 0px 1px $color-shadow;
+        overflow: hidden;
+
         padding-right: 0;
 
         &:active {
@@ -391,14 +386,16 @@ export default class ProductBox extends Mixins(NavigationMixin){
             padding: 15px 15px 15px 15px;
 
             img {
-                width: auto;
+                // width: auto; // breaks layout shift on load
                 height: auto;
                 max-width: 100px;
-                max-height: 100px;
+                // max-height: 100px; // breaks aspect ratio
             }
         }
 
         &.ticket {
+            overflow: visible;
+
             .maskingSvg {
                 display: block;
                 z-index: -1;
@@ -408,7 +405,14 @@ export default class ProductBox extends Mixins(NavigationMixin){
             }
             
             background: none;
-            filter: drop-shadow($color-side-view-shadow 0px 2px 5px);
+
+            // Force hardware acceleration (for filter)
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            position: relative;
+            z-index: 1;
+
+            filter: drop-shadow($color-shadow 0px 20px 50px) drop-shadow(rgba(0, 0, 0, 0.05) 0px 4px 4px);
             box-shadow: none;
 
             > .left {
@@ -428,6 +432,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
             .svg-background {
                 transition: fill 0.2s 0.1s;
+                fill: $color-background;
             }
 
             &:active {

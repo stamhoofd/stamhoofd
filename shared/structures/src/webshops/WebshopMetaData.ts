@@ -13,9 +13,21 @@ import { RecordCategory } from '../members/records/RecordCategory';
 import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
+import { RichText } from '../RichText';
 import { PaymentProviderConfiguration } from '../StripeAccount';
 import { TransferSettings } from './TransferSettings';
 import { WebshopField } from './WebshopField';
+
+export enum WebshopLayout {
+    "Default" = "Default",
+    "Split" = "Split"
+}
+
+export enum DarkMode {
+    "Off" = "Off",
+    "On" = "On",
+    "Auto" = "Auto"
+}
 
 export class WebshopTimeSlot extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -334,7 +346,8 @@ export class WebshopMetaData extends AutoEncoder {
     title = ""
 
     @field({ decoder: StringDecoder })
-    description = ""
+    @field({ decoder: RichText, version: 181, upgrade: (data) => RichText.create({ text: data }), downgrade: (data) => data.text, upgradePatch: (data) => RichText.patch({ text: data }), downgradePatch: (data) => data.text })
+    description = RichText.create({})
 
     @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
     ticketType = WebshopTicketType.None
@@ -398,6 +411,36 @@ export class WebshopMetaData extends AutoEncoder {
      */
     @field({ decoder: new EnumDecoder(WebshopStatus), version: 136 })
     status = WebshopStatus.Open
+
+    @field({ decoder: new EnumDecoder(WebshopLayout), version: 180 })
+    layout = WebshopLayout.Default
+
+    @field({ decoder: new EnumDecoder(DarkMode), version: 182 })
+    darkMode = DarkMode.Off
+
+    @field({ decoder: StringDecoder, nullable: true, version: 183 })
+    color: string | null = null
+
+    @field({ decoder: Image, nullable: true, version: 183 })
+    horizontalLogo: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 183 })
+    squareLogo: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 183 })
+    horizontalLogoDark: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 183 })
+    squareLogoDark: Image | null = null
+
+    @field({ decoder: BooleanDecoder, version: 184 })
+    useLogo = false
+
+    @field({ decoder: BooleanDecoder, optional: true, version: 183 })
+    expandLogo = false
+
+    @field({ decoder: BooleanDecoder, version: 180 })
+    cartEnabled = true
 
     /**
      * Whether the domain name has been validated and is active. Only used to know if this domain should get used emails and in the dashboard.

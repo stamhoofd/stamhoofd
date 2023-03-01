@@ -47,16 +47,16 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class PaymentSelectionList extends Mixins(NavigationMixin){
     @Prop({ default: null })
-    modelValue: PaymentMethod | null
+        modelValue: PaymentMethod | null
 
     @Prop({ required: true }) 
-    organization: Organization
+        organization: Organization
 
     @Prop({ required: true }) 
-    paymentMethods: PaymentMethod[]
+        paymentMethods: PaymentMethod[]
 
     @Prop({ default: null }) 
-    context: null | "takeout" | "delivery"
+        context: null | "takeout" | "delivery"
 
     mounted() {
         if (!this.selectedPaymentMethod || this.selectedPaymentMethod === PaymentMethod.Unknown || !this.paymentMethods.includes(this.selectedPaymentMethod)) {
@@ -155,9 +155,6 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 </script>
 
 <style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
 .payment-selection-list {
     .payment-method-logo {
         max-height: 30px;

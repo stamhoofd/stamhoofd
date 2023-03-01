@@ -16,7 +16,11 @@
 
         <template v-if="canChangeType">
             <hr>
-            <h2>Type verkoop</h2>
+            <h2>Ticketverkoop</h2>
+
+            <p v-if="isNew" class="info-box">
+                Je kan dit achteraf niet meer wijzigen.
+            </p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label" class="left-center">

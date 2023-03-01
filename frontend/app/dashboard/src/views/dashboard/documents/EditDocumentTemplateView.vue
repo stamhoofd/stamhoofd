@@ -88,7 +88,7 @@ import { SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { AppManager, SessionManager } from "@stamhoofd/networking";
 import { RecordAnswer, RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
 import { ResolutionFit } from "@stamhoofd/structures";
 import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
@@ -148,7 +148,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
 
     mounted() {
         // temporary!
-        if (!this.isNew) {
+        if (!this.isNew && !AppManager.shared.isNative) {
             // Force update of html etc
             this.editingType = 'fiscal';
         }

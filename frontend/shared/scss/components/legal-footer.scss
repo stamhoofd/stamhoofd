@@ -1,0 +1,65 @@
+@use '../base/variables' as *;
+@use '../base/text-styles';
+
+.legal-footer {
+    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    @extend .style-description-small;
+    padding: 30px 15px 15px 15px;
+    margin-top: auto;
+    line-height: 1.6;
+
+     >div {
+         display: flex;
+         flex-direction: row;
+         justify-content: space-between;
+         align-items: flex-start;
+         flex-wrap: wrap-reverse;
+
+        .stamhoofd-logo-container {
+            svg {
+                width: 140px;
+            }
+        }
+
+         @media (max-width: 500px) {
+             .stamhoofd-logo-container {
+                 svg {
+                     width: 120px;
+                 }
+             }
+         }
+
+         >div,
+         >aside {
+             &:first-child {
+                 padding-right: 10px;
+             }
+
+             &:last-child {
+                 --color-primary: #{$color-primary-original};
+                 flex-shrink: 0;
+                 text-align: right;
+
+                 a {
+                     display: flex;
+                     flex-direction: row;
+                     align-items: center;
+
+                     > :last-child {
+                         margin-left: 10px;
+                     }
+
+                     &,
+                     &:hover,
+                     &:link,
+                     &:active,
+                     &:visited {
+                         color: $color-gray-text;
+                         font-weight: 600;
+                         text-decoration: none;
+                     }
+                 }
+             }
+         }
+     }
+ }

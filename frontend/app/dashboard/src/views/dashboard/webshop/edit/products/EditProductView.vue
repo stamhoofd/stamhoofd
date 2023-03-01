@@ -118,11 +118,10 @@
                 <UploadButton v-model="image" :text="image ? 'Vervangen' : 'Uploaden'" :resolutions="resolutions" />
             </div>
         </h2>
-        <p>Foto’s worden altijd bijgeknipt tot een vierkant als ze in het overzicht getoond worden. Je hoeft foto's niet zelf bij te knippen. Een portretfoto wordt dus langs boven en onder afgeknipt, en een foto in landschapsoriëntatie wordt links en rechts afgeknipt. In de detailweergave is het soms mogelijk dat we links en rechts nog wat meer plaats hebben en de foto dus wat breder kunnen tonen.</p>
+        <p>Knip bij voorkeur zelf je foto's wat bij zodat ze mooi weergegeven worden voor je ze uploadt. Een hoge foto kan soms veel plaats in beslag nemen.</p>
 
         <div class="image-box">
             <img v-if="image" :src="imageSrc" class="image">
-            <img v-if="image" :src="imageSrc2" class="image">
         </div>  
         
         <hr>
@@ -615,11 +614,19 @@ export default class EditProductView extends Mixins(NavigationMixin) {
     get resolutions() {
         return [
             ResolutionRequest.create({
-                height: 500,
+                width: 1200,
             }),
             ResolutionRequest.create({
-                height: 250,
-                width: 250,
+                width: 600,
+            }),
+            ResolutionRequest.create({
+                //height: 300,
+                width: 300,
+                fit: ResolutionFit.Cover
+            }),
+            ResolutionRequest.create({
+                //height: 300,
+                width: 100,
                 fit: ResolutionFit.Cover
             })
         ]
@@ -650,20 +657,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
         if (!image) {
             return null
         }
-        return image.getPathForSize(140, 140)
-    }
-
-    get imageSrc2() {
-        const image = this.image
-        if (!image) {
-            return null
-        }
-        const resolution = image.getResolutionForSize(500, 500)
-        if (resolution.height >= resolution.width) {
-            // Never show photo in portrait mode (they will get cropped to a square)
-            return null
-        }
-        return resolution.file.getPublicPath()
+        return image.getPathForSize(140, undefined)
     }
 
     addPatch(patch: AutoEncoderPatchType<Product>) {

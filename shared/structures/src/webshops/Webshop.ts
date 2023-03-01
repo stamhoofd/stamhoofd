@@ -159,6 +159,23 @@ export class Webshop extends AutoEncoder {
         return this.meta.hasTickets
     }
 
+    get canEnableCart() {
+        if (this.products.length === 1) {
+            const product = this.products[0]
+            if (product.isUnique) {
+                return false
+            }
+        }
+        return true
+    }
+
+    get shouldEnableCart() {
+        if (!this.meta.cartEnabled) {
+            return false
+        }
+        return this.canEnableCart
+    }
+
     getDefaultDomain(organization: Organization): string  {
         return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop[""])
     }

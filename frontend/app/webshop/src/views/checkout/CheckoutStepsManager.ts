@@ -1,5 +1,6 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { UrlHelper } from '@stamhoofd/networking';
 import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, RecordAnswer, Webshop } from '@stamhoofd/structures';
@@ -239,14 +240,47 @@ export class CheckoutStepsManager {
     }
 
     static async goNext(step: string | undefined, component: NavigationMixin) {
+        const webshop = WebshopManager.webshop
+        let nextStep: CheckoutStep | undefined;
+
         // Force a save if nothing changed (to fix timeSlot + updated data)
-        const nextStep = await CheckoutStepsManager.getNextStep(step, true)
+        try {
+            nextStep = await CheckoutStepsManager.getNextStep(step, true)
+        } catch (error) {
+            if (isSimpleError(error) || isSimpleErrors(error)) {
+                if (error.hasFieldThatStartsWith("cart")) {
+                    // A cart error: force a reload and go back to the cart.
+                    await WebshopManager.reload()
+                    
+                    if (webshop.meta.cartEnabled) {
+                        component.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                    } else {
+                        component.dismiss({ force: true })
+                    }
+                    Toast.fromError(error).show()
+                } else if (error.hasFieldThatStartsWith("fieldAnswers")) {
+                    // A cart error: force a reload and go back to the cart.
+                    await WebshopManager.reload()
+
+                    if (webshop.meta.cartEnabled) {
+                        component.navigationController!.popToRoot({ force: true }).catch(e => console.error(e))
+                    } else {
+                        component.dismiss({ force: true })
+                    }
+
+                    Toast.fromError(error).show()
+                }
+            }
+            throw error;
+        }
+
         if (!nextStep) {
             throw new SimpleError({
                 code: "missing_config",
                 message: "Er ging iets mis bij het ophalen van de volgende stap"
             })
         }
+        
         component.show({
             components: [await nextStep.getComponent()],
             url: UrlHelper.transformUrl(nextStep.url),

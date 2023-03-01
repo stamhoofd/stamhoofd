@@ -388,6 +388,10 @@ export class Cart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(CartItem) })
     items: CartItem[] = []
 
+    clear() {
+        this.items = []
+    }
+
     addItem(item: CartItem) {
         if (item.amount === 0) {
             return
@@ -463,12 +467,14 @@ export class Cart extends AutoEncoder {
             try {
                 item.validate(webshop, this, true, asAdmin)
                 newItems.push(item)
+
+                if (!webshop.meta.cartEnabled) {
+                    break;
+                }
             } catch (e) {
                 errors.addError(e)
             }
         }
-
-        // TODO: validate stock
 
         this.items = newItems
         errors.throwIfNotEmpty()

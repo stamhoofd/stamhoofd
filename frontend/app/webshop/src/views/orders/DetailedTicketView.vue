@@ -6,8 +6,10 @@
         </STNavigationBar>
         <main>
             <figure class="qr-box">
-                <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness" width="320" height="320">
-                <div v-else class="placeholder" />
+                <div>
+                    <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness" width="370" height="370">
+                    <div v-else class="placeholder" />
+                </div>
             </figure>
             <p class="event-name">
                 {{ webshop.meta.name }}
@@ -66,16 +68,16 @@ import { WebshopManager } from "../../classes/WebshopManager";
 })
 export default class DetailedTicketView extends Mixins(NavigationMixin){
     @Prop({ default: false })
-    logo: boolean
+        logo: boolean
 
     @Prop({ required: true })
-    webshop: Webshop
+        webshop: Webshop
 
     @Prop({ required: true })
-    ticket: TicketPublic
+        ticket: TicketPublic
 
     @Prop({ required: false, default: null })
-    order: Order | null
+        order: Order | null
 
     QRCodeUrl: string | null = null
 
@@ -143,7 +145,13 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         const QRCode = (await import(/* webpackChunkName: "QRCode" */ 'qrcode')).default
 
         // Increase scanning speed on mobile screens by adding more correction levels
-        this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage, { margin: 0, width: 320, height: 320 })
+        this.QRCodeUrl = await QRCode.toDataURL(this.qrMessage, { 
+            margin: 0, 
+            width: 370, 
+            height: 370,
+            dark: "#000000",
+            color: "#ffffff",
+        })
     }
 
 }
@@ -212,15 +220,23 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         align-items: center;
         padding-bottom: var(--st-horizontal-padding, 30px);
 
+        body.dark & {
+            padding-bottom: 20px;
+            margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
 
-        > img, .placeholder {
-            width: 100%;
+            > div {
+                background: white;
+                padding: 30px;
+                border-radius: $border-radius;
+            }
+        }
+
+        img, .placeholder {
+            width: auto;
             height: auto;
-            max-height: calc(100vh - 200px);
-            max-width: calc(100vh - 200px);
-
-            max-height: calc(100dvh - 200px);
-            max-width: calc(100dvh - 200px);
+            max-width: 100%;
+            //max-height: calc(100vh - 200px);
+            //max-height: calc(100dvh - 200px);
         }
 
         .placeholder {

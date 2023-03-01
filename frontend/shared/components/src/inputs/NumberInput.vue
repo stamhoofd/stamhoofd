@@ -42,37 +42,42 @@ import StepperInput from "./StepperInput.vue"
 export default class NumberInput extends Vue {
     /** Price in cents */
     @Prop({ default: 0 })
-    min!: number | null
+        min!: number | null
 
     /** Price in cents */
     @Prop({ default: null })
-    max!: number | null;
+        max!: number | null;
 
     @Prop({ default: false })
-    stepper!: boolean;
+        stepper!: boolean;
 
     valueString = "";
     valid = true;
 
     /** Price in cents */
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     /** Price in cents */
     @Prop({ default: 0 })
-    value!: number | null
+        value!: number | null
 
     @Prop({ default: "" })
-    suffix: string;
+        suffix: string;
 
     @Prop({ default: null })
-    suffixSingular: string | null;
+        suffixSingular: string | null;
 
     @Prop({ default: "" })
-    placeholder!: string
+        placeholder!: string
 
     @Prop({ default: false })
-    floatingPoint!: boolean // In cents if floating point, never returns floats!
+        floatingPoint!: boolean // In cents if floating point, never returns floats!
+
+    @Watch("value")
+    onValueChange() {
+        this.clean()
+    }
 
     get internalValue() {
         return this.value

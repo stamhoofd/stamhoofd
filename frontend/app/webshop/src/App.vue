@@ -13,7 +13,7 @@ import { ComponentWithProperties, HistoryManager, ModalStackComponent, Navigatio
 import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
-import { GetWebshopFromDomainResult } from '@stamhoofd/structures';
+import { DarkMode, GetWebshopFromDomainResult } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -95,9 +95,12 @@ export default class App extends Vue {
                 await I18nController.loadDefault("webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
 
                 // Set color
-                if (response.data.organization.meta.color) {
+                if (response.data.webshop?.meta.color) {
+                    ColorHelper.setColor(response.data.webshop.meta.color)
+                } else if (response.data.organization.meta.color) {
                     ColorHelper.setColor(response.data.organization.meta.color)
                 }
+                ColorHelper.setDarkMode(response.data.webshop?.meta.darkMode ?? DarkMode.Off)
 
                 if (!response.data.webshop) {
                     if (response.data.webshops.length == 0) {
@@ -206,4 +209,9 @@ export default class App extends Vue {
 // We need to include the component styling of vue-app-navigation first
 @use "~@stamhoofd/scss/main";
 @import "~@simonbackx/vue-app-navigation/dist/main.css";
+@import "~@stamhoofd/scss/base/dark-modus";
+
+body {
+    --st-sheet-width: 450px;
+}
 </style>

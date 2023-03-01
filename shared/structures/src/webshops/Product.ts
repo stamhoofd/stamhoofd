@@ -177,7 +177,7 @@ export class Product extends AutoEncoder {
      * Set to true if you need to have a name for every ordered product. When this is true, you can't order this product mutliple times with the same name.
      * + will validate the name better
      */
-    @field({ decoder: BooleanDecoder })
+    @field({ decoder: BooleanDecoder, optional: true })
     askName = false
 
     /**
@@ -224,6 +224,23 @@ export class Product extends AutoEncoder {
             return null
         }
         return Math.max(0, this.stock - this.usedStock)
+    }
+
+    /**
+     * Whether it is not possibel to add multiple different items of this product to the cart, or whether this product supports multiple items in the cart.
+     * Controls whether cart is edited by default or updated when clicking it open in the webshop.
+     */
+    get isUnique() {
+        if (this.maxPerOrder === 1) {
+            return true
+        }
+
+        // No choice options
+        if (this.optionMenus.length === 0 && this.prices.length <= 1 && this.customFields.length === 0) {
+            return true
+        }
+
+        return false;
     }
 
     getRemainingStockText(stock: number): string {

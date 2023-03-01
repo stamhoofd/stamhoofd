@@ -1,9 +1,11 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
-        <label class="image-input-box" :class="{square: isSquare}" @click="onClick">
+        <label class="image-input-box" :class="{square: isSquare, dark}" @click="onClick">
             <span v-if="!required && value" class="icon trash" />
+            <span v-if="!required && !value && placeholder" class="icon sync" />
 
             <Spinner v-if="uploading" />
+            <img v-else-if="value === null && placeholder" :src="placeholderSrc" :width="placeholderShownResolution.width" :height="placeholderShownResolution.height">
             <span v-else-if="value == null" class="icon upload" />
             <img v-else :src="src" :width="shownResolution.width" :height="shownResolution.height">
             <input type="file" class="file-upload" accept="image/png, image/jpeg, image/svg+xml" @change="changedFile">
@@ -39,8 +41,14 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     @Prop({ default: null })
         value: Image | null;
 
+    @Prop({ default: null })
+        placeholder: Image | null;
+
     @Prop({ default: true })
         required!: boolean
+
+    @Prop({ default: false })
+        dark!: boolean
 
     errorBox: ErrorBox | null = null
 
@@ -59,6 +67,14 @@ export default class ImageInput extends Mixins(NavigationMixin) {
 
     get shownResolution() {
         return this.value!.getResolutionForSize(undefined, 220)
+    }
+
+    get placeholderSrc() {
+        return this.placeholder!.getResolutionForSize(undefined, 220).file.getPublicPath()
+    }
+
+    get placeholderShownResolution() {
+        return this.placeholder!.getResolutionForSize(undefined, 220)
     }
 
     onClick(event) {
@@ -120,7 +136,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     @extend .style-input-shadow;
     border: $border-width solid $color-gray-2;
     color: $color-gray-5;
-    background: $color-background;
+    background: $color-background-shade;
     border-radius: $border-radius;
     padding: 5px 15px;
     height: 120px;
@@ -136,6 +152,9 @@ export default class ImageInput extends Mixins(NavigationMixin) {
     touch-action: manipulation;
     position: relative;
 
+    &.dark {
+        @include dark-modus;
+    }
 
     &:hover {
         border-color: $color-primary-gray-light;
@@ -163,7 +182,7 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         width: auto;
     }
 
-    .icon.trash {
+    .icon.trash, .icon.sync {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -179,11 +198,15 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         height: 100%;
         z-index: 1;
         transition: opacity 0.2s;
+        border-radius: $border-radius;
+    }
+
+    .icon.trash {
         color: $color-error;
     }
 
     &:hover {
-        .icon.trash {
+        .icon.trash, .icon.sync {
             opacity: 1;
         }
     }

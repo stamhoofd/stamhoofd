@@ -119,28 +119,6 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editPage(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/palette.svg">
-                        <h2 class="style-title-list">
-                            Tekst, omslagfoto en externe links
-                        </h2>
-                        <p class="style-description">
-                            Wijzig de teksten en uitzicht van jouw webshop.
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-
-                    <STListItem :selectable="true" class="left-center" @click="editLink(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/compass.svg">
-                        <h2 class="style-title-list">
-                            Link
-                        </h2>
-                        <p class="style-description">
-                            Wijzig de link van jouw webshop.
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-
                     <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
@@ -174,17 +152,6 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
-                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg">
-                        <h2 class="style-title-list">
-                            E-mails
-                        </h2>
-                        <p class="style-description">
-                            Wijzig de inhoud van automatische e-mails naar bestellers.
-                        </p>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-
                     <STListItem :selectable="true" class="left-center" @click="editNotifications(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/notifications.svg">
                         <h2 class="style-title-list">
@@ -192,6 +159,44 @@
                         </h2>
                         <p class="style-description">
                             Blijf zelf op de hoogte van nieuwe bestellingen.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+
+                <hr>
+                <h2>Personaliseren</h2>
+
+                <STList class="illustration-list">
+                    <STListItem :selectable="true" class="left-center" @click="editPage(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/palette.svg">
+                        <h2 class="style-title-list">
+                            Tekst, uiterlijk, en externe links
+                        </h2>
+                        <p class="style-description">
+                            Wijzig de teksten en uitzicht van jouw webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editLink(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/compass.svg">
+                        <h2 class="style-title-list">
+                            Link
+                        </h2>
+                        <p class="style-description">
+                            Wijzig de link van jouw webshop.
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem :selectable="true" class="left-center" @click="editEmails(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/email.svg">
+                        <h2 class="style-title-list">
+                            E-mails
+                        </h2>
+                        <p class="style-description">
+                            Wijzig de inhoud van automatische e-mails naar bestellers.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>

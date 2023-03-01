@@ -1,9 +1,10 @@
 <template>
     <STInputBox :title="title" error-fields="*" :error-box="errorBox">
         <label for="color-input" class="input color-input-box" :class="{ hasColor: !!hasColor }">
-            <input v-model="colorRaw" class="text-input" type="text" pattern="#[0-9A-Fa-f]{6}" :placeholder="placeholder" :autocomplete="autocomplete" @change="validate">
-            <input id="color-input" v-model="colorRaw" class="color-input" type="color" pattern="#[0-9A-Fa-f]{6}" @change="validate">
-            <span class="color" :style="{ backgroundColor: myColor }" />
+            <input v-model="colorRaw" class="text-input" pattern="#[0-9A-Fa-f]{6}" type="text" :placeholder="placeholder" :autocomplete="autocomplete" @input="colorRaw = $event.target.value;" @blur="validate(false, false)">
+            <input id="color-input" v-model="pickerColor" pattern="#[0-9A-Fa-f]{6}" class="color-input" type="color" @input="pickerColor = $event.target.value;">
+            <span class="color" :style="{ backgroundColor: myColor }" :class="{empty: !myColor}" />
+            <span v-if="!myColor" class="icon arrow-down-small" />
         </label>
     </STInputBox>
 </template>
@@ -20,26 +21,26 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 })
 export default class ColorInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
     
 
     colorRaw = "";
     hasColor = "";
 
     @Prop({ default: null })
-    value!: string | null
+        value!: string | null
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     @Prop({ default: "" })
-    placeholder!: string
+        placeholder!: string
 
-    @Prop({ default: "email" })
-    autocomplete!: string
+    @Prop({ default: "color" })
+        autocomplete!: string
 
     errorBox: ErrorBox | null = null
 
@@ -51,10 +52,23 @@ export default class ColorInput extends Vue {
         this.colorRaw = val
     }
 
+    get pickerColor() {
+        if (!this.hasColor) {
+            // Hacky solution to make black colors work from emtpy -> black
+            return "#000001"
+        }
+        return this.hasColor || "#000000"
+    }
+
+    set pickerColor(val: string) {
+        this.colorRaw = val || "#000000"
+        this.validate(false, true)
+    }
+
     mounted() {
         if (this.validator) {
             this.validator.addValidation(this, () => {
-                return this.validate()
+                return this.validate(true, false)
             })
         }
 
@@ -72,11 +86,13 @@ export default class ColorInput extends Vue {
         return this.hasColor ?? "black"
     }
 
-    async validate() {
+    validate(final = true, silent = false) {
         this.colorRaw = this.colorRaw.trim().toUpperCase()
 
         if (!this.required && this.colorRaw.length == 0) {
-            this.errorBox = null
+            if (!silent) {
+                this.errorBox = null
+            }
             this.hasColor = ""
 
             if (this.value !== null) {
@@ -93,11 +109,14 @@ export default class ColorInput extends Vue {
         
         if (!regex.test(this.colorRaw)) {
             this.hasColor = ""
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": "Ongeldige kleurcode",
-                "field": "color"
-            }))
+
+            if (!silent) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    "code": "invalid_field",
+                    "message": "Ongeldige kleurcode",
+                    "field": "color"
+                }))
+            }
             if (this.value !== null) {
                 this.$emit("input", null)
             }
@@ -108,7 +127,9 @@ export default class ColorInput extends Vue {
             if (this.colorRaw !== this.value) {
                 this.$emit("input", this.colorRaw)
             }
-            this.errorBox = null
+            if (!silent) {
+                this.errorBox = null
+            }
             return true
         }
     }
@@ -122,9 +143,9 @@ export default class ColorInput extends Vue {
 
 .color-input-box {
     position: relative;
-    transition: border-color 0.2s, padding-left 0.2s !important;
     padding-top: 0 !important;
     padding-bottom: 0;
+    padding-right: 40px;
 
     .text-input {
         width: 100%;
@@ -132,33 +153,38 @@ export default class ColorInput extends Vue {
         height:  calc(#{$input-height} - 2 * #{$border-width});
         line-height: calc(#{$input-height} - 10px - 2 * #{$border-width});
         box-sizing: border-box;
+        
     }
 
     .color-input {
         appearance: none;
         opacity: 0;
         position: absolute;
-        left: 15px;
+        right: 10px;
         top: 50%;
-        margin-top: -5px;
-        width: 10px;
-        height: 10px;
+        transform: translate(0, -50%);
+        width: 15px;
+        height: 15px;
         border-radius: 3px;
     }
 
 
-    &.hasColor {
-        padding-left: 30px;
-    }
-
-    > span {
+    > span.color {
         position: absolute;
-        left: 15px;
+        right: 10px;
         top: 50%;
-        margin-top: -5px;
-        width: 10px;
-        height: 10px;
+        width: 15px;
+        height: 15px;
         border-radius: 3px;
+        box-sizing: border-box;
+        transform: translate(0, -50%);
+    }
+
+    > span.icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translate(0, -50%);
     }
 }
 </style>

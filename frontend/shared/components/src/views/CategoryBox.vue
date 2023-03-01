@@ -1,6 +1,8 @@
 <template>
     <div class="category-box container">
-        <h2>{{ category.name }}</h2>
+        <h2 class="larger">
+            {{ category.name }}
+        </h2>
         <p v-if="category.description.length > 0" class="style-description-small" v-text="category.description" />
 
         <ProductGrid :products="products" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :admin="admin" />
@@ -49,12 +51,12 @@ export default class CategoryBox extends Mixins(NavigationMixin){
         cart: Cart
 
     @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
 
     get products() {
         return this.category.productIds.flatMap(id => {
             const product = this.webshop.products.find(p => p.id === id)
-            if (product && !product.hidden) {
+            if (product && (!product.hidden || this.admin)) {
                 return [product]
             }
             return []

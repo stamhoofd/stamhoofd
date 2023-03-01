@@ -11,11 +11,9 @@
 
 .input {
     @extend .style-input;
-    //@extend .style-input-shadow;
+    @extend .style-input-box;
     color: $color-dark;
-    border: $border-width solid $color-border;
-    background: $color-background;
-    border-radius: $border-radius;
+
     padding: 5px 15px;
     text-align: left;
     height: $input-height;
@@ -24,7 +22,6 @@
     width: 100%;
     box-sizing: border-box;
     display: block;
-    transition: border-color 0.2s;
     outline: none;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     word-break: normal;
@@ -76,12 +73,6 @@
                 border-color: $color-border;
             }
         }
-    }
-
-    &:focus,
-    &:focus-within {
-        border-color: $color-primary;
-        box-shadow: 0 0 0 1px $color-primary;
     }
 
     &::placeholder {
