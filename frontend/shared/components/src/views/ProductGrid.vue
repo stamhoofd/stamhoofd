@@ -42,7 +42,7 @@ export default class ProductGrid extends Mixins(NavigationMixin){
         cart: Cart
 
     @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
 }
 </script>
 

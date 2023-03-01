@@ -95,6 +95,7 @@ import { Image, ResolutionRequest } from "@stamhoofd/structures"
 import { Content, JSONContent } from '@tiptap/core'
 import { Image as ImageExtension } from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
+import Typography from "@tiptap/extension-typography";
 import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
 import { Editor, EditorContent } from '@tiptap/vue-2'
@@ -161,28 +162,28 @@ const CustomImage = ImageExtension.extend({
 })
 export default class EditorView extends Vue {
     @Prop({ default: false })
-    loading!: boolean;
+        loading!: boolean;
 
     @Prop({ default: false })
-    disabled!: boolean;
+        disabled!: boolean;
 
     @Prop({ default: "" })
-    title!: string;
+        title!: string;
 
     @Prop({ default: "Opslaan" })
-    saveText!: string;
+        saveText!: string;
 
     @Prop({ default: null })
-    saveIcon!: string | null;
+        saveIcon!: string | null;
 
     @Prop({ default: "Annuleren" })
-    cancelText!: string;
+        cancelText!: string;
 
     @Prop({ default: () => [] })
-    smartVariables!: EditorSmartVariable[];
+        smartVariables!: EditorSmartVariable[];
 
     @Prop({ default: () => [] })
-    smartButtons!: EditorSmartButton[];
+        smartButtons!: EditorSmartButton[];
 
     // Handling
 
@@ -378,6 +379,7 @@ export default class EditorView extends Vue {
             content,
             extensions: [
                 StarterKit,
+                Typography.configure({}),
                 SmartVariableNode.configure({
                     smartVariables: this.smartVariables.filter(s => s.html === undefined),
                 }),
@@ -711,78 +713,6 @@ export default class EditorView extends Vue {
         min-height: calc($input-height * 2);
         line-height: normal;
         outline: none;
-    }
-
-    .editor-button-bar {
-
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        &.hint {
-            display: block;
-            padding: 10px 15px;
-            @extend .style-description;
-        }
-
-        &.link {
-            --st-horizontal-padding: 15px;
-            padding: 0 15px;
-            display: block;
-        }
-
-        &.mobile {
-            flex-wrap: wrap;
-            flex-grow: 1;
-
-            > .button {
-                flex-grow: 1;
-            }
-        }
-
-        &.sticky {
-            position: sticky; 
-            bottom: 0;
-            border: $border-width solid $color-border;
-            background: var(--color-current-background-shade);
-            border-radius: $border-radius-modals;
-            transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-start;
-
-            &.hidden {
-                transform: translate(0, 100%);
-                opacity: 0;
-                //visibility: hidden;
-                transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-end;
-            }
-
-            > .button {
-                padding: 10px 5px;
-            }
-        }
-
-        > .button, > .upload-button {
-            padding: 5px 10px;
-            margin: 0 auto;
-
-            &.is-active {
-                color: $color-primary;
-            }
-
-            &:after {
-                left: 0;
-                right: 0;
-            }
-        }
-
-        > hr {
-            width: $border-width;
-            height: 15px;
-            flex-shrink: 0;
-            border: 0;
-            outline: 0;
-            margin: 0 15px;
-            background: $color-border;
-        }
     }
 }
 </style>

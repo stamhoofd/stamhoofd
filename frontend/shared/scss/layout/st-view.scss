@@ -192,8 +192,10 @@ body.modern.web-iOS {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            --st-horizontal-padding: calc((100vw - 900px) / 2);
-            --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - 900px) / 2));
+
+            
+            --st-horizontal-padding: calc((100vw - var(--box-width, 900px)) / 2);
+            --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--box-width, 900px)) / 2));
 
             // due to a bug in Safari 16, combining display: flex with children that have a negative margin, we get horizontal scroll errors due to wrong width calculation
             // We can fix this by disabling overflow-x
@@ -352,6 +354,13 @@ body.modern.web-iOS {
 
 .sheet .st-view {
     min-height: auto;
+}
+
+.full-product-box .st-view {
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    contain: initial !important;
 }
 
 .popup .st-view {

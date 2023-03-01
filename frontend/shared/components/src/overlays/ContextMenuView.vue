@@ -1,6 +1,6 @@
 <template>
     <transition appear name="show">
-        <div class="context-menu-container" :class="{ hasParent: !!parentMenu }" @click="pop" @contextmenu.prevent>
+        <div class="context-menu-container" :class="{ hasParent: !!parentMenu, disableDismiss: !autoDismiss }" @click="pop" @contextmenu.prevent>
             <div
                 ref="context"
                 class="context-menu"
@@ -39,12 +39,12 @@ export default class ContextMenuView extends Vue {
     @Prop({
         default: 0,
     })
-    x!: number;
+        x!: number;
 
     @Prop({
         default: null,
     })
-    preferredWidth!: number | null;
+        preferredWidth!: number | null;
 
     usedPreferredHeight: number | null = null;
     usedPreferredWidth: number | null = this.preferredWidth;
@@ -52,7 +52,7 @@ export default class ContextMenuView extends Vue {
     @Prop({
         default: 0,
     })
-    y!: number;
+        y!: number;
 
     top: number | null = null
     left: number | null = null
@@ -64,21 +64,21 @@ export default class ContextMenuView extends Vue {
     @Prop({
         default: "right",
     })
-    xPlacement!: "right" | "left";
+        xPlacement!: "right" | "left";
 
     usedXPlacement: "right" | "left" = this.xPlacement
 
     @Prop({
         default: "bottom",
     })
-    yPlacement!: "bottom" | "top";
+        yPlacement!: "bottom" | "top";
 
     usedYPlacement: "bottom" | "top" = this.yPlacement
 
     @Prop({
         default: null,
     })
-    parentMenu!: ContextMenuView | null;
+        parentMenu!: ContextMenuView | null;
 
     /**
      * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
@@ -86,7 +86,7 @@ export default class ContextMenuView extends Vue {
     @Prop({
         default: null,
     })
-    wrapWidth!: number | null
+        wrapWidth!: number | null
 
     /**
      * In case a placement is not possible, instead of just swapping xPlacement, also affect the x position first with the wrapWidth (needed for e.g. context menu's)
@@ -94,7 +94,12 @@ export default class ContextMenuView extends Vue {
     @Prop({
         default: null,
     })
-    wrapHeight!: number | null
+        wrapHeight!: number | null
+
+    @Prop({
+        default: true,
+    })
+        autoDismiss!: boolean;
 
     isPopped = false
 
@@ -678,6 +683,14 @@ export default class ContextMenuView extends Vue {
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+
+    &.disableDismiss {
+        pointer-events: none;
+
+        > * {
+            pointer-events: all;
+        }
+    }
 
     &.hasParent {
         pointer-events: none;

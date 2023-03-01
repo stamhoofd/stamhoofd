@@ -32,14 +32,31 @@
                 <span v-else>Categorie toevoegen</span>
             </button>
         </p>
+
+        <template v-if="webshop.canEnableCart">
+            <hr>
+            <h2>Winkelmandje</h2>
+            <p>
+                Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.
+            </p>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <Checkbox slot="left" v-model="cartEnabled" />
+                    <h3 class="style-title-list">
+                        Winkelmandje gebruiken
+                    </h3>
+                </STListItem>
+            </STList>
+        </template>
     </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
-import { Category, PrivateWebshop, Product, ProductType, WebshopTicketType } from '@stamhoofd/structures';
+import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
+import { Category, PrivateWebshop, Product, ProductType, WebshopMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import CategoryRow from './categories/CategoryRow.vue';
@@ -56,6 +73,7 @@ import ProductRow from './products/ProductRow.vue';
         ProductRow,
         CategoryRow,
         SaveView,
+        Checkbox
     }
 })
 export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
@@ -74,6 +92,15 @@ export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
 
     get isTickets() {
         return this.webshop.meta.ticketType === WebshopTicketType.Tickets
+    }
+
+    get cartEnabled() {
+        return this.webshop.meta.cartEnabled
+    }
+
+    set cartEnabled(cartEnabled: boolean) {
+        const patch = WebshopMetaData.patch({ cartEnabled })
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
     }
 
     addProduct() {

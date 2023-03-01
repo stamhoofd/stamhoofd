@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="(e) => showContextMenu(e)" :selectable="true" class="right-stack" @click="editProduct()" @contextmenu.prevent="showContextMenu">
         <template slot="left">
-            <img v-if="imageSrc" :src="imageSrc" class="product-row-image">
+            <img v-if="imageSrc" :src="imageSrc" :width="imageResolution.width" :height="imageResolution.height" class="product-row-image">
         </template>
         
         <h2 class="style-title-list">
@@ -60,7 +60,11 @@ export default class ProductRow extends Mixins(NavigationMixin) {
         webshop: PrivateWebshop
 
     get imageSrc() {
-        return this.product.images[0]?.getPathForSize(80, 80)
+        return this.imageResolution?.file?.getPublicPath()
+    }
+
+    get imageResolution() {
+        return this.product.images[0]?.getResolutionForSize(80, 80)
     }
 
     editProduct() {
@@ -214,14 +218,13 @@ export default class ProductRow extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .product-row-image {
-    width: 80px;
-    height: 80px;
+    max-width: 80px;
+    height: auto;
     margin: -5px 0;
     border-radius: $border-radius;
 
     @media (max-width: 550px) {
-        width: 50px;
-        height: 50px;
+        max-width: 50px;
     }
 }
 </style>

@@ -2029,6 +2029,11 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text/-/extension-text-2.0.0-beta.15.tgz#f08cff1b78f1c6996464dfba1fef8ec1e107617f"
   integrity sha512-S3j2+HyV2gsXZP8Wg/HA+YVXQsZ3nrXgBM9HmGAxB0ESOO50l7LWfip0f3qcw1oRlh5H3iLPkA6/f7clD2/TFA==
 
+"@tiptap/extension-typography@^2.0.0-beta.218":
+  version "2.0.0-beta.218"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-typography/-/extension-typography-2.0.0-beta.218.tgz#e03298cfc79d77de662cb838a2ab3a8444cd36df"
+  integrity sha512-RYrRqR4J0dG05Aw06ZFoegnPdkVEd16f9vj85EYRGPG7RnhsmYLw9GeEeRWLXOofRHG4X798BRqoRYH750Ee6g==
+
 "@tiptap/extension-underline@^2.0.0-beta.23":
   version "2.0.0-beta.23"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-underline/-/extension-underline-2.0.0-beta.23.tgz#050a31ac55b7ad63e8abf57ac941c62e255f57b8"

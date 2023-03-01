@@ -13,15 +13,36 @@
         </STInputBox>
 
         <STInputBox title="Beschrijving" error-fields="meta.description" :error-box="errorBox" class="max">
-            <textarea
+            <WYSIWYGTextInput
                 v-model="description"
-                class="input large"
-                type="text"
                 placeholder="Beschrijving die op jouw webshop staat"
-                autocomplete=""
+                :color="color || defaultColor"
             />
         </STInputBox>
 
+        <hr>
+        <h2>Layout</h2>
+
+        <STList>
+            <STListItem :selectable="true" element-name="label" class="left-center">
+                <Radio slot="left" v-model="layout" :value="WebshopLayout.Split" />
+                <h3 class="style-title-list">
+                    Naast elkaar
+                </h3>
+                <p class="style-description">
+                    Indien er voldoende plaats is. Meerdere artikels worden in lijstweergave getoond.
+                </p>
+            </STListItem>
+            <STListItem :selectable="true" element-name="label" class="left-center">
+                <Radio slot="left" v-model="layout" :value="WebshopLayout.Default" />
+                <h3 class="style-title-list">
+                    Onder elkaar
+                </h3>
+                <p class="style-description">
+                    Meerdere artikels worden in vakjes getoond, indien er voldoende plaats is.
+                </p>
+            </STListItem>
+        </STList>
 
         <hr>
         <h2 class="style-with-button">
@@ -35,7 +56,7 @@
             </div>
         </h2>
 
-        <p>De foto wordt getoond met een grootte van 900 x 375, maar we raden aan om een foto van minstens 1800 x 750 te uploaden.</p>
+        <p>We raden aan om een foto van minstens 1600 pixels breed up te loaden. De foto zal volledig zichtbaar zijn, knip dus indien nodig bij voor het uploaden.</p>
 
         <figure v-if="coverPhotoSrc" class="webshop-banner">
             <img :src="coverPhotoSrc" :width="coverImageWidth" :height="coverImageHeight">
@@ -62,13 +83,49 @@
         <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
             De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
         </p>
+
+        <hr>
+        <h2>Kleuren</h2>
+        <p>
+            Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.
+        </p>
+
+        <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Standaardkleur" :required="false" />
+        <p class="style-description-small">
+            Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je vereniging te behouden (bij algemene instellingen > personalisatie).
+        </p>
+
+        <STInputBox title="Donkere mode" error-fields="meta.darkMode" :error-box="errorBox" class="max">
+            <RadioGroup>
+                <Radio v-model="darkMode" :value="'Off'">
+                    Uit
+                </Radio>
+                <Radio v-model="darkMode" :value="'On'">
+                    Aan
+                </Radio>
+                <Radio v-model="darkMode" :value="'Auto'">
+                    Automatisch
+                </Radio>
+            </RadioGroup>
+        </STInputBox>
+        <p v-if="darkMode !== 'Off'" class="style-description-small">
+            Test zeker het contrast van jouw gekozen kleur en logo als je voor een donkere modus kiest.
+        </p>
+
+        <hr>
+        <h2>Logo</h2>
+        <p>
+            Je kan een logo voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen.
+        </p>
+
+        <LogoEditor :meta-data="webshop.meta" :validator="validator" :default-to-organization="true" :dark-mode="darkMode" @patch="addMetaPatch" />
     </SaveView>
 </template>
 
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
-import { SaveView, STErrorsDefault, STInputBox, UploadButton } from "@stamhoofd/components";
-import { Image, Policy, PrivateWebshop, ResolutionRequest, WebshopMetaData } from '@stamhoofd/structures';
+import { ColorInput, LogoEditor, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, UploadButton, WYSIWYGTextInput } from "@stamhoofd/components";
+import { DarkMode, Image, Policy, PrivateWebshop, ResolutionRequest, RichText, WebshopLayout, WebshopMetaData } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
@@ -81,7 +138,14 @@ import EditWebshopMixin from "./EditWebshopMixin";
         STErrorsDefault,
         UploadButton,
         EditPolicyBox,
-        SaveView
+        SaveView,
+        STList,
+        STListItem,
+        Radio,
+        RadioGroup,
+        WYSIWYGTextInput,
+        LogoEditor,
+        ColorInput
     }
 })
 export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
@@ -91,6 +155,10 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
 
     get viewTitle() {
         return "Webshop pagina wijzigen"
+    }
+
+    addMetaPatch(patch: AutoEncoderPatchType<WebshopMetaData>) {
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
     }
 
     patchPolicy(policy: Policy, patch: AutoEncoderPatchType<Policy>) {
@@ -129,9 +197,44 @@ export default class EditWebshopPageView extends Mixins(EditWebshopMixin) {
         return this.webshop.meta.description
     }
 
-    set description(description: string) {
+    set description(description: RichText) {
         const patch = WebshopMetaData.patch({ description })
         this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+    }
+
+    get WebshopLayout() {
+        return WebshopLayout
+    }
+
+    get layout() {
+        return this.webshop.meta.layout
+    }
+
+    set layout(layout: WebshopLayout) {
+        const patch = WebshopMetaData.patch({ layout })
+        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+    }
+
+    get defaultColor() {
+        return this.organization.meta.color ?? null
+    }
+
+    get color() {
+        return this.webshop.meta.color
+    }
+
+    set color(color: string | null) {
+        const patch = WebshopMetaData.patch({ color })
+        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
+    }
+
+    get darkMode() {
+        return this.webshop.meta.darkMode
+    }
+
+    set darkMode(darkMode: DarkMode) {
+        const patch = WebshopMetaData.patch({ darkMode })
+        this.addPatch(PrivateWebshop.patch({ meta: patch }) )
     }
 
     get coverPhoto() {

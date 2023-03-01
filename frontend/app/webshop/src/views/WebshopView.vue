@@ -1,8 +1,8 @@
 <template>
-    <section class="st-view webshop-view">
+    <section class="st-view shade webshop-view">
         <STNavigationBar :large="true">
             <template slot="left">
-                <OrganizationLogo :organization="organization" />
+                <OrganizationLogo :organization="organization" :webshop="webshop" />
             </template>
 
             <template slot="right">
@@ -10,21 +10,22 @@
                     <span class="icon external" />
                     <span>Terug naar website</span>
                 </a>
-                <button class="primary button" type="button" @click="openCart(true)">
+                <button v-if="cartEnabled" class="primary button" type="button" @click="openCart(true)">
                     <span class="icon basket" />
                     <span>{{ cartCount }}</span>
                 </button>
             </template>
         </STNavigationBar>
 
-        <main class="limit-width">
-            <section class="white-top view">
-                <main>
+        <main>
+            <div class="webshop-layout" :class="webshopLayout + ' ' + (webshopLayout === 'Default' ? 'enable-grid' : '')">
+                <header class="webshop-header">
                     <figure v-if="bannerImageSrc" class="webshop-banner">
                         <img :src="bannerImageSrc" :width="bannerImageWidth" :height="bannerImageHeight">
                     </figure>
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
-                    <p v-if="webshop.meta.description" class="description" v-text="webshop.meta.description" />
+                    <div v-if="webshop.meta.description.html" class="description style-wysiwyg" v-html="webshop.meta.description.html" />
+                    <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
                     <p v-if="isTrial" class="error-box">
                         Dit is een demo webshop
@@ -39,56 +40,56 @@
                     <p v-else-if="almostClosed" class="info-box">
                         Bestellen kan tot {{ webshop.meta.availableUntil | time }}
                     </p>
-                </main>
-            </section>
-            <section class="gray-shadow view enable-grid">
-                <main>
                     <p v-if="categories.length == 0 && products.length == 0" class="info-box">
                         Momenteel is er niets beschikbaar.
                     </p>
+                </header>
 
-                    <template v-if="!closed || showOpenAt">
+                <template v-if="!closed || showOpenAt">
+                    <FullPageProduct v-if="products.length === 1" :product="products[0]" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
+                    <div v-else class="products">
                         <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
                         <ProductGrid v-if="categories.length == 0" :products="products" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
-                    </template>
-                </main>
-                <div class="legal-footer">
-                    <hr class="style-hr">
+                    </div>
+                </template>
+            </div>
+
+            <div class="legal-footer">
+                <hr class="style-hr">
+                <div>
+                    <aside>
+                        {{ organization.meta.companyName || organization.name }}{{ organization.meta.VATNumber || organization.meta.companyNumber ? (", "+(organization.meta.VATNumber || organization.meta.companyNumber)) : "" }}
+                        <template v-if="organization.website">
+                            -
+                        </template>
+                        <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                            Website
+                        </a>
+                        
+                        <template v-for="policy in policies">
+                            -
+                            <a :key="policy.id" :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                                {{ policy.name }}
+                            </a>
+                        </template>
+
+                        <template v-if="privacyUrl">
+                            -
+                        </template>
+
+                        <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
+                            Privacyvoorwaarden
+                        </a>
+
+                        <br>
+                        {{ organization.meta.companyAddress || organization.address }}
+                    </aside>
                     <div>
-                        <aside>
-                            {{ organization.meta.companyName || organization.name }}{{ organization.meta.VATNumber || organization.meta.companyNumber ? (", "+(organization.meta.VATNumber || organization.meta.companyNumber)) : "" }}
-                            <template v-if="organization.website">
-                                -
-                            </template>
-                            <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                                Website
-                            </a>
-                            
-                            <template v-for="policy in policies">
-                                -
-                                <a :key="policy.id" :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                                    {{ policy.name }}
-                                </a>
-                            </template>
-
-                            <template v-if="privacyUrl">
-                                -
-                            </template>
-
-                            <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                                Privacyvoorwaarden
-                            </a>
-
-                            <br>
-                            {{ organization.meta.companyAddress || organization.address }}
-                        </aside>
-                        <div>
-                            <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'/ticketverkoop'">Ticketverkoop via <Logo /></a>
-                            <a v-else :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
-                        </div>
+                        <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'/ticketverkoop'">Ticketverkoop via <Logo /></a>
+                        <a v-else :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
                     </div>
                 </div>
-            </section>
+            </div>
         </main>
     </section>
 </template>
@@ -96,6 +97,7 @@
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
+import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LoadingView, Logo, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
@@ -107,6 +109,7 @@ import { CheckoutManager } from '../classes/CheckoutManager';
 import { WebshopManager } from '../classes/WebshopManager';
 import CartView from './checkout/CartView.vue';
 import { CheckoutStep, CheckoutStepsManager } from './checkout/CheckoutStepsManager';
+import FullPageProduct from "./FullPageProduct.vue";
 import OrderView from './orders/OrderView.vue';
 import TicketView from "./orders/TicketView.vue";
 
@@ -121,7 +124,8 @@ import TicketView from "./orders/TicketView.vue";
         CategoryBox,
         ProductGrid,
         OrganizationLogo,
-        Logo
+        Logo,
+        FullPageProduct
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -136,7 +140,7 @@ import TicketView from "./orders/TicketView.vue";
                 {
                     vmid: 'description',
                     name: 'description',
-                    content: WebshopManager.webshop.meta.description,
+                    content: WebshopManager.webshop.meta.description.text,
                 },
                 {
                     hid: 'og:site_name',
@@ -188,12 +192,20 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return WebshopManager.webshop
     }
 
+    get cartEnabled() {
+        return this.webshop.shouldEnableCart
+    }
+
     get hasTickets() {
         return this.webshop.meta.ticketType === WebshopTicketType.Tickets
     }
 
     get policies() {
         return this.webshop.meta.policies
+    }
+
+    get webshopLayout() {
+        return this.webshop.meta.layout
     }
 
     get privacyUrl() {
@@ -217,14 +229,46 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return CheckoutManager.cart.count
     }
 
+    async openCheckout(animated = true) {
+        try {
+            // Force a save if nothing changed (to fix timeSlot + updated data)
+            const nextStep = await CheckoutStepsManager.getNextStep(undefined, false)
+            if (!nextStep) {
+                throw new SimpleError({
+                    code: "missing_config",
+                    message: "Er ging iets mis bij het ophalen van de volgende stap"
+                })
+            }
+
+            this.present({
+                animated,
+                adjustHistory: animated,
+                components: [
+                    new ComponentWithProperties(NavigationController, { 
+                        initialComponents: [await nextStep.getComponent()]
+                    }),
+                ],
+                modalDisplayStyle: "popup",
+                url: UrlHelper.transformUrl(nextStep.url),
+            })
+        } catch (e) {
+            console.error(e)
+            Toast.fromError(e).show()
+        }
+    }
+
     openCart(animated = true, components: ComponentWithProperties[] = [], url?: string) {
+        if (!this.cartEnabled && components.length == 0) {
+            this.openCheckout(animated).catch(console.error)
+            return
+        }
         this.present({
             animated,
             adjustHistory: animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
                     initialComponents: [
-                        new ComponentWithProperties(CartView),
+                        ...(this.cartEnabled ? [new ComponentWithProperties(CartView)] : []),
                         ...components
                     ] 
                 }),
@@ -256,7 +300,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
 
     get closed() {
         // 2 minutes in advance already
-        return this.webshop.isClosed(2*60*1000)
+        return this.webshop.isClosed(2*60*1000) || !this.organization.meta.packages.useWebshops
     }
 
     get almostClosed() {
@@ -284,11 +328,36 @@ export default class WebshopView extends Mixins(NavigationMixin){
         })
     }
     
-    onAddItem(cartItem: CartItem) {
-        cartItem.validate(this.webshop, CheckoutManager.cart)
-        new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
-        CheckoutManager.cart.addItem(cartItem)
-        CheckoutManager.saveCart()
+    onAddItem(cartItem: CartItem, oldItem: CartItem | null, component) {
+        if (this.cartEnabled) {
+            cartItem.validate(this.webshop, CheckoutManager.cart)
+            if (component) {
+                component.dismiss({force: true})
+            }
+
+            if (oldItem) {
+                CheckoutManager.cart.removeItem(oldItem)
+            }
+            CheckoutManager.cart.addItem(cartItem)
+            CheckoutManager.saveCart()
+
+            this.openCart(true)
+            // if (this.products.length === 1) {
+            //this.openCart(true)
+            // } else {
+            //new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
+            // }
+        } else {
+            CheckoutManager.cart.clear();
+            cartItem.validate(this.webshop, CheckoutManager.cart)
+            if (component) {
+                component.dismiss({force: true})
+            }
+
+            CheckoutManager.cart.addItem(cartItem)
+            CheckoutManager.saveCart()
+            this.openCheckout(true).catch(console.error)
+        }
     }
 
     mounted() {
@@ -366,7 +435,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             this.resumeStep('/' + path.join('/'), false).catch(e => {
                 console.error(e)
             })
-        } else if (path.length == 1 && path[0] == 'cart') {
+        } else if (path.length == 1 && path[0] == 'cart' && this.cartEnabled) {
             this.openCart(false)
         }
     }
@@ -420,12 +489,13 @@ export default class WebshopView extends Mixins(NavigationMixin){
     min-height: 100vh;
     box-sizing: border-box;
     min-height: calc(var(--vh, 1vh) * 100);*/
+    --box-width: 600px;
 
     .webshop-banner {
-        height: 0px;
-        width: 100%;
+        // height: 0px;
+        // width: 100%;
         margin: 0 auto;
-        padding-bottom: 300 / 720 * 100%;
+        // padding-bottom: 370 / 720 * 100%;
         background: $color-gray-3;
         border-radius: $border-radius;
         margin-bottom: 30px;
@@ -437,106 +507,125 @@ export default class WebshopView extends Mixins(NavigationMixin){
         }
 
         img {
-            position: absolute;
+            // position: absolute;
             border-radius: $border-radius;
-            height: 100%;
+            height: auto;
             width: 100%;
-            object-fit: cover;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            display: block;
         }
     }
 
-    > main {
-        @extend .main-text-container;
+    .webshop-layout {
+        max-width: 800px;
+        margin: 0 auto;
 
-        .white-top > main > h1 {
-            @extend .style-huge-title-1;
-            padding-bottom: 15px;
+        .full-product-box {
+            background: $color-background;
+            --color-current-background: #{$color-background};
+            --color-current-background-shade: #{$color-background-shade};
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.05), 0px 20px 50px $color-shadow, inset 0px 0px 0px 1px $color-shadow;
+            border-radius: $border-radius-modals;
+            overflow: hidden;
+            position: relative;
+            z-index: 0;
+
+            @media (max-width: 550px) {
+                margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+                border-radius: 0;
+            }
+
+            // Reset view insets
+            --st-safe-area-top: 0px;
+            --st-safe-area-bottom: 0px;
+            --keyboard-height: 0px;
+            --bottom-padding: 0px;
+
+            > .st-view > main{
+                // Disable scroll view
+                overflow: hidden;
+            }
         }
 
-        .white-top > main .description {
+        &.Default {
+            > .products {
+                --st-horizontal-padding: 0px;
+            }
+        }
+
+        &.Split {
+            > .products {
+                padding: 40px var(--st-horizontal-padding, 20px) 30px var(--st-horizontal-padding, 20px);
+
+                background: $color-background;
+                --color-current-background: #{$color-background};
+                --color-current-background-shade: #{$color-background-shade};
+                box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.05), 0px 20px 50px $color-shadow, inset 0px 0px 0px 1px $color-shadow;
+                border-radius: $border-radius-modals;
+                overflow: hidden;
+                position: relative;
+                z-index: 0;
+
+                @media (max-width: 550px) {
+                    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+                    border-radius: 0;
+                }
+            }
+
+            @media (min-width: 1000px) {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+                gap: 30px;
+                max-width: 1200px;
+                margin: 0 auto;
+
+                .webshop-header {
+                    > h1:first-child {
+                        padding-top: 40px;
+                    }
+                }
+
+                > .full-product-box {
+                    // position: sticky;
+                    // top: 0px;
+                }
+            }
+
+            @media (min-width: 1200px) {
+                gap: 50px;
+            }
+        }
+    }
+
+    .webshop-header {
+        --st-horizontal-padding: 0px;
+        padding-bottom: 30px;
+
+        h1 {
+            @extend .style-huge-title-1;
+            padding-bottom: 10px;
+        }
+
+        .description {
             @extend .style-description;
             white-space: pre-wrap;
         }
+    }
+    
+    .stamhoofd-footer {
+        padding-top: 15px;
+        @extend .style-description-small;
 
-        .stamhoofd-footer {
-            padding-top: 15px;
-            @extend .style-description-small;
-
-            a {
-                white-space: normal;
-                text-overflow: initial;
-                height: auto;
-                line-height: 1.4;
-            }
-
-            strong {
-                color: $color-primary-original;
-            }
+        a {
+            white-space: normal;
+            text-overflow: initial;
+            height: auto;
+            line-height: 1.4;
         }
 
-        .legal-footer {
-            @extend .style-description-small;
-            padding-top: 30px;
-            margin-top: auto;
-            line-height: 1.6;
-
-            > div {
-                display: flex;
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: flex-start;
-                flex-wrap: wrap-reverse;
-                padding: 0 var(--st-horizontal-padding, 40px);
-
-                @media (max-width: 500px) {
-                    .stamhoofd-logo-container {
-                        svg {
-                            width: 120px;
-                        }
-                    }
-                }
-
-                > div, > aside {
-                    &:first-child {
-                        padding-right: 10px;
-                    }
-
-                    &:last-child {
-                        --color-primary: #{$color-primary-original};
-                        flex-shrink: 0;
-                        text-align: right;
-
-                        a {
-                            display: flex;
-                            flex-direction: row;
-                            align-items: center;
-
-                            > :last-child {
-                                margin-left: 10px;
-                            }
-
-                            &, &:hover, &:link, &:active, &:visited {
-                                color: $color-gray-text;
-                                font-weight: 600;
-                                text-decoration: none;
-                            }
-                        }
-                    }
-                }
-            }
+        strong {
+            color: $color-primary-original;
         }
     }
-
-    //padding: 0 var(--st-horizontal-padding, 40px) var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
-    
-    /*@media (min-width: 801px) {
-        max-width: 800px;
-        margin: 0 auto;
-        min-height: auto;
-    }*/
 }
 </style>

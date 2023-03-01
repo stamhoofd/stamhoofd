@@ -1,17 +1,24 @@
 <template>
-    <ContextMenuView v-bind="$attrs">
-        <aside class="date-selection-view">
+    <ContextMenuView v-bind="$attrs" :auto-dismiss="autoDismiss">
+        <aside ref="aside" class="date-selection-view">
             <header>
                 <button type="button" class="button icon gray arrow-left" @click="previousMonth" />
                 <h1>
-                    <button v-long-press="(e) => openMonthContextMenu(e)" type="button" class="button title-button" @click.prevent="openMonthContextMenu" @contextmenu.prevent="openMonthContextMenu">
-                        <span>{{ monthTitle }}</span>
-                        <span class="icon arrow-down-small gray" />
-                    </button>
-                    <button v-long-press="(e) => openYearContext(e)" type="button" class="button title-button" @click.prevent="openYearContext" @contextmenu.prevent="openYearContext">
-                        <span>{{ yearTitle }}</span>
-                        <span class="icon arrow-down-small gray" />
-                    </button>
+                    <div class="input-icon-container right icon arrow-down-small gray">
+                        <select v-model="month" @mousedown.stop>
+                            <option v-for="month in 12" :key="month" :value="month">
+                                {{ monthText(month) }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="input-icon-container right icon arrow-down-small gray">
+                        <select v-model="currentYear" @mousedown.stop>
+                            <option v-for="year in 105" :key="year" :value="nowYear - year + 5">
+                                {{ nowYear - year + 5 }}
+                            </option>
+                        </select>
+                    </div>
                 </h1>
                 <button type="button" class="button icon gray arrow-right" @click="nextMonth" />
             </header>
@@ -49,12 +56,13 @@ import { Formatter } from "@stamhoofd/utility"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 import LongPressDirective from "../directives/LongPress";
-import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import Dropdown from "../inputs/Dropdown.vue";
 import ContextMenuView from "./ContextMenuView.vue";
 
 @Component({
     components: {
-        ContextMenuView
+        ContextMenuView,
+        Dropdown
     },
     directives: {
         LongPress: LongPressDirective
@@ -63,6 +71,12 @@ import ContextMenuView from "./ContextMenuView.vue";
 export default class DateSelectionView extends Mixins(NavigationMixin) {
     @Prop()
         setDate!: (date: Date | null) => void;
+
+    @Prop()
+        onClose!: () => void;
+
+    @Prop({ default: true })
+        autoDismiss!: boolean;
 
     @Prop({ required: true })
         selectedDay!: Date
@@ -77,6 +91,18 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     created() {
         this.weeks = this.generateDays()
         this.updateMonthTitle()
+    }
+
+    beforeDestroy() {
+        this.onClose()
+    }
+
+    mounted() {
+        if (!this.autoDismiss) {
+            (this.$refs?.aside as any)?.addEventListener("mousedown", (e) => {
+                e.preventDefault()
+            });
+        }
     }
 
     generateDays() {
@@ -122,13 +148,18 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         this.pop();
     }
 
-    setToday() {
+    setDateValue(date: Date) {
         const selectedDay = this.selectedDay
-        selectedDay.setTime(Date.now())
+        selectedDay.setTime(date.getTime())
         this.currentMonth = new Date(selectedDay.getTime())
         this.weeks = this.generateDays()
         this.updateMonthTitle()
-        this.setDate(new Date())
+        this.setDate(new Date(date.getTime()))
+    }
+
+    setToday() {
+        this.setDateValue(new Date())
+        this.pop();
     }
 
     updateMonthTitle() {
@@ -137,12 +168,7 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     nextMonth() {
-        this.currentMonth.setDate(1)
-        this.currentMonth.setMonth(this.currentMonth.getMonth() + 1)
-
-        this.updateSelectedMonth()
-        this.updateMonthTitle();
-        this.weeks = this.generateDays()
+        this.month = this.month + 1
     }
 
     updateSelectedMonth() {
@@ -162,25 +188,18 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
     }
 
     previousMonth() {
-        this.currentMonth.setDate(0)
-        this.currentMonth.setDate(1)
-        this.updateSelectedMonth()
-        this.updateMonthTitle();
-        this.weeks = this.generateDays()
+        const d = new Date(this.currentMonth)
+        d.setDate(0)
+        d.setDate(1)
+        this.setDateValue(d)
     }
 
     nextYear() {
-        this.currentMonth.setFullYear(this.currentMonth.getFullYear() + 1)
-        this.updateSelectedMonth()
-        this.updateMonthTitle();
-        this.weeks = this.generateDays()
+        this.currentYear = this.currentYear + 1
     }
 
     previousYear() {
-        this.currentMonth.setFullYear(this.currentMonth.getFullYear() - 1)
-        this.updateSelectedMonth()
-        this.updateMonthTitle();
-        this.weeks = this.generateDays()
+        this.currentYear = this.currentYear - 1
     }
 
     onSelect(day) {
@@ -189,86 +208,59 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         this.pop();
     }
 
-    openMonthContextMenu(event) {
-        // array from 1 - 12
-        const months = Array.from({length: 12},(_, i)=> i + 1)
+    get nowYear() {
+        const ny = new Date().getFullYear(); 
 
-        const menu = new ContextMenu([
-            months.map(m => {
-                return new ContextMenuItem({
-                    name: Formatter.capitalizeFirstLetter(Formatter.month(m)),
-                    selected: m === this.currentMonth.getMonth() + 1,
-                    action: () => {
-                        this.currentMonth.setDate(1)
-                        this.currentMonth.setMonth(m - 1)
-                        this.updateSelectedMonth()
-                        this.updateMonthTitle();
-                        this.weeks = this.generateDays()
-                        return true;
-                    }
-                })
-            })
-        ])
-
-        menu.show({ button: event.currentTarget }).catch(console.error)
+        if (this.currentYear < ny - 50) {
+            return this.currentYear + 50
+        }
+        if (this.currentYear > ny) {
+            return this.currentYear
+        }
+        return ny;
     }
 
-    openYearContext(event) {
-        const currentYear = new Date().getFullYear(); 
-        const years = Array.from({length: 15},(_, i)=> currentYear - i + 3) // 3 years in the future
-
-        const menu = new ContextMenu([
-            years.map(y => {
-                return new ContextMenuItem({
-                    name: y.toString(),
-                    selected: y === this.currentMonth.getFullYear(),
-                    icon: y === currentYear ? 'dot' : undefined,
-                    action: () => {
-                        this.currentMonth.setFullYear(y)
-                        this.updateSelectedMonth()
-                        this.updateMonthTitle();
-                        this.weeks = this.generateDays()
-                        return true;
-                    }
-                })
-            })
-        ])
-
-        menu.show({ button: event.currentTarget }).catch(console.error)
+    get currentYear() {
+        return this.currentMonth.getFullYear();
     }
 
-    activated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.addEventListener("keydown", this.onKey);
-    }
-
-    deactivated() {
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        document.removeEventListener("keydown", this.onKey);
-    }
-
-    onKey(event) {
-        if (event.defaultPrevented || event.repeat) {
+    set currentYear(year: number) {
+        if (!year) {
+            // Weird vue thing
             return;
         }
+        const d = new Date(this.currentMonth)
+        d.setFullYear(year)
 
-        const key = event.key || event.keyCode;
-
-        if (key === "ArrowLeft") {
-            this.previousMonth();
-            event.preventDefault();
-        } else if (key === "ArrowRight") {
-            this.nextMonth();
-            event.preventDefault();
-        } else if (key === "ArrowUp" || key === "PageUp") {
-            this.nextYear();
-            event.preventDefault();
-        } else if (key === "ArrowDown" || key === "PageDown") {
-            this.previousYear();
-            event.preventDefault();
-        }
+        this.currentMonth = d
+        this.updateSelectedMonth()
+        this.updateMonthTitle();
+        this.weeks = this.generateDays()
     }
 
+    get month() {
+        // Date is not reactive
+        return this.currentMonth.getMonth() + 1;
+    }
+
+    set month(month: number) {
+        if (!month) {
+            // Weird vue thing
+            return;
+        }
+        const d = new Date(this.currentMonth)
+        d.setDate(1)
+        d.setMonth(month - 1)
+
+        this.currentMonth = d
+        this.updateSelectedMonth()
+        this.updateMonthTitle();
+        this.weeks = this.generateDays()
+    }
+
+    monthText(month: number) {
+        return Formatter.capitalizeFirstLetter(Formatter.month(month))
+    }
 }
 </script>
 <style lang="scss">
@@ -290,9 +282,21 @@ export default class DateSelectionView extends Mixins(NavigationMixin) {
         align-items: center;
 
         > h1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+
             flex-grow: 1;
-            text-align: center;
             @extend .style-title-3;
+        }
+
+        .input-icon-container {
+            @extend .style-title-3;
+
+            select {
+                color: $color-dark;
+            }
         }
     }
 

@@ -149,12 +149,6 @@ export class OrganizationMetaData extends AutoEncoder {
     umbrellaOrganization: UmbrellaOrganization | null = null;
 
     /**
-     * Logo used in a horizontal environment (e.g. menu bar)
-     */
-    @field({ decoder: Image, nullable: true, version: 11 })
-    horizontalLogo: Image | null = null
-
-    /**
      * Set either file or url for the privacy policy. If both are set, the url has priority
      */
     @field({ decoder: File, nullable: true, version: 25 })
@@ -164,6 +158,12 @@ export class OrganizationMetaData extends AutoEncoder {
     privacyPolicyUrl: string | null = null
 
     /**
+     * Logo used in a horizontal environment (e.g. menu bar)
+     */
+    @field({ decoder: Image, nullable: true, version: 11 })
+    horizontalLogo: Image | null = null
+
+    /**
      * Logo to display (small)
      */
     @field({ decoder: Image, nullable: true, version: 11 })
@@ -171,6 +171,12 @@ export class OrganizationMetaData extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, optional: true })
     expandLogo = false
+
+    @field({ decoder: Image, nullable: true, version: 185 })
+    horizontalLogoDark: Image | null = null
+
+    @field({ decoder: Image, nullable: true, version: 185 })
+    squareLogoDark: Image | null = null
 
     @field({ decoder: StringDecoder, nullable: true, version: 21 })
     color: string | null = null

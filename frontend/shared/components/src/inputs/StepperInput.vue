@@ -13,17 +13,17 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 export default class StepperInput extends Vue {
     /** Price in cents */
     @Prop({ default: 0 })
-    min!: number | null
+        min!: number | null
 
     /** Price in cents */
     @Prop({ default: null })
-    max!: number | null
+        max!: number | null
 
     valid = true;
 
     /** Price in cents */
     @Prop({ default: 0 })
-    value!: number
+        value!: number
 
     get internalValue() {
         return this.value
@@ -90,7 +90,12 @@ export default class StepperInput extends Vue {
     button {
         padding: 5px 14px;
         border-radius: $border-radius;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         transition: background-color 0.2s;
+        touch-action: manipulation;
+        user-select: none;
+        cursor: pointer;
+        outline: 0;
 
         &:active {
             background: $color-gray-3;

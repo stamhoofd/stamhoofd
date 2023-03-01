@@ -1,15 +1,13 @@
 <template>
     <form class="st-view cart-item-view" @submit.prevent="addToCart">
-        <STNavigationBar :title="cartItem.product.name">
-            <BackButton v-if="canPop" slot="left" @click="pop" />
+        <STNavigationBar :title="cartItem.product.name" :pop="canPop" :dismiss="canDismiss">
             <span slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | priceFree }}</span>
-            <button v-if="canDismiss" slot="right" class="button icon close gray" type="button" @click="dismiss" />
         </STNavigationBar>
         <main>
             <h1>{{ cartItem.product.name }}</h1>
 
             <figure v-if="imageSrc" class="image-box">
-                <div :style="{ paddingBottom: Math.min(image.height/image.width*100, 100)+'%'}">
+                <div>
                     <img :src="imageSrc" :width="image.width" :height="image.height">
                 </div>
             </figure>
@@ -97,13 +95,15 @@
         </main>
 
         <STToolbar v-if="canOrder">
-            <button v-if="oldItem" slot="right" class="button primary" type="submit">
+            <button v-if="oldItem && cartEnabled" slot="right" class="button primary" type="submit">
                 <span class="icon basket" />
                 <span>Opslaan</span>
             </button>
             <button v-else slot="right" class="button primary" type="submit">
-                <span class="icon basket" />
-                <span>Toevoegen</span>
+                <span v-if="cartEnabled" class="icon basket" />
+                <span v-if="cartEnabled">Toevoegen</span>
+                <span v-else>Doorgaan</span>
+                <span v-if="!cartEnabled" class="icon arrow-right" />
             </button>
         </STToolbar>
     </form>
@@ -160,7 +160,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
         cart: Cart
 
     @Prop({ required: true })
-        saveHandler: (newItem: CartItem, oldItem: CartItem | null) => void
+        saveHandler: (newItem: CartItem, oldItem: CartItem | null, component) => void
 
     @Prop({ default: null })
         oldItem: CartItem | null
@@ -169,21 +169,18 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     addToCart() {
         try {
-            this.saveHandler(this.cartItem, this.oldItem)
+            this.saveHandler(this.cartItem, this.oldItem, this)
         } catch (e) {
+            console.error(e);
             this.errorBox = new ErrorBox(e)
             return
         }
+        this.errorBox = null // required if dismiss is disabled
+        //this.dismiss({ force: true })
+    }
 
-        /*if (this.oldItem) {
-            CheckoutManager.cart.removeItem(this.oldItem)
-            new Toast(this.cartItem.product.name+" is aangepast", "success green").setHide(1000).show()
-        } else {
-            new Toast(this.cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
-        }
-        CheckoutManager.cart.addItem(this.cartItem)
-        CheckoutManager.saveCart()*/
-        this.dismiss({ force: true })
+    get cartEnabled() {
+        return this.webshop.shouldEnableCart
     }
 
     get suffixSingular() {
@@ -201,7 +198,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get image() {
-        return this.cartItem.product.images[0]?.getResolutionForSize(500, undefined)
+        return this.cartItem.product.images[0]?.getResolutionForSize(600, undefined)
     }
 
     get imageSrc() {
@@ -290,7 +287,7 @@ export default class CartItemView extends Mixins(NavigationMixin){
     }
 
     get canOrder() {
-        return this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0) && this.product.isEnabled)
+        return this.admin || ((this.maximumRemaining === null || this.maximumRemaining > 0 || !!this.oldItem) && this.product.isEnabled)
     }
 
     get canSelectAmount() {
@@ -304,12 +301,14 @@ export default class CartItemView extends Mixins(NavigationMixin){
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
 .cart-item-view {
-    --st-horizontal-padding: 25px;
+    .sheet & {
+       --st-horizontal-padding: 25px;
+    }
 
     .image-box {
         position: relative;
-        max-height: 350px;
         overflow: hidden;
+        border-radius: $border-radius;
 
         > div {
             display: flex;
@@ -318,10 +317,9 @@ export default class CartItemView extends Mixins(NavigationMixin){
         }
 
         img {
-            position: absolute;
-            height: 100%;
+            height: auto;
+            max-width: 100%;
             border-radius: $border-radius;
-            width: 100%;
             object-fit: cover;
         }
     }

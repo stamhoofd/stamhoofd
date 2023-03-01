@@ -1,8 +1,7 @@
 <template>
     <div class="st-view cart-view">
-        <STNavigationBar :title="title">
+        <STNavigationBar :title="title" :dismiss="canDismiss">
             <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
-            <button slot="right" type="button" class="button icon close gray" @click="pop" />
         </STNavigationBar>
         <main>
             <h1>{{ title }}</h1>
@@ -34,10 +33,17 @@
                     </footer>
 
                     <figure v-if="imageSrc(cartItem)" slot="right">
-                        <img :src="imageSrc(cartItem)">
+                        <img :src="imageSrc(cartItem)" :width="imageResolution(cartItem).width" :height="imageResolution(cartItem).height">
                     </figure>
                 </STListItem>
             </STList>
+
+            <p>
+                <button type="button" class="button text" @click="pop">
+                    <span class="icon add" />
+                    <span>Nog iets toevoegen</span>
+                </button>
+            </p>
         </main>
 
         <STToolbar v-if="cart.items.length > 0">
@@ -110,7 +116,11 @@ export default class CartView extends Mixins(NavigationMixin){
     }
 
     imageSrc(cartItem: CartItem) {
-        return cartItem.product.images[0]?.getPathForSize(100, 100)
+        return this.imageResolution(cartItem)?.file?.getPublicPath()
+    }
+
+    imageResolution(cartItem: CartItem) {
+        return cartItem.product.images[0]?.getResolutionForSize(100, 100)
     }
 
     deleteItem(cartItem: CartItem) {
@@ -124,12 +134,12 @@ export default class CartView extends Mixins(NavigationMixin){
             oldItem: cartItem,
             cart: CheckoutManager.cart,
             webshop: WebshopManager.webshop,
-            saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
+            saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                 cartItem.validate(WebshopManager.webshop, CheckoutManager.cart)
+                component?.dismiss({force: true})
                 if (oldItem) {
                     CheckoutManager.cart.removeItem(oldItem)
                 }
-                new Toast(cartItem.product.name+" is aangepast", "success green").setHide(1000).show()
                 CheckoutManager.cart.addItem(cartItem)
                 CheckoutManager.saveCart()
             }
@@ -218,18 +228,16 @@ export default class CartView extends Mixins(NavigationMixin){
         }
 
         img {
-            width: 70px;
-            height: 70px;
+            max-width: 70px;
+            height: auto;
             border-radius: $border-radius;
 
             @media (min-width: 340px) {
-                width: 80px;
-                height: 80px;
+                max-width: 80px;
             }
 
             @media (min-width: 801px) {
-                width: 100px;
-                height: 100px;
+                max-width: 100px;
             }
         }
     }

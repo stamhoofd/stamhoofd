@@ -885,7 +885,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 shouldRetry: false,
                 owner: this
             })
-            console.log(url.data)
 
             if (AppManager.shared.isNative) {
                 window.open(url.data as any)

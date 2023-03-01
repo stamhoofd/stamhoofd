@@ -40,7 +40,8 @@ body {
     background: $color-background;
     color: $color-dark;
 
-
+    // Fix clarity city spacing
+    letter-spacing: -0.01em;
 }
 
 body,

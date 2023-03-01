@@ -113,6 +113,9 @@ export async function downloadDocuments(documents: Document[], owner?: any) {
         })
 
         await Promise.all(promises)
+
+        pendingToast?.hide()
+        pendingToast = new Toast("Documenten bundelen in een .zip...", "spinner").setHide(null).show()
         const blob = await zip.generateAsync({type:"blob"})
         saveAs(blob, "documenten.zip");
         pendingToast?.hide()

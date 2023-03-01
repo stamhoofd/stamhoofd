@@ -563,8 +563,9 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             root: new ComponentWithProperties(AddItemView, { 
                 cart: clone,
                 webshop: webshop,
-                saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
+                saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                     cartItem.validate(webshop, clone, false, true)
+                    component.dismiss({force: true})
 
                     if (oldItem) {
                         clone.removeItem(oldItem)
@@ -602,8 +603,10 @@ export default class EditOrderView extends Mixins(NavigationMixin){
             oldItem: cartItem,
             cart: clone,
             webshop: webshop,
-            saveHandler: (cartItem: CartItem, oldItem: CartItem | null) => {
+            saveHandler: (cartItem: CartItem, oldItem: CartItem | null, component) => {
                 cartItem.validate(webshop, clone, false, true)
+                component.dismiss({force: true})
+                
                 if (oldItem) {
                     clone.removeItem(oldItem)
                 }
