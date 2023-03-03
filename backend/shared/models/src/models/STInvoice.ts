@@ -318,6 +318,7 @@ export class STInvoice extends Model {
             STInvoice.numberCache = lastInvoice[0]?.number ?? 0
             
             this.number = STInvoice.numberCache + 1
+            this.meta.date = new Date()
             await this.save()
 
             // If save succeeded: increase it
