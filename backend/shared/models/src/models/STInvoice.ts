@@ -129,6 +129,10 @@ export class STInvoice extends Model {
         return []
     }
 
+    async getOrganizationActivePackages(): Promise<STPackage[]> {
+        return this.organizationId ? (await STPackage.getForOrganization(this.organizationId)) : []
+    }
+
     /**
      * WARNING: only call this in the correct queue!
      */
@@ -209,6 +213,19 @@ export class STInvoice extends Model {
                         pack.removeAt.setTime(pack.removeAt.getTime() - 1000)
                         await pack.save()
                     }
+                }
+            }
+        }
+
+        if (packages.length === 0) {
+            // Mark payments succeeded
+            const orgPackages = await this.getOrganizationActivePackages()
+            for (const p of orgPackages) {
+                if (p.meta.firstFailedPayment) {
+                    const pack = (await STPackage.getByID(p.id)) ?? p
+                    pack.meta.firstFailedPayment = null;
+                    pack.meta.paymentFailedCount = 0;
+                    await pack.save()
                 }
             }
         }
@@ -332,6 +349,18 @@ export class STInvoice extends Model {
                 pack.meta.paymentFailedCount++;
                 await pack.save()
 
+            }
+
+            if (packages.length == 0) {
+                // Mark all active packages as failed
+                const activePackages = await this.getOrganizationActivePackages()
+                for (const pack of activePackages) {
+                    console.log("Marking package with failed payment "+pack.id)
+
+                    pack.meta.firstFailedPayment = pack.meta.firstFailedPayment ?? new Date()
+                    pack.meta.paymentFailedCount++;
+                    await pack.save()
+                }
             }
         }
         
