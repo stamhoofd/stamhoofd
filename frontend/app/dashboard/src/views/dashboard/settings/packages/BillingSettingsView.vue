@@ -52,7 +52,7 @@
                             Factuur {{ invoice.number }}
                         </h3>
                         <p class="style-description">
-                            {{ (invoice.paidAt || invoice.createdAt) | date }}
+                            {{ (invoice.meta.date || invoice.paidAt || invoice.createdAt) | date }}
                         </p>
 
                         <span slot="right" class="icon download gray" />
