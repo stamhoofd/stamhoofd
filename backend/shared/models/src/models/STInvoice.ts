@@ -74,6 +74,9 @@ export class STInvoice extends Model {
     })
     updatedAt: Date
 
+    @column({ type: "string", nullable: true })
+    reference: string | null = null
+
     static organization = new ManyToOneRelation(Organization, "organization");
     static payment = new ManyToOneRelation(Payment, "payment");
 
@@ -129,7 +132,7 @@ export class STInvoice extends Model {
     /**
      * WARNING: only call this in the correct queue!
      */
-    async markPaid() {
+    async markPaid({sendEmail} = { sendEmail: true }) {
         // Schule on the queue because we are modifying pending invoices
         if (this.paidAt !== null) {
             return
@@ -241,7 +244,7 @@ export class STInvoice extends Model {
             await this.generatePdf()
         }
 
-        if (this.organizationId && this.meta.pdf && this.number !== null) {
+        if (this.organizationId && this.meta.pdf && this.number !== null && sendEmail) {
             const organization = await Organization.getByID(this.organizationId)
             if (organization) {
                 const invoicingTo = await organization.getInvoicingToEmails()
@@ -251,8 +254,8 @@ export class STInvoice extends Model {
                     Email.sendInternal({
                         to: invoicingTo,
                         bcc: "simon@stamhoofd.be",
-                        subject: "Jouw factuur voor "+organization.name,
-                        text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie de factuur van jullie aankoop. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                        subject: "Stamhoofd Factuur " + this.number + " voor " + organization.name,
+                        text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie factuur "+ this.number +" voor jullie administratie. Deze werd al betaald, je hoeft dus geen actie meer te ondernemen. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         attachments: [
                             {
                                 filename: "factuur-"+this.number+".pdf",

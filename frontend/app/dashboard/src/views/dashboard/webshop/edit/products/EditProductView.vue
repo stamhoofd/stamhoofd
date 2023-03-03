@@ -620,14 +620,10 @@ export default class EditProductView extends Mixins(NavigationMixin) {
                 width: 600,
             }),
             ResolutionRequest.create({
-                //height: 300,
-                width: 300,
-                fit: ResolutionFit.Cover
+                width: 300
             }),
             ResolutionRequest.create({
-                //height: 300,
-                width: 100,
-                fit: ResolutionFit.Cover
+                width: 100
             })
         ]
     }

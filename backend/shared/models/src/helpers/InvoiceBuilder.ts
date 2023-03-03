@@ -147,7 +147,7 @@ export class InvoiceBuilder {
             this.document.moveDown()
             const savedY = this.document.y
             this.document.text("Vervaldatum", logoX * MM, savedY, { align: 'left' })
-            this.document.text(Formatter.date((this.payment && this.payment.status === PaymentStatus.Succeeded) ? date : new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30), true), 43 * MM, savedY, { align: 'left' })
+            this.document.text(Formatter.date(((this.payment && this.payment.status === PaymentStatus.Succeeded) || (!this.payment && this.invoice.organizationId)) ? date : new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30), true), 43 * MM, savedY, { align: 'left' })
         }
 
         // Write Codawood BV
@@ -355,8 +355,17 @@ export class InvoiceBuilder {
         }
 
         if (!dryRun) {
-            this.document.text(Formatter.price(item.unitPrice).replace(/ /g, " ").replace(/,00/g, ""), x3, y, { align: 'left', width: x4 - x3 })
-            this.document.text(Formatter.price(item.price).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
+            // We need to show prices exluding VAT and round here if needed
+            let unitPrice = item.unitPrice
+            let price = item.price
+
+            if (this.invoice.meta.areItemsIncludingVAT) {
+                unitPrice = this.invoice.meta.includingVATToExcludingVAT(unitPrice)
+                price = this.invoice.meta.includingVATToExcludingVAT(price)
+            }
+
+            this.document.text(Formatter.price(unitPrice).replace(/ /g, " "), x3, y, { align: 'left', width: x4 - x3 })
+            this.document.text(Formatter.price(price).replace(/ /g, " "), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
         }
 
         return height
@@ -457,7 +466,17 @@ export class InvoiceBuilder {
                 
                 this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2 + 0.5*MM, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2 - 30*MM - 40*MM, lineGap: 2*MM })
             }
-            
+        } else {
+            if (this.invoice.organizationId) {
+                y -= 10*MM
+                this.document.fillColor(COLOR_PRIMARY)
+                this.document.translate(PAGE_MARGIN, y).path("M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z").fill('even-odd')
+                
+                this.document.translate(-PAGE_MARGIN, -y)
+                const payText = "Het bedrag werd reeds ingehouden van jouw Stripe balans."
+                const h = this.document.heightOfString(payText, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN*2  })
+                this.document.text(payText, PAGE_MARGIN + 8*MM, y + 12/2 - h/2, { align: 'left' })
+            }
         }
     }
 
