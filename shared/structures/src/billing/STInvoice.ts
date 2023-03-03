@@ -186,6 +186,13 @@ export class STInvoiceMeta extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(STInvoiceItem) })
     items: STInvoiceItem[] = []
 
+    /**
+     * Sometimes we need to calculate an invoice in reverse when we have a fixed price including VAT,
+     * but need to calculatle the price excluding VAT.
+     */
+    @field({ decoder: BooleanDecoder, version: 186 })
+    areItemsIncludingVAT = false
+
     // Cached company information (in case it is changed)
     @field({ decoder: StringDecoder })
     companyName: string
@@ -208,16 +215,54 @@ export class STInvoiceMeta extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 133 })
     userAgent: string | null = null
 
-    get priceWithoutVAT(): number {
+    /**
+     * Depending on areItemsIncludingVAT, this can either be including or excluding VAT
+     */
+    private get itemPrice() {
         return this.items.reduce((price, item) => price + item.price, 0)
     }
 
+    includingVATToExcludingVAT(price: number) {
+        // Always only round the VAT, not other prices
+        return price - this.getVATOnIncludingVATAmount(price)
+    }
+
+    excludingVATToIncludingVAT(price: number) {
+        // Always only round the VAT, not other prices
+        return price + this.getVATOnExcludingVATAmount(price)
+    }
+
+    getVATOnIncludingVATAmount(price: number) {
+        return Math.round(price  * this.VATPercentage / (100 + this.VATPercentage))
+    }
+
+    getVATOnExcludingVATAmount(price: number) {
+        return Math.round(this.itemPrice * this.VATPercentage / 100)
+    }
+
+    get priceWithoutVAT(): number {
+        const itemPrice = this.itemPrice
+        if (this.areItemsIncludingVAT) {
+            return itemPrice - this.VAT
+        }
+        return itemPrice
+    }
+
     get VAT(): number {
-        return Math.round(this.priceWithoutVAT * this.VATPercentage / 100)
+        if (this.areItemsIncludingVAT) {
+            // Subtract VAT and round
+            return this.getVATOnIncludingVATAmount(this.itemPrice)
+        }
+
+        return this.getVATOnExcludingVATAmount(this.itemPrice)
     }
 
     get priceWithVAT(): number {
-        return this.priceWithoutVAT + this.VAT
+        const itemPrice = this.itemPrice
+        if (this.areItemsIncludingVAT) {
+            return itemPrice
+        }
+        return itemPrice + this.VAT
     }
 }
 
@@ -256,6 +301,9 @@ export class STInvoicePrivate extends STInvoice {
 
     @field({ decoder: Settlement, nullable: true })
     settlement: Settlement | null = null
+
+    @field({ decoder: StringDecoder, nullable: true, version: 186 })
+    reference: string | null = null
 
     matchQuery(query: string) {
         if (query === this.number?.toString() || query === this.id) {

@@ -51,8 +51,8 @@
                         <h3 class="style-title-list">
                             Factuur {{ invoice.number }}
                         </h3>
-                        <p v-if="invoice.meta.date" class="style-description">
-                            {{ invoice.meta.date | date }}
+                        <p class="style-description">
+                            {{ (invoice.paidAt || invoice.createdAt) | date }}
                         </p>
 
                         <span slot="right" class="icon download gray" />

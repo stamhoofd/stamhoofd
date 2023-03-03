@@ -16,5 +16,5 @@ export class ResolutionRequest extends AutoEncoder {
     height: number | null = null;
 
     @field({ decoder: new EnumDecoder(ResolutionFit) })
-    fit: ResolutionFit = ResolutionFit.Contain
+    fit: ResolutionFit = ResolutionFit.Inside
 }
