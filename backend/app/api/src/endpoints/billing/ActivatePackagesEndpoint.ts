@@ -132,7 +132,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
             
             const invoice = STInvoice.createFor(user.organization)
-            const date = invoice.meta.date!
+            const date = new Date()
 
             invoice.meta.ipAddress = request.request.getIP()
             invoice.meta.userAgent = request.headers["user-agent"] ?? null

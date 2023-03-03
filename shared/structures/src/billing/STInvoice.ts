@@ -166,7 +166,7 @@ export class STInvoiceItem extends AutoEncoder {
 
 export class STInvoiceMeta extends AutoEncoder {
     /**
-     * Date the invoice was created. 
+     * Date the invoice was valid and given a number. 
      */
     @field({ decoder: DateDecoder, optional: true })
     date?: Date
