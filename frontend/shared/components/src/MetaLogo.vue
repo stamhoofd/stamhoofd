@@ -34,7 +34,7 @@
             >
         </picture>
 
-        <span v-if="!logoHorizontalSrc && !logoSrc" class="organization-logo-text">
+        <span v-if="!horizontalLogo && !squareLogo" class="organization-logo-text">
             {{ name }}
         </span>
     </div>
