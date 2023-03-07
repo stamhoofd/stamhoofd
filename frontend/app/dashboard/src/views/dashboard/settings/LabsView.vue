@@ -45,6 +45,10 @@
                 Activeer test-modus voor betalingen
             </Checkbox>
 
+            <Checkbox :checked="getFeatureFlag('stamhoofd-pay-by-transfer')" @change="setFeatureFlag('stamhoofd-pay-by-transfer', !!$event)">
+                Stamhoofd betalen via overschrijving
+            </Checkbox>
+
             <Checkbox :checked="getFeatureFlag('stripe-multiple')" @change="setFeatureFlag('stripe-multiple', !!$event)">
                 Meerdere Stripe accounts toestaan
             </Checkbox>

@@ -217,10 +217,10 @@ const throttle = (func, limit) => {
 })
 export default class PackageConfirmView extends Mixins(NavigationMixin) {
     @Prop({ default: () => [] })
-    selectedPackages: SelectablePackage[]
+        selectedPackages: SelectablePackage[]
 
     @Prop({ default: () => [] })
-    renewPackages: STPackage[]
+        renewPackages: STPackage[]
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
@@ -426,7 +426,17 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
         return this.companyAddress?.country ?? this.address.country
     }
 
+    getFeatureFlag(flag: string) {
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+    }
+
     get paymentMethods() {
+        if (this.getFeatureFlag('stamhoofd-pay-by-transfer')) {
+            if (this.country == Country.Netherlands) {
+                return [PaymentMethod.iDEAL, PaymentMethod.Bancontact, PaymentMethod.CreditCard, PaymentMethod.Transfer]
+            }
+            return [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard, PaymentMethod.Transfer]
+        }
         if (this.country == Country.Netherlands) {
             return [PaymentMethod.iDEAL, PaymentMethod.Bancontact, PaymentMethod.CreditCard]
         }
