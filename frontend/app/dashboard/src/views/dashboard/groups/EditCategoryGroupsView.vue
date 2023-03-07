@@ -61,7 +61,7 @@
             </button>
         </p>
 
-        <div class="container">
+        <div v-if="fullAccess" class="container">
             <hr>
             <h2>Start nieuwe inschrijvingsperiode</h2>
             <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je een nieuwe inschrijvinsgperiode starten, zodat leden opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
@@ -91,6 +91,15 @@
             </p>
         </div>
 
+        <div v-if="isRoot && fullAccess" class="container">
+            <hr>
+            <h2>Prullenmand inschrijvingsgroepen</h2>
+            <p>Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.</p>
+            <button type="button" class="button text" @click="openGroupTrash">
+                <span class="icon trash" /><span>Open prullenmand</span>
+            </button>
+        </div>
+
         <div v-if="!isNew && !isRoot && enableActivities" class="container">
             <hr>
             <h2>
@@ -117,6 +126,7 @@ import EditGroupView from './EditGroupView.vue';
 import EndRegistrationPeriodView from './EndRegistrationPeriodView.vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue"
 import GroupRow from "./GroupRow.vue"
+import GroupTrashView from './GroupTrashView.vue';
 
 @Component({
     components: {
@@ -457,6 +467,10 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
                 this.addPatch(p.patch(patch))
             }
         }).setDisplayStyle("popup"))
+    }
+
+    openGroupTrash() {
+        this.present(new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle("popup"))
     }
 
     async deleteMe() {

@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,6 +17,12 @@ export class Group extends AutoEncoder {
 
     @field({ decoder: GroupSettings })
     settings: GroupSettings
+
+    @field({ decoder: DateDecoder, version: 187 })
+    createdAt: Date = new Date()
+
+    @field({ decoder: DateDecoder, nullable: true, version: 187 })
+    deletedAt: Date | null = null
 
     /**
      * Only set when you have access to this information
