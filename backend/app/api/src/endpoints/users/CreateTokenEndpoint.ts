@@ -82,6 +82,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             const errBody = {
                 code: "invalid_username_or_password",
                 message: "Invalid username or password",
+                human: "Foutief wachtwoord of onbekend emailadres",
                 statusCode: 400
             };
 
