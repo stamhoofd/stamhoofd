@@ -288,7 +288,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
         for (const struct of request.body.groups.getPatches()) {
             const model = await Group.getByID(struct.id)
-            if (!model || model.organizationId != organization.id || model.deletedAt) {
+            if (!model || model.organizationId != organization.id) {
                 errors.addError(new SimpleError({
                     code: "invalid_id",
                     message: "No group found with id " + struct.id
@@ -318,6 +318,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
             if (struct.cycle !== undefined) {
                 model.cycle = struct.cycle
+            }
+
+            if (struct.deletedAt !== undefined) {
+                model.deletedAt = struct.deletedAt
             }
             
             await model.updateOccupancy()
