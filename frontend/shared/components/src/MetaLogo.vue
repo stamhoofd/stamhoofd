@@ -52,6 +52,22 @@ export default class OrganizationLogo extends Vue {
     @Prop({ required: true })
         name!: string
 
+    created() {
+        // Inject favicon if no favicon is present
+        if (!document.querySelector("link[rel='icon']")) {
+            const resolution = this.squareLogo?.getResolutionForSize(256, 256);
+
+            if (resolution && resolution.width === resolution.height) {
+                const path = resolution.file.getPublicPath();
+                const link = document.createElement("link");
+                link.rel = "icon";
+                link.href = path;
+                link.type = path.endsWith('.png') ? "image/png" : (path.endsWith('.svg') ? "image/svg+xml" : "image/jpeg");
+                document.head.appendChild(link);
+            }
+        }
+    }
+
     get expand() {
         return this.metaData.expandLogo
     }
