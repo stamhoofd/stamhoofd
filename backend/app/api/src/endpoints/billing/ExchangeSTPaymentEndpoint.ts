@@ -2,11 +2,11 @@ import { createMollieClient } from '@mollie/api-client';
 import { AutoEncoder, BooleanDecoder,Decoder,field } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { MolliePayment } from "@stamhoofd/models";
+import { MolliePayment, Organization } from "@stamhoofd/models";
 import { Payment } from "@stamhoofd/models";
 import { STInvoice } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentMethod,PaymentStatus, STInvoice as STInvoiceStruct } from "@stamhoofd/structures";
+import { PaymentMethod,PaymentProvider,PaymentStatus, STInvoice as STInvoiceStruct } from "@stamhoofd/structures";
 type Params = {id: string};
 class Query extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
@@ -87,9 +87,8 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                 return invoice
             }
 
-            if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created) {    
-
-                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard || payment.method == PaymentMethod.DirectDebit) {
+            if (payment.provider === PaymentProvider.Mollie && (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created || payment.status == PaymentStatus.Failed)) {    
+                if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard || payment.method == PaymentMethod.DirectDebit || payment.method == PaymentMethod.Transfer) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })
                     if (molliePayments.length == 1) {
@@ -102,12 +101,36 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
 
                             console.log(mollieData) // log to log files to check issues
 
+                            const details = (mollieData.details as any) 
+                            if (details?.cardNumber) {
+                                payment.iban = "xxxx xxxx xxxx "+details.cardNumber
+                            }
+                            if (details?.cardHolder) {
+                                payment.ibanName = details.cardHolder
+                            }
+                            if (details?.consumerAccount) {
+                                payment.iban = details.consumerAccount
+                            }
+                            if (details?.consumerName) {
+                                payment.ibanName = details.consumerName
+                            }
+
                             if (mollieData.status == "paid") {
                                 payment.status = PaymentStatus.Succeeded
                                 payment.paidAt = new Date()
                                 await payment.save();
 
                                 await invoice.markPaid()
+
+                                // Save customer id
+                                if (mollieData.customerId && _invoice.organizationId) {
+                                    const organization = await Organization.getByID(_invoice.organizationId)
+                                    if (organization) {
+                                        organization.serverMeta.mollieCustomerId = mollieData.customerId
+                                        console.log("Saving mollie customer", mollieData.customerId, "for organization", organization.id)
+                                        await organization.save()
+                                    }
+                                }
                             } else if (mollieData.status == "failed" || mollieData.status == "expired" || mollieData.status == "canceled") {
                                 payment.status = PaymentStatus.Failed
                                 await payment.save();

@@ -133,6 +133,54 @@ export class STInvoice extends Model {
         return this.organizationId ? (await STPackage.getForOrganization(this.organizationId)) : []
     }
 
+    async activatePackages(paymentSucceeded = false) {
+        const packages = await this.getPackages()
+        
+        // Search for all packages and activate them if needed (might be possible that they are already validated)
+        for (const p of packages) {
+            // It is possible that the meta of the package has changed in the previous loop call (in pack.activate), so we need to refetch it otherwise we get 'meta' conflicts
+            const pack = (await STPackage.getByID(p.id)) ?? p
+            console.log("Activating package "+pack.id)
+
+            // We'll never have multiple invoices for the same package that are awaiting payments
+            if (paymentSucceeded) {
+                pack.meta.firstFailedPayment = null;
+                pack.meta.paymentFailedCount = 0;
+            }
+
+            await pack.activate()
+
+            // Activate doesn't save always, so save if needed:
+            await pack.save()
+
+            // Deactivate demo packages
+            const remove: STPackageType[] = []
+            if (pack.meta.type === STPackageType.Members) {
+                // Remove demo
+                remove.push(STPackageType.TrialMembers)
+            }
+
+            if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
+                // Remove demo
+                remove.push(STPackageType.TrialWebshops)
+            }
+
+            if (remove.length > 0 && this.organizationId) {
+                // Get all packages
+                const all = await STPackage.getForOrganization(this.organizationId)
+                for (const pack of all) {
+                    if (remove.includes(pack.meta.type)) {
+                        console.log("Disabling demo package "+pack.id+" because package is bought.")
+                        // Stop
+                        pack.removeAt = new Date()
+                        pack.removeAt.setTime(pack.removeAt.getTime() - 1000)
+                        await pack.save()
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * WARNING: only call this in the correct queue!
      */
@@ -176,46 +224,7 @@ export class STInvoice extends Model {
         }
 
         // Search for all packages and activate them if needed (might be possible that they are already validated)
-        for (const p of packages) {
-            // It is possible that the meta of the package has changed in the previous loop call (in pack.activate), so we need to refetch it otherwise we get 'meta' conflicts
-            const pack = (await STPackage.getByID(p.id)) ?? p
-            console.log("Activating package "+pack.id)
-
-            // We'll never have multiple invoices for the same package that are awaiting payments
-            pack.meta.firstFailedPayment = null;
-            pack.meta.paymentFailedCount = 0;
-
-            await pack.activate()
-
-            // Activate doesn't save always, so save if needed:
-            await pack.save()
-
-            // Deactivate demo packages
-            const remove: STPackageType[] = []
-            if (pack.meta.type === STPackageType.Members) {
-                // Remove demo
-                remove.push(STPackageType.TrialMembers)
-            }
-
-            if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
-                // Remove demo
-                remove.push(STPackageType.TrialWebshops)
-            }
-
-            if (remove.length > 0 && this.organizationId) {
-                // Get all packages
-                const all = await STPackage.getForOrganization(this.organizationId)
-                for (const pack of all) {
-                    if (remove.includes(pack.meta.type)) {
-                        console.log("Disabling demo package "+pack.id+" because package is bought.")
-                        // Stop
-                        pack.removeAt = new Date()
-                        pack.removeAt.setTime(pack.removeAt.getTime() - 1000)
-                        await pack.save()
-                    }
-                }
-            }
-        }
+        await this.activatePackages(true)
 
         if (packages.length === 0) {
             // Mark payments succeeded
@@ -341,7 +350,7 @@ export class STInvoice extends Model {
 
         const packages = await this.getPackages()
 
-        if (payment.method === PaymentMethod.DirectDebit) {
+        if (payment.method === PaymentMethod.DirectDebit || payment.method === PaymentMethod.Transfer) {
             // Only mark failed payments for background payments
             for (const pack of packages) {
                 console.log("Marking package with failed payment "+pack.id)
@@ -412,6 +421,23 @@ export class STInvoice extends Model {
                         bcc: "simon@stamhoofd.be",
                         subject: "Betaling mislukt voor "+organization.name,
                         text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                    }, organization.i18n)
+                }
+            }
+        }
+
+        if (this.organizationId && payment.method === PaymentMethod.Transfer) {
+            const organization = await Organization.getByID(this.organizationId)
+            if (organization) {
+                const invoicingTo = await organization.getInvoicingToEmails()
+
+                if (invoicingTo) {
+                    // Send the e-mail
+                    Email.sendInternal({
+                        to: invoicingTo,
+                        bcc: "simon@stamhoofd.be",
+                        subject: "Betaling mislukt voor "+organization.name,
+                        text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat we geen overschrijving hebben ontvangen voor jullie aankoop. Kijk even na wat er fout ging en betaal het openstaande bedrag om te vermijden dat de diensten worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                     }, organization.i18n)
                 }
             }

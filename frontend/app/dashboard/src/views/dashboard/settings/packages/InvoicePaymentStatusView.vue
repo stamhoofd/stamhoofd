@@ -28,7 +28,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadingButton, LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PaymentStatus, STInvoice } from '@stamhoofd/structures';
+import { PaymentMethod, PaymentStatus, STInvoice } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import PackageSettingsView from './PackageSettingsView.vue';
@@ -46,7 +46,7 @@ import PackageSettingsView from './PackageSettingsView.vue';
 })
 export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    paymentId: string;
+        paymentId: string;
 
     invoice: STInvoice | null = null
     loading = false
@@ -80,6 +80,14 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
         this.dismiss({ force: true })
     }
 
+    onTransfer() {
+        // Reload organization
+        SessionManager.currentSession?.fetchOrganization().catch(e => console.error)
+
+        new CenteredMessage("Betalen via overschrijving", "Jouw pakket is tijdelijk geactiveerd. Zorg zeker voor een snelle afhandeling van de betaling. Als we jouw overschrijving niet ontvangen zal het pakket terug gedeactiveerd worden. Eventuele latere betalingen worden dan automatisch terugbetaald.").addCloseButton().show()
+        this.dismiss({ force: true })
+    }
+
     poll() {
         this.timer = null;
         const paymentId = this.paymentId;
@@ -93,8 +101,14 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
                 this.invoice = invoice
 
                 this.pollCount++;
+
                 if (this.payment && this.payment.status == PaymentStatus.Succeeded) {
                     this.onSuccess()
+                    return;
+                }
+
+                if (this.payment && this.payment.method == PaymentMethod.Transfer) {
+                    this.onTransfer()
                     return;
                 }
 

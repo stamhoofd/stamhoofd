@@ -1,10 +1,11 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
+import { BankTransferDetails } from '@mollie/api-client/dist/types/src/data/payments/data';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { MolliePayment, Payment, Registration, STCredit, STInvoice, STPackage, STPendingInvoice, Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceResponse, STPackage as STPackageStruct, STPackageBundle, STPackageBundleHelper, STPricingType, User as UserStruct, Version } from "@stamhoofd/structures";
+import { Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceResponse, STPackage as STPackageStruct, STPackageBundle, STPackageBundleHelper, STPricingType, TransferSettings, User as UserStruct, Version } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -220,7 +221,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 // Since we are about the pay something:
                 // also add the items that are in the pending queue
                 const pendingInvoice = await STPendingInvoice.addAutomaticItems(user.organization)
-                if (pendingInvoice && pendingInvoice.invoiceId === null) {
+                if (pendingInvoice && pendingInvoice.invoiceId === null && pendingInvoice.meta.items.length) {
                     if (!request.body.proForma) {
                         // Already generate an ID for the invoice
                         await invoice.save()
@@ -252,6 +253,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 payment.status = PaymentStatus.Created
                 payment.price = price
                 payment.paidAt = null
+                payment.provider = PaymentProvider.Mollie
                 await payment.save()
 
                 invoice.paymentId = payment.id
@@ -269,7 +271,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     }));
                 }
 
-                payment.provider = PaymentProvider.Mollie
 
                 try {
                     // Mollie payment is required
@@ -281,6 +282,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         })
                     }
                     const mollieClient = createMollieClient({ apiKey });
+                    let customerId = user.organization.serverMeta.mollieCustomerId
 
                     if (!user.organization.serverMeta.mollieCustomerId) {
                         const mollieCustomer = await mollieClient.customers.create({
@@ -291,9 +293,23 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                                 userId: user.id,
                             }
                         })
+
+                        customerId = mollieCustomer.id
                         user.organization.serverMeta.mollieCustomerId = mollieCustomer.id
                         console.log("Saving new mollie customer", mollieCustomer, "for organization", user.organization.id)
                         await user.organization.save()
+                    }
+
+                    let _molliePaymentMethod = molliePaymentMethod.bancontact
+
+                    if (payment.method == PaymentMethod.iDEAL) {
+                        _molliePaymentMethod = molliePaymentMethod.ideal
+                    } else if (payment.method == PaymentMethod.CreditCard) {
+                        _molliePaymentMethod = molliePaymentMethod.creditcard
+                    } else if (payment.method == PaymentMethod.Transfer) {
+                        _molliePaymentMethod = molliePaymentMethod.banktransfer
+                    } else if (payment.method == PaymentMethod.DirectDebit) {
+                        _molliePaymentMethod = molliePaymentMethod.directdebit
                     }
 
                     const molliePayment = await mollieClient.payments.create({
@@ -301,16 +317,17 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                             currency: 'EUR',
                             value: (price / 100).toFixed(2)
                         },
-                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                        method: _molliePaymentMethod,
                         description,
-                        customerId: user.organization.serverMeta.mollieCustomerId,
-                        sequenceType: SequenceType.first,
+                        customerId,
+                        sequenceType: _molliePaymentMethod !== molliePaymentMethod.banktransfer && _molliePaymentMethod !== molliePaymentMethod.directdebit ? SequenceType.first : undefined,
                         redirectUrl: "https://"+STAMHOOFD.domains.dashboard+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
                         webhookUrl: 'https://'+STAMHOOFD.domains.api+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
                         metadata: {
                             invoiceId: invoice.id,
                             paymentId: payment.id,
-                        }
+                        },
+                        billingEmail: user.email,
                     });
                     console.log(molliePayment)
                     const paymentUrl = molliePayment.getCheckoutUrl() ?? undefined
@@ -320,6 +337,22 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     dbPayment.paymentId = payment.id
                     dbPayment.mollieId = molliePayment.id
                     await dbPayment.save();
+
+                    if ((molliePayment.details as BankTransferDetails)?.transferReference) {
+                        const details = molliePayment.details as BankTransferDetails
+                        payment.transferSettings = TransferSettings.create({
+                            iban: details.bankAccount,
+                            creditor: 'Stamhoofd',
+                        })
+                        payment.transferDescription = details.transferReference
+                        await payment.save()
+                    }
+
+                    if (payment.method == PaymentMethod.Transfer) {
+                        // Activate package
+                        await invoice.activatePackages(false)
+                        await STPackage.updateOrganizationPackages(user.organizationId)
+                    }
 
                     return new Response(STInvoiceResponse.create({
                         paymentUrl: paymentUrl,
