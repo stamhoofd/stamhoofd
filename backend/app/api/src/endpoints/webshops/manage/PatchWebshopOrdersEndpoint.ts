@@ -244,13 +244,17 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 const payment = payments.find(p => p.id === order.paymentId)
                 order.setOptionalRelation(Order.payment, payment ?? null)
 
-                if (payment && payment.status === PaymentStatus.Succeeded) {
+                if (!payment || payment.status === PaymentStatus.Succeeded) {
                     await order.updateTickets()
                 }
             }
         } else {
             for (const order of orders) {
                 order.setOptionalRelation(Order.payment, null)
+
+                if (order.paymentId === null) {
+                    await order.updateTickets()
+                }
             }
         }
     
