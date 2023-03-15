@@ -49,7 +49,7 @@
         <STInputBox v-else-if="answer.settings.type == RecordType.Price" :title="label" error-fields="input" :error-box="errorBox">
             <PriceInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
-        <ImageInput v-else-if="answer.settings.type == RecordType.Image" v-model="answer.image" :title="label" :required="required" :validator="validator" :resolutions="recordSettings.resolutions" :placeholder="inputPlaceholder" />
+        <ImageInput v-else-if="answer.settings.type == RecordType.Image" v-model="answer.image" :title="label" :required="required" :validator="validator" :resolutions="recordSettings.resolutions" />
         <STInputBox v-else-if="answer.settings.type == RecordType.Integer" :title="label" error-fields="input" :error-box="errorBox">
             <NumberInput v-model="answer.value" :required="required" :validator="validator" :placeholder="inputPlaceholder" />
         </STInputBox>
