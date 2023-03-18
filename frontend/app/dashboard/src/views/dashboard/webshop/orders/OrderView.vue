@@ -304,7 +304,7 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, LoadingButton, LoadingView, LongPressDirective, Radio, RecordCategoryAnswersBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { CartItem, getPermissionLevelNumber, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, getPermissionLevelNumber, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -537,6 +537,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     created() {
         this.webshopManager.ticketsEventBus.addListener(this, "fetched", this.onNewTickets.bind(this))
         this.webshopManager.ticketPatchesEventBus.addListener(this, "patched", this.onNewTicketPatches.bind(this))
+        this.webshopManager.ordersEventBus.addListener(this, "fetched", this.onPatchedOrders.bind(this))
         
         if (this.hasTickets) {
             this.recheckTickets()
@@ -601,6 +602,13 @@ export default class OrderView extends Mixins(NavigationMixin){
         return Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(paymentMethod, this.order.data.paymentContext))
     }
 
+    onPatchedOrders(orders: PrivateOrder[]) {        
+        const order = orders.find(o => o.id === this.order.id);
+        if (order) {
+            this.recheckTickets()
+        }
+    }
+
     async onNewTickets(tickets: TicketPrivate[]) {        
         for (const ticket of tickets) {
             if (ticket.orderId == this.order.id) {
@@ -632,6 +640,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     beforeDestroy() {
         this.webshopManager.ticketsEventBus.removeListener(this)
         this.webshopManager.ticketPatchesEventBus.removeListener(this)
+        this.webshopManager.ordersEventBus.removeListener(this)
     }
 
     activated() {
