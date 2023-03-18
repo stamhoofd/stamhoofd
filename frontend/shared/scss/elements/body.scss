@@ -15,8 +15,9 @@
 
     --vh: 1vh;
 
-    @supports(width: 1dvh) {
-        --vh: 1dvh; // iOS improved
+    @supports(width: min(1dvh,1lvh)) {
+        // --vh: 1dvh; // Should be this
+        --vh: min(1dvh,1lvh); // Bug in Safari 15, fixed in Safari 16.1, where 1dvh was larger than possible and caused bugs
     }
 
     // Support for VirtualKeyboard API (Chrome on Android)
