@@ -103,7 +103,7 @@ import { WebshopManager } from '../WebshopManager';
 })
 export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
     @Prop()
-    webshopManager: WebshopManager
+        webshopManager: WebshopManager
 
     get preview() {
         return this.webshopManager.preview
@@ -461,6 +461,9 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
             // Keep a Set of all order Id's to prevent duplicate orders (in case an order gets updated, we'll receive it multiple times)
             const orderIds = new Set<string>()
 
+            // Keep a set of ticket ids to prevent duplicate tickets
+            const ticketIds = new Set<string>()
+
             await this.webshopManager.loadWebshopIfNeeded(false)
 
             // Keep track of all the order item ids that are a voucher, so we can count them separately
@@ -507,6 +510,11 @@ export default class WebshopStatisticsView extends Mixins(NavigationMixin) {
                     if (!orderIds.has(ticket.orderId)) {
                         return;
                     }
+                    if (ticketIds.has(ticket.id)) {
+                        // Duplicate (e.g. network fetch + local storage)
+                        return;
+                    }
+                    ticketIds.add(ticket.id)
 
                     if (ticket.scannedAt) {
                         if (!this.firstScannedTicketDate || ticket.scannedAt < this.firstScannedTicketDate) {
