@@ -386,7 +386,6 @@ export class Checkout extends AutoEncoder {
         }
     }
 
-
     /**
      * Convenience mapper
      */
@@ -457,6 +456,29 @@ export class Checkout extends AutoEncoder {
                 }
             })
         )
+
+        const priceChoices: ChoicesFilterChoice[]= [];
+        for (const product of webshop.products) {
+            if (product.prices.length > 1) {
+                for (const price of product.prices) {
+                    priceChoices.push(new ChoicesFilterChoice(product.id + ':' + price.id, product.name+": "+price.name))
+                }
+            }
+        }
+
+        if (priceChoices.length > 0) {
+            filters.push(
+                new ChoicesFilterDefinition<Checkout>({
+                    id: "order_product_prices",
+                    name: "Bestelde prijskeuzes",
+                    choices: priceChoices,
+                    defaultMode: ChoicesFilterMode.Or,
+                    getValue: (checkout) => {
+                        return checkout.cart.items.flatMap(i => i.product.id + ':' + i.productPrice.id)
+                    }
+                })
+            )
+        }
 
         return filters;
     }
