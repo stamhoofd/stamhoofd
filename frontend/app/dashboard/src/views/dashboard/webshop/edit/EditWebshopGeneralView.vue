@@ -120,6 +120,35 @@
                 </STListItem>
             </STList>
         </div>
+
+        <div v-if="getFeatureFlag('webshop-auth')" class="container">
+            <hr>
+            <h2>Inloggen</h2>
+            <p>
+                Verplicht gebruikers om in te loggen om de webshop te kunnen bekijken.
+            </p>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <Radio slot="left" v-model="authType" :value="WebshopAuthType.Disabled" />
+                    <h3 class="style-title-list">
+                        Uitgeschakeld
+                    </h3>
+                    <p class="style-description">
+                        Gebruikers kunnen en moeten niet inloggen om een bestelling te plaatsen.
+                    </p>
+                </STListItem>
+                <STListItem :selectable="true" element-name="label" class="left-center">
+                    <Radio slot="left" v-model="authType" :value="WebshopAuthType.Required" />
+                    <h3 class="style-title-list">
+                        Verplicht
+                    </h3>
+                    <p class="style-description">
+                        Gebruikers moeten inloggen om de webshop te zien en een bestelling te plaatsen.
+                    </p>
+                </STListItem>
+            </STList>
+        </div>
     </SaveView>
 </template>
 
@@ -128,7 +157,7 @@ import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
@@ -195,6 +224,10 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         return WebshopNumberingType
     }
 
+    get WebshopAuthType() {
+        return WebshopAuthType
+    }
+
     get name() {
         return this.webshop.meta.name
     }
@@ -224,6 +257,15 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     set numberingType(numberingType: WebshopNumberingType) {
         const patch = WebshopPrivateMetaData.patch({ numberingType })
         this.addPatch(PrivateWebshop.patch({ privateMeta: patch}) )
+    }
+
+    get authType() {
+        return this.webshop.meta.authType
+    }
+
+    set authType(authType: WebshopAuthType) {
+        const patch = WebshopMetaData.patch({ authType })
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
     }
 
     get organization() {
@@ -309,6 +351,10 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
                 paymentMethods: patch
             })
         }))
+    }
+
+    getFeatureFlag(flag: string) {
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
     }
 }
 </script>

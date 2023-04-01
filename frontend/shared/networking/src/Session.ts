@@ -1,16 +1,30 @@
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
+import { Toast } from '@stamhoofd/components'
 import { KeychainedResponseDecoder, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator"
 
-import { AppManager } from '..'
+import { AppManager, UrlHelper } from '..'
 import { Keychain } from './Keychain'
 import { ManagedToken } from './ManagedToken'
 import { NetworkManager } from './NetworkManager'
 import { Storage } from './Storage'
 
 type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organization" | "token") => void
+
+// dec2hex :: Integer -> String
+// i.e. 0-255 -> '00'-'ff'
+function dec2hex (dec) {
+    return dec.toString(16).padStart(2, "0")
+}
+
+// generateId :: Integer -> String
+function generateId (len) {
+    const arr = new Uint8Array((len || 40) / 2)
+    window.crypto.getRandomValues(arr)
+    return Array.from(arr, dec2hex).join('')
+}
 
 export class Session implements RequestMiddleware {
     organizationId: string;
@@ -98,6 +112,151 @@ export class Session implements RequestMiddleware {
         }
         
         console.log('Saved token to storage')
+    }
+
+    removeFromStorage() {
+        try {
+            void Storage.secure.removeItem('token-' + this.organizationId)
+            void Storage.secure.removeItem('user-' + this.organizationId)
+
+            // Deprecated: but best to delete it for now
+            void Storage.secure.removeItem('key-' + this.organizationId)
+        } catch (e) {
+            console.error("Storage error when deleting session")
+            console.error(e)
+        }
+        
+        console.log('Deleted token to storage')
+    }
+
+    async checkSSO() {
+        const search = UrlHelper.initial.getSearchParams();
+        const oid_rt = search.get('oid_rt');
+        const state = search.get('s');
+        const error = search.get('error');
+        if (oid_rt && state) {
+            // Check valid state
+            try {
+                const savedState = await Storage.secure.getItem("oid-state")
+                if (savedState !== state) {
+                    console.warn('SSO state didn\'t match')
+
+                    if (!this.canGetCompleted()) {
+                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                    }
+                    return
+                }
+                Storage.secure.removeItem("oid-state").catch(console.error)
+            } catch (e) {
+                console.error(e);
+                
+                if (!this.canGetCompleted()) {
+                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                }
+                return;
+            }
+
+            this.setToken(new Token({
+                accessToken: '',
+                refreshToken: oid_rt,
+                accessTokenValidUntil: new Date(0)
+            }))
+        }
+
+        if (state && error) {
+            // Check valid state
+            try {
+                const savedState = await Storage.secure.getItem("oid-state")
+                if (savedState !== state) {
+                    console.warn('SSO state didn\'t match')
+                    
+                    if (!this.canGetCompleted()) {
+                        new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                    }
+                    return
+                }
+                Storage.secure.removeItem("oid-state").catch(console.error)
+            } catch (e) {
+                console.error(e);
+                if (!this.canGetCompleted()) {
+                    new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+                }
+                return;
+            }
+
+            new Toast(error, 'error red').setHide(20000).show()
+        } else {
+            if (error) {
+                // Message not authorized
+                new Toast('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.', 'error red').setHide(20000).show()
+            }
+        }
+    }
+
+    async startSSO(data: {webshopId?: string, prompt?: string}) {
+        const spaState = generateId(40)
+        try {
+            await Storage.secure.setItem("oid-state", spaState)
+        } catch (e) {
+            console.error("Could not save state in local storage")
+            new Toast('Jouw browser ondersteunt geen lokale opslag, wat noodzakelijk is om in te kunnen loggen. Kijk na of je de browser niet in incognito/prive mode gebruikt. Schakel het indien mogelijk uit, of probeer in een andere browser.', 'error red').setHide(20000).show()
+            return;
+        }
+
+        // Check SSO required?
+        // if SSO
+        const url = new URL(this.server.host + '/openid/start');
+        
+        const form = document.createElement('form');
+        form.action= url.href;
+        form.method = 'POST';
+
+        const spaStateInput = document.createElement('input');
+        spaStateInput.type = 'hidden';
+        spaStateInput.name = 'spaState';
+        spaStateInput.value = spaState;
+        form.appendChild(spaStateInput);
+
+        // Include organizationId
+        const organizationIdInput = document.createElement('input');
+        organizationIdInput.type = 'hidden';
+        organizationIdInput.name = 'organizationId';
+        organizationIdInput.value = this.organizationId;
+        form.appendChild(organizationIdInput);
+
+        // Include webshopId
+        if (data.webshopId) {
+            const webshopIdInput = document.createElement('input');
+            webshopIdInput.type = 'hidden';
+            webshopIdInput.name = 'webshopId';
+            webshopIdInput.value = data.webshopId;
+            form.appendChild(webshopIdInput);
+        }
+
+        const redirectUriInput = document.createElement('input');
+        redirectUriInput.type = 'hidden';
+        redirectUriInput.name = 'redirectUri';
+        redirectUriInput.value = window.location.href;
+        form.appendChild(redirectUriInput);
+
+        // Include prompt
+        if (data.prompt) {
+            const promptInput = document.createElement('input');
+            promptInput.type = 'hidden';
+            promptInput.name = 'prompt';
+            promptInput.value = data.prompt;
+            form.appendChild(promptInput);
+        }
+
+        // Include client = sso
+        const clientInput = document.createElement('input');
+        clientInput.type = 'hidden';
+        clientInput.name = 'client';
+        clientInput.value = 'sso';
+        form.appendChild(clientInput);
+
+        document.body.appendChild(form);
+        form.submit();
     }
 
     addListener(owner: any, listener: AuthenticationStateListener) {

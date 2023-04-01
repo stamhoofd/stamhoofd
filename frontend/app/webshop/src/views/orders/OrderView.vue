@@ -4,7 +4,7 @@
         <STNavigationBar :large="true" :sticky="false">
             <OrganizationLogo slot="left" :organization="organization" />
             <button slot="right" class="text button" type="button" @click="pop">
-                Webshop
+                Sluiten
             </button>
         </STNavigationBar>
 

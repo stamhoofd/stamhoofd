@@ -1,4 +1,5 @@
 import { AutoEncoder,BooleanDecoder,DateDecoder,field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 
 export class OrganizationServerMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
@@ -33,4 +34,7 @@ export class OrganizationServerMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder, optional: true, version: 86 })
     mollieCustomerId?: string
+
+    @field({ decoder: OpenIDClientConfiguration, nullable: true, version: 189 })
+    ssoConfiguration: OpenIDClientConfiguration | null = null
 }

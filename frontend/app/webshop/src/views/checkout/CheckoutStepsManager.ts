@@ -2,7 +2,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { UrlHelper } from '@stamhoofd/networking';
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Checkout, CheckoutMethod, CheckoutMethodType, OrganizationMetaData, RecordAnswer, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -134,11 +134,15 @@ export class CheckoutStepsManager {
             })
         )
 
+        const loggedIn = SessionManager.currentSession?.isComplete() ?? false;
+        const user = loggedIn ? (SessionManager.currentSession?.user ?? null) : null;
+
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Customer,
             url: "/checkout/"+CheckoutStepType.Customer.toLowerCase(),
+            active: !loggedIn || webshop.meta.phoneEnabled || !user?.firstName || !user?.lastName,
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './CustomerView.vue').then(m => new ComponentWithProperties(m.default, {})),
-            validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n)
+            validate: (checkout, webshop, organizationMeta) => checkout.validateCustomer(webshop, organizationMeta, I18nController.i18n, false, loggedIn ? (SessionManager.currentSession?.user ?? null) : null)
         }))
 
         // Now add all the Record Category steps

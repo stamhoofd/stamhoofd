@@ -11,6 +11,7 @@ import { RecordAnswer, RecordAnswerDecoder } from '../members/records/RecordAnsw
 import { RecordCategory } from '../members/records/RecordCategory';
 import { OrganizationMetaData } from '../OrganizationMetaData';
 import { PaymentMethod } from '../PaymentMethod';
+import { User } from '../User';
 import { Cart } from './Cart';
 import { Customer } from './Customer';
 import { Webshop, WebshopPreview } from './Webshop';
@@ -288,7 +289,17 @@ export class Checkout extends AutoEncoder {
         this.timeSlot = timeSlot
     }
 
-    validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false) {
+    validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false, user: User | null = null) {
+        if (user) {
+            if (user.firstName) {
+                this.customer.firstName = user.firstName
+            }
+            if (user.lastName) {
+                this.customer.lastName = user.lastName
+            }
+            this.customer.email = user.email
+        }
+
         if (this.customer.firstName.length < 2) {
             throw new SimpleError({
                 code: "invalid_first_name",
@@ -362,12 +373,12 @@ export class Checkout extends AutoEncoder {
         this.recordAnswers = answers
     }
 
-    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false) {
+    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false, user: User | null = null) {
         this.validateCart(webshop, organizationMeta, asAdmin)
         this.validateCheckoutMethod(webshop, organizationMeta)
         this.validateDeliveryAddress(webshop, organizationMeta)
         this.validateTimeSlot(webshop, organizationMeta)
-        this.validateCustomer(webshop, organizationMeta, i18n, asAdmin)
+        this.validateCustomer(webshop, organizationMeta, i18n, asAdmin, user)
         this.validateRecordAnswers(webshop)
 
         if (this.totalPrice != 0 && !asAdmin) {
