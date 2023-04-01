@@ -212,6 +212,10 @@ export class Product extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(OptionMenu) })
     optionMenus: OptionMenu[] = []
 
+    clearStock() {
+        this.usedStock = 0
+    }
+
     get isSoldOut(): boolean {
         if (this.stock === null) {
             return false

@@ -131,6 +131,11 @@ export class WebshopTimeSlot extends AutoEncoder {
     timeRangeString() {
         return Formatter.minutes(this.startTime)+" - "+Formatter.minutes(this.endTime)
     }
+
+    clearStock() {
+        this.usedOrders = 0
+        this.usedPersons = 0
+    }
 }
 
 /**
@@ -179,6 +184,12 @@ export class CheckoutMethod extends AutoEncoder {
 
     get typeName() {
         return CheckoutMethodTypeHelper.getName(this.type)
+    }
+
+    clearStock() {
+        for (const slot of this.timeSlots.timeSlots) {
+            slot.clearStock()
+        }
     }
 }
 

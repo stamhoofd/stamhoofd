@@ -251,6 +251,16 @@ export class Webshop extends AutoEncoder {
         }
         return false
     }
+
+    clearStock() {
+        for (const product of this.products) {
+            product.clearStock()
+        }
+
+        for (const method of this.meta.checkoutMethods) {
+            method.clearStock()
+        }
+    }
 }
 
 export class PrivateWebshop extends Webshop {

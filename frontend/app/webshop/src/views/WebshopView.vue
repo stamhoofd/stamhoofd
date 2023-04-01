@@ -35,10 +35,6 @@
                         Dit is een demo webshop
                     </p>
 
-                    <p class="error-box">
-                        Bekijk mijn bestellingen
-                    </p>
-
                     <p v-if="showOpenAt" class="info-box">
                         Bestellen kan vanaf {{ webshop.meta.openAt | dateTime }}
                     </p>

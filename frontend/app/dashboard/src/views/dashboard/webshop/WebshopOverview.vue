@@ -535,25 +535,18 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
                     try {
                         // Make sure we have an up to date webshop
                         const webshop = await this.webshopManager.loadWebshopIfNeeded(false)
-                        let duplicate = PrivateWebshop.create({
-                            ...webshop,
+                        const duplicate = PrivateWebshop.create({
+                            ...webshop.clone(),
                             id: undefined, 
                         }).patch({
                             meta: WebshopMetaData.patch({
                                 status: WebshopStatus.Open,
                             })
                         })
+
                         // Set usedStock to 0
-                        const patch: PatchableArrayAutoEncoder<Product> = new PatchableArray()
-                        for (const product of duplicate.products) {
-                            patch.addPatch(Product.patch({
-                                id: product.id,
-                                usedStock: 0
-                            }))
-                        }
-                        duplicate = duplicate.patch({
-                            products: patch
-                        })
+                        duplicate.clearStock();
+
                         return new ComponentWithProperties(EditWebshopGeneralView, {
                             initialWebshop: duplicate
                         })
