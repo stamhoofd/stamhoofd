@@ -10,7 +10,7 @@ import { PayconiqPayment } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct } from "@stamhoofd/structures";
+import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct, WebshopAuthType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 
@@ -56,6 +56,15 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
             const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization)
+
+            if (webshop.meta.authType === WebshopAuthType.Required && !token) {
+                throw new SimpleError({
+                    code: "not_authenticated",
+                    message: "Not authenticated",
+                    human: "Je moet inloggen om een bestelling te kunnen plaatsen.",
+                    statusCode: 401
+                })
+            }
             const webshopStruct = WebshopStruct.create(webshop)
 
             request.body.validate(webshopStruct, organization.meta, request.i18n, false, token?.user?.getStructure())
