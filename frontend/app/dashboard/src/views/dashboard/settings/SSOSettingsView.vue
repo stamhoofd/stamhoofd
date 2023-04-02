@@ -4,7 +4,7 @@
             Single-Sign-On
         </h1>
         <p>
-            Zorg dat gebruikers kunnen inloggen via je eigen account systeem, apart van Stamhoofd. Momenteel kan dit enkel gebruikt worden voor webshops. Zie https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app voor meer informatie om aan de nodige gegevens te geraken.
+            Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Stamhoofd. Momenteel kan dit enkel gebruikt worden voor webshops. Voor Microsoft kan je <a href="https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app" target="_blank" class="inline-link">deze</a> handleiding volgen.
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
