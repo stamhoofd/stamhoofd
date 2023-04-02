@@ -58,16 +58,6 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
             }
         }
 
-        // Get provider
-        if (request.body.client !== 'sso') {
-            // Other providers not supported for now
-            throw new SimpleError({
-                code: "invalid_client",
-                message: "Invalid client",
-                statusCode: 400
-            });
-        }
-
         if (request.body.spaState.length < 10) {
             throw new SimpleError({
                 code: "invalid_state",
@@ -86,6 +76,6 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         const helper = new OpenIDConnectHelper(organization, configuration)
-        return await helper.startAuthCodeFlow(redirectUri, request.body.spaState, request.body.prompt)
+        return await helper.startAuthCodeFlow(redirectUri, request.body.provider, request.body.spaState, request.body.prompt)
     }
 }

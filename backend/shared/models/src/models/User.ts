@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version, User as UserStruct } from "@stamhoofd/structures";
+import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version, User as UserStruct, UserMeta, LoginProviderType } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { Worker } from 'node:worker_threads';
 import path from "path";
@@ -46,6 +46,12 @@ export class User extends Model {
      */
     @column({ type: "json", decoder: Permissions, nullable: true })
     permissions: Permissions | null = null
+
+    /**
+     * Public key used for encryption
+     */
+    @column({ type: "json", decoder: UserMeta, nullable: true })
+    meta: UserMeta | null = null
 
     /**
      * @deprecated
@@ -244,7 +250,7 @@ export class User extends Model {
         return user as UserFull;
     }
 
-    hasAccount() {
+    hasPasswordBasedAccount() {
         if (this.password) {
             return true;
         }
@@ -254,6 +260,16 @@ export class User extends Model {
             return false
         }
         return true
+    }
+
+    hasAccount() {
+        if (this.hasPasswordBasedAccount()) {
+            return true;
+        }
+        if ((this.meta?.loginProviderIds?.size ?? 0) > 0) {
+            return true;
+        }
+        return false
     }
 
     protected hasKeys() {
@@ -379,9 +395,16 @@ export class User extends Model {
         return user;
     }
 
+    linkLoginProvider(type: LoginProviderType, sub: string) {
+        if (!this.meta) {
+            this.meta = UserMeta.create({})
+        }
+        this.meta.loginProviderIds.set(type, sub)
+    }
+
     static async registerSSO(
         organization: Organization,
-        data: {email, id, firstName, lastName}
+        data: {email, id, firstName, lastName, type: LoginProviderType, sub: string}
     ): Promise<UserWithOrganization | undefined> {
         const {
             email,
@@ -396,6 +419,7 @@ export class User extends Model {
         user.verified = false;
         user.firstName = firstName
         user.lastName = lastName
+        user.linkLoginProvider(data.type, data.sub)
 
         try {
             await user.save();

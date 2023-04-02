@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD COLUMN `meta` json NULL AFTER `permissions`;

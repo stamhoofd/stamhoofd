@@ -113,7 +113,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LoadingView, Logo, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CartItem, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { CartItem, LoginProviderType, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -215,7 +215,8 @@ export default class WebshopView extends Mixins(NavigationMixin){
         // Redirect to login
         SessionManager.currentSession!.startSSO({
             webshopId: this.webshop.id,
-            prompt: 'select_account'
+            prompt: 'select_account',
+            providerType: LoginProviderType.SSO
         }).catch(console.error)
     }
 
