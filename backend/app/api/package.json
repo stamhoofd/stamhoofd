@@ -15,6 +15,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "devDependencies": {
+        "@types/cookie": "^0.5.1",
         "@types/luxon": "^2.0.8",
         "@types/mailparser": "^3.4.0",
         "@types/mysql": "^2.15.20",
@@ -28,6 +29,7 @@
         "aws-sdk": "^2.885.0",
         "axios": "^0.24.0",
         "base-x": "^3.0.9",
+        "cookie": "^0.5.0",
         "formidable": "^2.1.1",
         "handlebars": "^4.7.7",
         "html-to-text": "^5.1.1",
@@ -37,6 +39,7 @@
         "mockdate": "^3.0.2",
         "mysql": "^2.18.1",
         "node-rsa": "^1.1.1",
+        "openid-client": "^5.4.0",
         "postmark": "^2.8.1",
         "sharp": "^0.31.3",
         "stripe": "^11.5.0"

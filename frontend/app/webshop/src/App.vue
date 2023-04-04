@@ -10,10 +10,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, PushOptions } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
+import { AuthenticatedView, CenteredMessage, CenteredMessageView, ColorHelper, ErrorBox, LoadingView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { NetworkManager, UrlHelper } from '@stamhoofd/networking';
-import { DarkMode, GetWebshopFromDomainResult } from '@stamhoofd/structures';
+import { NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { DarkMode, GetWebshopFromDomainResult, WebshopAuthType } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -21,6 +21,7 @@ import { WebshopManager } from './classes/WebshopManager';
 import ChooseWebshopView from './views/ChooseWebshopView.vue';
 import InvalidWebshopView from './views/errors/InvalidWebshopView.vue';
 import PrerenderRedirectView from './views/errors/PrerenderRedirectView.vue';
+import RequiredLoginView from './views/RequiredLoginView.vue';
 import WebshopView from './views/WebshopView.vue';
 
 @Component({
@@ -102,6 +103,13 @@ export default class App extends Vue {
                 }
                 ColorHelper.setDarkMode(response.data.webshop?.meta.darkMode ?? DarkMode.Off)
 
+                // Set session
+                const session = new Session(response.data.organization.id)
+                await session.loadFromStorage()       
+                session.setOrganization(response.data.organization)
+                await session.checkSSO()
+                await SessionManager.setCurrentSession(session)
+
                 if (!response.data.webshop) {
                     if (response.data.webshops.length == 0) {
                         const marketingWebshops = "https://"+this.$t('shared.domains.marketing')+"/webshops"
@@ -124,10 +132,23 @@ export default class App extends Vue {
                 WebshopManager.webshop = response.data.webshop
                 document.title = WebshopManager.webshop.meta.name +" - "+WebshopManager.organization.name
 
+                // Do we need to require login?
+                if (response.data.webshop.meta.authType === WebshopAuthType.Required) {
+                    return new ComponentWithProperties(AuthenticatedView, {
+                        root: new ComponentWithProperties(NavigationController, { 
+                            root: new ComponentWithProperties(WebshopView, {}) 
+                        }),
+                        loginRoot: new ComponentWithProperties(ModalStackComponent, {
+                            root: new ComponentWithProperties(NavigationController, { 
+                                root: new ComponentWithProperties(RequiredLoginView, {}) 
+                            })
+                        })
+                    });
+                }
+
                 return new ComponentWithProperties(NavigationController, { 
                     root: new ComponentWithProperties(WebshopView, {}) 
                 })
-
             } catch (e) {
                 console.log(e)
                 // Check if we have an organization on this domain

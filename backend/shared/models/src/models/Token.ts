@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { Organization, User, UserWithOrganization } from './';
 
 export type TokenWithUser = Token & { user: User };
-export type UserWithOrganizationAndUser = Token & { user: UserWithOrganization };
+export type TokenWithOrganizationAndUser = Token & { user: UserWithOrganization };
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -64,7 +64,7 @@ export class Token extends Model {
 
     static user = new ManyToOneRelation(User, "user");
 
-    static async optionalAuthenticate(request: DecodedRequest<any, any, any>, options?: {allowWithoutAccount: boolean}): Promise<UserWithOrganizationAndUser | undefined> {
+    static async optionalAuthenticate(request: DecodedRequest<any, any, any>, options?: {allowWithoutAccount: boolean}): Promise<TokenWithOrganizationAndUser | undefined> {
         const header = request.headers.authorization
         if (!header) {
             return
@@ -76,7 +76,7 @@ export class Token extends Model {
      * Throws instead of returning undefined
      * allowWithoutAccount: allow users who don't have a password yet to authenticate (required for users who want to set a password)
      */
-    static async authenticate(request: DecodedRequest<any, any, any>, {allowWithoutAccount} = {allowWithoutAccount: false}): Promise<UserWithOrganizationAndUser> {
+    static async authenticate(request: DecodedRequest<any, any, any>, {allowWithoutAccount} = {allowWithoutAccount: false}): Promise<TokenWithOrganizationAndUser> {
         const organization = await Organization.getFromRequest(request);
         const header = request.headers.authorization
         if (!header) {
@@ -129,7 +129,7 @@ export class Token extends Model {
             })
         }
 
-        return token as UserWithOrganizationAndUser
+        return token as TokenWithOrganizationAndUser
     }
 
     isAccessTokenExpired(): boolean {

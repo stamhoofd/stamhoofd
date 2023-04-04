@@ -2,7 +2,7 @@ import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@molli
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, MolliePayment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, StripeCheckoutSession, StripePaymentIntent, Token } from '@stamhoofd/models';
 import { MollieToken } from '@stamhoofd/models';
 import { Order } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
@@ -41,6 +41,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const token = await Token.optionalAuthenticate(request);
+
         // Read + validate + update stock in one go, to prevent race conditions
         const { webshop, order, organization } = await QueueHandler.schedule("webshop-stock/"+request.params.id, async () => {
             const webshopWithoutOrganization = await Webshop.getByID(request.params.id)
@@ -56,7 +58,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization)
             const webshopStruct = WebshopStruct.create(webshop)
 
-            request.body.validate(webshopStruct, organization.meta, request.i18n)
+            request.body.validate(webshopStruct, organization.meta, request.i18n, false, token?.user?.getStructure())
 
             const order = new Order().setRelation(Order.webshop, webshop)
             order.data = request.body // TODO: validate

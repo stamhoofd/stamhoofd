@@ -53,9 +53,18 @@
                 Meerdere Stripe accounts toestaan
             </Checkbox>
 
+            <Checkbox :checked="getFeatureFlag('sso')" @change="setFeatureFlag('sso', !!$event)">
+                Single-Sign-On
+            </Checkbox>
+
+            <Checkbox :checked="getFeatureFlag('webshop-auth')" @change="setFeatureFlag('webshop-auth', !!$event)">
+                Webshop auth
+            </Checkbox>
+
             <Checkbox v-model="enableBuckaroo">
                 Gebruik Buckaroo voor online betalingen
             </Checkbox>
+
             <div v-if="enableBuckaroo" class="split-inputs">
                 <div>
                     <STInputBox title="Key" error-fields="buckarooSettings.key" :error-box="errorBox" class="max">

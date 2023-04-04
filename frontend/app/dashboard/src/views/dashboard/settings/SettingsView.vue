@@ -231,6 +231,25 @@
                 </STList>
             </template>
 
+            <template v-if="getFeatureFlag('sso')">
+                <hr>
+                <h2>Geavanceerd</h2>
+                <STList class="illustration-list">    
+                    <STListItem :selectable="true" class="left-center" @click="openSSO(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/lock.svg">
+                        <h2 class="style-title-list">
+                            Single-Sign-On (SSO)
+                        </h2>
+                        <p class="style-description">
+                            Configureer een externe authenticatie server
+                        </p>
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
+
             <template v-if="!areSalesDisabled">
                 <hr>
                 <h2>Stamhoofd administratie</h2>
@@ -299,7 +318,7 @@
 <script lang="ts">
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, BackButton, CenteredMessage, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
+import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, UrlHelper } from '@stamhoofd/networking';
 import { PaymentMethod } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -326,10 +345,6 @@ import ReferralView from './ReferralView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 
-
-
-
-
 @Component({
     components: {
         STNavigationBar,
@@ -352,6 +367,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get areSalesDisabled() {
         return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
+    }
+
+    getFeatureFlag(flag: string) {
+        return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
     }
 
     openReferrals(animated = true) {
@@ -426,6 +445,19 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             modalDisplayStyle: "popup",
             components: [
                 new ComponentWithProperties(AdminsView, {})
+            ]
+        })
+    }
+
+    async openSSO(animated = true) {
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: await LoadComponent(() => import(/* webpackChunkName: "SSOSettingsView" */  "./SSOSettingsView.vue"), { }, { instant: !animated })
+                })
             ]
         })
     }
@@ -668,6 +700,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'admins') {
             // Open mollie settings
             this.openAdmins(false)
+        }
+
+        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'sso') {
+            // Open mollie settings
+            this.openSSO(false).catch(console.error)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'records') {

@@ -1,5 +1,5 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version } from "@stamhoofd/structures";
+import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version, User as UserStruct } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { Worker } from 'node:worker_threads';
 import path from "path";
@@ -379,6 +379,37 @@ export class User extends Model {
         return user;
     }
 
+    static async registerSSO(
+        organization: Organization,
+        data: {email, id, firstName, lastName}
+    ): Promise<UserWithOrganization | undefined> {
+        const {
+            email,
+            id,
+            firstName,
+            lastName
+        } = data;
+
+        const user = new User().setRelation(User.organization, organization);
+        user.id = id ?? uuidv4()
+        user.email = email;
+        user.verified = false;
+        user.firstName = firstName
+        user.lastName = lastName
+
+        try {
+            await user.save();
+        } catch (e) {
+            // Duplicate key probably
+            if (e.code && e.code == "ER_DUP_ENTRY") {
+                return;
+            }
+            throw e;
+        }
+
+        return user;
+    }
+
     async changePassword(password: string) {
         this.password = await User.hash(password)
 
@@ -395,6 +426,18 @@ export class User extends Model {
             throw new Error("Unexpected permission failure")
         }
         return this.permissions ? await organization.getPrivateStructure(this.permissions) : await organization.getStructure()
+    }
+
+    getStructure() {
+        return UserStruct.create({
+            firstName: this.firstName,
+            lastName: this.lastName,
+            id: this.id,
+            email: this.email,
+            verified: this.verified,
+            permissions: this.permissions,
+            hasAccount: this.hasAccount()
+        });
     }
 
     getEmailTo() {

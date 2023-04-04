@@ -6,7 +6,11 @@
             </template>
 
             <template slot="right">
-                <a v-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
+                <button v-if="isLoggedIn" type="button" class="button text limit-space" @click="switchAccount">
+                    <span class="icon user" />
+                    <span>{{ userName }}</span>
+                </button>
+                <a v-else-if="organization.website" class="button text limit-space" :href="organization.website" target="_blank" rel="nofollow noreferrer noopener">
                     <span class="icon external" />
                     <span>Terug naar website</span>
                 </a>
@@ -29,6 +33,10 @@
 
                     <p v-if="isTrial" class="error-box">
                         Dit is een demo webshop
+                    </p>
+
+                    <p class="error-box">
+                        Bekijk mijn bestellingen
                     </p>
 
                     <p v-if="showOpenAt" class="info-box">
@@ -81,6 +89,14 @@
                             Privacyvoorwaarden
                         </a>
 
+                        <template v-if="isLoggedIn">
+                            -
+                        </template>
+
+                        <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
+                            Uitloggen
+                        </button>
+
                         <br>
                         {{ organization.meta.companyAddress || organization.address }}
                     </aside>
@@ -100,7 +116,7 @@
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LoadingView, Logo, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { UrlHelper } from "@stamhoofd/networking";
+import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CartItem, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -183,6 +199,29 @@ export default class WebshopView extends Mixins(NavigationMixin){
     CheckoutStepsManager = CheckoutStepsManager
     WebshopManager = WebshopManager
     visible = true
+
+    get isLoggedIn() {
+        return SessionManager.currentSession?.isComplete() ?? false
+    }
+
+    get userName() {
+        return SessionManager.currentSession?.user?.firstName ?? ""
+    }
+
+    logout() {
+        SessionManager.currentSession?.logout()
+    }
+
+    switchAccount() {
+        // Do a silent logout
+        SessionManager.currentSession?.removeFromStorage()
+
+        // Redirect to login
+        SessionManager.currentSession!.startSSO({
+            webshopId: this.webshop.id,
+            prompt: 'select_account'
+        }).catch(console.error)
+    }
 
     get organization() {
         return WebshopManager.organization

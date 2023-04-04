@@ -57,13 +57,13 @@ export default class LoginView extends Mixins(NavigationMixin){
     loading = false;
 
     @Prop({ default: ""})
-    initialEmail!: string
+        initialEmail!: string
 
     @Prop({ default: null})
-    lock!: string | null
+        lock!: string | null
 
     @Ref("emailInput")
-    emailInput: EmailInput
+        emailInput: EmailInput
 
     email = this.initialEmail
     password = ""
@@ -75,23 +75,6 @@ export default class LoginView extends Mixins(NavigationMixin){
 
     get organization() {
         return OrganizationManager.organization
-    }
-
-    get privacyUrl() {
-        if (OrganizationManager.organization.meta.privacyPolicyUrl) {
-            return OrganizationManager.organization.meta.privacyPolicyUrl
-        }
-        if (OrganizationManager.organization.meta.privacyPolicyFile) {
-            return OrganizationManager.organization.meta.privacyPolicyFile.getPublicPath()
-        }
-        return null
-    }
-
-    returnToSite() {
-        if (!this.organization.website || (!this.organization.website.startsWith("https://") && !this.organization.website.startsWith("http://"))) {
-            return
-        }
-        window.location.href = this.organization.website
     }
 
     gotoPasswordForgot() {

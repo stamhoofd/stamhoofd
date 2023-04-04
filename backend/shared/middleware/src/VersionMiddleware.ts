@@ -1,5 +1,5 @@
 import { EncodedResponse, Request, RequestMiddleware, ResponseMiddleware } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 
 export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware {
     minimumVersion: number | undefined
@@ -16,7 +16,22 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         }
 
         const platform = request.headers["x-platform"];
-        const version = request.getVersion()
+
+        let version!: number;
+
+        try {
+            version = request.getVersion()
+        } catch (e) {
+            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('missing_version')) {
+                // Allow missing version on /openid/ path
+                if (request.url.startsWith("/openid/")) {
+                    request.version = this.latestVersions.web
+                    return
+                }
+            }
+            throw e;
+        }
+
         if (version < this.minimumVersion) {
             // WARNING: update caddy config for on demand certificates, because we don't want to throw errors over there!
             if (platform === "web" || platform === undefined) {

@@ -338,6 +338,11 @@ export enum WebshopNumberingType {
     "Random" = "Random"
 }
 
+export enum WebshopAuthType {
+    "Disabled" = "Disabled",
+    "Required" = "Required",
+}
+
 export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = ""
@@ -449,6 +454,9 @@ export class WebshopMetaData extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder, version: 135 })
     domainActive = false
+
+    @field({ decoder: new EnumDecoder(WebshopAuthType), version: 188 })
+    authType: WebshopAuthType = WebshopAuthType.Disabled
 
     get hasTickets() {
         return this.ticketType === WebshopTicketType.SingleTicket || this.ticketType === WebshopTicketType.Tickets
