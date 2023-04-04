@@ -85,6 +85,7 @@ export default class ProductRow extends Mixins(NavigationMixin) {
 
     duplicate() {
         const duplicatedProduct = this.product.clone()
+        duplicatedProduct.clearStock();
         duplicatedProduct.id = uuidv4()
 
         // while name is in use
