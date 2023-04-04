@@ -141,7 +141,7 @@
             <h2>Kies je betaalmethode</h2>
 
             <p class="info-box">
-                Betaal bij voorkeur met de bankrekening van jouw vereniging en niet met een persoonlijke rekening. Automatische aanrekeningen van extra leden (bij ledenadministratie) of transactiekosten van online transacties gebeuren via dezelfde bankrekening waarmee je het laatst hebt betaald.
+                Betaal bij voorkeur met de bankrekening van jouw vereniging en niet met een persoonlijke rekening. Automatische aanrekeningen van extra leden (bij ledenadministratie) gebeuren via dezelfde bankrekening waarmee je het laatst hebt betaald.
             </p>
 
             <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
