@@ -95,6 +95,15 @@ a.st-list-item {
         }
     }
 
+    &.right-price {
+        > .main > div > .right {
+            @extend .style-description;
+            text-align: right;
+            flex-shrink: 0;
+            padding-left: 15px;
+        }
+    }
+
     &.right-description.wrap {
         > .main > div > .right {
             white-space: pre-wrap;
