@@ -28,6 +28,9 @@ export class Order extends Model {
 
     @column({ type: "string", nullable: true, foreignKey: Order.payment })
     paymentId: string | null = null
+
+    @column({ type: "string", nullable: true })
+    userId: string | null = null
     
     @column({ type: "json", decoder: OrderData })
     data: OrderData

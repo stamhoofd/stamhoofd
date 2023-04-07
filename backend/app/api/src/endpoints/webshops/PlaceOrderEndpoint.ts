@@ -74,6 +74,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             order.organizationId = organization.id
             order.createdAt = new Date()
             order.createdAt.setMilliseconds(0)
+            order.userId = token?.user?.id ?? null
 
             // Always reserve the stock
             await order.updateStock()

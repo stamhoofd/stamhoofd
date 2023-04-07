@@ -37,6 +37,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { LoadingView, Logo, OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
+import { LoginProviderType } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { WebshopManager } from "../classes/WebshopManager";
@@ -105,7 +106,8 @@ export default class RequiredLoginView extends Mixins(NavigationMixin){
         }
 
         await SessionManager.currentSession!.startSSO({
-            webshopId: this.webshop.id
+            webshopId: this.webshop.id,
+            providerType: LoginProviderType.SSO
         })
         this.loading = true
     }

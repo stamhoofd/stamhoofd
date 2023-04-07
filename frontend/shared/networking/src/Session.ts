@@ -2,7 +2,7 @@ import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors'
 import { Request, RequestMiddleware } from '@simonbackx/simple-networking'
 import { Toast } from '@stamhoofd/components'
-import { KeychainedResponseDecoder, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
+import { KeychainedResponseDecoder, LoginProviderType, MyUser, Organization, Token, Version } from '@stamhoofd/structures'
 import { Vue } from "vue-property-decorator"
 
 import { AppManager, UrlHelper } from '..'
@@ -193,7 +193,7 @@ export class Session implements RequestMiddleware {
         }
     }
 
-    async startSSO(data: {webshopId?: string, prompt?: string}) {
+    async startSSO(data: {webshopId?: string, prompt?: string, providerType: LoginProviderType}) {
         const spaState = generateId(40)
         try {
             await Storage.secure.setItem("oid-state", spaState)
@@ -251,8 +251,8 @@ export class Session implements RequestMiddleware {
         // Include client = sso
         const clientInput = document.createElement('input');
         clientInput.type = 'hidden';
-        clientInput.name = 'client';
-        clientInput.value = 'sso';
+        clientInput.name = 'provider';
+        clientInput.value = data.providerType;
         form.appendChild(clientInput);
 
         document.body.appendChild(form);
@@ -311,6 +311,13 @@ export class Session implements RequestMiddleware {
         const server = this.server
         server.middlewares.push(this)
         return server
+    }
+
+    get optionalAuthenticatedServer() {
+        if (this.isComplete()) {
+            return this.authenticatedServer
+        }
+        return this.server
     }
 
     protected onTokenChanged() {

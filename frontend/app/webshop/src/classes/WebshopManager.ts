@@ -1,5 +1,5 @@
 import { Decoder } from '@simonbackx/simple-encoding'
-import { NetworkManager } from '@stamhoofd/networking'
+import { NetworkManager, SessionManager } from '@stamhoofd/networking'
 import { Organization, Webshop } from '@stamhoofd/structures'
 
 /**
@@ -9,10 +9,13 @@ export class WebshopManagerStatic {
     organization!: Organization
     webshop!: Webshop
 
-     /**
+    /**
      * Doing authenticated requests
      */
     get server() {
+        if (SessionManager.currentSession) {
+            return SessionManager.currentSession.optionalAuthenticatedServer
+        }
         const server = NetworkManager.server
         server.host = "https://" + this.organization.id + "." + STAMHOOFD.domains.api;
         return server
