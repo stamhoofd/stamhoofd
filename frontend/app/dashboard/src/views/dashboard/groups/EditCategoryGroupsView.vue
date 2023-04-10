@@ -479,7 +479,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     async deleteMe() {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
+        if (!await CenteredMessage.confirm(this.groups.length ? "Ben je zeker dat je deze categorie en groepen wilt verwijderen?" : "Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
             return
         }
         const meta = OrganizationMetaData.patch({})
