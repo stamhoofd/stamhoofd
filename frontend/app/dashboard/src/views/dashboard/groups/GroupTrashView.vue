@@ -102,7 +102,7 @@ export default class GroupTrashView extends Mixins(NavigationMixin) {
     }
 
     get allCategories() {
-        return this.organization.availableCategories.filter(c => c.categories.length == 0)
+        return this.organization.getCategoryTree({admin: true, permissions: OrganizationManager.user?.permissions}).getAllCategories().filter(c => c.categories.length == 0)
     }
 
     async restoreGroup(event, group: Group) {

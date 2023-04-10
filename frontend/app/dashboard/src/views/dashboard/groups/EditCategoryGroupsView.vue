@@ -470,7 +470,12 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     openGroupTrash() {
-        this.present(new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle("popup"))
+        this.show({
+            components: [
+                new ComponentWithProperties(GroupTrashView, { }).setDisplayStyle("popup")
+            ],
+            replace: 1
+        })
     }
 
     async deleteMe() {
