@@ -87,7 +87,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                 return invoice
             }
 
-            if (payment.provider === PaymentProvider.Mollie && (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created || payment.status == PaymentStatus.Failed)) {    
+            if ((payment.provider === PaymentProvider.Mollie || (payment.provider === null && payment.method == PaymentMethod.DirectDebit)) && (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created || payment.status == PaymentStatus.Failed)) {    
                 if (payment.method == PaymentMethod.Bancontact || payment.method == PaymentMethod.iDEAL || payment.method == PaymentMethod.CreditCard || payment.method == PaymentMethod.DirectDebit || payment.method == PaymentMethod.Transfer) {
                     // check status via mollie
                     const molliePayments = await MolliePayment.where({ paymentId: payment.id}, { limit: 1 })

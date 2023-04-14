@@ -1,7 +1,7 @@
 import { createMollieClient, SequenceType } from '@mollie/api-client';
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { calculateVATPercentage, PaymentMethod, PaymentStatus, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPricingType, Version } from '@stamhoofd/structures';
+import { calculateVATPercentage, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPricingType, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 import { Email } from "@stamhoofd/email";
@@ -223,6 +223,7 @@ export class STPendingInvoice extends Model {
         payment.status = PaymentStatus.Created
         payment.price = price
         payment.paidAt = null
+        payment.provider = PaymentProvider.Mollie
         await payment.save()
         invoice.paymentId = payment.id
         invoice.setRelation(STInvoice.payment, payment)
