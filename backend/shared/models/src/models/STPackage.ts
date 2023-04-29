@@ -196,9 +196,15 @@ export class STPackage extends Model {
     }
 
     async sendExpiryEmail() {
+        if (this.validAt === null) {
+            // never activated
+            return
+        }
+
         if (this.removeAt && this.removeAt <= new Date()) {
             this.emailCount += 1
             await this.save()
+            return;
         }
 
         let allowDays = 0;
