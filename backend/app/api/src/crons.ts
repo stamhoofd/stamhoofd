@@ -79,6 +79,9 @@ async function checkExpirationEmails() {
             { sign: '>', value: new Date() },
             { sign: '<', value: new Date(Date.now() + 1000 * 60 * 60 * 24 * 31) }
         ],
+        validAt: [
+            { sign: '!=', value: null },
+        ],
         emailCount: 0
     })
 
