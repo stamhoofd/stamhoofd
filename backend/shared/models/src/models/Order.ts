@@ -193,13 +193,15 @@ export class Order extends Model {
         if (this.data.timeSlot !== null) {
             const s = this.data.timeSlot
 
-            if (previousData !== null && previousData.timeSlot && previousData.timeSlot.id !== s.id) {
+            if (previousData !== null && previousData.timeSlot) {
                 // Changed timeslot. Remove all reserved ones
                 const ps = previousData.timeSlot
                 const timeSlot = this.webshop.meta.checkoutMethods.flatMap(m => m.timeSlots).flatMap(t => t.timeSlots).find(t => t.id === ps.id)
                 if (timeSlot) {
                     // Remove any reserved stock
                     Order.updateTimeSlotStock(timeSlot, previousData, false)
+                    changed = true
+                } else {
                     this.data.reservedOrder = false
                     this.data.reservedPersons = 0
                     changed = true
