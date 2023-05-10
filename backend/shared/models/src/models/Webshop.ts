@@ -166,7 +166,7 @@ export class Webshop extends Model {
 
     // Return the location of the webshop
     getHost(this: Webshop & { organization: Organization }) {
-        if (this.domain) {
+        if (this.domain && this.meta.domainActive) {
             if (this.domainUri) {
                 return this.domain+"/"+this.domainUri
             }
