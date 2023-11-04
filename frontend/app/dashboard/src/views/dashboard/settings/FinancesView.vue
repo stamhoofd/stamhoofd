@@ -156,9 +156,11 @@ export default class FinancesView extends Mixins(NavigationMixin) {
         this.loadingStatus = true
 
         try {
-            this.status = await OrganizationManager.loadBillingStatus({
-                owner: this
-            })
+            if (this.hasFinanceAccess) {
+                this.status = await OrganizationManager.loadBillingStatus({
+                    owner: this
+                })
+            }
         } catch (e) {
             console.error(e)
         }
