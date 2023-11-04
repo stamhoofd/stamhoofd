@@ -226,6 +226,63 @@ export default class MemberExcelBuilderView extends Mixins(NavigationMixin) {
                 width: 15
             }),
         ]),
+        new ExcelMemberPropertyGroup("Inschrijvingen", undefined, [
+            new ExcelMemberProperty({
+                name: "Alle inschrijvingen",
+                description: 'Opsomming van alle huidige inschrijvingen van dit lid',
+                getValue: (member: MemberWithRegistrations) => {
+                    const registrations = member.filterRegistrations({waitingList: false, cycleOffset: this.cycleOffset})
+                    const groups = registrations.map(r =>{
+                        return  OrganizationManager.organization.groups.find(g => g.id === r.groupId)
+                    }).filter(g => g !== undefined) as Group[]
+                    return Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')
+                },
+                width: 50
+            }), 
+            ...(this.waitingList ? [
+                new ExcelMemberProperty({
+                    name: "Wachtlijsten",
+                    description: 'Opsomming van alle wachtlijsten waarop dit lid staat',
+                    getValue: (member: MemberWithRegistrations) => {
+                        const registrations = member.filterRegistrations({waitingList: true, cycleOffset: this.cycleOffset})
+                        const groups = registrations.map(r =>{
+                            return  OrganizationManager.organization.groups.find(g => g.id === r.groupId)
+                        }).filter(g => g !== undefined) as Group[]
+                        return Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')
+                    },
+                    width: 50
+                })
+            ] : []),
+            ...(this.groups.length > 1 ? [
+                new ExcelMemberProperty({
+                    name: "Inschrijvingen (specifiek)",
+                    description: 'Opsomming van alle inschrijvingen voor de groepen ' + Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' of '),
+                    getValue: (member: MemberWithRegistrations) => {
+                        const registrations = member.filterRegistrations({groups: this.groups, cycleOffset: this.cycleOffset})
+                        const groups = registrations.map(r =>{
+                            return  OrganizationManager.organization.groups.find(g => g.id === r.groupId)
+                        }).filter(g => g !== undefined) as Group[]
+                        return Formatter.joinLast(groups.map(g => g.settings.name), ', ', ' en ')
+                    },
+                    width: 50
+                })
+            ] : []),
+            ...(this.groups.length === 1 ? [
+                new ExcelMemberProperty({
+                    name: "Inschrijvingsdatum ("+Formatter.joinLast(this.groups.map(g => g.settings.name), ', ', ' of ')+")",
+                    getValue: (member: MemberWithRegistrations) => {
+                        const registrations = member.filterRegistrations({groups: this.groups, waitingList: false, cycleOffset: this.cycleOffset})
+
+                        if (registrations.length === 0) {
+                            return "/"
+                        }
+                        return registrations[0].registeredAt ?? registrations[0].createdAt
+                    },
+                    width: 50,
+                    format: "dd/mm/yyyy"
+                })
+            ] : [])
+        ]),
         new ExcelMemberPropertyGroup("Adres 1", OrganizationManager.organization.meta.recordsConfiguration.parents === null ? "Adres van het lid zelf" : "Adres van het lid zelf, of van de eerste ouder", [
             new ExcelMemberProperty({
                 name: "Straat",
