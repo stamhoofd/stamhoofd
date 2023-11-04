@@ -29,6 +29,10 @@ let isRunningCrons = false
 let lastDNSCheck: Date | null = null
 let lastDNSId = ""
 async function checkDNS() {
+    if (STAMHOOFD.environment === "development") {
+        return;
+    }
+
     // Wait 6 hours between every complete check
     if (lastDNSCheck && lastDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
         console.log("[DNS] Skip DNS check")
@@ -66,6 +70,10 @@ async function checkDNS() {
 
 let lastExpirationCheck: Date | null = null
 async function checkExpirationEmails() {
+    if (STAMHOOFD.environment === "development") {
+        return;
+    }
+
     // Wait 1 hour between every complete check
     if (lastExpirationCheck && lastExpirationCheck > new Date(new Date().getTime() - 1 * 60 * 60 * 1000)) {
         console.log("[EXPIRATION EMAILS] Skip checkExpirationEmails")
@@ -93,10 +101,13 @@ async function checkExpirationEmails() {
     lastExpirationCheck = new Date() 
 }
 
-
 let lastWebshopDNSCheck: Date | null = null
 let lastWebshopDNSId = ""
 async function checkWebshopDNS() {
+    if (STAMHOOFD.environment === "development") {
+        return;
+    }
+
     // Wait 6 hours between every complete check
     if (lastWebshopDNSCheck && lastWebshopDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
         console.log("[DNS] Skip webshop DNS check")
@@ -131,10 +142,10 @@ async function checkWebshopDNS() {
 }
 
 async function checkReplies() {
-    if (STAMHOOFD.environment !== "production") {
-        console.log("Skippping replies checking")
-        return
+    if (STAMHOOFD.environment === "development") {
+        return;
     }
+
     console.log("Checking replies from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-email-forwarding", MaxNumberOfMessages: 10 }).promise()
@@ -191,6 +202,10 @@ async function checkReplies() {
 let lastPostmarkCheck: Date | null = null
 let lastPostmarkId: string | null = null
 async function checkPostmarkBounces() {
+    if (STAMHOOFD.environment === "development") {
+        return;
+    }
+    
     const token = STAMHOOFD.POSTMARK_SERVER_TOKEN
     if (!token) {
         console.log("[POSTMARK BOUNCES] No postmark token, skipping postmark bounces")
@@ -256,9 +271,9 @@ async function checkPostmarkBounces() {
 
 async function checkBounces() {
     if (STAMHOOFD.environment !== "production") {
-        console.log("[AWS BOUNCES] Skippping bounce checking")
         return
     }
+    
     console.log("[AWS BOUNCES] Checking bounces from AWS SQS")
     const sqs = new AWS.SQS();
     const messages = await sqs.receiveMessage({ QueueUrl: "https://sqs.eu-west-1.amazonaws.com/118244293157/stamhoofd-bounces-queue", MaxNumberOfMessages: 10 }).promise()
@@ -546,7 +561,10 @@ async function checkFailedBuckarooPayments() {
 }
 // Unreserve reserved registrations
 async function checkReservedUntil() {
-    console.log("Check reserved until...")
+    if (STAMHOOFD.environment !== "development") {
+        console.log("Check reserved until...")
+    }
+
     const registrations = await Registration.where({
         reservedUntil: {
             sign: "<",
@@ -585,6 +603,10 @@ async function checkReservedUntil() {
 let lastBillingCheck: Date | null = new Date()
 let lastBillingId = ""
 async function checkBilling() {
+    if (STAMHOOFD.environment === "development") {
+        return
+    }
+
     console.log("[BILLING] Checking billing...")
 
     // Wait for the next day before doing a new check
@@ -594,7 +616,7 @@ async function checkBilling() {
     }
     
     const organizations = await Organization.where({ id: { sign: '>', value: lastBillingId } }, {
-        limit: STAMHOOFD.environment === "development" ? 10 : 10,
+        limit: 10,
         sort: ["id"]
     })
 
