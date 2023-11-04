@@ -388,7 +388,7 @@ export class EditMemberStepsManager {
             if (!m) {
                 throw new SimpleError({
                     code: "expected_member",
-                    message: "Er ging iets mis bij het opslaan."
+                    message: "Er ging iets mis bij het opslaan. Herlaad de pagina en probeer opnieuw."
                 })
             }
             this.editMember = m

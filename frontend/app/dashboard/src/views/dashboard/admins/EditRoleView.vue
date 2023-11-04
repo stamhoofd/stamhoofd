@@ -16,12 +16,12 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+            <STInputBox title="Titel" error-fields="name" :error-box="errorBox">
                 <input
                     v-model="name"
                     class="input"
                     type="text"
-                    placeholder="Naam van deze groep"
+                    placeholder="Titel van deze functie"
                     autocomplete=""
                 >
             </STInputBox>
@@ -33,7 +33,7 @@
                         Inschrijvingsgroepen
                     </div>
                     <div>
-                        <button class="button text" @click="editGroups()">
+                        <button class="button text" type="button" @click="editGroups()">
                             <span class="icon add" />
                             <span class="hide-smartphone">Toevoegen</span>
                         </button>
@@ -45,7 +45,7 @@
                 </STList>
 
                 <p v-else class="info-box">
-                    Deze beheerdersgroep heeft geen toegang tot inschrijvingsgroepen
+                    Beheerders met deze functie hebben geen toegang tot inschrijvingsgroepen
                 </p>
 
                 <template v-if="enableActivities">
@@ -55,7 +55,7 @@
                             Inschrijvingscategorieën
                         </div>
                         <div>
-                            <button class="button text" @click="editCategories()">
+                            <button class="button text" type="button" @click="editCategories()">
                                 <span class="icon add" />
                                 <span class="hide-smartphone">Toevoegen</span>
                             </button>
@@ -68,7 +68,7 @@
                     </STList>
 
                     <p v-else class="info-box">
-                        Deze beheerdersgroep kan geen inschrijvingsgroepen maken
+                        Beheerders met deze functie kunnen geen inschrijvingsgroepen maken
                     </p>
                 </template>
             </div>
@@ -80,12 +80,13 @@
                         Webshops
                     </div>
                     <div>
-                        <button class="button text" @click="editWebshops()">
+                        <button class="button text" type="button" @click="editWebshops()">
                             <span class="icon add" />
                             <span class="hide-smartphone">Toevoegen</span>
                         </button>
                     </div>
                 </h2>
+                <p>Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop</p>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -95,17 +96,34 @@
                     <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" @patch="addPatch" />
                 </STList>
 
-                <p v-if="webshops.length == 0" class="info-box">
-                    Deze beheerdersgroep heeft geen toegang tot webshops
+                <p v-if="webshops.length == 0 && !createWebshops" class="info-box">
+                    Beheerders met deze functie hebben geen toegang tot webshops
                 </p>
             </div>
 
             <hr>
-            <h2>Overschrijvingen</h2>
+            <h2>Boekhouding</h2>
 
-            <Checkbox v-model="managePayments">
-                Kan overschrijvingen bekijken en beheren
-            </Checkbox>
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <Checkbox slot="left" v-model="financeDirector" />
+                    <h3 class="style-title-list">
+                        Volledige toegang
+                    </h3>
+                    <p class="style-description-small">
+                        Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
+                    </p>
+                </STListItem>
+                <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
+                    <Checkbox slot="left" v-model="managePayments" />
+                    <h3 class="style-title-list">
+                        Overschrijvingen beheren
+                    </h3>
+                    <p class="style-description-small">
+                        Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
+                    </p>
+                </STListItem>
+            </STList>
 
             <hr>
             <h2>Beheerders in deze groep</h2>
@@ -142,6 +160,7 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
@@ -181,10 +200,10 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-    role: PermissionRoleDetailed
+        role: PermissionRoleDetailed
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
@@ -192,7 +211,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
     SessionManager = SessionManager // needed to make session reactive
     loading = true
@@ -220,7 +239,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.isNew ? "Nieuwe beheerdersgroep" : this.patchedRole.name
+        return this.isNew ? "Nieuwe functie" : this.patchedRole.name
     }
 
     get name() {
@@ -256,6 +275,18 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         this.addRolePatch(
             PermissionRoleDetailed.patch({ 
                 managePayments
+            })
+        )
+    }
+
+    get financeDirector() {
+        return this.patchedRole.financeDirector
+    }
+
+    set financeDirector(financeDirector: boolean) {
+        this.addRolePatch(
+            PermissionRoleDetailed.patch({ 
+                financeDirector
             })
         )
     }
@@ -486,6 +517,13 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         this.saving = true;
 
         try {
+            if (this.name.length === 0) {
+                throw new SimpleError({
+                    code: "invalid_field",
+                    message: "Gelieve een titel in te vullen",
+                    field: "name"
+                })
+            }
             await this.saveHandler(this.patchOrganization)
             this.pop({ force: true }) 
         } catch (e) {
@@ -499,7 +537,7 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
             return
         }
         
-        if (!await CenteredMessage.confirm("Ben je zeker dat je deze categorie wilt verwijderen?", "Verwijderen")) {
+        if (!await CenteredMessage.confirm("Ben je zeker dat je deze functie wilt verwijderen?", "Verwijderen")) {
             return
         }
         const privateMeta = OrganizationPrivateMetaData.patch({})

@@ -12,12 +12,12 @@
             <div class="box">
                 <main>
                     <h1>Deze pagina is voor beheerders</h1>
-                    <p>Oeps, deze website is enkel voor beheerders van {{ organization.name }}. Ga naar de inschrijvingspagina als je je wilt inschrijven als lid.</p> 
+                    <p>Oeps, deze website is enkel voor beheerders van {{ organization.name }}. Ga naar het ledenportaal als je je wilt inschrijven als lid.</p> 
                 </main>
                 
                 <STToolbar>
                     <button slot="right" type="button" class="primary button" @click="gotoRegistration">
-                        <span>Naar inschrijvingspagina</span>
+                        <span>Naar ledenportaal</span>
                     </button>
 
                     <button slot="right" type="button" class="button secundary" @click="logout">

@@ -1,7 +1,7 @@
 <template>
     <TableView ref="table" :organization="organization" :title="title" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection" column-configuration-id="transfer-payments" :actions="actions" :all-values="payments" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @click="openPayment">
         <p class="style-description">
-            Overzicht van alle openstaande overschrijvingen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 7 dagen zichtbaar).
+            Als je de betaalmethode 'overschrijven' gebruikt, kan je hier aangeven welke betalingen je hebt ontvangen (overschrijvingen die als betaald werden gemarkeerd blijven daarna nog 7 dagen zichtbaar).
         </p>
         <template #empty>
             Er zijn nog geen overschrijvingen.
@@ -10,12 +10,12 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Column, LoadComponent, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod,PaymentStatus } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, Payment, PaymentGeneral, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -48,7 +48,7 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             this.loading = false
         })
 
-        UrlHelper.setUrl("/transfers")
+        UrlHelper.setUrl("/finances/transfers")
         document.title = "Stamhoofd - Overschrijvingen"
     }
 
@@ -116,6 +116,18 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
                     await this.mail(payments)
                 }
             }),
+
+            new TableAction({
+                name: "Exporteren",
+                icon: "download",
+                priority: 0,
+                groupIndex: 2,
+                allowAutoSelectAll: true,
+                
+                handler: async (payments: PaymentGeneral[]) => {
+                    await this.downloadExcel(payments)
+                }
+            }),
         
             new TableAction({
                 name: "SMS'en",
@@ -144,6 +156,21 @@ export default class TransferPaymentsView extends Mixins(NavigationMixin) {
             payments
         });
         this.present(displayedComponent.setDisplayStyle("popup"));
+    }
+
+    async downloadExcel(payments: PaymentGeneral[]) {
+        try {
+            const d = await import(/* webpackChunkName: "PaymentsExcelExport" */ "../../../classes/PaymentsExcelExport");
+            const PaymentsExcelExport = d.PaymentsExcelExport
+            const instance = new PaymentsExcelExport({
+                webshops: this.organization.webshops,
+                stripeAccounts: [], // Not required because we only export transfers
+                groups: this.organization.groups
+            })
+            instance.export(payments);
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
     }
 
     get filterDefinitions(): FilterDefinition<PaymentGeneral, Filter<PaymentGeneral>, any>[] {

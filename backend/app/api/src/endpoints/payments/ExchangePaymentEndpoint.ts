@@ -186,10 +186,12 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                 return
             }
 
+            const testMode = organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production'
+
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status == PaymentStatus.Failed)) {
                 if (payment.provider === PaymentProvider.Stripe) {
                     try {
-                        let status = await StripeHelper.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment))
+                        let status = await StripeHelper.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment), testMode)
 
                         if (this.isManualExpired(status, payment)) {
                             console.error('Manually marking Stripe payment as expired', payment.id)

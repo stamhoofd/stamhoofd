@@ -42,6 +42,12 @@ export class Payment extends Model {
     price: number;
 
     /**
+     * Fee paid to the payment provider (if available, otherwise set to 0)
+     */
+    @column({ type: "integer" })
+    transferFee: number = 0
+
+    /**
      * Included in the total price
      */
     @column({ type: "integer", nullable: true })
@@ -252,7 +258,7 @@ export class Payment extends Model {
                         })
                     })
                 }),
-                ...(!checkPermissions || !checkPermissions.user || !checkPermissions.user.permissions) ? {settlement: null} : {}
+                ...(!checkPermissions || !checkPermissions.user || !checkPermissions.user.permissions) ? {settlement: null, transferFee: 0, stripeAccountId: null} : {}
             })
         })
     }

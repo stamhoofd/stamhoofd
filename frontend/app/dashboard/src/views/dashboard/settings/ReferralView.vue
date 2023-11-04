@@ -8,6 +8,11 @@
             </h1>
             <p>Ongetwijfeld ken je nog veel andere verenigingen (of ben je er ook in actief): een sportclub, school, jeugdbeweging... Als je andere verenigingen aanbrengt, en ze minimaal 1 euro besteden ontvang je zelf ook gratis tegoed. Per vereniging die je aanbrengt ontvang je telkens iets meer (zie tabel onderaan). Doe je het dus zorgvuldig en doordacht, dan kan je echt een hoop tegoed verzamelen zonder al te veel moeite.</p>
 
+            <button class="button text" type="button" @click="showBilling">
+                <span class="icon card" />
+                <span>Toon mijn tegoed</span>
+            </button>
+
             <Spinner v-if="loading" />
             <template v-if="!loading && status">
                 <hr>
@@ -40,62 +45,6 @@
                             Als je fysiek bij iemand bent, dan kan die deze QR-code scannen om de link te gebruiken. 
                         </p>
                         <span slot="left" class="icon qr-code" />
-                    </STListItem>
-                </STList>
-
-                <hr>
-                <h2>Tips</h2>
-
-                <STList>
-                    <STListItem>
-                        <span slot="left" class="icon info gray" />
-
-                        <h2 class="style-title-list">
-                            Wees authentiek, voeg altijd wat meer uitleg toe
-                        </h2>
-
-                        <p class="style-description-small">
-                            Deel niet gewoon de link. Vertel een verhaal, voeg een foto of video toe. Pas de boodschap aan afhankelijk naar wie je ze stuurt. Zo ga je veel meer bereiken.
-                        </p>
-                    </STListItem>
-                    <STListItem>
-                        <span slot="left" class="icon info gray" />
-                        <h2 class="style-title-list">
-                            Vraag alle vrijwilligers om de link of Facebook post ook te delen
-                        </h2>
-                    </STListItem>
-                    <STListItem>
-                        <span slot="left" class="icon info gray" />
-                        <h2 class="style-title-list">
-                            Plaats een bericht op jullie website
-                        </h2>
-                    </STListItem>
-                    <STListItem>
-                        <span slot="left" class="icon info gray" />
-                        <h2 class="style-title-list">
-                            Herinner nog eens op het juiste moment
-                        </h2>
-                        <p class="style-description-small">
-                            Het beste moment om een vereniging door te verwijzen is vaak één maand voor ze met een nieuw werkjaar beginnen. Zet dat in je agenda en stuur dan nog eens een herinnering of post het dan nog eens op je Facebook pagina.
-                        </p>
-                    </STListItem>
-                    <STListItem v-if="isYouth">
-                        <span slot="left" class="icon info gray" />
-                        <h2 class="style-title-list">
-                            Promoot Stamhoofd op de jeugdraad
-                        </h2>
-                        <p class="style-description-small">
-                            Toon de QR-code ter plaatse, of stuur gewoon een e-mail achteraf.
-                        </p>
-                    </STListItem>
-                    <STListItem>
-                        <span slot="left" class="icon info gray" />
-                        <h2 class="style-title-list">
-                            Promoot Stamhoofd in een (lokale) Facebook groep
-                        </h2>
-                        <p class="style-description-small">
-                            Volg wel altijd de regels van de Facebook groep en plaats geen spam.
-                        </p>
                     </STListItem>
                 </STList>
 
@@ -144,11 +93,6 @@
                 <p v-else class="info-box">
                     Jouw link werd nog niet gebruikt
                 </p>
-
-                <button class="button text" @click="showBilling">
-                    <span class="icon card" />
-                    <span>Toon mijn tegoed</span>
-                </button>
 
                 <hr>
 

@@ -1,17 +1,17 @@
 <template>
     <div id="registration-page-settings-view" class="st-view background">
-        <STNavigationBar title="Jouw inschrijvingspagina" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Jullie ledenportaal" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1>Jouw inschrijvingspagina</h1>
+            <h1>Jullie ledenportaal</h1>
 
             <p class="style-description">
-                Leden kunnen zelfstandig inschrijven via de inschrijvingspagina. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Stamhoofd en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.
+                Leden kunnen zelfstandig inschrijven via het ledenportaal. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Stamhoofd en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.
             </p>
 
             <hr>
             <h2 class="style-with-button">
-                <div>Jouw inschrijvingspagina</div>
+                <div>Jullie ledenportaal</div>
                 <div>
                     <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
                         <span class="icon external" />

@@ -3,14 +3,22 @@
         <STNavigationBar :title="invoice.number ? 'Factuur '+invoice.number : 'Proforma factuur'" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1 v-if="!invoice.number">
-                Proforma factuur
-            </h1>
+            <template v-if="!invoice.number">
+                <h1 v-if="!isPaymentFailed">
+                    Volgende aanrekening
+                </h1>
+                <h1 v-else>
+                    Openstaand bedrag
+                </h1>
+            </template>
             <h1 v-else>
                 Factuur {{ invoice.number }} [KOPIE]
             </h1>
-            <p v-if="!invoice.number">
+            <p v-if="!invoice.number && !isPaymentFailed">
                 Er wordt op het einde van de maand een factuur opgemaakt zodra het bedrag groter is dan 5 euro of als alle pakketten worden stopgezet.
+            </p>
+            <p v-else-if="!invoice.number" class="warning-box">
+                Eén of meerdere betalingen is mislukt. Betaal het openstaande bedrag om te voorkomen dat bepaalde functies worden uitgeschakeld.
             </p>
             <p v-else class="error-box">
                 Dit is geen officiële factuur. Download de PDF zodra die beschikbaar is.
@@ -22,7 +30,11 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <STList>
+            <p v-if="!invoice.number && invoice.meta.items.length == 0" class="info-box">
+                Geen openstaand bedrag.
+            </p>
+
+            <STList v-if="invoice.meta.items.length">
                 <STListItem v-for="item in invoice.meta.items" :key="item.id">
                     <template slot="left">
                         {{ item.amount }}x
@@ -41,7 +53,7 @@
                 </STListItem>
             </STList>
 
-            <div class="pricing-box">
+            <div v-if="invoice.meta.items.length" class="pricing-box">
                 <STList>
                     <STListItem>
                         Prijs excl. BTW
@@ -70,9 +82,9 @@
             </div>
         </main>
 
-        <STToolbar v-if="!invoice.number">
+        <STToolbar v-if="!invoice.number && invoice.meta.priceWithVAT > 0">
             <template slot="right">
-                <button class="button primary" :disabled="invoice.invoice" @click="charge">
+                <button class="button primary" :disabled="invoice.invoice" type="button" @click="charge">
                     Afrekenen
                 </button>
             </template>
@@ -82,12 +94,12 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, ErrorBox, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { STInvoice, STPendingInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import InvoicePaymentStatusView from "./InvoicePaymentStatusView.vue";
+import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import PackageConfirmView from "./PackageConfirmView.vue";
 
 @Component({
@@ -108,13 +120,35 @@ import PackageConfirmView from "./PackageConfirmView.vue";
 })
 export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    invoice: STInvoice | STPendingInvoice
+        invoice: STInvoice | STPendingInvoice
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
 
     charge() {
         this.show(new ComponentWithProperties(PackageConfirmView))
+    }
+
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get paymentFailedDeactivateDate() {
+        let d: Date | null = null
+        for (const [_, pack] of this.organization.meta.packages.packages) {
+            if (pack.deactivateDate === null || pack.firstFailedPayment === null) {
+                continue
+            }
+            if (d && d < pack.deactivateDate) {
+                continue
+            }
+            d = pack.deactivateDate
+        }
+        return d
+    }
+    
+    get isPaymentFailed() {
+        return this.paymentFailedDeactivateDate !== null && this.invoice.meta.items.length > 0
     }
 }
 </script>

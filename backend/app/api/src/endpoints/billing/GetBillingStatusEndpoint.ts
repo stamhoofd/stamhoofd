@@ -28,7 +28,7 @@ export class GetBillingStatusEndpoint extends Endpoint<Params, Query, Body, Resp
         const user = token.user
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (user.permissions === null || !user.permissions.hasFullAccess()) {
+        if (user.permissions === null || !user.permissions.hasFinanceAccess(user.organization.privateMeta.roles)) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You don't have permissions for this endpoint",

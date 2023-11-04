@@ -272,6 +272,14 @@ export class Order extends AutoEncoder {
                 title: "Betaalmethode",
                 value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.data.paymentMethod))
             },
+             ...(
+                (this.data.deliveryPrice) ? [
+                    {
+                        title: 'Leveringskost',
+                        value: Formatter.price(this.data.deliveryPrice)
+                    }
+                ] : []
+            ),
             {
                 title: "Prijs",
                 value: Formatter.price(this.data.totalPrice)

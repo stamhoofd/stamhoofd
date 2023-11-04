@@ -38,7 +38,7 @@
             </button>
 
 
-            <hr v-if="(!enableWebshopModule && !enableMemberModule) || (enableWebshopModule && canCreateWebshops && webshops.length == 0) || enableMemberModule && tree.categories.length == 0 && fullAccess">
+            <hr v-if="((!enableWebshopModule && !enableMemberModule) || (enableWebshopModule && canCreateWebshops && webshops.length == 0) || enableMemberModule && tree.categories.length == 0 && fullAccess) && ((enableMemberModule && tree.categories.length) || (enableWebshopModule && webshops.length > 0) || fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive))">
 
             <!--<div v-if="enableMemberModule" class="grouped">
                 <div class="group-title button">
@@ -51,8 +51,8 @@
             </div>-->
 
 
-            <template v-if="enableMemberModule">
-                <div v-for="category in tree.categories" :key="category.id" class="container">
+            <template v-if="enableMemberModule && tree.categories.length">
+                <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                     <div class="grouped">
                         <button class="group-title button" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
                             <span>{{ category.settings.name }}</span>
@@ -85,8 +85,9 @@
                             <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
                         </button>
                     </div>
-                    <hr>
+                    <hr v-if="index < tree.categories.length - 1">
                 </div>
+                <hr v-if="(enableWebshopModule && webshops.length > 0) || fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             </template>
 
             <div v-if="enableWebshopModule && webshops.length > 0" class="container">
@@ -111,7 +112,6 @@
                         <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon" />
                     </button>
                 </div>
-                
                 <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             </div>
 
@@ -125,25 +125,22 @@
                 <span>Webshop archief</span>
             </button>
 
-            <button v-if="canManagePayments" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-payments'}" @click="managePayments(true)"> 
-                <span class="icon card" />
-                <span>Overschrijvingen</span>
+            <hr v-if="(fullAccess || canManagePayments) && ((enableMemberModule && fullAccess) || (enableWebshopModule && hasWebshopArchive))">
+
+            <button v-if="fullAccess && enableMemberModule" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
+                <span class="icon file-filled" />
+                <span>Documenten</span>
+            </button>
+
+            <button v-if="canManagePayments" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-finances'}" @click="openFinances(true)"> 
+                <span class="icon calculator" />
+                <span>Boekhouding</span>
             </button>
 
             <div v-if="fullAccess">
-                <button v-if="enableMemberModule" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
-                    <span class="icon file" />
-                    <span>Documenten</span>
-                </button>
-
                 <button type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
                     <span class="icon settings" />
                     <span>Instellingen</span>
-                </button>
-
-                <button v-if="enableMemberModule && isSGV" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-sgv-groepsadministratie'}" @click="openSyncScoutsEnGidsen(true)">
-                    <span class="icon sync" />
-                    <span>Groepsadministratie</span>
                 </button>
             </div>
 
@@ -182,6 +179,7 @@ import { openNolt } from "../../classes/NoltHelper";
 import { OrganizationManager } from '../../classes/OrganizationManager';
 import { WhatsNewCount } from '../../classes/WhatsNewCount';
 import OrganizationSwitcher from './OrganizationSwitcher.vue';
+import InvoicePaymentStatusView from "./settings/packages/InvoicePaymentStatusView.vue";
 
 @Component({
     components: {
@@ -210,10 +208,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     get isNative() {
         return AppManager.shared.isNative
-    }
-
-    get isSGV() {
-        return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
     }
 
     get isBelgium() {
@@ -254,19 +248,20 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         UrlHelper.setUrl("/")
 
         const parts = UrlHelper.shared.getParts()
+        const params = UrlHelper.shared.getSearchParams()
 
         let didSet = false
 
-        if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie')) {
+        if ((parts.length >= 1 && parts[0] == 'settings') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'mollie') || (parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
             if (this.fullAccess) {
                 this.manageSettings(false).catch(console.error)
                 didSet = true
             }
         }
 
-        if (parts.length >= 1 && parts[0] == 'transfers') {
+        if (parts.length >= 1 && parts[0] == 'finances' || (!this.fullAccess && (parts.length >= 1 && parts[0] == 'settings'))) {
             if (this.canManagePayments) {
-                this.managePayments(false).catch(console.error).finally(() => UrlHelper.shared.clear())
+                this.openFinances(false).catch(console.error)
                 didSet = true
             }
         }
@@ -274,13 +269,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         if (parts.length >= 1 && parts[0] == 'account') {
             this.manageAccount(false).catch(console.error).finally(() => UrlHelper.shared.clear())
             didSet = true
-        }
-
-        if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
-            if (this.fullAccess) {
-                this.openSyncScoutsEnGidsen(false).catch(console.error)
-                didSet = true
-            }
         }
 
         if ((parts.length >= 1 && parts[0] == 'documents')) {
@@ -339,6 +327,8 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             UrlHelper.shared.clear()
             if (this.fullAccess) {
                 this.manageSettings(false).catch(console.error)
+            } else if (this.canManagePayments) {
+                this.openFinances(false).catch(console.error)
             } else {
                 this.manageAccount(false).catch(console.error)
             }
@@ -372,6 +362,20 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             LoadComponent(() => import(/* webpackChunkName: "AcceptTermsView" */ "./AcceptTermsView.vue"), {}, { instant: true }).then((component) => {
                 this.present(component.setDisplayStyle("popup").setAnimated(false))
             }).catch(console.error)
+        }
+
+        if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {
+            this.present({
+                animated: false,
+                adjustHistory: false,
+                modalDisplayStyle: "popup",
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: new ComponentWithProperties(InvoicePaymentStatusView, {
+                            paymentId: params.get("id")
+                        })
+                    })
+                ]})
         }
     }
 
@@ -482,14 +486,14 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         );
     }
 
-    async managePayments(animated = true) {
-        this.currentlySelected = "manage-payments"
+    async openFinances(animated = true) {
+        this.currentlySelected = "manage-finances"
         this.showDetail({
             adjustHistory: animated,
             animated,
             components: [
                 new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "TransferPaymentsView", webpackPrefetch: true */ './payments/TransferPaymentsView.vue'), {}, { instant: !animated })
+                    root: await LoadComponent(() => import(/* webpackChunkName: "FinancesView", webpackPrefetch: true */ './settings/FinancesView.vue'), {}, { instant: !animated })
                 })
             ]
         });
@@ -534,19 +538,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             return;
         }
         SessionManager.logout()
-    }
-
-    async openSyncScoutsEnGidsen(animated = true) {
-        this.currentlySelected = "manage-sgv-groepsadministratie"
-        this.showDetail({
-            adjustHistory: animated,
-            animated,
-            components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: await LoadComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */'./settings/SGVGroepsadministratieView.vue'), {}, { instant: !animated })
-                })
-            ]
-        });
     }
 
     async openDocuments(animated = true) {

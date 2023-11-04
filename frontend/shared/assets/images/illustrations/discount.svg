@@ -1,31 +1,31 @@
 <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0)">
+<g clip-path="url(#clip0_8300_203)">
 <path d="M9.88323 37.5275C8.68933 38.247 7.1399 37.8902 6.38095 36.7209C5.62201 35.5517 5.927 33.9912 7.07034 33.1937L29.6394 17.4519L33.4505 23.3235L9.88323 37.5275Z" fill="#ADADAD"/>
-<mask id="mask0" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="-2" y="3" width="30" height="32">
+<mask id="mask0_8300_203" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="-2" y="3" width="30" height="32">
 <path d="M-1.59688 17.194C5.63827 12.8303 20.1686 4.023 20.4087 3.7031L27.701 22.3061L6.59589 34.5974L-1.59688 17.194Z" fill="#C4C4C4"/>
 </mask>
-<g mask="url(#mask0)">
+<g mask="url(#mask0_8300_203)">
 <rect x="3.00006" y="22.5039" width="15.0079" height="26.6806" rx="0.83377" transform="rotate(-30 3.00006 22.5039)" fill="#BAE7B9" stroke="#359933" stroke-width="1.66754"/>
 <circle cx="16.1687" cy="30.305" r="5.00262" transform="rotate(-30 16.1687 30.305)" fill="#359933"/>
 <circle cx="11.9999" cy="23.0844" r="1.66754" transform="rotate(-30 11.9999 23.0844)" fill="#359933"/>
 <path d="M6.30521 21.5585L5.88833 20.8364L3.00006 22.5039L4.6676 25.3922L5.38967 24.9753C6.58603 24.2846 6.99593 22.7548 6.30521 21.5585Z" fill="#359933"/>
 <path d="M13.5259 17.3896L13.109 16.6675L15.9973 15L17.6648 17.8882L16.9427 18.3051C15.7464 18.9958 14.2166 18.5859 13.5259 17.3896Z" fill="#359933"/>
 </g>
-<mask id="mask1" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="5" y="17" width="29" height="21">
+<mask id="mask1_8300_203" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="5" y="17" width="29" height="21">
 <path d="M9.88323 37.5275C8.68933 38.247 7.1399 37.8902 6.38095 36.7209C5.62201 35.5517 5.927 33.9912 7.07034 33.1937L29.6394 17.4519L33.4505 23.3235L9.88323 37.5275Z" fill="#DCDCDC"/>
 </mask>
-<g mask="url(#mask1)">
+<g mask="url(#mask1_8300_203)">
 <path d="M26.2842 19.6297L-1.39619 37.5963L34.2671 24.5817L33.7448 21.9403L26.2842 19.6297Z" fill="#DCDCDC"/>
 </g>
 <circle cx="26.0927" cy="23.9265" r="1.5" transform="rotate(-122.987 26.0927 23.9265)" fill="#868686"/>
 <circle cx="40.6832" cy="21.6094" r="4" transform="rotate(-122.987 40.6832 21.6094)" stroke="#0053FF" stroke-width="3"/>
 <path d="M31.8171 20.807L38.1081 16.7237L36.342 25.0232C35.8586 24.2784 34.9401 23.9444 34.0912 24.2046L32.0451 24.8317L31.8171 20.807Z" fill="#0053FF"/>
-<circle r="4" transform="matrix(0.544442 0.838799 0.838799 -0.544442 34.1498 11.5438)" stroke="#0053FF" stroke-width="3"/>
+<circle cx="4" cy="4" r="4" transform="matrix(0.544442 0.838799 0.838799 -0.544442 28.6169 10.3663)" stroke="#0053FF" stroke-width="3"/>
 <path d="M31.2727 19.9683L37.5637 15.8849L29.2642 14.1188C29.7476 14.8636 29.6787 15.8385 29.0955 16.5079L27.6895 18.1213L31.2727 19.9683Z" fill="#0053FF"/>
-<mask id="mask2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="5" y="31" width="27" height="24">
+<mask id="mask2_8300_203" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="5" y="31" width="27" height="24">
 <path d="M5.82548 35.0032C14.2227 34.0678 31.1052 32.1495 31.4572 31.9595L30.2952 51.9069L5.9833 54.2379L5.82548 35.0032Z" fill="#C4C4C4"/>
 </mask>
-<g mask="url(#mask2)">
+<g mask="url(#mask2_8300_203)">
 <rect x="9.28088" y="19.5385" width="15.0079" height="26.6806" rx="0.83377" transform="rotate(-1.63263 9.28088 19.5385)" fill="#BAE7B9" stroke="#359933" stroke-width="1.66754"/>
 <circle cx="17.1618" cy="32.6596" r="5.00262" transform="rotate(-1.63263 17.1618 32.6596)" fill="#359933"/>
 <circle cx="17.3993" cy="40.994" r="1.66754" transform="rotate(-1.63263 17.3993 40.994)" fill="#359933"/>
@@ -34,7 +34,7 @@
 </g>
 </g>
 <defs>
-<clipPath id="clip0">
+<clipPath id="clip0_8300_203">
 <rect width="50" height="50" fill="white"/>
 </clipPath>
 </defs>

@@ -1,10 +1,17 @@
 <template>
     <div>
-        <p v-if="isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
-            Jouw betaling via domiciliëring/kredietkaart is mislukt. Breng de betaling zelf in orde via 'Facturen en betalingen' voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
+        <p v-if="!hasBillingListener && isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
+            Jouw betaling via domiciliëring/kredietkaart is mislukt. Breng de betaling zelf in orde via 'Boekhouding → Openstaand bedrag' voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
 
             <button class="button text" type="button">
                 Nakijken
+            </button>
+        </p>
+        <p v-else-if="hasBillingListener && isPaymentFailed" class="error-box selectable with-button" @click="openBilling">
+            Een automatische betaling is mislukt. Breng de betaling zelf in orde voor {{ paymentFailedDeactivateDate | dateTime }} om te voorkomen dat sommige functies tijdelijk onbeschikbaar worden.
+
+            <button class="button text" type="button">
+                Openen
             </button>
         </p>
 
@@ -25,26 +32,26 @@
         </p>
 
         <p v-if="!shouldFilter('webshops') && isWebshopsTrial" class="warning-box selectable with-button" @click="openPackages">
-            Je test momenteel de webshops functie. Activeer een pakket als je beslist om ze echt in gebruik te nemen.
+            Je test momenteel de webshops functie. Koop een pakket aan om het echt in gebruik te nemen.
 
             <button class="button text" type="button">
-                Activeren
+                Aankopen
             </button>
         </p>
 
         <p v-if="!shouldFilter('members') && isMembersTrial" class="warning-box selectable with-button" @click="openPackages">
-            Je test momenteel de ledenadministratie functie. Activeer een pakket als je beslist om ze echt in gebruik te nemen.
+            Je test momenteel de ledenadministratie functie. Koop een pakket aan om het echt in gebruik te nemen.
 
             <button class="button text" type="button">
-                Activeren
+                Aankopen
             </button>
         </p>
 
         <p v-if="!shouldFilter('members') && isActivitiesTrial" class="warning-box selectable with-button" @click="openPackages">
-            Je test momenteel inschrijvingen voor activiteiten. Activeer het 'ledenadministratie' pakket als je beslist om deze functie in gebruik te nemen.
+            Je test momenteel inschrijvingen voor activiteiten. Koop een pakket aan om het echt in gebruik te nemen.
 
             <button class="button text" type="button">
-                Activeren
+                Aankopen
             </button>
         </p>
 
@@ -77,13 +84,14 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage } from "@stamhoofd/components";
+import { CenteredMessage, LoadComponent } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import FinancesView from "../FinancesView.vue";
 import BillingSettingsView from "./BillingSettingsView.vue";
 import PackageSettingsView from "./PackageSettingsView.vue";
 
@@ -95,7 +103,7 @@ import PackageSettingsView from "./PackageSettingsView.vue";
 })
 export default class BillingWarningBox extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    filterTypes: "members" | "webshops" | null
+        filterTypes: "members" | "webshops" | null
 
     OrganizationManager = OrganizationManager
 
@@ -107,6 +115,10 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
             return true
         }
         return false
+    }
+
+    get hasBillingListener(){
+        return this.$listeners && this.$listeners.billing
     }
 
     get isWebshopsTrial() {
@@ -241,7 +253,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
     }
 
     openPackages() {
-        if (!SessionManager.currentSession!.user!.permissions?.hasFullAccess()) {
+        if (!SessionManager.currentSession!.user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
             new CenteredMessage("Enkel voor hoofdbeheerders", "Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.").addCloseButton().show()
             return
         }
@@ -250,14 +262,24 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
-    openBilling() {
-        if (!SessionManager.currentSession!.user!.permissions?.hasFullAccess()) {
+    async openBilling() {
+        if (this.hasBillingListener) {
+            this.$emit("billing")
+            return
+        }
+
+        if (!SessionManager.currentSession!.user!.permissions?.hasFinanceAccess(this.organization.privateMeta?.roles ?? [])) {
             new CenteredMessage("Enkel voor hoofdbeheerders", "Betalingen zijn enkel beschikbaar voor hoofdbeheerders. Vraag hen om de betaling in orde te brengen.").addCloseButton().show()
             return
         }
-        this.present(new ComponentWithProperties(NavigationController, {
-            root: new ComponentWithProperties(BillingSettingsView)
-        }).setDisplayStyle("popup"))
+        this.show({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: await LoadComponent(() => import(/* webpackChunkName: "FinancesView" */ '../FinancesView.vue'), {}, { instant: false })
+                })
+            ],
+            animated: true
+        })
     }
 
   

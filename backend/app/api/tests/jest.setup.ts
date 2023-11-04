@@ -11,7 +11,7 @@ Column.setJSONVersion(Version);
 // Automatically set endpoint default version to latest one (only in tests!)
 Request.defaultVersion = Version
 
-console.log = jest.fn();
+//console.log = jest.fn();
 
 beforeAll(async () => {
     await I18n.load()

@@ -219,6 +219,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
             payment.transferSettings = user.organization.mappedTransferSettings
 
+            if (!payment.transferSettings.iban) {
+                throw new SimpleError({
+                    code: "no_iban",
+                    message: "No IBAN",
+                    human: "Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder."
+                })
+            }
+
             const m = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)]
             payment.generateDescription(user.organization, Formatter.groupNamesByFamily(m as any))
         }

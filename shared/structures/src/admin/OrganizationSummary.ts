@@ -136,6 +136,10 @@ export class OrganizationOverview extends AutoEncoder {
     }
 
     matchQuery(q: string) {
+        if (q === this.id) {
+            return true;
+        }
+        
         const parts = q.split(/[ -]/);
         const name = Formatter.slug(this.name)
         const orgParts = name.split(/[ -]/);

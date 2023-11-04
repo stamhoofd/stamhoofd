@@ -31,13 +31,13 @@
 
         <div class="container">
             <hr>
-            <h2>Beheerdersgroepen</h2>
-            <p>Je kan beheerders in groepen onderverdelen. Zonder een groep heeft deze beheerder nergens toegang tot (tenzij voor hoofdbeheerders). Je kan groepen aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
+            <h2>Functies</h2>
+            <p>Je kan beheerders verschillende functies toekennen. Zonder een functie heeft deze beheerder nergens toegang tot (tenzij voor hoofdbeheerders). Je kan functies aanpassen en toevoegen in het overzicht van 'beheerders'.</p>
 
             <STList>
                 <STListItem element-name="label" :selectable="true" class="right-description smartphone-wrap">
                     <Checkbox slot="left" v-model="fullAccess" />
-                    Hoofdbeheerders
+                    Hoofdbeheerder
 
                     <template #right>
                         Kan alles bekijken en bewerken
@@ -51,13 +51,13 @@
             </STList>
 
             <p v-if="roles.length == 0" class="info-box">
-                Je hebt nog geen beheerdersgroepen aangemaakt. Maak een groep aan om beheerders op te delen.
+                Je hebt nog geen functies aangemaakt. Maak een functie aan om beheerders op te delen.
             </p>
 
             <p>
                 <button class="button text" type="button" @click="addRole">
                     <span class="icon add" />
-                    <span>Nieuwe groep toevoegen</span>
+                    <span>Nieuwe functie toevoegen</span>
                 </button>
             </p>
         </div>
@@ -113,12 +113,12 @@ export default class AdminView extends Mixins(NavigationMixin) {
     deleting = false
 
     @Prop({ required: true })
-    user!: User
+        user!: User
 
     patchUser: AutoEncoderPatchType<User> = User.patch({ id: this.user.id })
 
     @Prop({ required: true })
-    isNew!: boolean
+        isNew!: boolean
 
     get hasChanges() {
         return patchContainsChanges(this.patchUser, this.user, { version: Version })

@@ -3,6 +3,7 @@
 @use '../components/icons' as *;
 
 .inline-link {
+    cursor: pointer;
     &, &:hover, &:link, &:active, &:visited {
         color: $color-primary;
         font-weight: $font-weight-bold;

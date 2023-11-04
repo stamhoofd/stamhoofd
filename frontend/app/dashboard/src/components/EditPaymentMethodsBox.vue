@@ -127,12 +127,12 @@ export default class EditPaymentMethodsBox extends Vue {
         }
 
         // Force a given ordering
+        r.push(PaymentMethod.Bancontact)
+
+        // Force a given ordering
         if (this.country == Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
             r.push(PaymentMethod.Payconiq)
         }
-
-        // Force a given ordering
-        r.push(PaymentMethod.Bancontact)
 
         // Force a given ordering
         if (this.country != Country.Netherlands) {

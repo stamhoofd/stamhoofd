@@ -454,7 +454,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         if (!p) {
             return false
         }
-        if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? []) || p.hasFullAccess()) {
+        if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])) {
             return true
         }
         return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)

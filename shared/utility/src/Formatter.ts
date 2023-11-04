@@ -32,7 +32,11 @@ export class Formatter {
     /**
      * 1 = january
      */
-    static month(index: number): string {
+    static month(index: number|Date): string {
+        if (typeof index === "object") {
+            const datetime = DateTime.fromJSDate(index).setZone(this.timezone);
+            index = datetime.month
+        }
         const monthNames = ["januari", "februari", "maart", "april", "mei", "juni",
             "juli", "augustus", "september", "oktober", "november", "december"
         ];

@@ -1527,10 +1527,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
             padding-bottom: 15px;
         }
     }
-
-    .title-suffix {
-        @extend .style-description-small;
-    }
 }
 
 .table-column-content-style {

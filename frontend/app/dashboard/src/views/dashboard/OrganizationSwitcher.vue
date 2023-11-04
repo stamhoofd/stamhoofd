@@ -48,6 +48,10 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
         SessionManager.deactivateSession()
     }
 
+    get fullAccess() {
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
+    }
+
     async manageSettings(animated = true) {
         //this.currentlySelected = "manage-settings"
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -107,14 +111,14 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
                     }
                 }),
 
-                new ContextMenuItem({
+                ...(this.fullAccess ? [new ContextMenuItem({
                     name: "Instellingen",
                     icon: "settings",
                     action: () => {
                         this.manageSettings().catch(console.error)
                         return true;
                     }
-                }),
+                })] : []),
             ],
             [
                 new ContextMenuItem({

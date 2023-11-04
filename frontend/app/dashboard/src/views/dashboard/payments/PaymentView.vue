@@ -77,7 +77,7 @@
 
                     <STListItem v-if="payment.iban">
                         <h3 class="style-definition-label">
-                            Betaald via IBAN
+                            Betaald door IBAN
                         </h3>
 
                         <p class="style-definition-text">
@@ -96,6 +96,21 @@
                         <p class="style-definition-text">
                             {{ formatDate(payment.settlement.settledAt) }}<br>
                             Mededeling "{{ payment.settlement.reference }}"
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.transferFee">
+                        <h3 class="style-definition-label">
+                            Transactiekost
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ formatPrice(payment.transferFee) }}
+                        </p>
+                        <p class="style-description-small">
+                            <template v-if="VATPercentage > 0">
+                                Incl. {{ VATPercentage }}% BTW —
+                            </template> <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten-inhouding/'" class="inline-link" target="_blank">Meer info</a>
                         </p>
                     </STListItem>
                 </STList>
@@ -242,7 +257,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { PermissionLevel } from "@stamhoofd/structures";
+import { calculateVATPercentage, PermissionLevel } from "@stamhoofd/structures";
 import { ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -263,12 +278,20 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class PaymentView extends Mixins(NavigationMixin) {
     @Prop()
-    initialPayment!: Payment;
+        initialPayment!: Payment;
 
     payment: PaymentGeneral | null = null
     errorBox: ErrorBox | null = null
 
     loading = false
+
+    get VATPercentage() {
+        return calculateVATPercentage(this.organization.meta.companyAddress ?? this.organization.address, this.organization.meta.VATNumber)
+    }
+
+    get organization() {
+        return SessionManager.currentSession!.organization!
+    }
 
     get title() {
         return PaymentMethodHelper.getNameCapitalized(this.initialPayment.method ?? PaymentMethod.Unknown)
@@ -319,10 +342,10 @@ export default class PaymentView extends Mixins(NavigationMixin) {
     }
 
     @Prop({ default: null })
-    getNext!: (PaymentGeneral) => PaymentGeneral | null;
+        getNext!: (PaymentGeneral) => PaymentGeneral | null;
 
     @Prop({ default: null })
-    getPrevious!: (PaymentGeneral) => PaymentGeneral | null;
+        getPrevious!: (PaymentGeneral) => PaymentGeneral | null;
 
     get hasNext(): boolean {
         if (!this.getNext) {

@@ -10,7 +10,12 @@ export class StripeHelper {
         return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {apiVersion: '2022-11-15', typescript: true, maxNetworkRetries: 0, timeout: 10000});
     }
 
-    static async getStatus(payment: Payment, cancel = false): Promise<PaymentStatus> {
+    static async getStatus(payment: Payment, cancel = false, testMode = false): Promise<PaymentStatus> {
+        if (testMode && !STAMHOOFD.STRIPE_SECRET_KEY.startsWith("sk_test_")) {
+            // Do not query anything
+            return payment.status
+        }
+
         const [model] = await StripePaymentIntent.where({paymentId: payment.id}, {limit: 1})
 
         if (!model) {
@@ -18,6 +23,7 @@ export class StripeHelper {
         }
 
         const stripe = this.getInstance()
+
         let intent = await stripe.paymentIntents.retrieve(model.stripeIntentId)
         console.log(intent);
         if (intent.status === "succeeded") {
@@ -152,6 +158,8 @@ export class StripeHelper {
             fee = calculateFee(15, 100); // € 0,15 + 1%
         }
 
+        payment.transferFee = fee;
+
         const fullMetadata = {
             ...(metadata ?? {}),
             organizationVATNumber: organization.meta.VATNumber
@@ -275,6 +283,8 @@ export class StripeHelper {
             paymentIntentModel.organizationId = organization.id
             await paymentIntentModel.save()
         }
+
+        await payment.save()
 
         return {
             paymentUrl
