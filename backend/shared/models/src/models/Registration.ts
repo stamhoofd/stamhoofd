@@ -247,9 +247,22 @@ export class Registration extends Model {
     async sendEmailTemplate(data: {
         type: EmailTemplateType
     }) {
-        // First fetch template
-        let templates = (await EmailTemplate.where({ type: data.type, groupId: this.groupId }))
+        const Group = (await import('./')).Group
+        const group = await Group.getByID(this.groupId);
 
+        if (!group) {
+            return
+        }
+
+        // Most specific template: for specific group
+        let templates = (await EmailTemplate.where({ type: data.type, groupId: this.groupId, organizationId: group.organizationId }))
+
+        // Then for organization
+        if (templates.length == 0) {
+            templates = (await EmailTemplate.where({ type: data.type, organizationId: group.organizationId }))
+        }
+
+        // Then default
         if (templates.length == 0) {
             templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
         }
@@ -261,12 +274,6 @@ export class Registration extends Model {
 
         const template = templates[0]
 
-        const Group = (await import('./')).Group
-        const group = await Group.getByID(this.groupId);
-
-        if (!group) {
-            return
-        }
         const organization = await Organization.getByID(group.organizationId);
         if (!organization) {
             return
