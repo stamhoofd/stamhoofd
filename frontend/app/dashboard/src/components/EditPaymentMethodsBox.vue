@@ -88,10 +88,10 @@
             </p>
         </template>
 
-        <template v-if="showAdministrationFee && false">
+        <template v-if="showAdministrationFee">
             <hr>
             <h2>Administratiekosten</h2>
-            <p>Indien gewenst kan je ook administratiekosten in rekening brengen per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Hiermee kan je bepaalde kosten doorrekenen. Let wel op, het is wettelijk niet toegestaan om transactiekosten voor online betalingen door te rekenen. Deze kost is altijd duidelijk zichtbaar voor het afrekenen.</p>
+            <p>Breng een kost in rekening per betaling (dus slechts één keer, ook als er meerdere zaken worden afgerekend in één betaling). Hiermee kan je de kost van Stamhoofd recupereren en/of de tijd die je bezig bent met het verwerken van inschrijvingen/bestellingen. Wettelijk gezien is het niet toegestaan dat je deze laat afhangen van de gekozen betaalmethode (dat is dus niet mogelijk).</p>
         
             <div class="split-inputs">
                 <STInputBox title="Vaste kost" error-fields="administrationFee.fixed" :error-box="errorBox">
