@@ -2,7 +2,6 @@ import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDe
 import { Formatter } from "@stamhoofd/utility";
 
 import { PaymentMethod, PaymentMethodHelper } from "./PaymentMethod";
-import { TransferSettings } from "./webshops/TransferSettings";
 
 /**
  * Should remain private
