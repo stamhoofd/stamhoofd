@@ -204,6 +204,12 @@ export class MemberDetails extends AutoEncoder {
     }
 
     get name() {
+        if (!this.firstName) {
+            return this.lastName;
+        }
+        if (!this.lastName) {
+            return this.firstName;
+        }
         return this.firstName + " " + this.lastName;
     }
 
@@ -345,14 +351,58 @@ export class MemberDetails extends AutoEncoder {
      * This will add or update the parent (possibily partially if not all data is present)
      */
     addParent(parent: Parent) {
+        console.log('adding parent to ', this.name)
+        
+        // Multiple loops to mangage priority
         for (const [index, _parent] of this.parents.entries()) {
             if (_parent.id == parent.id) {
+                console.log('Merging parent on id', index, parent)
                 this.parents[index].merge(parent)
                 return
             }
-            if (StringCompare.typoCount(_parent.name || _parent.email || _parent.id, parent.name || parent.email || parent.id) < 2) {
-                this.parents[index].merge(parent)
-                return
+        }
+
+        for (const [index, _parent] of this.parents.entries()) {
+            // clean both parents before checking
+            parent.cleanData();
+            _parent.cleanData();
+
+            if (_parent.name && parent.name) {
+                if (StringCompare.typoCount(_parent.name, parent.name) === 0) {
+                    console.log('Merging parent on name', index, parent)
+                    this.parents[index].merge(parent)
+                    return
+                }
+            }
+        }
+
+        for (const [index, _parent] of this.parents.entries()) {
+            if (_parent.name && parent.name) {
+                if (StringCompare.typoCount(_parent.name, parent.name) < 2) {
+                    console.log('Merging parent on name typo', index, parent)
+                    this.parents[index].merge(parent)
+                    return
+                }
+            }
+        }
+
+        for (const [index, _parent] of this.parents.entries()) {
+            if (!_parent.name || !parent.name) {
+                if (_parent.email && parent.email) {
+                    // Compare on email address
+                    if (_parent.email == parent.email) {
+                        console.log('Merging parent on email', index, parent)
+                        this.parents[index].merge(parent)
+                        return
+                    }
+                }
+                if (_parent.phone && parent.phone) {
+                    if (_parent.phone == parent.phone) {
+                        console.log('Merging parent on phone', index, parent)
+                        this.parents[index].merge(parent)
+                        return
+                    }
+                }
             }
         }
         this.parents.push(parent)
@@ -431,6 +481,7 @@ export class MemberDetails extends AutoEncoder {
      * Apply newer details without deleting data or replacing filled in data with empty data
      */
     merge(other: MemberDetails) {
+        console.log('merge member details', this, other)
         if (other.firstName.length > 0) {
             this.firstName = other.firstName
         }
