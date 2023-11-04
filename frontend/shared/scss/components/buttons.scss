@@ -6,7 +6,7 @@
     cursor: pointer;
     &, &:hover, &:link, &:active, &:visited {
         color: $color-primary;
-        font-weight: $font-weight-bold;
+        font-weight: $font-weight-semibold;
         text-decoration: none;
     }
 

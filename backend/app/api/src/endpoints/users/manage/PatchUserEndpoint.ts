@@ -60,6 +60,13 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             } else {
                 editUser.permissions = request.body.permissions
             }
+
+            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess())) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
+                })
+            }
         }
 
         if (editUser.id == user.id && request.body.password) {

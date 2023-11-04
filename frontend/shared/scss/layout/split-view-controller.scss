@@ -3,6 +3,8 @@
 
 
 .split-view-controller {
+    --split-view-width: 280px;
+
     > .master {
         z-index: 100;
         overscroll-behavior: contain;

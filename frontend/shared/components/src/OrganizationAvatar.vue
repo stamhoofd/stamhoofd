@@ -19,7 +19,7 @@ import { ColorHelper } from "./ColorHelper";
 @Component
 export default class OrganizationAvatar extends Vue {
     @Prop({ required: true })
-    organization!: Organization
+        organization!: Organization
 
     width = 40
 
@@ -61,7 +61,7 @@ export default class OrganizationAvatar extends Vue {
         border-radius: $border-radius;
         text-align: center;
         background: $color-primary-light;
-        color: $color-primary;
+        color: $color-primary-dark;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);
         font-size: calc(var(--block-width, 40px) * 0.40);
@@ -69,11 +69,12 @@ export default class OrganizationAvatar extends Vue {
         position: relative;
 
         &[data-length="2"] {
-            font-size: calc(var(--block-width, 40px) * 0.3);
+            font-size: calc(var(--block-width, 40px) * 0.32);
         }
 
         &[data-length="3"] {
-            font-size: calc(var(--block-width, 40px) * 0.3);
+            font-size: calc(var(--block-width, 40px) * 0.32);
+            letter-spacing: -0.5px;
         }
     }
 
