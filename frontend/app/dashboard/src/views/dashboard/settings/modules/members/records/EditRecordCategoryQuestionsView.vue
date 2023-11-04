@@ -344,6 +344,7 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
             dataPermission: true,
             filterDefinitions: this.filterDefinitionsForCategory(),
             markReviewed: false,
+            hasNextStep: false,
             filterValueForAnswers: (answers: RecordAnswer[]) => {
                 return this.settings.filterValueForAnswers(answers)
             },

@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view boxed">
+    <div class="st-view">
         <STNavigationBar title="Betaling" />
 
         <main v-if="!payment || payment.status != 'Failed'">

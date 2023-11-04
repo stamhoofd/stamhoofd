@@ -1,19 +1,15 @@
 <template>
     <LoadingView v-if="loading" />
-    <div v-else class="st-view boxed ticket-view">
+    <div v-else class="st-view ticket-view">
         <STNavigationBar v-if="!$isMobile" :large="!true" :sticky="false">
             <OrganizationLogo slot="left" :organization="organization" />
         </STNavigationBar>
-
-        <div v-for="ticket in tickets" :key="ticket.id" class="box">
-            <DetailedTicketView :ticket="ticket" :webshop="webshop" :logo="$isMobile" />
-        </div>
     </div>
 </template>
 
 <script lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, LoadingButton, LoadingView, OrganizationLogo, Radio, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { TicketPublic } from '@stamhoofd/structures';
@@ -43,7 +39,7 @@ export default class TicketView extends Mixins(NavigationMixin){
     loading = true
     
     @Prop({ required: true })
-    secret: string 
+        secret: string 
 
     tickets: TicketPublic[] = []
 
@@ -69,12 +65,29 @@ export default class TicketView extends Mixins(NavigationMixin){
                 decoder: new ArrayDecoder(TicketPublic as Decoder<TicketPublic>)
             })
             this.tickets = response.data
+            this.openTicket();
         } catch (e) {
             Toast.fromError(e).show()
         }        
 
         this.loading = false
     }
+
+    openTicket() {
+        this.present({
+            components: [
+                new ComponentWithProperties(DetailedTicketView, {
+                    ticket: this.tickets[0],
+                    webshop: this.webshop,
+                    allowDismiss: false,
+                    logo: !!(this as any).$isMobile
+                })
+            ],
+            modalDisplayStyle: "sheet",
+            animated: false
+        })
+    }
+
 
     created() {
         this.downloadTickets().catch(console.error)

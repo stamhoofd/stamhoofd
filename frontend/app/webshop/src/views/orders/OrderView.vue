@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="!order" />
-    <div v-else class="st-view order-view boxed">
+    <div v-else class="st-view order-view box-shade">
         <STNavigationBar :large="true" :sticky="false">
             <OrganizationLogo slot="left" :organization="organization" />
             <button slot="right" class="text button" type="button" @click="pop">
@@ -8,8 +8,8 @@
             </button>
         </STNavigationBar>
 
-        <div class="box">
-            <div class="st-view">
+        <main>
+            <div class="box">
                 <main>
                     <h1 v-if="success">
                         Jouw bestelling is geplaatst
@@ -275,7 +275,7 @@
                     </template>
                 </STToolbar>
             </div>
-        </div>
+        </main>
     </div>
 </template>
 

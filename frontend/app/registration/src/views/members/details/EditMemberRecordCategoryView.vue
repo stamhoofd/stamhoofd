@@ -1,11 +1,11 @@
 <template>
-    <FillRecordCategoryView :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" :filter-value-for-answers="filterValueForAnswers" :filter-definitions="filterDefinitions" :data-permission="dataPermission" />
+    <FillRecordCategoryView ref="component" :save-handler="mappedSaveHandler" :answers="details.recordAnswers" :category="category" :mark-reviewed="true" :filter-value-for-answers="filterValueForAnswers" :filter-definitions="filterDefinitions" :data-permission="dataPermission" />
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { FillRecordCategoryView } from '@stamhoofd/components';
-import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, RegisterItem } from '@stamhoofd/structures';
+import { MemberDetails, MemberDetailsWithGroups, MemberWithRegistrations, RecordAnswer, RecordCategory, RegisterItem, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -21,22 +21,22 @@ import { OrganizationManager } from "../../../classes/OrganizationManager";
 })
 export default class EditMemberCategoryView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    category!: RecordCategory
+        category!: RecordCategory
 
     @Prop({ required: true })
-    isNew: boolean
+        isNew: boolean
 
     @Prop({ required: true })
-    details: MemberDetails
+        details: MemberDetails
 
     @Prop({ required: false })
-    member?: MemberWithRegistrations
+        member?: MemberWithRegistrations
 
     @Prop({ required: true })
-    items: RegisterItem[]
+        items: RegisterItem[]
 
     @Prop({ required: true })
-    saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
+        saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
     filterValueForAnswers(answers: RecordAnswer[]) {
         const details = this.details.patch({
@@ -57,5 +57,14 @@ export default class EditMemberCategoryView extends Mixins(NavigationMixin) {
         this.details.recordAnswers = answers
         await this.saveHandler(this.details, this)
     }
+
+    async shouldNavigateAway() {
+        const component = this.$refs.component as any;
+        if (component && component.shouldNavigateAway) {
+            return await component.shouldNavigateAway()
+        }
+        return true
+    }
+
 }
 </script>

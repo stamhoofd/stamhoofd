@@ -15,6 +15,7 @@ export * from "./src/ViewportHelper"
 // Navigation
 export { default as EditorView } from "./src/editor/EditorView.vue"
 export { default as BackButton } from "./src/navigation/BackButton.vue"
+export { default as LegalFooter } from "./src/navigation/LegalFooter.vue"
 export { default as LoadingButton } from "./src/navigation/LoadingButton.vue"
 export { default as SaveView } from "./src/navigation/SaveView.vue"
 export { default as STButtonToolbar } from "./src/navigation/STButtonToolbar.vue"

@@ -1,41 +1,39 @@
 <template>
-    <div class="boxed-view">
-        <form class="confirm-email-view st-view small" @submit.prevent="submit">
-            <STNavigationBar>
-                <LoadingButton slot="right" :loading="retrying">
-                    <button class="button text" type="button" @click="retry">
-                        <span class="icon retry" />
-                        <span>Opnieuw</span>
-                    </button>
-                </LoadingButton>
-            </STNavigationBar>
-            <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
+    <form class="confirm-email-view st-view small" @submit.prevent="submit">
+        <STNavigationBar>
+            <LoadingButton slot="right" :loading="retrying">
+                <button class="button text" type="button" @click="retry">
+                    <span class="icon retry" />
+                    <span>Opnieuw</span>
+                </button>
+            </LoadingButton>
+        </STNavigationBar>
+        <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
 
-            <main>
-                <h1 v-if="!login">
-                    Vul de code in uit de e-mail die we hebben gestuurd
-                </h1>
-                <h1 v-else>
-                    Verifieer jouw e-mailadres
-                </h1>
+        <main>
+            <h1 v-if="!login">
+                Vul de code in uit de e-mail die we hebben gestuurd
+            </h1>
+            <h1 v-else>
+                Verifieer jouw e-mailadres
+            </h1>
 
-                <p>Er werd een e-mail verstuurd naar '{{ email }}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
+            <p>Er werd een e-mail verstuurd naar '{{ email }}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
 
-                <div><CodeInput v-model="code" @complete="submit" /></div>
+            <div><CodeInput v-model="code" @complete="submit" /></div>
 
-                <div><STErrorsDefault :error-box="errorBox" /></div>
-            </main>
+            <div><STErrorsDefault :error-box="errorBox" /></div>
+        </main>
 
-            <STToolbar>
-                <LoadingButton slot="right" :loading="loading">
-                    <button class="button primary full" type="button">
-                        <span>Doorgaan</span>
-                        <span class="icon arrow-right" />
-                    </button>
-                </LoadingButton>
-            </STToolbar>
-        </form>
-    </div>
+        <STToolbar>
+            <LoadingButton slot="right" :loading="loading">
+                <button class="button primary full" type="button">
+                    <span>Doorgaan</span>
+                    <span class="icon arrow-right" />
+                </button>
+            </LoadingButton>
+        </STToolbar>
+    </form>
 </template>
 
 <script lang="ts">
@@ -67,16 +65,16 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
     code = ""
 
     @Prop({ required: true })
-    token!: string
+        token!: string
 
     @Prop({ required: true })
-    email!: string
+        email!: string
 
     @Prop({ default: false })
-    login!: boolean
+        login!: boolean
 
     @Prop({ required: true })
-    session!: Session
+        session!: Session
 
     timer: any = null
 

@@ -162,7 +162,7 @@
         background: $color-background;
         border-radius: $border-radius-modals;
         width: 400px;
-        width: var(--st-sheet-width, 400px);
+        width: min(100vw, var(--st-sheet-width, 400px));
         overscroll-behavior: contain;
         box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
         

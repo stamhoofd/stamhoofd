@@ -1,10 +1,9 @@
 @use '../base/variables' as *;
 @use '../base/text-styles' as *;
 
-.view, .st-view .box {
-    > main {
-        @extend .main-text-container;
-    }
+.view > main ,
+.st-view > main > .box > main {
+    @extend .main-text-container;
 }
 
 html.modern {
@@ -14,6 +13,7 @@ html.modern {
 }
 
 body.modern {
+
     // on iOS, we don't set overflow: hidden as that prevents scrolling the body. On Android, it doesn't matter, so better to hide overflow
     @supports not (-webkit-touch-callout: none) {
         //overflow: hidden;
@@ -38,162 +38,89 @@ body.modern.web-iOS {
 .st-view {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    min-height: 100dvh;
-    min-height: calc(var(--vh, 1vh) * 100);
     box-sizing: border-box;
-    padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px) 0;
 
+    padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px) 0;
     padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) 0 calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px)) 0;
-    
     padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
-    transition: padding-bottom 0.2s;
+    padding-bottom: 0; //var(--st-safe-area-bottom, 0px);
+    padding-top: 0; //var(--st-safe-area-top, 0px);
+    contain: strict;
+
+    height: 100vh;
+    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
+    max-height: 100vh;
+    max-height: 100dvh;
+
+    overflow: hidden;
+
     --current-view-safe-area-top: var(--st-safe-area-top, 0px);
     --current-view-safe-area-bottom: var(--st-safe-area-bottom, 0px);
 
-    body.modern & {
-        height: 100vh;
-        height: 100dvh;
-        height: calc(var(--vh, 1vh) * 100);
-        max-height: 100vh;
-        max-height: 100dvh;
+    // Save padding if we make changes
+    --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
 
+    .st-toolbar:not(.dont-float) {
+        margin-top: auto;
+    }
+
+    &.auto {
         min-height: auto;
-        overflow: hidden;
-        padding-bottom: 0; //var(--st-safe-area-bottom, 0px);
-        padding-top: 0; //var(--st-safe-area-top, 0px);
-        transition: none;
-        contain: strict;
-
-        > * {
-            flex-shrink: 0;
-            position: static !important;
-            margin-top: 0;
-
-            // Prevent scrolling outer areas when touching the footer or header
-            @supports not (overscroll-behavior: contain) {
-                touch-action: none;
-            }
-        }
-
-        > main {
-            flex-shrink: 1;
-            flex-grow: 1;
-            min-height: 0;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-
-            // Prevent scrolling outer scroll area's
-            overscroll-behavior: contain;
-            position: relative;
-
-            // z-index bug on chrome 93 causes scrollbar to be below content :/
-            //z-index: 0;
-
-            // Windows scrollbars
-            scrollbar-gutter: stable;
-
-            // Flexbox negative margins are broken on iOS 16 and Safari 16...
-            // display: flex;
-            // flex-direction: column;
-            
-            > * {
-                flex-shrink: 0;
-            }
-
-            touch-action: auto;
-
-            padding-bottom: calc(15px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
-            scroll-padding-bottom: calc(30px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
-
-            &:first-child {
-                padding-top: calc(var(--st-vertical-padding, 20px) + var(--current-view-safe-area-top, 0px));
-
-                &.sticky-navigation-bar {
-                    padding-top: 0;
-                }
-            }
-
-            &:last-child {
-                padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
-                scroll-padding-bottom: calc(30px + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
-            }
-
-
-            &~ * {
-                padding-top: 0;
-                margin-bottom: -300px;
-                z-index: 100;
-                position: relative;
-
-                // Add some fake bottom padding, so when we animate it, the background stays white
-                > div {
-                    padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 300px + var(--default-footer-padding, 0px));
-                }
-
-                transition: transform 0.2s;
-                transform: translateY(
-                    calc(
-                        -1 * var(--bottom-padding, 0px)
-                    )
-                );
-
-                // Show above keyboard with a specific class that will move it up
-                &.sticky {
-                    // Problem: when the keyboard is up,
-                    // the safe area (which is already inclused in the bottom padding or keyboard height)
-                    // is also added in the toolbar's bottom padding
-                    // So we need to make sure we don't add it twice
-                    transform: translateY(
-                        calc(
-                            -1 * max(var(--keyboard-height, 0px), var(--bottom-padding, 0px), var(--st-safe-area-bottom, 0px)) + var(--st-safe-area-bottom, 0px)
-                        )
-                    );
-                }
-            }
-        }
     }
 
-    body.modern .popup & {
-        // height: calc(var(--vh, 1vh) * 100);
-        // min-height: 0;
-        // max-height: 100vh;
-        // max-height: 100dvh;
-    }
+    @extend .view;
 
-    body.modern .sheet &, body.modern .box & {
-        height: auto;
-        min-height: 0;
-        max-height: calc(var(--vh, 1vh) * 100);
-        contain: content;
-    }
-
-    body.modern .box & {
-        @media (max-width: 800px), (max-height: 700px) {
-            > main:first-child {
-                padding-top: 0;
-            }
-
-            > main:last-child {
-                padding-bottom: 0;
-            }
-        }
-    }
-
+    background: var(--color-current-background, #{$color-background});
 
     > main {
         // We fixed the safe area, no need to recorrect it again
         --st-safe-area-top: 0px;
-        //--keyboard-height: 0px;
-
         padding: 0 var(--st-horizontal-padding, 40px) 0 var(--st-horizontal-padding, 40px);
+        flex-shrink: 1;
+        flex-grow: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    
+        // Prevent scrolling outer scroll area's
+        overscroll-behavior: contain;
+        position: relative;
+    
+        // z-index bug on chrome 93 causes scrollbar to be below content :/
+        //z-index: 0;
+    
+        // Windows scrollbars
+        scrollbar-gutter: stable;
+    
+        // Flexbox negative margins are broken on iOS 16 and Safari 16...
+        // display: flex;
+        // flex-direction: column;
+    
+        touch-action: auto;
+    
+        padding-bottom: calc(15px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
+        scroll-padding-bottom: calc(30px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
+    
+        &:first-child {
+            padding-top: calc(var(--st-vertical-padding, 20px) + var(--current-view-safe-area-top, 0px));
+    
+            &.sticky-navigation-bar {
+                padding-top: 0;
+            }
+        }
+    
+        &:last-child {
+            padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
+            scroll-padding-bottom: calc(30px + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
+        }
 
         &.limit-width {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
 
-            
+
             --st-horizontal-padding: calc((100vw - var(--box-width, 900px)) / 2);
             --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--box-width, 900px)) / 2));
 
@@ -202,7 +129,7 @@ body.modern.web-iOS {
             overflow-x: hidden;
         }
 
-        > .view {
+        >.view {
             margin: calc(-1 * var(--st-vertical-padding, 20px)) calc(-1 * var(--st-horizontal-padding, 40px));
             padding: var(--st-vertical-padding, 20px) 0;
             flex-grow: 1;
@@ -210,12 +137,12 @@ body.modern.web-iOS {
             flex-direction: column;
             box-sizing: border-box;
 
-            > main {
+            >main {
                 padding: 0 var(--st-horizontal-padding, 15px) 0 var(--st-horizontal-padding, 15px);
             }
         }
 
-        > .gray-shadow {
+        >.gray-shadow {
             background: $color-background-shade;
             margin-top: 0;
             margin-bottom: calc(-1 * var(--st-vertical-padding, 20px));
@@ -239,34 +166,109 @@ body.modern.web-iOS {
             }
         }
 
-        > .white-top {
+        >.white-top {
             background: $color-background;
             margin-bottom: 0;
             flex-grow: 0;
         }
+
+        > * {
+            flex-shrink: 0;
+        }
+
+        &~* {
+            padding-top: 0;
+            margin-bottom: -300px;
+            z-index: 100;
+            position: relative;
+
+            // Add some fake bottom padding, so when we animate it, the background stays white
+            >div {
+                padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 300px + var(--default-footer-padding, 0px));
+            }
+
+            transition: transform 0.2s;
+            transform: translateY(calc(-1 * var(--bottom-padding, 0px)));
+
+            // Show above keyboard with a specific class that will move it up
+            &.sticky {
+                // Problem: when the keyboard is up,
+                // the safe area (which is already inclused in the bottom padding or keyboard height)
+                // is also added in the toolbar's bottom padding
+                // So we need to make sure we don't add it twice
+                transform: translateY(calc(-1 * max(var(--keyboard-height, 0px), var(--bottom-padding, 0px), var(--st-safe-area-bottom, 0px)) + var(--st-safe-area-bottom, 0px)));
+            }
+        }
     }
 
-    body.modern &.boxed:not(.popup .st-view.boxed) {
-        width: 100%;
+    > * {
+        flex-shrink: 0;
+        position: static !important;
 
-        @media (min-width: 801px) and (min-height: 701px) {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-
-            background: $color-background-shade;
-            --color-current-background: #{$color-background-shade};
-        
-            --navigation-bar-margin: 10px;
-            --navigation-bar-horizontal-padding: 15px;
-            padding-bottom: max(var(--st-vertical-padding, 20px), var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px));
-            transition: padding-bottom 0.3s;
+        &:first-child {
+            margin-top: 0;
         }
-        --saved-keyboard-height: var(--keyboard-height, 0px);
+
+        // Prevent scrolling outer areas when touching the footer or header
+        @supports not (overscroll-behavior: contain) {
+            touch-action: none;
+        }
+    }
+
+    .sheet &,
+    .box & {
+        height: auto;
+        min-height: 0;
+        max-height: calc(var(--vh, 1vh) * 100);
+        contain: content;
+    }
+
+    .box & {
+
+        @media (max-width: 800px),
+        (max-height: 700px) {
+            >main:first-child {
+                padding-top: 0;
+            }
+
+            >main:last-child {
+                padding-bottom: 0;
+            }
+        }
+    }
+
+    main.with-legal {
+        // This makes sure we can move the legal footer to the bottom of the page
+        display: flex;
+        flex-direction: column;
+
+        // Note: only use this with a box, otherwise we get issues with margin etc. on iOS / Safari
     }
 
     // Box is a container for a different view
-    > .box {
-        flex-shrink: 1 !important; // required to shrink!
+    main > .box {
+        @media (min-width: 801px) and (min-height: 701px) {
+            background: $color-background;
+            --color-current-background: #{$color-background};
+            --color-current-background-shade: #{$color-background-shade};
+            @include style-side-view-shadow();
+            border-radius: $border-radius;
+
+            // Limit width and center
+            margin: 0px auto;
+            max-width: 800px;
+            max-width: var(--box-width, 800px);
+
+            padding: var(--st-vertical-padding, 20px) var(--st-horizontal-padding, 40px);
+
+            // We handled safe areas
+            --st-safe-area-top: 0px;
+            --st-safe-area-bottom: 0px;
+        }
+
+        //overflow: hidden;
+
+        /*flex-shrink: 1 !important; // required to shrink!
         flex-grow: 1;
         min-height: 0;
         display: flex;
@@ -275,69 +277,45 @@ body.modern.web-iOS {
 
         --color-current-background: #{$color-background};
 
-        > .st-view {
+        >.st-view {
             flex-grow: 1;
             flex-shrink: 1;
         }
 
         // the main extend has moved to .box general because CSS stops working (don't know why)
-        &:not(.popup .st-view > .box) {
-            @media (min-width: 801px) and (min-height: 701px)  { 
-                flex-shrink: 0 !important; // don't shrink
-                flex-grow: 0; // don't take full height
 
-                > .st-view {
-                    min-height: 0;
-                    height: auto;
-                    max-height: none;
-                }
+        flex-shrink: 0 !important; // don't shrink
+        flex-grow: 0; // don't take full height
 
-                --st-safe-area-top: 0px;
-                --st-safe-area-bottom: 0px;
-                --keyboard-height: 0px;
-                --bottom-padding: 0px;
-
-                max-width: 800px;
-                max-width: var(--box-width, 800px);
-                background: $color-background;
-                --color-current-background: #{$color-background};
-                --color-current-background-shade: #{$color-background-shade};
-                @include style-side-view-shadow();
-                border-radius: $border-radius;
-                margin: 0px auto;
-                min-height: auto;
-                width: 100%;
-                box-sizing: border-box;
-                overflow: hidden;
-                
-                &:first-child {
-                    margin-top: var(--st-vertical-padding, 20px);
-                }
-
-                //padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px)0;
-                
-                // With extra top padding safe area default to 20px
-                //padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) 0 var(--st-vertical-padding, 20px) 0;
-
-                
-            }
+        >.st-view {
+            min-height: 0;
+            height: auto;
+            max-height: none;
         }
-    }
 
-    // Save padding if we make changes
-    --st-view-horizontal-padding: var(--st-horizontal-padding, 40px);
+        --st-safe-area-top: 0px;
+        --st-safe-area-bottom: 0px;
+        --keyboard-height: 0px;
+        --bottom-padding: 0px;
 
-    .st-toolbar:not(.dont-float) {
-        margin-top: auto;
-    }
-
-    &.auto {
+        max-width: 800px;
+        max-width: var(--box-width, 800px);
+        background: $color-background;
+        --color-current-background: #{$color-background};
+        --color-current-background-shade: #{$color-background-shade};
+        @include style-side-view-shadow();
+        border-radius: $border-radius;
+        margin: 0px auto;
         min-height: auto;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+
+        &:first-child {
+            margin-top: var(--st-vertical-padding, 20px);
+        }*/
+
     }
-
-    @extend .view;
-
-    background: var(--color-current-background, #{$color-background} );
 
     &.background {
         background: $color-background;
@@ -349,6 +327,14 @@ body.modern.web-iOS {
         background: $color-background-shade;
         --color-current-background: #{$color-background-shade};
         --color-current-background-shade: #{$color-background-shade-darker};
+    }
+
+    &.box-shade {
+        @media (min-width: 801px) and (min-height: 701px) {
+            background: $color-background-shade;
+            --color-current-background: #{$color-background-shade};
+            --color-current-background-shade: #{$color-background-shade-darker};
+        }
     }
 }
 
@@ -364,7 +350,7 @@ body.modern.web-iOS {
 }
 
 .popup .st-view {
-    > main.limit-width {
+    >main.limit-width {
         --st-horizontal-padding: var(--st-view-horizontal-padding);
         padding: 0;
     }

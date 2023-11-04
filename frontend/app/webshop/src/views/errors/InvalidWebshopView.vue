@@ -1,6 +1,6 @@
 <template>
     <div class="st-view invalid-page-view">
-        <main>
+        <main class="limit-width">
             <h1 v-if="!errorBox">
                 Deze webshop bestaat niet
             </h1>
@@ -11,21 +11,21 @@
             <p>Kijk even na of de link klopt of probeer later opnieuw.</p>
 
             <STErrorsDefault :error-box="errorBox" />
-        </main>
 
-        <div class="legal-footer">
-            <hr class="style-hr">
-            <div>
-                <aside>
-                    <a :href="'https://'+$t('shared.domains.marketing')" class="inline-link secundary" target="_blank">
-                        Terug naar Stamhoofd
-                    </a>
-                </aside>
+            <div class="legal-footer">
+                <hr class="style-hr">
                 <div>
-                    <a :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
+                    <aside>
+                        <a :href="'https://'+$t('shared.domains.marketing')" class="inline-link secundary" target="_blank">
+                            Terug naar Stamhoofd
+                        </a>
+                    </aside>
+                    <div>
+                        <a :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 </template>
 

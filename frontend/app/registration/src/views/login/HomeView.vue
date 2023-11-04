@@ -46,7 +46,7 @@
                         </aside>
                     </div>
                     <p class="stamhoofd-footer">
-                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'" target="_blank" class="button text"><span>Ledenadministratie door</span> <strong class="notranslate">Stamhoofd</strong></a>
+                        <a :href="'https://'+$t('shared.domains.marketing')+'/ledenadministratie'" target="_blank" class="button text"><span>Ledenadministratie via</span> <strong class="notranslate">Stamhoofd</strong></a>
                     </p>
                 </main>
             </div>
@@ -56,13 +56,15 @@
                     <GroupTree :category="rootCategory" />
                 </main>
             </div>
+
+            <LegalFooter :organization="organization" class="shade" />
         </main>
     </div>
 </template>
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin, PushOptions } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LoadingButton, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
+import { CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ForgotPasswordView, LegalFooter,LoadingButton, ModalStackEventBus, OrganizationLogo, STFloatingFooter, STInputBox, STNavigationBar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -79,7 +81,8 @@ import SignupView from './SignupView.vue';
         STInputBox,
         LoadingButton,
         OrganizationLogo,
-        GroupTree
+        GroupTree,
+        LegalFooter
     },
     metaInfo() {
         return {
