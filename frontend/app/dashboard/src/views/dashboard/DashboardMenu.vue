@@ -131,7 +131,7 @@
             </button>
 
             <div v-if="fullAccess">
-                <button v-if="enableMemberModule && isBelgium" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
+                <button v-if="enableMemberModule" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
                     <span class="icon file" />
                     <span>Documenten</span>
                 </button>
