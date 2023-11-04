@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, RecordDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 
-import { PaymentMethod } from "./PaymentMethod";
+import { PaymentMethod, PaymentMethodHelper } from "./PaymentMethod";
 import { TransferSettings } from "./webshops/TransferSettings";
 
 /**
@@ -104,6 +104,15 @@ export class StripeAccount extends AutoEncoder {
     get warning() {
         if (this.meta.requirements.current_deadline) {
             return "Je moet nieuwe documenten in orde brengen om te voorkomen dat uitbetalingen en betalingen worden stopgezet. Dit moet gebeuren voor "+ Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) + ". Ga naar je Stripe dashboard om dit in orde te brengen.";
+        }
+        if (this.meta.charges_enabled && this.meta.paymentMethods.length < 3) {
+            const missing = [PaymentMethod.CreditCard, PaymentMethod.Bancontact, PaymentMethod.iDEAL].filter(m => !this.meta.paymentMethods.includes(m))
+            const text = Formatter.joinLast(missing.map(m => PaymentMethodHelper.getName(m)), ", ", " en ");
+
+            if (missing.length === 1) {
+                return "De betaalmethode " + text + " werd nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd. Kijk vooral of het websiteadres correct is en of elke bestuurder een adres heeft ingevuld.";
+            }
+            return "De betaalmethodes " + text + " werden nog niet door Stripe geactiveerd. Kijk na of alle informatie in je Stripe dashboard volledig ingevuld werd. Kijk vooral of het websiteadres correct is en of elke bestuurder een adres heeft ingevuld.";
         }
     }
 }

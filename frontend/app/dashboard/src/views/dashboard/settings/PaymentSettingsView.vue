@@ -86,7 +86,7 @@
                 <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled" class="success-box">
                     Betalingen en uitbetalingen via Stripe zijn geactiveerd. Hou in de gaten als je in de toekomst nog extra gegevens moet aanvullen.
                 </p>
-
+                
                 <div class="style-button-bar">
                     <button v-if="!account.meta.charges_enabled || !account.meta.payouts_enabled" type="button" class="button primary" :disabled="creatingStripeAccount" @click="openStripeAccountLink(account.id)">
                         <span>Vervolledig gegevens</span>

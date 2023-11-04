@@ -236,6 +236,7 @@ export default class EditPaymentMethodsBox extends Vue {
             if (this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject.meta) === PaymentProvider.Stripe)  {
                 return;
             }
+            return PaymentMethodHelper.getName(paymentMethod)+" is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld."
         }
 
         if (this.organization.privateMeta?.buckarooSettings?.paymentMethods.includes(paymentMethod)) {

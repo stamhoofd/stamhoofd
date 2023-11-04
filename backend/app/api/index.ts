@@ -72,7 +72,7 @@ const start = async () => {
 
     if (routerServer.server) {
         // Default timeout is a bit too short
-        routerServer.server.timeout = 15000;
+        routerServer.server.timeout = 61000;
     }
 
     let shuttingDown = false;

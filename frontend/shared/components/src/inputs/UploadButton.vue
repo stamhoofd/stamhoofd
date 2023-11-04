@@ -13,8 +13,10 @@
 </template>
 
 <script lang="ts">
+import { SimpleError } from "@simonbackx/simple-errors";
+import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { STInputBox, Validator } from "@stamhoofd/components"
+import { STInputBox, Toast, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
 import { Image, ResolutionRequest, Version } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
@@ -29,18 +31,22 @@ import LoadingButton from "../navigation/LoadingButton.vue";
 })
 export default class UploadButton extends Mixins(NavigationMixin) {
     @Prop({ default: "" }) 
-    text: string;
+        text: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
 
     @Prop({ default: null })
-    resolutions: ResolutionRequest[] | null
+        resolutions: ResolutionRequest[] | null
     
     @Prop({ default: null })
-    value: Image | null;
+        value: Image | null;
 
     uploading = false
+
+    beforeDestroy() {
+        Request.cancelAll(this)
+    }
 
     changedFile(event) {
         if (!event.target.files || event.target.files.length != 1) {
@@ -49,8 +55,19 @@ export default class UploadButton extends Mixins(NavigationMixin) {
         if (this.uploading) {
             return;
         }
+        Request.cancelAll(this)
 
         const file = event.target.files[0];
+
+        if (file.size > 5 * 1024 * 1024) {
+            const error = new SimpleError({
+                code: 'file_too_large',
+                message: 'De bestandsgrootte is te groot. De afbeelding mag maximaal 5MB groot zijn. Probeer de afbeelding te verkleinen en daarna opnieuw te selecteren.'
+            })
+            Toast.fromError(error).setHide(null).show()
+            return;
+        }
+
         const resolutions = this.resolutions ?? [ResolutionRequest.create({ height: 720 })]
 
         const formData = new FormData();
@@ -66,13 +83,16 @@ export default class UploadButton extends Mixins(NavigationMixin) {
                 path: "/upload-image",
                 body: formData,
                 decoder: Image,
-                timeout: 60*1000
+                timeout: 60*1000,
+                shouldRetry: false,
+                owner: this
             })
             .then(response => {
                 this.$emit("input", response.data)
             })
             .catch(e => {
                 console.error(e);
+                Toast.fromError(e).setHide(null).show()
                 //this.errorBox = new ErrorBox(e)
                 // TODO!
             })
