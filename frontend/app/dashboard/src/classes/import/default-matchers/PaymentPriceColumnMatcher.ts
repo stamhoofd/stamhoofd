@@ -5,18 +5,18 @@ import { ColumnMatcher } from "../ColumnMatcher";
 import { ImportingMember } from "../ImportingMember";
 import { MatcherCategory } from "../MatcherCategory";
 
-export class PaidPriceColumnMatcher implements ColumnMatcher {
-    id = "PaidPriceColumnMatcher"
+export class PaymentPriceColumnMatcher implements ColumnMatcher {
+    id = "PaymentPriceColumnMatcher"
     category: MatcherCategory = MatcherCategory.Payment
 
     getName(): string {
-        return "Bedrag dat betaald werd"
+        return "Bedrag (al dan niet betaald)"
     }
 
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
 
-        const possibleMatch = ["betaald", "payment"]
+        const possibleMatch = ["lidgeld", "price", "prijs", "bedrag"]
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
@@ -38,12 +38,15 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
 
     apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
         if (!cell) {
-            member.registration.paidPrice = 0
-            return
+            throw new SimpleError({
+                code: "invalid_type",
+                message: "Deze cel is leeg"
+            })
         }
 
+        // Check if string value
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        const value = ((cell.w ?? cell.v)+"").toLowerCase().replace(/[€$\s,]+/g, "").trim()
+        const value = ((cell.w ?? cell.v)+"").toLowerCase().replace(/[€$\s,]+/g, "").trim().trim()
         const b = parseFloat(value)
         
         if (isNaN(b)) {
@@ -53,6 +56,13 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
             })
         }
 
-        member.registration.paidPrice = Math.floor(b * 100)
+        if (Math.floor(b*100) !== b*100 ) {
+            throw new SimpleError({
+                code: "invalid_type",
+                message: "'"+ value +"' bevat te veel cijfers na de komma",
+            })
+        }
+
+        member.registration.price = Math.floor(b * 100)
     }
 }

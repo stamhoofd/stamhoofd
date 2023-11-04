@@ -52,7 +52,6 @@
                 <hr>
             </template>
 
-
             <table v-if="file && columns.length > 0" class="data-table">
                 <thead>
                     <tr>
@@ -65,7 +64,7 @@
                 <tbody>
                     <tr v-for="column in columns" :key="column.name">
                         <td>
-                            <Checkbox v-model="column.selected">
+                            <Checkbox :checked="getColumnSelected(column)" @change="setColumnSelected(column, $event)">
                                 <h2 class="style-title-list">
                                     {{ column.name }}
                                 </h2>
@@ -79,9 +78,9 @@
                                 <option :value="null" disabled>
                                     Maak een keuze
                                 </option>
-                                <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="getCategoryName(cat.name)">
+                                <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
                                     <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
-                                        {{ matcher.getName() }} ({{ getCategoryName(cat.name) }})
+                                        {{ matcher.getName() }} ({{ cat.name }})
                                     </option>
                                 </optgroup>
                             </Dropdown>
@@ -112,18 +111,20 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { Organization, OrganizationPatch } from "@stamhoofd/structures"
+import { BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { Address, Organization, OrganizationPatch, RecordAddressAnswer, RecordTextAnswer, RecordType } from "@stamhoofd/structures";
 import { Component, Mixins, Vue } from "vue-property-decorator";
 import XLSX from "xlsx";
 
-import { ImportingMember } from "../../../../../classes/import/ImportingMember"
-import { MatchedColumn } from "../../../../../classes/import/MatchedColumn"
-import { MatcherCategory, MatcherCategoryHelper } from '../../../../../classes/import/MatcherCategory';
-import { allMathcers } from "../../../../../classes/import/matchers"
-import { OrganizationManager } from "../../../../../classes/OrganizationManager"
+import { allMatchers } from "../../../../../classes/import/defaultMatchers";
+import { ImportingMember } from "../../../../../classes/import/ImportingMember";
+import { MatchedColumn } from "../../../../../classes/import/MatchedColumn";
+import { MatcherCategory } from '../../../../../classes/import/MatcherCategory';
+import { AddressColumnMatcher, TextColumnMatcher } from "../../../../../classes/import/matchers";
+import { OrganizationManager } from "../../../../../classes/OrganizationManager";
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
+import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
 
 @Component({
     components: {
@@ -150,8 +151,74 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
     sheets: Record<string, XLSX.WorkSheet> = {}
     internalSheetKey: string | null = null
 
-    matchers = allMathcers
+    matchers = allMatchers.slice()
     columns: MatchedColumn[] = []
+
+    mounted() {
+        this.matchers = allMatchers.slice()
+
+        // If parents are disabled, remove all parent categories
+        if (this.organization.meta.recordsConfiguration.parents === null) {
+            this.matchers = this.matchers.filter(m => m.category !== MatcherCategory.Parent1 && m.category !== MatcherCategory.Parent2)
+        }
+
+        // Include all custom fields
+        for (const category of this.organization.meta.recordsConfiguration.recordCategories) {
+            for (const record of category.getAllRecords()) {
+                switch (record.type) {
+                    case RecordType.Textarea:
+                    case RecordType.Text: {
+                        this.matchers.push(new TextColumnMatcher({
+                            name: record.name,
+                            category: category.name,
+                            required: false,
+                            save(value: string, member: ImportingMember) {
+                                if (!value) {
+                                    return;
+                                }
+
+                                const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
+                                if (index !== -1) {
+                                    member.details.recordAnswers.splice(index, 1)
+                                }
+
+                                const answer = RecordTextAnswer.create({
+                                    settings: record
+                                })
+                                answer.value = value
+                                member.details.recordAnswers.push(answer);
+                            }
+                        }));
+                        break;
+                    }
+                    case RecordType.Address: {
+                        this.matchers.push(new AddressColumnMatcher({
+                            name: record.name,
+                            category: category.name,
+                            required: false,
+                            save(value: Address, member: ImportingMember) {
+                                if (!value) {
+                                    return;
+                                }
+
+                                const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
+                                if (index !== -1) {
+                                    member.details.recordAnswers.splice(index, 1)
+                                }
+
+                                const answer = RecordAddressAnswer.create({
+                                    settings: record
+                                })
+                                answer.address = value
+                                member.details.recordAnswers.push(answer);
+                            }
+                        }));
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     get sheet() {
         if (!this.sheetKey) {
@@ -217,10 +284,6 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         return Object.values(arr)
     }
 
-    getCategoryName(category: MatcherCategory) {
-        return MatcherCategoryHelper.getName(category)
-    }
-
     async shouldNavigateAway() {
         if (!this.file) {
             return true;
@@ -273,7 +336,9 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
         }
 
         const range = XLSX.utils.decode_range(this.sheet['!ref']); // get the range
+        const previousColumns = this.columns
         this.columns = []
+        let skipAuto = previousColumns.length > 0
 
         const availableMatchers = this.matchers.slice()
 
@@ -292,17 +357,57 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
                 matched.examples.push((valueCell.w ?? valueCell.v ?? "")+"")
             }
 
-            for (const [index, matcher] of availableMatchers.entries()) {
-                if (matcher.doesMatch(columnName, matched.examples)) {
-                    availableMatchers.splice(index, 1)
-
-                    matched.matcher = matcher
+            const previous = previousColumns.find(c => c.name === columnName)
+            if (previous) {
+                const uptodateMatcher = availableMatchers.find(m => m.id === previous.matcherCode)
+                if (uptodateMatcher) {
+                    skipAuto = true;
+                    matched.matcher = uptodateMatcher
                     matched.selected = true
-                    break
+                    availableMatchers.splice(availableMatchers.indexOf(uptodateMatcher), 1)   
+                }
+            }
+
+            if (!matched.matcher && !skipAuto) {
+                for (const [index, matcher] of availableMatchers.entries()) {
+
+                    if (matcher.doesMatch(columnName, matched.examples)) {
+                        availableMatchers.splice(index, 1)
+
+                        matched.matcher = matcher
+                        matched.selected = true
+                        break
+                    }
                 }
             }
 
             this.columns.push(matched)
+        }
+    }
+
+    getColumnSelected(column: MatchedColumn) {
+        return column.selected
+    }
+
+    setColumnSelected(column: MatchedColumn, value: boolean) {
+        column.selected = value
+
+        if (value && column.matcher === null) {
+            // Find best matching by default
+            for (const matcher of this.matchers) {
+                // Not yet used
+                if (this.columns.find(c => c.matcher?.id === matcher.id)) {
+                    continue
+                }
+                if (matcher.doesMatch(column.name, column.examples)) {
+                    column.matcher = matcher
+                    break
+                }
+            }
+        }
+
+        if (!value) {
+            column.matcher = null
         }
     }
 
@@ -339,6 +444,20 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
                     errors: result.errors
                 }))
             } else {
+                const probablyEqual = result.members.filter(m => !m.equal && m.probablyEqual)
+                if (probablyEqual.length) {
+                    this.show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
+                        members: probablyEqual,
+                        onVerified: (component) => {
+                            component.show(new ComponentWithProperties(ImportMembersQuestionsView, {
+                                members: result.members
+                            }))
+                        }
+                    }))
+                    this.saving = false 
+                    return
+                }
+
                 this.show(new ComponentWithProperties(ImportMembersQuestionsView, {
                     members: result.members
                 }))

@@ -30,7 +30,7 @@
 
         <STToolbar>
             <template slot="right">
-                <button class="button secundary" @click="pop">
+                <button class="button secundary" type="button" @click="pop">
                     Sluiten
                 </button>
             </template>
@@ -58,13 +58,13 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class ImportAutoAssignedViewView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    title: string
+        title: string
 
     @Prop({ required: true })
-    description: string
+        description: string
     
     @Prop({ required: true })
-    members: { name: string; group: string}[]
+        members: { name: string; group: string}[]
 
 }
 </script>

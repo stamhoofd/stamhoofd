@@ -75,7 +75,7 @@
 
             <div class="container">
                 <hr>
-                <h2 class="style-with-button with-list">
+                <h2 class="style-with-button">
                     <button v-long-press="(e) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
                         {{ visibleRegistrationsTitle }}
                         <span class="icon arrow-down-small" />
@@ -200,7 +200,7 @@
                         <button v-if="hasWrite" type="button" class="button icon gray edit" @click="editRecordCategory(category)" />
                     </div>
                 </h2>
-                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :data-permission="dataPermission" />
+                <RecordCategoryAnswersBox :category="category" :answers="member.details.recordAnswers" :data-permission="true" />
             </div>
 
             <!-- Loop all records -->
@@ -232,42 +232,52 @@
                 </template>
             </div>
 
-            <div v-if="activeAccounts.length > 0" class="hover-box container">
+            <div v-if="member.users.length > 0" class="hover-box container">
                 <hr v-if="$isMobile">
-                <h2>
-                    <span class="icon-spacer">Accounts</span><span 
+                <h2 class="style-with-button">
+                    <span class="icon-spacer">Accounts</span>
+                    <a 
                         v-if="!$isTouch"
-                        v-tooltip="
-                            'Deze accounts kunnen inloggen en hebben toegang tot dit lid. Je kan toegang intrekken door het e-mailadres eerst te verwijderen uit alle gegevens van dit lid, daarna kan je op het vuilbakje klikken.'
-                        "
-                        class="icon gray help"
+                        class="button icon gray help"
+                        target="_blank"
+                        :href="'https://'+$t('shared.domains.marketing')+'/docs/leden-beheren-met-meerdere-ouders/'"
                     />
                 </h2>
-                <p v-for="user in activeAccounts" :key="user.id" class="account hover-box">
-                    <span>{{ user.email }}</span>
-                    <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
-                    <button v-if="isOldEmail(user.email)" class="button icon trash hover-show" type="button" @click="unlinkUser(user)" />
-                </p>
 
-                <template v-if="placeholderAccounts.length > 0">
-                    <hr>
-                </template>
-            </div>
+                <STList>
+                    <STListItem v-for="user in member.users" :key="user.id" class="hover-box">
+                        <span v-if="user.hasAccount && user.verified" slot="left" class="icon user small" />
+                        <span v-else-if="user.hasAccount && !user.verified" slot="left" v-tooltip="'Deze gebruiker moet het e-mailadres nog verifiëren.'" class="icon email small" />
+                        <span v-else slot="left" v-tooltip="'Deze gebruiker moet eerst registreren op dit emailadres en daarbij een wachtwoord instellen.'" class="icon email small" />
 
-            <div v-if="placeholderAccounts.length > 0" class="hover-box container">
-                <h2>
-                    <span class="icon-spacer">Kunnen registereren</span><span
-                        v-if="!$isTouch"
-                        v-tooltip="
-                            'Nieuwe accounts met één van deze e-mailadressen krijgen automatisch toegang tot dit lid (registreren kan op het ledenportaal). Deze worden automatisch bepaald aan de hand van de gegevens van het lid.'
-                        "
-                        class="icon gray help"
-                    />
-                </h2>
-                <p v-for="user in placeholderAccounts" :key="user.id" class="account">
-                    <span>{{ user.email }}</span>
-                    <span v-if="getInvalidEmailDescription(user.email)" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
-                </p>
+                        <template v-if="user.firstName || user.lastName">
+                            <h3 v-if="user.firstName || user.lastName" class="style-title-list">
+                                {{ user.firstName }} {{ user.lastName }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ user.email }}
+                            </p>
+                        </template>
+                        <h3 v-else class="style-title-list">
+                            {{ user.email }}
+                        </h3>
+
+                        <p v-if="!user.hasAccount" class="style-description-small">
+                            Kan registreren
+                        </p>
+
+                        <p v-else-if="!user.verified" class="style-description-small">
+                            E-mailadres nog niet geverifieerd
+                        </p>
+
+                        <p v-if="user.permissions" class="style-description-small">
+                            Beheerder
+                        </p>
+
+                        <span v-if="getInvalidEmailDescription(user.email)" slot="right" v-tooltip="getInvalidEmailDescription(user.email)" class="icon warning yellow" />
+                        <button v-if="isOldEmail(user.email)" slot="right" class="button icon trash hover-show" type="button" @click="unlinkUser(user)" />
+                    </STListItem>
+                </STList>
             </div>
 
             <div v-if="familyMembers.length > 0" class="hover-box container">
@@ -283,10 +293,11 @@
 
                 <STList>
                     <STListItem v-for="familyMember in familyMembers" :key="familyMember.id" :selectable="true" @click="gotoMember(familyMember)">
+                        <span slot="left" class="icon user small" />
                         <h3 class="style-title-list">
                             {{ familyMember.firstName }} {{ familyMember.details ? familyMember.details.lastName : "" }}
                         </h3>
-                        <p v-if="familyMember.groups.length > 0" class="style-description">
+                        <p v-if="familyMember.groups.length > 0" class="style-description-small">
                             {{ familyMember.groups.map(g => g.settings.name).join(", ") }}
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
@@ -370,11 +381,9 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
     }
 
     get recordCategories(): RecordCategory[] {
-        return RecordCategory.flattenCategories(
+        return RecordCategory.flattenCategoriesForAnswers(
             OrganizationManager.organization.meta.recordsConfiguration.recordCategories, 
-            new MemberDetailsWithGroups(this.member.details, this.member, []), 
-            MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
-            this.dataPermission
+            this.member.details.recordAnswers
         )
     }
 
@@ -495,14 +504,6 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         }
         
         return false
-    }
-
-    get activeAccounts() {
-        return this.member.users.filter(u => u.hasAccount)
-    }
-
-    get placeholderAccounts() {
-        return this.member.users.filter(u => !u.hasAccount)
     }
 
     getInvalidEmailDescription(email: string) {

@@ -17,6 +17,11 @@ export class MatchedColumn {
     }
 
     /// Fallback for vue bug that is not able to detect the proper selected matcher -.-
+    get matcherName() {
+        return this.matcher?.getName() ?? null
+    }
+
+    /// Fallback for vue bug that is not able to detect the proper selected matcher -.-
     get matcherCode() {
         return this.matcher?.id ?? null
     }

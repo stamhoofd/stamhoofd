@@ -13,7 +13,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
     category: MatcherCategory = MatcherCategory.Member
 
     getName(): string {
-        return "Leeftijdsgroep"
+        return "Inschrijvingsgroep"
     }
 
     doesMatch(columnName: string, examples: string[]): boolean {
@@ -34,7 +34,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "Deze leeftijdsgroep is leeg"
+                message: "Deze inschrijvingsgroep is leeg"
             })
         }
         
@@ -42,7 +42,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (cell.t != "s" || typeof cell.v !== "string" || !cell.v) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "De leeftijdsgroep is leeg"
+                message: "De inschrijvingsgroep is leeg"
             })
         }
 
@@ -61,7 +61,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!minErrorGroup) {
             throw new SimpleError({
                 code: "invalid_type",
-                message: "'"+ value +"' is geen geldige leeftijdsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
+                message: "'"+ value +"' is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
             })
         }
     }

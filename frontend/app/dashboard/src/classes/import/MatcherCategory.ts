@@ -1,8 +1,8 @@
 export enum MatcherCategory {
-    Member = "Member",
-    Payment = "Payment",
-    Parent1 = "Parent1",
-    Parent2 = "Parent2",
+    Member = "Lid",
+    Payment = "Betaling",
+    Parent1 = "Ouder 1",
+    Parent2 = "Ouder 2"
 }
 
 export class MatcherCategoryHelper {
