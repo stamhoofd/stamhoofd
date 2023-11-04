@@ -5,7 +5,7 @@
     "license": "UNLICENCED",
     "private": true,
     "scripts": {
-        "dev": "concurrently -r 'rm -rf ./dist && wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --exec node --enable-source-maps ./dist/index.js --signal SIGTERM' 'yarn build --watch --preserveWatchOutput > /dev/null'",
+        "dev": "concurrently -r 'rm -rf ./dist && wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --exec node --enable-source-maps ./dist/index.js --signal SIGTERM' 'yarn build --watch --preserveWatchOutput'",
         "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/src/seeds && tsc -b",
         "build:full": "yarn clear && yarn build",
         "clear": "rm -rf ./dist",
