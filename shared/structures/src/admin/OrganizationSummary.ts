@@ -125,6 +125,9 @@ export class OrganizationOverview extends AutoEncoder {
     @field({ decoder: OrganizationStats, version: 90 })
     stats: OrganizationStats
 
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
+    features: string[] = []
+
     get fullAccessAdmins() {
         return this.admins.filter(a => a.permissions && a.permissions.hasFullAccess())
     }

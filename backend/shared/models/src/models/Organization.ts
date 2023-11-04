@@ -771,4 +771,17 @@ export class Organization extends Model {
         }
     }
 
+    getConnectedPaymentProviders(): PaymentProvider[] {
+        const allPaymentMethods = Object.values(PaymentMethod)
+        const providers: PaymentProvider[] = []
+
+        for (const method of allPaymentMethods) {
+            const provider = this.privateMeta.getPaymentProviderFor(method)
+            if (provider && !providers.includes(provider)) {
+                providers.push(provider)
+            }
+        }
+
+        return providers
+    }
 }
