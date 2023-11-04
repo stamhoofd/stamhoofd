@@ -127,6 +127,8 @@
                         <p class="style-description">
                             Verzamel extra informatie van bestellers bij het afrekenen.
                         </p>
+
+                        <span slot="right" v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " />
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
