@@ -24,7 +24,7 @@ import { Group, GroupCategory, Organization, OrganizationMetaData } from "@stamh
 import { v4 as uuidv4 } from "uuid";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import EditGroupView from './EditGroupView.vue';
+import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 
 @Component({
     components: {
@@ -37,17 +37,17 @@ import EditGroupView from './EditGroupView.vue';
 })
 export default class GroupRow extends Mixins(NavigationMixin) {
     @Prop({})
-    group: Group
+        group: Group
 
     @Prop({})
-    organization: Organization
+        organization: Organization
 
     get imageSrc() {
         return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(50, 50)
     }
 
     editProduct() {
-        this.present(new ComponentWithProperties(EditGroupView, { 
+        this.present(new ComponentWithProperties(EditGroupGeneralView, { 
             group: this.group, 
             organization: this.organization, 
             saveHandler: (patch: AutoEncoderPatchType<Organization>) => {

@@ -1,11 +1,5 @@
 <template>
     <TableView ref="table" :back-hint="backHint" :organization="organization" :title="title" :column-configuration-id="waitingList ? 'members-waiting-list' : (category ? 'category-' + category.id : 'members')" :actions="actions" :all-values="loading ? [] : allValues" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="reload(false)" @click="openMember">
-        <button v-if="titleDescription" class="info-box selectable" type="button" @click="resetCycle">
-            {{ titleDescription }}
-
-            <span class="button text">Reset</span>
-        </button>
-
         <template #empty>
             <template v-if="cycleOffset != 0">
                 Er zijn nog geen leden ingeschreven in deze {{ waitingList ? 'wachtlijst tijdens deze periode' : 'inschrijvingsperiode' }}.
@@ -28,7 +22,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, GroupStatus, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -36,8 +30,8 @@ import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
+import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
-import EditGroupView from "./EditGroupView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
 
 @Component({
@@ -101,7 +95,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
 
         // Set url
         if (this.group) {
-            UrlHelper.setUrl("/groups/"+Formatter.slug(this.group.settings.name) + (this.waitingList ? "/waiting-list" : "") + queryString)
+            UrlHelper.setUrl("/groups/"+Formatter.slug(this.group.settings.name) + (this.waitingList ? "/waiting-list" : "/members") + queryString)
             document.title = "Stamhoofd - "+this.group.settings.name
         } else {
             if (this.category) {
@@ -123,22 +117,22 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return this.allValues.length
         }
 
-        if (this.cycleOffset !== 0) {
-            return 30;
-        }
-
         if (this.group) {
-            if (this.waitingList) {
-                return this.group.settings.waitingListSize ?? 30
-            }
-            return this.group.settings.registeredMembers ?? 30
+            return this.group.getMemberCount({
+                waitingList: this.waitingList,
+                cycleOffset: this.cycleOffset
+            }) ?? 30;
         }
 
         if (this.category) {
-            if (this.waitingList) {
-                return this.category.groups.reduce((sum, group) => sum + (group.settings.waitingListSize ?? 30), 0)
-            }
-            return this.category.groups.reduce((sum, group) => sum + (group.settings.registeredMembers ?? 30), 0)
+            return this.category.groups.reduce((sum, group) => {
+                return sum + (
+                    group.getMemberCount({
+                        waitingList: this.waitingList,
+                        cycleOffset: this.cycleOffset
+                    }) ?? 30
+                )
+            }, 0);
         }
 
         return 30
@@ -203,54 +197,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
                 singleSelection: true,
                 handler: (members: MemberWithRegistrations[]) => {
                     this.openMember(members[0])
-                }
-            }),
-
-            new TableAction({
-                name: "Open wachtlijst"+(this.waitingListSize ? (" ("+this.waitingListSize+")") : ""),
-                icon: "clock",
-                priority: 0,
-                groupIndex: 2,
-                needsSelection: false,
-                enabled: !this.waitingList,
-                handler: () => {
-                    this.openWaitingList()
-                }
-            }),
-
-            new TableAction({
-                name: "Vorige inschrijvingsperiode",
-                icon: "arrow-up",
-                priority: 0,
-                groupIndex: 2,
-                needsSelection: false,
-                enabled: this.canGoBack,
-                handler: () => {
-                    this.goBack()
-                }
-            }),
-
-            new TableAction({
-                name: "Volgende inschrijvingsperiode",
-                icon: "arrow-down",
-                priority: 0,
-                groupIndex: 2,
-                needsSelection: false,
-                enabled: this.canGoNext,
-                handler: () => {
-                    this.goNext()
-                }
-            }),
-
-            new TableAction({
-                name: "Instellingen",
-                icon: "settings",
-                priority: 0,
-                groupIndex: 4,
-                needsSelection: false,
-                enabled: this.hasFull,
-                handler: () => {
-                    this.editSettings()
                 }
             }),
 
@@ -435,26 +381,20 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
     allColumns = this.getColumns()
 
     get title() {
-        return this.waitingList ? "Wachtlijst" : (this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden"))
+        if (this.cycleOffset === 1) {
+            return "Vorige inschrijvingsperiode"
+        }
+
+        if (this.cycleOffset > 1) {
+            return this.cycleOffset+" inschrijvingsperiodes geleden"
+        }
+
+        return this.waitingList ? "Wachtlijst" : (this.group ? 'Leden' : (this.category ? this.category.settings.name : "Alle leden"))
     }
 
     get backHint() {
-        if (!this.waitingList) {
-            return 'Terug'
-        }
         return this.group ? this.group.settings.name : (this.category ? this.category.settings.name : "Alle leden")
     }
-
-    get titleDescription() {
-        if (this.cycleOffset === 1) {
-            return "Dit is de vorige inschrijvingsperiode"
-        }
-        if (this.cycleOffset > 1) {
-            return "Dit is "+this.cycleOffset+" inschrijvingsperiodes geleden"
-        }
-        return ""
-    }
-
 
     get canGoBack() {
         return true
@@ -758,39 +698,6 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             ],
             animated
         })
-    }
-
-    editSettings() {
-        if (!this.group) {
-            if (this.category) {
-                this.present(new ComponentWithProperties(NavigationController, { 
-                    root: new ComponentWithProperties(EditCategoryGroupsView, { 
-                        category: this.category, 
-                        organization: OrganizationManager.organization, 
-                        saveHandler: async (patch) => {
-                            patch.id = OrganizationManager.organization.id
-                            await OrganizationManager.patch(patch)
-                        }
-                    })
-                }).setDisplayStyle("popup"))
-            }
-
-            return;
-        }
-        this.present(new ComponentWithProperties(EditGroupView, { 
-            group: this.group, 
-            organization: OrganizationManager.organization, 
-            saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {
-                patch.id = OrganizationManager.organization.id
-                await OrganizationManager.patch(patch)
-                const g = OrganizationManager.organization.groups.find(g => g.id === this.group!.id)
-                if (!g) {
-                    this.pop({ force: true })
-                } else {
-                    this.group!.set(g)
-                }
-            }
-        }).setDisplayStyle("popup"))
     }
 }
 </script>

@@ -827,18 +827,49 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
+    gotoGroupRecordCategory(group: DocumentTemplateGroup, component: NavigationMixin, index: number) {
+        if (index >= this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories.length) {
+            this.patchDocument = this.patchDocument.patch({
+                privateSettings: DocumentPrivateSettings.patch({
+                    groups: this.patchedDocument.privateSettings.groups.concat(group)
+                })
+            })
+            component.dismiss({force: true})
+            return
+        }
+        const category = this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories[index]
+        component.show({
+            components: [
+                new ComponentWithProperties(FillRecordCategoryView, {
+                    category,
+                    answers: group.fieldAnswers,
+                    markReviewed: true,
+                    dataPermission: true, 
+                    filterDefinitions: [],
+                    saveHandler: (fieldAnswers: RecordAnswer[], component: NavigationMixin) => {
+                        const g = group.patch({
+                            fieldAnswers: fieldAnswers as any
+                        })
+                        this.gotoGroupRecordCategory(g, component, index+1)
+                    },
+                    filterValueForAnswers: (fieldAnswers: RecordAnswer[]) => {
+                        return group.patch({
+                            fieldAnswers: fieldAnswers as any
+                        })
+                    },
+                })
+            ]
+        })
+    }
+
     addGroup() {
         this.present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(ChooseDocumentTemplateGroup, {
                         fieldCategories: this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories,
-                        addGroup: (group: DocumentTemplateGroup) => {
-                            this.patchDocument = this.patchDocument.patch({
-                                privateSettings: DocumentPrivateSettings.patch({
-                                    groups: this.patchedDocument.privateSettings.groups.concat(group)
-                                })
-                            })
+                        addGroup: (group: DocumentTemplateGroup, component: NavigationMixin) => {
+                            this.gotoGroupRecordCategory(group, component, 0)
                         }
                     })
                 })
@@ -859,11 +890,11 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         const currentCycle = g?.cycle ?? 0
         const cycleOffset = currentCycle - group.cycle
 
-        let period = cycleOffset + ' inschrijvingperiodes geleden'
+        let period = cycleOffset + ' inschrijvingsperiodes geleden'
         if (cycleOffset === 0) {
-            period = 'Huidige inschrijvingperiode'
+            period = 'Huidige inschrijvinsgperiode'
         } else if (cycleOffset === 1) {
-            period = 'Vorige inschrijvingperiode'
+            period = 'Vorige inschrijvingsperiode'
         }
 
         // Append answers

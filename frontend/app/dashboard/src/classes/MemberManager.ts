@@ -358,10 +358,8 @@ export class MemberManagerStatic extends MemberManagerBase {
                     price
                 }))
 
-                if (cycleOffset === 0) {
-                    sizeUpdater.add({groupId: registration.groupId, waitingList: true}, -1);
-                    sizeUpdater.add({groupId: registration.groupId, waitingList: false}, 1);
-                }
+                sizeUpdater.add({groupId: registration.groupId, waitingList: true, cycle: registration.cycle}, -1);
+                sizeUpdater.add({groupId: registration.groupId, waitingList: false, cycle: registration.cycle}, 1);
             }
             
             patchArray.addPatch(patchMember)
@@ -389,10 +387,8 @@ export class MemberManagerStatic extends MemberManagerBase {
             const registration = member.registrations.find(r => r.groupId === group.id && r.cycle === cycle);
             if (registration) {
                 if (registration.waitingList && !waitingList) {
-                    if (registration.cycle === group.cycle) {
-                        sizeUpdater.add({groupId: group.id, waitingList: true}, -1);
-                        sizeUpdater.add({groupId: group.id, waitingList: false}, 1);
-                    }
+                    sizeUpdater.add({groupId: group.id, waitingList: true, cycle: registration.cycle}, -1);
+                    sizeUpdater.add({groupId: group.id, waitingList: false, cycle: registration.cycle}, 1);
 
                     const price = RegisterCartPriceCalculator.calculateSinglePrice(member, Registration.create({...registration, waitingList: false}), [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
                     
@@ -422,9 +418,7 @@ export class MemberManagerStatic extends MemberManagerBase {
             reg.price = RegisterCartPriceCalculator.calculateSinglePrice(member, reg, [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
             patchMember.registrations.addPut(reg)
 
-            if (cycle === group.cycle) {
-                sizeUpdater.add({groupId: group.id, waitingList}, 1)
-            }
+            sizeUpdater.add({groupId: group.id, waitingList, cycle}, 1)
             patchArray.addPatch(patchMember)
         }
 
@@ -460,11 +454,16 @@ export class MemberManagerStatic extends MemberManagerBase {
                     cycle: registration.cycle + cycleOffset - newCycleOffset
                 }))
 
-                if (cycleOffset === 0) {
-                    sizeUpdater.add({groupId: registration.groupId, waitingList: registration.waitingList}, -1)
-                } else if (newCycleOffset === 0) {
-                    sizeUpdater.add({groupId: registration.groupId, waitingList: registration.waitingList}, 1)
-                }
+                sizeUpdater.add({
+                    groupId: registration.groupId, 
+                    waitingList: registration.waitingList,
+                    cycle: registration.cycle
+                }, -1)
+                sizeUpdater.add({
+                    groupId: registration.groupId, 
+                    waitingList: registration.waitingList,
+                    cycle: registration.cycle + cycleOffset - newCycleOffset
+                }, 1)
             }
             
             patchArray.addPatch(patchMember)
@@ -499,10 +498,16 @@ export class MemberManagerStatic extends MemberManagerBase {
                     cycle: newGroup.cycle + cycleOffset // offset won't change but cycle can
                 }))
 
-                if (cycleOffset === 0) {
-                    sizeUpdater.add({groupId: registration.groupId, waitingList: registration.waitingList}, -1)
-                    sizeUpdater.add({groupId: newGroup.id, waitingList: waitingList}, 1)
-                }
+                sizeUpdater.add({
+                    groupId: registration.groupId, 
+                    waitingList: registration.waitingList,
+                    cycle: registration.cycle
+                }, -1)
+                sizeUpdater.add({
+                    groupId: newGroup.id, 
+                    waitingList: waitingList,
+                    cycle: newGroup.cycle + cycleOffset
+                }, 1)
             }
             
             patchArray.addPatch(patchMember)
@@ -531,10 +536,16 @@ export class MemberManagerStatic extends MemberManagerBase {
                     waitingList: true
                 }))
 
-                if (cycleOffset == 0) {
-                    sizeUpdater.add({groupId: registration.groupId, waitingList: false}, -1)
-                    sizeUpdater.add({groupId: registration.groupId, waitingList: true}, 1)
-                }
+                sizeUpdater.add({
+                    groupId: registration.groupId, 
+                    waitingList: false,
+                    cycle: registration.cycle
+                }, -1)
+                sizeUpdater.add({
+                    groupId: registration.groupId, 
+                    waitingList: true,
+                    cycle: registration.cycle
+                }, 1)
             }
             
             patchArray.addPatch(patchMember)

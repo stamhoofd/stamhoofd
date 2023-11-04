@@ -378,13 +378,13 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
     @Prop({ required: true })
-    group: Group
+        group: Group
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
@@ -645,7 +645,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         return this.patchedGroup.settings.registrationStartDate
     }
 
-    set registrationStartDate(registrationStartDate: Date) {
+    set registrationStartDate(registrationStartDate: Date | null) {
         this.addSettingsPatch({ registrationStartDate })
     }
 
@@ -653,7 +653,7 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
         return this.patchedGroup.settings.registrationEndDate
     }
 
-    set registrationEndDate(registrationEndDate: Date) {
+    set registrationEndDate(registrationEndDate: Date | null) {
         this.addSettingsPatch({ registrationEndDate })
     }
 
@@ -780,8 +780,6 @@ export default class EditGroupView extends Mixins(NavigationMixin) {
 
         // Check if reduced price is enabled
         if (!this.patchedOrganization.meta.recordsConfiguration.financialSupport && !!this.patchedGroup.settings.prices.find(g => !!g.prices.find(gg => gg.reducedPrice !== null))) {
-            console.log("Auto enabled financial problems record")
-
             const patchOrganization = Organization.patch({
                 meta:  OrganizationMetaData.patch({
                     recordsConfiguration: OrganizationRecordsConfiguration.patch({

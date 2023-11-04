@@ -154,28 +154,6 @@ export default class EndRegistrationPeriodView extends Mixins(NavigationMixin) {
                     cycle: !this.undo ? (group.cycle + 1) : (group.cycle - 1),
                     settings
                 })
-
-                if (!this.undo && group.settings.registrationStartDate < now && group.settings.registrationEndDate < nowFuture) {
-                    if (group.settings.endDate.getTime() - group.settings.startDate.getTime() > 1000 * 60 * 60 * 24 * 30 * 6) {
-                        // Move a year in the future
-                        settings.registrationEndDate = new Date(group.settings.registrationEndDate)
-                        settings.registrationStartDate = new Date(group.settings.registrationStartDate)
-
-                        if (group.settings.preRegistrationsDate) {
-                            settings.preRegistrationsDate = new Date(group.settings.preRegistrationsDate)
-                            settings.preRegistrationsDate.setFullYear(settings.preRegistrationsDate.getFullYear() + 1)
-                        }
-
-                        settings.registrationEndDate.setFullYear(settings.registrationEndDate.getFullYear() + 1)
-                        settings.registrationStartDate.setFullYear(settings.registrationStartDate.getFullYear() + 1)
-
-                        settings.startDate = new Date(group.settings.startDate)
-                        settings.endDate = new Date(group.settings.endDate)
-
-                        settings.endDate.setFullYear(settings.endDate.getFullYear() + 1)
-                        settings.startDate.setFullYear(settings.startDate.getFullYear() + 1)
-                    }
-                }
                 p.groups.addPatch(pp)
             }
             

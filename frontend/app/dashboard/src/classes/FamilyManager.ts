@@ -4,6 +4,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Address, EmergencyContact, EncryptedMemberWithRegistrations, MemberDetails, MemberWithRegistrations, Parent, Registration, User } from '@stamhoofd/structures';
 
 import { Toast } from '../../../../shared/components';
+import { GroupSizeUpdater } from './GroupSizeUpdater';
 import { MemberManager } from './MemberManager';
 
 // Manage a complete family so you can sync changes across multiple members (addresses, parents, emergency contacts)
@@ -86,24 +87,13 @@ export class FamilyManager {
 
         // Update group counts only when succesfully adjusted
         if (m) {
-            let updateOrganization = false
+            const sizeUpdater = new GroupSizeUpdater();
+
             for (const registration of m.registrations) {
-                const group = session.organization?.groups.find(g => g.id === registration.groupId)
-                if (group && group.cycle === registration.cycle) {
-                    if (group.settings.waitingListSize !== null && registration.waitingList) {
-                        group.settings.waitingListSize += 1
-                        updateOrganization = true
-                    } else if (group.settings.registeredMembers !== null && !registration.waitingList && registration.registeredAt !== null) {
-                        group.settings.registeredMembers += 1
-                        updateOrganization = true
-                    }
-                }
+                sizeUpdater.add(registration, 1);
             }
 
-            if (updateOrganization) {
-                // Save organization to disk
-                session.callListeners("organization")
-            }
+            sizeUpdater.save(session)
         }
 
         MemberManager.callListeners("created", m)
@@ -140,38 +130,17 @@ export class FamilyManager {
 
         // Update group counts only when succesfully adjusted
         if (m) {
-            let updateOrganization = false
+            const sizeUpdater = new GroupSizeUpdater();
 
             for (const registration of oldRegistrations) {
-                const group = session.organization?.groups.find(g => g.id === registration.groupId)
-                if (group && group.cycle === registration.cycle) {
-                    if (group.settings.waitingListSize !== null && registration.waitingList) {
-                        group.settings.waitingListSize = Math.max(0, group.settings.waitingListSize - 1)
-                        updateOrganization = true
-                    } else if (group.settings.registeredMembers !== null && !registration.waitingList && registration.registeredAt !== null) {
-                        group.settings.registeredMembers = Math.max(0, group.settings.registeredMembers - 1)
-                        updateOrganization = true
-                    }
-                }
+                sizeUpdater.add(registration, -1);
             }
 
             for (const registration of m.registrations) {
-                const group = session.organization?.groups.find(g => g.id === registration.groupId)
-                if (group && group.cycle === registration.cycle) {
-                    if (group.settings.waitingListSize !== null && registration.waitingList) {
-                        group.settings.waitingListSize += 1
-                        updateOrganization = true
-                    } else if (group.settings.registeredMembers !== null && !registration.waitingList && registration.registeredAt !== null) {
-                        group.settings.registeredMembers += 1
-                        updateOrganization = true
-                    }
-                }
+                sizeUpdater.add(registration, 1);
             }
 
-            if (updateOrganization) {
-                // Save organization to disk
-                session.callListeners("organization")
-            }
+            sizeUpdater.save(session)
         }
 
         MemberManager.callListeners("changedGroup", member)

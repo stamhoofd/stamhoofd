@@ -98,15 +98,6 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
                 })
             }
         }
-
-        if (template.groupId) {
-            throw new SimpleError({
-                code: "not_supported",
-                message: "Group templates not yet supported",
-                human: "Group templates not yet supported",
-                statusCode: 400
-            })
-        }
     }
 
     

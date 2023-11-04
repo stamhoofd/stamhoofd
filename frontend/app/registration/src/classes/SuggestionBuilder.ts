@@ -42,8 +42,7 @@ export class Suggestion {
             return "Je bent uitgenodigd om in te schrijven."
         }
         if (this.group && this.group.settings.registrationEndDate) {
-            const group = this.group;
-            return "Inschrijvingen sluiten op " + Formatter.dateTime(group.settings.registrationEndDate)
+            return "Inschrijvingen sluiten op " + Formatter.dateTime(this.group.settings.registrationEndDate)
         }
         return ""
     }

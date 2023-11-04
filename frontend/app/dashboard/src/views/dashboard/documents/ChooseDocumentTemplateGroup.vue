@@ -17,13 +17,30 @@
                     </STListItem>
                 </STList>
             </div>
+
+            <hr>
+            <h2>Archief</h2>
+            <Spinner v-if="loadingGroups" />
+            <STList v-else-if="archivedGroups.length">
+                <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" @click="selectGroup(group)">
+                    <h2 class="style-title-list">
+                        {{ group.settings.name }}
+                    </h2>
+                    <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+            </STList>
+            <p v-else class="info-box">
+                Het archief is leeg.
+            </p>
         </main>
     </div>
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { BackButton, Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { SessionManager } from "@stamhoofd/networking";
 import { DocumentTemplateGroup, Group, RecordCategory } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -36,21 +53,32 @@ import ChooseDocumentTemplateCycle from "./ChooseDocumentTemplateCycle.vue";
         STToolbar,
         STList,
         STListItem,
-        BackButton
+        BackButton,
+        Spinner
     }
 })
 export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin){
     @Prop({ required: true }) 
-        addGroup: (group: DocumentTemplateGroup) => void
+        addGroup: (group: DocumentTemplateGroup, component: NavigationMixin) => void
         
     @Prop({ required: true }) 
         fieldCategories!: RecordCategory[]
+
+    archivedGroups: Group[] = []
+    loadingGroups = true
 
     get categoryTree() {
         return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true})
     }
 
     selectGroup(group: Group) {
+        if (group.cycle === 0) {
+            this.addGroup(DocumentTemplateGroup.create({
+                groupId: group.id,
+                cycle: group.cycle
+            }), this);
+            return;
+        }
         this.show({
             components: [
                 new ComponentWithProperties(ChooseDocumentTemplateCycle, { 
@@ -60,6 +88,26 @@ export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin)
                 })
             ]
         })
+    }
+
+    mounted() {
+        this.load().catch(console.error)
+    }
+
+    async load() {
+        try {
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "GET",
+                path: "/organization/archived-groups",
+                decoder: new ArrayDecoder(Group as Decoder<Group>),
+                owner: this
+            })
+
+            this.archivedGroups = response.data.sort((a, b) => b.settings.endDate.getTime() - a.settings.endDate.getTime())
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+        this.loadingGroups = false
     }
 }
 </script>

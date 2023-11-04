@@ -61,15 +61,6 @@
             </button>
         </p>
 
-        <div v-if="fullAccess" class="container">
-            <hr>
-            <h2>Start nieuwe inschrijvingsperiode</h2>
-            <p>Op het einde van een werkjaar, semester, kwartaal... (kies je volledig zelf) kan je een nieuwe inschrijvinsgperiode starten, zodat leden opnieuw moeten inschrijven en betalen om hun inschrijving te verlengen.</p>
-            <button type="button" class="button text" @click.left.exact="startNewRegistrationPeriod(false)" @click.alt.exact="startNewRegistrationPeriod(true)">
-                <span class="icon undo" /><span>Start nieuwe inschrijvingsperiode...</span>
-            </button>
-        </div>
-
         <div v-if="!isRoot && enableActivities" class="container">
             <hr>
             <h2>Wie kan groepen maken in deze categorie?</h2>
@@ -122,7 +113,7 @@ import { SessionManager } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupCategoryTree, GroupGenderType,GroupPrivateSettings,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
-import EditGroupView from './EditGroupView.vue';
+import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import EndRegistrationPeriodView from './EndRegistrationPeriodView.vue';
 import GroupCategoryRow from "./GroupCategoryRow.vue"
 import GroupRow from "./GroupRow.vue"
@@ -406,8 +397,6 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
                 name: "",
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: [],
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
             }),
@@ -426,7 +415,7 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
         p.groups.addPut(group)
         
-        this.present(new ComponentWithProperties(EditGroupView, { 
+        this.present(new ComponentWithProperties(EditGroupGeneralView, { 
             group, 
             organization: this.patchedOrganization.patch(p), 
             saveHandler: (patch: AutoEncoderPatchType<Organization>) => {

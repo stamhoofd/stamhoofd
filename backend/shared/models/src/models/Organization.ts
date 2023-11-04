@@ -3,7 +3,7 @@ import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
-import { Address, DNSRecordStatus, Group as GroupStruct, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PaymentProviderConfiguration, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
+import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PaymentProviderConfiguration, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';

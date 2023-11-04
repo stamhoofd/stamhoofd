@@ -94,7 +94,7 @@ export class STCredit extends Model {
     static async applyCredits(organizationId, invoice: STInvoice, dryRun: boolean) {
         // Apply credits
         const {balance, balanceTransactions} = await STCredit.getBalance(organizationId)
-        if (balance > 0) {
+        if (balance > 0 || balanceTransactions > 0) {
             // Loop all items where you can use credits for
             const maxCredits = invoice.meta.items.filter(i => i.canUseCredits).reduce((price, item) => price + item.price, 0)
             let applyValue = Math.min(maxCredits, balance)
