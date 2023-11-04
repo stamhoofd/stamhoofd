@@ -131,6 +131,9 @@ export class OrganizationOverview extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
     features: string[] = []
 
+    @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), optional: true })
+    acquisitionTypes: AcquisitionType[] = [];
+
     get fullAccessAdmins() {
         return this.admins.filter(a => a.permissions && a.permissions.hasFullAccess([]))
     }
