@@ -13,7 +13,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/api-users", {});
+        const params = Endpoint.parseParameters(request.url, "/api-keys", {});
 
         if (params) {
             return [true, params as Params];

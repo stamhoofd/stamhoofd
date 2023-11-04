@@ -18,7 +18,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/api-users", {});
+        const params = Endpoint.parseParameters(request.url, "/api-keys", {});
 
         if (params) {
             return [true, params as Params];

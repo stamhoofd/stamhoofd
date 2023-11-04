@@ -154,7 +154,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
             if (this.isNew) {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "POST",
-                    path: "/api-users",
+                    path: "/api-keys",
                     body: this.patchedUser,
                     decoder: ApiUserWithToken as Decoder<ApiUserWithToken>
                 })
@@ -162,7 +162,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
             } else {
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "PATCH",
-                    path: "/api-users/"+this.user.id,
+                    path: "/api-keys/"+this.user.id,
                     body: this.patchUser,
                     decoder: ApiUser as Decoder<ApiUser>
                 })
@@ -213,7 +213,7 @@ export default class ApiUserView extends Mixins(NavigationMixin) {
             // Patch the user
             await SessionManager.currentSession!.authenticatedServer.request({
                 method: "DELETE",
-                path: "/user/"+this.user.id,
+                path: "/api-keys/"+this.user.id,
             })
 
             this.callback()
