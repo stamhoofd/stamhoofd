@@ -523,7 +523,6 @@
                             "*.dev.stamhoofd.be",
                             "*.dev.stamhoofd.nl",
                             "*.shop.stamhoofd.dev",
-                            "api.admin.stamhoofd.dev",
                             "login.sgv.stamhoofd.dev",
                             "groepsadmin.sgv.stamhoofd.dev"
                         ],
@@ -535,7 +534,8 @@
                     {
                         "subjects": [
                             "*.stamhoofd.dev",
-                            "*.api.stamhoofd.dev"
+                            "*.api.stamhoofd.dev",
+                            "api.admin.stamhoofd.dev"
                         ],
                         "on_demand": false,
                         "issuers": [{
