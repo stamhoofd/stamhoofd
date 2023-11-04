@@ -13,58 +13,51 @@
             >
         </STInputBox>
 
+        <hr>
+        <h2>Ticketverkoop</h2>
 
-        <template v-if="canChangeType">
+        <STList>
+            <STListItem :selectable="true" element-name="label" class="left-center">
+                <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.None" />
+                <h3 class="style-title-list">
+                    Webshop zonder scanners
+                </h3>
+            </STListItem>
+            <STListItem :selectable="true" element-name="label" class="left-center">
+                <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
+                <h3 class="style-title-list">
+                    Ticketverkoop voor groepen
+                </h3>
+                <p class="style-description">
+                    Ideaal voor een eetfestijn
+                </p>
+            </STListItem>
+            <STListItem :selectable="true" element-name="label" class="left-center">
+                <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.Tickets" />
+                <h3 class="style-title-list">
+                    Ticketverkoop voor personen
+                </h3>
+                <p class="style-description">
+                    Ideaal voor een fuif
+                </p>
+            </STListItem>
+        </STList>
+
+        <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
+            Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
+        </p>
+        <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
+            Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+        </p>
+
+        <template v-if="roles.length > 0">
             <hr>
-            <h2>Ticketverkoop</h2>
-
-            <p v-if="isNew" class="info-box">
-                Je kan dit achteraf niet meer wijzigen.
-            </p>
+            <h2>Toegangsbeheer</h2>
+            <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
 
             <STList>
-                <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.None" />
-                    <h3 class="style-title-list">
-                        Webshop zonder scanners
-                    </h3>
-                </STListItem>
-                <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
-                    <h3 class="style-title-list">
-                        Ticketverkoop voor groepen
-                    </h3>
-                    <p class="style-description">
-                        Ideaal voor een eetfestijn
-                    </p>
-                </STListItem>
-                <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.Tickets" />
-                    <h3 class="style-title-list">
-                        Ticketverkoop voor personen
-                    </h3>
-                    <p class="style-description">
-                        Ideaal voor een fuif
-                    </p>
-                </STListItem>
+                <WebshopRolePermissionRow v-for="role in roles" :key="role.id" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
             </STList>
-
-            <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
-                Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
-            </p>
-            <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
-                Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
-            </p>
-
-            <template v-if="roles.length > 0">
-                <hr>
-                <h2>Toegangsbeheer</h2>
-                <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
-
-                <STList>
-                    <WebshopRolePermissionRow v-for="role in roles" :key="role.id" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
-                </STList>
-            </template>
         </template>
 
         <hr>
@@ -155,9 +148,9 @@
 <script lang="ts">
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput } from "@stamhoofd/components";
+import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
@@ -206,7 +199,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     }
 
     get canChangeType() {
-        return this.webshop.products.length == 0 && this.webshop.meta.checkoutMethods.length == 0
+        return true; //this.webshop.products.length == 0 && this.webshop.meta.checkoutMethods.length == 0
     }
     
     get viewTitle() {
@@ -247,7 +240,68 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
 
     set ticketType(ticketType: WebshopTicketType) {
         const patch = WebshopMetaData.patch({ ticketType })
-        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+        const p = PrivateWebshop.patch({ meta: patch})
+
+        // Restore any chagnes to locations
+        if (this.webshopPatch.meta) {
+            this.webshopPatch.meta.checkoutMethods = patch.checkoutMethods
+        }
+
+        // Restore any changes to products
+        if (this.webshopPatch) {
+            this.webshopPatch.products = p.products
+        }
+
+        if (ticketType === WebshopTicketType.Tickets) {
+            let used = false;
+            // Update all products to not ticket or voucher if needed
+            for (const product of this.webshop.products) {
+                if (product.type !== ProductType.Ticket && product.type !== ProductType.Voucher) {
+                    const productPatch = Product.patch({
+                        id: product.id,
+                        type: ProductType.Ticket
+                    })
+                    p.products.addPatch(productPatch)
+                    used = true;
+                }
+            }
+
+            if (used) {
+                new Toast('Sommige artikelen zullen worden omgezet in tickets waardoor je hun locatie en datum nog zal moeten invullen', 'warning yellow').setHide(null).show()
+            }
+
+            // Remove all locations
+            let deletedLocation = false;
+            for (const location of this.webshop.meta.checkoutMethods) {
+                patch.checkoutMethods.addDelete(location.id)
+                deletedLocation = true;
+            }
+
+            if (deletedLocation) {
+                new Toast('Alle afhaal- en leveringslocaties zullen worden verwijderd als je opslaat omdat deze niet ondersteund worden bij een ticketverkoop voor personen', 'warning yellow').setHide(null).show()
+            }
+        } else {
+            let used = false;
+            // Update all products to not ticket or voucher if needed
+            for (const product of this.webshop.products) {
+                if (product.type === ProductType.Ticket || product.type === ProductType.Voucher) {
+                    const productPatch = Product.patch({
+                        id: product.id,
+                        type: ProductType.Product,
+                        location: null,
+                        dateRange: null
+                    })
+                    p.products.addPatch(productPatch)
+                    used = true;
+                }
+            }
+
+            if (used) {
+                new Toast('Sommige tickets zullen worden omgezet in gewone artikels waardoor hun locatie en datum informatie verloren gaat als je nu opslaat.', 'warning yellow').setHide(null).show()
+            }
+        }
+
+        this.addPatch(p)
     }
 
     get numberingType() {
