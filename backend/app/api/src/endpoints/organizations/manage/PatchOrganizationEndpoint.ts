@@ -1,8 +1,8 @@
-import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Group, PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 
@@ -83,18 +83,36 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     organization.privateMeta.useTestPayments = request.body.privateMeta.useTestPayments
                 }
 
-                if (request.body.privateMeta.payconiqApiKey !== undefined) {
-                    if (request.body.privateMeta.payconiqApiKey === null) {
-                        organization.privateMeta.payconiqApiKey = null;
-                    } else {
-                        organization.privateMeta.payconiqApiKey = request.body.privateMeta.payconiqApiKey ?? organization.privateMeta.payconiqApiKey
+                // Apply payconiq patch
+                if (request.body.privateMeta.payconiqAccounts !== undefined) {
+                    organization.privateMeta.payconiqAccounts = patchObject(organization.privateMeta.payconiqAccounts, request.body.privateMeta.payconiqAccounts)
 
-                        if (!(await PayconiqPayment.createTest(organization))) {
-                            throw new SimpleError({
-                                code: "invalid_field",
-                                message: "De API key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.",
-                                field: "payconiqApiKey"
-                            })
+                    for (const account of organization.privateMeta.payconiqAccounts) {
+                        if (account.merchantId === null) {
+                            const payment = await PayconiqPayment.createTest(organization, account)
+                            
+                            if (!payment) {
+                                throw new SimpleError({
+                                    code: "invalid_field",
+                                    message: "De API-key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.",
+                                    field: "payconiqAccounts"
+                                })
+                            }
+
+                            // Save merchant id
+                            const decoded = PayconiqAccount.decode(
+                                new ObjectData({
+                                    ...(payment as any).creditor,
+                                    id: account.id,
+                                    apiKey: account.apiKey,
+                                }, {version: 0})
+                            )
+
+                            account.merchantId = decoded.merchantId
+                            account.callbackUrl = decoded.callbackUrl
+                            account.profileId = decoded.profileId
+                            account.name = decoded.name
+                            account.iban = decoded.iban
                         }
                     }
                 }
@@ -119,18 +137,18 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
 
-                if (request.body.privateMeta.registrationProviderConfiguration?.stripeAccountId !== undefined) {
-                    if (request.body.privateMeta.registrationProviderConfiguration.stripeAccountId !== null) {
-                        const account = await StripeAccount.getByID(request.body.privateMeta.registrationProviderConfiguration.stripeAccountId)
+                if (request.body.privateMeta.registrationPaymentConfiguration?.stripeAccountId !== undefined) {
+                    if (request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId !== null) {
+                        const account = await StripeAccount.getByID(request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId)
                         if (!account || account.organizationId !== organization.id) {
                             throw new SimpleError({
                                 code: "invalid_field",
                                 message: "Het Stripe account dat je hebt gekozen bestaat niet (meer)",
-                                field: "registrationProviderConfiguration.stripeAccountId"
+                                field: "registrationPaymentConfiguration.stripeAccountId"
                             })
                         }
                     }
-                    organization.privateMeta.registrationProviderConfiguration.stripeAccountId = request.body.privateMeta.registrationProviderConfiguration.stripeAccountId
+                    organization.privateMeta.registrationPaymentConfiguration.stripeAccountId = request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId
                 }
             }
 
@@ -170,7 +188,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.meta.packages = savedPackages
 
                 // check payconiq + mollie
-                if (Array.isArray(request.body.meta.paymentMethods) || request.body.meta.paymentMethods.changes.length) {
+                if (request.body.meta.registrationPaymentConfiguration) {
                     if (!organization.privateMeta.payconiqApiKey && !organization.privateMeta.buckarooSettings?.paymentMethods.includes(PaymentMethod.Payconiq)) {
                         const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Payconiq)
                         if (i != -1) {
@@ -185,8 +203,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     // check payconiq + mollie
                     if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
                         let stripe: StripeAccount | undefined = undefined
-                        if (organization.privateMeta.registrationProviderConfiguration.stripeAccountId) {
-                            stripe = await StripeAccount.getByID(organization.privateMeta.registrationProviderConfiguration.stripeAccountId)
+                        if (organization.privateMeta.registrationPaymentConfiguration.stripeAccountId) {
+                            stripe = await StripeAccount.getByID(organization.privateMeta.registrationPaymentConfiguration.stripeAccountId)
                         }
 
                         const i = organization.meta.paymentMethods.findIndex(p => {

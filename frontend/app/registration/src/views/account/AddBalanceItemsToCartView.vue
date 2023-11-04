@@ -74,7 +74,7 @@ export default class AddBalanceItemsToCartView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
 
     @Prop(({required: true}))
-    balanceItems: MemberBalanceItem[]
+        balanceItems: MemberBalanceItem[]
 
     selectedItems: BalanceItemCartItem[] = []
 
@@ -160,25 +160,3 @@ export default class AddBalanceItemsToCartView extends Mixins(NavigationMixin){
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.choose-balance-items-view {
-    .pricing-box {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: flex-end;
-
-        > * {
-            flex-basis: 350px;
-        }
-
-        .middle {
-            font-weight: 600;
-        }
-    }
-}
-</style>

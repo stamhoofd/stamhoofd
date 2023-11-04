@@ -4,8 +4,9 @@
             Betaalaccounts
         </h1>
 
-        <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">deze pagina</a>.</p>
+        <p>Koppel betaalaccounts via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Stripe</a> of <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">Meer info</a>.</p>
         
+        <LoadingView v-if="loadingStripeAccounts" />
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="isBuckarooActive">
@@ -19,77 +20,142 @@
             </p>
         </template>
 
-        <hr>
-        <h2>
-            Online betalingen via Stripe
-        </h2>
-        <p class="info-box">
-            Lees eerst onze gids voor je begint, je zal het je anders beklagen! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt. 
-        </p>
+        <p v-if="hasDuplicateNames" class="warning-box">
+            Sommige van jouw Stripe accounts gebruiken dezelfde weergavenaam. Je past deze best aan zodat je later verwarring vermijdt.
+        </p>    
 
-        <div class="style-button-bar">
-            <a class="button primary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
-                <span>Lees de gids</span>
-                <span class="icon arrow-right" />
-            </a>
-
-            <LoadingButton v-if="stripeAccounts.length === 0 || creatingStripeAccount || getFeatureFlag('stripe-multiple')" :loading="creatingStripeAccount">
-                <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
-                    <span v-if="stripeAccounts.length > 0" class="icon add" />
-                    <span v-if="stripeAccounts.length > 0">Extra account (€5,00/rekening éénmalig)</span>
-                    <span v-else>Aansluiten bij Stripe</span>
-                </button>
-            </LoadingButton>
-        </div>
-        
-        <Spinner v-if="loadingStripeAccounts && stripeAccounts.length === 0" />
         <div v-for="account in stripeAccounts" :key="account.id" class="container">
             <hr>
-            <h2>
-                Stripe account <code>{{ account.accountId }}</code>
+            <h2 class="style-with-button">
+                <div>Stripe account <span class="title-suffix">{{ account.accountId }}</span></div>
+                <div>
+                    <button type="button" class="button icon edit gray" @click="editStripeAccount(account)" />
+                </div>
             </h2>
-            <p v-if="account.meta.bank_account_last4" class="style-description-small">
-                Gekoppeld aan jouw bankrekening die eindigt op {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
-            </p>
-            <p v-if="account.meta.company" class="style-description-small">
-                Op naam van {{ account.meta.business_profile.name }} / {{ account.meta.company.name }}
-            </p>
-            <p v-else-if="account.meta.business_profile.name" class="style-description-small">
-                Op naam van {{ account.meta.business_profile.name }}
+
+            <p v-if="account.warning" :class="account.warning.type + '-box'">
+                {{ account.warning.text }}
+                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/documenten-stripe-afgekeurd/'" target="_blank" class="button text">
+                    Meer info
+                </a>
             </p>
 
-            <p v-if="account.warning" class="warning-box">
-                {{ account.warning }}
-            </p>
+            <STList class="info">
+                <STListItem v-if="account.meta.settings.dashboard.display_name">
+                    <h3 class="style-definition-label">
+                        Weergavenaam
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ account.meta.settings.dashboard.display_name }}
+                    </p>
+                </STListItem>
 
-            <p v-if="!account.meta.charges_enabled" class="info-box">
-                Je hebt jouw Stripe account nog niet vervolledigd. Je kan nog geen betalingen ontvangen.
-            </p>
+                <STListItem v-if="account.meta.business_profile.name">
+                    <h3 class="style-definition-label">
+                        Handelsnaam
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ account.meta.business_profile.name }}
+                    </p>
+                </STListItem>
 
-            <p v-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="info-box">
-                Je kan al betalingen ontvangen via Stripe, maar uitbetalingen zijn nog niet geactiveerd. Kijk na of je nog gegevens moet aanvullen om wettelijk in orde te zijn om uitbetalingen te ontvangen.
-            </p>
+                <STListItem v-if="account.meta.bank_account_last4">
+                    <h3 class="style-definition-label">
+                        IBAN
+                    </h3>
+                    <p class="style-definition-text">
+                        xxxx {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
+                    </p>
+                </STListItem>
 
-            <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled" class="success-box">
-                Betalingen en uitbetalingen via Stripe zijn geactiveerd. Hou in de gaten als je in de toekomst nog extra gegevens moet aanvullen.
-            </p>
-            
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Status
+                    </h3>
+                    <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled && !account.warning" class="style-definition-text">
+                        <span>Volledig</span>
+                        <span class="icon success primary" />
+                    </p>
+                    <p v-else-if="account.meta.charges_enabled && account.meta.payouts_enabled && account.warning" class="style-definition-text">
+                        <span>Geactiveerd</span>
+                        <span class="icon clock gray" />
+                    </p>
+                    <p v-else-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text">
+                        <span>Uitbetalingen gepauzeerd</span>
+                        <span class="icon clock gray" />
+                    </p>
+                    <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled && !account.meta.details_submitted" class="style-definition-text">
+                        <span>Onvolledig</span>
+                        <span class="icon red canceled" />
+                    </p>
+                    <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text">
+                        <span>Betalingen geblokkeerd</span>
+                        <span class="icon red canceled" />
+                    </p>
+                </STListItem>
+            </STList>
+
             <div class="style-button-bar">
-                <button v-if="!account.meta.charges_enabled || !account.meta.payouts_enabled" type="button" class="button primary" :disabled="creatingStripeAccount" @click="openStripeAccountLink(account.id)">
+                <button v-if="!account.meta.charges_enabled || !account.meta.payouts_enabled || account.warning" type="button" class="button primary" :disabled="creatingStripeAccount" @click="openStripeAccountLink(account.id)">
                     <span>Vervolledig gegevens</span>
                     <span class="icon arrow-right" />
                 </button>
 
-                <button v-else type="button" class="button secundary" :disabled="creatingStripeAccount" @click="loginStripeAccount(account.id)">
-                    <span>Open Stripe Dashboard</span>
+                <button v-else type="button" class="button text" :disabled="creatingStripeAccount" @click="loginStripeAccount(account.id)">
+                    <span class="icon external" />
+                    <span>Stripe Dashboard</span>
                 </button>
 
-                <button v-if="isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
+                <button v-if="account.canDelete" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
                     <span class="icon trash" />
                     <span>Verwijder</span>
                 </button>
             </div>
         </div>
+
+        <template v-if="stripeAccounts.length && canCreateMultipleStripeAccounts">
+            <hr>
+
+            <div class="style-button-bar">
+                <LoadingButton v-if="stripeAccounts.length === 0 || creatingStripeAccount || canCreateMultipleStripeAccounts" :loading="creatingStripeAccount">
+                    <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
+                        <span class="icon add" />
+                        <span>Extra Stripe account*</span>
+                    </button>
+                </LoadingButton>
+                <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
+                    <span class="icon book" />
+                    <span>Stripe Documentatie</span>
+                </a>
+            </div>
+
+            <p class="style-description-small for-input">
+                * Een extra Stripe account naast je eerste Stripe account kost éénmalig 5 euro. Hiermee kan je betalingen per webshop op een andere rekening laten storten door een andere bankrekening te koppelen met je nieuwe account. 
+            </p>
+        </template>
+        <template v-if="stripeAccounts.length === 0 || creatingStripeAccount">
+            <hr>
+            <h2>
+                Online betalingen via Stripe
+            </h2>
+            <p class="info-box">
+                Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt. 
+            </p>
+
+            <div class="style-button-bar">
+                <a class="button primary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
+                    <span>Lees de gids</span>
+                    <span class="icon arrow-right" />
+                </a>
+
+                <LoadingButton :loading="creatingStripeAccount">
+                    <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
+                        <span>Aansluiten bij Stripe</span>
+                    </button>
+                </LoadingButton>
+            </div>
+        </template>
+        
 
         <template v-if="payconiqApiKey || forcePayconiq">
             <hr>
@@ -106,6 +172,9 @@
                     placeholder="API-key van Payconiq"
                 >
             </STInputBox>
+            <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
+                Op naam van {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
+            </p>
         </template>
 
         <template v-if="!enableBuckaroo && (organization.privateMeta.mollieOnboarding || forceMollie)">
@@ -196,16 +265,8 @@
                 Gebruik Buckaroo voor online betalingen
             </Checkbox>
 
-            <!--<Checkbox v-model="forcePayconiq">
-                Payconiq koppeling toestaan
-            </Checkbox>-->
-
             <Checkbox :checked="getFeatureFlag('stripe')" @change="setFeatureFlag('stripe', !!$event)">
                 Stripe koppeling toestaan
-            </Checkbox>
-
-            <Checkbox :checked="getFeatureFlag('stripe-multiple')" @change="setFeatureFlag('stripe-multiple', !!$event)">
-                Meerdere Stripe accounts toestaan
             </Checkbox>
 
             <Checkbox v-if="!enableBuckaroo" v-model="forceMollie">
@@ -241,8 +302,6 @@
                 </div>
             </div>
 
-            <EditPaymentMethodsBox v-if="enableBuckaroo" :methods="buckarooPaymentMethods" :organization="organization" :show-prices="false" :choices="buckarooAvailableMethods" @patch="patchBuckarooPaymentMethods" />
-
             <hr>
 
             <code v-for="account of stripeAccounts" :key="'code-'+account.id" class="style-code" v-text="formatJson(account.meta.blob)" />
@@ -254,15 +313,16 @@
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, PatchableArray, patchContainsChanges, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { CenteredMessage, CenteredMessageButton, Checkbox, ErrorBox, IBANInput, LoadingButton, LoadingView, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, StripeAccount, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
+import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationPatch, OrganizationPrivateMetaData, PayconiqAccount, PaymentMethod, StripeAccount, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
+import EditStripeAccountView from './EditStripeAccountView.vue';
 
 @Component({
     components: {
@@ -277,7 +337,8 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         STListItem,
         Checkbox,
         EditPaymentMethodsBox,
-        Spinner
+        Spinner,
+        LoadingView
     },
     directives: {
         tooltip: TooltipDirective
@@ -303,7 +364,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     get selectedMollieProfile() {
         return this.organization.privateMeta?.mollieProfile?.id ?? null
     }
-
     set selectedMollieProfile(id: string | null) {
         const profile = this.mollieProfiles.find(p => p.id == id)
         this.organizationPatch = this.organizationPatch.patch({
@@ -312,6 +372,11 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             })
         })
     }
+    get canCreateMultipleStripeAccounts() {
+        // Check if all current stripe accounts are connected
+        return this.stripeAccounts.every(a => (a.meta.charges_enabled && a.meta.payouts_enabled) || (a.meta.details_submitted))
+    }
+
 
     get isBelgium() {
         return this.organization.address.country == Country.Belgium
@@ -323,14 +388,6 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
     formatDateUnix(date: number) {
         return Formatter.date(new Date(date * 1000))
-    }
-
-    patchPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
-        this.organizationPatch = this.organizationPatch.patch({
-            meta: OrganizationMetaData.patch({
-                paymentMethods: patch
-            })
-        })
     }
 
     patchBuckarooPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
@@ -351,88 +408,8 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         return this.organization.meta.modules.useMembers
     }
 
-    get transferTypes() {
-        return [
-            { 
-                value: TransferDescriptionType.Structured,
-                name: this.$t('shared.transferTypes.structured'),
-                description: "Willekeurig aangemaakt. Geen kans op typefouten vanwege validatie in bankapps."
-            },
-            { 
-                value: TransferDescriptionType.Reference,
-                name: "Naam van lid/leden",
-                description: "Eventueel voorafgegaan door een zelf gekozen woord (zie onder)"
-            },
-            { 
-                value: TransferDescriptionType.Fixed,
-                name: "Vaste mededeling",
-                description: "Altijd dezelfde mededeling voor alle inschrijvingen. Opgelet: dit kan niet gewijzigd worden als leden de QR-code scannen, voorzie dus zelf geen eigen vervangingen zoals 'inschrijving + naam'!"
-            }
-        ]
-    }
-
-    get transferTypeDescription() {
-        return this.transferTypes.find(t => t.value === this.transferType)?.description ?? ""
-    }
-
-    get creditor() {
-        return this.organization.meta.transferSettings.creditor
-    }
-
-    set creditor(creditor: string | null ) {
-        this.preparePatchTransferSettings()
-        this.$set(this.organizationPatch.meta!.transferSettings!, "creditor", creditor ? creditor : null)
-    }
-
-    preparePatchTransferSettings() {
-        if (!this.organizationPatch.meta) {
-            this.$set(this.organizationPatch, "meta", OrganizationMetaData.patch({}))
-        }
-        if (!this.organizationPatch.meta!.transferSettings) {
-            this.$set(this.organizationPatch.meta!, "transferSettings", TransferSettings.patch({}))
-        }
-    }
-
-    get iban() {
-        return this.organization.meta.transferSettings.iban ?? ""
-    }
-
-    set iban(iban: string) {
-        this.preparePatchTransferSettings()
-        this.$set(this.organizationPatch.meta!.transferSettings!, "iban", iban ? iban : null)
-    }
-
-    get prefix() {
-        return this.organization.meta.transferSettings.prefix
-    }
-
-    set prefix(prefix: string | null ) {
-        this.preparePatchTransferSettings()
-        this.$set(this.organizationPatch.meta!.transferSettings!, "prefix", prefix ? prefix : null)
-    }
-
-    get transferType() {
-        return this.organization.meta.transferSettings.type
-    }
-
-    set transferType(type: TransferDescriptionType ) {
-        this.preparePatchTransferSettings()
-        this.$set(this.organizationPatch.meta!.transferSettings!, "type", type)
-    }
-
-    get transferExample() {
-        if (this.transferType == TransferDescriptionType.Structured) {
-            if (!this.isBelgium) {
-                return "4974 3024 6755 6964"
-            }
-            return "+++705/1929/77391+++"
-        }
-
-        if (this.transferType == TransferDescriptionType.Reference) {
-            return (this.prefix ? this.prefix+' ' : '') + "Simon en Andreas Backx"
-        }
-
-        return this.prefix
+    get payconiqAccount() {
+        return this.organization.privateMeta?.payconiqAccounts[0] ?? null
     }
 
     get payconiqApiKey() {
@@ -446,7 +423,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
 
         this.organizationPatch = this.organizationPatch.patch({
             privateMeta: OrganizationPrivateMetaData.patch({
-                payconiqApiKey: payconiqApiKey.length == 0 ? null : payconiqApiKey
+                payconiqAccounts: (payconiqApiKey.length == 0 ? [] : [PayconiqAccount.create({ apiKey: payconiqApiKey })]) as any
             })
         })
     }
@@ -775,6 +752,28 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         this.loadingStripeAccounts = false
     }
 
+    get hasDuplicateNames() {
+        for (const account of this.stripeAccounts) {
+            if (this.stripeAccounts.find(a => a.id !== account.id && a.meta.settings.dashboard.display_name === account.meta.settings.dashboard.display_name)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    editStripeAccount(account: StripeAccount) {
+        new CenteredMessage('Stripe Dashboard', 'Je kan alle gegevens wijzigen via je Stripe Dashboard. Bovenaan klik je daar op het gebruikersicoontje > Platforminstellingen om gegevens aan te passen.')
+            .addButton(
+                new CenteredMessageButton('Openen', {
+                    action: async () => {
+                        await this.loginStripeAccount(account.id)
+                    }
+                })
+            )
+            .addCloseButton()
+            .show()
+    }
+
     async createStripeAccount() {
         if (this.isBelgium && (!await CenteredMessage.confirm('Waarschuwing!', 'Ja, gelezen', 'Selecteer de juiste bedrijfsvorm in Stripe. Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen, en spaart dus veel problemen uit. Lees ook zeker de documentatie.'))) {
             return;
@@ -851,6 +850,11 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         if (!(await CenteredMessage.confirm('Dit account verwijderen?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
             return;
         }
+
+        if (!(await CenteredMessage.confirm('Heel zeker?', 'Verwijderen', 'Je kan dit niet ongedaan maken.'))) {
+            return;
+        }
+
         try {
             await SessionManager.currentSession!.authenticatedServer.request({
                 method: "DELETE",

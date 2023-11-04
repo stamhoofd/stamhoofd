@@ -294,6 +294,14 @@ export class Order extends AutoEncoder {
                     }
                 ] : []
             ),
+            ...(
+                (this.data.administrationFee) ? [
+                    {
+                        title: 'Administratiekosten',
+                        value: Formatter.price(this.data.administrationFee)
+                    }
+                ] : []
+            ),
              ...(
                 (this.data.totalPrice) ? [
                     {

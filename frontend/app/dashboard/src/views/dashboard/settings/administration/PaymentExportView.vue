@@ -501,6 +501,26 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
                     detail.price += balanceItem.order.data.deliveryPrice
                     detail.count = (detail.count ?? 0) + 1
                 }
+
+                // Administratie price
+                if (balanceItem.order.data.administrationFee) {
+                    let id = "administration-price"
+                    let name = "Administratiekosten"
+                    let description = ""
+
+                    if (!details.has(id)) {                    
+                        details.set(id, new Detail({
+                            id,
+                            name,
+                            description,
+                            price: 0,
+                            count: 0
+                        }))
+                    }
+                    const detail = details.get(id)!
+                    detail.price += balanceItem.order.data.administrationFee
+                    detail.count = (detail.count ?? 0) + 1
+                }
             }
         }
 

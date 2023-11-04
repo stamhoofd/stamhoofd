@@ -75,13 +75,13 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     didAutofillEmail = false
 
     @Prop({ required: true })
-    isNew: boolean
+        isNew: boolean
 
     @Prop({ required: true })
-    details!: MemberDetails
+        details!: MemberDetails
 
     @Prop({ required: true })
-    saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
+        saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
     validator = new Validator()
     errorBox: ErrorBox | null = null
@@ -103,7 +103,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
         return ""
     }
 
-    isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address") {
+    isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address"|"gender") {
         return OrganizationManager.organization.meta.recordsConfiguration[name]?.enabledWhen?.decode(
             MemberDetails.getBaseFilterDefinitions()
         ).doesMatch(this.details) ?? false
@@ -166,7 +166,7 @@ export default class EditMemberGeneralView extends Mixins(NavigationMixin) {
     }
 
     @Prop({ required: true })
-    originalDetails: MemberDetails
+        originalDetails: MemberDetails
 
     async shouldNavigateAway() {
         if (

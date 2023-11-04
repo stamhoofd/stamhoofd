@@ -1,5 +1,6 @@
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 
+import { ModalStackEventBus } from "../overlays/ModalStackEventBus";
 import Tooltip from "../overlays/Tooltip.vue";
 
 const helper = {
@@ -25,7 +26,7 @@ const helper = {
         (document.activeElement as HTMLElement)?.blur()
     },
     
-    copiedPopup(event, vnode) {
+    copiedPopup(event) {
         const el = event.currentTarget || event.target
         const rect = el.getBoundingClientRect();
 
@@ -35,7 +36,13 @@ const helper = {
             x: rect.left,
             y: rect.top + el.offsetHeight + 5
         });
-        vnode.context.present(displayedComponent.setDisplayStyle("overlay"));
+
+        ModalStackEventBus.sendEvent("present", {
+            components: [
+                displayedComponent
+            ],
+            modalDisplayStyle: "overlay",
+        }).catch(console.error)
 
         setTimeout(() => {
             displayedComponent.vnode?.componentInstance?.$parent.$emit("pop");

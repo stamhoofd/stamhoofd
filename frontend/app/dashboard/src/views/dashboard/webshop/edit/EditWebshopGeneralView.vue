@@ -57,16 +57,6 @@
             Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
         </p>
 
-        <template v-if="isNew && roles.length > 0">
-            <hr>
-            <h2>Toegangsbeheer</h2>
-            <p>Kies welke functies toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
-
-            <STList>
-                <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
-            </STList>
-        </template>
-
         <hr>
         <h2>Beschikbaarheid</h2>
 
@@ -121,6 +111,33 @@
             </STList>
         </div>
 
+        <template v-if="isNew">
+            <hr>
+            <h2>Betaalmethodes</h2>
+            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betaalmethodes-voor-webshops-instellen/'" target="_blank">deze pagina</a>.</p>
+
+            <EditPaymentMethodsBox
+                type="webshop"
+                :organization="organization" 
+                :config="config"
+                :private-config="privateConfig" 
+                :validator="validator" 
+                :show-administration-fee="false" 
+                @patch:config="patchConfig($event)"
+                @patch:privateConfig="patchPrivateConfig($event)"
+            />
+        </template>
+
+        <template v-if="isNew && roles.length > 0">
+            <hr>
+            <h2>Toegangsbeheer</h2>
+            <p>Kies welke functies toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
+
+            <STList>
+                <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
+            </STList>
+        </template>
+
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
             <hr>
             <h2>Inloggen</h2>
@@ -153,14 +170,15 @@
 </template>
 
 <script lang="ts">
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Checkbox, DateSelection, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import { PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
+import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
 import WebshopPermissionRow from '../../admins/WebshopPermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';
 
@@ -175,7 +193,8 @@ import EditWebshopMixin from './EditWebshopMixin';
         TimeInput,
         Radio,
         SaveView,
-        WebshopPermissionRow
+        WebshopPermissionRow,
+        EditPaymentMethodsBox
     },
 })
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
@@ -406,12 +425,32 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         }
     }
 
-    patchPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
-        this.addPatch(PrivateWebshop.patch({
-            meta: WebshopMetaData.patch({
-                paymentMethods: patch
+    get config() {
+        return this.webshop.meta.paymentConfiguration
+    }
+
+    patchConfig(patch: AutoEncoderPatchType<PaymentConfiguration>) {
+        this.addPatch(
+            PrivateWebshop.patch({
+                meta: WebshopMetaData.patch({
+                    paymentConfiguration: patch
+                })
             })
-        }))
+        )
+    }
+
+    get privateConfig() {
+        return this.webshop.privateMeta.paymentConfiguration
+    }
+
+    patchPrivateConfig(patch: PrivatePaymentConfiguration) {
+        this.addPatch(
+            PrivateWebshop.patch({
+                privateMeta: WebshopPrivateMetaData.patch({
+                    paymentConfiguration: patch
+                })
+            })
+        )
     }
 
     getFeatureFlag(flag: string) {

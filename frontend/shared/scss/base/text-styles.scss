@@ -322,6 +322,10 @@
     @media (max-width: 400px) {
         font-size: 14px;
     }
+
+    &.for-input {
+        margin-top: 8px;
+    }
 }
 
 .style-price-big {
@@ -876,6 +880,10 @@
     }
 }
 
+.style-em {
+    font-style: italic;
+}
+
 .style-code {
     @extend .style-input-box;
     display: block;
@@ -897,4 +905,24 @@
 
 .title-suffix {
     @extend .style-description-small;
+}
+
+.pricing-box {
+    margin-top: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
+
+    > * {
+        flex-basis: 400px;
+    }
+
+    &.max {
+        display: block;
+    }
+
+    .middle {
+        font-weight: 600;
+    }
 }

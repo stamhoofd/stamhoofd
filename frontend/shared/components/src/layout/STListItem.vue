@@ -1,5 +1,5 @@
 <template>
-    <component :is="elementName" class="st-list-item" :class="{selectable}" @click="$emit('click', $event)" @contextmenu="$emit('contextmenu', $event)">
+    <component :is="elementName" class="st-list-item" :class="{selectable, disabled}" @click="$emit('click', $event)" @contextmenu="$emit('contextmenu', $event)">
         <div class="left">
             <slot name="left" />
         </div>
@@ -27,6 +27,9 @@ export default class STListItem extends Vue {
 
     @Prop({ default: false, type: Boolean })
         selectable!: boolean;
+
+    @Prop({ default: false, type: Boolean })
+        disabled!: boolean;
 }
 </script>
 
@@ -238,6 +241,10 @@ a.st-list-item {
         > .main > hr {
             display: none;
         }
+    }
+
+    &.disabled {
+        opacity: 0.5;
     }
 
     &.selectable:not(.is-dragging) {

@@ -10,11 +10,11 @@ import { Province } from '../addresses/Province';
 import { DNSRecord, DNSRecordType } from '../DNSRecord';
 import { Image } from '../files/Image';
 import { RecordCategory } from '../members/records/RecordCategory';
+import { PaymentConfiguration, PrivatePaymentConfiguration } from '../PaymentConfiguration';
 import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from '../PaymentMethod';
 import { PermissionsByRole } from '../Permissions';
 import { Policy } from '../Policy';
 import { RichText } from '../RichText';
-import { PaymentProviderConfiguration } from '../StripeAccount';
 import { TransferSettings } from './TransferSettings';
 import { WebshopField } from './WebshopField';
 
@@ -389,31 +389,60 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(AnyCheckoutMethodDecoder) })
     checkoutMethods: CheckoutMethod[] = []
 
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethodV150)), version: 41 })
+    /**
+     * @deprecated
+     * Use paymentConfiguration.paymentMethods instead
+     */
     @field({ 
         decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), 
         version: 151, 
-        downgrade: downgradePaymentMethodArrayV150
+        field: 'paymentMethods',
+        optional: true // We no longer expect this from the backend, so it can get removed in a future version
     })
-    paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
+    oldPaymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
-    @field({ decoder: new ArrayDecoder(Policy), version: 116 })
-    policies: Policy[] = []
-
-    @field({ decoder: StringDecoder, nullable: true, version: 42, field: "iban" })
+    /**
+     * @deprecated
+     * Use paymentConfiguration.transferSettings instead
+     */
     @field({ 
         decoder: TransferSettings, 
         version: 49, 
-        upgrade: (iban: string | null) => {
-            return TransferSettings.create({
-                iban
+        field: 'transferSettings',
+        optional: true // We no longer expect this from the backend, so it can get removed in a future version
+    })
+    oldTransferSettings = TransferSettings.create({})
+
+    @field({ 
+        decoder: PaymentConfiguration, 
+        version: 205,
+        upgrade: function () {
+            return PaymentConfiguration.create({
+                transferSettings: this.oldTransferSettings,
+                paymentMethods: this.oldPaymentMethods
             })
         },
-        downgrade: (transferSettings: TransferSettings) => {
-            return transferSettings.iban
-        } 
     })
-    transferSettings = TransferSettings.create({})
+    paymentConfiguration = PaymentConfiguration.create({})
+
+    /**
+     * @deprecated
+     * Use paymentConfiguration.paymentMethods instead
+     */
+    get paymentMethods(): PaymentMethod[] {
+        return this.paymentConfiguration.paymentMethods
+    }
+
+    /**
+     * @deprecated
+     * Use paymentConfiguration.paymentMethods instead
+     */
+    get transferSettings(): TransferSettings {
+        return this.paymentConfiguration.transferSettings
+    }
+
+    @field({ decoder: new ArrayDecoder(Policy), version: 116 })
+    policies: Policy[] = []
 
     @field({ decoder: DateDecoder, nullable: true, version: 43 })
     availableUntil: Date | null = null
@@ -515,8 +544,9 @@ export class WebshopPrivateMetaData extends AutoEncoder {
         ]
     }
 
-    @field({ decoder: PaymentProviderConfiguration, version: 175 })
-    providerConfiguration = PaymentProviderConfiguration.create({})
+    @field({ decoder: PrivatePaymentConfiguration, version: 175, field: 'providerConfiguration' })
+    @field({ decoder: PrivatePaymentConfiguration, version: 205 })
+    paymentConfiguration = PrivatePaymentConfiguration.create({})
 }
 
 export class WebshopServerMetaData extends AutoEncoder {

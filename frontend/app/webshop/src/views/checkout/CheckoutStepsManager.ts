@@ -213,7 +213,12 @@ export class CheckoutStepsManager {
         if (reload) {
             await WebshopManager.reload()
         }
-        CheckoutManager.checkout.validateCart(WebshopManager.webshop, WebshopManager.organization.meta);
+
+        try {
+            CheckoutManager.checkout.validateCart(WebshopManager.webshop, WebshopManager.organization.meta);
+        } finally {
+            CheckoutManager.checkout.update(WebshopManager.webshop)
+        }
 
         const steps = this.getSteps()
         let next = stepId === undefined

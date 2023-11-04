@@ -152,32 +152,3 @@ export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.invoice-details-view {
-    > main {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-    }
-
-    .pricing-box {
-        margin-top: auto;
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: flex-end;
-
-        > * {
-            flex-basis: 500px;
-        }
-
-        .middle {
-            font-weight: 600;
-        }
-    }
-}
-</style>

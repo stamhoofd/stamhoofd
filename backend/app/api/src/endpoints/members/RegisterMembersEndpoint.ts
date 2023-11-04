@@ -248,7 +248,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Determine the payment provider
         // Throws if invalid
-        const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationProviderConfiguration)
+        const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationPaymentConfiguration)
         payment.provider = provider
         payment.stripeAccountId = stripeAccount?.id ?? null
 

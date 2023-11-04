@@ -166,6 +166,43 @@
                 </button>
             </p>
 
+            <div class="pricing-box">
+                <STList>
+                    <STListItem v-if="patchedOrder.data.administrationFee">
+                        Subtotaal
+
+                        <template slot="right">
+                            {{ patchedOrder.data.cart.price | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="patchedOrder.data.deliveryPrice">
+                        Leveringskost
+
+                        <template slot="right">
+                            {{ patchedOrder.data.deliveryPrice | price }}
+                        </template>
+                    </STListItem>
+
+
+                    <STListItem v-if="patchedOrder.data.administrationFee">
+                        Administratiekosten
+
+                        <template slot="right">
+                            {{ patchedOrder.data.administrationFee | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Totaal
+
+                        <template slot="right">
+                            {{ patchedOrder.data.totalPrice | price }}
+                        </template> 
+                    </STListItem>
+                </STList>
+            </div>
+
             <template v-if="isNew">
                 <hr>
                 <h2>Betaalmethode</h2>
@@ -307,7 +344,11 @@ export default class EditOrderView extends Mixins(NavigationMixin){
     }
 
     get patchedOrder() {
-        return this.order.patch(this.finalPatch)
+        const patched = this.order.patch(this.finalPatch)
+        if (this.webshopManager.webshop) {
+            patched.data.update(this.webshopManager.webshop);
+        }
+        return patched
     }
 
     get deliveryMethod() {
@@ -618,9 +659,11 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                     new Toast("De totaalprijs van de bestelling is gewijzigd. Je moet dit zelf communiceren naar de besteller en de betaling hiervan opvolgen indien nodig.", "warning yellow").setHide(10*1000).show();
                 }
 
-                this.patchOrder = this.patchOrder.patch({ data: OrderData.patch({
-                    cart: clone
-                })})
+                this.patchOrder = this.patchOrder.patch({ 
+                    data: OrderData.patch({
+                        cart: clone
+                    })
+                })
             }
         }).setDisplayStyle("sheet"))
     }

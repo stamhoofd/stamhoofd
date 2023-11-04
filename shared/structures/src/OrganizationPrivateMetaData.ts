@@ -1,11 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder,DateDecoder,Decoder,EnumDecoder,field, IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
-import { DNSRecord } from "./DNSRecord"
+import { DNSRecord } from "./DNSRecord";
 import { OrganizationEmail } from './OrganizationEmail';
+import { PayconiqAccount, PrivatePaymentConfiguration } from './PaymentConfiguration';
 import { PaymentMethod } from './PaymentMethod';
 import { PaymentProvider } from './PaymentProvider';
 import { PermissionRoleDetailed } from './Permissions';
-import { PaymentProviderConfiguration, StripeAccount, StripeMetaData } from './StripeAccount';
+import { StripeMetaData } from './StripeAccount';
 
 export class CreditItem extends AutoEncoder {
     /**
@@ -165,8 +166,16 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: BuckarooSettings, nullable: true, version: 152 })
     buckarooSettings: BuckarooSettings | null = null
 
-    @field({ decoder: PaymentProviderConfiguration, version: 176 })
-    registrationProviderConfiguration = PaymentProviderConfiguration.create({})
+    @field({ decoder: PrivatePaymentConfiguration, version: 176, field: 'registrationProviderConfiguration' })
+    @field({ decoder: PrivatePaymentConfiguration, version: 204 })
+    registrationPaymentConfiguration = PrivatePaymentConfiguration.create({})
+
+    /**
+     * @deprecated
+     */
+    get registrationProviderConfiguration() {
+        return this.registrationPaymentConfiguration
+    }
 
     @field({ decoder: new ArrayDecoder(StringDecoder), version: 161})
     featureFlags: string[] = []
@@ -178,8 +187,25 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     useTestPayments: null | boolean = null
 
     // Only set for admins
-    @field({ decoder: StringDecoder, nullable: true, version: 29 })
-    payconiqApiKey: string | null = null
+    @field({ decoder: StringDecoder, nullable: true, version: 29, field: 'payconiqApiKey' })
+    @field({ 
+        decoder: new ArrayDecoder(PayconiqAccount), 
+        version: 206,
+        upgrade: (oldValue: string | null) => {
+            if (oldValue === null) {
+                return []
+            }
+            return [PayconiqAccount.create({ apiKey: oldValue })]
+        }
+    })
+    payconiqAccounts: PayconiqAccount[] = []
+
+    get payconiqApiKey(): string | null {
+        if (this.payconiqAccounts.length === 0) {
+            return null
+        }
+        return this.payconiqAccounts[0].apiKey
+    }
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(AcquisitionType)), version: 56 })
     acquisitionTypes: AcquisitionType[] = [];
@@ -219,7 +245,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
             }
         }
 
-        if ((this.mollieOnboarding?.canReceivePayments || this.useTestPayments) && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
+        if ((this.mollieOnboarding && (this.mollieOnboarding?.canReceivePayments || this.useTestPayments)) && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
             return PaymentProvider.Mollie
         }
 

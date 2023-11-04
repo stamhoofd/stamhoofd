@@ -119,6 +119,8 @@ body.modern.web-iOS {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
+            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         &.limit-width {

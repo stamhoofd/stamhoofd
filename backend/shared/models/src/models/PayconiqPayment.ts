@@ -1,6 +1,6 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from '@simonbackx/simple-errors';
-import { PaymentStatus, Version } from '@stamhoofd/structures';
+import { PayconiqAccount, PaymentStatus, Version } from '@stamhoofd/structures';
 import { IncomingMessage } from 'http';
 import https from "https";
 import { v4 as uuidv4 } from "uuid";
@@ -74,10 +74,10 @@ export class PayconiqPayment extends Model {
         }
     }
 
-    static async createTest(organization: Organization): Promise<boolean> {
-        const apiKey = organization.privateMeta.payconiqApiKey
+    static async createTest(organization: Organization, payconiqAccount: PayconiqAccount): Promise<undefined|object> {
+        const apiKey = payconiqAccount.apiKey
         if (!apiKey) {
-            return false
+            return
         }
 
         try {
@@ -89,9 +89,9 @@ export class PayconiqPayment extends Model {
                 description: "Key validation test",
 
             }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
-            return !!response.paymentId;
+            return response;
         } catch (e) {
-            return false;
+            return;
         }
     }
 

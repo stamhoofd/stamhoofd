@@ -177,6 +177,15 @@
                             {{ order.data.deliveryPrice | price }}
                         </p>
                     </STListItem>
+                    <STListItem v-if="order.data.administrationFee > 0" class="right-description">
+                        <h3 class="style-definition-label">
+                            Administratiekosten
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ order.data.administrationFee | price }}
+                        </p>
+                    </STListItem>
                 </STList>
             </template>
 
