@@ -28,7 +28,7 @@ import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-na
 import { BackButton, FemaleIcon, LongPressDirective, MaleIcon, SegmentedControl, STNavigationBar, STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
 import { UrlHelper } from "@stamhoofd/networking";
-import { Gender, Group, MemberWithRegistrations, PermissionLevel } from '@stamhoofd/structures';
+import { Gender, Group, MemberWithRegistrations } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';

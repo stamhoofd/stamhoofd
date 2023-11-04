@@ -6,26 +6,14 @@
             <h1>{{ title }}</h1>
             <p>{{ description }}</p>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>
-                            Lid
-                        </th>
-                        <th>Groep</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(member, index) in members" :key="index">
-                        <td>
-                            {{ member.name }}
-                        </td>
-                        <td>
-                            {{ member.group }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <STList>
+                <STListItem v-for="(member, index) in members" :key="index">
+                    <h3 class="style-list-title">
+                        {{ member.name }}
+                    </h3>
+                    <p v-if="member.description" class="style-description-small pre-wrap" v-text="member.description" />
+                </STListItem>
+            </STList>
         </main>
 
         <STToolbar>
@@ -40,7 +28,7 @@
 
 <script lang="ts">
 import {  NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { BackButton, Checkbox, LoadingButton, Radio, RadioGroup, STErrorsDefault,STInputBox, STList,STListItem,STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component({
@@ -53,10 +41,12 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         STErrorsDefault,
         Checkbox,
         BackButton,
-        LoadingButton
+        LoadingButton,
+        STList,
+        STListItem
     },
 })
-export default class ImportAutoAssignedViewView extends Mixins(NavigationMixin) {
+export default class ImportAutoAssignedView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         title: string
 
@@ -64,7 +54,7 @@ export default class ImportAutoAssignedViewView extends Mixins(NavigationMixin) 
         description: string
     
     @Prop({ required: true })
-        members: { name: string; group: string}[]
+        members: { name: string; description?: string}[]
 
 }
 </script>

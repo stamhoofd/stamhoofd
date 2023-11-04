@@ -135,6 +135,9 @@ export class ImportingMember {
             }
             result.errors.push(...errorStack)
 
+            // Clean data
+            member.details.cleanData()
+
             // Check if we find the same member
             if (member.details.firstName.length > 0 && member.details.lastName.length > 0) {
                 for (const m of allMembers) {

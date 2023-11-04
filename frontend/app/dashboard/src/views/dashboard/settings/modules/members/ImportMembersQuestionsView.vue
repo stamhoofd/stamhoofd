@@ -14,6 +14,10 @@
                 <p v-else-if="existingCount > 0" class="warning-box">
                     {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem ({{ members.length }} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.
                 </p>
+
+                <p v-if="deletedRegistrationsCount > 0" class="warning-box">
+                    Stamhoofd zal {{ deletedRegistrationsCount }} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.
+                </p>
                 <p v-if="membersWithoutNewRegistrations.length" class="success-box">
                     {{ membersWithoutNewRegistrations.length }} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.
                 </p>
@@ -152,6 +156,10 @@
 
         <STToolbar>
             <template slot="right">
+                <button type="button" class="button secundary" @click="openResultView">
+                    Toon wijzigingen
+                </button>
+
                 <LoadingButton :loading="saving">
                     <button type="button" class="button primary" @click="goNext">
                         Importeer {{ members.length }} leden
@@ -166,14 +174,14 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Dropdown, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Group, Organization, OrganizationPatch, Registration } from "@stamhoofd/structures";
-import { Sorter } from '@stamhoofd/utility';
+import { Gender, Group, Organization, OrganizationPatch, Registration } from "@stamhoofd/structures";
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../../../classes/FamilyManager';
 import { ImportingMember } from '../../../../../classes/import/ImportingMember';
 import { OrganizationManager } from "../../../../../classes/OrganizationManager";
-import ImportAutoAssignedViewView from './ImportAutoAssignedView.vue';
+import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
 
 @Component({
     components: {
@@ -262,6 +270,16 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             }
             return false;
         })
+    }
+
+    get deletedRegistrationsCount() {
+        return this.membersWithNewRegistrations.reduce((acc, m) => {
+            const registration = this.buildRegistration(m)
+            if (!registration) {
+                return acc
+            }
+            return acc + this.getOverrideRegistrations(registration, m).length
+        }, 0)
     }
 
     shouldAssignRegistrationToMember(m: ImportingMember) {
@@ -356,7 +374,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
     openAssignment() {
         this.autoAssignMembers(this.members)
-        this.present(new ComponentWithProperties(ImportAutoAssignedViewView, {
+        this.present(new ComponentWithProperties(ImportAutoAssignedView, {
             title: "Wijzigingen aan inschrijvingen",
             description: "Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand",
             members: this.membersNeedingAssignment.flatMap(m => {
@@ -366,14 +384,14 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
                 return [{
                     name: m.details.name,
-                    group: m.registration.autoAssignedGroup.settings.name
+                    description: m.registration.autoAssignedGroup.settings.name
                 }]
             })
         }).setDisplayStyle("popup"))
     }
 
     openPriorityAssignedToGroup(group: Group) {
-        this.present(new ComponentWithProperties(ImportAutoAssignedViewView, {
+        this.present(new ComponentWithProperties(ImportAutoAssignedView, {
             title: "Leden die door prioriteit bij "+group.settings.name+" zullen worden ingeschreven",
             description: "Deze leden passen in meerdere groepen, maar op basis van jouw prioriteit bij "+group.settings.name+" zullen worden ingeschreven",
             members: this.membersWithMultipleGroups.flatMap(m => {
@@ -385,7 +403,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                     const groups = m.details.getMatchingGroups(this.organization.groups)
                     return [{
                         name: m.details.name,
-                        group: groups.map(g => g.settings.name).join(", ")
+                        description: groups.map(g => g.settings.name).join(", ")
                     }]
                 }
 
@@ -395,7 +413,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     openMultipleGroups() {
-        this.present(new ComponentWithProperties(ImportAutoAssignedViewView, {
+        this.present(new ComponentWithProperties(ImportAutoAssignedView, {
             title: "Leden die in meerdere groepen passen",
             description: "Dit zijn alle leden en de groepen waar ze in passen. Je kan beperken tot welke groepen ze horen door de instellingen van die groep te wijzigen.",
             members: this.membersWithMultipleGroups.flatMap(m => {
@@ -406,8 +424,83 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                 const groups = m.details.getMatchingGroups(this.organization.groups)
                 return [{
                     name: m.details.name,
-                    group: groups.map(g => g.settings.name).join(", ")
+                    description: groups.map(g => g.settings.name).join(", ")
                 }]
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    openResultView() {
+        this.present(new ComponentWithProperties(ImportAutoAssignedView, {
+            title: "Wijzigingen",
+            description: "Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.",
+            members: this.members.map(member => {
+                let description: string[] = []
+                const registration = this.buildRegistration(member)
+
+                if (registration !== null) {
+                    const group = this.organization.groups.find(g => g.id === registration.groupId)
+                    const groupName = (group?.settings.name ?? 'onbekende groep')
+
+                    if (member.equal) {
+                        if (registration !== null) {
+                            if (registration.waitingList) {
+                                description.push('Wachtlijst plaatsen voor ' + groupName)
+                            } else {
+                                description.push('Inschrijven voor ' + groupName)
+                            }
+
+                            // Delete conflicting registrations (based on categories too!)
+                            const deleteRegs = this.getOverrideRegistrations(registration, member)
+                            for (const r of deleteRegs) {
+                                if (r.waitingList) {
+                                    description.push('Verwijderen van wachtlijst van ' + (this.organization.groups.find(g => g.id === r.groupId)?.settings.name ?? 'onbekende groep'))
+                                } else {
+                                    description.push('Verwijderen inschrijving voor ' + (this.organization.groups.find(g => g.id === r.groupId)?.settings.name ?? 'onbekende groep'))
+                                }
+                            }
+                        }
+                    } else {
+                        if (registration.waitingList) {
+                            description.push('Toevoegen in het systeem en op wachtlijst plaatsen voor ' + groupName)
+                        } else {
+                            description.push('Toevoegen in het systeem met inschrijving voor ' + groupName)
+                        }
+
+                    }
+                } else {
+                    description.push('Geen wijziging aan inschrijvingen')
+                }
+
+                if (member.equal) {
+                    // Data changes
+                    if (member.equal.details.name !== member.details.name) {
+                        description.push('Naam wijzigen naar ' + member.details.name)
+                    }
+                    if (member.details.gender !== Gender.Other && member.equal.details.gender !== member.details.gender) {
+                        description.push('Geslacht wijzigen naar ' + member.details.gender)
+                    }
+                    if ( member.details.email && member.equal.details.email !== member.details.email) {
+                        description.push('E-mail wijzigen naar ' + member.details.email)
+                    }
+                    if (member.details.phone && member.equal.details.phone !== member.details.phone) {
+                        description.push('Telefoonnummer wijzigen naar ' + member.details.phone)
+                    }
+                    if (member.details.birthDay && (!member.equal.details.birthDay || Formatter.dateIso(member.equal.details.birthDay) !== Formatter.dateIso(member.details.birthDay))) {
+                        description.push('Geboortedatum wijzigen naar ' + Formatter.date(member.details.birthDay, true))
+                    }
+                    if (member.details.parents.length) {
+                        description.push('Gegevens ouders wijzigen/toevoegen')
+                    }
+                    for (const answer of member.details.recordAnswers) {
+                        description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue)
+                    }
+                }
+
+                return {
+                    name: member.details.name,
+                    description: description.join('\n')
+                }
             })
         }).setDisplayStyle("popup"))
     }
@@ -441,7 +534,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     openWithoutMatchingGroups() {
-        this.present(new ComponentWithProperties(ImportAutoAssignedViewView, {
+        this.present(new ComponentWithProperties(ImportAutoAssignedView, {
             title: "Leden die in geen enkele groep passen",
             description: "Dit zijn alle leden waarvoor we geen geschikte leeftijdsgroep konden vinden: omdat ze te oud of te jong zijn bijvoorbeeld. Pas de instellingen van jouw inschrijvingsgroepen eventueel aan.",
             members: this.membersWithoutMatchingGroups.flatMap(m => {
@@ -507,6 +600,49 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         })
     }
 
+    getOverrideRegistrations(registration: Registration, member: ImportingMember): Registration[] {
+        if (!member.equal) {
+            return [];
+        }
+
+        let list: Registration[] = []
+
+        // TODO: delete more conflicting registrations (based on categories too!)
+        const group = this.organization.groups.find(g => g.id === registration.groupId)
+        if (group) {
+            if (!registration.waitingList) {
+                // Delete from waiting list
+                const existing = member.equal.filterRegistrations({groups: [group], cycle: registration.cycle, waitingList: true})
+                for (const r of existing) {
+                    if (list.find(l => l.id === r.id)) {
+                        continue;
+                    }
+                    list.push(r)
+                }
+            }
+
+
+            const parents = group.getParentCategories(this.organization.meta.categories, false)
+            const cycleOffset = group.cycle - registration.cycle
+
+            for (const parent of parents) {
+                const groups = parent.groupIds.map(id => this.organization.groups.find(g => g.id === id)).filter(g => !!g) as Group[]
+
+                if (parent.settings.maximumRegistrations === 1) {
+                    // Delete all registrations for these groups
+                    const existing = member.equal.filterRegistrations({groups: groups, cycleOffset})
+                    for (const r of existing) {
+                        if (list.find(l => l.id === r.id)) {
+                            continue;
+                        }
+                        list.push(r)
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
     async goNext() {
         if (this.saving) {
             return
@@ -542,46 +678,12 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                         patchRegistrations.addPut(registration)
                         await family.patchMemberRegistrations(member.equal, patchRegistrations)
 
-                        // TODO: delete more conflicting registrations (based on categories too!)
-                        const group = this.organization.groups.find(g => g.id === registration.groupId)
-                        if (group) {
-                            const existing = member.equal.filterRegistrations({groups: [group], cycle: registration.cycle, waitingList: true})
-                            for (const r of existing) {
-                                patchRegistrations.addDelete(r.id)
-                            }
+                        // Delete conflicting registrations (based on categories too!)
+                        const deleteRegs = this.getOverrideRegistrations(registration, member)
+                        for (const r of deleteRegs) {
+                            patchRegistrations.addDelete(r.id)
                         }
-
-                        // Check if we have these registrations already
-                        // const existing = member.equal.filterRegistrations({groups: this.organization.groups, cycle: registration.cycle})
-                        // 
-                        // if (existing.length === 0) {
-                        //     // Okay to add: no duplicate
-                        //     patchRegistrations.addPut(registration)
-                        //     await family.patchMemberRegistrations(member.equal, patchRegistrations)
-                        // } else if (!registration.waitingList) {
-                        //     // Try to move members from the waiting list to the normal list
-                        //     // Other registrations will be left untouched
-                        //     const existing2 = member.equal.filterRegistrations({groups: this.organization.groups, cycle: registration.cycle, waitingList: false})
-                        //     if (!existing2.length) {
-                        //         // Members are currently on the waiting list
-                        //         // Delete this and add the new one
-                        //         patchRegistrations.addDelete(existing[0]!.id)
-                        //         patchRegistrations.addPut(registration)
-                        //         await family.patchMemberRegistrations(member.equal, patchRegistrations)
-                        //     }
-                        // } else {
-                        //     // todo: only add if not already registered or on waiting list for the same group
-                        // }
                     }
-
-                    /*for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: false})) {
-                        const group = member.allGroups.find(g => g.id === registration.groupId)
-                        patchMember.registrations.addPatch(Registration.patch({
-                            id: registration.id,
-                            waitingList: true,
-                            cycle: group?.cycle ?? undefined
-                        }))*/
-
                 } else {
                     const registration = this.buildRegistration(member)
                     await family.addMember(member.details, registration ? [registration] : [])
