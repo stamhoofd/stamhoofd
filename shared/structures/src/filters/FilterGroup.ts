@@ -61,6 +61,14 @@ export class FilterGroupEncoded<T> implements Encodeable {
 export enum GroupFilterMode {
     Or = "Or",
     And = "And",
+    /**
+     * Means !(A || B) == !A && !B
+     */
+    Nor = "Nor",
+    /**
+     * Means !(A && B) == !A || !B
+     */
+    Nand = "Nand",
 }
 
 /**
@@ -102,13 +110,21 @@ export class FilterGroup<T> extends Filter<T> {
                 if (this.mode === GroupFilterMode.And) {
                     return false
                 }
+
+                if (this.mode === GroupFilterMode.Nand) {
+                    return true
+                }
             } else {
                 if (this.mode === GroupFilterMode.Or) {
                     return true
                 } 
+
+                if (this.mode === GroupFilterMode.Nor) {
+                    return false
+                }
             }
         }
-        return this.filters.length == 0 || this.mode === GroupFilterMode.And
+        return this.filters.length == 0 || this.mode === GroupFilterMode.And || this.mode === GroupFilterMode.Nor
     }
 
     encode(context: EncodeContext): PlainObject {
@@ -119,11 +135,37 @@ export class FilterGroup<T> extends Filter<T> {
         }
     }
 
-    toString() {
-        if (this.mode === GroupFilterMode.And) {
-            return Formatter.joinLast(this.filters.map(f => f.toString()), ", ", " en ")
+    get inverted(): FilterGroup<T> {
+        const group = this.clone() as FilterGroup<T>
+        switch (group.mode) {
+            case GroupFilterMode.And:
+                group.mode = GroupFilterMode.Nand
+                break
+            case GroupFilterMode.Nand:
+                group.mode = GroupFilterMode.And
+                break
+            case GroupFilterMode.Or:
+                group.mode = GroupFilterMode.Nor
+                break
+            case GroupFilterMode.Nor:
+                group.mode = GroupFilterMode.Or
+                break
         }
-        return Formatter.joinLast(this.filters.map(f => f.toString()), ", ", " of ")
+        return group
+    }
+
+
+    toString() {
+        switch(this.mode) {
+            case GroupFilterMode.Or:
+                return Formatter.joinLast(this.filters.map(f => f.toString()), ", ", " of ")
+            case GroupFilterMode.And:
+                return Formatter.joinLast(this.filters.map(f => f.toString()), ", ", " en ")
+            case GroupFilterMode.Nand:
+                return Formatter.joinLast(this.filters.map(f => f.inverted.toString()), ", ", " of ")
+            case GroupFilterMode.Nor:
+                return Formatter.joinLast(this.filters.map(f => f.inverted.toString()), ", ", " en ")
+        }
     }
 }
 
@@ -153,7 +195,8 @@ export class FilterGroupDecoder<T> extends FilterDefinition<T, FilterGroup<T>, a
     constructor(definitions: FilterDefinition<T, Filter<T>, any>[]) {
         super({
             id: "filter_group",
-            name: "Filter group",
+            name: "Filtergroep",
+            description: 'Een groep van filters die je samen als filter kan gebruiken, waardoor je complexe filters kan opstellen (bv. door en/of te combineren).',
             getValue: () => {
                 throw new Error("Can't get value of group filter definition")
             }

@@ -91,4 +91,22 @@ export class StringFilter<T> extends Filter<T> {
         }
         return "Onbekend"
     }
+
+    get inverted(): StringFilter<T> {
+        const filter = this.clone() as StringFilter<T>
+        if (this.mode === StringFilterMode.Contains) {
+            filter.mode = StringFilterMode.NotContains
+        } else if (this.mode === StringFilterMode.NotContains) {
+            filter.mode = StringFilterMode.Contains
+        } else if (this.mode === StringFilterMode.Equals) {
+            filter.mode = StringFilterMode.NotEquals
+        } else if (this.mode === StringFilterMode.NotEquals) {
+            filter.mode = StringFilterMode.Equals
+        } else if (this.mode === StringFilterMode.NotEmpty) {
+            filter.mode = StringFilterMode.Empty
+        } else if (this.mode === StringFilterMode.Empty) {
+            filter.mode = StringFilterMode.NotEmpty
+        }
+        return filter
+    }
 }

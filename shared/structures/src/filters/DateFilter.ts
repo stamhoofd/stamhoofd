@@ -148,6 +148,24 @@ export class DateFilter<T> extends Filter<T> {
         }
     }
 
+    get inverted(): DateFilter<T> {
+        const filter = this.clone() as DateFilter<T>
+        if (filter.mode === DateFilterMode.Between) {
+            filter.mode = DateFilterMode.NotBetween
+        } else if (filter.mode === DateFilterMode.NotBetween) {
+            filter.mode = DateFilterMode.Between
+        } else if (filter.mode === DateFilterMode.GreaterThan) {
+            filter.mode = DateFilterMode.LessThan
+        } else if (filter.mode === DateFilterMode.LessThan) {
+            filter.mode = DateFilterMode.GreaterThan
+        } else if (filter.mode === DateFilterMode.Equal) {
+            filter.mode = DateFilterMode.NotEqual
+        } else if (filter.mode === DateFilterMode.NotEqual) {
+            filter.mode = DateFilterMode.Equal
+        }
+        return filter
+    }
+
     toString() {
         if (this.definition.explainFilter) {
             return this.definition.explainFilter(this)

@@ -17,7 +17,7 @@
     },
     "license": "AGPL-3.0-only",
     "scripts": {
-        "dev": "yarn build:shared && lerna run dev --stream --parallel",
+        "dev": "concurrently -r 'yarn build:shared:watch' 'lerna run dev --stream --parallel'",
         "app:release": "cd devops && yarn build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
         "build:shared:watch": "npx nodemon --quiet --watch shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ext ts --exec yarn build:shared",
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
@@ -73,7 +73,7 @@
         "autoprefixer": "^10.4.0",
         "babel-loader": "^8.2.3",
         "clean-webpack-plugin": "^4.0.0",
-        "concurrently": "^8.0.1",
+        "concurrently": "^8.2.0",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.5.1",
         "css-minimizer-webpack-plugin": "^3.3.1",
