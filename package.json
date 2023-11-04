@@ -18,9 +18,8 @@
     "license": "AGPL-3.0-only",
     "scripts": {
         "dev": "yarn build:shared && lerna run dev --stream --parallel",
+        "app:release": "cd devops && yarn build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
         "build:shared:watch": "npx nodemon --quiet --watch shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ext ts --exec yarn build:shared",
-        "dev:backend": "lerna run dev --scope backend",
-        "dev:frontend": "lerna run dev --scope frontend",
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
         "build:full": "cd shared/locales && yarn build:full && cd ../structures && yarn build:full && cd ../utility && yarn build:full && cd ../crypto && yarn build:full && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
@@ -29,12 +28,10 @@
         "build:shared:full": "yarn build:full && cd backend/shared/queues && yarn build:full && cd ../email && yarn build:full && cd ../models && yarn build:full && cd ../logging && yarn build:full && cd ../middleware && yarn build:full && cd ../i18n && yarn build:full && cd ../env && yarn build:full && cd ../..",
         "build:locales": "cd shared/locales && yarn build && cd ../..",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.vue",
-        "upgrade:internal": "yarn upgrade --scope simonbackx",
         "caddy": "export $(cat .env | xargs) && caddy run --resume",
         "caddy:update": "curl localhost:2019/load -X POST -H \"Content-Type: application/json\" -d @caddy.dev.watch.json",
         "get-version": "node -e 'process.stdout.write(require(\"./package.json\").version);'",
-        "version": "yarn workspaces run -s version --no-git-tag-version --new-version \"$npm_package_version\" 2>&1 >/dev/null",
-        "ptest": "yarn workspaces run -s publish --tag dev"
+        "version": "yarn workspaces run -s version --no-git-tag-version --new-version \"$npm_package_version\" 2>&1 >/dev/null"
     },
     "dependencies": {
         "@babel/runtime": "^7.15.4",
