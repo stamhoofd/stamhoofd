@@ -112,7 +112,7 @@ export class MemberActionBuilder {
                         this.moveToWaitingList(members)
                     }
                 }),
-                ...this.getActionsForCategory(OrganizationManager.organization.categoryTree, (members, group) => this.moveRegistrations(members, group))
+                ...this.getActionsForCategory(OrganizationManager.organization.adminCategoryTree, (members, group) => this.moveRegistrations(members, group))
             ]
         })
     }
