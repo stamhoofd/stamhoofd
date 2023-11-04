@@ -48,6 +48,34 @@ export enum AcquisitionType {
     Other = "Other"
 }
 
+export enum MollieProfileMode {
+    Test = "test",
+    Live = "live"
+}
+
+export enum MollieProfileStatus {
+    Unverified = "unverified",
+    Verified = "verified",
+    Blocked = "blocked"
+}
+
+export class MollieProfile extends AutoEncoder {
+    @field({decoder: StringDecoder})
+    id: string
+
+    @field({decoder: new EnumDecoder(MollieProfileMode)})
+    mode: MollieProfileMode
+
+    @field({decoder: StringDecoder})
+    name: string
+
+    @field({decoder: StringDecoder})
+    website: string
+
+    @field({decoder: new EnumDecoder(MollieProfileStatus)})
+    status: MollieProfileStatus
+}
+
 export class MollieOnboarding extends AutoEncoder  {
     @field({ decoder: BooleanDecoder })
     canReceivePayments = false
@@ -127,6 +155,9 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     // readonly
     @field({ decoder: MollieOnboarding, nullable: true, version: 27})
     mollieOnboarding: MollieOnboarding | null = null
+
+    @field({ decoder: MollieProfile, nullable: true, version: 200})
+    mollieProfile: MollieProfile|null = null
 
     /**
      * When set, Buckaroo has priority over Mollie as a payment provider

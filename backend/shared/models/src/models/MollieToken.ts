@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { column,Model } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { MollieOnboarding,MollieStatus } from '@stamhoofd/structures';
+import { MollieProfile, MollieOnboarding,MollieStatus } from '@stamhoofd/structures';
 import { IncomingMessage } from "http";
 import https from "https";
 
@@ -239,10 +239,14 @@ export class MollieToken extends Model {
     * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
     */
     async revoke(): Promise<void> {
-        await MollieToken.request("DELETE", "/oauth2/tokens", {
-            token_type_hint: "refresh_token",
-            token: this.refreshToken,
-        }, "urlencoded")
+        try {
+            await MollieToken.request("DELETE", "/oauth2/tokens", {
+                token_type_hint: "refresh_token",
+                token: this.refreshToken,
+            }, "urlencoded")
+        } catch (e) {
+            console.error("Failed to revoke token", this.organizationId, e)
+        }
         await this.delete()
     }
 
@@ -289,6 +293,17 @@ export class MollieToken extends Model {
             console.error("Error when requesting Mollie onboarding status:")
             console.error(e)
             return null;
+        }
+    }
+
+    async getProfiles(): Promise<MollieProfile[]> {
+        try {
+            const response = await this.authRequest("GET", "/v2/profiles?limit=250")
+            const profiles = response._embedded.profiles;
+            return profiles.map(p => MollieProfile.create(p))
+        } catch(e) {
+            console.error('Failed to parse mollie profiles', e)
+            return [];
         }
     }
 
