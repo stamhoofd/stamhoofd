@@ -13,10 +13,14 @@
         ".yalc/*"
     ],
     "engines": {
-        "yarn": "1.19.0"
+        "yarn": "1.22.19"
     },
     "license": "AGPL-3.0-only",
     "scripts": {
+        "dev": "yarn build:shared && lerna run dev --stream --parallel",
+        "build:shared:watch": "npx nodemon --quiet --watch shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ext ts --exec yarn build:shared",
+        "dev:backend": "lerna run dev --scope backend",
+        "dev:frontend": "lerna run dev --scope frontend",
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
         "build:full": "cd shared/locales && yarn build:full && cd ../structures && yarn build:full && cd ../utility && yarn build:full && cd ../crypto && yarn build:full && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",
@@ -49,6 +53,7 @@
         "luxon": "^2.3.2",
         "path-browserify": "^1.0.1",
         "qrcode": "^1.4.4",
+        "sharp": "0.32.1",
         "stream-browserify": "^3.0.0",
         "tslib": "^2.3.1",
         "uuid": "^9.0.0",
@@ -71,6 +76,7 @@
         "autoprefixer": "^10.4.0",
         "babel-loader": "^8.2.3",
         "clean-webpack-plugin": "^4.0.0",
+        "concurrently": "^8.0.1",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.5.1",
         "css-minimizer-webpack-plugin": "^3.3.1",
@@ -85,7 +91,9 @@
         "html-webpack-plugin": "^5.5.0",
         "jest": "^27.4.5",
         "jest-extended": "^1.2.0",
+        "lerna": "^6.6.2",
         "mini-css-extract-plugin": "^2.4.5",
+        "nodemon": "^2.0.22",
         "postcss": "^8.4.5",
         "postcss-loader": "^6.2.1",
         "raw-loader": "^4.0.2",
@@ -96,9 +104,11 @@
         "terser-webpack-plugin": "^5.3.0",
         "ts-jest": "^27.1.2",
         "ts-loader": "^9.4.2",
+        "ts-node": "^10.9.1",
         "typescript": "^4.9.4",
         "vue-loader": "15.9.8",
         "vue-template-compiler": "^2.6.14",
+        "wait-on": "^7.0.1",
         "webfonts-loader": "^7.3.0",
         "webpack": "^5.65.0",
         "webpack-bundle-analyzer": "^3.8.0",

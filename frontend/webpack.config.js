@@ -58,6 +58,9 @@ module.exports = {
     mode: "development",
     target: 'web',
     stats: 'minimal',
+    infrastructureLogging: {
+        level: 'error',
+    },
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension (so that you don't have to add it explicitly)
         extensions: [".ts", ".tsx", ".js"],
@@ -82,6 +85,7 @@ module.exports = {
                 // needed because the dev server runs behind a reverse proxy (Caddy)
                 port: 443,
             },
+            
         },
         allowedHosts: "all",
         historyApiFallback: {
