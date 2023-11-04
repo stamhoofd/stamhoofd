@@ -340,7 +340,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
+import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";

@@ -2,7 +2,6 @@
 	"appId": "com.stamhoofd.stamhoofd",
 	"appName": "Stamhoofd",
 	"webDir": "dist",
-	"bundledWebRuntime": false,
 	"loggingBehavior": "none",
 	"plugins": {
 		"Keyboard": {
@@ -14,6 +13,9 @@
 				"sound",
 				"alert"
 			]
+		},
+		"CapacitorUpdater": {
+			"autoUpdate": false
 		}
 	},
 	"server": {

@@ -282,7 +282,7 @@ export class Session implements RequestMiddleware {
     }
 
     isComplete(): boolean {
-        return !!this.token && !!this.user && !!this.organization && !this.preventComplete
+        return !!this.token && !!this.user && !!this.organization && !this.preventComplete && (!this.user.permissions || !!this.organization.privateMeta)
     }
 
     /**
@@ -440,7 +440,7 @@ export class Session implements RequestMiddleware {
                 await this.fetchUser(shouldRetry)
             }
 
-            if (force || !this.organization || fetched == 1) { //  || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))
+            if (force || !this.organization || fetched == 1 || (this.user?.permissions && !this.organization.privateMeta)) { //  || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))
                 fetched++
                 await this.fetchOrganization(shouldRetry)
             }

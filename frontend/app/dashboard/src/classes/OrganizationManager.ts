@@ -104,7 +104,7 @@ export class OrganizationManagerStatic {
         })).data
     }
 
-    async switchOrganization(component, organizationId: string) {
+    async switchOrganization(component, organizationId: string, animated = true) {
         if (document.activeElement) {
             // Blur currently focused element, to prevent from opening the login view multiple times
             (document.activeElement as HTMLElement).blur()
@@ -153,11 +153,17 @@ export class OrganizationManagerStatic {
                 I18nController.shared?.switchToLocale({ country: session.organization.address.country }).catch(console.error)
             }
 
-            component.present(new ComponentWithProperties(NavigationController, { 
-                root: new ComponentWithProperties(LoginView, { 
-                    session 
-                }) 
-            }).setDisplayStyle("sheet"))
+            component.present({
+                components: [
+                    new ComponentWithProperties(NavigationController, { 
+                        root: new ComponentWithProperties(LoginView, { 
+                            session 
+                        }) 
+                    })
+                ],
+                modalDisplayStyle: 'sheet',
+                animated
+            })
         } catch (e) {
             if (e.hasCode("invalid_organization")) {
                 // Clear from session storage

@@ -26,6 +26,9 @@ export class NetworkManagerStatic implements RequestMiddleware {
     get server() {
         const server = new Server("https://"+STAMHOOFD.domains.api)
         server.middlewares.push(this)
+
+        // Set the version in which we decode the responses
+        server.setVersionHeaders(['X-Version'])
         return server
     }
 
@@ -35,6 +38,9 @@ export class NetworkManagerStatic implements RequestMiddleware {
     get rendererServer() {
         const server = new Server("https://"+STAMHOOFD.domains.rendererApi)
         server.middlewares.push(this)
+
+        // Set the version in which we decode the responses
+        server.setVersionHeaders(['X-Version'])
         return server
     }
 
@@ -114,6 +120,12 @@ export class NetworkManagerStatic implements RequestMiddleware {
                     const url = new URL(window.location.href);
                     url.searchParams.set("forceClientUpdate", new Date().getTime()+"")
                     window.location.href = url.toString()
+                } else {
+                    AppManager.shared.checkUpdates({
+                        visibleCheck: 'text',
+                        visibleDownload: true,
+                        installAutomatically: true
+                    }).catch(console.error)
                 }
             }
         } catch (e) {
@@ -157,6 +169,9 @@ export class NetworkManagerStatic implements RequestMiddleware {
                 if (this.platformLatestVersion > Version) {
                     if (AppManager.shared.isNative) {
                         new Toast("Er is een update beschikbaar. Update de app om te vermijden dat bepaalde zaken stoppen met werken. Tip: houd automatische updates ingeschakeld.", "yellow download").setHide(null).show()
+                        AppManager.shared.checkUpdates({
+                            checkTimeout: 10 * 1000
+                        }).catch(console.error)
                     } else {
                         new Toast("Er is een update beschikbaar. Herlaad de pagina zodra het kan om te vermijden dat bepaalde zaken stoppen met werken.", "yellow download").setHide(null).show()
                     }

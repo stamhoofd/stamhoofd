@@ -21,6 +21,20 @@ type QRScannerPlugin = {
     ): Promise<PluginListenerHandle>
 }
 
+export type UpdateOptions = {
+    customText?: string,
+    visibleCheck?: 'spinner' | 'text',
+    visibleDownload?: boolean,
+    installAutomatically?: boolean,
+    checkTimeout?: number,
+    /**
+     * Download and install latest version again
+     */
+    force?: boolean,
+    channel?: string
+};
+
+
 export class AppManager {
     static shared = new AppManager()
 
@@ -29,8 +43,16 @@ export class AppManager {
     /// If needed: in the app we need to override XMLHttpRequest with native http requests to prevent CORS in some API's
     overrideXMLHttpRequest?: any
 
+    nativeVersion?: string
+    nativeBuild?: string
+
     get isNative(): boolean {
         return this.platform !== "web"
+    }
+
+    setVersion({version, build}: {version: string, build:string}) {
+        this.nativeVersion = version
+        this.nativeBuild = build
     }
 
     hapticWarning = () => {
@@ -61,6 +83,10 @@ export class AppManager {
      * Mark a place in the app where an app review is appropriate.
      */
     markReviewMoment = () => {
+        // No default implementation
+    }
+
+    checkUpdates: (options?: UpdateOptions) => Promise<void> = async () => {
         // No default implementation
     }
 

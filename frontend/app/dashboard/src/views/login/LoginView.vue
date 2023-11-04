@@ -39,7 +39,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ConfirmEmailView, EmailInput, ErrorBox, ForgotPasswordView, LoadingButton, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Validator } from "@stamhoofd/components";
-import { AppManager, LoginHelper, Session } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, Session, UrlHelper } from '@stamhoofd/networking';
 import { Component, Mixins, Prop, Ref } from "vue-property-decorator";
 
 @Component({
@@ -97,6 +97,11 @@ export default class LoginView extends Mixins(NavigationMixin){
                 this.animating = false;
             }, 300);
         }
+
+        UrlHelper.shared.clear()
+
+        // Reset url if we log out
+        UrlHelper.setUrl("/login/" + this.session.organizationId)
     }
 
     help() {
