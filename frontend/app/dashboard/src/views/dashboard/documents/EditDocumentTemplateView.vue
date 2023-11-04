@@ -4,10 +4,6 @@
             {{ title }}
         </h1>
 
-        <p v-if="isNew" class="info-box">
-            <span>Momenteel is het enkel mogelijk om fiscale attesten voor kinderopvang te genereren. Lees alle informatie na via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/fiscaal-attest-kinderopvang/'" target="_blank">deze pagina</a></span>
-        </p>
-
         <STErrorsDefault :error-box="errorBox" />
 
         <STInputBox v-if="isNew" title="Type document" error-fields="type" :error-box="errorBox">
