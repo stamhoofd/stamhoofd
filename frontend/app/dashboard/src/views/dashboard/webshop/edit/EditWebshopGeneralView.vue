@@ -14,14 +14,17 @@
         </STInputBox>
 
         <hr>
-        <h2>Ticketverkoop</h2>
+        <h2>Type</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.None" />
                 <h3 class="style-title-list">
-                    Webshop zonder scanners
+                    Webshop
                 </h3>
+                <p class="style-description">
+                    Webshop zonder scanners. Er worden geen tickets aangemaakt.
+                </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
@@ -29,7 +32,7 @@
                     Ticketverkoop voor groepen
                 </h3>
                 <p class="style-description">
-                    Ideaal voor een eetfestijn
+                    Eén ticket per bestelling. Ideaal voor een eetfestijn
                 </p>
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -38,7 +41,7 @@
                     Ticketverkoop voor personen
                 </h3>
                 <p class="style-description">
-                    Ideaal voor een fuif
+                    Eén ticket per artikel. Ideaal voor een fuif
                 </p>
             </STListItem>
         </STList>
@@ -50,7 +53,7 @@
             Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
         </p>
 
-        <template v-if="roles.length > 0">
+        <template v-if="isNew && roles.length > 0">
             <hr>
             <h2>Toegangsbeheer</h2>
             <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
