@@ -431,16 +431,20 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 
     get paymentMethods() {
+        const extra: PaymentMethod[] = []
+
+        if (this.getFeatureFlag('stamhoofd-pay-by-saved')) {
+            extra.push(PaymentMethod.DirectDebit)
+        }
+
         if (this.getFeatureFlag('stamhoofd-pay-by-transfer')) {
-            if (this.country == Country.Netherlands) {
-                return [PaymentMethod.iDEAL, PaymentMethod.Bancontact, PaymentMethod.CreditCard, PaymentMethod.Transfer]
-            }
-            return [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard, PaymentMethod.Transfer]
+            extra.push(PaymentMethod.Transfer)
         }
+
         if (this.country == Country.Netherlands) {
-            return [PaymentMethod.iDEAL, PaymentMethod.Bancontact, PaymentMethod.CreditCard]
+            return [PaymentMethod.iDEAL, PaymentMethod.Bancontact, PaymentMethod.CreditCard, ...extra]
         }
-        return [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard]
+        return [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard, ...extra]
     }
     
     async checkout() {
@@ -480,7 +484,11 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 window.location.href = response.data.paymentUrl;
             } else {
                 // Reload organization
-                SessionManager.currentSession?.fetchOrganization().catch(e => console.error)
+                try {
+                    await SessionManager.currentSession?.fetchOrganization();
+                } catch (e) {
+                    console.error(e)
+                }
                 new CenteredMessage("Gelukt", "Het pakket wordt meteen geactiveerd").addCloseButton().show()
                 this.show({
                     components: [new ComponentWithProperties(PackageSettingsView)], 

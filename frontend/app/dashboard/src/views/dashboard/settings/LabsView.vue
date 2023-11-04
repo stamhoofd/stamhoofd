@@ -49,6 +49,10 @@
                 Stamhoofd betalen via overschrijving
             </Checkbox>
 
+            <Checkbox :checked="getFeatureFlag('stamhoofd-pay-by-saved')" @change="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
+                Stamhoofd betalen via opgeslagen betaalmethode
+            </Checkbox>
+
             <Checkbox :checked="getFeatureFlag('stripe-multiple')" @change="setFeatureFlag('stripe-multiple', !!$event)">
                 Meerdere Stripe accounts toestaan
             </Checkbox>

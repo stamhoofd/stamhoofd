@@ -52,7 +52,7 @@ class EmailStatic {
                 pass: STAMHOOFD.SMTP_PASSWORD // generated ethereal password
             }
         });
-
+        
         // create reusable transporter object using the default SMTP transport
         this.transactionalTransporter = nodemailer.createTransport({
             pool: true,

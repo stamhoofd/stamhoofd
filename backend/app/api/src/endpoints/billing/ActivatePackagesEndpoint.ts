@@ -254,6 +254,41 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 payment.price = price
                 payment.paidAt = null
                 payment.provider = PaymentProvider.Mollie
+
+                // Do some quick validatiosn before creating the payment (otherwise we'll have to mark it as failed)
+                let _molliePaymentMethod: molliePaymentMethod | undefined = molliePaymentMethod.bancontact
+                let sequenceType: SequenceType | undefined = SequenceType.first
+
+                if (payment.method == PaymentMethod.iDEAL) {
+                    _molliePaymentMethod = molliePaymentMethod.ideal
+                } else if (payment.method == PaymentMethod.CreditCard) {
+                    _molliePaymentMethod = molliePaymentMethod.creditcard
+                } else if (payment.method == PaymentMethod.Transfer) {
+                    _molliePaymentMethod = molliePaymentMethod.banktransfer
+                    sequenceType = SequenceType.oneoff
+                } else if (payment.method == PaymentMethod.DirectDebit) {
+                    const pendingInvoice = await STPendingInvoice.getForOrganization(user.organization.id)
+
+                    if (pendingInvoice && pendingInvoice.invoiceId !== null && pendingInvoice.invoiceId !== invoice.id) {
+                        throw new SimpleError({
+                            code: "payment_pending",
+                            message: "Payment pending",
+                            human: "Er is momenteel al een afrekening in behandeling (dit kan 3 werkdagen duren). Probeer een andere betaalmethode."
+                        })
+                    }
+                    
+                    // Use saved payment method
+                    _molliePaymentMethod = undefined
+                    sequenceType = SequenceType.recurring
+
+                    if (!user.organization.serverMeta.mollieCustomerId) {
+                        throw new SimpleError({
+                            code: "no_mollie_customer",
+                            message: "Er is geen opgeslagen betaalmethode gevonden. Probeer te betalen via een andere betaalmethode."
+                        })
+                    }
+                }
+
                 await payment.save()
 
                 invoice.paymentId = payment.id
@@ -271,7 +306,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     }));
                 }
 
-
                 try {
                     // Mollie payment is required
                     const apiKey = STAMHOOFD.MOLLIE_API_KEY
@@ -285,6 +319,12 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     let customerId = user.organization.serverMeta.mollieCustomerId
 
                     if (!user.organization.serverMeta.mollieCustomerId) {
+                        if (payment.method === PaymentMethod.DirectDebit) {
+                            throw new SimpleError({
+                                code: "no_mollie_customer",
+                                message: "Er is geen opgeslagen betaalmethode gevonden. Probeer te betalen via een andere betaalmethode."
+                            })
+                        }
                         const mollieCustomer = await mollieClient.customers.create({
                             name: user.organization.name,
                             email: user.email,
@@ -300,18 +340,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         await user.organization.save()
                     }
 
-                    let _molliePaymentMethod = molliePaymentMethod.bancontact
-
-                    if (payment.method == PaymentMethod.iDEAL) {
-                        _molliePaymentMethod = molliePaymentMethod.ideal
-                    } else if (payment.method == PaymentMethod.CreditCard) {
-                        _molliePaymentMethod = molliePaymentMethod.creditcard
-                    } else if (payment.method == PaymentMethod.Transfer) {
-                        _molliePaymentMethod = molliePaymentMethod.banktransfer
-                    } else if (payment.method == PaymentMethod.DirectDebit) {
-                        _molliePaymentMethod = molliePaymentMethod.directdebit
-                    }
-
                     const molliePayment = await mollieClient.payments.create({
                         amount: {
                             currency: 'EUR',
@@ -320,7 +348,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         method: _molliePaymentMethod,
                         description,
                         customerId,
-                        sequenceType: _molliePaymentMethod !== molliePaymentMethod.banktransfer && _molliePaymentMethod !== molliePaymentMethod.directdebit ? SequenceType.first : undefined,
+                        sequenceType,
                         redirectUrl: "https://"+STAMHOOFD.domains.dashboard+'/settings/billing/payment?id='+encodeURIComponent(payment.id),
                         webhookUrl: 'https://'+STAMHOOFD.domains.api+"/v"+Version+"/billing/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
                         metadata: {
@@ -329,6 +357,13 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         },
                         billingEmail: user.email,
                     });
+
+                    if (molliePayment.method === 'creditcard') {
+                        console.log("Corrected payment method to creditcard")
+                        payment.method = PaymentMethod.CreditCard
+                        await payment.save();
+                    }
+
                     console.log(molliePayment)
                     const paymentUrl = molliePayment.getCheckoutUrl() ?? undefined
 
@@ -348,10 +383,16 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         await payment.save()
                     }
 
-                    if (payment.method == PaymentMethod.Transfer) {
+                    if (sequenceType === SequenceType.recurring) {
                         // Activate package
                         await invoice.activatePackages(false)
                         await STPackage.updateOrganizationPackages(user.organizationId)
+
+                        const pendingInvoice = await STPendingInvoice.getForOrganization(user.organization.id)
+                        if (pendingInvoice) {
+                            pendingInvoice.invoiceId = invoice.id
+                            await pendingInvoice.save()
+                        }
                     }
 
                     return new Response(STInvoiceResponse.create({
@@ -362,7 +403,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     console.error(e)
                     payment.status = PaymentStatus.Failed
                     await payment.save()
-                    await invoice.markFailed(payment)
+                    await invoice.markFailed(payment, false)
 
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         throw e
