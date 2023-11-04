@@ -24,11 +24,9 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, STNavigationBar } from "@stamhoofd/components";
-import { BackButton, FilterGroupView, STToolbar } from "@stamhoofd/components";
-import { Filter, FilterDefinition, Organization, Version } from "@stamhoofd/structures";
-import { FilterGroup, MemberWithRegistrations } from "@stamhoofd/structures";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { BackButton, FilterGroupView, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Filter, FilterDefinition, FilterGroup, Organization } from "@stamhoofd/structures";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 
 @Component({
@@ -41,19 +39,19 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class FilterEditor extends Mixins(NavigationMixin) {
     @Prop({ default: "Filter" })
-    title!: string
+        title!: string
 
     @Prop({ required: true })
-    selectedFilter!: FilterGroup<any> | null
+        selectedFilter!: FilterGroup<any> | null
 
     @Prop({ required: true })
-    setFilter: (filter: Filter<any>) => void
+        setFilter: (filter: Filter<any>) => void
 
     @Prop({ required: true })
-    definitions!: FilterDefinition[]
+        definitions!: FilterDefinition[]
 
     @Prop({ required: false })
-    organization?: Organization
+        organization?: Organization
 
     editingFilter: FilterGroup<any> = (this.selectedFilter?.clone() ?? new FilterGroup<any>(this.definitions)) as FilterGroup<any>
 
@@ -64,6 +62,11 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
         }
     }
 
+    @Watch('editingFilter', { deep: true })
+    onFilterChanged() {
+        this.setFilter(this.editingFilter)
+    }
+
     resetFilter() {
         this.setFilter(new FilterGroup<any>(this.definitions))
         this.dismiss({ force: true })
@@ -72,20 +75,6 @@ export default class FilterEditor extends Mixins(NavigationMixin) {
     applyFilter() {
         this.setFilter(this.editingFilter)
         this.dismiss({ force: true })
-    }
-
-    isChanged() {
-        if (this.selectedFilter === null) {
-            return this.editingFilter.filters.length > 0
-        }
-        return JSON.stringify(this.editingFilter.encode({ version: Version })) != JSON.stringify(this.selectedFilter.encode({ version: Version }))
-    }
-
-    async shouldNavigateAway() {
-        if (!this.isChanged()) {
-            return true
-        }
-        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 }
 </script>

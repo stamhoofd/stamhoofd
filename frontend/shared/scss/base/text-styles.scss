@@ -266,7 +266,7 @@
 
 .style-description-small {
     font-size: 14px;
-    line-height: 1.4;
+    line-height: 1.5;
     font-weight: $font-weight-default;
     color: $color-gray-text;
     font-variation-settings: 'opsz' 19;
@@ -367,12 +367,6 @@
     font-size: 15px;
     font-weight: $font-weight-default;
     color: $color-gray-5;
-}
-
-.style-description-small {
-    font-size: 14px;
-    font-weight: $font-weight-default;
-    line-height: 1.5;
 }
 
 .style-context-menu-item {
@@ -700,24 +694,27 @@
     vertical-align: text-bottom;
 
     &.warn {
-        color: $color-warning;
+        background: $color-warning;
     }
 
     &.error {
-        color: $color-error;
+        background: $color-error;
     }
 
     &.success {
-        color: $color-success;
+        background: $color-success;
     }
 
+    &.primary {
+        background: $color-primary;
+    }
 
     &.secundary {
-        color: $color-secundary;
+        background: $color-secundary;
     }
 
     &.tertiary {
-        color: $color-tertiary;
+        background: $color-tertiary;
     }
 }
 
