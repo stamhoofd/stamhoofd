@@ -1,11 +1,11 @@
-import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { LoginHelper, Session, SessionManager } from '@stamhoofd/networking'
-import { Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures'
+import { Group, Organization, OrganizationAdmins, OrganizationPatch, STBillingStatus } from '@stamhoofd/structures'
 
 import LoginView from '../views/login/LoginView.vue';
 
@@ -73,6 +73,17 @@ export class OrganizationManagerStatic {
         this.save().catch(console.error)
 
         return this.organization as any
+    }
+
+    async loadArchivedGroups({owner}: {owner?: any}) {
+        const response = await SessionManager.currentSession!.authenticatedServer.request({
+            method: "GET",
+            path: "/organization/archived-groups",
+            decoder: new ArrayDecoder(Group as Decoder<Group>),
+            owner
+        })
+
+        return response.data.sort((a, b) => b.settings.endDate.getTime() - a.settings.endDate.getTime())
     }
 
     /**

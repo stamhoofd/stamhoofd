@@ -87,7 +87,12 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     get enableMemberModule() {
-        return this.organization.meta.packages.useMembers || this.loadingModule === STPackageType.TrialMembers
+        if (this.organization.meta.packages.useMembers || this.loadingModule === STPackageType.TrialMembers) {
+            return true;
+        }
+        
+        // Check if previously bought the package and not removeAt yet
+        return !this.organization.meta.packages.canStartMembersTrial;
     }
 
     set enableMemberModule(enable: boolean) {
@@ -132,7 +137,12 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     get enableActivities() {
-        return this.organization.meta.modules.useActivities
+        if (this.organization.meta.modules.useActivities) {
+            return true;
+        }
+        
+        // Check if previously bought the package and not removeAt yet
+        return !this.organization.meta.packages.canStartMembersTrial;
     }
 
     set enableActivities(enable: boolean) {
@@ -153,7 +163,12 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     get enableWebshopModule() {
-        return this.organization.meta.packages.useWebshops || this.loadingModule === STPackageType.TrialWebshops
+        if (this.organization.meta.packages.useWebshops || this.loadingModule === STPackageType.TrialWebshops) {
+            return true;
+        }
+
+        // Check if previously bought the package and not removeAt yet
+        return !this.organization.meta.packages.canStartWebshopsTrial;
     }
 
     set enableWebshopModule(enable: boolean) {

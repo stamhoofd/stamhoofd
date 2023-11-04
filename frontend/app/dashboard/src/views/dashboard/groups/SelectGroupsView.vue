@@ -18,9 +18,36 @@
                         <h2 class="style-title-list">
                             {{ group.settings.name }}
                         </h2>
+                        <p class="style-description-small">
+                            {{ group.getTimeRangeOffset(cycleOffset) }}
+                        </p>
                     </STListItem>
                 </STList>
             </div>
+
+            <template v-if="allowArchived">
+                <Spinner v-if="loadingGroups" />
+                <template v-else-if="archivedGroups.length">
+                    <hr>
+                    <h2>Archief</h2>
+
+                    <STList>
+                        <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" element-name="label" class="right-stack left-center">
+                            <Checkbox slot="left" :checked="getSelectedGroup(group)" @change="setSelectedGroup(group, $event)" />
+                            <h2 class="style-title-list">
+                                {{ group.settings.name }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ group.getTimeRangeOffset(cycleOffset) }}
+                            </p>
+                        </STListItem>
+                    </STList>
+                </template>
+            </template>
+
+            <p v-if="categoryTree.categories.length === 0 && archivedGroups.length === 0 && !loadingGroups" class="info-box">
+                Geen inschrijvingsgroepen beschikbaar om te selecteren.
+            </p>
         </main>
 
         <STToolbar>
@@ -34,9 +61,10 @@
 </template>
 
 <script lang="ts">
+import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, EmailInput, ErrorBox, LoadingButton, PhoneInput, Radio, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { Group } from "@stamhoofd/structures"
+import { CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
+import { Group } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -47,33 +75,45 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
         STNavigationBar,
         STErrorsDefault,
         STInputBox,
-        AddressInput,
-        Radio,
-        PhoneInput,
-        EmailInput,
+        Spinner,
         Checkbox,
         STList,
         STListItem,
-        BackButton,
         LoadingButton
     }
 })
 export default class SelectGroupsView extends Mixins(NavigationMixin) {
-
     @Prop({ required: true })
-    initialGroupIds!: string[]
+        initialGroupIds!: string[]
+
+    @Prop({ default: true })
+        allowArchived!: boolean
+
+    @Prop({ default: 0 })
+        cycleOffset!: number
 
     groupIds = this.initialGroupIds.slice()
 
     @Prop({ required: true })
-    callback: (groupIds: string[]) => Promise<void>
+        callback: (groupIds: string[]) => Promise<void>
 
     errorBox: ErrorBox | null = null
     loading = false
     validator = new Validator()
 
+    archivedGroups: Group[] = []
+    loadingGroups = true
+
     get categoryTree() {
-        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true})
+        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: true, smartCombine: true, filterGroups: this.filterGroup})
+    }
+
+    filterGroup(group: Group) {
+        return group.cycle >= this.cycleOffset
+    }
+
+    mounted() {
+        this.load().catch(console.error)
     }
 
     getSelectedGroup(group: Group): boolean {
@@ -119,5 +159,25 @@ export default class SelectGroupsView extends Mixins(NavigationMixin) {
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
+
+    async load() {
+        if (!this.allowArchived) {
+            this.loadingGroups = false
+            return;
+        }
+
+        try {
+            this.archivedGroups = (await OrganizationManager.loadArchivedGroups({owner: this})).filter(this.filterGroup)
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+        this.loadingGroups = false
+    }
+
+    beforeDestroy() {
+        // Cancel all requests
+        Request.cancelAll(this)
+    }
+
 }
 </script>

@@ -37,10 +37,9 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
+import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Spinner,STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
-import { SessionManager } from "@stamhoofd/networking";
+import { BackButton, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { DocumentTemplateGroup, Group, RecordCategory } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -94,16 +93,14 @@ export default class ChooseDocumentTemplateGroup extends Mixins(NavigationMixin)
         this.load().catch(console.error)
     }
 
+    beforeDestroy() {
+        // Cancel all requests
+        Request.cancelAll(this)
+    }
+
     async load() {
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "GET",
-                path: "/organization/archived-groups",
-                decoder: new ArrayDecoder(Group as Decoder<Group>),
-                owner: this
-            })
-
-            this.archivedGroups = response.data.sort((a, b) => b.settings.endDate.getTime() - a.settings.endDate.getTime())
+            this.archivedGroups = await OrganizationManager.loadArchivedGroups({owner: this})
         } catch (e) {
             Toast.fromError(e).show()
         }
