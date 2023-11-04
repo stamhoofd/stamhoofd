@@ -14,6 +14,8 @@
 </template>
 
 <script lang="ts">
+import { SimpleError } from "@simonbackx/simple-errors";
+import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
@@ -30,16 +32,16 @@ import Spinner from "../Spinner.vue";
 })
 export default class FileInput extends Mixins(NavigationMixin) {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
     
     @Prop({ default: null })
-    value: File | null;
+        value: File | null;
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     errorBox: ErrorBox | null = null
 
@@ -56,6 +58,10 @@ export default class FileInput extends Mixins(NavigationMixin) {
         }
     }
 
+    beforeDestroy() {
+        Request.cancelAll(this)
+    }
+
     changedFile(event) {
         if (!event.target.files || event.target.files.length != 1) {
             return;
@@ -65,6 +71,14 @@ export default class FileInput extends Mixins(NavigationMixin) {
         }
 
         const file = event.target.files[0];
+
+        if (file.size > 20 * 1024 * 1024) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: 'file_too_large',
+                message: 'De bestandsgrootte is te groot. Het bestand mag maximaal 20MB groot zijn.'
+            }))
+            return;
+        }
 
         const formData = new FormData();
         formData.append("file", file);
@@ -78,7 +92,9 @@ export default class FileInput extends Mixins(NavigationMixin) {
                 path: "/upload-file",
                 body: formData,
                 decoder: File,
-                timeout: 60*1000
+                timeout: 60*1000,
+                shouldRetry: false,
+                owner: this
             })
             .then(response => {
                 this.$emit("input", response.data)
