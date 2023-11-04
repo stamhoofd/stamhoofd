@@ -33,17 +33,17 @@ export class PropertyFilter<T> implements Encodeable {
             // Always enabled
 
             if (decodedRequiredWhen === null) {
-                return "Optioneel invullen"
+                return "Stap kan worden overgeslagen"
             }
             if (decodedRequiredWhen.filters.length == 0) {
-                return "Verplicht invullen"
+                return "Stap kan niet worden overgeslagen"
             }
 
-            return "Verplicht invullen als: "+decodedRequiredWhen.toString()
+            return "Stap kan niet worden overgeslagen als: "+decodedRequiredWhen.toString()
         }
 
         if (decodedRequiredWhen === null) {
-            return "Ingeschakeld, en altijd optioneel als: "+decodedEnabledWhen.toString()
+            return "Ingeschakeld (kan altijd worden overgeslagen) als: "+decodedEnabledWhen.toString()
         }
 
         if (decodedRequiredWhen.filters.length == 0) {

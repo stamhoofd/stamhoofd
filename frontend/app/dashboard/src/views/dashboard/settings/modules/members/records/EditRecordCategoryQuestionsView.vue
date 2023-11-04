@@ -87,8 +87,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
-import { RecordEditorSettings } from '@stamhoofd/structures';
-import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordAnswer, RecordCategory, RecordSettings } from "@stamhoofd/structures";
+import { MemberDetailsWithGroups, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, RecordSettings } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../../classes/OrganizationManager';
