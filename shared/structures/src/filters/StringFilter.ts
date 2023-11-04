@@ -25,7 +25,10 @@ export class StringFilterDefinition<T> extends FilterDefinition<T, StringFilter<
 export enum StringFilterMode {
     Contains = "Contains",
     Equals = "Equals",
-    NotContains = "NotContains"
+    NotContains = "NotContains",
+    NotEquals = "NotEquals",
+    NotEmpty = "NotEmpty",
+    Empty = "Empty"
 }
 
 export class StringFilter<T> extends Filter<T> {
@@ -43,6 +46,15 @@ export class StringFilter<T> extends Filter<T> {
         }
         if (this.mode === StringFilterMode.Equals) {
             return StringCompare.typoCount(str, this.value) == 0
+        }
+        if (this.mode === StringFilterMode.NotEquals) {
+            return StringCompare.typoCount(str, this.value) != 0
+        }
+        if (this.mode === StringFilterMode.NotEmpty) {
+            return str != ""
+        }
+        if (this.mode === StringFilterMode.Empty) {
+            return str == ""
         }
         return false
     }
@@ -67,6 +79,15 @@ export class StringFilter<T> extends Filter<T> {
         }
         if (this.mode === StringFilterMode.Equals) {
             return this.definition.name + " is gelijk aan "+this.value
+        }
+        if (this.mode === StringFilterMode.NotEquals) {
+            return this.definition.name + " is niet gelijk aan "+this.value
+        }
+        if (this.mode === StringFilterMode.NotEmpty) {
+            return this.definition.name + " is niet leeg"
+        }
+        if (this.mode === StringFilterMode.Empty) {
+            return this.definition.name + " is leeg"
         }
         return "Onbekend"
     }
