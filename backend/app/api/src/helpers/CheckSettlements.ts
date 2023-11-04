@@ -24,6 +24,24 @@ type MolliePaymentJSON = {
 
 let lastSettlementCheck: Date | null = null
 
+export async function checkAllStripePayouts(checkAll = false) {
+    // Stripe payouts
+    const stripeAccounts = await StripeAccount.all()
+    for (const account of stripeAccounts) {
+        try {
+            console.log("Checking settlements for ", account.accountId)
+
+            const checker = new StripePayoutChecker({
+                secretKey: STAMHOOFD.STRIPE_SECRET_KEY,
+                stripeAccount: account.accountId
+            })
+            await checker.checkSettlements(checkAll)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+}
+
 export async function checkSettlements(checkAll = false) {
     if (!checkAll && lastSettlementCheck && (lastSettlementCheck > new Date(new Date().getTime() - 24 * 60 * 60 * 1000))) {
         console.log("Skip settlement check")
@@ -49,20 +67,7 @@ export async function checkSettlements(checkAll = false) {
     // Loop all mollie tokens created after given date (when settlement permission was added)
     try {
         // Stripe payouts
-        const stripeAccounts = await StripeAccount.all()
-        for (const account of stripeAccounts) {
-            try {
-                console.log("Checking settlements for ", account.accountId)
-
-                const checker = new StripePayoutChecker({
-                    secretKey: STAMHOOFD.STRIPE_SECRET_KEY,
-                    stripeAccount: account.accountId
-                })
-                await checker.checkSettlements(checkAll)
-            } catch (e) {
-                console.error(e)
-            }
-        }
+        await checkAllStripePayouts(checkAll)
 
         const mollieTokens = await MollieToken.all()
         for (const token of mollieTokens) {
