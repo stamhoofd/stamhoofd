@@ -775,7 +775,7 @@ export class Organization extends Model {
         const allPaymentMethods = Object.values(PaymentMethod)
         const providers: PaymentProvider[] = []
 
-        let stripeAccounts: (StripeAccount|null)[] = await StripeAccount.where({ organizationId: this.id })
+        let stripeAccounts: (StripeAccount|null)[] = await StripeAccount.where({ organizationId: this.id, status: 'active' })
 
         if (stripeAccounts.length === 0) {
             stripeAccounts = [null]

@@ -127,4 +127,18 @@ export class RegistrationsFilter<T> extends Filter<T> {
                 return Formatter.capitalizeFirstLetter(Formatter.joinLast(this.choices.map(c => 'niet ingeschreven voor ' + c.name), ", ", " en "))
         }
     }
+
+    get inverted(): RegistrationsFilter<T> {
+        const filter = this.clone() as RegistrationsFilter<T>
+        if (filter.mode === RegistrationsFilterMode.And) {
+            filter.mode = RegistrationsFilterMode.Nand
+        } else if (filter.mode === RegistrationsFilterMode.Nand) {
+            filter.mode = RegistrationsFilterMode.And
+        } else if (filter.mode === RegistrationsFilterMode.Or) {
+            filter.mode = RegistrationsFilterMode.Nor
+        } else if (filter.mode === RegistrationsFilterMode.Nor) {
+            filter.mode = RegistrationsFilterMode.Or
+        }
+        return filter
+    }
 }

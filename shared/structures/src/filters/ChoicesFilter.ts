@@ -20,6 +20,14 @@ export class ChoicesFilterChoice {
 export enum ChoicesFilterMode {
     Or = "Or",
     And = "And",
+    /**
+     * Means !(A || B) == !A && !B
+     */
+    Nor = "Nor",
+    /**
+     * Means !(A && B) == !A || !B
+     */
+    Nand = "Nand",
 }
 
 export class ChoicesFilterDefinition<T> extends FilterDefinition<T, ChoicesFilter<T>, string[]> {
@@ -68,13 +76,19 @@ export class ChoicesFilter<T> extends Filter<T> {
                 if (this.mode === ChoicesFilterMode.Or) {
                     return true
                 }
+                if (this.mode === ChoicesFilterMode.Nor) {
+                    return false
+                }
             } else {
                 if (this.mode === ChoicesFilterMode.And) {
                     return false
                 }
+                if (this.mode === ChoicesFilterMode.Nand) {
+                    return true
+                }
             }
         }
-        return this.mode === ChoicesFilterMode.And
+        return this.mode === ChoicesFilterMode.And || this.mode === ChoicesFilterMode.Nor
     }
 
     encode(context: EncodeContext): PlainObject {
@@ -91,8 +105,31 @@ export class ChoicesFilter<T> extends Filter<T> {
         }
         if (this.mode === ChoicesFilterMode.Or) {
             return this.definition.name + " is "+Formatter.joinLast(this.choiceIds.map(c => this.definition.choices.find(cc => cc.id == c)?.name ?? c), ", ", " of ")
-        } else {
+        } else if (this.mode === ChoicesFilterMode.And) {
             return this.definition.name + " is "+Formatter.joinLast(this.choiceIds.map(c => this.definition.choices.find(cc => cc.id == c)?.name ?? c), ", ", " en ")
+        } else if (this.mode === ChoicesFilterMode.Nor) {
+            return this.definition.name + " is niet "+Formatter.joinLast(this.choiceIds.map(c => this.definition.choices.find(cc => cc.id == c)?.name ?? c), ", niet ", " en ook niet ")
+        } else if (this.mode === ChoicesFilterMode.Nand) {
+            return this.definition.name + " is niet "+Formatter.joinLast(this.choiceIds.map(c => this.definition.choices.find(cc => cc.id == c)?.name ?? c), ", niet ", " of ook niet ")
         }
+    }
+
+    get inverted(): ChoicesFilter<T> {
+        const filter = this.clone() as ChoicesFilter<T>
+        switch (filter.mode) {
+            case ChoicesFilterMode.Or:
+                filter.mode = ChoicesFilterMode.Nor
+                break
+            case ChoicesFilterMode.And:
+                filter.mode = ChoicesFilterMode.Nand
+                break
+            case ChoicesFilterMode.Nor:
+                filter.mode = ChoicesFilterMode.Or
+                break
+            case ChoicesFilterMode.Nand:
+                filter.mode = ChoicesFilterMode.And
+                break
+        }
+        return filter
     }
 }

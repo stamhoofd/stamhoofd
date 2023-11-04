@@ -165,4 +165,22 @@ export class NumberFilter<T> extends Filter<T> {
         }
         return "Onbekend"
     }
+
+    get inverted(): NumberFilter<T> {
+        const filter = this.clone() as NumberFilter<T>
+        if (filter.mode === NumberFilterMode.GreaterThan) {
+            filter.mode = NumberFilterMode.LessThan
+        } else if (filter.mode === NumberFilterMode.LessThan) {
+            filter.mode = NumberFilterMode.GreaterThan
+        } else if (filter.mode === NumberFilterMode.Between) {
+            filter.mode = NumberFilterMode.NotBetween
+        } else if (filter.mode === NumberFilterMode.NotBetween) {
+            filter.mode = NumberFilterMode.Between
+        } else if (filter.mode === NumberFilterMode.NotEqual) {
+            filter.mode = NumberFilterMode.Equal
+        } else if (filter.mode === NumberFilterMode.Equal) {
+            filter.mode = NumberFilterMode.NotEqual
+        }
+        return filter
+    }
 }

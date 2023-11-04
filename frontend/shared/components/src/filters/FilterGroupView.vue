@@ -7,6 +7,20 @@
             <option :value="GroupFilterMode.Or">
                 Minstens één filter is voldoende
             </option>
+            <option :value="GroupFilterMode.Nand">
+                Toon resultaten waarbij niet alle filters matchen
+            </option>
+            <option :value="GroupFilterMode.Nor">
+                Toon resultaten waarbij geen enkele filter matcht
+            </option>
+        </Dropdown>
+        <Dropdown v-else-if="group.filters.length === 1" v-model="mode">
+            <option :value="GroupFilterMode.And">
+                Toon resultaten waarbij de filter matcht
+            </option>
+            <option :value="GroupFilterMode.Nor">
+                Toon resultaten waarbij de filter niet matcht
+            </option>
         </Dropdown>
 
         <div v-for="(filter, index) of group.filters" :key="'filters'+index" class="container">
@@ -27,6 +41,15 @@
             <DateFilterView v-else-if="isDateFilter(filter)" :filter="filter" />
             <ChoicesFilterView v-else-if="isChoicesFilter(filter)" :filter="filter" />
             <RegistrationsFilterView v-else-if="isRegistrationsFilter(filter)" :filter="filter" :organization="organization" />
+            <template v-else-if="isFilterGroup(filter)">
+                <p v-if="filter.toString()">
+                    {{ filter.toString() }}
+                </p>
+                <button class="button text" type="button" @click="editFilterGroup(filter)">
+                    <span class="icon edit" />
+                    <span>Wijzigen</span>
+                </button>
+            </template>
             <p v-else class="error-box">
                 Filter niet ondersteund
             </p>
@@ -47,13 +70,18 @@
                 <span>{{ category.name }}</span>
             </button>
         </p>
+
+        <button class="button text" type="button" @click="addFilterGroup()">
+            <span class="icon add" />
+            <span>Complexe filtergroep</span>
+        </button>
     </div>
 </template>
 
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Dropdown,STInputBox, STListItem } from "@stamhoofd/components"
+import { Dropdown,FilterEditor,STInputBox, STListItem } from "@stamhoofd/components"
 import { ChoicesFilter, DateFilter, Filter, FilterDefinition, FilterGroup, GroupFilterMode, NumberFilter, Organization, RegistrationsFilter, StringFilter } from "@stamhoofd/structures";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
@@ -78,10 +106,10 @@ import StringFilterView from "./StringFilterView.vue"
 })
 export default class FilterGroupView extends Mixins(NavigationMixin)  {
     @Prop({ required: true }) 
-    group: FilterGroup<any>
+        group: FilterGroup<any>
 
     @Prop({ required: false })
-    organization?: Organization
+        organization?: Organization
 
     get GroupFilterMode() {
         return GroupFilterMode
@@ -161,8 +189,33 @@ export default class FilterGroupView extends Mixins(NavigationMixin)  {
         return filter instanceof RegistrationsFilter
     }
 
+    isFilterGroup(filter: Filter<any>): boolean {
+        return filter instanceof FilterGroup
+    }
+
     addFilter(definition: FilterDefinition<any, Filter<any>, any>) {
         this.group.filters.push(definition.createFilter())
+    }
+
+    addFilterGroup() {
+        this.group.filters.push(new FilterGroup<any>(this.group.getDefinitions()))
+    }
+
+    editFilterGroup(filter: FilterGroup<any>) {
+        const index = this.group.filters.indexOf(filter);
+        const displayedComponent = new ComponentWithProperties(FilterEditor, {
+            title: 'Filtergroep wijzigen',
+            selectedFilter: filter,
+            setFilter: (filter) => {
+                this.$set(this.group.filters, index, filter)
+            },
+            definitions: this.group.getDefinitions(),
+            organization: this.organization
+        });
+        this.present({
+            components: [displayedComponent],
+            modalDisplayStyle: 'sheet'
+        });
     }
 
     removeFilter(index: number) {

@@ -50,6 +50,7 @@ export abstract class Filter<T> implements Encodeable {
 
     abstract doesMatch(object: T): boolean
     abstract encode(context: EncodeContext): PlainObject
+    abstract get inverted(): Filter<T>
 
     clone(): Filter<T> {
         const o = new ObjectData(this.encode({ version: 0 }), { version: 0})
