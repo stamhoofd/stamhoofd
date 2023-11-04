@@ -1,7 +1,7 @@
 <template>
     <div class="st-view payconiq-button-view">
         <STNavigationBar title="Payconiq by Bancontact">
-            <button slot="right" class="button icon gray close" type="button" @click="dismiss" />
+            <button slot="right" class="button icon gray close" type="button" @click="close" />
         </STNavigationBar>
 
         <main>
@@ -44,7 +44,7 @@ import PayconiqBannerView from "./PayconiqBannerView.vue";
 })
 export default class PayconiqButtonView extends PayconiqBannerView {
     @Prop({})
-    paymentUrl: string;
+        paymentUrl: string;
 
     getOS(): string {
         var userAgent = navigator.userAgent || navigator.vendor;

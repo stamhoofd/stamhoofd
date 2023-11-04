@@ -35,7 +35,7 @@ export class PayconiqPayment extends Model {
         const response = await PayconiqPayment.request("GET", "/v3/payments/"+this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
         if (response.status) {
             switch (response.status) {
-                case "AUTHORIZED": return PaymentStatus.Created;
+                case "AUTHORIZED": return PaymentStatus.Pending;
                 case "PENDING": return PaymentStatus.Created;
 
                 case "IDENTIFIED": return PaymentStatus.Pending; // Code has been scanned!
@@ -53,6 +53,25 @@ export class PayconiqPayment extends Model {
             code: "",
             message: "Status missing in response"
         })
+    }
+
+    async cancel(organization: Organization): Promise<boolean> {
+        const apiKey = organization.privateMeta.payconiqApiKey
+        if (!apiKey) {
+            throw new SimpleError({
+                code: "",
+                message: "Payconiq API key missing to check the status of the payment"
+            })
+        }
+
+        // Throws on failure
+        try {
+            await PayconiqPayment.request("DELETE", "/v3/payments/"+this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+            return true;
+        } catch (e) {
+            console.error('Failed to cancel Payconiq payment', this.id, this.payconiqId, e)
+            return false;
+        }
     }
 
     static async createTest(organization: Organization): Promise<boolean> {
@@ -164,6 +183,7 @@ export class PayconiqPayment extends Model {
 
                             if (response.statusCode == 204) {
                                 resolve(undefined);
+                                return;
                             }
 
                             let json: any;

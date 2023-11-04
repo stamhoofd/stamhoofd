@@ -170,7 +170,6 @@ export class RecordFactory {
         // Defaults
         record.required = false
         record.sensitive = true
-        record.encrypted = true
 
         //record.encrypted = !this.isPublic(type)
         //record.sensitive = !this.isPublic(type)
@@ -189,7 +188,6 @@ export class RecordFactory {
 
                 // Force same id for group and normal pictures
                 record.id = "legacy-type-"+LegacyRecordType.PicturePermissions
-                record.encrypted = false
                 record.sensitive = false
                 record.type = RecordType.ChooseOne
                 record.required = true
@@ -623,7 +621,6 @@ export class RecordFactory {
             type: RecordType.Text,
             required: true,
             sensitive: true,
-            encrypted: true,
             label: "Naam"
         })
     }

@@ -18,7 +18,7 @@ export class StripeHelper {
         }
 
         const stripe = this.getInstance()
-        const intent = await stripe.paymentIntents.retrieve(model.stripeIntentId)
+        let intent = await stripe.paymentIntents.retrieve(model.stripeIntentId)
         console.log(intent);
         if (intent.status === "succeeded") {
             if (intent.latest_charge) {
@@ -59,7 +59,9 @@ export class StripeHelper {
         if (cancel) {
             try {
                 // Cancel the intent
-                const intent = await stripe.paymentIntents.cancel(model.stripeIntentId)
+                console.log('Cancelling payment intent')
+                intent = await stripe.paymentIntents.cancel(model.stripeIntentId)
+                console.log('Cancelled payment intent', intent)
 
                 if (intent.status === "succeeded") {
                     return PaymentStatus.Succeeded

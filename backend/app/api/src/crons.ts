@@ -430,9 +430,7 @@ async function checkComplaints() {
 
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
-    if (STAMHOOFD.environment === "development") {
-        return
-    }
+    const timeout = STAMHOOFD.environment === 'development' ? 60*1000*2 : 60*1000*11;
     
     // TODO: only select the ID + organizationId
     const payments = await Payment.where({
@@ -444,10 +442,10 @@ async function checkPayments() {
             sign: "IN",
             value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard]
         },
-        // Check all payments that are 15 minutes old and are still pending
+        // Check all payments that are 11 minutes old and are still pending
         createdAt: {
             sign: "<",
-            value: new Date(new Date().getTime() - 60*1000*15)
+            value: new Date(new Date().getTime() - timeout)
         },
     }, {
         limit: 100,

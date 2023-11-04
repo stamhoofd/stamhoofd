@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{name}}</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <style>
+            body, html {
+                padding: 0;
+                margin: 0;
+                font-family: "Helvetica Neue", Arial, sans-serif;
+                line-height: normal;
+                font-size: 14px;
+                overflow-wrap: break-word;
+                font-weight: 400;
+                font-style: normal;
+                font-variant-caps: normal;
+                font-variant-ligatures: normal;
+                font-variant-numeric: normal;
+                font-variant-east-asian: normal;
+            }
+
+            /* Targets all the pages */
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+
+            p, h1, div, h2, h3, h4 {
+                margin: 0;
+                padding: 0;
+            }
+
+            hr {
+                border: 0;
+                border-top: 0.5px solid rgb(186, 186, 186);
+                margin: 20px 0;
+            }
+
+            .form-box p.flex {
+                display: flex;
+                gap: 30px;
+            }
+
+            .page-box > p, .page-box > h1, .page-box > h2, .page-box > h3, .page-box > h4 {
+                padding: 0 4.5px;
+            }
+
+            h1 {
+                font-size: 26px;
+                font-weight: 500;
+            }
+
+            h1 + p {
+                margin-top: 20px;
+            }
+
+            main > div > p {
+                margin: 20px 0;
+            }
+
+            h2 {
+                font-size: 18px;
+                font-weight: 500;
+            }
+
+            h2 span {
+                font-weight: normal;
+                text-decoration: none;
+            }
+
+            .plaintext {
+                white-space: pre-wrap;
+            }
+
+            .space {
+                height: 16px;
+            }
+
+            .checklist {
+                padding-left: 24.5px;
+                position: relative;
+            }
+
+            .checklist::before {
+                content: "□";
+                position: absolute;
+                left: 5.5px;
+            }
+            .checklist.selected::before {
+                content: "■";
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin: 5px 0;
+                table-layout: fixed;
+            }
+
+            table td, table th {
+                border: 0;
+                padding: 2px 7px;
+                text-align: left;
+                vertical-align: top;
+                min-height: 36px;
+            }
+            table th, table td:first-child {
+                font-weight: 500;
+                padding-left: 0;
+                width: 30%;
+            }
+
+            .avoid {
+                page-break-after: avoid;
+            }
+
+            .signature {
+                max-height: 150px;
+                max-width: 100%;
+                display: block;
+                height: auto;
+                width: auto;
+            }
+
+            /* Hide broken images */
+            img {
+                position: relative;
+            }
+            img::before {
+                content: '';
+                width: 100%;
+                height: 100%;
+                background-color: white;
+                position: absolute;
+            }
+
+            footer {
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                text-align: right;
+                color: gray;
+                font-size: 12px;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <div>
+                <h1>{{name}}</h1>
+
+                {{#if comments}}
+                <p class="plaintext">{{comments}}</p>
+                {{/if}}
+
+                {{#if (or registration.showGroup registration.showDate registration.price) }}
+                <hr>
+                <h2>Details</h2>
+                <table>
+                    <tbody>
+                        {{#if registration.showGroup}}
+                        <tr>
+                            <td>Beschrijving</td>
+                            <td>{{ group.name }}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if registration.showDate}}
+                        <tr>
+                            <td>Datum</td>
+                            <td>{{ formatDate registration.startDate }} tot {{ formatDate registration.endDate }}</td>
+                        </tr>
+                        <tr>
+                            <td>Aantal dagen</td>
+                            <td>{{ days registration.startDate registration.endDate }}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if registration.price}}
+                        <tr>
+                            <td>Betaald bedrag</td>
+                            <td>{{ formatPrice registration.price }}</td>
+                        </tr>
+                        {{/if}}
+                    </tbody>
+                </table>
+                {{/if}}
+
+                <hr>
+                <h2>Deelnemer</h2>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Naam</td>
+                            <td>{{member.firstName}} {{member.lastName}}</td>
+                        </tr>
+                        {{#if member.birthDay}}
+                        <tr>
+                            <td>Geboortedatum</td>
+                            <td>{{ formatDate member.birthDay}}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if member.address}}
+                        <tr>
+                            <td>Adres</td>
+                            <td>{{member.address.street}} {{member.address.number}}, {{member.address.postalCode}}
+                                {{member.address.city}}</td>
+                        </tr>
+                        {{/if}}
+                    </tbody>
+                </table>
+
+                <hr>
+                <h2>Organisatie</h2>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Naam</td>
+                            <td>{{organization.name}}</td>
+                        </tr>
+                        {{#if organization.companyNumber}}
+                        <tr>
+                            <td>Ondernemingsnummer</td>
+                            <td>{{organization.companyNumber}}</td>
+                        </tr>
+                        {{/if}}
+                        <tr>
+                            <td>Adres</td>
+                            <td>{{organization.address.street}} {{organization.address.number}}, {{organization.address.postalCode}}
+                                {{organization.address.city}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <hr>
+
+                {{#if commentsFooter}}
+                <p class="plaintext">{{commentsFooter}}</p>
+                {{/if}}
+
+                <p class="avoid">Opgemaakt op {{ formatDate created_at }}</p>
+
+                {{#if signature.image}}
+                    <p class="avoid">Handtekening en/of stempel van de organisatie:</p>
+                    <p class="avoid">{{signature.name}}</p>
+                    <img src="{{src signature.image height=150}}" alt="" width="{{src-width signature.image height=150}}"
+                        height="{{src-width signature.image height=150}}" class="signature" />
+                {{else}}
+                <p>Ondertekend door {{signature.name}}</p>
+                {{/if}}
+            </div>
+            <footer>
+                Volgnummer {{id}}
+            </footer>
+        </main>
+    </body>
+</html>
