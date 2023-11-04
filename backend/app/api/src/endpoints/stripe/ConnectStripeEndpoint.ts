@@ -3,6 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount, Token } from '@stamhoofd/models';
 import { StripeAccount as StripeAccountStruct, StripeMetaData } from "@stamhoofd/structures";
+import Stripe from 'stripe';
 
 import { StripeHelper } from '../../helpers/StripeHelper';
 type Params = Record<string, never>;
@@ -44,11 +45,10 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             })
         }
 
-        // Create a new Stripe account
-        const stripe = StripeHelper.getInstance()
-        const account = await stripe.accounts.create({
+        const type = 'express'
+
+        let expressData: Stripe.AccountCreateParams = {
             country: user.organization.address.country,
-            type: 'express',
             // Problem: we cannot set company or business_type, because then it defaults the structure of the company to one that requires a company number
             /*
             business_type: 'non_profit',
@@ -84,6 +84,17 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
                     }
                 }
             }
+        };
+
+        if (type !== 'express') {
+            expressData = {};
+        }
+
+        // Create a new Stripe account
+        const stripe = StripeHelper.getInstance()
+        const account = await stripe.accounts.create({
+            type,
+            ...expressData
         });
 
         // Save the Stripe account in the database

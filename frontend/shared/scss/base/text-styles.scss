@@ -824,3 +824,12 @@
         }
     }
 }
+
+.style-code {
+    @extend .style-input-box;
+    display: block;
+    padding: 15px;
+    background: $color-background-shade;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
