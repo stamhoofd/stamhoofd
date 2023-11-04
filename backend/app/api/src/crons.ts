@@ -434,7 +434,7 @@ async function checkPayments() {
         return;
     }
 
-    const timeout = 60*1000*11;
+    const timeout = 60*1000*16;
     
     // TODO: only select the ID + organizationId
     const payments = await Payment.where({
