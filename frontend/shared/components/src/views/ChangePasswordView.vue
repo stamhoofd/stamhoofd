@@ -4,6 +4,8 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
+        <input id="username" style="display: none;" type="text" name="username" autocomplete="username" :value="email">
+
         <STInputBox title="Kies een wachtwoord">
             <input v-model="password" class="input" enterkeyhint="next" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
         </STInputBox>
@@ -19,8 +21,8 @@
 <script lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ErrorBox, LoadingButton, PasswordStrength, SaveView,STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
-import { LoginHelper, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { ErrorBox, LoadingButton, PasswordStrength, SaveView, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from "@stamhoofd/components";
+import { LoginHelper, SessionManager } from '@stamhoofd/networking';
 import { Component, Mixins } from "vue-property-decorator";
 
 @Component({
@@ -42,6 +44,10 @@ export default class ChangePasswordView extends Mixins(NavigationMixin){
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
+
+    get email() {
+        return SessionManager.currentSession?.user?.email ?? ""
+    }
 
     async submit() {
         if (this.loading) {
