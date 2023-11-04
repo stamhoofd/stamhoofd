@@ -174,7 +174,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                         // Only now we can update the transfer description, since we need the order number as a reference
                         payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings)
-                        payment.generateDescription(organization, (order.number ?? "")+"")
+                        payment.generateDescription(organization, (order.number ?? "")+"", order.getTransferReplacements())
                         await payment.save()
                         await order.save()
                     } else if (payment.method == PaymentMethod.PointOfSale) {

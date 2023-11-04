@@ -99,9 +99,9 @@ export class Payment extends Model {
     @column({ type: "string", nullable: true })
     ibanName: string | null = null;
 
-    generateDescription(organization: Organization, reference: string) {
+    generateDescription(organization: Organization, reference: string, replacements: { [key: string]: string } = {}) {
         const settings = this.transferSettings ?? organization.meta.transferSettings
-        this.transferDescription = settings.generateDescription(reference, organization.address.country)
+        this.transferDescription = settings.generateDescription(reference, organization.address.country, replacements)
     }
 
     /**

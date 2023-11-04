@@ -11,6 +11,13 @@ export enum TransferDescriptionType {
     "Fixed" = "Fixed" // Use a fixed description
 }
 
+function replaceReplacements(str: string, replacements: { [key: string]: string }) {
+    for (const key in replacements) {
+        str = str.replace("{{" + key + "}}", replacements[key])
+    }
+    return str
+}
+
 export class TransferSettings extends AutoEncoder {
     @field({ decoder: new EnumDecoder(TransferDescriptionType) })
     type = TransferDescriptionType.Structured
@@ -42,7 +49,7 @@ export class TransferSettings extends AutoEncoder {
         return this.iban;
     }
 
-    generateDescription(reference: string, country: Country) {
+    generateDescription(reference: string, country: Country, replacements: { [key: string]: string } = {}) {
         if (this.type == TransferDescriptionType.Structured) {
             if (country === Country.Belgium) {
                 return TransferSettings.generateOGM()
@@ -51,10 +58,10 @@ export class TransferSettings extends AutoEncoder {
         }
 
         if (this.type == TransferDescriptionType.Reference) {
-            return (this.prefix ? (this.prefix + " ") : "" ) + reference
+            return replaceReplacements(this.prefix ? (this.prefix + " ") : "", replacements) + reference
         }
 
-        return this.prefix
+        return replaceReplacements(this.prefix ?? '', replacements)
     }
 
     static generateOGMNL() {

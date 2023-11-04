@@ -25,7 +25,7 @@
                     <h3 class="style-title-list">
                         {{ getName(method) }}
                     </h3>
-                    <p v-if="showPrices" class="style-description pre-wrap" v-text="getDescription(method)" />
+                    <p v-if="showPrices && getPaymentMethod(method)" class="style-description pre-wrap" v-text="getDescription(method)" />
                 </STListItem>
             </STList>
         </div>
@@ -170,20 +170,20 @@ export default class EditPaymentMethodsBox extends Vue {
                 return this.providerText(provider, {
                     [PaymentProvider.Buckaroo]: "Via Buckaroo",
                     [PaymentProvider.Mollie]: "Via Mollie",
-                    [PaymentProvider.Stripe]: "Via Stripe",
+                    [PaymentProvider.Stripe]: "",
                 })
             
             case PaymentMethod.iDEAL:  
                 return this.providerText(provider, {
                     [PaymentProvider.Buckaroo]: "Via Buckaroo",
                     [PaymentProvider.Mollie]: "Via Mollie",
-                    [PaymentProvider.Stripe]: "Via Stripe",
+                    [PaymentProvider.Stripe]: "",
                 })
             case PaymentMethod.CreditCard: 
                 return this.providerText(provider, {
                     [PaymentProvider.Buckaroo]: "Via Buckaroo",
                     [PaymentProvider.Mollie]: "Via Mollie",
-                    [PaymentProvider.Stripe]: "Via Stripe",
+                    [PaymentProvider.Stripe]: "",
                 })
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return ""

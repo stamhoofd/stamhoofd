@@ -362,10 +362,6 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         return this.preview.getUrl(OrganizationManager.organization)
     }
 
-    get canonicalUrl() {
-        return this.preview.getCanonicalUrl(OrganizationManager.organization)
-    }
-
     get hasFullPermissions() {
         if (!OrganizationManager.user.permissions) {
             return false

@@ -156,7 +156,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             human: "Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder."
                         })
                     }
-                    payment.generateDescription(organization, (order.number ?? "")+"")
+                    payment.generateDescription(organization, (order.number ?? "")+"", order.getTransferReplacements())
                     balanceItem.status = BalanceItemStatus.Pending;
                     await balanceItem.save()
                     await payment.save()

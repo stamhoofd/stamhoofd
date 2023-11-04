@@ -28,19 +28,19 @@
                         <tbody>
                             <tr>
                                 <td>Bedrag</td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100">
+                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="payment.price/100" class="style-copyable">
                                     {{ payment.price | price }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td>Begunstigde</td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor">
+                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="creditor" class="style-copyable">
                                     {{ creditor }}
                                 </td>
                             </tr>
                             <tr v-if="payment.price > 0">
                                 <td>Rekeningnummer</td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban">
+                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="iban" class="style-copyable">
                                     {{ iban }}
                                 </td>
                             </tr>
@@ -54,7 +54,7 @@
                                 <td v-else>
                                     Mededeling
                                 </td>
-                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription">
+                                <td v-tooltip="'Klik om te kopiëren'" v-copyable="transferDescription" class="style-copyable">
                                     {{ formattedTransferDescription }}
                                 </td>
                             </tr>
@@ -63,7 +63,7 @@
                 </div>
                 <div v-if="payment.price > 0" class="hide-smartphone rectangle">
                     <div class="rectangle-top">
-                        Of scan met deze apps
+                        Of schrijf over met deze apps*
                     </div>
                     <div class="rectangle-bottom">
                         <img v-if="isBelgium" src="@stamhoofd/assets/images/partners/scan-apps-belgium.svg">
@@ -150,7 +150,7 @@
             </p>
             <template v-else-if="payment.price > 0 && created">
                 <p v-if="isBelgium" class="hide-smartphone info-box">
-                    De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact.
+                    <span>*De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact. De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). Dit is een overschrijving, niet te verwarren met een online betaling. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betalen-qr-code/'" target="_blank">Meer info</a></span>
                 </p>     
                 <p v-else class="hide-smartphone info-box">
                     De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner.
@@ -339,7 +339,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
         const creditor = this.creditor
 
         // Note: structured reference still as normal description (the structured reference ISO is not supported)
-        return "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
+        return "BCD\n001\n1\nSCT\n\n"+creditor+"\n"+iban+"\nEUR"+(this.payment.price/100).toFixed(2)+"\n\n\n"+this.transferDescription?.substring(0, 140)+"\nhttps://"+this.$t("shared.domains.marketing")+"/docs/betalen-qr-code";
     }
 
     async generateQRCode() {
@@ -354,9 +354,9 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
 
     helpMe() {
         if (this.type === "order") {
-            new CenteredMessage("Het lukt niet", "Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
+            new CenteredMessage("Het lukt niet", "Jouw bestelling is al geplaatst, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.").addCloseButton().show()
         } else {
-            new CenteredMessage("Het lukt niet", "Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Neem je bankapp en voer de overschrijving uit of ga naar de bank om de bovenstaande overschrijving uit te voeren.").addCloseButton().show()
+            new CenteredMessage("Het lukt niet", "Jouw inschrijving is al in orde, probeer dus zeker niet opnieuw! Als het scannen niet lukt, kan je gewoon de overschrijving manueel uitvoeren via de vermelde gegevens. Het scannen van de QR-code is niet noodzakelijk, en werkt niet in elke bankapp. Dit is niet te verwarren met een online betaling, de QR-code neemt enkel de gegevens over in je app zodat je sneller zonder typefouten kan overschrijven.").addCloseButton().show()
         }
     }
 
@@ -482,6 +482,7 @@ export default class TransferPaymentView extends Mixins(NavigationMixin){
     td:first-child {
         @extend .style-title-small;
         padding: 7px 15px 7px 0;
+        white-space: nowrap;
 
         @media (max-width: 400px) {
             font-size: 12px;
