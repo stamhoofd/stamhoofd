@@ -156,7 +156,7 @@
                 </STListItem>
 
                 <template v-if="!disabled">
-                    <STListItem :selectable="true" element-name="label">
+                    <STListItem :selectable="true" :element-name="useEnableAfter ? 'div' : 'label'">
                         <Checkbox slot="left" v-model="useEnableAfter" />
 
                         <h3 class="style-title-list">
@@ -166,7 +166,7 @@
                             Zichtbaar op de webshop, maar pas te bestellen vanaf een bepaalde datum.
                         </p>
 
-                        <div v-if="useEnableAfter" class="split-inputs option" @click.stop.prevent>
+                        <div v-if="useEnableAfter" class="split-inputs option">
                             <STInputBox title="" error-fields="enableAfter" :error-box="errorBox">
                                 <DateSelection v-model="enableAfter" />
                             </STInputBox>
@@ -174,7 +174,7 @@
                         </div>
                     </STListItem>
 
-                    <STListItem :selectable="true" element-name="label">
+                    <STListItem :selectable="true" :element-name="useDisableAfter ? 'div' : 'label'">
                         <Checkbox slot="left" v-model="useDisableAfter" />
 
                         <h3 class="style-title-list">
@@ -184,7 +184,7 @@
                             Zichtbaar op de webshop, maar niet meer te bestellen na een bepaalde datum.
                         </p>
 
-                        <div v-if="useDisableAfter" class="split-inputs option" @click.stop.prevent>
+                        <div v-if="useDisableAfter" class="split-inputs option">
                             <STInputBox title="" error-fields="disableAfter" :error-box="errorBox">
                                 <DateSelection v-model="disableAfter" />
                             </STInputBox>
