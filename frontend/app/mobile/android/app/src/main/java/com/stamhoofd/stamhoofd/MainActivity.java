@@ -15,6 +15,8 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.Window;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
@@ -36,31 +38,8 @@ public class MainActivity extends BridgeActivity {
     protected PermissionRequest pendingPermissionRequest;
 
     void setDarkMode() {
-        // Android "fix" for enabling dark mode
-        // @see: https://github.com/ionic-team/capacitor/discussions/1978
-        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         WebView webView = this.bridge.getWebView();
         WebSettings webSettings = webView.getSettings();
-
-        // Fix background color in dark mode: always use a color that switches depending on the theme
-        webView.setBackgroundColor(this.getResources().getColor(R.color.navigationBarColor));
-
-        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // As of Android 10, you can simply force the dark mode
-                webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
-
-                // Only let CSS do the work
-                if(WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
-                    WebSettingsCompat.setForceDarkStrategy(webSettings, WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY);
-                }
-            }
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
-            }
-        }
-
         webSettings.setDomStorageEnabled(true);
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
@@ -70,8 +49,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         registerPlugin(FileOpenerPlugin.class);
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -84,5 +63,29 @@ public class MainActivity extends BridgeActivity {
     public void onResume() {
         super.onResume();
         setDarkMode();
+        this.updateDarkMode();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        this.updateDarkMode();
+    }
+
+    private void updateDarkMode() {
+        // for some reason we need to explicitly do this
+        Window window = getWindow();
+        window.setNavigationBarColor(ContextCompat.getColor(this, R.color.navigationBarColor));
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.statusBar));
+
+        // Update status bar color
+        int nightModeFlags =
+                window.getContext().getResources().getConfiguration().uiMode &
+                        Configuration.UI_MODE_NIGHT_MASK;
+        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+            window.getDecorView().setSystemUiVisibility(0);
+        } else {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
     }
 }

@@ -18,6 +18,11 @@ const config: CapacitorConfig = {
         PushNotifications: {
             presentationOptions: ["badge", "sound", "alert"]
         }
+    },
+    server: {
+        // Add autocomplete passwords
+        hostname: 'stamhoofd.app',
+        androidScheme: 'https',
     }
 };
 

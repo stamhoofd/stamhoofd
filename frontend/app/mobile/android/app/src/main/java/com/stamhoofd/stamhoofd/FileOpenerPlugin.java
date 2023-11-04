@@ -67,7 +67,7 @@ public class FileOpenerPlugin extends Plugin {
                 return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
             }
         };
-        this.bridge.setWebChromeClient(chromeClient);
+        //this.bridge.setWebChromeClient(chromeClient);
     }
 
     private String getMimeType(String url) {

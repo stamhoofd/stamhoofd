@@ -24,11 +24,6 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We gebruiken de camera om tickets te kunnen scannen</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
