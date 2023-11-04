@@ -17,6 +17,10 @@
             <p v-if="organization.isCategoryDeactivated(category)" class="error-box">
                 Deze categorie is niet zichtbaar voor leden omdat het activiteiten pakket niet is geactiveerd. Er kan dan maar één categorie in gebruik zijn. Via instellingen kunnen hoofdbeheerders pakketten activeren.
             </p>
+
+            <p v-else-if="!category.settings.public" class="info-box">
+                Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.
+            </p>
           
             <STErrorsDefault :error-box="errorBox" />
 
