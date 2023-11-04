@@ -31,6 +31,12 @@ export async function getEmailBuilder(organization: Organization, email: {
                 token: "unsubscribeUrl",
                 value: "https://"+STAMHOOFD.domains.dashboard+"/"+organization.i18n.locale+"/unsubscribe?id="+encodeURIComponent(unsubscribe.id)+"&token="+encodeURIComponent(unsubscribe.token)+"&type=all"
             }))
+
+            // Override headers
+            recipient.headers = {
+                'List-Unsubscribe': "<mailto:unsubscribe+"+unsubscribe.id+"@stamhoofd.email>",
+                'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+            }
             cleaned.push(recipient)
         } catch (e) {
             console.error(e)
@@ -86,20 +92,20 @@ export async function getEmailBuilder(organization: Organization, email: {
         }
 
         let to = recipient.email
-
-        if (recipient.firstName && recipient.lastName) {
-            to = '"'+(recipient.firstName+" "+recipient.lastName).replace("\"", "\\\"")+"\" <"+to+">" 
-        } else if (recipient.firstName) {
-            to = '"'+recipient.firstName.replace("\"", "\\\"")+"\" <"+to+">" 
-        }
-
         return {
             from: email.from,
             replyTo: email.replyTo,
-            to,
+            to: [
+                {
+                    // Name will get cleaned by email service
+                    name: (recipient.firstName??'')+" "+(recipient.lastName??''),
+                    email: recipient.email
+                }
+            ],
             subject: replacedSubject,
             html: replacedHtml ?? undefined,
-            attachments: email.attachments
+            attachments: email.attachments,
+            headers: recipient.headers
         }
     }
     return builder;

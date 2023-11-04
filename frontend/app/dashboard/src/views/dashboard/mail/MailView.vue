@@ -1235,7 +1235,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                         Replacement.create({
                             token: "loginDetails",
                             value: "",
-                            html: user.hasAccount ? `<p class="description"><em>Je kan op het ledenportaal inloggen op <strong>${Formatter.escapeHtml(email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken op <strong>${Formatter.escapeHtml(email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
+                            html: user.hasAccount ? `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml(email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres <strong>${Formatter.escapeHtml(email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
                         }),
                         ...shared
                     ],

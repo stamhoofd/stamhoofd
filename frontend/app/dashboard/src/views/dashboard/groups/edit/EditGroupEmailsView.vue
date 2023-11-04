@@ -338,7 +338,7 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                 id: "loginDetails",
                 name: "Inloggegevens", 
                 example: 'text',
-                html: `<p class="description"><em>Je kan op het ledenportaal inloggen op <strong>${Formatter.escapeHtml('voorbeeld@email.com')}</strong></em></p>`,
+                html: `<p class="description"><em>Je kan op het ledenportaal inloggen met <strong>${Formatter.escapeHtml('voorbeeld@email.com')}</strong></em></p>`,
                 hint: "Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen."
             }),
         ]

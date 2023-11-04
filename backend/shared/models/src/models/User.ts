@@ -1,12 +1,13 @@
 import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version, User as UserStruct, UserMeta, LoginProviderType } from "@stamhoofd/structures";
+import { KeyConstants, NewUser, Organization as OrganizationStruct, Permissions, Version, User as UserStruct, UserMeta, LoginProviderType, ApiUser } from "@stamhoofd/structures";
 import argon2 from "argon2";
 import { Worker } from 'node:worker_threads';
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 
 import { QueueHandler } from "@stamhoofd/queues";
-import { Organization } from "./";
+import { Organization, Token } from "./";
+import { EmailInterfaceRecipient } from "@stamhoofd/email";
 
 export type UserWithOrganization = User & { organization: Organization };
 export type UserForAuthentication = User & { publicAuthSignKey: string; authSignKeyConstants: KeyConstants; authEncryptionKeyConstants: KeyConstants };
@@ -113,6 +114,22 @@ export class User extends Model {
 
     static organization = new ManyToOneRelation(Organization, "organization");
 
+    get name() {
+        if (this.firstName && this.lastName) {
+            return this.firstName + " " + this.lastName;
+        }
+
+        if (this.firstName) {
+            return this.firstName;
+        }
+
+        if (this.lastName) {
+            return this.lastName;
+        }
+
+        return null;
+    }
+
     hasReadAccess(this: UserWithOrganization): this is { permissions: Permissions } {
         return this.permissions?.hasReadAccess(this.organization.privateMeta.roles) ?? false
     }
@@ -179,7 +196,7 @@ export class User extends Model {
 
     static async login(organizationId: string, email: string, password: string): Promise<UserForAuthentication | undefined> {
         const user = await User.getForAuthentication(organizationId, email)
-        if (!user || !user.hasKeys()) {
+        if (!user || !user.hasKeys() || user.isApiUser) {
             return undefined
         }
 
@@ -274,11 +291,32 @@ export class User extends Model {
         return true
     }
 
+    get isApiUser() {
+        return !this.email.includes('@') && this.email.endsWith('.api') && this.verified
+    }
+
+    async toApiUserStruct() {
+        const [lastToken] = await Token.where({
+            userId: this.id
+        }, {limit: 1})
+
+        return ApiUser.create({
+            id: this.id,
+            name: this.name,
+            permissions: this.permissions,
+            expiresAt: lastToken?.accessTokenValidUntil ?? null,
+            createdAt: this.createdAt,
+        })
+    }
+
     hasAccount() {
         if (this.hasPasswordBasedAccount()) {
             return true;
         }
         if ((this.meta?.loginProviderIds?.size ?? 0) > 0) {
+            return true;
+        }
+        if (this.isApiUser) {
             return true;
         }
         return false
@@ -477,12 +515,13 @@ export class User extends Model {
         });
     }
 
-    getEmailTo() {
-        return this.firstName && this.lastName ? ('"'+(this.firstName+" "+this.lastName).replace("\"", "\\\"")+"\" <"+this.email+">") 
-        : (
-            this.firstName ? ('"'+this.firstName.replace("\"", "\\\"")+"\" <"+this.email+">") 
-            : this.email
-        )
+    getEmailTo(): EmailInterfaceRecipient[] {
+        return [
+           {
+                email: this.email,
+                name: this.name
+            }
+        ]
     }
 
 }

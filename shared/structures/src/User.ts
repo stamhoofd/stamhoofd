@@ -1,4 +1,4 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder,EnumDecoder,field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EmailDecoder,EnumDecoder,field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
 import { Permissions } from './Permissions';
@@ -61,4 +61,26 @@ export class MyUser extends NewUser {
      */
     @field({ decoder: new ArrayDecoder(AnyDecoder), optional: true })
     incomingInvites: never[] = []
+}
+
+export class ApiUser extends AutoEncoder {
+    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+    id: string;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 14 })
+    name: string | null = null;
+
+    @field({ decoder: Permissions, nullable: true, version: 2, upgrade: () => null })
+    permissions: Permissions | null = null
+
+    @field({ decoder: DateDecoder })
+    createdAt = new Date();
+
+    @field({ decoder: DateDecoder, nullable: true })
+    expiresAt: Date|null = null;
+}
+
+export class ApiUserWithToken extends ApiUser {
+    @field({ decoder: StringDecoder })
+    token: string;
 }
