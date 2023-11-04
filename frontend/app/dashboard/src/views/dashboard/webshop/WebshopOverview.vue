@@ -31,7 +31,7 @@
                         Scan tickets
                     </h2>
                     <p class="style-description">
-                        Gebruik je camera om snel tickets te scannen en te markeren als 'gescand'
+                        Gebruik je camera om snel tickets te scannen.
                     </p>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
@@ -42,7 +42,7 @@
                         Statistieken
                     </h2>
                     <p class="style-description">
-                        Bekijk jouw omzet en andere statistieken
+                        Bekijk jouw omzet en andere statistieken.
                     </p>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
@@ -70,7 +70,7 @@
                             Algemeen
                         </h2>
                         <p class="style-description">
-                            Naam en beschikbaarheid
+                            Naam, type en beschikbaarheid.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
@@ -103,7 +103,7 @@
                             Afhalen, leveren, ter plaatse eten
                         </h2>
                         <p class="style-description">
-                            Wijzig tijdstippen, locaties en afhaalmethodes
+                            Wijzig tijdstippen, locaties en afhaalmethodes.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
@@ -114,7 +114,7 @@
                             Betaalmethodes
                         </h2>
                         <p class="style-description">
-                            Welke betaalmethodes je wilt activeren op jouw webshop.
+                            Kies welke betaalmethodes je wilt activeren, en stel eventueel administratiekosten in.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
@@ -149,7 +149,7 @@
                             Toegangsbeheer
                         </h2>
                         <p class="style-description">
-                            Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen
+                            Bepaal wie bestellingen en instellingen van deze webshop kan bekijken of wijzigen.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>

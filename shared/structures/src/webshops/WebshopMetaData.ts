@@ -399,6 +399,16 @@ export class WebshopMetaData extends AutoEncoder {
         field: 'paymentMethods',
         optional: true // We no longer expect this from the backend, so it can get removed in a future version
     })
+    @field({ 
+        decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), 
+        version: 208, 
+        field: 'oldPaymentMethods',
+        optional: true, // We no longer expect this from the backend, so it can get removed in a future version
+        downgrade: function() {
+            // This return value for old clients
+            return this.paymentMethods
+        }
+    })
     oldPaymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
 
     /**
@@ -410,6 +420,16 @@ export class WebshopMetaData extends AutoEncoder {
         version: 49, 
         field: 'transferSettings',
         optional: true // We no longer expect this from the backend, so it can get removed in a future version
+    })
+    @field({ 
+        decoder: TransferSettings, 
+        version: 208, 
+        field: 'oldTransferSettings',
+        optional: true, // We no longer expect this from the backend, so it can get removed in a future version
+        downgrade: function() {
+            // This return value for old clients
+            return this.transferSettings
+        }
     })
     oldTransferSettings = TransferSettings.create({})
 
