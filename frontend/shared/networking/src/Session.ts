@@ -51,7 +51,7 @@ export class Session implements RequestMiddleware {
         this.organizationId = organizationId
     }
 
-    async loadFromStorage() {
+    async loadTokenFromStorage() {
         // Check localstorage
         try {
             const json = await Storage.secure.getItem('token-' + this.organizationId)
@@ -65,6 +65,16 @@ export class Session implements RequestMiddleware {
                     console.error(e)
                 }
             }
+        } catch (e) {
+            console.error("Localstorage error")
+            console.error(e)
+        }
+    }
+
+    async loadFromStorage() {
+        // Check localstorage
+        try {
+            await this.loadTokenFromStorage()
 
             if (this.token) {
                 // Also check if we have the user (optional)
@@ -488,6 +498,9 @@ export class Session implements RequestMiddleware {
     // -- Implementation for requestMiddleware ----
 
     async onBeforeRequest(request: Request<any>): Promise<void> {
+        // Check if we have an updated token in storage (other browser tab refreshed the token)
+        await this.loadTokenFromStorage()
+
         if (!this.token) {
             // Euhm? The user is not signed in!
             throw new Error("Could not authenticate request without token")

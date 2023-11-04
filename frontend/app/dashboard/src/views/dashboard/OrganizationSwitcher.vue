@@ -96,7 +96,7 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
     }
 
     async updateDefault() {
-        this.availableSessions = (await SessionManager.availableSessions()).slice(0, 10)
+        this.availableSessions = await SessionManager.availableSessions()
     }
 
     showContextMenu(event) {
