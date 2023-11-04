@@ -158,29 +158,29 @@ enum UserFilter {
 })
 export default class MailView extends Mixins(NavigationMixin) {
     @Prop({ default: () => []})
-    members!: MemberWithRegistrations[];
+        members!: MemberWithRegistrations[];
 
     @Prop({ default: () => []})
-    orders!: PrivateOrder[];
+        orders!: PrivateOrder[];
 
     @Prop({ default: () => []})
-    payments!: PaymentGeneral[];
+        payments!: PaymentGeneral[];
 
     @Prop({ default: null})
-    webshop!: WebshopPreview | null
+        webshop!: WebshopPreview | null
 
     @Prop({ default: () => []})
-    otherRecipients: { firstName?: string; lastName?: string; email: string }[]
+        otherRecipients: { firstName?: string; lastName?: string; email: string }[]
 
     sending = false
 
     addButton = (this.orders.length > 0 && this.webshop) || (this.members.length > 0 && this.hasAllUsers)
 
     @Prop({ default: null })
-    defaultSubject!: string | null
+        defaultSubject!: string | null
 
     @Prop({ default: null })
-    group!: Group | null
+        group!: Group | null
 
     // Make session (organization) reactive
     reactiveSession = SessionManager.currentSession
@@ -666,7 +666,7 @@ export default class MailView extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     getDefaultEmailId() {

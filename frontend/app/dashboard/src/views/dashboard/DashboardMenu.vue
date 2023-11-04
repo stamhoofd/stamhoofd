@@ -5,7 +5,7 @@
                 <OrganizationSwitcher slot="middle" />
             </STNavigationBar>
 
-            <form v-if="false" class="input-icon-container icon search gray">
+            <form v-if="false" class="input-icon-container icon search grayy">
                 <input class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off">
             </form>
 
@@ -13,70 +13,56 @@
 
             <!--<h1 v-if="isNative" @click="switchOrganization">
                 <span>{{ organization.name }}</span>
-                <span class="icon arrow-down-small gray" />
+                <span class="icon arrow-down-small grayy" />
             </h1>
 
             <div v-else class="padding-group">
                 <Logo />
                 <button id="organization-switcher" type="button" @click="switchOrganization">
                     <span class="text">{{ organization.name }}</span>
-                    <span class="icon arrow-down-small gray" />
+                    <span class="icon arrow-down-small grayy" />
                 </button>
             </div>-->
 
 
-            <button v-if="!enableWebshopModule && !enableMemberModule" type="button" class="menu-button button heading cta" @click="openSignupSelection()">
+            <button v-if="!enableWebshopModule && !enableMemberModule" type="button" class="menu-button button cta" @click="openSignupSelection()">
                 <span class="icon flag" />
                 <span>Proefperiode starten</span>
             </button>
 
-            <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" type="button" class="menu-button button heading cta" @click="addWebshop()">
+            <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" type="button" class="menu-button button cta" @click="addWebshop()">
                 <span class="icon add" />
-                <span>Maak je eerste webshop aan</span>
+                <span>Maak nieuwe webshop</span>
             </button>
 
-            <button v-if="enableMemberModule && tree.categories.length == 0 && fullAccess" type="button" class="menu-button button heading cta" @click="manageGroups(true)">
+            <button v-if="enableMemberModule && tree.getAllGroups().length == 0 && fullAccess" type="button" class="menu-button button cta" @click="manageGroups(true)">
                 <span class="icon settings" />
-                <span>Configureer ledenadministratie</span>
+                <span>Ledenadministratie</span>
             </button>
 
 
-            <hr v-if="((!enableWebshopModule && !enableMemberModule) || (enableWebshopModule && canCreateWebshops && webshops.length == 0) || enableMemberModule && tree.categories.length == 0 && fullAccess) && ((enableMemberModule && tree.categories.length) || (enableWebshopModule && webshops.length > 0) || fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive))">
+            <hr v-if="((!enableWebshopModule && !enableMemberModule) || (enableWebshopModule && canCreateWebshops && webshops.length == 0) || enableMemberModule && tree.getAllGroups().length == 0 && fullAccess) && ((enableMemberModule && tree.categories.length) || (enableWebshopModule && webshops.length > 0) || fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive))">
 
-            <!--<div v-if="enableMemberModule" class="grouped">
-                <div class="group-title button">
-                    <span>Favorieten</span>
-                </div>
-
-                <p class="style-description-small">
-                    Voeg inschrijvingsgroepen die je vaak gebruikt toe aan je favorieten. Zo vind je ze snel terug.
-                </p>
-            </div>-->
-            <div class="grouped">
-                <button class="group-title menu-button button heading" type="button" :class="{ selected: currentlySelected == 'favourites' }">
+            <div v-if="false" class="grouped">
+                <button class="menu-button button" type="button" :class="{ selected: currentlySelected == 'favourites' }">
                     <span class="icon star" />
                     <span>Favorieten</span>
-                    <span class="button icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed('favourites')}" @click="toggleCollapse('favourites')" />
+                    <span class="button icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed('favourites')}" @click.stop="toggleCollapse('favourites')" />
                 </button>
+                <hr>
             </div>
-
-            <hr>
 
             <template v-if="enableMemberModule && tree.categories.length">
                 <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                     <div class="grouped">
-                        <button class="group-title menu-button button heading" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
-                            <span v-if="category.categories.length" class="icon category" />
-                            <span v-else class="icon layered">
-                                <span class="icon group-layer-1" />
-                                <span class="icon group-layer-2 gray" />
-                            </span>
+                        <button class="menu-button button" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                            <span :class="'icon ' + getCategoryIcon(category)" />
                             <span>{{ category.settings.name }}</span>
                             <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
-                            <span class="button icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed(category.id)}" @click="toggleCollapse(category.id)" />
+                            <span v-else-if="category.groups.length || category.categories.length" class="button icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed(category.id)}" @click.stop="toggleCollapse(category.id)" />
                         </button>
 
-                        <div :class="{collapsable: true, hide: isCollapsed(category.id)}">
+                        <div :class="{collapsable: true, hide: isCollapsed(category.id) || isCategoryDeactivated(category)}">
                             <button
                                 v-for="c in category.categories"
                                 :key="c.id"
@@ -85,7 +71,7 @@
                                 type="button"
                                 @click="openCategory(c)"
                             >
-                                <span class="icon gray small" />
+                                <span class="icon" />
                                 <span>{{ c.settings.name }}</span>
                             </button>
 
@@ -97,7 +83,7 @@
                                 type="button"
                                 @click="openGroup(group)"
                             >
-                                <GroupAvatar :group="group" />
+                                <GroupAvatar :group="group" :allow-empty="true" />
                                 <span>{{ group.settings.name }}</span>
                                 <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
                             </button>
@@ -111,59 +97,82 @@
 
             <div v-if="enableWebshopModule && webshops.length > 0" class="container">
                 <div class="grouped">
-                    <div class="group-title menu-button button">
-                        <span class="icon layered">
-                            <span class="icon basket-layer-1 primary-light" />
-                            <span class="icon basket-layer-2" />
-                        </span>
+                    <div class="menu-button button" @click.stop="toggleCollapse('webshops')">
+                        <span class="icon basket" />
                         <span>Webshops</span>
-                        <button v-if="canCreateWebshops" type="button" class="button icon add gray" @click="addWebshop()" />
+                        <span class="icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed('webshops')}" />
                     </div>
 
-                    <button
-                        v-for="webshop in webshops"
-                        :key="webshop.id"
-                        type="button"
-                        class="menu-button button sub-button"
-                        :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
-                        @click="openWebshop(webshop)"
-                    >
-                        <span v-if="isWebshopOpen(webshop)" class="icon dot small green " />
-                        <span v-else class="icon gray small" />
-                        <span>{{ webshop.meta.name }}</span>
-                    </button>
+                    <div :class="{collapsable: true, hide: isCollapsed('webshops')}">
+                        <button
+                            v-for="webshop in webshops"
+                            :key="webshop.id"
+                            type="button"
+                            class="menu-button button sub-button"
+                            :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
+                            @click="openWebshop(webshop)"
+                        >
+                            <span class="icon" />
+                            <span>{{ webshop.meta.name }}</span>
+                            <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon small " />
+                        </button>
+
+                        <button v-if="canCreateWebshops" type="button" class="menu-button button sub-button cta" @click="addWebshop()">
+                            <span class="icon" />
+                            <span class="icon add-line small correct-offset" />
+                            <span>Webshop</span>
+                        </button>
+                    </div>
                 </div>
                 <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             </div>
 
-            <button v-if="enableMemberModule && fullAccess" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'member-archive'}" @click="openMemberArchive(true)"> 
-                <span class="icon layered">
-                    <span class="icon archive-layer-1 primary-light" />
-                    <span class="icon archive-layer-2 " />
-                </span>
-                <span>Leden</span>
-            </button>
+            <div v-if="enableMemberModule && fullAccess && enableWebshopModule && hasWebshopArchive" class="grouped">
+                <div class="menu-button button" @click="toggleCollapse('archive')">
+                    <span class="icon archive" />
+                    <span>Archief</span>
+                    <span class="icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed('archive')}" />
+                </div>
 
-            <button v-if="enableWebshopModule && hasWebshopArchive" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
-                <span class="icon layered">
-                    <span class="icon archive-layer-1 primary-light" />
-                    <span class="icon archive-layer-2 " />
-                </span>
-                <span>Webshops</span>
-            </button>
+                <div :class="{collapsable: true, hide: isCollapsed('archive')}">
+                    <button type="button" class="menu-button button sub-button" :class="{ selected: currentlySelected == 'member-archive'}" @click="openMemberArchive(true)"> 
+                        <span class="icon" />
+                        <span>Leden</span>
+                    </button>
 
-            <button v-if="fullAccess && enableMemberModule" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
+                    <button type="button" class="menu-button button sub-button" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
+                        <span class="icon " />
+                        <span>Webshops</span>
+                    </button>
+                </div>
+
+                <hr v-if="fullAccess || canManagePayments">
+            </div>
+            <div v-else>
+                <button v-if="enableMemberModule && fullAccess" type="button" class="menu-button button" :class="{ selected: currentlySelected == 'member-archive'}" @click="openMemberArchive(true)"> 
+                    <span class="icon archive" />
+                    <span>Archief</span>
+                </button>
+
+                <button v-if="enableWebshopModule && hasWebshopArchive" type="button" class="menu-button button" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
+                    <span class="icon archive" />
+
+                    <span>Archief</span>
+                </button>
+            </div>
+
+            <button v-if="fullAccess && enableMemberModule" type="button" class="menu-button button" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
                 <span class="icon file-filled" />
                 <span>Documenten</span>
             </button>
 
-            <button v-if="canManagePayments" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-finances'}" @click="openFinances(true)"> 
+            <button v-if="canManagePayments" type="button" class="menu-button button" :class="{ selected: currentlySelected == 'manage-finances'}" @click="openFinances(true)"> 
                 <span class="icon calculator" />
                 <span>Boekhouding</span>
             </button>
 
             <div v-if="fullAccess">
-                <button type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
+                <button type="button" class="menu-button button" :class="{ selected: currentlySelected == 'manage-settings'}" @click="manageSettings(true)">
                     <span class="icon settings" />
                     <span>Instellingen</span>
                 </button>
@@ -172,18 +181,18 @@
             <div class="grouped footer">
                 <hr>
 
-                <button class="menu-button button heading" type="button" @click="manageWhatsNew()">
+                <button class="menu-button button" type="button" @click="manageWhatsNew()">
                     <span class="icon gift" />
                     <span>Wat is er nieuw?</span>
                     <span v-if="whatsNewBadge" class="bubble">{{ whatsNewBadge }}</span>
                 </button>
 
-                <a class="menu-button button heading" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
+                <a class="menu-button button" :href="'https://'+$t('shared.domains.marketing')+'/docs'" target="_blank">
                     <span class="icon book" />
                     <span>Documentatie</span>
                 </a>
 
-                <button v-if="!isAppReview" type="button" class="menu-button button heading" @click="gotoFeedback(false)">
+                <button v-if="!isAppReview" type="button" class="menu-button button" @click="gotoFeedback(false)">
                     <span class="icon feedback" />
                     <span>Feedback</span>
                 </button>
@@ -194,10 +203,10 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ComponentWithProperties, NavigationController, NavigationMixin, SplitViewController } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { Country, Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { Country, Group, GroupCategory, GroupCategoryTree, Permissions, PrivateWebshop, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -291,6 +300,30 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
         if (value) {
             this.collapsedSections = JSON.parse(value)
         }
+    }
+
+    created() {
+        this.loadCollapsed().catch(console.error)
+    }
+
+    getCategoryIcon(category: GroupCategoryTree) {
+        if (category.settings.name.toLocaleLowerCase().includes('lessen') || category.settings.name.toLocaleLowerCase().includes('proefles')) {
+            return "education"
+        }
+
+        if (category.settings.name.toLocaleLowerCase().includes('activiteiten') || category.settings.name.toLocaleLowerCase().includes('kamp') || category.settings.name.toLocaleLowerCase().includes('weekend')) {
+            return "flag"
+        }
+
+        if (category.settings.name.toLocaleLowerCase().includes('betaling')) {
+            return "card"
+        }
+
+        if (category.categories.length) {
+            return "category"
+        }
+
+        return "group"
     }
 
     mounted() {
@@ -467,23 +500,6 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     async openCategory(category: GroupCategory, animated = true) {
-        //if (category.categoryIds.length > 0 && category.groupIds.length == 0) {
-        //    // Open a stacked split view controller
-        //    this.currentlySelected = "category-"+category.id
-        //    this.showDetail({
-        //        adjustHistory: animated,
-        //        animated,
-        //        components: [
-        //            new ComponentWithProperties(SplitViewController, {
-        //                root: new ComponentWithProperties(NavigationController, { 
-        //                    root: await LoadComponent(() => import(/* webpackChunkName: "CategoryMenu", webpackPrefetch: true */ "./groups/CategoryMenu.vue"), { category }, { instant: !animated })
-        //                })
-        //            })
-        //        ]}
-        //    );
-        //    return;
-        //}
-
         this.currentlySelected = "category-"+category.id
         this.showDetail({
             adjustHistory: animated,
@@ -505,7 +521,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             components: [
                 new ComponentWithProperties(NavigationController, { 
                     root: await LoadComponent(() => import(/* webpackChunkName: "GroupMembersView", webpackPrefetch: true */ "./groups/GroupMembersView.vue"), {
-                        category: GroupCategoryTree.build(category, this.organization.meta.categories, this.organization.groups)
+                        category: GroupCategoryTree.build(category, this.organization)
                     }, { instant: !animated })
                 })
             ]
@@ -649,11 +665,11 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     get fullReadAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasReadAccess()
+        return SessionManager.currentSession!.user!.permissions!.hasReadAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     get enableMemberModule() {

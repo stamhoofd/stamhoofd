@@ -250,7 +250,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     get hasFullAccess() {
-        return SessionManager.currentSession?.user?.permissions?.hasFullAccess() ?? false
+        return SessionManager.currentSession?.user?.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [], ) ?? false
     }
 
     openGeneralSettings() {

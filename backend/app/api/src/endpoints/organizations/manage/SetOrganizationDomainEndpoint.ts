@@ -34,7 +34,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You do not have permissions for this endpoint",
@@ -191,7 +191,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
         console.log("Done.")
         
         errors.throwIfNotEmpty()
-        return new Response(await user.getOrganizatonStructure(organization));
+        return new Response(await user.getOrganizationStructure());
     }
 
     

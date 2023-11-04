@@ -30,7 +30,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je moet hoofdbeheerder zijn om Stripe te kunnen connecteren"

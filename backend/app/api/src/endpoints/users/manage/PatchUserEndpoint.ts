@@ -29,7 +29,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         const token = await Token.authenticate(request, {allowWithoutAccount: true});
         const user = token.user
 
-        if (((!user.permissions || !user.permissions.hasFullAccess()) && user.id != request.body.id) || request.params.id != request.body.id) {
+        if (((!user.permissions || !user.hasFullAccess()) && user.id != request.body.id) || request.params.id != request.body.id) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang om deze gebruiker te wijzigen"
@@ -48,7 +48,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         editUser.lastName = request.body.lastName ?? editUser.lastName
 
         if (request.body.permissions !== undefined) {
-            if (!user.permissions || !user.permissions.hasFullAccess()) {
+            if (!user.hasFullAccess()) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je hebt geen rechten om de rechten van deze gebruiker te wijzigen"
@@ -61,7 +61,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 editUser.permissions = request.body.permissions
             }
 
-            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess())) {
+            if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.hasFullAccess(user.organization.privateMeta.roles))) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "Je kan jezelf niet verwijderen als hoofdbeheerder"

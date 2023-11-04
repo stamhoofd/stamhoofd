@@ -30,7 +30,7 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = user?.organization ?? await Organization.fromApiHost(request.host);
 
         return new Response(new KeychainedResponse({
-            data: user ? await user.getOrganizatonStructure(user.organization) : await organization.getStructure(),
+            data: user ? await user.getOrganizationStructure() : await organization.getStructure(),
             keychainItems: []
         }));
     }

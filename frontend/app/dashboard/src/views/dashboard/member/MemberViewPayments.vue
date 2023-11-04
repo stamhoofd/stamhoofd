@@ -150,7 +150,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, GlobalEventBus, LoadingButton, Spinner, STErrorsDefault, STList, STListItem, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { BalanceItemDetailed, FinancialSupportSettings, getPermissionLevelNumber, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
+import { BalanceItemDetailed, FinancialSupportSettings, MemberBalanceItem, MemberWithRegistrations, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -176,13 +176,13 @@ import EditPaymentView from './EditPaymentView.vue';
 })
 export default class MemberViewPayments extends Mixins(NavigationMixin) {
     @Prop()
-    member!: MemberWithRegistrations;
+        member!: MemberWithRegistrations;
 
     @Prop({default: null})
-    defaultRegistration!: Registration | null;
+        defaultRegistration!: Registration | null;
 
     @Prop()
-    familyManager!: FamilyManager;
+        familyManager!: FamilyManager;
     
     loadingPayments = true
     errorBox: ErrorBox | null = null
@@ -222,13 +222,13 @@ export default class MemberViewPayments extends Mixins(NavigationMixin) {
             return false
         }
 
-        if (OrganizationManager.user.permissions.hasFullAccess() || OrganizationManager.user.permissions.canManagePayments(this.organization.privateMeta?.roles ?? []) ) {
+        if (OrganizationManager.user.permissions.hasFullAccess(OrganizationManager.organization.privateMeta?.roles ?? []) || OrganizationManager.user.permissions.canManagePayments(this.organization.privateMeta?.roles ?? []) ) {
             // Can edit members without groups
             return true
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && group.privateSettings.permissions.hasAccess(OrganizationManager.user.permissions, PermissionLevel.Write)) {
+            if(group.privateSettings && group.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization)) {
                 return true
             }
         }

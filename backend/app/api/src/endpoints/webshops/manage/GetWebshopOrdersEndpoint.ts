@@ -1,11 +1,8 @@
 import { Decoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Order } from '@stamhoofd/models';
-import { Payment } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
-import { PaginatedResponse, Payment as PaymentStruct,PermissionLevel, PrivateOrder, PrivatePayment, WebshopOrdersQuery } from "@stamhoofd/structures";
+import { Order, Payment, Token, Webshop } from '@stamhoofd/models';
+import { PaginatedResponse, PermissionLevel, PrivateOrder, PrivatePayment, WebshopOrdersQuery } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = WebshopOrdersQuery
@@ -41,13 +38,15 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             })
         }
 
-        if (!token.user.permissions || webshop.privateMeta.permissions.getPermissionLevel(token.user.permissions) === PermissionLevel.None) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "No permissions for this webshop",
-                human: "Je hebt geen toegang tot de bestellingen van deze webshop",
-                statusCode: 403
-            })
+        if (!webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Read)) {
+            if (!webshop.privateMeta.scanPermissions.userHasAccess(token.user, PermissionLevel.Write)) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "No permissions for this webshop",
+                    human: "Je hebt geen toegang tot de bestellingen van deze webshop",
+                    statusCode: 403
+                })
+            }
         }
         
         errors.throwIfNotEmpty()

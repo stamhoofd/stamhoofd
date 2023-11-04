@@ -29,6 +29,10 @@
             <Checkbox v-if="!isRoot" v-model="isHidden">
                 Toon deze categorie enkel voor beheerders
             </Checkbox>
+
+            <p v-if="!isRoot && !isHidden && !isPublic" class="warning-box">
+                Een bovenliggende categorie is enkel zichtbaar voor beheerders, dus deze categorie is bijgevolg ook enkel zichtbaar voor beheerders.
+            </p>
         </template>
 
         <template v-if="categories.length > 0">
@@ -63,18 +67,15 @@
 
         <div v-if="!isRoot && enableActivities" class="container">
             <hr>
-            <h2>Wie kan groepen maken in deze categorie?</h2>
-            <p>Deze beheerders kunnen zelf bijvoorbeeld een nieuwe groep (bv. activiteit, cursus of workshop) toevoegen in deze categorie. Beheerders zien enkel de groepen de ze zelf hebben aangemaakt of waar ze toegang tot hebben gekregen. Je kan functies bewerken bij je instellingen.</p>
+            <h2>Toegangsbeheer</h2>
+            <p>Je kan toegang tot leden instellen per groep (instellingen van groep zelf) of per categorie (hieronder). Kies ook welke beheerders zelf een nieuwe groep (bv. activiteit, cursus of workshop) kunnen toevoegen in deze categorie. Je kan functies bewerken bij je instellingen.</p>
     
             <STList v-if="roles.length > 0">
                 <STListItem>
                     <Checkbox slot="left" :checked="true" :disabled="true" />
                     Hoofdbeheerders
                 </STListItem>
-                <STListItem v-for="role in roles" :key="role.id" element-name="label" :selectable="true" class="right-description">
-                    <Checkbox slot="left" :checked="getCreateRole(role)" @change="setCreateRole(role, $event)" />
-                    {{ role.name }}
-                </STListItem>
+                <GroupCategoryPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :category="patchedCategory" :organization="patchedOrganization" @patch="addCategoryPatch" />
             </STList>
 
             <p v-else-if="fullAccess" class="info-box">
@@ -108,15 +109,15 @@
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsDefault,STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupCategoryTree, GroupGenderType,GroupPrivateSettings,GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, OrganizationPrivateMetaData, PermissionRole, Version } from "@stamhoofd/structures"
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Group, GroupCategory, GroupCategoryPermissions, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData, PermissionRole, Version } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import GroupCategoryPermissionRow from '../admins/GroupCategoryPermissionRow.vue';
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
-import EndRegistrationPeriodView from './EndRegistrationPeriodView.vue';
-import GroupCategoryRow from "./GroupCategoryRow.vue"
-import GroupRow from "./GroupRow.vue"
+import GroupCategoryRow from "./GroupCategoryRow.vue";
+import GroupRow from "./GroupRow.vue";
 import GroupTrashView from './GroupTrashView.vue';
 
 @Component({
@@ -130,7 +131,8 @@ import GroupTrashView from './GroupTrashView.vue';
         LoadingButton,
         BackButton,
         Checkbox,
-        STListItem
+        STListItem,
+        GroupCategoryPermissionRow
     },
 })
 export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
@@ -155,6 +157,10 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
+    get isPublic() {
+        return this.patchedCategory.isPublic(this.patchedOrganization.availableCategories)
+    }
+
     get enableActivities() {
         return this.organization.meta.modules.useActivities
     }
@@ -176,29 +182,11 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess(this.patchedOrganization.privateMeta?.roles ?? [])
     }
 
     get roles() {
         return this.patchedOrganization.privateMeta?.roles ?? []
-    }
-
-    getCreateRole(role: PermissionRole) {
-        return !!this.patchedCategory.settings.permissions.create.find(r => r.id === role.id)
-    }
-
-    setCreateRole(role: PermissionRole, enable: boolean) {
-        const p = GroupCategoryPermissions.patch({})
-
-        if (enable) {
-            if (this.getCreateRole(role)) {
-                return
-            }
-            p.create.addPut(role)
-        } else {
-            p.create.addDelete(role.id)
-        }
-        this.addPermissionsPatch(p)
     }
 
     get title() {
@@ -426,19 +414,15 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
 
     createCategory() {
         const category = GroupCategory.create({})
-        category.groupIds = this.category.categoryIds.length == 0 ? this.category.groupIds : []
+        category.groupIds = this.patchedCategory.categoryIds.length == 0 ? this.patchedCategory.groupIds : []
         
         const meta = OrganizationMetaData.patch({})
         meta.categories.addPut(category)
 
         const me = GroupCategory.patch({ 
             id: this.category.id,
+            groupIds: [] as any
         })
-
-        // Delete all groups in this category
-        for (const id of this.category.groupIds) {
-            me.groupIds.addDelete(id)
-        }
 
         me.categoryIds.addPut(category.id)
         meta.categories.addPatch(me)
@@ -493,12 +477,6 @@ export default class EditCategoryGroupsView extends Mixins(NavigationMixin) {
             return true
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
-    }
-
-    startNewRegistrationPeriod(undo = false) {
-        const tree = GroupCategoryTree.build(this.category, this.organization.meta.categories, this.organization.groups)
-        const initialGroupIds =  tree.getAllGroups().map(g => g.id)
-        this.present(new ComponentWithProperties(EndRegistrationPeriodView, { initialGroupIds, undo }).setDisplayStyle("popup"))
     }
 }
 </script>

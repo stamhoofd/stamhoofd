@@ -21,31 +21,39 @@ import draggable from 'vuedraggable'
 })
 export default class STList extends Vue {
     @Prop({ default: null })
-    value!: any[] | null
+        value!: any[] | null
 
     @Prop({ default: false })
-    draggable!: boolean;
+        draggable!: boolean;
 
     @Prop({ default: undefined })
-    group!: string | undefined;
+        group!: string | undefined;
 
     @Prop({ default: false })
-    withAnimation!: boolean;
+        withAnimation!: boolean;
 
     get list() {
         return this.value;
     }
 
     set list(changed: any[] | null) {
+        console.log('set list', changed)
         this.$emit('input', changed);
     }
 }
 </script>
 
 <style lang="scss">
+@use '~@stamhoofd/scss/base/variables' as *;
+
 .st-list {
     padding: 0;
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+
+    .st-list > & {
+        // Allow stacking if we need partial draggable area
+        margin: 0;
+    }
 
     > .st-list-item {
         &.list-move {
@@ -57,6 +65,14 @@ export default class STList extends Vue {
                 visibility: hidden;
             }
         }
+
+        &.sortable-drag {
+            opacity: 0.8 !important;
+        }
+    }
+
+    +.style-button-bar {
+        margin-top: 15px;
     }
         
 

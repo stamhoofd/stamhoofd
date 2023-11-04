@@ -5,8 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import { GroupCategory } from './GroupCategory';
 import { GroupPrivateSettings } from './GroupPrivateSettings';
 import { CycleInformation, GroupSettings, WaitingListType } from './GroupSettings';
+import { Organization } from './Organization';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Permissions } from './Permissions';
+import { PermissionLevel, PermissionRoleDetailed, Permissions } from './Permissions';
 
 export enum GroupStatus {
     "Open" = "Open",
@@ -176,70 +177,55 @@ export class Group extends AutoEncoder {
         return [...map.values()]
     }
 
-    /**
-     * Whetever a given user has access to the members in this group. 
-     */
-    canViewMembers(permissions: Permissions): boolean {
-        if (permissions.hasReadAccess()) {
-            return true
-        }
-
-        if (!this.privateSettings) {
+    hasAccess(permissions: Permissions|null, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (!permissions) {
             return false
         }
 
-        // Check roles
-        for (const role of this.privateSettings.permissions.read) {
-            if (permissions.roles.find(r => r.id === role.id)) {
+        if (this.privateSettings?.permissions.hasAccess(permissions, organization.privateMeta?.roles ?? [], permissionLevel)) {
+            return true;
+        }
+
+        // Check parent categories
+        const parentCategories = this.getParentCategories(organization.meta.categories)
+        for (const category of parentCategories) {
+            if (category.settings.permissions.groupPermissions.hasAccess(permissions, organization.privateMeta?.roles ?? [], permissionLevel)) {
                 return true
             }
         }
 
-        return this.canEditMembers(permissions)
+        return false;
+    }
+
+    isPublic(allCategories: GroupCategory[]): boolean {
+        for (const parent of this.getParentCategories(allCategories)) {
+            if (!parent.settings.public) {
+                return false
+            }
+        }
+        return true;
     }
 
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    canEditMembers(permissions: Permissions): boolean {
-        if (permissions.hasWriteAccess()) {
-            return true
-        }
+    hasReadAccess(permissions: Permissions|null, organization: Organization): boolean {
+        return this.hasAccess(permissions, organization, PermissionLevel.Read)
 
-        if (!this.privateSettings) {
-            return false
-        }
-
-        // Check roles
-        for (const role of this.privateSettings.permissions.write) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                return true
-            }
-        }
-
-        return this.canEditSettings(permissions)
     }
 
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    canEditSettings(permissions: Permissions): boolean {
-        if (permissions.hasFullAccess()) {
-            return true
-        }
+    hasWriteAccess(permissions: Permissions|null, organization: Organization): boolean {
+        return this.hasAccess(permissions, organization, PermissionLevel.Write)
+    }
 
-        if (!this.privateSettings) {
-            return false
-        }
-
-        // Check roles
-        for (const role of this.privateSettings.permissions.full) {
-            if (permissions.roles.find(r => r.id === role.id)) {
-                return true
-            }
-        }
-
-        return false
+    /**
+     * Whetever a given user has access to the members in this group. 
+     */
+    hasFullAccess(permissions: Permissions|null, organization: Organization): boolean {
+        return this.hasAccess(permissions, organization, PermissionLevel.Full)
     }
 
     get squareImage() {

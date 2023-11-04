@@ -29,7 +29,7 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Deze actie is enkel beschikbaar voor hoofdbeheerders",

@@ -49,7 +49,7 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
     }
 
     get fullAccess() {
-        return SessionManager.currentSession!.user!.permissions!.hasFullAccess()
+        return SessionManager.currentSession!.user!.permissions!.hasFullAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     async manageSettings(animated = true) {
@@ -96,7 +96,7 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
     }
 
     async updateDefault() {
-        this.availableSessions = (await SessionManager.availableSessions()).slice(0, 4)
+        this.availableSessions = (await SessionManager.availableSessions()).slice(0, 10)
     }
 
     showContextMenu(event) {
@@ -122,7 +122,7 @@ export default class OrganizationSwitcher extends Mixins(NavigationMixin) {
             ],
             [
                 new ContextMenuItem({
-                    name: "Wisselen van vereniging",
+                    name: "Wissel tussen vereniging",
                     icon: "sync",
                     childMenu: this.defaultOrganizations.length > 1 ? 
                         new ContextMenu([

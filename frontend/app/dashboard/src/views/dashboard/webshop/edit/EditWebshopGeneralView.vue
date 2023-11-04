@@ -11,6 +11,10 @@
                 placeholder="bv. Wafelverkoop"
                 autocomplete=""
             >
+
+            <p v-if="name.length > 30" class="style-description-small">
+                Lange naam? Je kan de zichtbare titel op de webshop apart wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.
+            </p>
         </STInputBox>
 
         <hr>
@@ -20,7 +24,7 @@
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.None" />
                 <h3 class="style-title-list">
-                    Webshop
+                    Geen tickets
                 </h3>
                 <p class="style-description">
                     Webshop zonder scanners. Er worden geen tickets aangemaakt.
@@ -59,7 +63,7 @@
             <p>Kies welke functies toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
 
             <STList>
-                <WebshopRolePermissionRow v-for="role in roles" :key="role.id" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
+                <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
             </STList>
         </template>
 
@@ -157,7 +161,7 @@ import { PaymentMethod, PermissionLevel, PermissionRole, PermissionsByRole, Priv
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import WebshopRolePermissionRow from '../../admins/WebshopRolePermissionRow.vue';
+import WebshopPermissionRow from '../../admins/WebshopPermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
@@ -171,13 +175,13 @@ import EditWebshopMixin from './EditWebshopMixin';
         TimeInput,
         Radio,
         SaveView,
-        WebshopRolePermissionRow
+        WebshopPermissionRow
     },
 })
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     mounted() {
         // Auto assign roles
-        if (this.isNew && OrganizationManager.user.permissions && this.webshop.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+        if (this.isNew && OrganizationManager.user.permissions && !this.webshop.privateMeta.permissions.hasFullAccess(OrganizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])) {
             // By default, add full permissions for all the roles this user has, that also have create webshop permissions
             const roles = OrganizationManager.organization.privateMeta?.roles.flatMap(r => {
                 const has = OrganizationManager.user.permissions?.roles.find(i => i.id === r.id)
@@ -207,7 +211,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     
     get viewTitle() {
         if (this.isNew) {
-            return "Nieuwe verkoop starten"
+            return "Nieuwe verkoop, inschrijvingsformulier of geldinzameling starten"
         }
         return "Algemene instellingen"
     }

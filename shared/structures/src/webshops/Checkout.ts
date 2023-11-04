@@ -152,6 +152,7 @@ export class Checkout extends AutoEncoder {
     }
 
     validateCheckoutMethod(webshop: Webshop, organizationMeta: OrganizationMetaData) {
+        console.log('validating checkout method', webshop, this.checkoutMethod)
         if (this.checkoutMethod == null) {
             if (webshop.meta.checkoutMethods.length > 0) {
                 throw new SimpleError({
@@ -168,6 +169,12 @@ export class Checkout extends AutoEncoder {
         const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id == current.id)
 
         if (!checkoutMethod) {
+            console.log('didnt found')
+            if (webshop.meta.checkoutMethods.length === 0) {
+                console.log('did set to null')
+                this.checkoutMethod = null
+                return
+            }
             throw new SimpleError({
                 code: "invalid_checkout_method",
                 message: "Checkout method is invalid",
@@ -175,7 +182,7 @@ export class Checkout extends AutoEncoder {
                 field: "checkoutMethod"
             })
         }
-
+        console.log('was valid??')
         this.checkoutMethod = checkoutMethod
     }
 

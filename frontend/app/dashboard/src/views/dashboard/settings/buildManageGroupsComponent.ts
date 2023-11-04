@@ -39,7 +39,7 @@ export function buildManageGroupsComponent(organization: Organization) {
     })
 
     if (!enableActivities) {
-        const full = GroupCategoryTree.build(cat, organization.meta.categories, organization.groups)
+        const full = GroupCategoryTree.build(cat, organization)
         if (full.categories.length === 0) {
 
             // Create a new one and open that one instead

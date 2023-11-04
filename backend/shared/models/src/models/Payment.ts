@@ -171,7 +171,7 @@ export class Payment extends Model {
             }
         }
 
-        if (user.permissions && (user.permissions.hasFullAccess() || user.permissions.canManagePayments(user.organization.privateMeta.roles))) {
+        if (user.permissions && (user.permissions.hasFullAccess(user.organization.privateMeta.roles) || user.permissions.canManagePayments(user.organization.privateMeta.roles))) {
             return
         }
 
@@ -197,7 +197,7 @@ export class Payment extends Model {
                 const webshop = webshopCache.get(order.webshopId) ?? await Webshop.getByID(order.webshopId)
                 if (webshop) {
                     webshopCache.set(order.webshopId, webshop)
-                    if (getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(permissionLevel)) {
+                    if (webshop.privateMeta.permissions.userHasAccess(user, permissionLevel)) {
                         return
                     }
                 }

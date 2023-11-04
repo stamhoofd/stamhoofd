@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailTemplate, Token, UserWithOrganization, Webshop } from '@stamhoofd/models';
-import { EmailTemplate as EmailTemplateStruct, getPermissionLevelNumber, PermissionLevel } from '@stamhoofd/structures';
+import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;
 type Body = PatchableArrayAutoEncoder<EmailTemplateStruct>;
@@ -89,7 +89,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
     async checkTemplateWritePermission(template: EmailTemplate, user: UserWithOrganization) {
         if (template.webshopId) {
             const webshop = await Webshop.getByID(template.webshopId)
-            if (!webshop || webshop.organizationId !== user.organizationId || !user.permissions || getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+            if (!webshop || webshop.organizationId !== user.organizationId || !webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions for this webshop",

@@ -123,7 +123,7 @@ export default class EditGroupGeneralView extends Mixins(EditGroupMixin) {
 
     mounted() {
         // Auto assign roles
-        if (this.isNew && OrganizationManager.user.permissions && this.group.privateSettings!.permissions.getPermissionLevel(OrganizationManager.user.permissions) !== PermissionLevel.Full) {
+        if (this.isNew && OrganizationManager.user.permissions && !this.group.privateSettings!.permissions.hasFullAccess(OrganizationManager.user.permissions, this.patchedOrganization.privateMeta?.roles ?? [])) {
             const categories = this.patchedOrganization.meta.categories.filter(c => c.groupIds.includes(this.group.id))
             for (const cat of categories) {
                 // Get all roles that have create permissions in the categories that this group will get added into

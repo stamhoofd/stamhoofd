@@ -325,6 +325,10 @@ body.modern.web-iOS {
         --color-current-background-shade: #{$color-background-shade};
     }
 
+    &.transparent {
+        background: transparent;
+    }
+
     &.shade {
         background: $color-background-shade;
         --color-current-background: #{$color-background-shade};

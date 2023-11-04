@@ -156,7 +156,12 @@ export class Organization extends AutoEncoder {
     getCategoryTree(options?: {maxDepth?: number, filterGroups?: (group: Group) => boolean, permissions?: Permissions | null, smartCombine?: boolean, admin?: boolean}): GroupCategoryTree {
         const root = this.meta.categories.find(c => c.id === this.meta.rootCategoryId)
         if (root) {
-            let tree = GroupCategoryTree.build(root, this.meta.categories, options?.filterGroups ? this.groups.filter(options.filterGroups) : this.groups, options?.permissions, options?.maxDepth, options?.smartCombine)
+            let tree = GroupCategoryTree.build(root, this, {
+                groups: options?.filterGroups ? this.groups.filter(options.filterGroups) : undefined,
+                permissions: options?.permissions, 
+                maxDepth: options?.maxDepth, 
+                smartCombine: options?.smartCombine
+            })
 
             if (!options?.permissions) {
                 // Hide non public items

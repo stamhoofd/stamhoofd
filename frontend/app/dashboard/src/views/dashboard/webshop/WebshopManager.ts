@@ -3,7 +3,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { EventBus, Toast } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { getPermissionLevelNumber, OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
+import { OrderStatus, PaginatedResponse, PaginatedResponseDecoder, PrivateOrder, PrivateWebshop, TicketPrivate, Version, WebshopOrdersQuery, WebshopPreview, WebshopTicketsQuery } from "@stamhoofd/structures";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 
@@ -48,7 +48,15 @@ export class WebshopManager {
         if (!p) {
             return false
         }
-        return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.preview.privateMeta.permissions.hasWriteAccess(p, SessionManager.currentSession!.organization?.privateMeta?.roles ?? [])
+    }
+
+    get hasRead() {
+        const p = SessionManager.currentSession?.user?.permissions
+        if (!p) {
+            return false
+        }
+        return this.preview.privateMeta.permissions.hasReadAccess(p, SessionManager.currentSession!.organization?.privateMeta?.roles ?? [])
     }
 
     /**
@@ -126,6 +134,10 @@ export class WebshopManager {
         await this.storeSettingKey("webshop", webshop.encode({ version: Version }))
     }
 
+    backgroundReloadWebshop() {
+        this.loadWebshop(false).catch(console.error)
+    }
+
     /**
      * Try to get a webshop as fast as possible and also initiates a background update of the webshop
      * if it is updated too long ago.
@@ -138,7 +150,7 @@ export class WebshopManager {
 
             if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
                 // Do a background update if not yet already doing this
-                this.loadWebshop(false).catch(console.error)
+                this.backgroundReloadWebshop()
             }
 
             return this.webshop
@@ -161,7 +173,7 @@ export class WebshopManager {
 
                     if (forceBackground || !this.lastFetchedWebshop || this.lastFetchedWebshop < new Date(new Date().getTime() - 1000*60*15)) {
                         // Do a background update if not yet already doing this
-                        this.loadWebshop(false).catch(console.error)
+                        this.backgroundReloadWebshop()
                     }
                     return webshop
                 }

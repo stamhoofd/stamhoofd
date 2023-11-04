@@ -70,13 +70,13 @@ import ValidTicketView from "./ValidTicketView.vue";
 })
 export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    webshopManager!: WebshopManager
+        webshopManager!: WebshopManager
 
     @Prop({ required: true })
-    ticket!: TicketPrivate
+        ticket!: TicketPrivate
 
     @Prop({ required: true })
-    order!: PrivateOrder
+        order!: PrivateOrder
 
     get item() {
         return this.order.data.cart.items.find(i => i.id === this.ticket.itemId)
@@ -110,12 +110,7 @@ export default class TicketAlreadyScannedView extends Mixins(NavigationMixin) {
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
 .ticket-already-scanned-view {
-    background: $color-warning-background;
-    --color-current-background: #{$color-warning-background};
     //--color-current-background-shade: #{$color-success-background-shade};
-
-    color: $color-warning-dark;
-
     > main {
         > h1 {
             color: $color-warning-dark;

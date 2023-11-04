@@ -30,7 +30,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
-    async checkDuplicate(member: Member) {
+    static async checkDuplicate(member: Member) {
         if (!member.details.birthDay) {
             return
         }
@@ -43,7 +43,10 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     return member
                 }
             }
-            return existingMembers[0]
+
+            if (withRegistrations.length > 0) {
+                return withRegistrations[0]
+            }
         }
     }
 
@@ -75,7 +78,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             // Check for duplicates and prevent creating a duplicate member by a user
-            const duplicate = await this.checkDuplicate(member);
+            const duplicate = await PatchUserMembersEndpoint.checkDuplicate(member);
             if (duplicate) {
                 // Merge data
                 duplicate.details.merge(member.details)

@@ -58,7 +58,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         const allowedIds: string[] = []
 
         const organization = token.user.organization
-        if (user.permissions.hasFullAccess()) {
+        if (user.hasFullAccess()) {
             organization.name = request.body.name ?? organization.name
             if (request.body.website !== undefined) {
                 organization.website = request.body.website;
@@ -153,7 +153,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             admin.permissions = patch.permissions
                         }
 
-                        if (admin.id === user.id && (!admin.permissions || !admin.permissions.hasFullAccess())) {
+                        if (admin.id === user.id && admin.permissions.hasFullAccess(user.organization.privateMeta.roles)) {
                             throw new SimpleError({
                                 code: "permission_denied",
                                 message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
@@ -228,7 +228,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             continue
                         }
 
-                        if (category.settings.permissions.getPermissionLevel(user.permissions) !== "Create") {
+                        if (category.settings.permissions.getPermissionLevel(user.permissions, user.organization.privateMeta.roles) !== "Create") {
                             throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to add new groups", statusCode: 403 })
                         }
 
@@ -263,7 +263,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     continue;
                 }
 
-                if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+                if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
                     throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to delete this group", statusCode: 403 })
                 }
                 model.deletedAt = new Date()
@@ -273,7 +273,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         for (const groupPut of request.body.groups.getPuts()) {
-            if (!user.permissions.hasFullAccess() && !allowedIds.includes(groupPut.put.id)) {
+            if (!user.hasFullAccess() && !allowedIds.includes(groupPut.put.id)) {
                 throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to create groups", statusCode: 403 })
             }
 
@@ -286,7 +286,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             model.status = struct.status
 
             // Check if current user has permissions to this new group -> else fail with error
-            if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+            if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "missing_permissions",
                     message: "You cannot restrict your own permissions",
@@ -308,7 +308,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 continue;
             }
 
-            if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+            if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
                 throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this group", statusCode: 403 })
             }
 
@@ -323,7 +323,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (struct.privateSettings) {
                 model.privateSettings.patchOrPut(struct.privateSettings)
 
-                if (model.privateSettings.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+                if (!model.privateSettings.permissions.userHasAccess(user, PermissionLevel.Full)) {
                     throw new SimpleError({
                         code: "missing_permissions",
                         message: "You cannot restrict your own permissions",
@@ -356,7 +356,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
 
-            if (model.privateMeta.permissions.getPermissionLevel(user.permissions) !== PermissionLevel.Full) {
+            if (!model.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
                 throw new SimpleError({ code: "permission_denied", message: "You do not have permissions to edit the settings of this webshop", statusCode: 403 })
             }
 
@@ -379,7 +379,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         errors.throwIfNotEmpty()
-        return new Response(await user.getOrganizatonStructure(organization));
+        return new Response(await user.getOrganizationStructure());
     }
 }
 

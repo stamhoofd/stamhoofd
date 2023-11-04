@@ -243,6 +243,10 @@ export default class STNavigationBar extends Vue {
     transition: background-color 0.3s, border-color 0.3s;
     z-index: 200;
 
+    &.transparent {
+        background: transparent;
+    }
+
     > div {
         display: flex;
         flex-direction: row;

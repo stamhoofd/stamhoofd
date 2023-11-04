@@ -44,7 +44,7 @@
         text-transform: uppercase;
         line-height: 40px;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: $font-weight-bold;
 
         @media (max-width: 400px) {
             width: 30px;

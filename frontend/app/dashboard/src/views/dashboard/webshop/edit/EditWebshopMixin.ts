@@ -88,6 +88,7 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                 // Save to database
                 const manager = new WebshopManager(preview)
                 await manager.storeWebshop(response.data)
+                manager.close()
 
                 // Send system wide notification that we might need an update in data
                 await GlobalEventBus.sendEvent("new-webshop", response.data)
