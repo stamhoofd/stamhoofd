@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
+        "dev": "yarn serve",
         "serve": "NODE_ENV=development ENV_FILE=../../.env.json webpack serve --hot",
         "build": "NODE_ENV=development ENV_FILE=../../.env.json webpack --progress ",
         "build:production": "NODE_ENV=production webpack --performance-hints warning",

@@ -75,7 +75,12 @@ const start = async () => {
         routerServer.server.timeout = 15000;
     }
 
+    let shuttingDown = false;
     const shutdown = async () => {
+        if (shuttingDown) {
+            return
+        }
+        shuttingDown = true
         console.log("Shutting down...")
         // Disable keep alive
         routerServer.defaultHeaders = Object.assign(routerServer.defaultHeaders, { 'Connection': 'close' })
