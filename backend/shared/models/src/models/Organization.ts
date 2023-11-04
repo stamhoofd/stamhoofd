@@ -771,14 +771,22 @@ export class Organization extends Model {
         }
     }
 
-    getConnectedPaymentProviders(): PaymentProvider[] {
+    async getConnectedPaymentProviders(): Promise<PaymentProvider[]> {
         const allPaymentMethods = Object.values(PaymentMethod)
         const providers: PaymentProvider[] = []
 
-        for (const method of allPaymentMethods) {
-            const provider = this.privateMeta.getPaymentProviderFor(method)
-            if (provider && !providers.includes(provider)) {
-                providers.push(provider)
+        let stripeAccounts: (StripeAccount|null)[] = await StripeAccount.where({ organizationId: this.id })
+
+        if (stripeAccounts.length === 0) {
+            stripeAccounts = [null]
+        }
+
+        for (const account of stripeAccounts) {
+            for (const method of allPaymentMethods) {
+                const provider = this.privateMeta.getPaymentProviderFor(method, account?.meta)
+                if (provider && !providers.includes(provider)) {
+                    providers.push(provider)
+                }
             }
         }
 

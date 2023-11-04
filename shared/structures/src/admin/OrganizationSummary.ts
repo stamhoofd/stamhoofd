@@ -89,6 +89,9 @@ export class OrganizationSummary extends Organization {
 
     @field({ decoder: new ArrayDecoder(OrganizationPaymentMandate), version: 154 })
     paymentMandates: OrganizationPaymentMandate[] = [];
+
+    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true })
+    features: string[] = []
 }
 
 export class OrganizationOverview extends AutoEncoder {
