@@ -69,7 +69,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             throw new Error("Not supported without real request")
         }
 
-        const form = formidable({ maxFileSize: 20 * 1024 * 1024, keepExtensions: true, maxFiles: 1 });
+        const form = formidable({ maxFileSize: 5 * 1024 * 1024, keepExtensions: true, maxFiles: 1 });
         const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
             form.parse(request.request.request, (err, fields, files) => {
                 if (err) {

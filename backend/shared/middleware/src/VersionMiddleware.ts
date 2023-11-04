@@ -32,6 +32,15 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
             throw e;
         }
 
+        /*if (request.getIP() === '') {
+            throw new SimpleError({
+                code: "blocked",
+                statusCode: 400,
+                message: "Temporary blocked",
+                human: "Jouw verbinding is tijdelijk geblokkeerd. Gelieve contact op te nemen met hallo@stamhoofd.be"
+            })
+        }*/
+
         if (version < this.minimumVersion) {
             // WARNING: update caddy config for on demand certificates, because we don't want to throw errors over there!
             if (platform === "web" || platform === undefined) {

@@ -221,7 +221,7 @@ class EmailStatic {
 
         // Filter by environment
         if (STAMHOOFD.environment === 'staging') {
-            matches = matches.filter(mail => mail.endsWith("@stamhoofd.be") || mail.endsWith("@chiro.be"))
+            matches = matches.filter(mail => mail.endsWith("@stamhoofd.be"))
         }
         if (STAMHOOFD.environment === 'development') {
             matches = matches.filter(mail => mail.endsWith("@stamhoofd.be") || mail.endsWith("@bounce-testing.postmarkapp.com"))
@@ -269,7 +269,7 @@ class EmailStatic {
         try {
             const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
             const info = await transporter.sendMail(mail);
-            console.log("Message sent: %s via %s", info.messageId, data.type);
+            console.log("Message sent:", info.messageId, data.type);
         } catch (e) {
             console.error("Failed to send e-mail:")
             console.error(e);
