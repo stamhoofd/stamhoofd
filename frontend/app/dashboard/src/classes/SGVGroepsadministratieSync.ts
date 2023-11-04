@@ -290,7 +290,7 @@ export function buildGroupMapping(details: MemberDetails|null, memberGroups: Gro
     }
 
     const defaultAgeMapping = [
-        {code: "KAP", minAge: 6, maxAge: 7},
+        {code: "KAP", minAge: 5, maxAge: 7},
         {code: "KW",minAge: 8, maxAge: 10},
         {code: "JGJV",minAge: 11, maxAge: 13},
         {code: "GVE",minAge: 14, maxAge: 16},
