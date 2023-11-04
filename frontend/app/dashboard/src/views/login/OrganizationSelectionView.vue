@@ -3,7 +3,7 @@
         <STGradientBackground />
 
         <div class="st-view background transparent">
-            <STNavigationBar v-if="!isNative" :large="true" class="transparent">
+            <STNavigationBar :large="true" class="transparent">
                 <template slot="left">
                     <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener" class="logo-container">
                         <Logo class="responsive" />
@@ -17,19 +17,21 @@
                         <span>Terug naar website</span>
                     </a>
 
-                    <a class="button primary" href="/aansluiten" @click.prevent="gotoSignup">
+                    <a v-if="!isNative" class="button primary" href="/aansluiten" @click.prevent="gotoSignup">
                         {{ $t("dashboard.join") }}
                     </a>
                 </template>
             </STNavigationBar>
-            <STNavigationBar v-else title="Kies jouw vereniging" />
             <main class="limit-width">
                 <div class="organization-selection-view" :class="{native: isNative}">
                     <h1>
                         Beheer jouw vereniging
                     </h1>
-                    <p class="style-description-block style-description-large">
+                    <p v-if="!isNative" class="style-description-block style-description-large">
                         Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging als is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
+                    </p>
+                    <p v-else class="style-description-block style-description-large">
+                        Welkom in de Stamhoofd app voor beheerders. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
                     </p>
 
                     <form class="input-icon-container icon search gray" @submit.prevent>
