@@ -11,7 +11,7 @@
     
         <main>
             <h1>Beheerders</h1>
-            <p>Voeg hier beheerders toe en geef iedereen toegang tot bepaalde onderdelen door functies toe te kennen. Een beheerder kan meerdere functies hebben. Maak zelf nieuwe functies aan en stel de toegang in per functie.</p>
+            <p>Voeg hier beheerders toe en regel wat ze kunnen doen in Stamhoofd door functies toe te kennen. Maak zelf nieuwe functies aan en stel de toegang in per functie.</p>
 
 
             <STList class="illustration-list">    
@@ -21,7 +21,7 @@
                         Nieuwe beheerder
                     </h2>
                     <p class="style-description">
-                        Nodig iemand uit om beheerder te worden
+                        Nodig iemand uit om beheerder te worden.
                     </p>
                     <template slot="right">
                         <span class="icon arrow-right-small gray" />
@@ -34,7 +34,7 @@
                         Functies beheren
                     </h2>
                     <p class="style-description">
-                        Maak functies die je aan beheerders kan toekennen om hen zo toegang te geven tot bepaalde onderdelen van Stamhoofd
+                        Maak functies die je aan beheerders kan toekennen.
                     </p>
                     <template slot="right">
                         <span class="icon arrow-right-small gray" />
