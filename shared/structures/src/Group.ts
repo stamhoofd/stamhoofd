@@ -87,7 +87,7 @@ export class Group extends AutoEncoder {
         return 0
     }
 
-    getMemberCount({cycle, cycleOffset, waitingList}: {cycle?: number, cycleOffset?: number, waitingList?: boolean}) {
+    getMemberCount({cycle, cycleOffset, waitingList}: {cycle?: number, cycleOffset?: number, waitingList?: boolean} = {}) {
         if (cycleOffset) {
             cycle = this.cycle - cycleOffset
         }

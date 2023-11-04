@@ -28,7 +28,7 @@
                     <p v-else class="style-description">
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
-                    <span v-if="group.settings.registeredMembers !== null" slot="right" class="style-description-small">{{ group.settings.registeredMembers }}</span>
+                    <span v-if="group.getMemberCount() !== null" slot="right" class="style-description-small">{{ group.getMemberCount() }}</span>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
