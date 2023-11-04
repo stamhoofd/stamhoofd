@@ -5,6 +5,10 @@
         </h1>
         <STErrorsDefault :error-box="errorBox" />
 
+        <p v-if="!hasPayments(patchedBalanceItem)" class="warning-box">
+            Een afrekening (= de schuld) wijzigen die al gebruikt werd in een aangemaakte betaling (= hoe de schuld betaald werd) zal enkel het openstaande bedrag wijzigen. Een betaling is niet meer aanpasbaar na het aanmaken ervan. Indien je het bedrag van een betaling wilt wijzigen moet je ofwel een extra betaling aanmaken voor het verschil of de betaling annuleren en opnieuw aanmaken.
+        </p>
+
         <div class="split-inputs">
             <div>
                 <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox">
@@ -41,7 +45,7 @@
 
         <template v-if="patchedBalanceItem.registration">
             <hr>
-            <h2>Aanrekening voor</h2>
+            <h2>Aangerekend voor</h2>
 
             <STList>
                 <MemberRegistrationBlock :registration="patchedBalanceItem.registration" @edit="linkRegistration" />
@@ -52,7 +56,7 @@
             <span class="icon link" /><span>Koppelen aan inschrijving</span>
         </button>
 
-        <template v-if="!isNew">
+        <template v-if="!isNew && hasPayments(patchedBalanceItem)">
             <hr>
             <h2>Betaalpogingen</h2>
             <p>Een openstaand bedrag kan door een lid betaald worden via het ledenportaal. Daar kan men via één van de ingestelde betaalmethodes afrekenen. Meerdere openstaande bedragen (ook over meerdere leden heen als een account meerdere leden beheert) kunnen in één keer betaald worden, vandaar dat het bedrag van een betaling vaak hoger is dan het bedrag van een individuele afrekening.</p>
@@ -146,7 +150,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection,ErrorBox, PriceInput, Radio, RadioGroup, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { BalanceItemStatus } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemDetailed, BalanceItemStatus } from '@stamhoofd/structures';
 import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -175,20 +179,20 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-        balanceItem: MemberBalanceItem
+        balanceItem!: MemberBalanceItem|BalanceItemDetailed
 
     @Prop({ required: true })
         isNew!: boolean
     
-    patchBalanceItem: AutoEncoderPatchType<MemberBalanceItem> = MemberBalanceItem.patch({})
+    patchBalanceItem: AutoEncoderPatchType<BalanceItem> = this.balanceItem instanceof MemberBalanceItem ? MemberBalanceItem.patch({}) : BalanceItemDetailed.patch({})
 
     @Prop({ required: true })
-        saveHandler: ((patch: AutoEncoderPatchType<MemberBalanceItem>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<BalanceItem>) => Promise<void>);
 
     familyManager = new FamilyManager([]);
 
     get title() {
-        return this.isNew ? 'Aanrekening toevoegen' : 'Aanrekening bewerken';
+        return this.isNew ? 'Verschuldigd bedrag toevoegen' : 'Verschuldigd bedrag bewerken';
     }
 
     mounted() {
@@ -299,8 +303,19 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     getPaymentMethodName(method: PaymentMethod) {
         return PaymentMethodHelper.getNameCapitalized(method);
     }
+
+    hasPayments(balanceItem: MemberBalanceItem|BalanceItemDetailed): balanceItem is MemberBalanceItem {
+        return (balanceItem instanceof MemberBalanceItem)
+    }
     
     get outstanding() {
+        if (!this.hasPayments(this.patchedBalanceItem)) {
+            return {
+                paid: 0,
+                pending: 0,
+                remaining: 0
+            }
+        }
         const paid = this.patchedBalanceItem.payments.filter(p => p.payment.isSucceeded).map(p => p.price).reduce((a, b) => a + b, 0)
         const pending = this.patchedBalanceItem.payments.filter(p => p.payment.isPending).map(p => p.price).reduce((a, b) => a + b, 0)
         const remaining = this.patchedBalanceItem.price - paid

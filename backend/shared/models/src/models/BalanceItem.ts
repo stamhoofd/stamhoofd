@@ -191,8 +191,16 @@ export class BalanceItem extends Model {
 
         // Set other items to zero (the balance item payments keep the real price)
         for (const item of items) {
-            item.status = BalanceItemStatus.Hidden
-            await item.save()
+            // Don't change status of items that are already paid or are partially paid
+            // Not using item.paidPrice, since this is cached
+            const bip = allBalanceItemPayments.filter(p => p.balanceItemId == item.id)
+            const relatedPayments = payments.filter(p => bip.find(b => b.paymentId == p.id))
+
+            if (relatedPayments.length === 0 || !relatedPayments.find(p => p.status === PaymentStatus.Succeeded)) {
+                // No paid payments associated with this item
+                item.status = BalanceItemStatus.Hidden
+                await item.save()
+            }
         }
     }
 

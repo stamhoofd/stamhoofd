@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Member } from "./members/Member";
 import { Payment } from "./members/Payment";
+import { PaymentGeneral } from "./members/PaymentGeneral";
 import { Registration } from "./members/Registration";
 import { Order } from "./webshops/Order";
 
@@ -64,6 +65,10 @@ export class BalanceItemDetailed extends BalanceItem {
 
     @field({ decoder: Order, nullable: true })
     order: Order | null = null
+
+    get memberId() {
+        return this.member?.id ?? null
+    }
 }
 
 export class BalanceItemPaymentDetailed extends BalanceItemPayment {
