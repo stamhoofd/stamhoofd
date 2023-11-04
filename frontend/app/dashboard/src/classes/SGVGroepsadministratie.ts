@@ -546,10 +546,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         for (const match of matched) {
             try {
                 // If updatedAt close to lastsynced at (5 seconds)
-                /*if (match.stamhoofd.details.lastExternalSync && Math.abs(match.stamhoofd.details.lastExternalSync.getTime() - match.stamhoofd.updatedAt.getTime()) < 1000*5) {
-                    report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
+                if (match.stamhoofd.details.lastExternalSync && Math.abs(match.stamhoofd.details.lastExternalSync.getTime() - match.stamhoofd.updatedAt.getTime()) < 1000*5) {
+                    //report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
                     continue;
-                }*/
+                }
                 if (onStatusChange) {
                     onStatusChange(match.stamhoofd.details!.firstName+" "+match.stamhoofd.details!.lastName+" aanpassen...", progress/total)
                     progress++;

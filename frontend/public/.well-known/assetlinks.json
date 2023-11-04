@@ -34,5 +34,17 @@
                 "A0:7B:07:40:BD:36:D6:07:29:C5:E4:5C:06:68:C6:CE:4B:B0:F6:F8:CD:B3:51:FC:1E:CF:06:78:AF:7C:2C:75"
             ]
         }
+    },
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.stamhoofd.stamhoofd",
+            "sha256_cert_fingerprints": [
+                "37:CB:B5:AA:AF:4E:72:6F:DB:26:9E:52:F8:3C:D9:A9:1D:1C:A0:C5:46:F4:20:79:36:60:85:D4:56:C0:9B:C4"
+            ]
+        }
     }
 ]

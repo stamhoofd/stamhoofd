@@ -1,4 +1,4 @@
-import { Http } from '@capacitor-community/http';
+import { CapacitorHttp } from '@capacitor/core';
 
 export class WrapperHTTPRequest implements XMLHttpRequest {
     // Event listeners.
@@ -38,18 +38,18 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     url = ""
     requestHeaders = {}
 
-    responseHeaders = {}
+    responseHeaders: Record<string, string> = {}
 
     constructor() {
-        console.log("Created new WrapperHTTPRequest")
-        // TODO
+        //nvt
     }
 	
     abort(): void {
         throw new Error('Method not implemented.');
     }
     getAllResponseHeaders(): string {
-        throw new Error('Method not implemented.');
+        // Convert response headers to string
+        return Object.keys(this.responseHeaders).map(key => `${key}: ${this.responseHeaders[key]}`).join("\r\n")
     }
 
     getResponseHeader(name: string): string | null {
@@ -59,8 +59,6 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     open(method: string, url: string): void;
     open(method: string, url: string, async: boolean, username?: string | null, password?: string | null): void;
     open(method: any, url: any, async?: any, username?: any, password?: any): void {
-		
-		
         this.method = method
         this.url = url
 
@@ -74,9 +72,9 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
     }
 
     send(body?: Document | BodyInit | null): void {
-        /*console.log("Starting new HTTP request...")
-		console.log(this.method, this.url)
-		console.log(body)*/
+        console.log("Starting new HTTP request...")
+        console.log(this.method, this.url)
+        console.log(body)
 
         const contentType = this.requestHeaders["Content-Type"] as string | undefined
 
@@ -84,15 +82,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
             body = JSON.parse(body)
         }
 
-        if (contentType && contentType.startsWith("application/x-www-form-urlencoded") && typeof body === "string") {
-            const result: any = {}
-            for(const [key, value] of new URLSearchParams(body)) { // each 'entry' is a [key, value] tupple
-                result[key] = value;
-            }
-            body = result;
-        }
-
-        Http.request({
+        CapacitorHttp.request({
             url: this.url,
             method: this.method,
             data: body,
@@ -101,7 +91,7 @@ export class WrapperHTTPRequest implements XMLHttpRequest {
             headers: this.requestHeaders,
             responseType: "text"
         }).then((response) => {
-            //console.log("received response", response)
+            console.log("Received response", response)
 
             this.readyState = 4
             this.status = response.status
