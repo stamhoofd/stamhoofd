@@ -328,9 +328,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get cycleOffsets() {
-        const arr = new Array(this.group.cycle)
-        for (let i = 0; i < this.group.cycle; i++) {
-            arr[i] = i+1
+        const minimumCycle = Math.min(0, ...this.group.settings.cycleSettings.keys())
+
+        const arr: number[] = []
+        for (let i = 0; i < this.group.cycle - minimumCycle; i++) {
+            arr.push(i + 1)
         }
         return arr;
     }
