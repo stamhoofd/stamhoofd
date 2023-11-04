@@ -26,6 +26,13 @@ p {
 
 p.description {
     color: $color-gray-4;
+
+    a {
+        &, &:link, &:visited, &:active, &:hover {
+            text-decoration: underline;
+            color: $color-gray-4;
+        }
+    }
 }
 
 strong {

@@ -38,6 +38,14 @@
                 {{ getSmartButton(editor.getAttributes('smartButton').id).hint }}
             </div>
 
+            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartVariable') && getSmartVariable(editor.getAttributes('smartVariable').id).hint" class="editor-button-bar hint sticky">
+                {{ getSmartVariable(editor.getAttributes('smartVariable').id).hint }}
+            </div>
+
+            <div v-if="!$isMobile && !showTextStyles && !showLinkEditor && editor.isActive('smartVariableBlock') && getSmartVariable(editor.getAttributes('smartVariableBlock').id).hint" class="editor-button-bar hint sticky">
+                {{ getSmartVariable(editor.getAttributes('smartVariableBlock').id).hint }}
+            </div>
+
             <form v-if="showLinkEditor" class="editor-button-bar sticky link" autocomplete="off" novalidate data-submit-last-field @submit.prevent="saveLink()">
                 <STList>
                     <STListItem class="no-padding right-stack">
@@ -467,6 +475,10 @@ export default class EditorView extends Vue {
 
     getSmartButton(id: string) {
         return this.smartButtons.find(button => button.id === id)
+    }
+
+    getSmartVariable(id: string) {
+        return this.smartVariables.find(button => button.id === id)
     }
 
     showSmartVariableMenu(event) {
