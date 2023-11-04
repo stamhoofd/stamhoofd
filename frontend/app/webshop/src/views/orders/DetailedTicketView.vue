@@ -57,13 +57,7 @@ import { WebshopManager } from "../../classes/WebshopManager";
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter),
-        priceFree: (p: number) => {
-            if (p === 0) {
-                return "Gratis"
-            }
-            return Formatter.price(p);
-        }
+        priceChange: Formatter.priceChange.bind(Formatter)
     }
 })
 export default class DetailedTicketView extends Mixins(NavigationMixin){

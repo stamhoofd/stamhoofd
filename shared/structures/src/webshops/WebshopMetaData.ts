@@ -380,6 +380,9 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(RecordCategory as Decoder<RecordCategory>), optional: true })
     recordCategories: RecordCategory[] = []
 
+    /**
+     * @deprecated
+     */
     @field({ decoder: new ArrayDecoder(WebshopField), version: 94 })
     customFields: WebshopField[] = []
 

@@ -195,12 +195,22 @@ export class Order extends AutoEncoder {
     }
 
     getHTMLTable(): string {
+        const allFree = this.data.cart.items.every(i => i.getPrice(this.data.cart) === 0)
+
+        if (allFree) {
+            let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Aantal</th></tr></thead><tbody>`
+
+            for (const item of this.data.cart.items) {
+                str += `<tr><td><h4>${Formatter.escapeHtml(item.product.name)}</h4>${item.descriptionWithoutDate.length > 0 ? "<p>"+Formatter.escapeHtml(item.descriptionWithoutDate)+"</p>" : ""}</td><td>${item.amount}</td></tr>`
+            }
+            return str+"</tbody></table>";
+        }
+
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>Artikel</th><th>Prijs</th></tr></thead><tbody>`
-        
+
         for (const item of this.data.cart.items) {
             str += `<tr><td><h4>${item.amount} x ${Formatter.escapeHtml(item.product.name)}</h4>${item.descriptionWithoutDate.length > 0 ? "<p>"+Formatter.escapeHtml(item.descriptionWithoutDate)+"</p>" : ""}</td><td>${Formatter.escapeHtml(Formatter.price(item.getPrice(this.data.cart)))}</td></tr>`
         }
-        
         return str+"</tbody></table>";
     }
 
@@ -268,10 +278,14 @@ export class Order extends AutoEncoder {
                 title: a.field.name,
                 value: a.answer
             })),
-            {
-                title: "Betaalmethode",
-                value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.data.paymentMethod))
-            },
+            ...(
+                (this.data.paymentMethod !== PaymentMethod.Unknown) ? [
+                    {
+                        title: "Betaalmethode",
+                        value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.data.paymentMethod))
+                    }
+                ] : []
+            ),
              ...(
                 (this.data.deliveryPrice) ? [
                     {
@@ -280,10 +294,14 @@ export class Order extends AutoEncoder {
                     }
                 ] : []
             ),
-            {
-                title: "Prijs",
-                value: Formatter.price(this.data.totalPrice)
-            },
+             ...(
+                (this.data.totalPrice) ? [
+                    {
+                        title: "Prijs",
+                        value: Formatter.price(this.data.totalPrice)
+                    }
+                ] : []
+            ),
         ]
 
         for (const replacement of data) {

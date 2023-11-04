@@ -1,7 +1,7 @@
 export class Column<T, ValueType> {
     name: string
     enabled = true
-    index = 0
+    index = 100
     id: string
     align?: "left" | "right" | "center"
 
@@ -61,7 +61,7 @@ export class Column<T, ValueType> {
         recommendedWidth?: number,
     }) {
         this.enabled = settings.enabled ?? true
-        this.index = settings.index ?? 0
+        this.index = settings.index ?? 100
         this.name = settings.name
         this.id = settings.id ?? settings.name;
 

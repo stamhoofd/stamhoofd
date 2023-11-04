@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="title" :loading="loading" save-text="Bestelling bevestigen" :prefer-large-button="true" @save="goNext">
-        <span slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
+        <span v-if="checkout.totalPrice > 0" slot="left">Totaal: {{ checkout.totalPrice | price }}</span>
 
         <h1>{{ title }}</h1>
 

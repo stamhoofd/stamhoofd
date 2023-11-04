@@ -1,7 +1,7 @@
 <template>
     <form class="st-view cart-item-view" @submit.prevent="addToCart">
         <STNavigationBar :title="cartItem.product.name" :pop="canPop" :dismiss="canDismiss">
-            <span slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | priceFree }}</span>
+            <span v-if="!webshop.isAllFree || cartItem.calculateUnitPrice(cart)" slot="left" class="style-tag">{{ cartItem.calculateUnitPrice(cart) | priceFree }}</span>
         </STNavigationBar>
         <main>
             <h1>{{ cartItem.product.name }}</h1>
