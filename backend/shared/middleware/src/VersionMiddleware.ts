@@ -74,6 +74,11 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         if (platform === "web") {
             response.headers["X-Platform-Latest-Version"] = this.latestVersions.web
         }
-        response.headers["X-Version"] = Math.min(Version, request.getVersion())
+
+        try {
+            response.headers["X-Version"] = Math.min(Version, request.getVersion())
+        } catch (e) {
+            // No version provided or invalid version
+        }
     }
 }
