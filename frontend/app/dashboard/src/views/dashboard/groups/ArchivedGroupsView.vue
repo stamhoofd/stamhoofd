@@ -139,7 +139,17 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
 
         const metaPatch = OrganizationMetaData.patch({})
         const catPatch = GroupCategory.patch({id: cat.id})
-        catPatch.groupIds.addPut(group.id)
+
+        if (cat.groupIds.filter(id => id == group.id).length > 1) {
+            // Not fixable, we need to set the ids manually
+            const cleaned = cat.groupIds.filter(id => id != group.id)
+            cleaned.push(group.id)
+            catPatch.groupIds = cleaned as any
+        } else {
+            // We need to delete it to fix issues if it is still there
+            catPatch.groupIds.addDelete(group.id)
+            catPatch.groupIds.addPut(group.id)
+        }
 
         metaPatch.categories.addPatch(catPatch)
 
