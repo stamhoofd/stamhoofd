@@ -36,6 +36,9 @@
             <div class="container">
                 <h1 class="style-navigation-title">
                     {{ title }}
+                    <span v-if="suffix" class="title-suffix">
+                        {{ suffix }}
+                    </span>
                 </h1>
                 <slot />
 
@@ -49,7 +52,7 @@
                         <button type="button" class="button text" @click="editFilter">
                             <span class="icon filter" />
                             <span class="hide-small">Filter</span>
-                            <span v-if="filteredCount > 0" class="bubble">{{ filteredCount }}</span>
+                            <span v-if="filteredCount > 0" class="bubble primary">{{ filteredText }}</span>
                         </button>
                     </div>
                 </div>
@@ -273,6 +276,22 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
 
     get isIOS() {
         return this.$OS === "iOS"
+    }
+
+    get suffix() {
+        if (this.allValues.length == 0) {
+            return ''
+        }
+
+        return `${this.allValues.length}`
+    }
+
+    get filteredCount() {
+        return this.allValues.length - this.filteredValues.length
+    }
+
+    get filteredText() {
+        return `${this.filteredValues.length}`
     }
 
     wrapColumns = this.isMobile
@@ -1034,10 +1053,6 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         this.selectedFilter = null
     }
 
-    get filteredCount() {
-        return this.allValues.length - this.filteredValues.length
-    }
-
     get filteredValues() {
         const filtered = this.selectedFilter === null ? this.allValues.slice() : this.allValues.filter((val: Value) => {
             if (this.selectedFilter?.doesMatch(val)) {
@@ -1511,6 +1526,10 @@ export default class TableView<Value extends TableListable> extends Mixins(Navig
         > h1 + p {
             padding-bottom: 15px;
         }
+    }
+
+    .title-suffix {
+        @extend .style-description-small;
     }
 }
 
