@@ -89,6 +89,19 @@ export class RecordCategoryStep implements EditMemberStep {
         ).length == 0
     }
 
+    isRequired(details: MemberDetails, member: MemberWithRegistrations | undefined, items: RegisterItem[]): boolean {
+        const definitions = MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member, registerItems: items})
+        if (this.category.filter) {
+            if (this.category.filter.requiredWhen === null) {
+                return false;
+            }
+            return this.category.filter.requiredWhen.decode(definitions).doesMatch(
+                new MemberDetailsWithGroups(details, member, items)
+            )
+        }
+        return true;
+    }
+
     delete(details: MemberDetails) {
         for (const record of this.category.getAllRecords()) {
             const index = details.recordAnswers.findIndex(a => a.settings.id == record.id)
@@ -110,6 +123,12 @@ export class RecordCategoryStep implements EditMemberStep {
         for (const record of records) {
             const answer = details.recordAnswers.find(a => a.settings.id === record.id)
             if (!answer) {
+                if (this.onlyReviewIfMissing) {
+                    // We only want to ask missing data, but it isn't really missing data if it is an optional category
+                    if (!this.isRequired(details, member, items)) {
+                        continue
+                    }
+                }
                 // This was never answered
                 return true
             }
@@ -230,7 +249,7 @@ export class BuiltInEditMemberStep implements EditMemberStep {
             }
 
             case EditMemberStepType.DataPermissions: {
-                return (member.details.dataPermissions?.value ?? false) == false || !member.details.dataPermissions || (!this.onlyReviewIfMissing && member.details.dataPermissions.isOutdated(this.outdatedTime))
+                return (!this.onlyReviewIfMissing && member.details.dataPermissions?.value === false) || !member.details.dataPermissions || (!this.onlyReviewIfMissing && member.details.dataPermissions.isOutdated(this.outdatedTime))
             }
 
             default: {
@@ -306,7 +325,10 @@ export class EditMemberStepsManager {
 
     isNew = true
 
-    // force to do all steps (and not skip them)
+    /**
+     * force to do all steps, even when they are not enabled for the member (and not skip them)
+     * This is not the same as forceReview
+     */ 
     force = false
 
     /**
