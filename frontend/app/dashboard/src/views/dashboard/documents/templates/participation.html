@@ -177,8 +177,14 @@
                         {{/if}}
                         {{#if registration.price}}
                         <tr>
-                            <td>Betaald bedrag</td>
+                            <td>Bedrag</td>
                             <td>{{ formatPrice registration.price }}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if (and registration.showPaidAt registration.paidAt) }}
+                        <tr>
+                            <td>Betaald op</td>
+                            <td>{{ formatDate registration.paidAt }}</td>
                         </tr>
                         {{/if}}
                     </tbody>

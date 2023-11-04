@@ -90,6 +90,12 @@ export const participation = DocumentTemplateDefinition.create({
                     name: "Start- en einddatum vermelden op document",
                     required: false,
                     type: RecordType.Checkbox
+                }),
+                RecordSettings.create({
+                    id: "registration.showPaidAt",
+                    name: "Toon betaaldatum op document (indien betaald)",
+                    required: false,
+                    type: RecordType.Checkbox
                 })
             ]
         })

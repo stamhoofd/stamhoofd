@@ -23,6 +23,11 @@ Handlebars.registerHelper('or', (...args) => {
     return !!args.find(a => !!a)
 });
 
+Handlebars.registerHelper('and', (...args) => {
+    args.pop();
+    return args.every(a => !!a)
+});
+
 /**
  * Filter string for a given type
  */
