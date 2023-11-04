@@ -14,6 +14,8 @@
 </template>
 
 <script lang="ts">
+import { SimpleError } from "@simonbackx/simple-errors";
+import { Request } from "@simonbackx/simple-networking";
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, STInputBox, Validator } from "@stamhoofd/components"
 import { SessionManager } from '@stamhoofd/networking';
@@ -84,6 +86,10 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         }
     }
 
+    beforeDestroy() {
+        Request.cancelAll(this)
+    }
+
     changedFile(event) {
         if (!event.target.files || event.target.files.length != 1) {
             return;
@@ -93,6 +99,15 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         }
 
         const file = event.target.files[0];
+
+        if (file.size > 5 * 1024 * 1024) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: 'file_too_large',
+                message: 'De bestandgrootte is te groot. De afbeelding mag maximaal 5MB groot zijn. Probeer de afbeelding te verkleinen en daarna opnieuw te selecteren.'
+            }))
+            return;
+        }
+
         const resolutions = this.resolutions ?? [ResolutionRequest.create({ height: 720 })]
 
         const formData = new FormData();
@@ -102,13 +117,16 @@ export default class ImageInput extends Mixins(NavigationMixin) {
         this.uploading = true;
         this.errorBox = null;
 
+        Request.cancelAll(this)
         SessionManager.currentSession!.authenticatedServer
             .request({
                 method: "POST",
                 path: "/upload-image",
                 body: formData,
                 decoder: Image,
-                timeout: 60*1000
+                timeout: 120*1000,
+                shouldRetry: false,
+                owner: this
             })
             .then(response => {
                 this.$emit("input", response.data)
