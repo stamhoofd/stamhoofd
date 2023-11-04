@@ -6,13 +6,18 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+
+        <p class="style-description">
+            Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+        </p>
         
-        <p v-if="records.length === 0 && categories.length === 0" class="style-description">
-            Elke vragenlijst kan bestaan uit enkele kenmerken en/of subcategorieën. Via subcategorieën kan je de vragenlijst opdelen in overzichtelijke onderdelen.
+        <p v-if="records.length === 0 && categories.length === 0" class="info-box">
+            Deze vragenlijst is leeg en zal nog niet getoond worden.
         </p>
 
-        <p v-if="patchedCategory.description" class="style-description">
-            {{ patchedCategory.description }}
+        <p v-if="patchedCategory.filter" class="info-box selectable with-icon" @click="editCategory()">
+            {{ patchedCategory.filter.getString(filterDefinitionsForCategory()) }}
+            <button type="button" class="button icon edit" />
         </p>
 
         <STErrorsDefault :error-box="errorBox" />
@@ -21,11 +26,16 @@
             <RecordRow v-for="record in records" :key="record.id" :record="record" :category="patchedCategory" :root-categories="patchedRootCategories" :selectable="true" :settings="settings" @patch="addRootCategoriesPatch" />
         </STList>
 
-        <p>
+        <p class="style-button-bar">
             <button class="button text" type="button" @click="addRecord()">
                 <span class="icon add" />
                 <span v-if="categories.length === 0">Vraag</span>
                 <span v-else>Algemene vraag</span>
+            </button>
+
+            <button class="button text" type="button" @click="addCategory()">
+                <span class="icon add" />
+                <span>Categorie</span>
             </button>
         </p>
 
@@ -40,30 +50,19 @@
                     <button class="icon settings button gray" type="button" @click="editCategory(c)" />
                 </div>
             </h2>
-            <p v-if="c.description" class="style-description-small">
-                {{ c.description }}
-            </p>
-            <p v-if="c.filter" class="info-box">
+            <p v-if="c.filter" class="info-box selectable with-icon" @click="editCategory(c)">
                 {{ c.filter.getString(filterDefinitionsForCategory()) }}
+                <button type="button" class="button icon edit" />
             </p>
 
+            <p v-if="c.records.length === 0" class="info-box">
+                Deze categorie bevat nog geen vragen.
+            </p>
                 
             <STList :draggable="true" :value="getDraggableRecords(c)" group="records" @input="setDraggableRecords(c, $event)">
                 <RecordRow v-for="record in c.records" :key="record.id" :record="record" :category="c" :root-categories="patchedRootCategories" :settings="settings" :selectable="true" @patch="addRootCategoriesPatch" />
             </STList>
-            <p v-if="c.records.length === 0" class="info-box">
-                Deze categorie bevat nog geen vragen.
-            </p>
         </div>
-
-        <hr v-if="categories.length">
-
-        <p>
-            <button class="button text" type="button" @click="addCategory()">
-                <span class="icon add" />
-                <span>Nieuwe categorie</span>
-            </button>
-        </p>
 
         <div class="container">
             <hr>
@@ -86,7 +85,7 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, FillRecordCategoryView, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
 import { RecordEditorSettings } from '@stamhoofd/structures';
 import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordAnswer, RecordCategory, RecordSettings } from "@stamhoofd/structures";
@@ -145,13 +144,13 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
                     category: category,
                     isNew: false,
                     parentCategory: category.id !== this.patchedCategory.id ? this.patchedCategory : null,
-                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                    saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => {
                         if (category.id !== this.patchedCategory.id) {
                             this.addCategoriesPatch(patch)
                         } else {
                             this.patchRootCategories = this.patchRootCategories.patch(patch)
                         }
-                        // TODO: handle deletion
+                        component.pop({ force: true })
                     },
                     filterDefinitions: this.filterDefinitionsForCategory()
                 })
@@ -261,21 +260,29 @@ export default class EditRecordCategoryQuestionsView<T> extends Mixins(Navigatio
     addCategory() {
         const category = RecordCategory.create({})
 
-        this.present(new ComponentWithProperties(EditRecordCategoryView, {
-            category,
-            isNew: true,
-            parentCategory: this.patchedCategory,
-            filterDefinitions: this.filterDefinitionsForCategory(),
-            saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                // Add category
-                this.addCategoriesPatch(patch)
-            }
-        }).setDisplayStyle("popup"))
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(EditRecordCategoryView, {
+                        category,
+                        isNew: true,
+                        parentCategory: this.patchedCategory,
+                        filterDefinitions: this.filterDefinitionsForCategory(),
+                        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => {
+                            this.addCategoriesPatch(patch)
+                            component.pop({ force: true })
+                        }
+                    })
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
 
     addRecord(parent: RecordCategory = this.patchedCategory) {
         const record = RecordSettings.create({
-            sensitive: false
+            sensitive: false,
+            required: true
         })
 
         this.present(new ComponentWithProperties(EditRecordView, {

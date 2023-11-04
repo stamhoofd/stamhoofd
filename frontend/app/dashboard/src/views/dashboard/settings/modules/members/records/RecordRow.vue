@@ -68,31 +68,58 @@ export default class RecordRow<T> extends Mixins(NavigationMixin) {
             if (this.record.askComments) {
                 return "Aankruisvakje met tekstvak indien aangevinkt"
             }
+            if (this.record.required) {
+                return 'Verplicht aankruisvakje'
+            }
             return 'Aankruisvakje'
         }
         if (this.record.type === RecordType.ChooseOne) {
+            if (!this.record.required) {
+                return 'Kies optioneel één uit ' + this.record.choices.length + ' opties'
+            }
             return 'Kies één uit ' + this.record.choices.length + ' opties'
         }
         if (this.record.type === RecordType.MultipleChoice) {
-            return 'Kies meerdere uit ' + this.record.choices.length + ' opties'
+            if (this.record.required) {
+                return 'Kies minstens één uit ' + this.record.choices.length + ' opties'
+            }
+            return 'Kies optioneel meerdere keuzes uit ' + this.record.choices.length + ' opties'
         }
         if (this.record.type === RecordType.Email) {
+            if (!this.record.required) {
+                return 'Optioneel e-mailadres'
+            }
             return 'E-mailadres'
         }
         if (this.record.type === RecordType.Address) {
+            if (!this.record.required) {
+                return 'Optioneel adres'
+            }
             return 'Adres'
         }
         if (this.record.type === RecordType.Phone) {
+            if (!this.record.required) {
+                return 'Optioneel telefoonnummer'
+            }
             return 'Telefoonnummer'
         }
         if (this.record.type === RecordType.Date) {
+            if (!this.record.required) {
+                return 'Optionele datum'
+            }
             return 'Datum'
         }
 
         if (this.record.type === RecordType.Textarea) {
+            if (!this.record.required) {
+                return 'Optioneel (groot) tekstveld'
+            }
             return 'Groot tekstveld'
         }
 
+        if (!this.record.required) {
+            return 'Optioneel tekstveld'
+        }
         return 'Tekstveld';
     }
 
