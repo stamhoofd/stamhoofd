@@ -42,6 +42,18 @@ export class RegisterCartValidator {
             }
         }
 
+        // Check if we have an invite (doesn't matter if registrations are closed)
+        if (member.registrations.find(r => r.groupId === group.id && r.waitingList && r.canRegister && r.cycle === group.cycle)) {
+            // Max members doesn't matter (invites are counted into the occupancy)
+            return {
+                closed: false,
+                waitingList: false,
+                message: "Uitnodiging",
+                description: "Je bent uitgenodigd om "+member.details.firstName+" in te schrijven voor "+group.settings.name,
+                invited: true
+            }
+        }
+
         if (group.notYetOpen) {
             return {
                 closed: true,
@@ -59,18 +71,6 @@ export class RegisterCartValidator {
                 message: "Gesloten",
                 description: "De inschrijvingen voor "+group.settings.name+" zijn afgelopen.",
                 invited: false
-            }
-        }
-
-        // Check if we have an invite (doesn't matter if registrations are closed)
-        if (member.registrations.find(r => r.groupId === group.id && r.waitingList && r.canRegister && r.cycle === group.cycle)) {
-            // Max members doesn't matter (invites are counted into the occupancy)
-            return {
-                closed: false,
-                waitingList: false,
-                message: "Uitnodiging",
-                description: "Je bent uitgenodigd om "+member.details.firstName+" in te schrijven voor "+group.settings.name,
-                invited: true
             }
         }
 
