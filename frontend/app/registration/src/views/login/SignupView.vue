@@ -37,7 +37,7 @@
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary full" type="button">
+                    <button class="button primary full" type="submit">
                         <span class="icon lock" />
                         <span>Account aanmaken</span>
                     </button>
