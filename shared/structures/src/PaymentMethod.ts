@@ -1,3 +1,5 @@
+import { CheckoutMethodType } from "./webshops/WebshopMetaData";
+
 export enum PaymentMethod {
     Unknown = "Unknown",
     PointOfSale = "PointOfSale",
@@ -50,13 +52,17 @@ export class PaymentMethodHelper {
         }
     }
 
-    static getNameCapitalized(method: PaymentMethod, context: null | "takeout" | "delivery" = null): string {
+    static getNameCapitalized(method: PaymentMethod, context: null | "takeout" | "delivery" | 'Takeout' | 'Delivery' | 'OnSite' = null): string {
         switch(method) {
             case PaymentMethod.Unknown: return "Onbekende betaalmethode";
             case PaymentMethod.PointOfSale: {
                 switch (context) {
-                    case "takeout": return "Bij afhalen";
-                    case "delivery": return "Bij levering";
+                    case "takeout":
+                    case 'Takeout': 
+                        return "Bij afhalen";
+                    case "delivery": 
+                    case 'Delivery':
+                        return "Bij levering";
                     default: return "Ter plaatse";
                 }
             }

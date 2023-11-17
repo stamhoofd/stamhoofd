@@ -12,7 +12,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopOrdersQuery, WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordCategory, TicketPrivate, WebshopOrdersQuery, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -115,7 +115,50 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 grow: true,
                 index: (this as any).$isMobile ? 0 : 1
             }),
+
+            new Column<PrivateOrder, string>({
+                name: "E-mailadres", 
+                getValue: (order) => order.data.customer.email, 
+                compare: (a, b) => Sorter.byStringValue(a, b),
+                minimumWidth: 100,
+                recommendedWidth: 500,
+                grow: false,
+                enabled: false,
+                index: (this as any).$isMobile ? 0 : 1
+            }),
         ]
+
+        if (this.preview.meta.phoneEnabled) {
+            cols.push(
+                new Column<PrivateOrder, string>({
+                    name: "Telefoonnummer", 
+                    getValue: (order) => order.data.customer.phone, 
+                    compare: (a, b) => Sorter.byStringValue(a, b),
+                    minimumWidth: 100,
+                    recommendedWidth: 500,
+                    grow: false,
+                    enabled: false,
+                    index: (this as any).$isMobile ? 0 : 1
+                })
+            )
+        }
+
+        if (this.preview.meta.paymentMethods.length > 1){
+            cols.push(new Column<PrivateOrder, PrivateOrder>({
+                name: "Betaalmethode", 
+                getValue: (order) => order, 
+                format: (order: PrivateOrder) => {
+                    if (order.data.paymentMethod === PaymentMethod.Unknown) {
+                        return "Geen"
+                    }
+                    return PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod, order.data.checkoutMethod?.type ?? null)
+                },
+                compare: (a, b) => Sorter.byStringValue(a.data.paymentMethod, b.data.paymentMethod),
+                minimumWidth: 100,
+                recommendedWidth: 120,
+                enabled: false
+            }))
+        }
 
         if (this.preview.meta.checkoutMethods.length > 1){
             cols.push(new Column<PrivateOrder, CheckoutMethod | null>({
@@ -415,6 +458,27 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             })
         )
       
+        // Custom questions
+        for (const category of this.preview.meta.recordCategories) {
+            for (const record of category.getAllRecords()) {
+                cols.push(new Column<PrivateOrder, string | undefined>({
+                    name: record.name, 
+                    enabled: false,
+                    getValue: (order) => {
+                        const answer = order.data.recordAnswers.find(a => a.settings.id === record.id)
+                        if (!answer) {
+                            return undefined
+                        }
+                        return answer.stringValue
+                    },
+                    format: (v) => v ? v : "Leeg",
+                    compare: (a, b) => Sorter.byStringValue(b ?? '', a ?? ''),
+                    getStyle: (price) => price === undefined ? "gray" : '',
+                    minimumWidth: 70,
+                    recommendedWidth: 150,
+                }));
+            }
+        }
         return cols
     })()
 
@@ -888,6 +952,10 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }
         }
 
+        // Custom questions
+        definitions.push(
+            ...RecordCategory.getRecordCategoryDefinitions<PrivateOrderWithTickets>(this.preview.meta.recordCategories, (order) => order.data.recordAnswers)
+        )
 
         return definitions
     }
