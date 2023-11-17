@@ -51,7 +51,10 @@ export class StripeAccount extends Model {
 
     setMetaFromStripeAccount(account: any) {
         this.meta = StripeMetaData.create({
-            business_profile: StripeBusinessProfile.create(account.business_profile),
+            type: account.type ?? 'express',
+            blob: account,
+            business_profile: StripeBusinessProfile.create(account.business_profile.name === null ? {...account.business_profile, name: ''} : account.business_profile),
+            business_type: account.business_type ?? null,
             company: account.company ? StripeCompany.create(account.company) : null,
             charges_enabled: account.charges_enabled,
             payouts_enabled: account.payouts_enabled,
