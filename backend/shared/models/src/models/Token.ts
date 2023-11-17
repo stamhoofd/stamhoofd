@@ -270,4 +270,9 @@ export class Token extends Model {
         await token.save();
         return token;
     }
+
+    static async clearFor(userId: string, currentToken: string) {
+        const query = `DELETE from ${this.table} where userId = ? AND accessToken != ?`;
+        await Database.delete(query, [userId, currentToken])
+    }
 }
