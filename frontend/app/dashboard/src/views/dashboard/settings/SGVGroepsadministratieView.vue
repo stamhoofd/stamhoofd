@@ -20,7 +20,7 @@
                 <li>Gestopte leden uitschrijven (dat doe je best pas vanaf de week voor de deadline van 15 oktober). Opgelet: we schrappen enkel de functies waarvoor Stamhoofd verantwoordelijk is (de leeftijdsgroepen die in Stamhoofd staan).</li>
                 <li>Lidnummers ophalen</li>
                 <li>Functies van leden worden correct ingesteld voor de standaard leeftijdsgroepen, deze schrappen en starten we waar nodig. Tussentakken worden ook automatisch ondersteund: omdat je in de groepsadministratie altijd een 'hoofdfunctie' moet kiezen om facturen en dergelijke te krijgen voor die leden, gaan we tussentakken ook op basis van de ingestelde leeftijd of naam in Stamhoofd matchen op een hoofdtak. Alle woudlopers, wolven, kawellen, pioniers... komen dus ook terecht bij de wouters.</li>
-                <li>Leden importeren kan door je leden uit de groepsadministratie te exporteren naar Excel en deze vervolgens te importeren in Stamhoofd via Instellingen > Leden importeren.</li>
+                <li>Leden importeren kan door je leden uit de groepsadministratie te exporteren naar Excel en deze vervolgens te importeren in Stamhoofd via Instellingen > Leden importeren (normaal nooit nodig om dit te doen).</li>
             </ul>
 
             <hr>
@@ -29,6 +29,7 @@
             <ul>
                 <li>De functies van leiding en vrijwilligers goed instellen in de groepsadministratie (deze informatie staat niet in Stamhoofd)</li>
                 <li>Als leiding niet inschrijft via Stamhoofd: deze zelf toevoegen en wijzigen</li>
+                <li>Als leiding wel inschrijft via Stamhoofd: nieuwe leiding eerst zelf toevoegen in de groepsadmin met de juiste functies (naam en geboortedatum is voldoende), en functies van bestaande leiding controleren in de groepsadministratie</li>
                 <li>Gestopte leiding/vrijwilligers schrappen</li>
                 <li>We kunnen het e-mailadres niet wijzigen van leden die een login hebben in de groepsadministratie</li>
             </ul>

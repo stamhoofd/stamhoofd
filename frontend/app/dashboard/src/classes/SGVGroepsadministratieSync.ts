@@ -67,7 +67,7 @@ export class SGVSyncReport {
 
 export function schrappen(lid: any, allGroups: Group[], groepFuncties: any): any {
     const newFunctions: any[] = []
-    const mapping = buildGroupMapping(allGroups, groepFuncties)
+    const mapping = buildGroupMapping(null, [], allGroups, groepFuncties)
 
     for (const functie of lid.functies ?? []) {
         // Keep all functies that have been ended
@@ -154,7 +154,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 
     const newFunctions: any[] = []
     let hasActiveFunctie = false // True als we een active functie hebben (zonder einde)
-    const mapping = buildGroupMapping(allGroups, groepFuncties)
+    const mapping = buildGroupMapping(details, groups, allGroups, groepFuncties)
     const endedFunctions: any[] = []
 
     for (const functie of lid.functies ?? []) {
@@ -224,6 +224,10 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
     }
 
     if (!hasActiveFunctie) {
+        if (!lid.persoonsgegevens) {
+            // New members need a functie
+            throw new Error(details.firstName+" "+details.lastName+": we konden niet automatisch bepalen welke functies we moeten toekennen. Ten minste één functie in de groepsadministratie is verplicht om een lid te kunnen toevoegen in de groepsadministratie. Voor nieuwe leiding moet je zelf eerst de leiding toevoegen met de juiste functies, daarna kan je de andere gegevens synchroniseren.")
+        }
         report?.addWarning(details.firstName+" "+details.lastName+" moet nog een functie toegekend krijgen in de groepsadministratie, we konden niet automatisch bepalen welke functies we moeten toekennen.")
     }
 
@@ -275,7 +279,7 @@ export function getPatch(details: MemberDetails, lid: any, groepNummer: string, 
 /**
  * Returns a list of groepsadmin ids => group that Stamhoofd will handle for this group
  */
-export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<string, Group[]> {
+export function buildGroupMapping(details: MemberDetails|null, memberGroups: Group[], groups: Group[], groepFuncties: any): Map<string, Group[]> {
     const mapping = {
         "KAP": ["kapoenen"],
         "KW": ["kabouters", "welpen", "wouters", "woudlopers", "kawellen", "wolven", "pioniers"],
@@ -377,6 +381,45 @@ export function buildGroupMapping(groups: Group[], groepFuncties: any): Map<stri
                     continue main;
                 }
             }
+        }
+    }
+
+    // And also based on the current member age
+    if (details) {
+        // find a match for normal members
+        const memberAge = details.age
+
+        if (memberAge !== null) {
+            // Does this group has a matching?
+            for (const age of defaultAgeMapping) {
+                if (memberAge >= age.minAge && memberAge <= age.maxAge) {
+                    // Found one
+                    const functie =  groepFuncties.find(f => f.code == age.code)
+                    if (!functie) {
+                        throw new Error( age.code+" niet gevonden :(")
+                    }
+
+                    for (const group of memberGroups) {
+                        const current = map.get(functie.id) ?? []
+                        if (!current.find(g => g.id == group.id)) {
+                            map.set(functie.id, [...current, group])
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    // always add the keys for each default functie
+    for (const age of defaultAgeMapping) {
+        const functie =  groepFuncties.find(f => f.code == age.code)
+        if (!functie) {
+            throw new Error( age.code+" niet gevonden :(")
+        }
+
+        if (!map.has(functie.id)) {
+            map.set(functie.id, [])
         }
     }
 
