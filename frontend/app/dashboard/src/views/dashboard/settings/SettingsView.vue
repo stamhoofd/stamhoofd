@@ -106,7 +106,6 @@
                         {{ $t('dashboard.settings.menu.paymentAccounts.description') }}
                     </p>
                     <template slot="right">
-                        <span v-if="!hasPaymentMethod" v-tooltip="'Je hebt nog geen bankrekeningnummer toegevoegd of andere betaalmethodes geactiveerd'" class="icon warning yellow" />
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
