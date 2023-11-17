@@ -238,6 +238,12 @@ export default class MailView extends Mixins(NavigationMixin) {
                 example: "", 
                 deleteMessage: "Je kan het openstaand bedrag van een lid enkel gebruiken als je één e-mail per lid verstuurt."
             }),
+            new EditorSmartVariable({
+                id: "loginDetails", 
+                name: "Inloggegevens", 
+                example: "",
+                hint: "Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen."
+            }),
         ]
 
         //if (this.orders.length > 0) {
@@ -382,7 +388,7 @@ export default class MailView extends Mixins(NavigationMixin) {
             buttons.push(new EditorSmartButton({
                 id: "signInUrl",
                 name: "Knop om in te loggen",
-                text: "Inschrijvingen beheren",
+                text: "Open ledenportaal",
                 hint: "Als gebruikers op deze knop klikken, zorgt het systeem ervoor dat ze inloggen of registreren op het juiste e-mailadres dat al in het systeem zit."
             }))
         }
@@ -699,7 +705,7 @@ export default class MailView extends Mixins(NavigationMixin) {
 
         // Insert <hr> and content
         // Warning: due to a bug in Safari, we cannot add the <hr> as the first element, because that will cause the whole view to offset to the top for an unknown reason
-        const content2 = `<p></p><p class="description"><em>Klik op de knop hierboven om jouw gegevens te wijzigen of om je in te schrijven. Belangrijk! Log altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
+        //const content2 = `<p class="description"><em>Log in het ledenportaal altijd in met <strong><span data-type="smartVariable" data-id="email"></span></strong>. Anders heb je geen toegang tot jouw gegevens.</em></p>`;
         this.editor.chain().insertContentAt(this.editor.state.doc.content.size, [
             {
                 type: "paragraph",
@@ -712,7 +718,7 @@ export default class MailView extends Mixins(NavigationMixin) {
                 type: "paragraph",
                 content: []
             },
-        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0], { updateSelection: true }).insertContent(content2, { updateSelection: false }).setTextSelection(0)/*.focus()*/.run()
+        ], { updateSelection: true }).insertSmartButton(this.smartButtons[0], { updateSelection: true }).insertSmartVariable(this.smartVariables.find(s => s.id === 'loginDetails')!, { updateSelection: false }).setTextSelection(0)/*.focus()*/.run()
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         //this.editor.state.tr.setSelection(TextSelection.create(this.editor.state.tr.doc, position))
@@ -1225,6 +1231,11 @@ export default class MailView extends Mixins(NavigationMixin) {
                         Replacement.create({
                             token: "email",
                             value: email
+                        }),
+                        Replacement.create({
+                            token: "loginDetails",
+                            value: "",
+                            html: user.hasAccount ? `<p class="description"><em>Je kan in het ledenportaal inloggen op <strong>${Formatter.escapeHtml(email)}</strong></em></p>` : `<p class="description"><em>Je kan in het ledenportaal een nieuw account aanmaken op <strong>${Formatter.escapeHtml(email)}</strong>, dan krijg je automatisch toegang tot alle gekoppelde gegevens.</em></p>`
                         }),
                         ...shared
                     ],
