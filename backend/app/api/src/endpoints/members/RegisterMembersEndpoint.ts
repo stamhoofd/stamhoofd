@@ -424,7 +424,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     lineItems: itemPayments,
                     organization,
                     customer: {
-                        name: user.firstName ? user.firstName : (user.lastName ? user.lastName : (oldestMember ? oldestMember.details.name : "")),
+                        name: user.name ?? undefined,
                         email: user.email,
                     }
                 });

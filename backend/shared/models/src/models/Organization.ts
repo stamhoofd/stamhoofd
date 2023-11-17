@@ -763,7 +763,11 @@ export class Organization extends Model {
         }
         const provider = this.privateMeta.getPaymentProviderFor(method, stripeAccount?.meta)
         if (provider === null && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(method)) {
-            throw new Error("No payment provider configured for "+method)
+            throw new SimpleError({
+                code: 'payment_provider_not_configured',
+                message: 'Payment provider not configured for '+method,
+                human: 'Deze betaalmethode werd helaas niet volledig geconfigureerd. Probeer later even opnieuw, neem contact met ons op of kies een andere betaalmethode.'
+            })
         }
         return {
             provider,

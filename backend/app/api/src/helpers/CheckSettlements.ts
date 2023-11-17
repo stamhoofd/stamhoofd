@@ -31,7 +31,7 @@ export async function checkAllStripePayouts(checkAll = false) {
     }
     
     // Stripe payouts
-    const stripeAccounts = await StripeAccount.all()
+    const stripeAccounts = await StripeAccount.where({ status: 'active' })
     for (const account of stripeAccounts) {
         try {
             console.log("Checking settlements for ", account.accountId)
