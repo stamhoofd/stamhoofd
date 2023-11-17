@@ -253,6 +253,14 @@ export class BalanceItem extends Model {
         await this.deleteItems(items)
     }
 
+    static async getForRegistration(registrationId: string) {
+        const items = await BalanceItem.where({ registrationId })
+        return {
+            items,
+            ...(await this.loadPayments(items))
+        }
+    }
+
     static async loadPayments(items: BalanceItem[]) {
         if (items.length == 0) {
             return {balanceItemPayments: [], payments: []}
