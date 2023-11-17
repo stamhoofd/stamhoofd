@@ -209,7 +209,7 @@ export class EncryptedMemberDetails extends AutoEncoder {
         details.memberNumber = original.memberNumber
 
         // Keep all non-encrypted fields
-        details.recordAnswers = original.recordAnswers.filter(answer => !answer.settings.encrypted)
+        details.recordAnswers = original.recordAnswers
 
         // Deprecated
         details.records = []

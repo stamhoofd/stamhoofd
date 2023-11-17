@@ -53,6 +53,9 @@ export class DocumentSettings extends AutoEncoder {
 }
 
 export class DocumentTemplateDefinition extends AutoEncoder {
+    @field({ decoder: StringDecoder, nullable: true, version: 194, upgrade: () => 'fiscal' })
+    type: string | null = null
+
     @field({ decoder: StringDecoder })
     name = ""
 

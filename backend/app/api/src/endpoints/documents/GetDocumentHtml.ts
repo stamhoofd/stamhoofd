@@ -49,7 +49,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         }
 
 
-        const html = await document.getRenderedHtml();
+        const html = await document.getRenderedHtml(user.organization);
         if (!html) {
             throw new SimpleError({
                 code: "failed_generating",

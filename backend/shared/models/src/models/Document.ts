@@ -4,6 +4,7 @@ import { Document as DocumentStruct, DocumentData, DocumentStatus } from '@stamh
 import { v4 as uuidv4 } from "uuid";
 import { render } from "../helpers/Handlebars";
 import { RegistrationWithMember } from "./Member";
+import { Organization } from "./Organization";
 
 export class Document extends Model {
     static table = "documents";
@@ -63,12 +64,14 @@ export class Document extends Model {
         return DocumentStruct.create(this)
     }
 
-    buildContext() {
+    buildContext(organization: Organization) {
         // Convert the field answers in a simplified javascript object
         const data = {
             "id": this.id,
+            "name": this.data.name,
             "number": this.number,
-            "created_at": this.createdAt
+            "created_at": this.createdAt,
+            "organization.logo": organization.meta.squareLogo,
         };
 
         for (const field of this.data.fieldAnswers) {
@@ -171,20 +174,20 @@ export class Document extends Model {
     }
 
     // Rander handlebars template
-    async getRenderedHtml(): Promise<string | null> {
+    async getRenderedHtml(organization: Organization): Promise<string | null> {
         const DocumentTemplate = (await import("./DocumentTemplate")).DocumentTemplate
         const template = await DocumentTemplate.getByID(this.templateId)
         if (!template) {
             return null
         }
 
-        return this.getRenderedHtmlForTemplate(template.html)
+        return this.getRenderedHtmlForTemplate(organization, template.html)
     }
 
     // Rander handlebars template
-    private getRenderedHtmlForTemplate(htmlTemplate: string): string | null {
+    private getRenderedHtmlForTemplate(organization: Organization, htmlTemplate: string): string | null {
         try {
-            const context = this.buildContext()
+            const context = this.buildContext(organization)
             const renderedHtml = render(htmlTemplate, context);
             return renderedHtml;
         } catch (e) {

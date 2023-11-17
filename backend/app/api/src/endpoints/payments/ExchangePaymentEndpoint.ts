@@ -189,7 +189,8 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
             if (payment.status == PaymentStatus.Pending || payment.status == PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status == PaymentStatus.Failed)) {
                 if (payment.provider === PaymentProvider.Stripe) {
                     try {
-                        let status = await StripeHelper.getStatus(payment, cancel)
+                        let status = await StripeHelper.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment))
+
                         if (this.isManualExpired(status, payment)) {
                             console.error('Manually marking Stripe payment as expired', payment.id)
                             status = PaymentStatus.Failed
@@ -290,7 +291,19 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                     if (payconiqPayments.length == 1) {
                         const payconiqPayment = payconiqPayments[0]
 
+                        if (cancel) {
+                            console.error('Cancelling Payconiq payment on request', payment.id)
+                            await payconiqPayment.cancel(organization)
+                        }
+
                         let status = await payconiqPayment.getStatus(organization)
+
+                        if (!cancel && this.shouldTryToCancel(status, payment)) {
+                            console.error('Manually cancelling Payconiq payment', payment.id)
+                            if (await payconiqPayment.cancel(organization)) {
+                                status = PaymentStatus.Failed
+                            }
+                        }
 
                         if (this.isManualExpired(status, payment)) {
                             console.error('Manually marking Payconiq payment as expired', payment.id)
@@ -323,6 +336,25 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         if ((status == PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
             // If payment is not succeeded after one day, mark as failed
             if (payment.createdAt < new Date(new Date().getTime() - 60*1000*60*24)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Try to cancel a payment that is still pending
+     */
+    static shouldTryToCancel(status: PaymentStatus, payment: Payment) {
+        if ((status == PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
+            let timeout = STAMHOOFD.environment === 'development' ? 60*1000*2 : 60*1000*10;
+
+            // If payconiq and not yet 'identified' (scanned), cancel after 5 minutes
+            if (payment.provider === PaymentProvider.Payconiq && status === PaymentStatus.Created) {
+                timeout = STAMHOOFD.environment === 'development' ? 60*1000*1 : 60*1000*5;
+            }
+
+            if (payment.createdAt < new Date(new Date().getTime() - timeout)) {
                 return true;
             }
         }
