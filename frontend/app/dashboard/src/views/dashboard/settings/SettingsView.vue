@@ -10,27 +10,11 @@
             <BillingWarningBox />
 
             <p v-if="stripeWarning" class="error-box">
-                {{ stripeWarning }}<br>Hulp nodig? Neem contact met ons op.
+                {{ stripeWarning }}
 
-                <a :href="'mailto:'+$t('shared.emails.general')" class="button text">
-                    E-mail
+                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/documenten-stripe-afgekeurd/'" target="_blank" class="button text">
+                    Meer info
                 </a>
-            </p>
-
-            <p v-if="false" class="info-box icon help with-button">
-                Hulp nodig? Neem contact met ons op via {{ $t('shared.emails.general') }}
-
-                <a :href="'mailto:'+$t('shared.emails.general')" class="button text">
-                    E-mail
-                </a>
-            </p>
-
-            <p v-if="false && !areSalesDisabled" class="info-box icon gift selectable with-button" @click="openReferrals(true)">
-                Geef 25 euro, en krijg tot 100 euro per vereniging die via jou Stamhoofd gebruikt. Klik hier om mee te doen.
-
-                <button class="button text" type="button">
-                    Meedoen
-                </button>
             </p>
 
             <STList class="illustration-list">    
