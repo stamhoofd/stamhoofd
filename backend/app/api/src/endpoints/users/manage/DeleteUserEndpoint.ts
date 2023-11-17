@@ -39,6 +39,13 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             })
         }
 
+         if (editUser.id === user.id) {
+            throw new SimpleError({
+                code: "permission_denied",
+                message: "Je kan jezelf niet verwijderen"
+            })
+        }
+
         await editUser.delete();
 
         return new Response(undefined);      

@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view admins-list-view">
+    <div class="st-view background">
         <STNavigationBar title="Beheerders" :dismiss="canDismiss" :pop="canPop">
             <button slot="right" class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" type="button" @click="createAdmin">
                 <span class="icon add" />
@@ -10,22 +10,27 @@
     
         <main>
             <h1>Beheerders</h1>
-            <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan in meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
+            <p>Voeg hier beheerders toe en geef iedereen toegang tot bepaalde onderdelen door functies toe te kennen. Een beheerder kan meerdere functies hebben. Maak zelf nieuwe functies aan en stel de toegang in per functie.</p>
 
             <Spinner v-if="loading" />
 
             <template v-else>
-                <hr>
-                <h2>
-                    Hoofdbeheerders
-                </h2>
-                <p>Hoofdbeheerders hebben toegang tot alles, zonder beperkingen.</p>
+                <STList>
+                    <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
+                        <template slot="left">
+                            <span v-if="hasFullAccess(admin)" vv-tooltip="'Hoofdbeheerder'" class="icon layered">
+                                <span class="icon user-admin-layer-1" />
+                                <span class="icon user-admin-layer-2 yellow" />
+                            </span>
+                            <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen functies'" class="icon layered">
+                                <span class="icon user-blocked-layer-1" />
+                                <span class="icon user-blocked-layer-2 error" />
+                            </span>
+                            <span v-else class="icon user" />
+                        </template>
 
-                <Spinner v-if="loading" />
-                <STList v-else>
-                    <STListItem v-for="admin in getAdmins()" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
                         <h2 class="style-title-list">
-                            {{ admin.firstName }} {{ admin.lastName }}
+                            <span>{{ admin.firstName }} {{ admin.lastName }}</span>
                         </h2>
                         <p class="style-description-small">
                             {{ admin.email }}
@@ -38,91 +43,11 @@
                             <span v-if="admin.id === me.id" class="style-tag">
                                 Ik
                             </span>
-                            <span v-else-if="!admin.hasAccount" class="style-tag warn">
-                                Niet geaccepteerd
-                            </span>
+                            <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>
                 </STList>
-
-                <div v-for="(role, index) in roles" :key="role.id" class="container">
-                    <hr>
-                    <h2 class="style-with-button">
-                        <div>
-                            {{ role.name }}
-                        </div>
-                        <div>
-                            <button class="button icon gray arrow-up" type="button" @click="moveRoleUp(index, role)" />
-                            <button class="button icon gray arrow-down" type="button" @click="moveRoleDown(index, role)" />
-                            <button class="button text" type="button" @click="editRole(role)">
-                                <span class="icon settings" />
-                                <span class="hide-smartphone">Bewerken</span>
-                            </button>
-                        </div>
-                    </h2>
-
-                    <Spinner v-if="loading" />
-                    <STList v-else>
-                        <STListItem v-for="admin in getAdminsForRole(role)" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
-                            <h2 class="style-title-list">
-                                {{ admin.firstName }} {{ admin.lastName }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ admin.email }}
-                            </p>
-                            <p class="style-description-small">
-                                {{ permissionList(admin) }}
-                            </p>
-
-                            <template slot="right">
-                                <span v-if="admin.id === me.id" class="style-tag">
-                                    Ik
-                                </span>
-                                <span v-else-if="!admin.hasAccount" class="style-tag warn">
-                                    Niet geaccepteerd
-                                </span>
-                                <span><span class="icon gray edit" /></span>
-                            </template>
-                        </STListItem>
-                    </STList>
-
-                    <p v-if="getAdminsForRole(role).length == 0" class="info-box">
-                        Geen beheerders met deze functie
-                    </p>
-                </div>
-
-                <div v-if="getAdminsWithoutRole().length > 0" class="container">
-                    <hr>
-                    <h2>
-                        Beheerders zonder functie
-                    </h2>
-                    <p>Deze beheerders hebben nergens toegang toe, deel ze op in groepen op basis van hun functie in de vereniging.</p>
-
-                    <STList v-if="!loading">
-                        <STListItem v-for="admin in getAdminsWithoutRole()" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
-                            <h2 class="style-title-list">
-                                {{ admin.firstName }} {{ admin.lastName }}
-                            </h2>
-                            <p class="style-description-small">
-                                {{ admin.email }}
-                            </p>
-                            <p class="style-description-small">
-                                {{ permissionList(admin) }}
-                            </p>
-
-                            <template slot="right">
-                                <span v-if="admin.id === me.id" class="style-tag">
-                                    Ik
-                                </span>
-                                <span v-else-if="!admin.hasAccount" class="style-tag warn">
-                                    Niet geaccepteerd
-                                </span>
-                                <span><span class="icon gray edit" /></span>
-                            </template>
-                        </STListItem>
-                    </STList>
-                </div>
 
                 <hr>
 
@@ -148,7 +73,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
@@ -167,6 +92,9 @@ import EditRoleView from "./EditRoleView.vue";
         STListItem,
         Spinner,
         BackButton
+    },
+    directives: {
+        tooltip: TooltipDirective
     }
 })
 export default class AdminsView extends Mixins(NavigationMixin) {
@@ -225,7 +153,15 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     get sortedAdmins() {
-        return this.admins.slice().sort((a, b) => Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName))
+        return this.admins.slice().sort((a, b) => Sorter.stack(Sorter.byBooleanValue(a.permissions?.hasFullAccess() ?? false, b.permissions?.hasFullAccess() ?? false), Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)))
+    }
+
+    hasFullAccess(user: User) {
+        return user.permissions?.hasFullAccess() ?? false
+    }
+
+    hasNoRoles(user: User) {
+        return !user.permissions?.hasReadAccess() && user.permissions?.roles.length == 0
     }
 
     createAdmin() {
@@ -339,11 +275,3 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 }
 
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-.admins-list-view {
-    background: $color-background;
-}
-</style>

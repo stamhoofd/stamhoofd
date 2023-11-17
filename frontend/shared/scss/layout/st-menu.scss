@@ -4,8 +4,12 @@
 .st-menu {
     --st-vertical-padding: 25px;
 
+    @media (min-width: 400px) {
+        --st-horizontal-padding: 20px;
+    }
+
     @media (min-width: 801px) {
-        --st-horizontal-padding: 25px;
+        --st-horizontal-padding: 20px;
     }
 
     #organization-switcher {
@@ -43,21 +47,21 @@
         margin-bottom: 5px;
     }
 
-    > .padding-group {
-    }
-
-    hr.footer {
-        margin-top: auto;
-    }
-
     .grouped {
-        padding: 5px 0;
+        //padding: 5px 0;
+
+        &.footer {
+            margin-top: auto;
+        }
 
 
         .group-title {
-            color: $color-gray-1;
-            font-size: 14px;
+            //color: $color-gray-1;
+            /*font-size: 16px;
+            //text-transform: uppercase;
+            
             font-weight: $font-weight-semibold;
+            letter-spacing: -0.2px;
             min-height: 24px;
             padding-bottom: 5px;
 
@@ -72,7 +76,7 @@
                 &.icon.arrow-right-small {
                     margin-right: -9px;
                 }
-            }
+            }*/
         }
     }
 
@@ -83,20 +87,33 @@
         overflow-x: clip; // Same as above, but prevent scrolling
     }
 
-    > main > hr, > main > .container > hr {
+    > main hr {
         height: $border-width-thin;
-        border-radius: $border-width-thin/2;
-        background: $color-gray-2;
+        background: $color-gray-3;
         border: 0;
         outline: 0;
-        margin: 15px 0;
+        margin: 15px -25px;
+
+        &.first {
+            margin-top: 10px;
+        }
+    }
+
+    >main>.grouped>hr {
+        height: 0;;
+        //margin: 10px 0;
     }
 
     .menu-button {
         display: flex;
         flex-direction: row;
-        @extend .style-button-small;
-        color: $color-dark-light;
+        @extend .style-button;
+        font-weight: $font-weight-semibold;
+        font-size: 15px;
+        letter-spacing: 0.1px;
+
+        color: $color-dark;
+
         align-items: center;
         justify-content: flex-start;
         width: 100%;
@@ -112,15 +129,27 @@
 
         padding-left: 15px;
         padding-right: 15px;
-        margin: 0 -15px;
+        margin: 0px -15px;
         border-radius: $border-radius;
 
         &, &:active, &:visited, &:link {
             text-decoration: none;
         }
 
-        > .icon {
-            padding-right: 15px;
+        &.group-title {
+        }
+
+        &.sub-button {
+            //margin-left: -px;
+            //width: calc(100% - 10px);
+            font-size: 14px;
+            color: $color-dark-light;
+            //font-weight: $font-weight-medium;
+            //letter-spacing: 0px;
+        }
+
+        > .icon:first-child {
+            padding-right: 18px;
             flex-shrink: 0;
         }
 
@@ -142,23 +171,7 @@
         > figure:first-child {
             margin-right: 10px;
             flex-shrink: 0;
-            --block-width: 29px;
-        }
-
-        > .text-icon {
-            margin-right: 10px;
-            flex-shrink: 0;
-            width: 29px;
-            height: 29px;
-
-            border-radius: 4px;
-            text-align: center;
-            background: $color-primary-light;
-            color: $color-primary;
-            text-transform: uppercase;
-            line-height: 29px;
-            font-size: 11px;
-            font-weight: bold;
+            --block-width: 30px;
         }
 
         > span {
@@ -190,13 +203,21 @@
             padding-right: 0
         }
 
+        .icon.rot {
+            transition: transform 0.2s;
+
+            &.rot180 {
+                transform: rotate(-180deg);
+            }
+        }
+
         &.cta {
             color: $color-primary;
         }
 
         .split-view-controller[data-has-detail="true"] &.selected  {
-            background-color: $color-primary-light;
-            color: $color-primary;
+            background-color: $color-background-shade-darker;
+            color: $color-dark;
         }
 
         &.button {
@@ -210,6 +231,12 @@
         > button {
             margin-left: auto;
             color: $color-primary;
+        }
+    }
+
+    .collapsable {
+        &.hide {
+            display: none;
         }
     }
 }

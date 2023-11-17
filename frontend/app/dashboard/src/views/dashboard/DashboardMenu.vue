@@ -9,6 +9,8 @@
                 <input class="input" name="search" placeholder="Zoeken" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off">
             </form>
 
+            <hr class="first">
+
             <!--<h1 v-if="isNative" @click="switchOrganization">
                 <span>{{ organization.name }}</span>
                 <span class="icon arrow-down-small gray" />
@@ -21,6 +23,7 @@
                     <span class="icon arrow-down-small gray" />
                 </button>
             </div>-->
+
 
             <button v-if="!enableWebshopModule && !enableMemberModule" type="button" class="menu-button button heading cta" @click="openSignupSelection()">
                 <span class="icon flag" />
@@ -49,50 +52,70 @@
                     Voeg inschrijvingsgroepen die je vaak gebruikt toe aan je favorieten. Zo vind je ze snel terug.
                 </p>
             </div>-->
+            <div class="grouped">
+                <button class="group-title menu-button button heading" type="button" :class="{ selected: currentlySelected == 'favourites' }">
+                    <span class="icon star" />
+                    <span>Favorieten</span>
+                    <span class="button icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed('favourites')}" @click="toggleCollapse('favourites')" />
+                </button>
+            </div>
 
+            <hr>
 
             <template v-if="enableMemberModule && tree.categories.length">
                 <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                     <div class="grouped">
-                        <button class="group-title button" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                        <button class="group-title menu-button button heading" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                            <span v-if="category.categories.length" class="icon category" />
+                            <span v-else class="icon layered">
+                                <span class="icon group-layer-1" />
+                                <span class="icon group-layer-2 gray" />
+                            </span>
                             <span>{{ category.settings.name }}</span>
-                            <span class="icon arrow-right-small right-icon" />
                             <span v-if="isCategoryDeactivated(category)" v-tooltip="'Deze categorie is onzichtbaar voor leden omdat activiteiten niet geactiveerd is'" class="icon error red right-icon" />
+                            <span class="button icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed(category.id)}" @click="toggleCollapse(category.id)" />
                         </button>
 
-                        <button
-                            v-for="c in category.categories"
-                            :key="c.id"
-                            class="menu-button button heading"
-                            :class="{ selected: currentlySelected == 'category-'+c.id }"
-                            type="button"
-                            @click="openCategory(c)"
-                        >
-                            <span class="icon group" />
-                            <span>{{ c.settings.name }}</span>
-                        </button>
+                        <div :class="{collapsable: true, hide: isCollapsed(category.id)}">
+                            <button
+                                v-for="c in category.categories"
+                                :key="c.id"
+                                class="menu-button button sub-button"
+                                :class="{ selected: currentlySelected == 'category-'+c.id }"
+                                type="button"
+                                @click="openCategory(c)"
+                            >
+                                <span class="icon gray small" />
+                                <span>{{ c.settings.name }}</span>
+                            </button>
 
-                        <button
-                            v-for="group in category.groups"
-                            :key="group.id"
-                            class="menu-button button"
-                            :class="{ selected: currentlySelected == 'group-'+group.id }"
-                            type="button"
-                            @click="openGroup(group)"
-                        >
-                            <GroupAvatar :group="group" />
-                            <span>{{ group.settings.name }}</span>
-                            <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
-                        </button>
+                            <button
+                                v-for="group in category.groups"
+                                :key="group.id"
+                                class="menu-button button sub-button"
+                                :class="{ selected: currentlySelected == 'group-'+group.id }"
+                                type="button"
+                                @click="openGroup(group)"
+                            >
+                                <GroupAvatar :group="group" />
+                                <span>{{ group.settings.name }}</span>
+                                <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
+                            </button>
+
+                            <hr v-if="index < tree.categories.length - 1">
+                        </div>
                     </div>
-                    <hr v-if="index < tree.categories.length - 1">
                 </div>
                 <hr v-if="(enableWebshopModule && webshops.length > 0) || fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             </template>
 
             <div v-if="enableWebshopModule && webshops.length > 0" class="container">
                 <div class="grouped">
-                    <div class="group-title">
+                    <div class="group-title menu-button button">
+                        <span class="icon layered">
+                            <span class="icon basket-layer-1 primary-light" />
+                            <span class="icon basket-layer-2" />
+                        </span>
                         <span>Webshops</span>
                         <button v-if="canCreateWebshops" type="button" class="button icon add gray" @click="addWebshop()" />
                     </div>
@@ -101,31 +124,33 @@
                         v-for="webshop in webshops"
                         :key="webshop.id"
                         type="button"
-                        class="menu-button button"
+                        class="menu-button button sub-button"
                         :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
                         @click="openWebshop(webshop)"
                     >
-                        <span v-if="webshop.meta.hasTickets" class="icon ticket" />
-                        <span v-else class="icon basket" />
+                        <span v-if="isWebshopOpen(webshop)" class="icon dot small green " />
+                        <span v-else class="icon gray small" />
                         <span>{{ webshop.meta.name }}</span>
-
-                        <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon" />
                     </button>
                 </div>
                 <hr v-if="fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive)">
             </div>
 
             <button v-if="enableMemberModule && fullAccess" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'member-archive'}" @click="openMemberArchive(true)"> 
-                <span class="icon archive" />
-                <span>Leden archief</span>
+                <span class="icon layered">
+                    <span class="icon archive-layer-1 primary-light" />
+                    <span class="icon archive-layer-2 " />
+                </span>
+                <span>Leden</span>
             </button>
 
             <button v-if="enableWebshopModule && hasWebshopArchive" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'webshop-archive'}" @click="openWebshopArchive(true)"> 
-                <span class="icon archive" />
-                <span>Webshop archief</span>
+                <span class="icon layered">
+                    <span class="icon archive-layer-1 primary-light" />
+                    <span class="icon archive-layer-2 " />
+                </span>
+                <span>Webshops</span>
             </button>
-
-            <hr v-if="(fullAccess || canManagePayments) && ((enableMemberModule && fullAccess) || (enableWebshopModule && hasWebshopArchive))">
 
             <button v-if="fullAccess && enableMemberModule" type="button" class="menu-button button heading" :class="{ selected: currentlySelected == 'documents'}" @click="openDocuments(true)"> 
                 <span class="icon file-filled" />
@@ -144,8 +169,9 @@
                 </button>
             </div>
 
-            <hr class="footer">
-            <div class="grouped">
+            <div class="grouped footer">
+                <hr>
+
                 <button class="menu-button button heading" type="button" @click="manageWhatsNew()">
                     <span class="icon gift" />
                     <span>Wat is er nieuw?</span>
@@ -168,9 +194,9 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin, SplitViewController } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, GlobalEventBus, GroupAvatar, LoadComponent, Logo, STNavigationBar, TooltipDirective } from '@stamhoofd/components';
-import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, Group, GroupCategory, GroupCategoryTree, OrganizationType, Permissions, PrivateWebshop, UmbrellaOrganization, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
@@ -197,6 +223,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     currentlySelected: string | null = null
     whatsNewBadge = ""
     OrganizationManager = OrganizationManager
+    collapsedSections: string[] = []
 
     get organization() {
         return OrganizationManager.organization
@@ -216,8 +243,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     get tree() {
         return this.organization.getCategoryTree({
-            permissions: OrganizationManager.user.permissions ?? Permissions.create({}),
-            smartCombine: false
+            permissions: OrganizationManager.user.permissions ?? Permissions.create({})
         })
     }
 
@@ -241,6 +267,30 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
             return null
         }
         return this.organization.meta.squareLogo.getPathForSize(undefined, 50) + " 1x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*2)+" 2x, "+this.organization.meta.squareLogo.getPathForSize(undefined, 50*3)+" 3x"
+    }
+
+    toggleCollapse(id: string) {
+        if (this.collapsedSections.includes(id)) {
+            this.collapsedSections = this.collapsedSections.filter(i => i != id)
+        } else {
+            this.collapsedSections.push(id)
+        }
+        this.saveCollapsed().catch(console.error)
+    }
+
+    isCollapsed(id: string) {
+        return this.collapsedSections.includes(id)
+    }
+
+    async saveCollapsed() {
+        await Storage.keyValue.setItem("dm-c", JSON.stringify(this.collapsedSections))
+    }
+
+    async loadCollapsed() {
+        const value = await Storage.keyValue.getItem("dm-c")
+        if (value) {
+            this.collapsedSections = JSON.parse(value)
+        }
     }
 
     mounted() {
@@ -417,6 +467,23 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     }
 
     async openCategory(category: GroupCategory, animated = true) {
+        //if (category.categoryIds.length > 0 && category.groupIds.length == 0) {
+        //    // Open a stacked split view controller
+        //    this.currentlySelected = "category-"+category.id
+        //    this.showDetail({
+        //        adjustHistory: animated,
+        //        animated,
+        //        components: [
+        //            new ComponentWithProperties(SplitViewController, {
+        //                root: new ComponentWithProperties(NavigationController, { 
+        //                    root: await LoadComponent(() => import(/* webpackChunkName: "CategoryMenu", webpackPrefetch: true */ "./groups/CategoryMenu.vue"), { category }, { instant: !animated })
+        //                })
+        //            })
+        //        ]}
+        //    );
+        //    return;
+        //}
+
         this.currentlySelected = "category-"+category.id
         this.showDetail({
             adjustHistory: animated,
@@ -609,10 +676,10 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 .dashboard-menu {
-    --block-width: 45px;
+    --block-width: 40px;
 
     @media (max-width: 600px) {
-        --block-width: 65px;
+        --block-width: 55px;
     }
 }
 </style>

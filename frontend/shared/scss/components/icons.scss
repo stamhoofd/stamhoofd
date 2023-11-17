@@ -14,6 +14,7 @@
     }
 }
 
+
 .icon {
     width: 24px;
     font-size: 24px;
@@ -25,6 +26,27 @@
     display: inline-flex; // needed for proper vertical alignemnt of icons
     vertical-align: middle;
     align-items: center;
+
+    &.small {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+
+        &:before {
+            font-size: 20px;
+        }
+    }
+
+    &.layered {
+        display: inline-grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+
+        > .icon {
+            grid-column: 1 / 1;
+            grid-row: 1 / 1;
+        }
+    }
     
     &.light-gray {
         color: $color-gray-2;
@@ -32,6 +54,10 @@
 
     &.gray {
         color: $color-gray-4;
+    }
+
+    &.primary-light {
+        color: $color-primary-gray-light;
     }
 
     &.green {
@@ -48,6 +74,14 @@
 
     &.yellow {
         color: $color-warning;
+    }
+
+    &.secundary {
+        color: $color-secundary;
+    }
+
+    &.tertiary {
+        color: $color-tertiary;
     }
 
     &.color-word {

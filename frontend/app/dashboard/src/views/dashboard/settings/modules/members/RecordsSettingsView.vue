@@ -86,7 +86,7 @@
         </STList>
 
         <hr>
-        <h2>Vragen tijdens inschrijven</h2>
+        <h2>Vragenlijsten tijdens inschrijven</h2>
 
         <p>
             Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het inschrijven. Met filters kan je ervoor zorgen dat bepaalde vragenlijsten enkel gevraagd worden voor bepaalde leden.
@@ -102,6 +102,13 @@
                 <span>Nieuwe vragenlijst</span>
             </button>
         </p>
+
+        <!--<hr>
+        <h2>Templates</h2>
+
+        <p>
+            Het instellen van vragenlijsten kan soms complex zijn. Daarom voorzien we enkele templates die je kan gebruiken en waarmee je meteen een werkende vragenlijst kan toevoegen.
+        </p>-->
 
         <hr>
         <h2>Interne gegevens</h2>

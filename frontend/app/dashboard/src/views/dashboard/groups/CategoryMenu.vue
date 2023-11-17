@@ -1,66 +1,65 @@
 <template>
-    <div class="st-view background">
-        <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
-            <template slot="right">
-                <button v-if="canEdit" class="button text" type="button" @click="editMe">
-                    <span class="icon settings" />
-                    <span>Instellingen</span>
-                </button>
-            </template>
-        </STNavigationBar>
-
+    <div class="st-menu st-view background">
         <main>
-            <h1>
-                {{ title }}
-            </h1>
-
-            <p v-if="organization.isCategoryDeactivated(category)" class="error-box">
-                Deze categorie is niet zichtbaar voor leden omdat het activiteiten pakket niet is geactiveerd. Er kan dan maar één categorie in gebruik zijn. Via instellingen kunnen hoofdbeheerders pakketten activeren.
-            </p>
-
-            <p v-else-if="!category.settings.public" class="warning-box icon lock">
-                Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.
-            </p>
-          
-            <STErrorsDefault :error-box="errorBox" />
-
+            <h1>{{ title }}</h1>
             <template v-if="categories.length > 0">
-                <STList>
-                    <STListItem v-for="category in categories" :key="category.id" :selectable="true" @click="openCategory(category)">
-                        <template slot="left">
-                            <span v-if="category.categories.length" class="icon category" />
-                            <span v-else class="icon layered">
+                <div v-for="(category, index) in categories" :key="category.id" class="container">
+                    <div class="grouped">
+                        <button class="group-title menu-button button heading" type="button" :class="{ selected: currentlySelected == 'category-'+category.id }" @click="openCategory(category)">
+                            <span class="icon layered">
                                 <span class="icon group-layer-1" />
                                 <span class="icon group-layer-2 gray" />
                             </span>
-                        </template>
+                            <span>{{ category.settings.name }}</span>
+                            <span class="button icon arrow-down-small right-icon rot" :class="{rot180: isCollapsed(category.id)}" @click="toggleCollapse(category.id)" />
+                        </button>
 
-                        {{ category.settings.name }}
+                        <div :class="{collapsable: true, hide: isCollapsed(category.id)}">
+                            <button
+                                v-for="c in category.categories"
+                                :key="c.id"
+                                class="menu-button button sub-button"
+                                :class="{ selected: currentlySelected == 'category-'+c.id }"
+                                type="button"
+                                @click="openCategory(c)"
+                            >
+                                <span class="icon gray small" />
+                                <span>{{ c.settings.name }}</span>
+                            </button>
 
-                        <template slot="right">
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                </STList>
+                            <button
+                                v-for="group in category.groups"
+                                :key="group.id"
+                                class="menu-button button sub-button"
+                                :class="{ selected: currentlySelected == 'group-'+group.id }"
+                                type="button"
+                                @click="openGroup(group)"
+                            >
+                                <GroupAvatar :group="group" />
+                                <span>{{ group.settings.name }}</span>
+                                <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
+                            </button>
+
+                            <hr v-if="index < tree.categories.length - 1">
+                        </div>
+                    </div>
+                </div>
             </template>
 
             <template v-else-if="groups.length > 0">
-                <STList>
-                    <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
-                        <GroupAvatar slot="left" :group="group" />
-                        <h3 class="style-title-list">
-                            {{ group.settings.name }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ group.settings.dateRangeDescription }}
-                        </p>
+                <button
+                    v-for="group in groups"
+                    :key="group.id"
+                    class="menu-button button sub-button"
+                    :class="{ selected: currentlySelected == 'group-'+group.id }"
+                    type="button"
+                    @click="openGroup(group)"
+                >
+                    <GroupAvatar :group="group" />
+                    <span>{{ group.settings.name }}</span>
+                    <span v-if="group.settings.registeredMembers !== null" class="count">{{ group.settings.registeredMembers }}</span>
+                </button>
 
-                        <template slot="right">
-                            <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-                </STList>
 
                 <p v-if="canCreate">
                     <button class="button text" type="button" @click="createGroup">
@@ -69,9 +68,17 @@
                     </button>
                 </p>
 
+
                 <template v-if="groups.length > 1">
                     <hr>
-                    <h2>Alle leden</h2>
+
+                    <div class="group-title menu-button button">
+                        <span class="icon layered">
+                            <span class="icon group-layer-1" />
+                            <span class="icon group-layer-2 primary-light" />
+                        </span>
+                        <span>Alle leden</span>
+                    </div>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center" @click="openAll(true)">
@@ -140,12 +147,13 @@
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, ErrorBox, GroupAvatar, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
+import { Storage, UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
+import CategoryView from "./CategoryView.vue";
 import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import GroupMembersView from "./GroupMembersView.vue";
@@ -163,10 +171,12 @@ import GroupOverview from "./GroupOverview.vue";
         GroupAvatar
     },
 })
-export default class CategoryView extends Mixins(NavigationMixin) {
+export default class CategoryMenu extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
     validator = new Validator()
     saving = false
+    currentlySelected = ''
+    collapsedSections: string[] = []
 
     @Prop({ required: true })
         category: GroupCategory
@@ -174,7 +184,41 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     mounted() {
         UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
         document.title = "Stamhoofd - "+ this.category.settings.name
+
+        // Open first
+        if (this.categories.length) {
+            this.openCategory(this.categories[0])
+        } else {
+            if (this.groups.length) {
+                this.openGroup(this.groups[0])
+            }
+        }
     }
+
+    toggleCollapse(id: string) {
+        if (this.collapsedSections.includes(id)) {
+            this.collapsedSections = this.collapsedSections.filter(i => i != id)
+        } else {
+            this.collapsedSections.push(id)
+        }
+        this.saveCollapsed().catch(console.error)
+    }
+
+    isCollapsed(id: string) {
+        return this.collapsedSections.includes(id)
+    }
+
+    async saveCollapsed() {
+        await Storage.keyValue.setItem("dm-c", JSON.stringify(this.collapsedSections))
+    }
+
+    async loadCollapsed() {
+        const value = await Storage.keyValue.getItem("dm-c")
+        if (value) {
+            this.collapsedSections = JSON.parse(value)
+        }
+    }
+
 
     get cycleOffsets() {
         const l = Math.max(...this.groups.map(g => g.cycle));
@@ -278,14 +322,22 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     openCategory(category: GroupCategory) {
-        this.show(new ComponentWithProperties(CategoryView, {
-            category
+        this.currentlySelected = "category-"+category.id
+
+        this.showDetail(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(CategoryView, {
+                category
+            })
         }))
     }
 
     openGroup(group: Group) {
-        this.show(new ComponentWithProperties(GroupOverview, {
-            group
+        this.currentlySelected = "group-"+group.id
+
+        this.showDetail(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(GroupOverview, {
+                group
+            })
         }))
     }
 

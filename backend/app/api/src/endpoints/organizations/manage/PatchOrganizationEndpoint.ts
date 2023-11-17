@@ -152,6 +152,13 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         } else {
                             admin.permissions = patch.permissions
                         }
+
+                        if (admin.id === user.id && (!admin.permissions || !admin.permissions.hasFullAccess())) {
+                            throw new SimpleError({
+                                code: "permission_denied",
+                                message: "Je kan jezelf niet verwijderen als hoofdbeheerder"
+                            })
+                        }
                         await admin.save()
                     }
                 }

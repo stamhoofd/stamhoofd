@@ -17,7 +17,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 @Component
 export default class GroupAvatar extends Vue {
     @Prop({ required: true })
-    group!: Group
+        group!: Group
 
     get letters() {
         return Formatter.firstLetters(this.group.settings.name, 2)

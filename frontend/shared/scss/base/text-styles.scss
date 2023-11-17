@@ -147,7 +147,7 @@
 .style-tag {
     font-size: 11px;
     text-transform: uppercase;
-    font-weight: $font-weight-bold;
+    font-weight: $font-weight-semibold;
     color: $color-primary;
 
     @media (prefers-color-scheme: dark) {
@@ -689,7 +689,7 @@
     height: 21px;
     min-width: 21px;
     box-sizing: border-box;
-    font-weight: $font-weight-bold;
+    font-weight: $font-weight-semibold;
     line-height: 21px;
     vertical-align: text-bottom;
 
