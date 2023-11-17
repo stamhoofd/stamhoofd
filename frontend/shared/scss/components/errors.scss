@@ -6,7 +6,8 @@
     background: $color-error-background;
     color: $color-error-dark;
 
-    &::before {
+    &::before,
+        .inline-link {
         color: $color-error;
     }
 }
@@ -22,13 +23,20 @@
     &::before {
         color: $color-warning;
     }
+
+    .inline-link {
+        color: $color-warning-dark;
+        font-weight: $font-weight-bold;
+        text-decoration: underline;
+    }
 }
 
 .info-box {
     background: $color-primary-background;
     color: $color-dark;
 
-    &::before {
+    &::before,
+        .inline-link {
         color: $color-primary;
     }
 }
@@ -37,7 +45,7 @@
     background: $color-success-background;
     color: $color-success-dark;
 
-    &::before {
+    &::before, .inline-link {
         color: $color-success;
     }
 }
@@ -88,7 +96,7 @@
     }
 
     > .button {
-        &.text.button {
+        &.text {
             color: inherit;
 
             &:disabled, &.disabled {

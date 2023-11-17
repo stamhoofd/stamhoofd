@@ -8,9 +8,12 @@
                 Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.
             </p>
 
-            <p class="info-box">
-                Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.
+            <p v-if="!hasMembers" class="warning-box">
+                <span>Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.
+                    <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">Meer info</a>
+                </span>
             </p>
+            <STErrorsDefault :error-box="errorBox" />
 
             <label class="upload-box">
                 <span v-if="!file" class="icon upload" />
@@ -34,6 +37,21 @@
                 <input type="file" multiple="multiple" style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
                 <span v-if="file" class="icon sync gray" />
             </label>
+
+            <template v-if="sheetSelectionList.length > 1">
+                <STInputBox title="Werkblad" error-fields="sheet" :error-box="errorBox">
+                    <Dropdown v-model="sheetKey">
+                        <option :value="null" disabled>
+                            Maak een keuze
+                        </option>
+                        <option v-for="key in sheetSelectionList" :key="key" :value="key">
+                            {{ key }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+                <hr>
+            </template>
+
 
             <table v-if="file && columns.length > 0" class="data-table">
                 <thead>
@@ -82,7 +100,7 @@
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="saving">
-                    <button class="button primary" :disabled="!file || columns.length == 0 || rowCount === 0" @click="goNext">
+                    <button class="button primary" :disabled="!file || columns.length == 0 || rowCount === 0" type="button" @click="goNext">
                         Volgende
                     </button>
                 </LoadingButton>
@@ -96,7 +114,7 @@ import { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { Organization, OrganizationPatch } from "@stamhoofd/structures"
-import { Component, Mixins } from "vue-property-decorator";
+import { Component, Mixins, Vue } from "vue-property-decorator";
 import XLSX from "xlsx";
 
 import { ImportingMember } from "../../../../../classes/import/ImportingMember"
@@ -129,13 +147,58 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
     rowCount = 0
     columnCount = 0
 
-    sheet: XLSX.WorkSheet | null = null
+    sheets: Record<string, XLSX.WorkSheet> = {}
+    internalSheetKey: string | null = null
 
     matchers = allMathcers
     columns: MatchedColumn[] = []
 
+    get sheet() {
+        if (!this.sheetKey) {
+            return null
+        }
+        return this.sheets[this.sheetKey] ?? null
+    }
+
+    get sheetKey() {
+        return this.internalSheetKey
+    }
+    
+    set sheetKey(key: string | null) {
+        if (key === null) {
+            this.internalSheetKey = null
+            this.columns = []
+            this.rowCount = 0
+            this.columnCount = 0
+            return
+        }
+
+        const sheet = this.sheets[key]
+        if (!sheet) {
+            return
+        }
+
+        if (!sheet['!ref']) {
+            throw new Error("Missing ref in sheet")
+        }
+        const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
+        this.rowCount = range.e.r + 1
+        this.columnCount = range.e.c + 1
+        this.internalSheetKey = key
+        this.readColumns()
+    }
+
+    get sheetSelectionList() {
+        return Object.keys(this.sheets)
+    }
+
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get hasMembers() {
+        const count = this.organization.adminCategoryTree.getMemberCount({})
+        return this.organization.meta.packages.useMembers && !this.organization.meta.packages.isMembersTrial && count !== null && count > 30
     }
 
     get matcherCategories() {
@@ -172,10 +235,6 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
 
         this.file = null
 
-        /*for (const file of event.target.files as FileList) {
-            this.files.push(new TmpFile(file.name, file))
-        }*/
-
         const files = event.target.files as FileList
         const file = files[0]
 
@@ -190,24 +249,13 @@ export default class ImportMembersView extends Mixins(NavigationMixin) {
 
             /* DO SOMETHING WITH workbook HERE */
             const keys = Object.keys(workbook.Sheets)
-            if (keys.length != 1) {
-                new CenteredMessage("Dit bestand heeft meer dan één werkblad, verwijder de werkbladen die we niet moeten importeren.").addCloseButton().show()
+            if (keys.length === 0) {
+                new CenteredMessage("Dit bestand heeft geen werkbladen").addCloseButton().show()
                 return
             }
-
-            const sheet = workbook.Sheets[keys[0]]
-
-            if (!sheet['!ref']) {
-                throw new Error("Missing ref in sheet")
-            }
-            const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
-            this.rowCount = range.e.r + 1
-            this.columnCount = range.e.c + 1
-
+            Vue.set(this, "sheets", workbook.Sheets)
             this.file = file.name
-            this.sheet = sheet
-
-            this.readColumns()
+            this.sheetKey = keys[0]
         };
         reader.readAsArrayBuffer(file);
         
