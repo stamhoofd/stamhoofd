@@ -16,5 +16,9 @@
 				"alert"
 			]
 		}
+	},
+	"server": {
+		"hostname": "stamhoofd.app",
+		"androidScheme": "https"
 	}
 }
