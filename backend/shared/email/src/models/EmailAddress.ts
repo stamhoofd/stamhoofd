@@ -2,6 +2,7 @@ import { column, Database, Model } from '@simonbackx/simple-database';
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import { QueueHandler } from '@stamhoofd/queues';
+import { EmailInterfaceRecipient } from '../classes/Email';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -122,7 +123,12 @@ export class EmailAddress extends Model {
     }
 
     // Methods
-    static async filterSendTo(emails: string[]): Promise<string[]> {
+    static async filterSendTo(recipients: EmailInterfaceRecipient[]): Promise<EmailInterfaceRecipient[]> {
+        if (recipients.length == 0) {
+            return []
+        }
+
+        const emails = recipients.map(r => r.email)
         const [results] = await Database.select(
             `SELECT email FROM ${this.table} WHERE \`email\` IN (?) AND (\`hardBounce\` = 1 OR \`markedAsSpam\` = 1)`,
             [emails]
@@ -130,9 +136,9 @@ export class EmailAddress extends Model {
 
         const remove = results.map(r => r[this.table]['email'])
         if (remove.length == 0) {
-            return emails
+            return recipients
         }
 
-        return emails.filter(r => !remove.includes(r))
+        return recipients.filter(r => !remove.includes(r.email))
     }
 }

@@ -2,7 +2,7 @@ import { column, Database, Model } from "@simonbackx/simple-database";
 import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
-import { Email } from "@stamhoofd/email";
+import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
 import { Address, DNSRecordStatus, Group as GroupStruct, GroupStatus, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, PermissionLevel, Permissions, TransferSettings, WebshopPreview } from "@stamhoofd/structures";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
@@ -610,24 +610,19 @@ export class Organization extends Model {
      * E-mail address when we receive replies for organization@stamhoofd.email.
      * Note that this sould be private because it can contain personal e-mail addresses if the organization is not configured correctly
      */
-    async getReplyEmails(): Promise<{ emails: string; private: boolean } | undefined> {
+    async getReplyEmails(): Promise<EmailInterfaceRecipient[]> {
         const sender: OrganizationEmail | undefined = this.privateMeta.emails.find(e => e.default) ?? this.privateMeta.emails[0];
 
         if (sender) {
-            if (sender.name) {
-                return { emails: '"'+sender.name.replace("\"", "\\\"")+"\" <"+sender.email+">", private: false }
-            }  else {
-                return { emails: '"'+this.name.replace("\"", "\\\"")+"\" <"+sender.email+">", private: false }
-            }
+            return [
+                {
+                    name: sender.name,
+                    email: sender.email
+                }
+            ]
         }
 
-        const privateEmails = await this.getAdminToEmails()
-
-        if (privateEmails) {
-            return { emails: privateEmails, private: true }
-        }
-
-        return undefined
+        return await this.getAdminToEmails()
     }
 
     /**
@@ -637,7 +632,11 @@ export class Organization extends Model {
         // Circular reference fix
         const User = (await import('./User')).User;
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
-        const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
+
+        let filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
+
+        // Hide api accounts
+        filtered = filtered.filter(a => !a.isApiUser)
 
         return filtered
     }
@@ -645,14 +644,9 @@ export class Organization extends Model {
     /**
      * These email addresess are private
      */
-    async getAdminToEmails() {
+    async getAdminToEmails(): Promise<EmailInterfaceRecipient[]> {
         const filtered = await this.getAdmins()
-
-        if (filtered.length > 0) {
-            return filtered.map(f => f.getEmailTo() ).join(", ")
-        }
-
-        return undefined
+        return filtered.flatMap(f => f.getEmailTo() )
     }
 
     /**
