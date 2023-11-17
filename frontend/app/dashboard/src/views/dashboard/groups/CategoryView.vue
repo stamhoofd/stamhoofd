@@ -32,8 +32,6 @@
                 </STList>
             </template>
 
-            
-
             <template v-else-if="groups.length > 0">
                 <STList>
                     <STListItem v-if="groups.length > 1" :selectable="true" @click="openAll()">
@@ -82,16 +80,17 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,ErrorBox, GroupAvatar,STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, ErrorBox, GroupAvatar, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, Organization, OrganizationGenderType, OrganizationMetaData } from "@stamhoofd/structures"
+import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
+import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
 import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
-import EditGroupView from "./EditGroupView.vue";
 import GroupMembersView from "./GroupMembersView.vue";
+import GroupOverview from "./GroupOverview.vue";
 
 @Component({
     components: {
@@ -111,7 +110,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-    category: GroupCategory
+        category: GroupCategory
 
     mounted() {
         UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
@@ -184,7 +183,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     openGroup(group: Group) {
-        this.show(new ComponentWithProperties(GroupMembersView, {
+        this.show(new ComponentWithProperties(GroupOverview, {
             group
         }))
     }
@@ -201,8 +200,6 @@ export default class CategoryView extends Mixins(NavigationMixin) {
                 name: "",
                 startDate: this.organization.meta.defaultStartDate,
                 endDate: this.organization.meta.defaultEndDate,
-                registrationStartDate: this.organization.meta.defaultStartDate,
-                registrationEndDate: this.organization.meta.defaultEndDate,
                 prices: [],
                 genderType: this.organization.meta.genderType == OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale
             }),
@@ -221,7 +218,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
 
         p.groups.addPut(group)
         
-        this.present(new ComponentWithProperties(EditGroupView, { 
+        this.present(new ComponentWithProperties(EditGroupGeneralView, { 
             group, 
             organization: this.organization.patch(p), 
             saveHandler: async (patch: AutoEncoderPatchType<Organization>) => {

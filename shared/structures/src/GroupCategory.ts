@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, field,IntegerDecoder,StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from "uuid";
 
-import { Group } from './Group';
+import { Group, GroupStatus } from './Group';
 // Eslint wants to remove Permissions, but it is needed for types!
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PermissionLevel, PermissionRole, Permissions } from './Permissions';

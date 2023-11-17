@@ -259,12 +259,12 @@ export class Registration extends Model {
 
         // Then for organization
         if (templates.length == 0) {
-            templates = (await EmailTemplate.where({ type: data.type, organizationId: group.organizationId }))
+            templates = (await EmailTemplate.where({ type: data.type, organizationId: group.organizationId, groupId: null }))
         }
 
         // Then default
         if (templates.length == 0) {
-            templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
+            templates = (await EmailTemplate.where({ type: data.type, organizationId: null, groupId: null }))
         }
 
         if (templates.length == 0) {
@@ -301,10 +301,10 @@ export class Registration extends Model {
         };
 
         // First fetch template
-        let templates = (await EmailTemplate.where({ type: data.type, organizationId: user.organizationId }))
+        let templates = (await EmailTemplate.where({ type: data.type, organizationId: user.organizationId, groupId: null }))
 
         if (templates.length == 0) {
-            templates = (await EmailTemplate.where({ type: data.type, organizationId: null }))
+            templates = (await EmailTemplate.where({ type: data.type, organizationId: null, groupId: null }))
         }
 
         if (templates.length == 0) {

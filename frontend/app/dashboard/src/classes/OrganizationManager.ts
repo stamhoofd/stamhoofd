@@ -25,11 +25,14 @@ export class OrganizationManagerStatic {
         return SessionManager.currentSession!.user!
     }
 
-
     getPatch() {
         return OrganizationPatch.create({
             id: this.organization.id
         })
+    }
+
+    async forceUpdate() {
+        await SessionManager.currentSession!.fetchOrganization(false)
     }
 
     async patch(patch: AutoEncoderPatchType<Organization>, shouldRetry = false) {
@@ -43,9 +46,10 @@ export class OrganizationManagerStatic {
 
         // Keep admins
         const admins = this.organization.admins
+
         this.organization = response.data
 
-        if (admins && !this.organization.admins && patch.admins) {
+        if (admins && !response.data.admins && patch.admins) {
             this.organization.admins = patch.admins.applyTo(admins)
         }
 

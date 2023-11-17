@@ -54,6 +54,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             EmailTemplateType.TicketsConfirmationTransfer,
             EmailTemplateType.TicketsConfirmationPOS,
             EmailTemplateType.TicketsReceivedTransfer,
+            EmailTemplateType.RegistrationConfirmation
         ]
         
         const templates = await EmailTemplate.where({ organizationId: user.organizationId, webshopId: request.query.webshopId ?? null, groupId: request.query.groupId ?? null, type: {sign: 'IN', value: types}});
