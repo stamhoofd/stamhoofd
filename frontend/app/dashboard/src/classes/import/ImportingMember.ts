@@ -46,6 +46,11 @@ export class ImportingMember {
     equal: MemberWithRegistrations | null = null
     probablyEqual: MemberWithRegistrations | null = null
 
+    /**
+     * Whether probablyEqual is equal
+     */
+    verified = false;
+
     /// Set to true to prevent syncing multiple times on internet issues
     synced = false
 
@@ -69,11 +74,8 @@ export class ImportingMember {
     }
 
     isProbablyEqual(member: MemberWithRegistrations) {
-        if (!member.details?.birthDay) {
-            return false
-        }
-        if (!this.details?.birthDay) {
-            return false
+        if (!member.details?.birthDay || !this.details?.birthDay) {
+            return StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.details.firstName+" "+this.details.lastName) == 0
         }
         const t = StringCompare.typoCount(member.details.firstName+" "+member.details.lastName, this.details.firstName+" "+this.details.lastName)
         const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.details.birthDay))
@@ -89,7 +91,7 @@ export class ImportingMember {
             throw new Error("Missing ref in sheet")
         }
 
-         // Start! :D
+        // Start! :D
         const allMembers = await MemberManager.loadMembers([], null, null)
 
         const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
@@ -118,6 +120,7 @@ export class ImportingMember {
                 try {
                     await column.matcher.apply(valueCell, member)
                 } catch (e) {
+                    console.error(e);
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         errorStack.push(new ImportError(row, column.index, e.getHuman()))
                     } else {

@@ -7,7 +7,6 @@
 }
 
 .data-table {
-    user-select: none;
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     width: 100%;
     width: calc(100% + 2 * var(--st-horizontal-padding, 40px));
@@ -15,6 +14,11 @@
     margin-top: calc(-1 * var(--current-view-safe-area-top, 0px));
     position: relative;
     z-index: 0;
+
+    td, th {
+        word-wrap: break-word;
+        min-width: 150px;
+    }
 
     thead {
         text-align: left;
@@ -90,6 +94,10 @@
 
                 &.minor {
                     @extend .style-description;
+                }
+
+                &.nowrap {
+                    white-space: nowrap;
                 }
             }
 

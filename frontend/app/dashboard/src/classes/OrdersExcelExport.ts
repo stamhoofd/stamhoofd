@@ -41,6 +41,7 @@ export class OrdersExcelExport {
         const wsData: RowValue[][] = [
             [
                 "Bestelnummer",
+                "Besteldatum",
                 "Voornaam",
                 "Achternaam",
                 "E-mail",
@@ -50,10 +51,29 @@ export class OrdersExcelExport {
                 "Stukprijs",
                 "Prijs",
                 "Product (terugloop aanzetten!)",
+
+                // Duplicates
+                "Afhaalmethode",
+                "Leveringsadres / afhaallocatie",
+                "Datum",
+                "Tijdstip",
+                "Betaalmethode",
+                "Betaald",
+                "Status",
             ],
         ];
 
         for (const order of orders) {
+            let checkoutType = "/"
+            let address = "/"
+            if (order.data.checkoutMethod?.type == CheckoutMethodType.Takeout) {
+                checkoutType = "Afhalen"
+                address = order.data.checkoutMethod.name
+            } else if (order.data.checkoutMethod?.type == CheckoutMethodType.Delivery) {
+                checkoutType = "Levering" + (order.data.checkoutMethod.name.length > 0 ? "("+order.data.checkoutMethod.name+")" : "")
+                address = order.data.address?.toString() ?? "??"
+            }
+            
             for (const [index, item] of order.data.cart.items.entries()) {
                 const answers: RowValue[] = answerNames.map(a => "")
 
@@ -77,6 +97,10 @@ export class OrdersExcelExport {
                         value: order.number ?? 0,
                         format: '0'
                     } : "",
+                    {
+                        value: order.createdAt,
+                        format: 'dd/mm/yyyy hh:mm'
+                    },
                     showDetails ? order.data.customer.firstName : "",
                     showDetails ? order.data.customer.lastName : "",
                     showDetails ? order.data.customer.email : "",
@@ -95,6 +119,14 @@ export class OrdersExcelExport {
                         format: '€0.00'
                     },
                     `${item.product.name}${item.description ? "\r\n"+item.description : ""}`,
+                    checkoutType,
+                    address,
+                    order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : "/",
+                    order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime)+" - "+Formatter.minutes(order.data.timeSlot.endTime) : "/",
+                    PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
+                    order.payment?.paidAt === null ? "Nog niet betaald" : "Betaald",
+                    OrderStatusHelper.getName(order.status),
+                    
                 ]);
             }
         }

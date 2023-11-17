@@ -69,6 +69,10 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
 
     filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
         return this.registrations.filter(r => {
+            if (filters.groups && !filters.groups.find(g => g.id === r.groupId)) {
+                return false
+            }
+
             let cycle = filters.cycle
             if (filters.cycle === undefined) {
                 const group = (filters.groups ?? this.allGroups).find(g => g.id === r.groupId)

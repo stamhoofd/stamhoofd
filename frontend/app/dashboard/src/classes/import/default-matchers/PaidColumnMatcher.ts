@@ -68,6 +68,18 @@ export class PaidColumnMatcher implements ColumnMatcher {
             return false
         }
 
+        if (value.toLowerCase() === "betaald") {
+            return true
+        }
+
+        if (value.toLowerCase() === "nog niet betaald") {
+            return false
+        }
+        
+        if (value.toLowerCase() === "niet betaald") {
+            return false
+        }
+
         return null
     }
 

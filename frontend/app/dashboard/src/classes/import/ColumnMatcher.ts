@@ -1,11 +1,10 @@
 import XLSX from "xlsx";
 
 import { ImportingMember } from "./ImportingMember";
-import { MatcherCategory } from "./MatcherCategory";
 
 export interface ColumnMatcher {
     id: string;
-    category: MatcherCategory;
+    category: string;
 
     getName(): string;
     doesMatch(columnName: string, examples: string[]): boolean;
