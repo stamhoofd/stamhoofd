@@ -3,7 +3,10 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
-        
+        <p class="style-description">
+            Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vragenlijst kan instellen.
+        </p>
+
         <STErrorsDefault :error-box="errorBox" />
 
         <div class="split-inputs">
@@ -57,6 +60,7 @@
 
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, ErrorBox, PropertyFilterInput, SaveView, STErrorsDefault, STInputBox, STList, Validator } from "@stamhoofd/components";
 import { FilterDefinition, MemberDetailsWithGroups, PropertyFilter, RecordCategory, Version } from "@stamhoofd/structures";
@@ -92,7 +96,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
      * Pass along the changes of the array (so we can also delete with the save handler)
      */
     @Prop({ required: true })
-        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => void;
+        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => void;
 
     @Prop({ required: true })
         filterDefinitions!: FilterDefinition[]
@@ -153,6 +157,15 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
             return
         }
 
+        if (this.name.trim().length === 0) {
+            this.errorBox = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                field: 'name',
+                message: 'Gelieve een titel voor je vragenlijst in te vullen'
+            }))
+            return;
+        }
+
         const arrayPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
 
         if (this.isNew) {
@@ -161,8 +174,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
             arrayPatch.addPatch(this.patchCategory)
         }
 
-        this.saveHandler(arrayPatch)
-        this.pop({ force: true })
+        this.saveHandler(arrayPatch, this)
     }
 
     async deleteMe() {
@@ -172,8 +184,7 @@ export default class EditRecordCategoryView extends Mixins(NavigationMixin) {
 
         const arrayPatch: PatchableArrayAutoEncoder<RecordCategory> = new PatchableArray()
         arrayPatch.addDelete(this.category.id)
-        this.saveHandler(arrayPatch)
-        this.pop({ force: true })
+        this.saveHandler(arrayPatch, this)
     }
 
     cancel() {

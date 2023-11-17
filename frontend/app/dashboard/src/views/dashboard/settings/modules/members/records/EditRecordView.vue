@@ -3,6 +3,9 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+        <p>
+            Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">hier</a> meer informatie na over hoe je een vraag kan instellen.
+        </p>
         
         <STErrorsDefault :error-box="errorBox" />
 
@@ -199,7 +202,7 @@
 
         <template v-if="settings.dataPermission">
             <hr>
-            <h2>Opslag en beveiliging</h2>
+            <h2>Gevoelige gegevens</h2>
             <p>
                 Verzamel je gevoelige informatie? Dan moet je daar in de meeste gevallen toestemming voor vragen volgens de GDPR-wetgeving. We raden je aan om altijd toestemming te vragen zodra je ook maar een beetje twijfelt. In onze gids geven we enkele voorbeelden, lees die zeker na. <a :href="'https://'+$t('shared.domains.marketing')+'/docs/toestemming-gegevens-verzamelen'" class="inline-link" target="_blank" rel="noopener">
                     Lees onze gids
@@ -487,8 +490,9 @@ export default class EditRecordView<T> extends Mixins(NavigationMixin) {
     set type(type: RecordType) {
         this.patchRecord = this.patchRecord.patch({ 
             type,
-            // Set required if choose one and if it wasn't choose one when opening
-            required: type === RecordType.ChooseOne && this.record.type !== RecordType.ChooseOne ? true : undefined
+            // Set required if not checkbox or multiple choice, and if the type changed
+            required: (type !== RecordType.MultipleChoice && type !== RecordType.Checkbox) && this.record.type !== type ? true : 
+                ((type === RecordType.Checkbox || type === RecordType.MultipleChoice) && this.record.type !== type ? false: undefined)
         })
 
         if (type === RecordType.MultipleChoice || type === RecordType.ChooseOne) {
