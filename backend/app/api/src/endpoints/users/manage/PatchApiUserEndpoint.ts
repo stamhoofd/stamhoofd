@@ -17,7 +17,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, "/api-users/@id", { id: String });
+        const params = Endpoint.parseParameters(request.url, "/api-keys/@id", { id: String });
 
         if (params) {
             return [true, params as Params];
