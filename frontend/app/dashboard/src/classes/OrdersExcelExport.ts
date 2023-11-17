@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PaymentProvider,PrivateOrder } from '@stamhoofd/structures';
+import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PaymentProvider,PrivateOrder, ProductType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -17,6 +17,9 @@ export class OrdersExcelExport {
 
         const answerColumns = new Map<string, number>()
         const answerNames: string[] = []
+
+        const optionColumns = new Map<string, number>()
+        const optionNames: string[] = []
 
         for (const order of orders) {
             for (const a of order.data.fieldAnswers) {
@@ -35,7 +38,53 @@ export class OrdersExcelExport {
                     answerNames.push(a.settings.name)
                 }
             }
+
+
+            // Add all prodcuct options and variants
+            for (const item of order.data.cart.items) {
+                
+                // Produce prices
+                if (item.product.prices.length > 1) {
+                    const name = 'Prijskeuze'
+
+                    if (!optionColumns.has(Formatter.slug(name))) {
+                        optionColumns.set(Formatter.slug(name), optionColumns.size)
+                        optionNames.push(name)
+                    }
+                }
+
+                // Ticket date/time
+                if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
+                    const name = 'Ticketdatum'
+
+                    if (!optionColumns.has(Formatter.slug(name))) {
+                        optionColumns.set(Formatter.slug(name), optionColumns.size)
+                        optionNames.push(name)
+                    }
+                }
+
+                // Produce options
+                for (const menu of item.product.optionMenus) {
+                    const name = menu.name
+
+                    if (!optionColumns.has(Formatter.slug(name))) {
+                        optionColumns.set(Formatter.slug(name), optionColumns.size)
+                        optionNames.push(name)
+                    }
+                }
+
+                // Open questions
+                for (const field of item.product.customFields) {
+                    const name = field.name
+
+                    if (!optionColumns.has(Formatter.slug(name))) {
+                        optionColumns.set(Formatter.slug(name), optionColumns.size)
+                        optionNames.push(name)
+                    }
+                }
+            }
         }
+
         
         // Columns
         const wsData: RowValue[][] = [
@@ -50,7 +99,8 @@ export class OrdersExcelExport {
                 "Aantal",
                 "Stukprijs",
                 "Prijs",
-                "Product (terugloop aanzetten!)",
+                "Product",
+                ...optionNames,
 
                 // Duplicates
                 "Afhaalmethode",
@@ -76,6 +126,7 @@ export class OrdersExcelExport {
             
             for (const [index, item] of order.data.cart.items.entries()) {
                 const answers: RowValue[] = answerNames.map(a => "")
+                const options: RowValue[] = optionNames.map(a => "")
 
                 for (const a of order.data.fieldAnswers) {
                     const index = answerColumns.get(a.field.id)
@@ -88,6 +139,43 @@ export class OrdersExcelExport {
                     const index = answerColumns.get(a.settings.id)
                     if (index !== undefined) {
                         answers[index] = a.excelValue
+                    }
+                }
+
+                // Product price
+                if (item.product.prices.length > 1) {
+                    const columnName = 'Prijskeuze'
+                    const index = optionColumns.get(Formatter.slug(columnName))
+                    if (index !== undefined) {
+                        options[index] = item.productPrice.name
+                    }
+                }
+
+                if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange) {
+                    const columnName = 'Ticketdatum'
+                    const index = optionColumns.get(Formatter.slug(columnName))
+                    if (index !== undefined) {
+                        options[index] = item.product.dateRange.toString()
+                    }
+                }
+
+                // Option menu's
+                for (const option of item.options) {
+                    const menu = option.optionMenu
+                    const columnName = menu.name
+                    const index = optionColumns.get(Formatter.slug(columnName))
+                    if (index !== undefined) {
+                        options[index] = option.option.name
+                    }
+                }
+
+                // Open fields
+                for (const answer of item.fieldAnswers) {
+                    const field = answer.field
+                    const columnName = field.name
+                    const index = optionColumns.get(Formatter.slug(columnName))
+                    if (index !== undefined) {
+                        options[index] = answer.answer
                     }
                 }
 
@@ -118,7 +206,8 @@ export class OrdersExcelExport {
                         value: (item.getPrice(order.data.cart) ?? 0) / 100,
                         format: '€0.00'
                     },
-                    `${item.product.name}${item.description ? "\r\n"+item.description : ""}`,
+                    item.product.name,
+                    ...options,
                     checkoutType,
                     address,
                     order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : "/",
