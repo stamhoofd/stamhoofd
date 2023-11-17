@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { MolliePayment, MollieToken, Order, Payment } from '@stamhoofd/models';
+import { MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payment, StripeAccount } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/structures'
 import axios from 'axios';
+
+import { StripePayoutChecker } from './StripePayoutChecker';
 
 type MollieSettlement = {
     id: string;
@@ -41,11 +43,27 @@ export async function checkSettlements(checkAll = false) {
     if (!token) {
         console.error("Missing mollie organization token")
     } else {
-        await checkSettlementsFor(token, checkAll)
+        await checkMollieSettlementsFor(token, checkAll)
     }
 
     // Loop all mollie tokens created after given date (when settlement permission was added)
     try {
+        // Stripe payouts
+        const stripeAccounts = await StripeAccount.all()
+        for (const account of stripeAccounts) {
+            try {
+                console.log("Checking settlements for ", account.accountId)
+
+                const checker = new StripePayoutChecker({
+                    secretKey: STAMHOOFD.STRIPE_SECRET_KEY,
+                    stripeAccount: account.accountId
+                })
+                await checker.checkSettlements(checkAll)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
         const mollieTokens = await MollieToken.all()
         for (const token of mollieTokens) {
             if (token.createdAt < new Date(2021, 8 /* september! */, 8)) {
@@ -53,7 +71,7 @@ export async function checkSettlements(checkAll = false) {
             } else {
                 try {
                     await token.refreshIfNeeded()
-                    await checkSettlementsFor(token.accessToken, checkAll)
+                    await checkMollieSettlementsFor(token.accessToken, checkAll)
                 } catch (e) {
                     console.error(e)
                 }
@@ -65,7 +83,7 @@ export async function checkSettlements(checkAll = false) {
 }
 
 // Check settlements once a week on tuesday morning/night
-export async function checkSettlementsFor(token: string, checkAll = false) {
+export async function checkMollieSettlementsFor(token: string, checkAll = false) {
     // Check last 2 weeks + 3 day margin, unless we check them all
     const d = new Date()
     d.setDate(d.getDate() - 17)

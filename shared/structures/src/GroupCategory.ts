@@ -173,11 +173,11 @@ export class GroupCategoryTree extends GroupCategory {
                         return []
                     }
 
-                    if (smartCombine && !t.categories.find(c => c.categories.length || c.groups.length > 1)) {
-                        // If all categories only have groups and no more than 1 group, combine them all
-                        t.groups = t.getAllGroups()
-                        t.categories = []
-                    }
+                    // if (smartCombine && !t.categories.find(c => c.categories.length || c.groups.length > 1)) {
+                    //     // If all categories only have groups and no more than 1 group, combine them all
+                    //     t.groups = t.getAllGroups()
+                    //     t.categories = []
+                    // }
                     
                     if (maxDepth !== null && t.depth >= maxDepth && t.categories.length > 0) {
                         const categories: GroupCategoryTree[] = []
@@ -237,13 +237,13 @@ export class GroupCategoryTree extends GroupCategory {
      * Remove empty categories and non-public categories
      * @param admin Whether not-public categories should be visible
      */
-    filterForDisplay(admin = false, useActivities = true): GroupCategoryTree {
+    filterForDisplay(admin = false, useActivities = true, smartCombine = false): GroupCategoryTree {
         const categories = this.categories.flatMap((category) => {
             if (!admin && !category.settings.public) {
                 return []
             }
             const filtered = category.filterForDisplay(admin, useActivities)
-            if (filtered.groups.length == 0 && filtered.categories.length == 0) {
+            if (smartCombine && filtered.groups.length == 0 && filtered.categories.length == 0) {
                 return []
             }
             return [filtered]

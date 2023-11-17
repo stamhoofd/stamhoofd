@@ -265,7 +265,7 @@ export default class STNavigationBar extends Vue {
             align-items: center;
             justify-content: flex-start;
 
-            > .button {
+            > .button, > .loading-button {
                 margin-left: 10px;
                 margin-right: 10px;
 
@@ -294,7 +294,7 @@ export default class STNavigationBar extends Vue {
             align-items: center;
             justify-content: flex-end;
 
-            > .button {
+            > .button, > .loading-button {
                 margin-left: 10px;
                 margin-right: 10px;
 

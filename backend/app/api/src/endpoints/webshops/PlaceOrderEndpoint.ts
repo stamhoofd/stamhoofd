@@ -148,6 +148,14 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
                     // Only now we can update the transfer description, since we need the order number as a reference
                     payment.transferSettings = webshop.meta.transferSettings.fillMissing(organization.mappedTransferSettings)
+
+                    if (!payment.transferSettings.iban) {
+                        throw new SimpleError({
+                            code: "no_iban",
+                            message: "No IBAN",
+                            human: "Er is geen rekeningnummer ingesteld voor overschrijvingen. Contacteer de beheerder."
+                        })
+                    }
                     payment.generateDescription(organization, (order.number ?? "")+"")
                     balanceItem.status = BalanceItemStatus.Pending;
                     await balanceItem.save()

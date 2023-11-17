@@ -84,14 +84,18 @@ export class Organization extends AutoEncoder {
      * Get all groups that are in a category
      */
     get availableCategories() {
-        return this.categoryTree.getAllCategories()
+        return this.adminCategoryTree.getAllCategories()
     }
-
+    
     /**
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     get categoryTree(): GroupCategoryTree {
         return this.getCategoryTree()
+    }
+
+    get publicCategoryTree(): GroupCategoryTree {
+        return this.getCategoryTree({smartCombine: true})
     }
 
     get adminCategoryTree(): GroupCategoryTree {
@@ -156,7 +160,7 @@ export class Organization extends AutoEncoder {
 
             if (!options?.permissions) {
                 // Hide non public items
-                tree = tree.filterForDisplay(options?.admin ?? false, this.meta.packages.useActivities || options?.admin)
+                tree = tree.filterForDisplay(options?.admin ?? false, this.meta.packages.useActivities || options?.admin, options?.smartCombine)
             }
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {

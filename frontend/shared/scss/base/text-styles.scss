@@ -833,3 +833,7 @@
     font-family: monospace;
     white-space: pre-wrap;
 }
+
+.title-suffix {
+    @extend .style-description-small;
+}

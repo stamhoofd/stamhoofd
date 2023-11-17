@@ -8,6 +8,9 @@
       "iban": {
         "placeholder": "Bv. BE71 6316 1793 1969"
       },
+      "companyNumber": {
+        "label": "Ondernemingsnummer"
+      },
       "mobile": {
         "label": "Mobiel nummer",
         "invalidMessage": "Ongeldig GSM-nummer",
@@ -28,6 +31,9 @@
   "dashboard": {
     "join": "Nieuwe vereniging",
     "settings": {
+      "billing": {
+        "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid"
+      },
       "menu": {
         "paymentMethods": {
           "description": "Bepaal hoe leden kunnen betalen voor inschrijvingen.",

@@ -41,10 +41,16 @@ export class PermissionRole extends AutoEncoder {
 
 export class PermissionRoleDetailed extends PermissionRole {
     /**
-     * Access to payments
+     * Access to open transfers
      */
     @field({ decoder: BooleanDecoder })
     managePayments = false
+
+    /**
+     * Full payments access
+     */
+    @field({ decoder: BooleanDecoder, version: 199 })
+    financeDirector = false
 
     /**
      * Can create new webshops = write
@@ -192,7 +198,30 @@ export class Permissions extends AutoEncoder {
                 // Deleted role
                 continue
             }
+            if (f.financeDirector) {
+                return true
+            }
             if (f.managePayments) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     */
+    hasFinanceAccess(roles: PermissionRoleDetailed[]): boolean {
+        if (this.hasFullAccess()) {
+            return true
+        }
+        for (const r of this.roles) {
+            const f = roles.find(rr => r.id === rr.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (f.financeDirector) {
                 return true
             }
         }

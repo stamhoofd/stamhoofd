@@ -9,10 +9,11 @@
         >
             <div :data-text="labels ? labels[index] : item" />
         </div>
-        <div class="pointer"
-             :style="{
-                 transform: pointerTransform
-             }"
+        <div
+            class="pointer"
+            :style="{
+                transform: pointerTransform
+            }"
         >
             <div
                 :style="{
@@ -68,12 +69,16 @@ $segmented-control-inner-height: $segmented-control-height - $segmented-control-
 
 $border-radius: 9px;
 
-.st-view > main > h1 + .segmented-control {
+.st-view > main > h1 + .segmented-control{
     margin-bottom: 25px;
 
     @media (max-width: 550px) {
         margin-bottom: 20px;
     }
+}
+
+.segmented-control.with-margin {
+    margin-bottom: 15px;
 }
 
 .segmented-control {

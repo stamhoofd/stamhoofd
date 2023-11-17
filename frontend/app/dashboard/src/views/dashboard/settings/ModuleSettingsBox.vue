@@ -212,9 +212,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                     bundles: [bundle],
                     paymentMethod: PaymentMethod.Unknown
                 },
-                decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
+                decoder: STInvoiceResponse as Decoder<STInvoiceResponse>,
+                shouldRetry: false
             })
-            await SessionManager.currentSession!.fetchOrganization()
+            await SessionManager.currentSession!.fetchOrganization(false)
             new Toast(message, "success green").show()
         } catch (e) {
             Toast.fromError(e).show()
@@ -230,7 +231,10 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         this.loadingModule = type
 
         try {
-            const status = await OrganizationManager.loadBillingStatus()
+            const status = await OrganizationManager.loadBillingStatus({
+                shouldRetry: false,
+                owner: this
+            })
             const packages = status.packages
             const pack = packages.find(p => p.meta.type === type)
 
@@ -238,12 +242,14 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
                 await SessionManager.currentSession!.authenticatedServer.request({
                     method: "POST",
                     path: "/billing/deactivate-package/"+pack.id,
+                    owner: this,
+                    shouldRetry: false
                 })
-                await SessionManager.currentSession!.fetchOrganization()
+                await SessionManager.currentSession!.fetchOrganization(false)
                 new Toast(message, "success green").show()
             } else {
                 // Update out of date
-                await SessionManager.currentSession!.fetchOrganization()
+                await SessionManager.currentSession!.fetchOrganization(false)
             }
         } catch (e) {
             Toast.fromError(e).show()

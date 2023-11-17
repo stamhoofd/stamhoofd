@@ -6,7 +6,7 @@ import { MollieToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
 
-import { checkSettlementsFor } from '../../helpers/CheckSettlements';
+import { checkMollieSettlementsFor } from '../../helpers/CheckSettlements';
 
 type Params = Record<string, never>;
 
@@ -49,7 +49,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         const mollieToken = await MollieToken.create(user.organization, request.body.code)
 
         // Check settlements after linking (shouldn't block)
-        checkSettlementsFor(mollieToken.accessToken, true).catch(console.error)
+        checkMollieSettlementsFor(mollieToken.accessToken, true).catch(console.error)
         
         return new Response(await user.getOrganizatonStructure(user.organization));
     }

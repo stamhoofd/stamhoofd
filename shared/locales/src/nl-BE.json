@@ -12,6 +12,11 @@
   },
   "backend": {},
   "dashboard": {
+    "settings": {
+      "billing": {
+        "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid (feitelijke vereniging)"
+      }
+    },
     "inputs": {
       "parentPhone": {
         "placeholder": "GSM-nummer van ouder"

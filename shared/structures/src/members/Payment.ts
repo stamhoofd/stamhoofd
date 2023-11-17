@@ -148,6 +148,13 @@ export class Settlement extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     amount: number
+
+    /**
+     * Fee for the payment provider for the individual payment
+     * Only set if it is witheld from the settlement/payout
+     */
+    @field({ decoder: IntegerDecoder, version: 195 })
+    fee = 0
 }
 
 export class PrivatePayment extends Payment {
@@ -159,5 +166,8 @@ export class PrivatePayment extends Payment {
 
     @field({ decoder: StringDecoder, nullable: true, version: 153 })
     ibanName: string | null = null
+
+    @field({ decoder: IntegerDecoder, version: 197 })
+    transferFee = 0
 }
 

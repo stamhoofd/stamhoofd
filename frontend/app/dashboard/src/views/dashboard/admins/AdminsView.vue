@@ -88,14 +88,14 @@
                     </STList>
 
                     <p v-if="getAdminsForRole(role).length == 0" class="info-box">
-                        Geen beheerders in deze groep
+                        Geen beheerders met deze functie
                     </p>
                 </div>
 
                 <div v-if="getAdminsWithoutRole().length > 0" class="container">
                     <hr>
                     <h2>
-                        Beheerders die niet in een groep zitten
+                        Beheerders zonder functie
                     </h2>
                     <p>Deze beheerders hebben nergens toegang toe, deel ze op in groepen op basis van hun functie in de vereniging.</p>
 
@@ -129,7 +129,7 @@
                 <p>
                     <button class="button text" type="button" @click="addRole">
                         <span class="icon add" />
-                        <span>Nieuwe beheerdersgroep toevoegen</span>
+                        <span>Nieuwe functie toevoegen</span>
                     </button>
                 </p>
                 <p>

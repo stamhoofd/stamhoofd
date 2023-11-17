@@ -3,18 +3,18 @@
         <STNavigationBar title="Ledenadministratie is actief" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1>Yay! 🥳 De ledenadministratie is actief</h1>
+            <h1>Hoera! 🥳 De ledenadministratie is actief</h1>
 
-            <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie inschrijvingspagina (zie hieronder) of je kan ze importeren via Excel. Je kan ook gewoon zelf eerst even proberen in te schrijven. Je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
+            <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie ledenportaal, of kan je ze uitnodigen (<a :href="'https://'+ $t('shared.domains.marketing') +'/docs/hoe-schrijven-leden-in/'" class="inline-link" target="_blank">meer info</a>). Je kan gerust zelf eerst even proberen in te schrijven. Je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
 
             <hr>
             <h2>Lidstructuur</h2>
 
             <p v-if="isYouth">
-                Alle activiteiten, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven, of je kan de activiteit archiveren. Je kan hen daarvoor uitnodigen via e-mail.
+                Alle activiteiten, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven, of je kan de activiteit archiveren.
             </p>
             <p v-else>
-                In Stamhoofd worden leden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven, of je kan de activiteit archiveren. Je kan hen daarvoor uitnodigen via e-mail.
+                In Stamhoofd worden leden opgedeeld in 'inschrijvingsgroepen'. Leden kunnen inschrijven voor één of meer van die groepen, of je schrijft ze er zelf in (importeren vanaf Excel of manueel). Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven, of je kan de activiteit archiveren.
             </p>
 
             <button class="button secundary" type="button" @click="manageGroups">
@@ -36,7 +36,7 @@
 
             <hr>
             <h2 class="style-with-button">
-                <div>Jouw inschrijvingspagina</div>
+                <div>Eigen ledenportaal</div>
                 <div>
                     <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
                         <span class="icon external" />
@@ -46,7 +46,7 @@
             </h2>
 
             <p>
-                Leden kunnen inschrijven voor inschrijvingsgroepen via je eigen inschrijvingspagina of via een uitnodiging in een e-mail die je via Stamhoofd verstuurd.
+                Leden kunnen inschrijven via jullie eigen ledenportaal of via een uitnodiging in een e-mail die je via Stamhoofd verstuurt (<a :href="'https://'+ $t('shared.domains.marketing') +'/docs/hoe-schrijven-leden-in/'" class="inline-link" target="_blank">meer info</a>). Plaats deze link bijvoorbeeld op je website.
             </p>
 
 

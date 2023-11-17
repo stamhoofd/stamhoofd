@@ -2,10 +2,10 @@
 <path d="M25 37L8 23L25 11L42 23L25 37Z" fill="#002573"/>
 <path d="M11 8C11 7.44772 11.4477 7 12 7H38C38.5523 7 39 7.44772 39 8V36H11V8Z" fill="#DCDCDC"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M42 43V23L25 36L8 23V43C8 44.1046 8.89543 45 10 45H40C41.1046 45 42 44.1046 42 43Z" fill="#0053FF"/>
-<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="8" y="23" width="34" height="22">
+<mask id="mask0_6232_11934" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="23" width="34" height="22">
 <path d="M8 23H42V43C42 44.1046 41.1046 45 40 45H10C8.89543 45 8 44.1046 8 43V23Z" fill="#C4C4C4"/>
 </mask>
-<g mask="url(#mask0)">
+<g mask="url(#mask0_6232_11934)">
 <path d="M23.7851 32.929L8 45H42L26.2149 32.929C25.4978 32.3807 24.5022 32.3807 23.7851 32.929Z" fill="#002573"/>
 </g>
 <rect x="14" y="11" width="19" height="3" rx="1.5" fill="#868686"/>

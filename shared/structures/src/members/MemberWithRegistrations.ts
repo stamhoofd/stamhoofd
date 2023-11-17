@@ -290,7 +290,7 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
             new ChoicesFilterDefinition<MemberWithRegistrations>({
                 id: "members_accounts", 
                 name: "Accounts", 
-                description: "Filter leden die wel of geen account hebben om de gegevens van leden te wijzigen via de inschrijvingspagina.",
+                description: "Filter leden die wel of geen account hebben om de gegevens van leden te wijzigen via het ledenportaal.",
                 choices: [
                     new ChoicesFilterChoice("no_account", "Heeft geen account"),
                     new ChoicesFilterChoice("has_account", "Heeft een account")

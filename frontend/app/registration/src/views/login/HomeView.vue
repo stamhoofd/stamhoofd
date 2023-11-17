@@ -196,7 +196,7 @@ export default class HomeView extends Mixins(NavigationMixin){
     }
 
     get rootCategory() {
-        return this.organization.categoryTree
+        return this.organization.publicCategoryTree
     }
 
     get privacyUrl() {

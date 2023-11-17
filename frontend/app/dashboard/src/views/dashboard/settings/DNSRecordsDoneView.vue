@@ -1,7 +1,7 @@
 <template>
-    <div class="st-view" id="dns-records-view">
+    <div id="dns-records-view" class="st-view">
         <STNavigationBar title="Gelukt!">
-            <button slot="right" class="button icon close gray" v-if="canDismiss" @click="dismiss"/>
+            <button v-if="canDismiss" slot="right" class="button icon close gray" @click="dismiss" />
         </STNavigationBar>
 
         <main>
@@ -9,8 +9,12 @@
                 Gelukt! Jouw domeinnaam wordt binnenkort actief
             </h1>
         
-            <p class="st-list-description" v-if="enableMemberModule">Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails naar jouw leden automatisch vanaf @{{ mailDomain }} verstuurd. Jouw inschrijvingspagina zal waarschijnlijk al iets sneller beschikbaar zijn op {{ registerDomain }}.</p>
-            <p class="st-list-description" v-else>Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails automatisch vanaf @{{ mailDomain }} verstuurd.</p>
+            <p v-if="enableMemberModule" class="st-list-description">
+                Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails naar jouw leden automatisch vanaf @{{ mailDomain }} verstuurd. Jullie ledenportaal zal waarschijnlijk al iets sneller beschikbaar zijn op {{ registerDomain }}.
+            </p>
+            <p v-else class="st-list-description">
+                Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails automatisch vanaf @{{ mailDomain }} verstuurd.
+            </p>
         </main>
 
         <STToolbar>
@@ -25,8 +29,9 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox,STErrorsDefault,STInputBox, STNavigationBar, STToolbar, LoadingButton, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox,LoadingButton, STErrorsDefault,STInputBox, STNavigationBar, STToolbar, TooltipDirective } from "@stamhoofd/components";
 import { Component, Mixins } from "vue-property-decorator";
+
 import { OrganizationManager } from "../../../classes/OrganizationManager"
 
 @Component({

@@ -42,7 +42,7 @@
                 >
             </STInputBox>
             <p v-if="mailDomain && enableMemberModule" class="st-list-description">
-                Jouw inschrijvingspagina zal bereikbaar zijn op {{ usedRegisterDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
+                Jullie ledenportaal zal bereikbaar zijn op {{ usedRegisterDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
             </p>
             <p v-else-if="mailDomain" class="st-list-description">
                 Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.

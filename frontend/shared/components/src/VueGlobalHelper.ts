@@ -1,3 +1,4 @@
+import { Request } from "@simonbackx/simple-networking";
 import { AppManager } from "@stamhoofd/networking";
 import Vue from "vue";
 
@@ -102,5 +103,12 @@ export class VueGlobalHelper {
                 }
             }, { passive: true })
         }
+
+        Vue.mixin({
+            beforeDestroy() {
+                // Clear all pending requests
+                Request.cancelAll(this)
+            }
+        })
     }
 }
