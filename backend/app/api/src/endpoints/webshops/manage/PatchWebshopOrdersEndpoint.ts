@@ -158,7 +158,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     balanceItem.description = webshop.meta.name
                     balanceItem.pricePaid = 0
                     balanceItem.organizationId = organization.id;
-                    balanceItem.status = BalanceItemStatus.Hidden;
+                    balanceItem.status = BalanceItemStatus.Pending;
                     await balanceItem.save();
 
                     // Create one balance item payment to pay it in one payment
@@ -186,6 +186,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         throw new Error("Unsupported payment method")
                     }
 
+                    if (order.number) {
+                        balanceItem.description = 'Bestelling #' + order.number.toString() + ' - ' + webshop.meta.name
+                        await balanceItem.save()
+                    }
                 }
                 
                 orders.push(order)
