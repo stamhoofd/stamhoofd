@@ -178,14 +178,19 @@ export class MemberDetails extends AutoEncoder {
      */
     cleanData() {
         if (StringCompare.isFullCaps(this.firstName)) {
-            this.firstName = Formatter.capitalizeWords(this.firstName.toLowerCase())
+            this.firstName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.firstName.toLowerCase()))
         }
         if (StringCompare.isFullCaps(this.lastName)) {
-            this.lastName = Formatter.capitalizeWords(this.lastName.toLowerCase())
+            this.lastName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.lastName.toLowerCase()))
         }
 
-        this.firstName = Formatter.capitalizeFirstLetter(this.firstName.trim())
-        this.lastName = this.lastName.trim()
+        this.firstName = Formatter.capitalizeFirstLetter(Formatter.removeDuplicateSpaces(this.firstName.trim()))
+        this.lastName = Formatter.removeDuplicateSpaces(this.lastName.trim())
+
+        if (this.lastName === this.lastName.toLocaleLowerCase()) {
+            // Add auto capitals
+            this.lastName = Formatter.capitalizeWords(this.lastName)
+        }
 
         for (const parent of this.parents) {
             parent.cleanData()

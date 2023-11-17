@@ -1,7 +1,8 @@
-import { SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { Country, Parent, ParentType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
+import { PhoneNumber } from "libphonenumber-js/types";
 import XLSX from "xlsx";
 
 import { ColumnMatcher } from "../ColumnMatcher";
@@ -21,13 +22,13 @@ export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
 
-        for (const word of ["lidnummer", ...this.negativeMatch]) {
+        for (const word of ["lidnummer",'rijksregister', "bestel", ...this.negativeMatch]) {
             if (cleaned.includes(word)) {
                 return false
             }
         }
         
-        const possibleMatch = ["telefoon", "gsm", "nummer", "mobiel", "mobile", "phone", "tel"]
+        const possibleMatch = ["telefoon", "gsm", "nummer", "mobiel", "mobile", "phone"]
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
@@ -52,20 +53,46 @@ export class PhoneColumnMatcher extends SharedMatcher implements ColumnMatcher {
         }
 
         const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ "libphonenumber-js/max")
-        const phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, I18nController.shared?.country ?? Country.Belgium)
+
+            
+        let phoneNumber: PhoneNumber | undefined = undefined
+        try {
+            phoneNumber = libphonenumber.parsePhoneNumberFromString(phoneRaw, I18nController.shared?.country ?? Country.Belgium)
+        } catch (e) {
+            throw new SimpleError({
+                "code": "invalid_field",
+                message: e.message || 'Invalid phone',
+                "human": 'Ongeldig telefoonnummer',
+                "field": "phone"
+            })
+        }
 
         if (!phoneNumber || !phoneNumber.isValid()) {
             for (const country of Object.values(Country)) {
-                const phoneNumber = libphonenumber.parsePhoneNumber(phoneRaw, country)
+                try {
+                    const phoneNumber = libphonenumber.parsePhoneNumber(phoneRaw, country)
 
-                if (phoneNumber && phoneNumber.isValid()) {
+                    if (phoneNumber && phoneNumber.isValid()) {
+                        throw new SimpleError({
+                            "code": "invalid_field",
+                            "message": I18nController.i18n.t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
+                            "field": "phone"
+                        })
+                    }
+                } catch (e) {
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        throw e;
+                    }
+
                     throw new SimpleError({
                         "code": "invalid_field",
-                        "message": I18nController.i18n.t("shared.inputs.mobile.invalidMessageTryCountry").toString(),
+                        message: e.message || 'Invalid phone',
+                        "human": 'Ongeldig telefoonnummer',
                         "field": "phone"
                     })
                 }
             }
+
             throw new SimpleError({
                 "code": "invalid_field",
                 "message": I18nController.i18n.t("shared.inputs.mobile.invalidMessage").toString(),

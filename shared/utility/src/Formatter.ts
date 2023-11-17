@@ -29,6 +29,10 @@ export class Formatter {
         return this.removeAccents(name).replace(/[^A-Za-z0-9-]+/g, " ").trim()
     }
 
+    static removeDuplicateSpaces(name: string): string {
+        return name.replace(/\s+/, " ");
+    }
+
     /**
      * 1 = january
      */

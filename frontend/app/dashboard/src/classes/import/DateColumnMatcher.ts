@@ -55,8 +55,6 @@ export abstract class DateColumnMatcher implements ColumnMatcher {
             })
         }
 
-        console.log("from str", text)
-
         return this.parseDate(text, usa)
     }
     
