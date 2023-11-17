@@ -60,7 +60,7 @@ const start = async () => {
             ios: STAMHOOFD.LATEST_IOS_VERSION,
             web: Version
         },
-        minimumVersion: 168
+        minimumVersion: 203
     })
     routerServer.addRequestMiddleware(versionMiddleware)
     routerServer.addResponseMiddleware(versionMiddleware)
