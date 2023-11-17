@@ -2,10 +2,10 @@
     <div class="st-view invalid-page-view">
         <main>
             <h1>
-                Deze webshop bestaat niet
+                Doorverwijzen...
             </h1>
 
-            <p>Kijk even na of de link klopt of probeer later opnieuw.</p>
+            <p>Bezig met doorverwijzen</p>
         </main>
 
         <div class="legal-footer">

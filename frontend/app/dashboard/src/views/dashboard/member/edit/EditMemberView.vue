@@ -80,10 +80,10 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
     loading = false
 
     @Prop({ default: null })
-    initialFamily!: FamilyManager | null;
+        initialFamily!: FamilyManager | null;
 
     @Prop({ default: null })
-    member!: MemberWithRegistrations | null;
+        member!: MemberWithRegistrations | null;
 
     familyManager = this.initialFamily ?? new FamilyManager(this.member ? [this.member] : []);
 
@@ -257,6 +257,7 @@ export default class EditMemberView extends Mixins(NavigationMixin) {
             category,
             answers: this.memberDetails.recordAnswers,
             dataPermission: this.dataPermissionsValue,
+            hasNextStep: false,
             filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member ?? undefined}),
             markReviewed: false,
             filterValueForAnswers: (answers) => {

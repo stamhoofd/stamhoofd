@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view boxed">
+    <div class="st-view box-shade">
         <STNavigationBar :large="true">
             <template slot="left">
                 <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
@@ -8,24 +8,24 @@
             </template>
         </STNavigationBar>
 
-        <div class="box">
-            <div class="st-view">
+        <main>
+            <div class="box">
                 <main>
                     <h1>Deze pagina is voor beheerders</h1>
                     <p>Oeps, deze website is enkel voor beheerders van {{ organization.name }}. Ga naar de inschrijvingspagina als je je wilt inschrijven als lid.</p> 
                 </main>
-
+                
                 <STToolbar>
-                    <button slot="right" class="primary button" @click="gotoRegistration">
+                    <button slot="right" type="button" class="primary button" @click="gotoRegistration">
                         <span>Naar inschrijvingspagina</span>
                     </button>
 
-                    <button slot="right" class="button secundary" @click="logout">
+                    <button slot="right" type="button" class="button secundary" @click="logout">
                         <span class="icon logout" /><span>Uitloggen</span>
                     </button>
                 </STToolbar>
             </div>
-        </div>
+        </main>
     </div>
 </template>
 

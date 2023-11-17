@@ -40,13 +40,10 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             const withRegistrations = await Member.getAllWithRegistrations(...existingMembers.map(m => m.id))
             for (const member of withRegistrations) {
                 if (member.registrations.length > 0) {
-                    throw new SimpleError({
-                        code: "duplicate_member",
-                        message: "This member already exists",
-                        human: "Er bestaat al een lid met deze naam en geboortedatum. Je kan dit lid niet opnieuw aanmaken. Kijk na of je niet met een ander account al toegang hebt tot dat lid, en neem eventueel contact met ons op om te bepalen met welk account/emailadres je moet inloggen."
-                    })
+                    return member
                 }
             }
+            return existingMembers[0]
         }
     }
 
@@ -64,6 +61,8 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             const member = new Member()
             member.id = struct.id
             member.organizationId = user.organizationId
+
+            struct.details.cleanData()
             member.details = struct.details
 
             if (!struct.details) {
@@ -76,7 +75,14 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             // Check for duplicates and prevent creating a duplicate member by a user
-            await this.checkDuplicate(member)
+            const duplicate = await this.checkDuplicate(member);
+            if (duplicate) {
+                // Merge data
+                duplicate.details.merge(member.details)
+                await duplicate.save()
+                addedMembers.push(duplicate)
+                continue;
+            }
 
             await member.save()
             addedMembers.push(member)
@@ -101,6 +107,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             if (struct.details) {
                 member.details.patchOrPut(struct.details)
+                member.details.cleanData()
             }
 
             if (!member.details) {

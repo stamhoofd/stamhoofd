@@ -1,52 +1,50 @@
 <template>
-    <div class="boxed-view">
-        <form class="signup-view st-view" @submit.prevent="submit">
-            <STNavigationBar title="Inloggen">
-                <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
-            </STNavigationBar>
+    <form class="signup-view st-view" @submit.prevent="submit">
+        <STNavigationBar title="Inloggen">
+            <button slot="right" type="button" class="button icon gray close" @click="dismiss" />
+        </STNavigationBar>
 
-            <main>
-                <h1>Account aanmaken</h1>
+        <main>
+            <h1>Account aanmaken</h1>
 
-                <STErrorsDefault :error-box="errorBox" />
+            <STErrorsDefault :error-box="errorBox" />
 
-                <EmailInput ref="emailInput" v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
-                <p v-if="lock" class="style-description-small">
-                    {{ lock }}
-                </p>
+            <EmailInput ref="emailInput" v-model="email" title="E-mailadres" name="email" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" :disabled="lock !== null" />
+            <p v-if="lock" class="style-description-small">
+                {{ lock }}
+            </p>
 
-                <div class="split-inputs">
-                    <div>
-                        <STInputBox title="Kies een wachtwoord">
-                            <input v-model="password" name="new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
-                        </STInputBox>
+            <div class="split-inputs">
+                <div>
+                    <STInputBox title="Kies een wachtwoord">
+                        <input v-model="password" name="new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
+                    </STInputBox>
 
-                        <STInputBox title="Herhaal wachtwoord">
-                            <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
-                        </STInputBox>
-                    </div>
-                    <div>
-                        <PasswordStrength v-model="password" />
-                    </div>
+                    <STInputBox title="Herhaal wachtwoord">
+                        <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Kies een nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
+                    </STInputBox>
                 </div>
+                <div>
+                    <PasswordStrength v-model="password" />
+                </div>
+            </div>
 
-                <Checkbox v-if="privacyUrl" v-model="acceptPrivacy" class="long-text">
-                    Ik heb kennis genomen van <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
-                </Checkbox>
-            </main>
+            <Checkbox v-if="privacyUrl" v-model="acceptPrivacy" class="long-text">
+                Ik heb kennis genomen van <a class="inline-link" :href="privacyUrl" target="_blank">het privacybeleid</a>.
+            </Checkbox>
+        </main>
 
-            <STToolbar>
-                <template #right>
-                    <LoadingButton :loading="loading">
-                        <button class="button primary full">
-                            <span class="icon lock" />
-                            <span>Account aanmaken</span>
-                        </button>
-                    </LoadingButton>
-                </template>
-            </STToolbar>
-        </form>
-    </div>
+        <STToolbar>
+            <template #right>
+                <LoadingButton :loading="loading">
+                    <button class="button primary full" type="button">
+                        <span class="icon lock" />
+                        <span>Account aanmaken</span>
+                    </button>
+                </LoadingButton>
+            </template>
+        </STToolbar>
+    </form>
 </template>
 
 <script lang="ts">
@@ -75,10 +73,10 @@ export default class SignupView extends Mixins(NavigationMixin){
     loading = false;
     
     @Prop({ default: ""})
-    initialEmail!: string
+        initialEmail!: string
 
     @Prop({ default: null})
-    lock!: string | null
+        lock!: string | null
 
     email = this.initialEmail
     password = ""
@@ -91,7 +89,7 @@ export default class SignupView extends Mixins(NavigationMixin){
     session = SessionManager.currentSession!
 
     @Ref("emailInput")
-    emailInput: EmailInput
+        emailInput: EmailInput
 
     get privacyUrl() {
         if (OrganizationManager.organization.meta.privacyPolicyUrl) {

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :cancel-text="null" :loading="loading" :save-text="saveText" @save="goNext">
+    <SaveView :title="title" :loading="loading" :save-text="saveText" @save="goNext">
         <h1>
             {{ title }}
         </h1>
@@ -66,6 +66,9 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         dataPermission!: boolean
 
+    @Prop({ default: true })
+        hasNextStep!: boolean
+
     /**
      * Type of the filters used (category.filter)
      */
@@ -129,6 +132,9 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
     }
 
     get saveText() {
+        if (!this.hasNextStep) {
+            return 'Opslaan'
+        }
         if (this.isOptional && this.isAllEmpty) {
             return "Sla over"
         }
@@ -207,6 +213,8 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
         this.loading = true
         this.errorBox = null
 
+        const cachedLastSavedAnswers = this.lastSavedAnswers
+
         try {
             let valid = await this.validator.validate()
 
@@ -234,10 +242,10 @@ export default class FillRecordCategoryView<T> extends Mixins(NavigationMixin) {
                 }
                 return true
             })
-            
-            await this.saveHandler(editingAnswers, this)
             this.lastSavedAnswers = editingAnswers
+            await this.saveHandler(editingAnswers, this)
         } catch (e) {
+            this.lastSavedAnswers = cachedLastSavedAnswers
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false

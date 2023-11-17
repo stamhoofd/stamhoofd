@@ -329,6 +329,7 @@ export default class DocumentTemplateOverview extends Mixins(NavigationMixin) {
             answers: this.template.settings.fieldAnswers,
             markReviewed: true,
             dataPermission: true,
+            hasNextStep: index < this.template.privateSettings.templateDefinition.exportFieldCategories.length - 1,
             filterDefinitions: [],
             saveHandler: async (fieldAnswers: RecordAnswer[], component: NavigationMixin) => {
                 await this.patchTemplate(DocumentTemplatePrivate.patch({
