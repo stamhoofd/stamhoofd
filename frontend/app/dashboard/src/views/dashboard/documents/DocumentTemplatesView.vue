@@ -10,10 +10,6 @@
                 Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
             </p>
 
-            <p class="info-box">
-                <span>Momenteel is het enkel mogelijk om fiscale attesten voor kinderopvang te genereren. Lees alle informatie na via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/fiscaal-attest-kinderopvang/'" target="_blank">deze pagina</a></span>
-            </p>
-
             <Spinner v-if="loading" />
 
             <STList v-else-if="templates.length">
