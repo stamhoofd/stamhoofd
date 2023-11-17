@@ -25,19 +25,19 @@
             </STList>
         </STInputBox>
 
-        <STInputBox v-if="allowOptional" title="Wanneer verplicht invullen?" class="max">
+        <STInputBox v-if="allowOptional" title="Wanneer verplicht invullen?*" class="max">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <Radio slot="left" :model-value="isAlwaysRequired()" :value="true" @change="setAlwaysRequired()" />
                     <h3 class="style-title-list">
-                        Invullen altijd verplicht
+                        Stap kan niet worden overgeslagen
                     </h3>
                 </STListItem>
 
                 <STListItem :selectable="true" element-name="label">
                     <Radio slot="left" :model-value="isNeverRequired()" :value="true" @change="setNeverRequired()" />
                     <h3 class="style-title-list">
-                        Invullen nooit verplicht
+                        Stap kan altijd worden overgeslagen
                     </h3>
                 </STListItem>
 
@@ -56,6 +56,9 @@
                 </STListItem>
             </STList>
         </STInputBox>
+        <p v-if="allowOptional" class="style-description-small">
+            * Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.
+        </p>
     </div>
 </template>
 
@@ -76,16 +79,16 @@ import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 })
 export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    value: PropertyFilter<any>
+        value: PropertyFilter<any>
 
     @Prop({ default: true })
-    allowOptional: boolean
+        allowOptional: boolean
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
 
     @Prop({ required: true })
-    definitions!: FilterDefinition[]
+        definitions!: FilterDefinition[]
 
     cachedRequiredFilter: FilterGroup<any> | null = null
     cachedEnabledFilter: FilterGroup<any> = new FilterGroup(this.definitions) // need a value to keep this reactive
