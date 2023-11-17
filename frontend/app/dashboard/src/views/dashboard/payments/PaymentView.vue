@@ -196,7 +196,7 @@
                     <hr>
                     <h2>Overzicht</h2>
                     <STList>
-                        <STListItem v-for="item in payment.balanceItemPayments" :key="item.id" :selectable="false">
+                        <STListItem v-for="item in payment.balanceItemPayments" :key="item.id" :selectable="true" @click="editBalanceItem(item.balanceItem)">
                             <h3 class="style-title-list">
                                 {{ item.balanceItem.description }}
                             </h3>
@@ -255,14 +255,16 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { calculateVATPercentage, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
+import { calculateVATPercentage, MemberBalanceItem, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import EditBalanceItemView from "../member/balance/EditBalanceItemView.vue";
 
 
 @Component({
@@ -592,6 +594,33 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             Toast.fromError(e).show()
         }
         this.markingPaid = false;
+    }
+
+    editBalanceItem(balanceItem: MemberBalanceItem) {
+        if (!this.canWrite) {
+            return
+        }
+        const component = new ComponentWithProperties(EditBalanceItemView, {
+            balanceItem,
+            isNew: false,
+            saveHandler: async (patch: AutoEncoderPatchType<MemberBalanceItem>) => {
+                const arr: PatchableArrayAutoEncoder<MemberBalanceItem> = new PatchableArray();
+                patch.id = balanceItem.id;
+                arr.addPatch(patch)
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/organization/balance',
+                    body: arr,
+                    decoder: new ArrayDecoder(MemberBalanceItem),
+                    shouldRetry: false
+                });
+                await this.reload();
+            }
+        })
+        this.present({
+            components: [component],
+            modalDisplayStyle: "popup"
+        })
     }
 }
 </script>
