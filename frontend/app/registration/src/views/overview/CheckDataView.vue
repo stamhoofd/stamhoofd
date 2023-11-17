@@ -164,7 +164,8 @@ export default class CheckDataView extends Mixins(NavigationMixin){
     editParent(parent: Parent) {
         this.present(new ComponentWithProperties(ParentView, {
             parent,
-            handler: (parent: Parent, component: NavigationMixin) => {
+            handler: async (parent: Parent, component: NavigationMixin) => {
+                await MemberManager.patchAllMembersWith()
                 component.pop({ force: true })
             }
         }).setDisplayStyle("popup"))
@@ -172,7 +173,11 @@ export default class CheckDataView extends Mixins(NavigationMixin){
 
     editAddress(address: Address) {
         this.present(new ComponentWithProperties(AddressView, {
-            address
+            address,
+            handler: async (address: Address, component: NavigationMixin) => {
+                await MemberManager.patchAllMembersWith()
+                component.pop({ force: true })
+            }
         }).setDisplayStyle("sheet"))
     }
 }
