@@ -215,6 +215,9 @@ export class STInvoiceMeta extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 133 })
     userAgent: string | null = null
 
+    @field({ decoder: StringDecoder, nullable: true, version: 210 })
+    stripeAccountId: string | null = null
+
     /**
      * Depending on areItemsIncludingVAT, this can either be including or excluding VAT
      */

@@ -133,6 +133,7 @@ export * from "./src/billing/STPackageBundle"
 export * from "./src/admin/Admin"
 export * from "./src/admin/MemberSummary"
 export * from "./src/admin/OrganizationSummary"
+export * from "./src/admin/StripePayoutExport"
 export * from "./src/Graph"
 
 // Email
