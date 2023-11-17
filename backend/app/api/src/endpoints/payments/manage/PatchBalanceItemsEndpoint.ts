@@ -219,12 +219,12 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        if (adminUser.permissions.hasFullAccess()) {
+        if (adminUser.hasFullAccess()) {
             // Can manage all
             return user;
         }
 
-        if (adminUser.permissions.hasWriteAccess()) {
+        if (adminUser.hasWriteAccess()) {
             // Can write all
             return user;
         }

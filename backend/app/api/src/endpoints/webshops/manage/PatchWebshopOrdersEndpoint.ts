@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, BalanceItemPayment, Order, Payment, Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, getPermissionLevelNumber, OrderStatus, PaymentMethod, PaymentProviderConfiguration, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment } from "@stamhoofd/structures";
+import { BalanceItemStatus, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment,Webshop as WebshopStruct } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -85,7 +85,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 })
             }
 
-            if (!token.user.permissions || getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(token.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+            if (!webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Write)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "No permissions for this webshop",
@@ -190,6 +190,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 
                 orders.push(order)
             }
+            const webshopStruct = WebshopStruct.create(webshop)
 
             for (const patch of body.getPatches()) {
                 const model = orders.find(p => p.id == patch.id)
@@ -212,6 +213,11 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 const previousData = model.data.clone()
                 if (patch.data) {
                     model.data.patchOrPut(patch.data)
+
+                    if (model.status !== OrderStatus.Deleted) {
+                        // Make sure all data is up to date and validated (= possible corrections happen here too)
+                        model.data.validate(webshopStruct, organization.meta, request.i18n, true);
+                    }
                 }
 
                 if (model.status === OrderStatus.Deleted) {

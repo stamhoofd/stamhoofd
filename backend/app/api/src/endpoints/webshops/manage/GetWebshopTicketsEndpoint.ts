@@ -40,13 +40,15 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
             })
         }
 
-        if (!token.user.permissions || webshop.privateMeta.permissions.getPermissionLevel(token.user.permissions) === PermissionLevel.None) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "No permissions for this webshop",
-                human: "Je hebt geen toegang tot de tickets van deze webshop",
-                statusCode: 403
-            })
+        if (!webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Read)) {
+            if (!webshop.privateMeta.scanPermissions.userHasAccess(token.user, PermissionLevel.Read)) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "No permissions for this webshop",
+                    human: "Je hebt geen toegang tot de tickets van deze webshop",
+                    statusCode: 403
+                })
+            }
         }
         
         errors.throwIfNotEmpty()

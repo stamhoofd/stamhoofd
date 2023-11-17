@@ -27,7 +27,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ErrorBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { getPermissionLevelNumber, PermissionLevel, PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
+import { PrivateOrderWithTickets, TicketPublic } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../../registration/src/classes/OrganizationManager";
@@ -64,11 +64,7 @@ export default class OrderTicketsView extends Mixins(NavigationMixin){
     }
 
     get hasWrite() {
-        const p = SessionManager.currentSession?.user?.permissions
-        if (!p) {
-            return false
-        }
-        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(SessionManager.currentSession?.user?.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     async downloadAllTickets() {

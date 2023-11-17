@@ -35,6 +35,13 @@ export class Address extends AutoEncoder {
         return this.city + ", " + CountryHelper.getName(this.country)
     }
 
+    anonymousString(currentCountry: string): string {
+        if (this.country == currentCountry) {
+            return this.street + ', ' + this.city
+        }
+        return this.street + ', ' + this.city + " (" + CountryHelper.getName(this.country)+")"
+    }
+
     static createDefault(country = Country.Belgium): Address {
         return Address.create({
             street: "",

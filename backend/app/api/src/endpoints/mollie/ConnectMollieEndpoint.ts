@@ -39,7 +39,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je moet hoofdbeheerder zijn om mollie te kunnen connecteren"
@@ -51,6 +51,6 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         // Check settlements after linking (shouldn't block)
         checkMollieSettlementsFor(mollieToken.accessToken, true).catch(console.error)
         
-        return new Response(await user.getOrganizatonStructure(user.organization));
+        return new Response(await user.getOrganizationStructure());
     }
 }

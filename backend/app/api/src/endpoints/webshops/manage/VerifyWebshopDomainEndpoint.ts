@@ -54,7 +54,7 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
                 })
             }
 
-            if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions!) !== PermissionLevel.Full) {
+            if (!webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "You do not have permissions for this endpoint",

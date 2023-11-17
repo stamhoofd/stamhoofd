@@ -25,7 +25,7 @@ export class GetOrganizationArchivedEndpoint extends Endpoint<Params, Query, Bod
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang tot dit onderdeel"
@@ -34,6 +34,6 @@ export class GetOrganizationArchivedEndpoint extends Endpoint<Params, Query, Bod
 
         // Get all admins
         const groups = await Group.where({ organizationId: user.organization.id, status: GroupStatus.Archived, deletedAt: null })
-        return new Response(groups.map(g => g.getPrivateStructure(user.permissions ?? undefined)));
+        return new Response(groups.map(g => g.getPrivateStructure(user)));
     }
 }

@@ -88,7 +88,7 @@ export class Registration extends Model {
         })
     }
 
-    hasAccess(user: User, groups: import('./').Group[], permissionLevel: PermissionLevel) {
+    hasAccess(user: UserWithOrganization, groups: import('./').Group[], permissionLevel: PermissionLevel) {
         if (!user.permissions) {
             return false
         }
@@ -98,18 +98,18 @@ export class Registration extends Model {
             return false;
         }
 
-        if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) >= getPermissionLevelNumber(permissionLevel)) {
+        if (group.hasAccess(user, permissionLevel)) {
             return true;
         }
 
         return false;
     }
 
-    hasReadAccess(user: User, groups: import('./').Group[]) {
+    hasReadAccess(user: UserWithOrganization, groups: import('./').Group[]) {
         return this.hasAccess(user, groups, PermissionLevel.Read)
     }
 
-    hasWriteAccess(user: User, groups: import('./').Group[]) {
+    hasWriteAccess(user: UserWithOrganization, groups: import('./').Group[]) {
         return this.hasAccess(user, groups, PermissionLevel.Write)
     }
 

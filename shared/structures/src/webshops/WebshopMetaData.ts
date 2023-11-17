@@ -488,6 +488,9 @@ export class WebshopPrivateMetaData extends AutoEncoder {
     @field({ decoder: PermissionsByRole, version: 60, optional: true })
     permissions = PermissionsByRole.create({})
 
+    @field({ decoder: PermissionsByRole, version: 202, optional: true })
+    scanPermissions = PermissionsByRole.create({})
+
     /**
      * DNS records that need to be set in order to activate mail domain and registration domain
      */

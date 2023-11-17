@@ -179,6 +179,7 @@ export class OrderActionBuilder {
 
             new TableAction({
                 name: "E-mailen",
+                enabled: this.webshopManager.hasRead,
                 icon: "email",
                 priority: 10,
                 groupIndex: 3,
@@ -189,6 +190,7 @@ export class OrderActionBuilder {
         
             ...(this.webshopManager.preview.meta.phoneEnabled ? [new TableAction({
                 name: "SMS'en",
+                enabled: this.webshopManager.hasRead,
                 icon: "feedback-line",
                 priority: 9,
                 groupIndex: 3,
@@ -200,6 +202,7 @@ export class OrderActionBuilder {
 
             new TableAction({
                 name: "Exporteer naar Excel",
+                enabled: this.webshopManager.hasRead,
                 icon: "download",
                 priority: 8,
                 groupIndex: 3,
@@ -264,6 +267,7 @@ export class OrderActionBuilder {
 
     async markAs(orders: PrivateOrder[], status: OrderStatus) {
         try {
+            const wasCanceledOrDeleted = !!orders.find(o => o.status === OrderStatus.Canceled || o.status === OrderStatus.Deleted)
             const patches: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray()
             for (const order of orders) {
                 patches.addPatch(PrivateOrder.patch({ status, id: order.id }))
@@ -281,11 +285,25 @@ export class OrderActionBuilder {
 
             if (status === OrderStatus.Deleted) {
                 new Toast(orders.length == 1 ? "Bestelling verwijderd" : "Bestellingen verwijderd", "success").setHide(1500).show()
+
+                // Do a slow reload of the webshop stocks
+                if (!wasCanceledOrDeleted) {
+                    this.webshopManager.backgroundReloadWebshop()
+                }
             } else {
                 new Toast("Status gewijzigd", "success").setHide(1500).show()
 
                 if (status == OrderStatus.Canceled) {
                     new Toast("Je moet zelf communiceren dat de bestelling werd geannuleerd", "warning yellow").setHide(10*1000).show()
+
+                    // Do a slow reload of the webshop stocks
+                    if (!wasCanceledOrDeleted) {
+                        this.webshopManager.backgroundReloadWebshop()
+                    }
+                } else {
+                    if (wasCanceledOrDeleted) {
+                        this.webshopManager.backgroundReloadWebshop()
+                    }
                 }
             }
             

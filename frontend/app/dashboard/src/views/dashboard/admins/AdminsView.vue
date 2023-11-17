@@ -1,5 +1,6 @@
 <template>
-    <div class="st-view background">
+    <LoadingView v-if="loading" />
+    <div v-else class="st-view background">
         <STNavigationBar title="Beheerders" :dismiss="canDismiss" :pop="canPop">
             <button slot="right" class="button text only-icon-smartphone" aria-label="Nieuwe beheerder" type="button" @click="createAdmin">
                 <span class="icon add" />
@@ -12,76 +13,87 @@
             <h1>Beheerders</h1>
             <p>Voeg hier beheerders toe en geef iedereen toegang tot bepaalde onderdelen door functies toe te kennen. Een beheerder kan meerdere functies hebben. Maak zelf nieuwe functies aan en stel de toegang in per functie.</p>
 
-            <Spinner v-if="loading" />
 
-            <template v-else>
-                <STList>
-                    <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
-                        <template slot="left">
-                            <span v-if="hasFullAccess(admin)" vv-tooltip="'Hoofdbeheerder'" class="icon layered">
-                                <span class="icon user-admin-layer-1" />
-                                <span class="icon user-admin-layer-2 yellow" />
-                            </span>
-                            <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen functies'" class="icon layered">
-                                <span class="icon user-blocked-layer-1" />
-                                <span class="icon user-blocked-layer-2 error" />
-                            </span>
-                            <span v-else class="icon user" />
-                        </template>
+            <STList class="illustration-list">    
+                <STListItem :selectable="true" class="left-center" @click="createAdmin">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/account-add.svg">
+                    <h2 class="style-title-list">
+                        Nieuwe beheerder
+                    </h2>
+                    <p class="style-description">
+                        Nodig iemand uit om beheerder te worden
+                    </p>
+                    <template slot="right">
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
 
-                        <h2 class="style-title-list">
-                            <span>{{ admin.firstName }} {{ admin.lastName }}</span>
-                        </h2>
-                        <p class="style-description-small">
-                            {{ admin.email }}
-                        </p>
-                        <p class="style-description-small">
-                            {{ permissionList(admin) }}
-                        </p>
+                <STListItem :selectable="true" class="left-center" @click="editRoles(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/admin-role.svg">
+                    <h2 class="style-title-list">
+                        Functies beheren
+                    </h2>
+                    <p class="style-description">
+                        Maak functies die je aan beheerders kan toekennen om hen zo toegang te geven tot bepaalde onderdelen van Stamhoofd
+                    </p>
+                    <template slot="right">
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
 
-                        <template slot="right">
-                            <span v-if="admin.id === me.id" class="style-tag">
-                                Ik
-                            </span>
-                            <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
-                            <span><span class="icon gray edit" /></span>
-                        </template>
-                    </STListItem>
-                </STList>
+            <hr>
+            <h2>Alle beheerders</h2>
+            <STList>
+                <STListItem v-for="admin in sortedAdmins" :key="admin.id" :selectable="true" class="right-stack" @click="editAdmin(admin)">
+                    <template slot="left">
+                        <span v-if="hasFullAccess(admin)" v-tooltip="'Hoofdbeheerder'" class="icon layered">
+                            <span class="icon user-admin-layer-1" />
+                            <span class="icon user-admin-layer-2 yellow" />
+                        </span>
+                        <span v-else-if="hasNoRoles(admin)" v-tooltip="'Heeft geen functies'" class="icon layered">
+                            <span class="icon user-blocked-layer-1" />
+                            <span class="icon user-blocked-layer-2 error" />
+                        </span>
+                        <span v-else class="icon user" />
+                    </template>
 
-                <hr>
+                    <h2 class="style-title-list">
+                        <span>{{ admin.firstName }} {{ admin.lastName }}</span>
+                    </h2>
+                    <p class="style-description-small">
+                        {{ admin.email }}
+                    </p>
+                    <p class="style-description-small">
+                        {{ permissionList(admin) }}
+                    </p>
 
-                <p>
-                    <button class="button text" type="button" @click="addRole">
-                        <span class="icon add" />
-                        <span>Nieuwe functie toevoegen</span>
-                    </button>
-                </p>
-                <p>
-                    <button class="button text" type="button" @click="createAdmin">
-                        <span class="icon add" />
-                        <span>Nieuwe beheerder toevoegen</span>
-                    </button>
-                </p>
-            </template>
+                    <template slot="right">
+                        <span v-if="admin.id === me.id" class="style-tag">
+                            Ik
+                        </span>
+                        <span v-else-if="!admin.hasAccount" v-tooltip="'Uitnodiging nog niet geaccepteerd'" class="icon email gray" />
+                        <span><span class="icon gray edit" /></span>
+                    </template>
+                </STListItem>
+            </STList>
         </main>
     </div>
 </template>
 
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
+import AdminRolesView from './AdminRolesView.vue';
 import AdminView from './AdminView.vue';
-import EditRoleView from "./EditRoleView.vue";
 
 @Component({
     components: {
@@ -90,7 +102,7 @@ import EditRoleView from "./EditRoleView.vue";
         STToolbar,
         STList,
         STListItem,
-        Spinner,
+        LoadingView,
         BackButton
     },
     directives: {
@@ -102,12 +114,21 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     loading = true
 
     mounted() {
+        const parts = UrlHelper.shared.getParts()
+
         this.load(true).catch(e => {
             console.error(e)
         })
 
         UrlHelper.setUrl("/settings/admins")
         document.title = "Stamhoofd - Beheerders"
+
+        if (parts.length >= 3 && parts[0] == 'settings' && parts[1] == 'admins' && parts[2] == 'roles') {
+            this.editRoles(false)
+        } else {
+            UrlHelper.shared.clear()
+        }
+        
     }
 
     async load(force = false) {
@@ -138,7 +159,7 @@ export default class AdminsView extends Mixins(NavigationMixin) {
 
     permissionList(user: User) {
         const list: string[] = []
-        if (user.permissions?.hasFullAccess()) {
+        if (user.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [])) {
             list.push("Hoofdbeheerders")
         }
 
@@ -153,15 +174,15 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     }
 
     get sortedAdmins() {
-        return this.admins.slice().sort((a, b) => Sorter.stack(Sorter.byBooleanValue(a.permissions?.hasFullAccess() ?? false, b.permissions?.hasFullAccess() ?? false), Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)))
+        return this.admins.slice().sort((a, b) => Sorter.stack(Sorter.byBooleanValue(a.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) ?? false, b.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) ?? false), Sorter.byStringValue(a.firstName+" "+a.lastName, b.firstName+" "+b.lastName)))
     }
 
     hasFullAccess(user: User) {
-        return user.permissions?.hasFullAccess() ?? false
+        return user.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) ?? false
     }
 
     hasNoRoles(user: User) {
-        return !user.permissions?.hasReadAccess() && user.permissions?.roles.length == 0
+        return !user.permissions?.hasReadAccess(this.organization.privateMeta?.roles ?? []) && user.permissions?.roles.length == 0
     }
 
     createAdmin() {
@@ -220,57 +241,24 @@ export default class AdminsView extends Mixins(NavigationMixin) {
     getAdminsWithoutRole() {
         // We still do a check on ID because users might have a role that is deleted
         const ids = this.roles.map(r => r.id)
-        return this.sortedAdmins.filter(a => !a.permissions?.hasFullAccess() && !a.permissions?.roles.find(r => ids.includes(r.id)))
+        return this.sortedAdmins.filter(a => !a.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []) && !a.permissions?.roles.find(r => ids.includes(r.id)))
     }
 
     getAdmins() {
         // We still do a check on ID because users might have a role that is deleted
-        return this.sortedAdmins.filter(a => !!a.permissions?.hasFullAccess())
+        return this.sortedAdmins.filter(a => !!a.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? []))
     }
 
-    addRole() {
-        const role = PermissionRoleDetailed.create({})
-        const privateMeta = OrganizationPrivateMetaData.patch({})
-        privateMeta.roles.addPut(role)
-
-        const patch = Organization.patch({ 
-            id: this.organization.id,
-            privateMeta
+    editRoles(animated = true) {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: new ComponentWithProperties(AdminRolesView, {}),
+                })
+            ],
+            modalDisplayStyle: 'popup',
+            animated
         })
-        
-        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(EditRoleView, { 
-                role,
-                organization: this.organization.patch(patch),
-                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
-                    const doSave = patch.patch(p)
-                    await OrganizationManager.patch(doSave)
-                    if (doSave.admins) {
-                        await this.load(true)
-                    }
-                }
-            }),
-        }).setDisplayStyle("popup"))
-    }
-
-    editRole(role: PermissionRoleDetailed) {
-        const patch = Organization.patch({ 
-            id: this.organization.id
-        })
-        
-        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(EditRoleView, { 
-                role,
-                organization: this.organization,
-                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
-                    const doSave = patch.patch(p)
-                    await OrganizationManager.patch(doSave)
-                    if (doSave.admins) {
-                        await this.load(true)
-                    }
-                }
-            }),
-        }).setDisplayStyle("popup"))
     }
 }
 

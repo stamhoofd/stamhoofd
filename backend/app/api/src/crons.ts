@@ -430,7 +430,11 @@ async function checkComplaints() {
 
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
-    const timeout = STAMHOOFD.environment === 'development' ? 60*1000*2 : 60*1000*11;
+    if (STAMHOOFD.environment === "development") {
+        return;
+    }
+
+    const timeout = 60*1000*11;
     
     // TODO: only select the ID + organizationId
     const payments = await Payment.where({

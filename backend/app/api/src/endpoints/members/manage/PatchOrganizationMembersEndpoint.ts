@@ -3,8 +3,10 @@ import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, Patch
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
-import { BalanceItemStatus, EncryptedMemberWithRegistrations, getPermissionLevelNumber, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
+import { BalanceItemStatus, EncryptedMemberWithRegistrations, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
+
+import { PatchUserMembersEndpoint } from '../PatchUserMembersEndpoint';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<EncryptedMemberWithRegistrations>
@@ -53,10 +55,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const put of request.body.getPuts()) {
             const struct = put.put
-            const member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
+            let member = new Member().setManyRelation(Member.registrations as any as OneToManyRelation<"registrations", Member, Registration>, []).setManyRelation(Member.users, [])
             member.id = struct.id
             member.organizationId = user.organizationId
+
+            struct.details.cleanData()
             member.details = struct.details
+
+            const duplicate = await PatchUserMembersEndpoint.checkDuplicate(member);
+            if (duplicate) {
+                // Merge data
+                duplicate.details.merge(member.details)
+                await duplicate.save()
+                member = duplicate
+            }
 
             for (const registrationStruct of struct.registrations) {
                 const group = groups.find(g => g.id === registrationStruct.groupId)
@@ -68,7 +80,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         statusCode: 404
                     })
                 }
-                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+
+                if (!group.hasAccess(user, PermissionLevel.Write)) {
                     throw new SimpleError({
                         code: "permission_denied",
                         message: "No permissions to create member in this group",
@@ -310,7 +323,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         statusCode: 404
                     })
                 }
-                if (getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+                if (!group.hasAccess(user, PermissionLevel.Write)) {
                     throw new SimpleError({
                         code: "permission_denied",
                         message: "No permissions to create member in this group",

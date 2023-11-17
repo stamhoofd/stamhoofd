@@ -3,6 +3,7 @@
         <div v-if="logoSrc" class="logo">
             <img :src="logoSrc" :srcset="logoSrcSet">
         </div>
+        <span v-else-if="allowEmpty" class="icon gray" />
         <div v-else class="letter-logo" :data-length="letters.length">
             {{ letters }}
         </div>
@@ -19,19 +20,22 @@ export default class GroupAvatar extends Vue {
     @Prop({ required: true })
         group!: Group
 
+    @Prop({ default: false })
+        allowEmpty!: boolean
+
     get letters() {
         return Formatter.firstLetters(this.group.settings.name, 2)
     }
 
     get logoSrc() {
-        return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(24, 24)
+        return (this.group.settings.squarePhoto)?.getPathForSize(24, 24)
     }
 
     get logoSrcSet() {
-        if (!this.group.settings.squarePhoto && !this.group.settings.coverPhoto) {
+        if (!this.group.settings.squarePhoto) {
             return null
         }
-        return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)!.getPathForSize(24, 24) + " 1x, "+(this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)!.getPathForSize(24*2, 24*2)+" 2x, "+(this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)!.getPathForSize(24*3, 24*3)+" 3x"
+        return (this.group.settings.squarePhoto)!.getPathForSize(24, 24) + " 1x, "+(this.group.settings.squarePhoto)!.getPathForSize(24*2, 24*2)+" 2x, "+(this.group.settings.squarePhoto)!.getPathForSize(24*3, 24*3)+" 3x"
     }
 }
 </script>
@@ -43,14 +47,14 @@ export default class GroupAvatar extends Vue {
     .letter-logo {
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
-        border-radius: $border-radius;
+        border-radius: 4px;
         text-align: center;
         background: $color-primary-light;
-        color: $color-primary;
+        color: $color-primary-dark;
         text-transform: uppercase;
         line-height: var(--block-width, 40px);
-        font-size: 11px;
-        font-weight: bold;
+        font-size: 10px;
+        font-weight: $font-weight-bold;
         position: relative;
     }
 
@@ -62,7 +66,8 @@ export default class GroupAvatar extends Vue {
         }
         width: var(--block-width, 40px);
         height: var(--block-width, 40px);
-        border-radius: $border-radius;
+        margin: -5px 0;
+        border-radius: 4px;
         overflow: hidden;
         //background: $color-background;
         //box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05), 0px 2px 15px rgba(0, 0, 0, 0.05);

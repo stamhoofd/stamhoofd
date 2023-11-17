@@ -118,13 +118,13 @@
 
                 <p v-if="patchedOrder.data.deliveryPrice == 0" class="success-box">
                     Levering is gratis
-                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0" class="info-box">
+                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.price != 0">
                         vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
                     </template>
                 </p>
                 <p v-else class="info-box">
                     De leveringskost bedraagt {{ patchedOrder.data.deliveryPrice | price }}
-                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === patchedOrder.data.deliveryPrice" class="info-box">
+                    <template v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice === patchedOrder.data.deliveryPrice">
                         vanaf een bestelbedrag van {{ deliveryMethod.price.minimumPrice | price }}.
                     </template>
                 </p>
@@ -407,7 +407,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         return this.webshop.meta.checkoutMethods
     }
 
-    get selectedMethod(): CheckoutMethod {
+    get selectedMethod(): CheckoutMethod|null {
         if (this.patchedOrder.data.checkoutMethod) {
             const search = this.patchedOrder.data.checkoutMethod.id
             const f = this.webshop.meta.checkoutMethods.find(c => c.id == search)
@@ -415,10 +415,12 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                 return f
             }
         }
-        return this.webshop.meta.checkoutMethods[0]
+
+        // Don't return a default here: otherwise you are not able to save
+        return null
     }
 
-    set selectedMethod(checkoutMethod: CheckoutMethod) {
+    set selectedMethod(checkoutMethod: CheckoutMethod|null) {
         this.patchOrder = this.patchOrder.patch(PrivateOrder.patch({
             data: OrderData.patch({
                 checkoutMethod
@@ -429,7 +431,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         const temporaryVariable = this.selectedSlot
         this.selectedSlot = temporaryVariable ?? this.timeSlots[0] ?? null
 
-        if (checkoutMethod.type !== CheckoutMethodType.Delivery) {
+        if (!checkoutMethod || checkoutMethod.type !== CheckoutMethodType.Delivery) {
             this.address = null
         }
     }
@@ -463,7 +465,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
         return this.selectedMethod?.timeSlots.timeSlots.slice().sort(WebshopTimeSlot.sort) ?? []
     }
 
-    get selectedSlot(): WebshopTimeSlot {
+    get selectedSlot(): WebshopTimeSlot|null {
         if (this.patchedOrder.data.timeSlot) {
             const search = this.patchedOrder.data.timeSlot
             const f = this.timeSlots.find(c => c.id == search.id)
@@ -476,7 +478,7 @@ export default class EditOrderView extends Mixins(NavigationMixin){
                 return f2
             }
         }
-        return this.timeSlots[0]
+        return null
     }
 
     set selectedSlot(timeSlot: WebshopTimeSlot | null) {

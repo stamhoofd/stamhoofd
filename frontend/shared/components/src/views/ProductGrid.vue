@@ -1,5 +1,5 @@
 <template>
-    <div class="product-grid">
+    <div class="product-grid" :class="{single: products.length === 1}">
         <ProductBox v-for="product in products" :key="product.id" :product="product" :webshop="webshop" :cart="cart" :save-handler="saveHandler" :admin="admin" />
     </div>
 </template>
@@ -57,6 +57,10 @@ export default class ProductGrid extends Mixins(NavigationMixin){
     @media (min-width: 801px) {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
+
+        &.single {
+            grid-template-columns: 1fr;
+        }
     }
 }
 </style>

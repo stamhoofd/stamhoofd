@@ -1,160 +1,166 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar title="Beheerders" :dismiss="canDismiss" :pop="canPop">
-            <template slot="right">
-                <button v-if="!isNew" class="button text" type="button" @click="deleteMe">
-                    <span class="icon trash" />
-                    <span>Verwijderen</span>
-                </button>
-            </template>
-        </STNavigationBar>
+    <SaveView :title="title" :loading="saving" :disabled="!hasChanges" @save="save">
+        <h1>
+            {{ title }}
+        </h1>
 
-        <main>
-            <h1>
-                {{ title }}
-            </h1>
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <STInputBox title="Titel" error-fields="name" :error-box="errorBox">
+            <input
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="Titel van deze functie"
+                autocomplete=""
+            >
+        </STInputBox>
 
-            <STInputBox title="Titel" error-fields="name" :error-box="errorBox">
-                <input
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    placeholder="Titel van deze functie"
-                    autocomplete=""
-                >
-            </STInputBox>
+        <hr>
+        <h2>Basistoegang</h2>
+        <p>Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw vereniging.</p>
 
-            <div v-if="enableMemberModule" class="container">
-                <hr>
-                <h2 class="style-with-button">
-                    <div>
-                        Inschrijvingsgroepen
-                    </div>
-                    <div>
-                        <button class="button text" type="button" @click="editGroups()">
-                            <span class="icon add" />
-                            <span class="hide-smartphone">Toevoegen</span>
-                        </button>
-                    </div>
-                </h2>
-
-                <STList v-if="groups.length > 0">
-                    <GroupPermissionRow v-for="group in groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
-                </STList>
-
-                <p v-else class="info-box">
-                    Beheerders met deze functie hebben geen toegang tot inschrijvingsgroepen
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <Radio slot="left" v-model="basePermission" value="None" />
+                <h3 class="style-title-list">
+                    Geen
+                </h3>
+                <p v-if="basePermission === 'None'" class="style-description-small">
+                    Deze beheerders kunnen geen onderdelen zien of bewerken tenzij expliciet hieronder toegang werd gegeven.
                 </p>
+            </STListItem>
 
-                <template v-if="enableActivities">
-                    <hr>
-                    <h2 class="style-with-button">
-                        <div>
-                            Inschrijvingscategorieën
-                        </div>
-                        <div>
-                            <button class="button text" type="button" @click="editCategories()">
-                                <span class="icon add" />
-                                <span class="hide-smartphone">Toevoegen</span>
-                            </button>
-                        </div>
-                    </h2>
-                    <p>Geef deze beheerders zelf de mogelijkheid om zelf inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.</p>
-
-                    <STList v-if="categories.length > 0">
-                        <CategoryPermissionRow v-for="category in categories" :key="category.id" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
-                    </STList>
-
-                    <p v-else class="info-box">
-                        Beheerders met deze functie kunnen geen inschrijvingsgroepen maken
-                    </p>
-                </template>
-            </div>
-
-            <div v-if="enableWebshopModule" class="container">
-                <hr>
-                <h2 class="style-with-button">
-                    <div>
-                        Webshops
-                    </div>
-                    <div>
-                        <button class="button text" type="button" @click="editWebshops()">
-                            <span class="icon add" />
-                            <span class="hide-smartphone">Toevoegen</span>
-                        </button>
-                    </div>
-                </h2>
-                <p>Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop</p>
-
-                <STList>
-                    <STListItem :selectable="true" element-name="label">
-                        <Checkbox slot="left" v-model="createWebshops" />
-                        Kan nieuwe webshops maken
-                    </STListItem>
-                    <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" @patch="addPatch" />
-                </STList>
-
-                <p v-if="webshops.length == 0 && !createWebshops" class="info-box">
-                    Beheerders met deze functie hebben geen toegang tot webshops
+            <STListItem :selectable="true" element-name="label">
+                <Radio slot="left" v-model="basePermission" value="Read" />
+                <h3 class="style-title-list">
+                    Lezen
+                </h3>
+                <p v-if="basePermission === 'Read'" class="style-description-small">
+                    Deze beheerders kunnen alle onderdelen zien. Je kan ze eventueel bewerk toegang geven tot specifieke onderdelen.
                 </p>
-            </div>
+            </STListItem>
 
+            <STListItem :selectable="true" element-name="label">
+                <Radio slot="left" v-model="basePermission" value="Write" />
+                <h3 class="style-title-list">
+                    Bewerken
+                </h3>
+                <p v-if="basePermission === 'Write'" class="style-description-small">
+                    Deze beheerders kunnen alle onderdelen zien en bewerken. Je kan ze eventueel toegang geven tot instellingen (volledige toegang) voor specifieke onderdelen.
+                </p>
+            </STListItem>
+        </STList>
+
+        <template v-if="enableActivities">
             <hr>
-            <h2>Boekhouding</h2>
+            <h2>
+                Inschrijvingscategorieën
+            </h2>
+            <p>Geef deze beheerders meteen toegang tot alle inschrijvingsgroepen uit een categorie, of geef ze zelf de mogelijkheid om inschrijvingsgroepen (bv. activiteiten of leeftijdsgroepen) aan te maken in één of meerdere categorieën. Enkel hoofdbeheerders kunnen categorieën toevoegen en bewerken.</p>
+           
+            <STList>
+                <GroupCategoryPermissionRow v-for="category in categories" :key="category.id" type="category" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
+
+                <STListItem :selectable="true" @click="editCategories()">
+                    <span class="button text">
+                        <span class="icon add" />
+                        <span>Categorie toevoegen</span>
+                    </span>
+                </STListItem>
+            </STList>
+        </template>
+
+        <div v-if="enableMemberModule" class="container">
+            <hr>
+            <h2>
+                Individuele inschrijvingsgroepen
+            </h2>
+
+            <STList>
+                <GroupPermissionRow v-for="group in groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
+                <STListItem :selectable="true" @click="editGroups()">
+                    <span class="button text">
+                        <span class="icon add" />
+                        <span>Groep toevoegen</span>
+                    </span>
+                </STListItem>
+            </STList>
+        </div>
+
+        <div v-if="enableWebshopModule" class="container">
+            <hr>
+            <h2>Webshops</h2>
+            <p>Voeg webshops toe om deze beheerders toegang te geven tot een specifieke webshop</p>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
-                    <Checkbox slot="left" v-model="financeDirector" />
-                    <h3 class="style-title-list">
-                        Volledige toegang
-                    </h3>
-                    <p class="style-description-small">
-                        Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
-                    </p>
+                    <Checkbox slot="left" v-model="createWebshops" />
+                    Kan nieuwe webshops maken
                 </STListItem>
-                <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
-                    <Checkbox slot="left" v-model="managePayments" />
-                    <h3 class="style-title-list">
-                        Overschrijvingen beheren
-                    </h3>
-                    <p class="style-description-small">
-                        Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
-                    </p>
+                <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" type="webshop" @patch="addPatch" />
+
+                <STListItem :selectable="true" @click="editWebshops()">
+                    <span class="button text">
+                        <span class="icon add" />
+                        <span>Webshop toevoegen</span>
+                    </span>
                 </STListItem>
             </STList>
+        </div>
 
+        <hr>
+        <h2>Boekhouding</h2>
+
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="financeDirector" />
+                <h3 class="style-title-list">
+                    Volledige toegang
+                </h3>
+                <p class="style-description-small">
+                    Beheerders met deze toegang krijgen toegang tot alle financiële gegevens van jouw organisatie, en kunnen overschrijvingen als betaald markeren.
+                </p>
+            </STListItem>
+            <STListItem v-if="!financeDirector" :selectable="true" element-name="label">
+                <Checkbox slot="left" v-model="managePayments" />
+                <h3 class="style-title-list">
+                    Overschrijvingen beheren
+                </h3>
+                <p class="style-description-small">
+                    Beheerders met deze toegang kunnen openstaande overschrijvingen bekijken en markeren als betaald.
+                </p>
+            </STListItem>
+        </STList>
+
+        <div v-if="!isNew" class="container">
             <hr>
-            <h2>Beheerders in deze groep</h2>
+            <h2>
+                Verwijder deze functie
+            </h2>
 
-            <STList>
-                <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
-                    <Checkbox slot="left" :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
+            <button class="button secundary danger" type="button" @click="deleteMe">
+                <span class="icon trash" />
+                <span>Verwijderen</span>
+            </button>
+        </div>
 
-                    <h2 class="style-title-list">
-                        {{ admin.firstName }} {{ admin.lastName }}
-                    </h2>
-                    <p class="style-description-small">
-                        {{ admin.email }}
-                    </p>
-                </STListItem>
-            </STList>
-        </main>
+        <hr>
+        <h2>Beheerders met deze functie</h2>
 
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" type="button" @click="cancel">
-                    Annuleren
-                </button>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" type="button" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <STList>
+            <STListItem v-for="admin in sortedAdmins" :key="admin.id" element-name="label" :selectable="true">
+                <Checkbox slot="left" :checked="hasAdminRole(admin)" @change="setAdminRole(admin, $event)" />
+
+                <h2 class="style-title-list">
+                    {{ admin.firstName }} {{ admin.lastName }}
+                </h2>
+                <p class="style-description-small">
+                    {{ admin.email }}
+                </p>
+            </STListItem>
+        </STList>
+    </SaveView>
 </template>
 
 
@@ -163,25 +169,25 @@ import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-e
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
-import { SessionManager } from '@stamhoofd/networking';
-import { Group, GroupCategory, Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
-import { Sorter } from "@stamhoofd/utility";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Radio, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { Group, GroupCategory, Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version, WebshopPreview } from '@stamhoofd/structures';
+import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
-import CategoryPermissionRow from './CategoryPermissionRow.vue';
 import EditRoleCategoriesView from './EditRoleCategoriesView.vue';
 import EditRoleGroupsView from './EditRoleGroupsView.vue';
 import EditRoleWebshopsView from './EditRoleWebshopsView.vue';
+import GroupCategoryPermissionRow from './GroupCategoryPermissionRow.vue';
 import GroupPermissionRow from './GroupPermissionRow.vue';
 import WebshopPermissionRow from './WebshopPermissionRow.vue';
 
 @Component({
     components: {
         Checkbox,
-        STNavigationBar,
-        STToolbar,
+        Radio,
+        SaveView,
         STList,
         STListItem,
         Spinner,
@@ -190,7 +196,7 @@ import WebshopPermissionRow from './WebshopPermissionRow.vue';
         STErrorsDefault,
         LoadingButton,
         GroupPermissionRow,
-        CategoryPermissionRow,
+        GroupCategoryPermissionRow,
         WebshopPermissionRow
     }
 })
@@ -201,6 +207,9 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
 
     @Prop({ required: true })
         role: PermissionRoleDetailed
+
+    @Prop({ required: true })
+        isNew: boolean
 
     @Prop({ required: true })
         organization: Organization
@@ -220,6 +229,13 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         this.load().catch(e => {
             console.error(e)
         })
+
+        if (this.isNew) {
+            UrlHelper.setUrl("/settings/admins/roles/new")
+        } else {
+            UrlHelper.setUrl("/settings/admins/roles/" + Formatter.slug(this.role.name))
+        }
+        document.title = "Stamhoofd - " + this.title
     }
 
     get patchedOrganization() {
@@ -234,10 +250,6 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         return this.role
     }
 
-    get isNew() {
-        return this.patchedRole.name.length == 0
-    }
-
     get title() {
         return this.isNew ? "Nieuwe functie" : this.patchedRole.name
     }
@@ -250,6 +262,18 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         this.addRolePatch(
             PermissionRoleDetailed.patch({ 
                 name
+            })
+        )
+    }
+
+    get basePermission() {
+        return this.patchedRole.level
+    }
+
+    set basePermission(basePermission: PermissionLevel) {
+        this.addRolePatch(
+            PermissionRoleDetailed.patch({ 
+                level: basePermission
             })
         )
     }
@@ -376,10 +400,19 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
                 g.set(category.id, category)
                 continue
             }
+            if (category.settings.permissions.groupPermissions.roleHasAccess(this.role)) {
+                g.set(category.id, category)
+                continue
+            }
         }
 
         for (const category of this.patchedOrganization.meta.categories) {
             if (category.settings.permissions.create.find(r => r.id === this.role.id)) {
+                g.set(category.id, category)
+                continue
+            }
+
+            if (category.settings.permissions.groupPermissions.roleHasAccess(this.role)) {
                 g.set(category.id, category)
                 continue
             }
@@ -398,34 +431,24 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
 
         // Keep both old and new
         for (const group of this.organization.webshops) {
-            if (group.privateMeta?.permissions.full.find(r => r.id === this.role.id)) {
+            if (group.privateMeta.permissions.roleHasAccess(this.role)) {
                 g.set(group.id, group)
                 continue
             }
 
-            if (group.privateMeta?.permissions.write.find(r => r.id === this.role.id)) {
-                g.set(group.id, group)
-                continue
-            }
-
-            if (group.privateMeta?.permissions.read.find(r => r.id === this.role.id)) {
+            if (group.privateMeta.scanPermissions.roleHasAccess(this.role)) {
                 g.set(group.id, group)
                 continue
             }
         }
 
         for (const group of this.patchedOrganization.webshops) {
-            if (group.privateMeta?.permissions.full.find(r => r.id === this.role.id)) {
+            if (group.privateMeta.permissions.roleHasAccess(this.role)) {
                 g.set(group.id, group)
                 continue
             }
 
-            if (group.privateMeta?.permissions.write.find(r => r.id === this.role.id)) {
-                g.set(group.id, group)
-                continue
-            }
-
-            if (group.privateMeta?.permissions.read.find(r => r.id === this.role.id)) {
+            if (group.privateMeta.scanPermissions.roleHasAccess(this.role)) {
                 g.set(group.id, group)
                 continue
             }
@@ -450,8 +473,6 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
 
     addPatch(patch: AutoEncoderPatchType<Organization>) {
         this.patchOrganization = this.patchOrganization.patch(patch)
-        console.log(this.patchOrganization)
-        console.log(this.patchedOrganization)
     }
 
     async load() {
@@ -489,7 +510,6 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
     }
 
     setAdminRole(admin: User, enable: boolean) {
-        console.log("set", enable)
         const permissionPatch = Permissions.patch({})
 
         if (enable) {
@@ -556,18 +576,13 @@ export default class EditRoleView extends Mixins(NavigationMixin) {
         this.saving = false
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
+    get hasChanges() {
         return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
     }
 
     async shouldNavigateAway() {
-        console.log("should navigate away")
-        if (!this.isChanged()) {
-            return true
+        if (!this.hasChanges) {
+            return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }

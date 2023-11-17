@@ -10,7 +10,7 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <STList>
-            <WebshopRolePermissionRow v-for="role in roles" :key="role.id" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
+            <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
         </STList>
     </SaveView>
 </template>
@@ -20,14 +20,14 @@ import { SaveView, STErrorsDefault, STList } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
 import { Component, Mixins } from "vue-property-decorator";
 
-import WebshopRolePermissionRow from '../../admins/WebshopRolePermissionRow.vue';
+import WebshopPermissionRow from '../../admins/WebshopPermissionRow.vue';
 import EditWebshopMixin from './EditWebshopMixin';
 
 @Component({
     components: {
         STList,
         STErrorsDefault,
-        WebshopRolePermissionRow,
+        WebshopPermissionRow,
         SaveView
     }
 })

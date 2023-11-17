@@ -26,8 +26,7 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { ContextMenu, ContextMenuItem, LongPressDirective, STList, STListItem } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { TicketPrivate } from "@stamhoofd/structures";
-import { getPermissionLevelNumber, Order, PermissionLevel, ProductDateRange, TicketPublicPrivate, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { Order, ProductDateRange, TicketPrivate, TicketPublicPrivate, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -95,7 +94,7 @@ export default class TicketRow extends Mixins(NavigationMixin){
         if (!p) {
             return false
         }
-        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     openMenu(clickEvent) {

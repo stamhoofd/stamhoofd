@@ -30,7 +30,7 @@ export class GetDocumentTemplteXMLEndpoint extends Endpoint<Params, Query, Body,
         const user = token.user
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "You don't have permissions to access documents",

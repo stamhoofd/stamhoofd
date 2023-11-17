@@ -54,10 +54,10 @@
                 Je hebt nog geen functies aangemaakt. Maak een functie aan om beheerders op te delen.
             </p>
 
-            <p>
-                <button class="button text" type="button" @click="addRole">
-                    <span class="icon add" />
-                    <span>Nieuwe functie toevoegen</span>
+            <p class="style-button-bar">
+                <button class="button text" type="button" @click="editRoles">
+                    <span class="icon edit" />
+                    <span>Functies bewerken</span>
                 </button>
             </p>
         </div>
@@ -81,12 +81,12 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import Tooltip from '@stamhoofd/components/src/directives/Tooltip';
 import { SessionManager } from '@stamhoofd/networking';
-import { Organization, OrganizationPrivateMetaData, PermissionLevel, PermissionRole, PermissionRoleDetailed, Permissions, User, Version } from "@stamhoofd/structures";
+import { PermissionLevel, PermissionRole, Permissions, User, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
-import EditRoleView from './EditRoleView.vue';
+import AdminRolesView from './AdminRolesView.vue';
 
 @Component({
     components: {
@@ -161,26 +161,16 @@ export default class AdminView extends Mixins(NavigationMixin) {
         this.addPermissionsPatch(p)
     }
 
-    addRole() {
-        const role = PermissionRoleDetailed.create({})
-        const privateMeta = OrganizationPrivateMetaData.patch({})
-        privateMeta.roles.addPut(role)
-
-        const patch = Organization.patch({ 
-            id: this.organization.id,
-            privateMeta
+    editRoles() {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: new ComponentWithProperties(AdminRolesView, { }),
+                })
+            ],
+            modalDisplayStyle: "popup",
+            animated: true
         })
-        
-        this.present(new ComponentWithProperties(NavigationController, { 
-            root: new ComponentWithProperties(EditRoleView, { 
-                role,
-                organization: this.organization.patch(patch),
-                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
-                    const doSave = patch.patch(p)
-                    await OrganizationManager.patch(doSave)
-                }
-            }),
-        }).setDisplayStyle("popup"))
     }
 
     async save() {
@@ -352,7 +342,7 @@ export default class AdminView extends Mixins(NavigationMixin) {
 
     get fullAccess() {
         const user = this.patchedUser
-        return !!user.permissions && user.permissions.hasFullAccess()
+        return !!user.permissions && user.permissions.hasFullAccess(this.organization.privateMeta?.roles ?? [])
     }
 
     set fullAccess(fullAccess: boolean) {

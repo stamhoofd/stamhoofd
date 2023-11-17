@@ -10,6 +10,12 @@
     }
 }
 
+.hide-medium {
+    @media (max-width: 800px) {
+        display: none !important;
+    }
+}
+
 .only-smartphone {
     @media (min-width: 551px) {
         display: none !important;

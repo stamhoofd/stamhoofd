@@ -1,67 +1,73 @@
 <template>
-    <div class="st-view shade">
-        <STNavigationBar v-if="!isNative" :large="true">
-            <template slot="left">
-                <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
-                    <Logo class="responsive" />
-                </a>
-            </template>
+    <div>
+        <STGradientBackground />
 
-            <template slot="right">
-                <a class="button primary" href="/aansluiten" @click.prevent="gotoSignup">
-                    {{ $t("dashboard.join") }}
-                </a>
-            </template>
-        </STNavigationBar>
-        <STNavigationBar v-else title="Kies jouw vereniging" />
-        <main class="limit-width">
-            <div class="organization-selection-view" :class="{native: isNative}">
-                <a v-if="!isNative" class="button text" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
-                    <span class="icon arrow-left" />
-                    <span>Stamhoofd website</span>
-                </a>
-                <h1>Log in bij jouw vereniging</h1>
-                <form class="input-icon-container icon search gray" @submit.prevent>
-                    <input ref="input" v-model="query" class="input" placeholder="Zoek op postcode of naam" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
-                </form>
-                <p v-if="!loading && filteredResults.length == 0 && !query">
-                    <template v-if="isNative">
-                        Zoek en selecteer de vereniging waar je wilt inloggen of maak een vereniging aan via de website.
-                    </template>
-                    <template v-else>
-                        Zoek en selecteer de vereniging waar je wilt inloggen of gebruik de knop bovenaan om een nieuwe vereniging aan te sluiten.
-                    </template>
-                </p>
-
-                <Spinner v-if="loading" class="gray center" />
-                <template v-else>
-                    <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" type="button" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
-                        <OrganizationAvatar :organization="organization" />
-                        <div>
-                            <h1>{{ organization.name }}</h1>
-                            <p>{{ organization.address.cityString($country) }}</p>
-                            <Spinner v-if="loadingSession === organization.id" class="floating" />
-                            <span v-else-if="isSignedInFor(organization.id)" class="icon success-line primary floating" />
-                            <span v-else class="icon arrow-right-small gray floating" />
-                        </div>
-                    </button>
+        <div class="st-view background transparent">
+            <STNavigationBar v-if="!isNative" :large="true" class="transparent">
+                <template slot="left">
+                    <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener" class="logo-container">
+                        <Logo class="responsive" />
+                        <span class="logo-text horizontal hide-medium">Beheerders</span>
+                    </a>
                 </template>
 
-                <p v-if="!loading && filteredResults.length == 0 && query" class="info-box">
-                    Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.
-                </p>
+                <template slot="right">
+                    <a v-if="!isNative" class="button text only-icon-smartphone" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener">
+                        <span class="icon external" />
+                        <span>Terug naar website</span>
+                    </a>
 
-                <button class="button text full" type="button" @click="help">
-                    <span class="icon help" />
-                    <span>Mijn vereniging staat er niet tussen</span>
-                </button>
+                    <a class="button primary" href="/aansluiten" @click.prevent="gotoSignup">
+                        {{ $t("dashboard.join") }}
+                    </a>
+                </template>
+            </STNavigationBar>
+            <STNavigationBar v-else title="Kies jouw vereniging" />
+            <main class="limit-width">
+                <div class="organization-selection-view" :class="{native: isNative}">
+                    <h1>
+                        Beheer jouw vereniging
+                    </h1>
+                    <p class="style-description-block style-description-large">
+                        Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging als is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
+                    </p>
 
-                <a v-if="!isNative" href="/aansluiten" class="button text full" @click.prevent="gotoSignup">
-                    <span class="icon add" />
-                    <span>Nieuwe vereniging aansluiten</span>
-                </a>
-            </div>
-        </main>
+                    <form class="input-icon-container icon search gray" @submit.prevent>
+                        <input ref="input" v-model="query" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
+                    </form>
+
+                    <Spinner v-if="loading" class="gray center" />
+                    <template v-else>
+                        <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" type="button" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
+                            <OrganizationAvatar :organization="organization" />
+                            <div>
+                                <h1>{{ organization.name }}</h1>
+                                <p>{{ organization.address.anonymousString($country) }}</p>
+                                <Spinner v-if="loadingSession === organization.id" class="floating" />
+                                <span v-else-if="isSignedInFor(organization.id)" class="icon success primary floating" />
+                                <span v-else class="icon arrow-right-small gray floating" />
+                            </div>
+                        </button>
+                    </template>
+
+                    <p v-if="!loading && filteredResults.length == 0 && query" class="info-box">
+                        Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
+                    </p>
+
+                    <footer>
+                        <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="gotoSignup">
+                            <span class="icon add" />
+                            <span>Mijn vereniging aansluiten</span>
+                        </a>
+
+                        <button class="button text full" type="button" @click="help">
+                            <span class="icon help" />
+                            <span>Mijn vereniging staat er niet tussen</span>
+                        </button>
+                    </footer>
+                </div>
+            </main>
+        </div>
     </div>
 </template>
 
@@ -69,7 +75,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STNavigationBar, Toast } from '@stamhoofd/components';
+import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STGradientBackground,STNavigationBar, Toast } from '@stamhoofd/components';
 import { AppManager, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
@@ -104,7 +110,8 @@ const throttle = (func, limit) => {
         Spinner,
         STNavigationBar,
         Logo,
-        OrganizationAvatar
+        OrganizationAvatar,
+        STGradientBackground
     },
     metaInfo() {
         return {
@@ -329,7 +336,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 @use "~@stamhoofd/scss/base/text-styles.scss" as *;
 
 .organization-selection-view {
-    max-width: 500px;
+    max-width: 600px;
     margin: 0 auto;
     width: 100%;
 
@@ -342,7 +349,8 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     }
 
     > h1 {
-        @extend .style-title-1;
+        @extend .style-title-huge;
+        @extend .style-text-gradient;
         padding-bottom: 10px;
     }
 
@@ -357,6 +365,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     > .spinner-container {
         padding: 10px 0;
+    }
+
+    > footer {
+        padding-top: 15px;
     }
 
     > .search-result {
@@ -378,7 +390,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         display: flex;
         flex-basis: row;
         align-items: center;
-        --block-width: 50px;
+        --block-width: 40px;
 
         > figure {
             flex-shrink: 0;

@@ -1,7 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
 
+import { Group } from './Group';
 import { Organization } from './Organization';
+import { WebshopPreview } from './webshops/Webshop';
 
 
 export enum PermissionLevel {
@@ -41,6 +44,12 @@ export class PermissionRole extends AutoEncoder {
 
 export class PermissionRoleDetailed extends PermissionRole {
     /**
+     * Allow to read members and member details
+     */
+    @field({ decoder: new EnumDecoder(PermissionLevel), version: 201 })
+    level: PermissionLevel = PermissionLevel.None
+
+    /**
      * Access to open transfers
      */
     @field({ decoder: BooleanDecoder })
@@ -57,6 +66,63 @@ export class PermissionRoleDetailed extends PermissionRole {
      */
     @field({ decoder: BooleanDecoder })
     createWebshops = false
+
+    getDescription(webshops: WebshopPreview[], groups: Group[]) {
+        const stack: string[] = []
+        if (this.level === PermissionLevel.Read) {
+            stack.push("alles lezen")
+        }
+        if (this.level === PermissionLevel.Write) {
+            stack.push("alles bewerken")
+        }
+        if (this.level === PermissionLevel.Full) {
+            stack.push("alles")
+        }
+
+        if (this.financeDirector) {
+            stack.push("volledige boekhouding")
+        } else if (this.managePayments) {
+            stack.push("overschrijvingen")
+        }
+
+        if (this.createWebshops) {
+            stack.push("webshops maken")
+        }
+
+        let webshopCount = 0
+        for (const webshop of webshops) {
+            if (webshop.privateMeta.permissions.roleHasAccess(this)) {
+                webshopCount++
+                continue;
+            }
+            if (webshop.privateMeta.scanPermissions.roleHasAccess(this)) {
+                webshopCount++
+                continue;
+            }
+        }
+
+        if (webshopCount > 0) {
+            stack.push(webshopCount+" webshop"+(webshopCount > 1 ? "s" : ""))
+        }
+
+        let groupCount = 0
+        for (const group of groups) {
+            if (group.privateSettings?.permissions.roleHasAccess(this)) {
+                groupCount++
+                continue;
+            }
+        }
+
+        if (groupCount > 0) {
+            stack.push(groupCount+" groep"+(groupCount > 1 ? "en" : ""))
+        }
+
+        if (stack.length === 0) {
+            return "geen toegang"
+        }
+
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' en '))
+    }
 }
 
 /**
@@ -75,8 +141,8 @@ export class PermissionsByRole extends AutoEncoder {
     /**
      * Whetever a given user has access to the members in this group. 
      */
-    getPermissionLevel(permissions: Permissions): PermissionLevel {
-        if (permissions.hasFullAccess()) {
+    getPermissionLevel(permissions: Permissions, allRoles: PermissionRoleDetailed[]): PermissionLevel {
+        if (permissions.hasFullAccess(allRoles)) {
             return PermissionLevel.Full
         }
 
@@ -86,7 +152,7 @@ export class PermissionsByRole extends AutoEncoder {
             }
         }
 
-        if (permissions.hasWriteAccess()) {
+        if (permissions.hasWriteAccess(allRoles)) {
             return PermissionLevel.Write
         }
 
@@ -96,7 +162,7 @@ export class PermissionsByRole extends AutoEncoder {
             }
         }
 
-        if (permissions.hasReadAccess()) {
+        if (permissions.hasReadAccess(allRoles)) {
             return PermissionLevel.Read
         }
 
@@ -109,8 +175,55 @@ export class PermissionsByRole extends AutoEncoder {
         return PermissionLevel.None
     }
 
-    hasAccess(permissions: Permissions, level: PermissionLevel): boolean {
-        return getPermissionLevelNumber(this.getPermissionLevel(permissions)) >= getPermissionLevelNumber(level)
+     /**
+     * Whetever a given user has access to the members in this group. 
+     */
+    getRolePermissionLevel(role: PermissionRole): PermissionLevel {
+        for (const r of this.full) {
+            if (r.id === role.id) {
+                return PermissionLevel.Full
+            }
+        }
+
+        for (const r of this.write) {
+            if (r.id === role.id) {
+                return PermissionLevel.Write
+            }
+        }
+        for (const r of this.read) {
+            if (r.id === role.id) {
+                return PermissionLevel.Read
+            }
+        }
+
+        return PermissionLevel.None
+    }
+
+    userHasAccess(user: {permissions?: Permissions|null, organization: {privateMeta: {roles: PermissionRoleDetailed[]}}}, level: PermissionLevel): boolean {
+        return this.hasAccess(user.permissions, user.organization.privateMeta.roles, level)
+    }
+
+    hasAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[], level: PermissionLevel): boolean {
+        if (!permissions) {
+            return false
+        }
+        return getPermissionLevelNumber(this.getPermissionLevel(permissions, allRoles)) >= getPermissionLevelNumber(level)
+    }
+
+    roleHasAccess(role: PermissionRole, level: PermissionLevel = PermissionLevel.Read): boolean {
+        return getPermissionLevelNumber(this.getRolePermissionLevel(role)) >= getPermissionLevelNumber(level)
+    }
+
+    hasFullAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[]): boolean {
+        return this.hasAccess(permissions, allRoles, PermissionLevel.Full)
+    }
+
+    hasWriteAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[]): boolean {
+        return this.hasAccess(permissions, allRoles, PermissionLevel.Write)
+    }
+
+    hasReadAccess(permissions: Permissions|undefined|null, allRoles: PermissionRoleDetailed[]): boolean {
+        return this.hasAccess(permissions, allRoles, PermissionLevel.Read)
     }
 }
 
@@ -132,7 +245,7 @@ export class Permissions extends AutoEncoder {
      * Also allows creating new groups
      */
     @field({ decoder: new EnumDecoder(PermissionLevel) })
-    level: PermissionLevel
+    level: PermissionLevel = PermissionLevel.None
 
     /**
      * @deprecated
@@ -152,27 +265,72 @@ export class Permissions extends AutoEncoder {
         return false
     }
 
-    hasReadAccess(): boolean {
-        return this.hasAccess(PermissionLevel.Read)
+    hasReadAccess(allRoles: PermissionRoleDetailed[]): boolean {
+        if (this.hasAccess(PermissionLevel.Read)) {
+            return true;
+        }
+
+        for (const r of this.roles) {
+            const f = allRoles.find(rr => r.id === rr.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(PermissionLevel.Read)) {
+                return true
+            }
+        }
+
+        return false;
     }
 
-    hasWriteAccess(): boolean {
-        return this.hasAccess(PermissionLevel.Write)
+    hasWriteAccess(allRoles: PermissionRoleDetailed[]): boolean {
+        if (this.hasAccess(PermissionLevel.Write)) {
+            return true;
+        }
+
+        for (const r of this.roles) {
+            const f = allRoles.find(rr => r.id === rr.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(PermissionLevel.Write)) {
+                return true
+            }
+        }
+
+        return false;
     }
 
-    hasFullAccess(): boolean {
-        return this.hasAccess(PermissionLevel.Full)
+    hasFullAccess(allRoles: PermissionRoleDetailed[]): boolean {
+        if (this.hasAccess(PermissionLevel.Full)) {
+            return true;
+        }
+
+        for (const r of this.roles) {
+            const f = allRoles.find(rr => r.id === rr.id)
+            if (!f) {
+                // Deleted role
+                continue
+            }
+            if (getPermissionLevelNumber(f.level) >= getPermissionLevelNumber(PermissionLevel.Full)) {
+                return true
+            }
+        }
+
+        return false;
     }
 
     /**
      * @param roles All available roles of the organizatino (to query)
      */
-    canCreateWebshops(roles: PermissionRoleDetailed[]): boolean {
-        if (this.hasFullAccess()) {
+    canCreateWebshops(allRoles: PermissionRoleDetailed[]): boolean {
+        if (this.hasFullAccess(allRoles)) {
             return true
         }
         for (const r of this.roles) {
-            const f = roles.find(rr => r.id === rr.id)
+            const f = allRoles.find(rr => r.id === rr.id)
             if (!f) {
                 // Deleted role
                 continue
@@ -188,12 +346,12 @@ export class Permissions extends AutoEncoder {
     /**
      * @param roles All available roles of the organizatino (to query)
      */
-    canManagePayments(roles: PermissionRoleDetailed[]): boolean {
-        if (this.hasFullAccess()) {
+    canManagePayments(allRoles: PermissionRoleDetailed[]): boolean {
+        if (this.hasFullAccess(allRoles)) {
             return true
         }
         for (const r of this.roles) {
-            const f = roles.find(rr => r.id === rr.id)
+            const f = allRoles.find(rr => r.id === rr.id)
             if (!f) {
                 // Deleted role
                 continue
@@ -211,12 +369,12 @@ export class Permissions extends AutoEncoder {
 
     /**
      */
-    hasFinanceAccess(roles: PermissionRoleDetailed[]): boolean {
-        if (this.hasFullAccess()) {
+    hasFinanceAccess(allRoles: PermissionRoleDetailed[]): boolean {
+        if (this.hasFullAccess(allRoles)) {
             return true
         }
         for (const r of this.roles) {
-            const f = roles.find(rr => r.id === rr.id)
+            const f = allRoles.find(rr => r.id === rr.id)
             if (!f) {
                 // Deleted role
                 continue

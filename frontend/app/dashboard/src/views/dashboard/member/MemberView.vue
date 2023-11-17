@@ -24,15 +24,12 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { LongPressDirective, STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
-import { STNavigationBar } from "@stamhoofd/components";
-import { BackButton,FemaleIcon, MaleIcon, SegmentedControl } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, FemaleIcon, LongPressDirective, MaleIcon, SegmentedControl, STNavigationBar, STNavigationTitle, TooltipDirective } from "@stamhoofd/components";
 import TableActionsContextMenu from "@stamhoofd/components/src/tables/TableActionsContextMenu.vue";
 import { UrlHelper } from "@stamhoofd/networking";
-import { Gender,getPermissionLevelNumber,Group,MemberWithRegistrations, PermissionLevel } from '@stamhoofd/structures';
-import { Component, Mixins,Prop } from "vue-property-decorator";
+import { Gender, Group, MemberWithRegistrations, PermissionLevel } from '@stamhoofd/structures';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { FamilyManager } from '../../../classes/FamilyManager';
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -57,19 +54,19 @@ import MemberViewPayments from "./MemberViewPayments.vue";
 })
 export default class MemberView extends Mixins(NavigationMixin) {
     @Prop()
-    member!: MemberWithRegistrations;
+        member!: MemberWithRegistrations;
 
     @Prop({ default: null })
-    initialTab!: number | null
+        initialTab!: number | null
 
     @Prop({ default: null })
-    group: Group | null;
+        group: Group | null;
 
     @Prop({ default: 0 })
-    cycleOffset!: number
+        cycleOffset!: number
 
     @Prop({ default: false })
-    waitingList!: boolean
+        waitingList!: boolean
 
     tabs = [MemberViewDetails, MemberViewPayments];
     tabLabels = ["Gegevens", "Rekening"];
@@ -78,10 +75,10 @@ export default class MemberView extends Mixins(NavigationMixin) {
     familyManager = new FamilyManager([this.member]);
 
     @Prop({ default: null })
-    getNextMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
+        getNextMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
 
     @Prop({ default: null })
-    getPreviousMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
+        getPreviousMember!: (MemberWithRegistrations) => MemberWithRegistrations | null;
 
     mounted() {
         UrlHelper.addSearchParam("member", this.member.id);
@@ -199,13 +196,13 @@ export default class MemberView extends Mixins(NavigationMixin) {
             return false
         }
 
-        if (OrganizationManager.user.permissions.hasFullAccess()) {
+        if (OrganizationManager.user.permissions.hasFullAccess(OrganizationManager.organization.privateMeta?.roles ?? [])) {
             // Can edit members without groups
             return true
         }
 
         for (const group of this.member.groups) {
-            if(group.privateSettings && group.privateSettings.permissions.hasAccess(OrganizationManager.user.permissions, PermissionLevel.Write)) {
+            if(group.privateSettings && group.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization)) {
                 return true
             }
         }

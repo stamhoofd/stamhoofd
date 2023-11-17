@@ -29,7 +29,7 @@
   },
   "backend": {},
   "dashboard": {
-    "join": "Nieuwe vereniging",
+    "join": "Aansluiten",
     "settings": {
       "billing": {
         "unincorporatedAssociationDescription": "Geen rechtspersoonlijkheid"

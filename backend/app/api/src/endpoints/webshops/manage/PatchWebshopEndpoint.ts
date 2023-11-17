@@ -54,7 +54,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                 })
             }
 
-            if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions!) !== PermissionLevel.Full) {
+            if (!webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "permission_denied",
                     message: "You do not have permissions for this endpoint",
@@ -193,7 +193,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             // Verify if we still have full access
-            if (webshop.privateMeta.permissions.getPermissionLevel(user.permissions!) !== PermissionLevel.Full) {
+            if (!webshop.privateMeta.permissions.userHasAccess(user, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: "missing_permissions",
                     message: "You cannot restrict your own permissions",

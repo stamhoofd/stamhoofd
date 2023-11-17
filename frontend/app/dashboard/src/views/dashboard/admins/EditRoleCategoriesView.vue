@@ -10,7 +10,7 @@
             <STErrorsDefault :error-box="errorBox" />
                 
             <STList>
-                <CategoryPermissionRow v-for="category in categories" :key="category.id" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
+                <GroupCategoryPermissionRow v-for="category in categories" :key="category.id" type="category" :role="patchedRole" :organization="patchedOrganization" :category="category" @patch="addPatch" />
             </STList>
         </main>
 
@@ -37,7 +37,7 @@ import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner,
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
-import CategoryPermissionRow from './CategoryPermissionRow.vue';
+import GroupCategoryPermissionRow from './GroupCategoryPermissionRow.vue';
 
 @Component({
     components: {
@@ -51,7 +51,7 @@ import CategoryPermissionRow from './CategoryPermissionRow.vue';
         STInputBox,
         STErrorsDefault,
         LoadingButton,
-        CategoryPermissionRow
+        GroupCategoryPermissionRow
     }
 })
 export default class EditRoleCategoriesView extends Mixins(NavigationMixin) {
@@ -60,10 +60,10 @@ export default class EditRoleCategoriesView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-    role: PermissionRoleDetailed
+        role: PermissionRoleDetailed
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
@@ -71,7 +71,7 @@ export default class EditRoleCategoriesView extends Mixins(NavigationMixin) {
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
     get patchedOrganization() {
         return this.organization.patch(this.patchOrganization)

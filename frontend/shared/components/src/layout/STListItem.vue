@@ -240,7 +240,7 @@ a.st-list-item {
         }
     }
 
-    &.selectable:not([draggable="true"]) {
+    &.selectable:not(.is-dragging) {
         touch-action: manipulation;
         user-select: none;
         transition: background-color 0.2s 0.1s;
@@ -265,6 +265,23 @@ a.st-list-item {
                 }
             }
         }
+    }
+
+    &.sortable-chosen {
+        transition: none;
+        background: $color-background-shade;
+        background: var(--color-current-background-shade, $color-background-shade);
+    }
+
+    &.sortable-chosen.is-dragging {
+        touch-action: manipulation;
+        user-select: none;
+        transition: background-color 0.2s 0.1s;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        cursor: pointer;
+
+        transition: none;
+        background: none;
     }
 }
 </style>

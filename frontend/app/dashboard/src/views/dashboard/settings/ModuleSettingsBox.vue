@@ -1,12 +1,27 @@
 <template>
     <div class="module-settings-box">
         <div class="module-box">
+            <label class="box" :class="{ selected: enableWebshopModule }">
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
+                <div>
+                    <h2 class="style-title-list">Webshops, tickets, geldinzameling en openbare inschrijvingen</h2>
+                    <p v-if="enableWebshopModule && !isWebshopsTrial && !loadingWebshopModule" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-else class="style-description-small">
+                        Het webshop systeem kan gebruikt worden voor gewone webshops, ticketverkopen, crowdfundings en inschrijvingen voor openbare evenementen.
+                    </p>
+                </div>
+                <div>
+                    <Spinner v-if="loadingModule == 'TrialWebshops'" />
+                    <Checkbox v-else v-model="enableWebshopModule" :disabled="enableWebshopModule && !isWebshopsTrial" />
+                </div>
+            </label>
+            
             <label v-if="!hasLegacy" class="box" :class="{ selected: enableMemberModule }">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/list.svg"></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg"></div>
                 <div>
                     <h2 class="style-title-list">Ledenadministratie en online inschrijvingen</h2>
                     <p v-if="enableMemberModule && !isMembersTrial && !loadingMembers" class="style-description">Dit zit in jouw pakket inbegrepen</p>
-                    <p v-else class="style-description">Probeer gratis 14 dagen uit</p>
+                    <p v-else class="style-description-small">Laat leden online inschrijven via een eigen ledenportaal, beheer alle leden, maak attesten aan...</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'TrialMembers'" />
@@ -15,28 +30,14 @@
             </label>
 
             <label v-else class="box" :class="{ selected: enableActivities }">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg"></div>
+                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg"></div>
                 <div>
-                    <h2 class="style-title-list">Activiteiten</h2>
-                    <p v-if="enableActivities && !isMembersTrial && !loadingMembers" class="style-description">Dit zit in jouw pakket inbegrepen</p>
-                    <p v-else class="style-description">Probeer het gratis 14 dagen uit</p>
+                    <h2 class="style-title-list">Ledenadministratie</h2>
+                    <p class="style-description-small">Laat leden inschrijven voor meerdere groepen (bv. voor activiteiten) en maak documenten/attesten aan.</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'TrialMembers'" />
                     <Checkbox v-else v-model="enableActivities" :disabled="enableActivities && !isMembersTrial" />
-                </div>
-            </label>
-
-            <label class="box" :class="{ selected: enableWebshopModule }">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
-                <div>
-                    <h2 class="style-title-list">Webshops &amp; tickets</h2>
-                    <p v-if="enableWebshopModule && !isWebshopsTrial && !loadingWebshopModule" class="style-description">Dit zit in jouw pakket inbegrepen</p>
-                    <p v-else class="style-description">Probeer het gratis uit met fictieve bestellingen, zolang je wilt</p>
-                </div>
-                <div>
-                    <Spinner v-if="loadingModule == 'TrialWebshops'" />
-                    <Checkbox v-else v-model="enableWebshopModule" :disabled="enableWebshopModule && !isWebshopsTrial" />
                 </div>
             </label>
         </div>
@@ -137,7 +138,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     }
 
     get enableActivities() {
-        if (this.organization.meta.modules.useActivities) {
+        if (this.organization.meta.packages.useActivities) {
             return true;
         }
         
@@ -276,13 +277,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
     .module-box {
         display: grid;
         gap: 10px;
-        grid-template-columns: 50% 50%;
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-
-        // auto-fill is causing a weird unfixable overflow bug, so hard fix it:
-        @media (max-width: 800px) {
-            grid-template-columns: 100%;
-        }
+        grid-template-columns: 1fr;
 
         .box {
             min-width: 0;

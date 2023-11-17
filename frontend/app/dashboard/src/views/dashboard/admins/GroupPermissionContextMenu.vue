@@ -1,10 +1,10 @@
 <template>
     <ContextMenuView v-bind="{ x, y, xPlacement, yPlacement }">
         <ContextMenuItemView @click="setPermission('read')">
-            Bekijken
+            Lezen
         </ContextMenuItemView>
         <ContextMenuItemView @click="setPermission('write')">
-            Bekijken en bewerken
+            Bewerken
         </ContextMenuItemView>
         <ContextMenuItemView @click="setPermission('full')">
             Volledige toegang
@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ContextMenuView, ContextMenuItemView, ContextMenuLine, Spinner } from "@stamhoofd/components";
+import { ContextMenuItemView, ContextMenuLine, ContextMenuView, Spinner } from "@stamhoofd/components";
 import { Component, Mixins,Prop } from "vue-property-decorator";
 
 @Component({
@@ -27,19 +27,19 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 })
 export default class GroupPermissionContextMenu extends Mixins(NavigationMixin) {    
     @Prop({ default: 0 })
-    x!: number;
+        x!: number;
 
     @Prop({ default: 0 })
-    y!: number;
+        y!: number;
 
     @Prop()
-    xPlacement?: string;
+        xPlacement?: string;
 
     @Prop()
-    yPlacement?: string;
+        yPlacement?: string;
 
     @Prop()
-    callback!: (status: "read" | "write" | "full") => void;
+        callback!: (status: "read" | "write" | "full") => void;
 
     setPermission(status) {
         this.callback(status)

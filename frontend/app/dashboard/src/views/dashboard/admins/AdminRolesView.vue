@@ -1,40 +1,50 @@
 <template>
     <LoadingView v-if="loading" />
-    <div v-else class="st-view background">
-        <STNavigationBar title="Functies" :dismiss="canDismiss" :pop="canPop">
-            <button slot="right" class="button icon add" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
-        </STNavigationBar>
-
+    <SaveView v-else class="st-view background" title="Functies" :loading="saving" :disabled="!hasChanges" @save="save">
+        <button slot="buttons" class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
     
-        <main>
-            <h1>Beheerder functies</h1>
-            <p>Voeg hier beheerders toe en deel ze op in groepen. Een beheerder kan in meerdere groepen zitten. Je kan vervolgens de toegang tot zaken regelen per groep.</p>
+        <h1>Beheerder functies</h1>
+        <p>Maak functies aan om toegang te regelen tot bepaalde onderdelen. Daarna kan je één of meerdere functies toekennen aan een beheerder. In Stamhoofd kan je zo bijvoorbeeld alle beheerders met een bepaalde functie toegang geven tot een webshop, in plaats van individueel per beheerder. Als beheerders later van functie veranderen of de vereniging verlaten, hoef je enkel maar de functies van een beheerder te wijzigen.</p>
 
-            <STList>
-                <STListItem>
-                    <h2 class="style-title-list">
-                        Hoofdbeheerder
-                    </h2>
-                    <p class="style-description-small">
-                        Toegang tot alles
-                    </p>
+        <STErrorsDefault :error-box="errorBox" />
 
-                    <template slot="right">
-                        <span v-if="getAdmins(role).length > 1" class="style-tag">
-                            {{ getAdmins(role).length }}
-                        </span>
-                        <span v-else-if="getAdminsForRole(role).length == 1" class="style-tag">
-                            1
-                        </span>
-                        <span><span class="icon gray edit" /></span>
+        <STList>
+            <STListItem>
+                <template slot="left">
+                    <span class="icon layered">
+                        <span class="icon user-admin-layer-1" />
+                        <span class="icon user-admin-layer-2 yellow" />
+                    </span>
+                </template>
+
+                <h2 class="style-title-list">
+                    Hoofdbeheerder
+                </h2>
+                <p class="style-description-small">
+                    Toegang tot alles
+                </p>
+
+                <template slot="right">
+                    <span v-if="getAdmins().length > 1" class="style-tag">
+                        {{ getAdmins().length }}
+                    </span>
+                    <span v-else-if="getAdmins().length == 1" class="style-tag">
+                        1
+                    </span>
+                </template>
+            </STListItem>
+
+            <STList v-if="roles.length" v-model="draggableRoles" :draggable="true">
+                <STListItem v-for="role in roles" :key="role.id" :selectable="true" class="right-stack" @click="editRole(role)">
+                    <template slot="left">
+                        <span class="icon user" />
                     </template>
-                </STListItem>
-                <STListItem v-for="(role, index) in roles" :key="role.id" :selectable="true" class="right-stack" @click="editRole(admin)">
+
                     <h2 class="style-title-list">
                         {{ role.name }}
                     </h2>
                     <p class="style-description-small">
-                        Beschrijving (todo)
+                        {{ roleDescription(role) }}
                     </p>
 
                     <template slot="right">
@@ -45,24 +55,28 @@
                             1
                         </span>
                         <span v-else class="style-tag warn">
-                            -
+                            Ongebruikt
                         </span>
-                        <span><span class="icon gray edit" /></span>
+                    </template>
+
+                    <template slot="right">
+                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                        <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
-            </stlist>
-        </main>
-    </div>
-    </loadingview>
+            </STList>
+        </STList>
+    </SaveView>
 </template>
 
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, LoadingView, SaveView, STErrorsDefault, STList, STListItem, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed } from '@stamhoofd/structures';
+import { Organization, OrganizationPrivateMetaData, PermissionRole, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../classes/OrganizationManager';
@@ -70,18 +84,19 @@ import EditRoleView from "./EditRoleView.vue";
 
 @Component({
     components: {
-        Checkbox,
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
         LoadingView,
-        BackButton
+        SaveView,
+        STErrorsDefault
     }
 })
 export default class AdminRolesView extends Mixins(NavigationMixin) {
     SessionManager = SessionManager // needed to make session reactive
     loading = true
+    saving = false
+    errorBox: ErrorBox | null = null
+    patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
     mounted() {
         this.load(true).catch(e => {
@@ -90,6 +105,21 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
 
         UrlHelper.setUrl("/settings/admins/roles")
         document.title = "Stamhoofd - Beheerderfuncties"
+        
+        const parts = UrlHelper.shared.getParts()
+        if (parts.length === 4 && parts[0] == 'settings' && parts[1] == 'admins' && parts[2] == 'roles') {
+            const slug = parts[3];
+
+            if (slug === 'new') {
+                this.addRole()
+            } else {
+                const role = this.roles.find(r => Formatter.slug(r.name) === slug)
+                if (role) {
+                    this.editRole(role)
+                }
+            }
+        }
+        UrlHelper.shared.clear()
     }
 
     async load(force = false) {
@@ -97,44 +127,24 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
         this.loading = false
     }
 
+    addPatch(patch: AutoEncoderPatchType<Organization>) {
+        this.patchOrganization = this.patchOrganization.patch(patch)
+    }
+
     get admins() {
-        return this.organization.admins ?? []
+        return this.patchedOrganization.admins ?? []
     }
 
     get organization() {
         return OrganizationManager.organization
     }
 
+    get patchedOrganization() {
+        return this.organization.patch(this.patchOrganization)
+    }
+
     get roles() {
-        return this.organization.privateMeta?.roles ?? []
-    }
-
-    moveRoleUp(index: number, role: PermissionRoleDetailed) {
-        if (index == 0) {
-            return
-        }
-        const prev = this.roles[index - 2]?.id
-        const privateMeta = OrganizationPrivateMetaData.patch({})
-        privateMeta.roles.addMove(role.id, prev ?? null)
-        const patch = Organization.patch({
-            id: this.organization.id,
-            privateMeta
-        })
-        OrganizationManager.patch(patch).catch(e => Toast.fromError(e).show())
-    }
-
-    moveRoleDown(index: number, role: PermissionRoleDetailed) {
-        if (index >= this.roles.length - 1) {
-            return
-        }
-        const prev = this.roles[index + 1]?.id
-        const privateMeta = OrganizationPrivateMetaData.patch({})
-        privateMeta.roles.addMove(role.id, prev ?? null)
-        const patch = Organization.patch({
-            id: this.organization.id,
-            privateMeta
-        })
-        OrganizationManager.patch(patch).catch(e => Toast.fromError(e).show())
+        return this.patchedOrganization.privateMeta?.roles ?? []
     }
 
     getAdminsForRole(role: PermissionRole) {
@@ -143,7 +153,27 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
 
     getAdmins() {
         // We still do a check on ID because users might have a role that is deleted
-        return this.admins.filter(a => !!a.permissions?.hasFullAccess())
+        return this.admins.filter(a => !!a.permissions?.hasFullAccess(this.patchedOrganization.privateMeta?.roles ?? []))
+    }
+
+    get draggableRoles() {
+        return this.patchedOrganization.privateMeta?.roles ?? [];
+    }
+
+    set draggableRoles(roles) {
+        if (roles.length !== this.patchedOrganization.privateMeta?.roles?.length) {
+            return;
+        }
+
+        const patch = OrganizationPrivateMetaData.patch({})
+        for (const p of roles.slice().reverse()) {
+            patch.roles.addMove(p.id, null)
+        }
+        this.addPatch(Organization.patch({ privateMeta: patch }))
+    }
+
+    roleDescription(role: PermissionRoleDetailed) {
+        return role.getDescription(this.patchedOrganization.webshops, this.patchedOrganization.groups)
     }
 
     addRole() {
@@ -158,14 +188,11 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
         
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(EditRoleView, { 
+                isNew: true,
                 role,
-                organization: this.organization.patch(patch),
-                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
-                    const doSave = patch.patch(p)
-                    await OrganizationManager.patch(doSave)
-                    if (doSave.admins) {
-                        await this.load(true)
-                    }
+                organization: this.patchedOrganization.patch(patch),
+                saveHandler: (p: AutoEncoderPatchType<Organization>) => {
+                    this.addPatch(patch.patch(p))
                 }
             }),
         }).setDisplayStyle("popup"))
@@ -178,18 +205,53 @@ export default class AdminRolesView extends Mixins(NavigationMixin) {
         
         this.present(new ComponentWithProperties(NavigationController, { 
             root: new ComponentWithProperties(EditRoleView, { 
+                isNew: false,
                 role,
-                organization: this.organization,
-                saveHandler: async (p: AutoEncoderPatchType<Organization>) => {
-                    const doSave = patch.patch(p)
-                    await OrganizationManager.patch(doSave)
-                    if (doSave.admins) {
-                        await this.load(true)
-                    }
+                organization: this.patchedOrganization,
+                saveHandler: (p: AutoEncoderPatchType<Organization>) => {
+                    this.addPatch(patch.patch(p))
                 }
             }),
         }).setDisplayStyle("popup"))
     }
+
+    async save() {
+        if (this.saving) {
+            return;
+        }
+
+        this.saving = true
+
+        try {
+            this.patchOrganization.id = this.organization.id
+            const doSave = this.patchOrganization
+            await OrganizationManager.patch(this.patchOrganization)
+            this.patchOrganization = Organization.patch({ id: OrganizationManager.organization.id })
+
+            if (doSave.admins) {
+                await this.load(true)
+            }
+            new Toast('De wijzigingen zijn opgeslagen', "success green").show()
+            this.dismiss({ force: true })
+
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+
+        this.saving = false
+    }
+
+    get hasChanges() {
+        return patchContainsChanges(this.patchOrganization, OrganizationManager.organization, { version: Version })
+    }
+
+    async shouldNavigateAway() {
+        if (!this.hasChanges) {
+            return true;
+        }
+        return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
+    }
+
 }
 
 </script>
