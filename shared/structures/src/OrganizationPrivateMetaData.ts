@@ -196,6 +196,12 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
                 return []
             }
             return [PayconiqAccount.create({ apiKey: oldValue })]
+        },
+        downgrade: (newValue: PayconiqAccount[]) => {
+            if (newValue.length === 0) {
+                return null
+            }
+            return newValue[0].apiKey
         }
     })
     payconiqAccounts: PayconiqAccount[] = []
