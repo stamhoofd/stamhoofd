@@ -106,7 +106,7 @@
                     <span>Stripe Dashboard</span>
                 </button>
 
-                <button v-if="account.canDelete" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
+                <button v-if="account.canDelete || isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
                     <span class="icon trash" />
                     <span>Verwijder</span>
                 </button>
