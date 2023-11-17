@@ -1,6 +1,9 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
+        <p>
+            Lees zeker ook onze <a :href="'https://'+$t('shared.domains.marketing')+'/docs/webshop-link-wijzigen/'" target="_blank" class="inline-link">documentatie hierover</a> na.
+        </p>
 
         <p v-if="legacyUrl && webshop.domain === null" class="info-box">
             We hebben het formaat gewijzigd van webshop links. Maar jouw webshop is (en blijft) ook bereikbaar via {{ legacyUrl }}. In toekomstige communicaties gebruik je best de nieuwe link, maar pas de nieuwe link eerst aan naar wens.
@@ -111,7 +114,7 @@
 
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
-import { SimpleError } from "@simonbackx/simple-errors";
+import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { Dropdown, PrefixInput, SaveView, Spinner, STErrorsDefault, STInputBox, Toast, Tooltip } from "@stamhoofd/components";
@@ -475,6 +478,7 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
                     message: "Kies een andere link, deze is ongeldig of al in gebruik."
                 })
             }
+
             this.addPatch(PrivateWebshop.patch({ domainUri: null, domain: null }))
         } else {
             // Don't change the uri, because error handling could get weird if it is duplicate (the user won't notice it is changed)
@@ -482,6 +486,40 @@ export default class EditWebshopLinkView extends Mixins(EditWebshopMixin) {
 
             if (this.webshop.domainUri === null) {
                 this.addPatch(PrivateWebshop.patch({ domainUri: "" }))
+            }
+
+            /// Check if URL format is okay
+            try {
+                const url = new URL('https://' + this.webshop.getDomainUrl())
+
+                const hostname = url.hostname
+                const parts = hostname.split(".")
+
+                if (parts.length === 2) {
+                    throw new SimpleError({
+                        code: "",
+                        field: "customUrl",
+                        message: "Het is niet mogelijk om een hoofddomein te gebruiken voor een webshop. Lees de documentatie hierover na voor meer informatie."
+                    })
+                }
+                const subdomain = parts[0]
+
+                if (subdomain === 'inschrijven') {
+                    throw new SimpleError({
+                        code: "",
+                        field: "customUrl",
+                        message: "Het is momenteel niet mogelijk om 'inschrijven' te gebruiken als een subdomeinnaam voor jouw webshop. Deze is gereserveerd voor de ledenadministratie."
+                    })
+                }
+            } catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    throw e
+                }
+                throw new SimpleError({
+                    code: "",
+                    field: "customUrl",
+                    message: "Deze domeinnaam is ongeldig."
+                })
             }
         }
     }

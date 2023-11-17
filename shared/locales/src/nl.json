@@ -25,6 +25,11 @@
       "general": "hallo@stamhoofd.be",
       "complaints": "klachten@stamhoofd.be",
       "personal": "simon@stamhoofd.be"
+    },
+    "exampleData": {
+      "phone": "+32 470 12 34 56",
+      "email": "voorbeeld@gmail.com",
+      "name": "Jan Janssens"
     }
   },
   "backend": {},

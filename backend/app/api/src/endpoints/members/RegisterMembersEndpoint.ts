@@ -228,7 +228,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             const m = [...payRegistrations.map(r => r.registration.member.details), ...memberBalanceItems.map(i => members.find(m => m.id === i.memberId)?.details).filter(n => n !== undefined)]
-            payment.generateDescription(user.organization, Formatter.groupNamesByFamily(m as any))
+            payment.generateDescription(
+                user.organization, 
+                Formatter.groupNamesByFamily(m as any),
+                {
+                    name: Formatter.groupNamesByFamily(m as any),
+                    naam:  Formatter.groupNamesByFamily(m as any),
+                    email: user.email
+                }
+            )
         }
         payment.paidAt = null
 

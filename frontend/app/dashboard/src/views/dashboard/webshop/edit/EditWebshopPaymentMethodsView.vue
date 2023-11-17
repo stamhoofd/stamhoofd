@@ -7,13 +7,14 @@
 
         <EditPaymentMethodsBox :methods="paymentMethods" :organization="organization" :provider-config="providerConfig" @patch="patchPaymentMethods" @patch:providerConfig="patchProviderConfiguration($event)" />
 
-        <p v-if="isAnyTicketType" class="warning-box">
-            Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddelijk.
-        </p>
-
         <template v-if="enableTransfers">
             <hr>
             <h2>Overschrijvingen</h2>
+
+            <p v-if="isAnyTicketType" class="warning-box">
+                Bij overschrijvingen wordt er pas een ticket aangemaakt zodra je manueel de betaling als betaald hebt gemarkeerd in Stamhoofd. Bij online betalingen gaat dat automatisch en krijgt men de tickets onmiddellijk.
+            </p>
+
 
             <STInputBox title="Begunstigde" error-fields="transferSettings.creditor" :error-box="errorBox">
                 <input
@@ -34,8 +35,13 @@
                     </Radio>
                 </RadioGroup>
             </STInputBox>
+
             <p class="style-description-small">
                 {{ transferTypeDescription }}
+            </p>
+
+            <p v-if="transferType === 'Fixed'" class="style-description-small">
+                Gebruik automatische tekstvervangingen in de mededeling via <code v-copyable class="style-inline-code style-copyable" v-text="`{{naam}}`" />, <code v-copyable class="style-inline-code style-copyable" v-text="`{{email}}`" /> of <code v-copyable class="style-inline-code style-copyable" v-text="`{{nr}}`" />
             </p>
 
             <STInputBox v-if="transferType != 'Structured'" :title="transferType == 'Fixed' ? 'Mededeling' : 'Voorvoegsel'" error-fields="transferSettings.prefix" :error-box="errorBox">
@@ -115,7 +121,7 @@ export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMix
             { 
                 value: TransferDescriptionType.Fixed,
                 name: "Vaste mededeling",
-                description: "Altijd dezelfde mededeling voor alle bestellingen. Opgelet: dit kan niet gewijzigd worden als bestellers de QR-code scannen, voorzie dus zelf geen eigen vervangingen zoals 'bestelling + naam'!"
+                description: "Altijd dezelfde mededeling voor alle bestellingen. Opgelet: dit kan niet gewijzigd worden als bestellers de QR-code scannen, voorzie dus zelf geen eigen vervangingen zoals 'bestelling + naam', maar gebruik de beschikbare automatische vervangingen indien gewenst (bv. 'bestelling {{naam}}')!"
             }
         ]
     }
@@ -185,18 +191,16 @@ export default class EditWebshopPaymentMethodsView extends Mixins(EditWebshopMix
     }
 
     get transferExample() {
-        if (this.transferType == TransferDescriptionType.Structured) {
-            if (!this.isBelgium) {
-                return "4974 3024 6755 6964"
-            }
-            return "+++705/1929/77391+++"
-        }
+        const fakeReference = "152";
+        const settings = this.webshop.meta.transferSettings
 
-        if (this.transferType == TransferDescriptionType.Reference) {
-            return (this.prefix ? this.prefix+' ' : '') + "152"
-        }
-
-        return this.prefix
+        return settings.generateDescription(fakeReference, this.organization.address.country, {
+            nr: fakeReference,
+            email: this.$t('shared.exampleData.email').toString(),
+            phone: this.$t('shared.exampleData.phone').toString(),
+            name: this.$t('shared.exampleData.name').toString(),
+            naam: this.$t('shared.exampleData.name').toString(),
+        })
     }
 
     get enableTransfers() {
