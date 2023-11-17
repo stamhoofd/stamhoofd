@@ -79,6 +79,12 @@ export class Parent extends AutoEncoder {
         this.address?.cleanData()
     }
 
+    isEqual(other: Parent) {
+        this.cleanData();
+        other.cleanData();
+        return this.firstName === other.firstName && this.lastName === other.lastName && this.email === other.email && this.phone === other.phone && this.address?.toString() === other.address?.toString()
+    }
+
     merge(other: Parent) {
         if (other.firstName.length > 0) {
             this.firstName = other.firstName
