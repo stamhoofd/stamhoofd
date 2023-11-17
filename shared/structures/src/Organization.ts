@@ -120,6 +120,21 @@ export class Organization extends AutoEncoder {
         return false;
     }
 
+    isAcceptingExistingMembers(admin: boolean) {
+        const groups = this.getCategoryTree({admin}).getAllGroups()
+        
+        for (const group of groups) {
+            if (group.closed) {
+                continue;
+            }
+            if  (group.settings.availableMembers === 0 && !group.settings.waitingListIfFull) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * @deprecated
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.

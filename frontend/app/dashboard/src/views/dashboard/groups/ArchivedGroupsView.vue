@@ -37,12 +37,11 @@
 </template>
 
 <script lang="ts">
-import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, ContextMenu, ContextMenuItem, GroupAvatar, Spinner,STList, STListItem, STNavigationBar, Toast } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationMetaData } from "@stamhoofd/structures";
+import { GroupAvatar, Spinner,STList, STListItem, STNavigationBar, Toast } from "@stamhoofd/components";
+import { UrlHelper } from "@stamhoofd/networking";
+import { Group } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -109,67 +108,6 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
                 })
             ]
         })
-    }
-
-    async restoreGroup(event, group: Group) {
-        if (this.allCategories.length == 1) {
-            await this.restoreTo(group, this.allCategories[0])
-            return
-        }
-
-        const menu = new ContextMenu([
-            this.allCategories.map(cat => 
-                new ContextMenuItem({
-                    name: cat.settings.name,
-                    rightText: cat.groupIds.length+"",
-                    action: () => {
-                        this.restoreTo(group, cat).catch(console.error)
-                        return true
-                    }
-                })
-            )
-        ])
-        menu.show({ clickEvent: event }).catch(console.error)
-    }
-
-    async restoreTo(group: Group, cat: GroupCategoryTree) {
-        if (!(await CenteredMessage.confirm(`${group.settings.name} terugzetten naar ${cat.settings.name}?`, 'Ja, terugzetten'))) {
-            return
-        }
-
-        const metaPatch = OrganizationMetaData.patch({})
-        const catPatch = GroupCategory.patch({id: cat.id})
-
-        if (cat.groupIds.filter(id => id == group.id).length > 1) {
-            // Not fixable, we need to set the ids manually
-            const cleaned = cat.groupIds.filter(id => id != group.id)
-            cleaned.push(group.id)
-            catPatch.groupIds = cleaned as any
-        } else {
-            // We need to delete it to fix issues if it is still there
-            catPatch.groupIds.addDelete(group.id)
-            catPatch.groupIds.addPut(group.id)
-        }
-
-        metaPatch.categories.addPatch(catPatch)
-
-        const patch = Organization.patch({
-            id: this.organization.id,
-            meta: metaPatch
-        })
-
-        patch.groups.addPatch(Group.patch({
-            id: group.id,
-            deletedAt: null
-        }))
-
-        try {
-            await OrganizationManager.patch(patch)
-        } catch (e) {
-            Toast.fromError(e).show()
-        }
-
-        this.load().catch(console.error);
     }
 }
 </script>
