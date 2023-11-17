@@ -29,6 +29,10 @@
                 {{ cartItem.product.closesSoonText }}
             </p>
 
+            <p v-if="remainingReduced > 0" class="info-box">
+                Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
 
             <STList v-if="(cartItem.product.type == 'Ticket' || cartItem.product.type == 'Voucher') && cartItem.product.location" class="info">
@@ -82,16 +86,32 @@
                 <hr>
                 <h2>Aantal</h2>
 
-                <p v-if="remainingReduced > 0" class="info-box">
-                    Bestel je {{ cartItem.productPrice.discountAmount }} of meer stuks, dan betaal je maar {{ discountPrice | price }} per stuk!
-                </p>
-
                 <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
                 <p v-if="maximumRemainingStock !== null && cartItem.amount + 1 >= maximumRemainingStock" class="st-list-description">
                     <!-- eslint-disable-next-line vue/singleline-html-element-content-newline-->
                     Er {{ remainingStock == 1 ? 'is' : 'zijn' }} nog maar {{ remainingStockText }} beschikbaar<template v-if="count > 0">, waarvan er al {{ count }} in jouw winkelmandje {{ count == 1 ? 'zit' : 'zitten' }}</template>
                 </p>
             </template>
+
+            <div v-if="!cartEnabled && (administrationFee || (canSelectAmount && !webshop.isAllFree))" class="pricing-box max">
+                <STList>
+                    <STListItem v-if="administrationFee">
+                        Administratiekosten
+
+                        <template slot="right">
+                            {{ administrationFee | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Totaal
+
+                        <template slot="right">
+                            {{ (totalPrice + administrationFee) | price }}
+                        </template> 
+                    </STListItem>
+                </STList>
+            </div>
         </main>
 
         <STToolbar v-if="canOrder">
@@ -293,6 +313,14 @@ export default class CartItemView extends Mixins(NavigationMixin){
     get canSelectAmount() {
         return this.product.maxPerOrder !== 1 && this.product.allowMultiple
     }
+
+    get totalPrice() {
+        return this.cartItem.getPrice(this.cart)
+    }
+
+    get administrationFee() {
+        return this.webshop.meta.paymentConfiguration.administrationFee.calculate(this.cartItem.getPrice(this.cart))
+    }
 }
 </script>
 
@@ -345,6 +373,10 @@ export default class CartItemView extends Mixins(NavigationMixin){
 
     h1 + .info {
         padding-top: 0;
+    }
+
+    .pricing-box {
+        padding-top: 15px;
     }
 }
 

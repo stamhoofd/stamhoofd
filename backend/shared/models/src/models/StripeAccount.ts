@@ -1,5 +1,5 @@
 import { column, Model } from '@simonbackx/simple-database';
-import { Requirements, StripeBusinessProfile, StripeCompany, StripeMetaData } from '@stamhoofd/structures';
+import { Requirements, StripeBusinessProfile, StripeCompany, StripeMetaAccountSettings, StripeMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -62,6 +62,7 @@ export class StripeAccount extends Model {
             capabilities: account.capabilities,
             requirements: Requirements.create(account.requirements),
             future_requirements: Requirements.create(account.future_requirements),
+            settings: StripeMetaAccountSettings.create(account.settings),
             bank_account_last4: account.external_accounts?.data[0]?.last4 ?? this.meta.bank_account_last4 ?? "",
             bank_account_bank_name: account.external_accounts?.data[0]?.bank_name ?? this.meta.bank_account_bank_name ?? "",
         });

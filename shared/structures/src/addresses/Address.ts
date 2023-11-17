@@ -114,8 +114,16 @@ export class Address extends AutoEncoder {
                 human: "Vul de straat en huisnummer in"
             })
         }
+
+        if (addressLine1.includes(',')) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Empty address line 1",
+                human: "De straat bevat een komma. Verwijder die uit het adres en kijk na of het wel correct werd ingevuld."
+            })
+        }
         // Get position of last letter
-        const match = /^\s*([^0-9]+?)[\s,]*([0-9].*?)\s*$/.exec(addressLine1)
+        const match = /^\s*([^0-9\s][^0-9]+?)[\s,]+([0-9].*?)\s*$/.exec(addressLine1)
         if (!match) {
             throw new SimpleError({
                 code: "invalid_field",

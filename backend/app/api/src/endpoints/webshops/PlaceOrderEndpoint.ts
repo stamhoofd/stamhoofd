@@ -102,7 +102,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
                 // Determine the payment provider
                 // Throws if invalid
-                const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, webshop.privateMeta.providerConfiguration)
+                const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, webshop.privateMeta.paymentConfiguration)
                 payment.provider = provider
                 payment.stripeAccountId = stripeAccount?.id ?? null
 

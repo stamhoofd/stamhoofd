@@ -10,7 +10,8 @@ import { GroupPrices } from './GroupPrices';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration';
 import { OrganizationGenderType } from './OrganizationGenderType';
 import { OrganizationType } from './OrganizationType';
-import { downgradePaymentMethodArrayV150, PaymentMethod, PaymentMethodV150 } from './PaymentMethod';
+import { PaymentConfiguration } from './PaymentConfiguration';
+import { downgradePaymentMethodArrayV150, PaymentMethod } from './PaymentMethod';
 import { UmbrellaOrganization } from './UmbrellaOrganization';
 import { TransferSettings } from './webshops/TransferSettings';
 
@@ -217,28 +218,57 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(GroupPrices) })
     defaultPrices: GroupPrices[] = []
 
-    @field({ decoder: StringDecoder, version: 6, upgrade: () => "", field: "iban" })
+    /**
+     * @deprecated
+     * Use registrationPaymentConfiguration.transferSettings instead
+     */
     @field({ 
         decoder: TransferSettings, 
         version: 50, 
-        upgrade: (iban: string) => {
-            return TransferSettings.create({
-                iban: iban ? iban : null
-            })
-        },
-        downgrade: (transferSettings: TransferSettings) => {
-            return transferSettings.iban ?? ""
-        }
+        field: 'transferSettings',
+        optional: true // We no longer expect this from the backend, so it can get removed in a future version
     })
-    transferSettings = TransferSettings.create({})
+    oldTransferSettings = TransferSettings.create({})
 
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethodV150)), version: 26 })
+    /**
+     * @deprecated
+     * Use registrationPaymentConfiguration.paymentMethods instead
+     */
     @field({ 
         decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)), 
         version: 151, 
-        downgrade: downgradePaymentMethodArrayV150
+        field: 'paymentMethods',
+        optional: true // We no longer expect this from the backend, so it can get removed in a future version
     })
-    paymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
+    oldPaymentMethods: PaymentMethod[] = [PaymentMethod.Transfer]
+
+    @field({ 
+        decoder: PaymentConfiguration, 
+        version: 204,
+        upgrade: function () {
+            return PaymentConfiguration.create({
+                transferSettings: this.oldTransferSettings,
+                paymentMethods: this.oldPaymentMethods
+            })
+        },
+    })
+    registrationPaymentConfiguration = PaymentConfiguration.create({paymentMethods: [PaymentMethod.Transfer]})
+
+    /**
+     * @deprecated
+     * Use registrationPaymentConfiguration.paymentMethods instead
+     */
+    get paymentMethods(): PaymentMethod[] {
+        return this.registrationPaymentConfiguration.paymentMethods
+    }
+
+    /**
+     * @deprecated
+     * Use registrationPaymentConfiguration.paymentMethods instead
+     */
+    get transferSettings(): TransferSettings {
+        return this.registrationPaymentConfiguration.transferSettings
+    }
 
     @field({ 
         decoder: OrganizationRecordsConfiguration, 

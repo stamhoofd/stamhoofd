@@ -510,17 +510,3 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-
-.package-confirm-view {
-    .pricing-box {
-        max-width: 300px;
-        margin-left: auto;
-
-        .middle {
-            font-weight: 600;
-        }
-    }
-}
-</style>

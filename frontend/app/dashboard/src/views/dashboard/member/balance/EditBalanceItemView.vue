@@ -379,25 +379,3 @@ export default class EditBalanceItemView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.edit-balance-item-view {
-    .pricing-box {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: flex-end;
-
-        > * {
-            flex-basis: 350px;
-        }
-
-        .middle {
-            font-weight: 600;
-        }
-    }
-}
-</style>

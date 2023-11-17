@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
@@ -46,6 +46,9 @@ export class Checkout extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
     paymentMethod: PaymentMethod | null = null
 
+    @field({ decoder: IntegerDecoder, version: 207 })
+    administrationFee = 0;
+
     /**
      * Number of persons we did reserve in webshop time slots (and maybe future other maximums)
      */
@@ -86,7 +89,11 @@ export class Checkout extends AutoEncoder {
     }
 
     get totalPrice() {
-        return this.cart.price + this.deliveryPrice
+        return this.cart.price + this.deliveryPrice + this.administrationFee
+    }
+
+    get totalPriceWithoutAdministrationFee() {
+        return this.totalPrice - this.administrationFee
     }
 
     validateAnswers(webshop: Webshop) {
@@ -152,7 +159,6 @@ export class Checkout extends AutoEncoder {
     }
 
     validateCheckoutMethod(webshop: Webshop, organizationMeta: OrganizationMetaData) {
-        console.log('validating checkout method', webshop, this.checkoutMethod)
         if (this.checkoutMethod == null) {
             if (webshop.meta.checkoutMethods.length > 0) {
                 throw new SimpleError({
@@ -169,9 +175,7 @@ export class Checkout extends AutoEncoder {
         const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id == current.id)
 
         if (!checkoutMethod) {
-            console.log('didnt found')
             if (webshop.meta.checkoutMethods.length === 0) {
-                console.log('did set to null')
                 this.checkoutMethod = null
                 return
             }
@@ -182,7 +186,6 @@ export class Checkout extends AutoEncoder {
                 field: "checkoutMethod"
             })
         }
-        console.log('was valid??')
         this.checkoutMethod = checkoutMethod
     }
 
@@ -380,16 +383,31 @@ export class Checkout extends AutoEncoder {
         this.recordAnswers = answers
     }
 
-    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false, user: User | null = null) {
-        this.validateCart(webshop, organizationMeta, asAdmin)
-        this.validateCheckoutMethod(webshop, organizationMeta)
-        this.validateDeliveryAddress(webshop, organizationMeta)
-        this.validateTimeSlot(webshop, organizationMeta)
-        this.validateCustomer(webshop, organizationMeta, i18n, asAdmin, user)
-        this.validateRecordAnswers(webshop)
+    updateAdministrationFee(webshop: Webshop) {
+        this.administrationFee = webshop.meta.paymentConfiguration.administrationFee.calculate(this.totalPriceWithoutAdministrationFee)
+    }
 
-        if (this.totalPrice != 0 && !asAdmin) {
-            this.validatePayment(webshop, organizationMeta)
+    update(webshop: Webshop) {
+        this.updateAdministrationFee(webshop)
+    }
+
+    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false, user: User | null = null) {
+        try {
+            this.validateCart(webshop, organizationMeta, asAdmin)
+        
+            this.validateCheckoutMethod(webshop, organizationMeta)
+            this.validateDeliveryAddress(webshop, organizationMeta)
+            this.validateTimeSlot(webshop, organizationMeta)
+            this.validateCustomer(webshop, organizationMeta, i18n, asAdmin, user)
+            this.validateRecordAnswers(webshop)
+
+            if (this.totalPrice != 0 && !asAdmin) {
+                this.validatePayment(webshop, organizationMeta)
+            } else if (this.totalPrice === 0) {
+                this.paymentMethod = PaymentMethod.Unknown
+            }
+        } finally {
+            this.update(webshop)
         }
     }
 

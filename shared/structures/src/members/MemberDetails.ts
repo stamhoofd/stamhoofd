@@ -350,7 +350,7 @@ export class MemberDetails extends AutoEncoder {
                 this.parents[index].merge(parent)
                 return
             }
-            if (StringCompare.typoCount(_parent.name, parent.name) < 2) {
+            if (StringCompare.typoCount(_parent.name || _parent.email || _parent.id, parent.name || parent.email || parent.id) < 2) {
                 this.parents[index].merge(parent)
                 return
             }

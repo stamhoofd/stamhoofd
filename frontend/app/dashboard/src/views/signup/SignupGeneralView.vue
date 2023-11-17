@@ -19,7 +19,7 @@
             </button>
 
             <p v-if="registerCode" class="success-box icon gift">
-                Je ontvangt 25 euro tegoed van <strong>{{ registerCode.organization }}</strong> als je nu registreert
+                Je ontvangt 25 euro tegoed van {{ registerCode.organization }} als je nu registreert
             </p>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -152,10 +152,10 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
     acquisitionTypes: AcquisitionType[] = []
 
     @Prop({ default: false})
-    visitViaUrl!: boolean
+        visitViaUrl!: boolean
 
     @Prop({ default: null })
-    initialRegisterCode!: { code: string; organization: string } | null;
+        initialRegisterCode!: { code: string; organization: string } | null;
 
     registerCode = this.initialRegisterCode
     loading = false

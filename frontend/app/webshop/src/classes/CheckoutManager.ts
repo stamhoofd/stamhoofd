@@ -10,6 +10,7 @@ export class CheckoutManagerStatic {
     private _checkout: Checkout | null = null
 
     saveCart() {
+        console.log('saving cart', this.cart);
         this.saveCheckout()
     }
 
@@ -41,8 +42,11 @@ export class CheckoutManagerStatic {
 
     saveCheckout() {
         try {
+            console.log('saving checkout', this.checkout);
+            this.checkout.update(WebshopManager.webshop)
             const data = new VersionBox(this.checkout).encode({ version: Version })
             const json = JSON.stringify(data)
+            console.log('saving checkout', json);
             localStorage.setItem(WebshopManager.webshop.id+"-checkout", json)
         } catch (e) {
             console.error("Failed to save cart")

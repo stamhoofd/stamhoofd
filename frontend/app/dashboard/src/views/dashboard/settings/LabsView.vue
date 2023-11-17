@@ -11,29 +11,9 @@
         <hr>
         <h2>Extra betaalproviders</h2>
 
-        <!--<Checkbox v-model="forcePayconiq">
-            Payconiq (via API-key)
-        </Checkbox>-->
-
         <Checkbox v-if="!enableBuckaroo" key="mollie" v-model="forceMollie">
             Mollie
         </Checkbox>
-
-        <!--<hr>
-        <h2>Nieuwe functies</h2>
-
-        <STList>
-            <STListItem element-name="label" :selectable="true">
-                <Checkbox slot="left" :checked="getFeatureFlag('documents')" @change="setFeatureFlag('documents', !!$event)" />
-                <h3 class="style-title-list">
-                    Documenten
-                </h3>
-                <p class="style-description-small">
-                    Maak het fiscaal attest voor kinderopvang aan (publiceren voorlopig uitgeschakeld).
-                </p>
-            </STListItem>
-        </STList>
-        -->
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>
@@ -53,10 +33,6 @@
                 Stamhoofd betalen via opgeslagen betaalmethode
             </Checkbox>
 
-            <Checkbox :checked="getFeatureFlag('stripe-multiple')" @change="setFeatureFlag('stripe-multiple', !!$event)">
-                Meerdere Stripe accounts toestaan
-            </Checkbox>
-
             <Checkbox :checked="getFeatureFlag('sso')" @change="setFeatureFlag('sso', !!$event)">
                 Single-Sign-On
             </Checkbox>
@@ -64,41 +40,6 @@
             <Checkbox :checked="getFeatureFlag('webshop-auth')" @change="setFeatureFlag('webshop-auth', !!$event)">
                 Webshop auth
             </Checkbox>
-
-            <Checkbox v-model="enableBuckaroo">
-                Gebruik Buckaroo voor online betalingen
-            </Checkbox>
-
-            <div v-if="enableBuckaroo" class="split-inputs">
-                <div>
-                    <STInputBox title="Key" error-fields="buckarooSettings.key" :error-box="errorBox" class="max">
-                        <input
-                            v-model="buckarooKey"
-                            class="input"
-                            type="text"
-                            placeholder="Key"
-                        >
-                    </STInputBox>
-                    <p class="style-description-small">
-                        Buckaroo Plaza > Mijn Buckaroo > Websites > Algemeen > Key
-                    </p>
-                </div>
-                <div>
-                    <STInputBox title="Secret" error-fields="buckarooSettings.secret" :error-box="errorBox" class="max">
-                        <input
-                            v-model="buckarooSecret"
-                            class="input"
-                            type="text"
-                            placeholder="Secret"
-                        >
-                    </STInputBox>
-                    <p class="style-description-small">
-                        Buckaroo Plaza > Configuratie > Beveiliging > Secret Key
-                    </p>
-                </div>
-            </div>
-
-            <EditPaymentMethodsBox v-if="enableBuckaroo" :methods="buckarooPaymentMethods" :organization="organization" :show-prices="false" :choices="buckarooAvailableMethods" @patch="patchBuckarooPaymentMethods" />
         </div>
     </SaveView>
 </template>
@@ -114,7 +55,6 @@ import { BuckarooSettings, Country, Organization, OrganizationPatch, Organizatio
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
-import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
 @Component({
     components: {
@@ -123,8 +63,7 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         STErrorsDefault,
         STList,
         STListItem,
-        Checkbox,
-        EditPaymentMethodsBox,
+        Checkbox
     },
 })
 export default class LabsView extends Mixins(NavigationMixin) {
@@ -145,54 +84,8 @@ export default class LabsView extends Mixins(NavigationMixin) {
         return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
-    patchBuckarooPaymentMethods(patch: PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>) {
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                buckarooSettings: BuckarooSettings.patch({
-                    paymentMethods: patch
-                })
-            })
-        })
-    }
-
     get enableBuckaroo() {
         return (this.organization.privateMeta?.buckarooSettings ?? null) !== null
-    }
-
-    set enableBuckaroo(enable: boolean) {
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                buckarooSettings: enable ? BuckarooSettings.create({}) : null
-            })
-        })
-    }
-
-    get buckarooKey() {
-        return this.organization.privateMeta?.buckarooSettings?.key ?? ""
-    }
-
-    set buckarooKey(key: string) {
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                buckarooSettings: BuckarooSettings.patch({
-                    key
-                })
-            })
-        })
-    }
-
-    get buckarooSecret() {
-        return this.organization.privateMeta?.buckarooSettings?.secret ?? ""
-    }
-
-    set buckarooSecret(secret: string) {
-        this.organizationPatch = this.organizationPatch.patch({
-            privateMeta: OrganizationPrivateMetaData.patch({
-                buckarooSettings: BuckarooSettings.patch({
-                    secret
-                })
-            })
-        })
     }
 
     get forceMollie() {
@@ -233,14 +126,6 @@ export default class LabsView extends Mixins(NavigationMixin) {
                 featureFlags: featureFlags as any
             })
         })
-    }
-
-    get buckarooPaymentMethods() {
-        return this.organization.privateMeta?.buckarooSettings?.paymentMethods ?? []
-    }
-
-    get buckarooAvailableMethods() {
-        return [PaymentMethod.Bancontact, PaymentMethod.CreditCard, PaymentMethod.iDEAL, PaymentMethod.Payconiq]
     }
 
     get useTestPayments() {

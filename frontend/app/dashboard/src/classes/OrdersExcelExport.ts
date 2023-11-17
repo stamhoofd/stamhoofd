@@ -266,6 +266,7 @@ export class OrdersExcelExport {
                 "Datum",
                 "Tijdstip",
                 "Leveringskost",
+                "Administratiekosten",
                 "Totaal",
                 "Betaalmethode",
                 "Betaald",
@@ -321,6 +322,10 @@ export class OrdersExcelExport {
                 order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime)+" - "+Formatter.minutes(order.data.timeSlot.endTime) : "/",
                 {
                     value: order.data.deliveryPrice / 100,
+                    format: "€0.00"
+                },
+                {
+                    value: order.data.administrationFee / 100,
                     format: "€0.00"
                 },
                 {
