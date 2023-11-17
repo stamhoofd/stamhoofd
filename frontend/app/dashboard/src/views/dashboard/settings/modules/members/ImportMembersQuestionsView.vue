@@ -7,33 +7,11 @@
             <p>We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.</p>
 
             <p v-if="existingCount > 0" class="warning-box">
-                {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem. Zo ga je mogelijk informatie van deze leden overschrijven door de informatie uit jouw bestand. De betaalstatus en leeftijdsgroep van {{ existingCountRegistrations }} leden kan niet worden gewijzigd via deze import.
+                {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem. Zo ga je mogelijk informatie van deze leden overschrijven door de informatie uit jouw bestand.
             </p>
 
             <hr>
             <h2>Inschrijvingstatus</h2>
-
-            <STInputBox v-if="needsPaidStatus" title="Hebben deze leden al betaald?" error-fields="paid" :error-box="errorBox" class="max">
-                <RadioGroup>
-                    <Radio v-model="paid" :value="true">
-                        Al betaald
-                    </Radio>
-                    <Radio v-model="paid" :value="false">
-                        Niet betaald
-                    </Radio>
-                    <Radio v-model="paid" :value="null">
-                        Sommigen wel, anderen niet
-                    </Radio>
-                </RadioGroup>
-            </STInputBox>
-
-            <p v-if="needsPaidStatus && somePaid" class="warning-box">
-                Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
-            </p>
-
-            <p v-if="needsPaidStatus && paid === null" class="warning-box">
-                We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten. 
-            </p>
 
             <STInputBox v-if="hasWaitingLists" title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errorBox" class="max">
                 <RadioGroup>
@@ -45,21 +23,45 @@
                     </Radio>
                 </RadioGroup>
             </STInputBox>
+            
+            <template v-if="!waitingList">
+                <STInputBox v-if="needsPaidStatus" title="Hebben deze leden al betaald?" error-fields="paid" :error-box="errorBox" class="max">
+                    <RadioGroup>
+                        <Radio v-model="paid" :value="true">
+                            Al betaald
+                        </Radio>
+                        <Radio v-model="paid" :value="false">
+                            Niet betaald
+                        </Radio>
+                        <Radio v-model="paid" :value="null">
+                            Sommigen wel, anderen niet
+                        </Radio>
+                    </RadioGroup>
+                </STInputBox>
 
-            <STInputBox title="Moeten deze leden hun inschrijving voor de huidige periode nog bevestigen?" error-fields="needRegistration" :error-box="errorBox" class="max">
-                <RadioGroup>
-                    <Radio v-model="needRegistration" :value="false">
-                        Nee, ze zijn al ingeschreven
-                    </Radio>
-                    <Radio v-model="needRegistration" :value="true">
-                        Ja, ze moeten hun inschrijving nog verlengen
-                    </Radio>
-                </RadioGroup>
-            </STInputBox>
+                <p v-if="needsPaidStatus && somePaid" class="warning-box">
+                    Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
+                </p>
 
-            <p v-if="needRegistration === true" class="info-box">
-                De leden zullen worden ingeschreven in de vorige inschrijvingsperiode, en zullen dus niet meteen zichtbaar zijn in het normale overzicht (daarin staan enkel de bevestigde inschrijvingen). Om de leden na het importeren te bekijken ga je naar de inschrijvingsgroep > ... > Vorige inschrijvingsperiode.
-            </p>
+                <p v-if="needsPaidStatus && paid === null" class="warning-box">
+                    We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten. 
+                </p>
+
+                <STInputBox title="Moeten deze leden hun inschrijving voor de huidige periode nog bevestigen?" error-fields="needRegistration" :error-box="errorBox" class="max">
+                    <RadioGroup>
+                        <Radio v-model="needRegistration" :value="false">
+                            Nee, ze zijn al ingeschreven
+                        </Radio>
+                        <Radio v-model="needRegistration" :value="true">
+                            Ja, ze moeten hun inschrijving nog verlengen
+                        </Radio>
+                    </RadioGroup>
+                </STInputBox>
+
+                <p v-if="needRegistration === true" class="info-box">
+                    De leden zullen worden ingeschreven in de vorige inschrijvingsperiode, en zullen dus niet meteen zichtbaar zijn in het normale overzicht (daarin staan enkel de bevestigde inschrijvingen). Om de leden na het importeren te bekijken ga je naar de inschrijvingsgroep > ... > Vorige inschrijvingsperiode.
+                </p>
+            </template>
 
             <template v-if="needsGroup">
                 <hr>
@@ -91,17 +93,14 @@
                             {{ membersWithMultipleGroups.length }} {{ membersWithMultipleGroups.length == 1 ? 'lid past' : 'leden passen' }} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > leeftijdsgroepen)
                         </p>
 
-                        <STList>
+                        <STList v-model="draggableGroups" :draggable="true">
                             <STListItem v-for="(group, index) of multipleGroups" :key="group.id" class="right-description">
                                 {{ index + 1 }}. {{ group.settings.name }}
 
                                 <template slot="right">
-                                    <button class="button text" type="button" @click="openPriorityAssignedToGroup(group)">
-                                        <span class="icon external" />
-                                        <span>{{ getGroupAutoAssignCountForPriority(group) }} leden</span>
-                                    </button>
-                                    <button type="button" class="button icon arrow-up gray" @click.stop="moveUp(index)" />
-                                    <button type="button" class="button icon arrow-down gray" @click.stop="moveDown(index)" />
+                                    <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
+                                    <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
+                                    <span class="button icon drag gray" @click.stop @contextmenu.stop />
                                 </template>
                             </STListItem>
                         </STList>
@@ -194,7 +193,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
     @Prop({ required: true })
-    members: ImportingMember[]
+        members: ImportingMember[]
 
 
     paid: boolean | null = true
@@ -223,15 +222,11 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     }
 
     get needsGroup() {
-        return !!this.members.find(m => m.registration.group === null && (m.equal?.activeRegistrations?.length ?? 0) == 0)
+        return !!this.members.find(m => m.registration.group === null)
     }
 
     get existingCount() {
         return this.members.filter(m => m.equal !== null).length
-    }
-
-    get existingCountRegistrations() {
-        return this.members.filter(m => (m.equal?.activeRegistrations?.length ?? 0) > 0).length
     }
 
     get hasWaitingLists() {
@@ -243,10 +238,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
-                return false
-            }
-
             const groups = m.details.getMatchingGroups(this.organization.groups)
             return (groups.length === 1)
         })
@@ -257,9 +248,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
-                return false
-            }
 
             return true
         })
@@ -268,9 +256,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     get notAutomaticallyAssigned() {
         return this.members.filter(m => {
             if (m.registration.group !== null) {
-                return false
-            }
-            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -284,10 +269,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (m.registration.group !== null) {
                 return false
             }
-            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
-                return false
-            }
-
             const groups = m.details.getMatchingGroups(this.organization.groups)
             return (groups.length > 1)
         })
@@ -296,9 +277,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     get membersWithoutMatchingGroups() {
         return this.members.filter(m => {
             if (m.registration.group !== null) {
-                return false
-            }
-            if ((m.equal?.activeRegistrations?.length ?? 0) > 0) {
                 return false
             }
 
@@ -316,10 +294,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
             if (member.registration.group !== null) {
                 continue
             }
-            if ((member.equal?.activeRegistrations?.length ?? 0) > 0) {
-                continue
-            }
-
             const g = member.details.getMatchingGroups(this.organization.groups)
             if (g.length > 1) {
                 for (const gg of g) {
@@ -336,11 +310,6 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
     autoAssignMembers(members: ImportingMember[]) {
         for (const member of members) {
             if (member.registration.group) {
-                member.registration.autoAssignedGroup = null
-                continue
-            }
-
-            if ((member.equal?.activeRegistrations?.length ?? 0) > 0) {
                 member.registration.autoAssignedGroup = null
                 continue
             }
@@ -434,6 +403,18 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         }).setDisplayStyle("popup"))
     }
 
+    get draggableGroups() {
+        return this.multipleGroups;
+    }
+
+    set draggableGroups(groups) {
+        if (groups.length != this.multipleGroups.length) {
+            return;
+        }
+
+        this.multipleGroups = groups;
+    }
+
     moveUp(index: number) {
         if (index === 0) {
             return
@@ -486,10 +467,10 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
         return Registration.create({
             groupId: group.id,
-            cycle: group.cycle + (this.needRegistration ? -1 : 0),
+            cycle: group.cycle + (this.needRegistration && !this.waitingList ? -1 : 0),
             waitingList: this.waitingList,
-            price,
-            pricePaid: paidPrice,
+            price: this.waitingList ? undefined : price,
+            pricePaid: this.waitingList ? undefined : paidPrice,
             registeredAt: this.waitingList ? null : (member.registration.date ?? new Date()),
             createdAt: member.registration.date ?? new Date(),
         })
@@ -522,13 +503,37 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                     member.equal.details!.merge(member.details)
                     await family.patchAllMembersWith(member.equal)
 
-                    if (member.equal.activeRegistrations.length === 0) {
-                        // Register
-                        const patchRegistrations: PatchableArrayAutoEncoder<Registration> = new PatchableArray()
-                        const registration = this.buildRegistration(member)
+                    const patchRegistrations: PatchableArrayAutoEncoder<Registration> = new PatchableArray()
+                    const registration = this.buildRegistration(member)
+
+                    // Check if we have these registrations already
+                    const existing = member.equal.filterRegistrations({groups: this.organization.groups, cycle: registration.cycle})
+
+                    if (existing.length === 0) {
+                        // Okay to add: no duplicate
                         patchRegistrations.addPut(registration)
                         await family.patchMemberRegistrations(member.equal, patchRegistrations)
+                    } else if (!registration.waitingList) {
+                        // Try to move members from the waiting list to the normal list
+                        // Other registrations will be left untouched
+                        const existing2 = member.equal.filterRegistrations({groups: this.organization.groups, cycle: registration.cycle, waitingList: false})
+                        if (!existing2.length) {
+                            // Members are currently on the waiting list
+                            // Delete this and add the new one
+                            patchRegistrations.addDelete(existing[0]!.id)
+                            patchRegistrations.addPut(registration)
+                            await family.patchMemberRegistrations(member.equal, patchRegistrations)
+                        }
                     }
+
+                    /*for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: false})) {
+                        const group = member.allGroups.find(g => g.id === registration.groupId)
+                        patchMember.registrations.addPatch(Registration.patch({
+                            id: registration.id,
+                            waitingList: true,
+                            cycle: group?.cycle ?? undefined
+                        }))*/
+
                 } else {
                     await family.addMember(member.details, [
                         this.buildRegistration(member)
