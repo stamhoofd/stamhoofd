@@ -155,11 +155,7 @@ export class StripeHelper {
         } else if (payment.method === PaymentMethod.Bancontact) {
             fee = calculateFee(24, 20); // € 0,24 + 0,2%
         } else {
-            if (new Date() < new Date(2023, 10, 1)) {
-                fee = calculateFee(15, 100); // € 0,15 + 1%
-            } else {
-                fee = calculateFee(25, 150); // € 0,25 + 1%
-            }
+            fee = calculateFee(25, 150); // € 0,25 + 1,5%
         }
 
         payment.transferFee = fee;
