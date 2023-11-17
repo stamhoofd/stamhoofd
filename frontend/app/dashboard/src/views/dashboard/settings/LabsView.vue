@@ -11,9 +11,9 @@
         <hr>
         <h2>Extra betaalproviders</h2>
 
-        <Checkbox v-model="forcePayconiq">
+        <!--<Checkbox v-model="forcePayconiq">
             Payconiq (via API-key)
-        </Checkbox>
+        </Checkbox>-->
 
         <Checkbox v-if="!enableBuckaroo" key="mollie" v-model="forceMollie">
             Mollie

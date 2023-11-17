@@ -232,11 +232,12 @@ export default class EditPaymentMethodsBox extends Vue {
     }
 
     getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined {
-        if (this.stripeAccountObject) {
-            if (this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject.meta) === PaymentProvider.Stripe)  {
-                return;
-            }
-            return PaymentMethodHelper.getName(paymentMethod)+" is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld."
+        if (paymentMethod === PaymentMethod.Unknown || paymentMethod === PaymentMethod.Transfer || paymentMethod === PaymentMethod.PointOfSale) {
+            return
+        }
+
+        if (this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta))  {
+            return;
         }
 
         if (this.organization.privateMeta?.buckarooSettings?.paymentMethods.includes(paymentMethod)) {
@@ -246,7 +247,7 @@ export default class EditPaymentMethodsBox extends Vue {
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: {
                 if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
-                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes), dat kan via Buckaroo of rechtstreeks via Payconiq. Daar vind je ook meer informatie."
+                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie."
                 }
                 break
             }
@@ -254,12 +255,14 @@ export default class EditPaymentMethodsBox extends Vue {
             case PaymentMethod.iDEAL:
             case PaymentMethod.CreditCard:
             case PaymentMethod.Bancontact: {
-                if (!this.organization.privateMeta?.mollieOnboarding || (!this.organization.privateMeta.mollieOnboarding.canReceivePayments && !this.organization.privateMeta.useTestPayments)) {
-                    return "Je kan "+PaymentMethodHelper.getName(paymentMethod)+" niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts."
+                if (this.stripeAccountObject) {
+                    return PaymentMethodHelper.getName(paymentMethod)+" is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld."
                 }
                 break
             }
         }
+
+        return "Je kan "+PaymentMethodHelper.getName(paymentMethod)+" niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts."
     }
 
 
