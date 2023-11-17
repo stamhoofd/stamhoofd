@@ -434,18 +434,19 @@ export class Session implements RequestMiddleware {
             console.log("Session update data")
         }
         try {
-            let fetched = 0
+            let fetchedUser = false
             if (force || !this.user) {
-                fetched++
+                fetchedUser = true
                 await this.fetchUser(shouldRetry)
             }
 
-            if (force || !this.organization || fetched == 1 || (this.user?.permissions && !this.organization.privateMeta)) { //  || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))
-                fetched++
+            let fetchedOrganization = false
+            if (force || !this.organization || (fetchedUser && this.user?.permissions) || (this.user?.permissions && !this.organization.privateMeta)) { //  || (this.user.permissions && !Keychain.hasItem(this.organization.publicKey))
+                fetchedOrganization = true
                 await this.fetchOrganization(shouldRetry)
             }
 
-            if (fetched < 2 && background) {
+            if ((!fetchedOrganization) && background) {
                 // Initiate a slow background update without retry
                 // = we don't need to block the UI for this ;)
                 this.updateData(true, false, false).catch(e => {
@@ -454,9 +455,7 @@ export class Session implements RequestMiddleware {
                 })
             }
         } catch (e) {
-            if (!Request.isNetworkError(e)) {
-                this.temporaryLogout()
-            }
+            console.error('Error while updating session data', e)
             throw e;
         }
     }

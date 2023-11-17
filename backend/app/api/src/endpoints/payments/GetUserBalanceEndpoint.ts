@@ -27,23 +27,41 @@ export class GetUserBalanceEndpoint extends Endpoint<Params, Query, Body, Respon
             return []
         }
         
-        const params: any[] = [BalanceItemStatus.Hidden];
+        const params: any[] = [];
         const where: string[] = [];
 
         if (memberIds.length) {
-            where.push(`memberId IN (?)`)
-            params.push(memberIds);
+            if (memberIds.length == 1) {
+                where.push(`memberId = ?`)
+                params.push(memberIds[0]);
+            } else {
+                where.push(`memberId IN (?)`)
+                params.push(memberIds);
+            }
         }
 
+        // Note here, we don't search for memberId IS NULL restriction in MySQL because it slows down the query too much (500ms)
+        // Better if we do it in code here
         if (userIds.length) {
-            where.push('(memberId is null AND userId IN (?))')
-            params.push(userIds);
+            if (userIds.length == 1) {
+                where.push('userId = ?')
+                params.push(userIds[0]);
+            } else {
+                where.push('userId IN (?)')
+                params.push(userIds);
+            }
         }
         
-        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE ${BalanceItem.table}.status != ? AND (${where.join(" OR ")})`;
-
+        const query = `SELECT ${BalanceItem.getDefaultSelect()} FROM ${BalanceItem.table} WHERE (${where.join(" OR ")}) AND ${BalanceItem.table}.status != ?`;
+        params.push(BalanceItemStatus.Hidden);
+        
         const [rows] = await Database.select(query, params);
         const balanceItems = BalanceItem.fromRows(rows, BalanceItem.table);
+
+        // Filter out items of other members
+        if (memberIds.length) {
+            return balanceItems.filter(b => !b.memberId || memberIds.includes(b.memberId))
+        }
         return balanceItems;
     }
 
