@@ -64,17 +64,12 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
-import { Group, GroupGenderType, GroupPrices, GroupPrivateSettings, GroupSettings, Image, Organization, PermissionLevel, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, WaitingListType } from '@stamhoofd/structures';
-import { StringCompare } from '@stamhoofd/utility';
+import { WaitingListType } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
-import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import GroupPermissionRow from "../../admins/GroupPermissionRow.vue";
 import EditGroupPriceBox from "../EditGroupPriceBox.vue";
-import SelectGroupsView from '../SelectGroupsView.vue';
 import EditGroupMixin from './EditGroupMixin';
 
 @Component({

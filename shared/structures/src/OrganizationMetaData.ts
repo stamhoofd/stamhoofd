@@ -28,6 +28,17 @@ export class OrganizationPackages extends AutoEncoder {
         }
         return true
     }
+
+    wasActive(type: STPackageType) {
+        const status = this.packages.get(type)
+        if (!status) {
+            return false
+        }
+        if (!status.wasActive) {
+            return false
+        }
+        return true
+    }
     
     get useMembers() {
         return this.isActive(STPackageType.Members) || this.isActive(STPackageType.LegacyMembers) || this.isActive(STPackageType.TrialMembers)
@@ -35,6 +46,10 @@ export class OrganizationPackages extends AutoEncoder {
 
     set useMembers(_: boolean) {
         console.warn("Deprected set on useMembers")
+    }
+
+    get canStartMembersTrial() {
+        return !this.useMembers && !this.wasActive(STPackageType.Members)
     }
 
     get isMembersTrial() {
@@ -47,6 +62,10 @@ export class OrganizationPackages extends AutoEncoder {
 
     get isWebshopsTrial() {
         return !this.isActive(STPackageType.Webshops) && !this.isActive(STPackageType.SingleWebshop) && this.isActive(STPackageType.TrialWebshops)
+    }
+
+    get canStartWebshopsTrial() {
+        return !this.useWebshops && !this.wasActive(STPackageType.Webshops) && !this.wasActive(STPackageType.SingleWebshop)
     }
 
     get useWebshops() {

@@ -63,9 +63,6 @@
         </main>
 
         <STToolbar>
-            <template #left>
-                Het aanmaken van de vereniging kan een tiental seconden duren afhankelijk van de rekenkracht van jouw toestel.
-            </template>
             <template #right>
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click.prevent="goNext">
@@ -100,10 +97,10 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
     @Prop({required: true})
-    organization: Organization
+        organization: Organization
 
     @Prop({required: true})
-    registerCode: { code: string; organization: string } | null;
+        registerCode: { code: string; organization: string } | null;
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
