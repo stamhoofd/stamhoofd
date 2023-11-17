@@ -122,6 +122,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: return this.hasNonPayconiq ? 'Payconiq' : "Payconiq, KBC mobile of ING-app (snelst)"
             case PaymentMethod.Transfer: return "Via overschrijving"
+            case PaymentMethod.DirectDebit: return "Opgeslagen betaalkaart"
         }
         return PaymentMethodHelper.getNameCapitalized(paymentMethod, this.context)
     }
@@ -133,7 +134,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? "Meest gebruikte betaalmethode." : ""
             case PaymentMethod.iDEAL: return this.organization.address.country === Country.Netherlands ? "Meest gebruikte betaalmethode." : ""
             case PaymentMethod.Unknown: return ""
-            case PaymentMethod.DirectDebit: return ""
+            case PaymentMethod.DirectDebit: return "Indien beschikbaar (kan 3 werkdagen duren)"
             case PaymentMethod.CreditCard: return ""
             case PaymentMethod.PointOfSale: return ""
         }
