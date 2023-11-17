@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.stamhoofd.stamhoofd">
+    >
 
     <application
         android:allowBackup="true"
@@ -15,7 +15,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:name="com.stamhoofd.stamhoofd.MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
             android:windowSoftInputMode="adjustPan"
             android:launchMode="singleTask"
             android:exported="true">
@@ -29,7 +29,14 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="stamhoofd.app" />
+
+                <!-- If a user clicks on a shared link that uses the "http" scheme, your
+                app should be able to delegate that traffic to "https". -->
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+
+                <!-- Include one or more domains that should be verified. -->
+                <data android:host="stamhoofd.app" />
             </intent-filter>
         </activity>
 

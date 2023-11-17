@@ -4,7 +4,6 @@
 	"webDir": "dist",
 	"bundledWebRuntime": false,
 	"loggingBehavior": "none",
-	"hideLogs": true,
 	"plugins": {
 		"Keyboard": {
 			"resize": "none"
