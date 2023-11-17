@@ -90,9 +90,16 @@ export class Toast {
             listener(toast)
         }
     }
-
     show() {
-        Toast.callListeners(this)
+        if (Toast.listeners.size == 0) {
+            console.log('Delayed Toast show')
+            // Delayed show
+            setTimeout(() => {
+                this.show()
+            }, 1000)
+        } else {
+            Toast.callListeners(this)
+        }
         return this
     }
 

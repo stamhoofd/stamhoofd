@@ -2,11 +2,13 @@ import { Group } from "../../Group"
 import { GroupCategory, GroupCategorySettings } from "../../GroupCategory"
 import { GroupPrice, GroupPrices } from "../../GroupPrices"
 import { GroupSettings } from "../../GroupSettings"
+import { PaymentConfiguration } from "../../PaymentConfiguration"
 import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistrations"
 import { Registration } from "../Registration"
 import { IDRegisterCart } from "./RegisterCart"
 import { IDRegisterItem } from "./RegisterItem"
 
+const defaultPaymentConfiguration = PaymentConfiguration.create({})
 
 describe("Test register cart price calculations", () => {
     test("Family discount best combination", () => {
@@ -134,7 +136,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
+        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(3)
 
         // Check if Bart got the cheapest price
@@ -155,7 +157,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
+        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 
@@ -312,7 +314,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice, tom, linda], [group1, group2, group3, group4], [category])
+        cart.calculatePrices([bart, alice, tom, linda], [group1, group2, group3, group4], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(4)
 
         // Check if Bart got the cheapest price
@@ -338,7 +340,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([tom, bart, alice, linda], [group2, group1, group3, group4], [category])
+        cart.calculatePrices([tom, bart, alice, linda], [group2, group1, group3, group4], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 
@@ -466,7 +468,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
+        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(2)
 
         const calculatedAlice = cart.items.find(i => i.memberId === alice.id)
@@ -481,7 +483,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
+        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 
@@ -615,7 +617,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category])
+        cart.calculatePrices([bart, alice, tom], [group1, group2, group3], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(2)
 
         const calculatedTom = cart.items.find(i => i.memberId === tom.id)
@@ -625,7 +627,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category])
+        cart.calculatePrices([tom, bart, alice], [group2, group1, group3], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 
@@ -697,7 +699,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice, tom], [group1], [category])
+        cart.calculatePrices([bart, alice, tom], [group1], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(3)
 
         // Check if Bart got the cheapest price
@@ -719,7 +721,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([tom, bart, alice], [group1], [category])
+        cart.calculatePrices([tom, bart, alice], [group1], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 
@@ -828,7 +830,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice, tom], [group1, group2], [category])
+        cart.calculatePrices([bart, alice, tom], [group1, group2], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(3)
 
         // Check if Bart got the cheapest price
@@ -849,7 +851,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([tom, bart, alice], [group2, group1], [category])
+        cart.calculatePrices([tom, bart, alice], [group2, group1], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 
@@ -949,7 +951,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice], [group1, group2], [category])
+        cart.calculatePrices([bart, alice], [group1, group2], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(3)
 
         // Check if Bart got the cheapest price
@@ -970,7 +972,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([bart, alice], [group2, group1], [category])
+        cart.calculatePrices([bart, alice], [group2, group1], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 
@@ -1075,7 +1077,7 @@ describe("Test register cart price calculations", () => {
             waitingList: false
         }))
 
-        cart.calculatePrices([bart, alice], [group1, group2], [category])
+        cart.calculatePrices([bart, alice], [group1, group2], [category], defaultPaymentConfiguration)
         expect(cart.items).toHaveLength(3)
 
         const calculatedBart = cart.items.find(i => i.memberId === bart.id)
@@ -1095,7 +1097,7 @@ describe("Test register cart price calculations", () => {
 
         // Try in different order
         const cached = cart.price
-        cart.calculatePrices([bart, alice], [group2, group1], [category])
+        cart.calculatePrices([bart, alice], [group2, group1], [category], defaultPaymentConfiguration)
         expect(cart.price).toEqual(cached)
     })
 })

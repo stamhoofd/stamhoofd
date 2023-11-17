@@ -334,6 +334,13 @@ export default class EditGroupEmailsView extends Mixins(NavigationMixin) {
                 name: "Groepnaam", 
                 example: this.group.settings.name, 
             }),
+            new EditorSmartVariable({
+                id: "loginDetails",
+                name: "Inloggegevens", 
+                example: 'text',
+                html: `<p class="description"><em>Je kan op het ledenportaal inloggen op <strong>${Formatter.escapeHtml('voorbeeld@email.com')}</strong></em></p>`,
+                hint: "Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen."
+            }),
         ]
 
         //if (this.orders.length > 0) {

@@ -4,7 +4,7 @@
             <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
         </STNavigationBar>
 
-        <main>
+        <main class="flex">
             <h1>{{ title }}</h1>
 
             <p v-if="cart.price">
@@ -55,21 +55,12 @@
                         </div>
                     </footer>
                 </STListItem>
-
-                <STListItem v-if="cart.freeContribution > 0 && cart.items.length > 0">
-                    <h3 class="style-title-list">
-                        + Vrije bijdrage van {{ cart.freeContribution | price }}. Bedankt!
-                    </h3>
-                    <p class="style-description-small">
-                        Je kan dit in één van de volgende stappen wijzigen
-                    </p>
-                </STListItem>
             </STList>
 
             <template v-if="suggestedRegistrations.length">
                 <hr>
 
-                <h2>Alles toegevoegd?</h2>
+                <h2>Suggesties</h2>
                 <STList>
                     <STListItem v-for="suggestion in suggestedRegistrations" :key="suggestion.id" class="left-center hover-box member-registration-block" :selectable="true" @click="startRegistrationFlow(suggestion)">
                         <img v-if="!suggestion.group" slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
@@ -100,6 +91,42 @@
                     </STListItem>
                 </STList>
             </template>
+
+            <div v-if="(cart.items.length > 0 || cart.balanceItems.length) && (cart.administrationFee || cart.freeContribution)" class="pricing-box">
+                <STList>
+                    <STListItem v-if="cart.administrationFee || cart.freeContribution">
+                        Subtotaal
+
+                        <template slot="right">
+                            {{ cart.priceWithoutFees | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="cart.administrationFee">
+                        Administratiekosten
+
+                        <template slot="right">
+                            {{ cart.administrationFee | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="cart.freeContribution">
+                        Vrije bijdrage
+
+                        <template slot="right">
+                            {{ cart.freeContribution | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Totaal
+
+                        <template slot="right">
+                            {{ cart.price | price }}
+                        </template> 
+                    </STListItem>
+                </STList>
+            </div>
         </main>
 
         <STToolbar v-if="!cart.isEmpty">
@@ -267,7 +294,12 @@ export default class CartView extends Mixins(NavigationMixin){
     @Watch("cart.items")
     onCartChanged() {
         try {
-            this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+            this.cart.calculatePrices(
+                MemberManager.members ?? [], 
+                OrganizationManager.organization.groups, 
+                OrganizationManager.organization.meta.categories,
+                OrganizationManager.organization.meta.registrationPaymentConfiguration
+            )
         } catch (e) {
             // error in calculation!
             console.error(e)

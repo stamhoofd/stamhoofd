@@ -87,7 +87,8 @@ export class EmailTemplate extends AutoEncoder {
                 "organizationName",
                 "groupName",
                 "signInUrl",
-                "unsubscribeUrl"
+                "unsubscribeUrl",
+                'loginDetails'
             ];
         }
 
@@ -105,7 +106,8 @@ export class EmailTemplate extends AutoEncoder {
                 "registerUrl",
                 "organizationName",
                 "signInUrl",
-                "unsubscribeUrl"
+                "unsubscribeUrl",
+                'loginDetails'
             ];
         }
 

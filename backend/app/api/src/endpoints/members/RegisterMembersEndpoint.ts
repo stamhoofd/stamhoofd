@@ -104,7 +104,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         request.body.cart.validate(members, groupsStructure, organization.meta.categories, memberBalanceItems)
 
         // Recalculate the price
-        request.body.cart.calculatePrices(members, groupsStructure, organization.meta.categories)
+        request.body.cart.calculatePrices(
+            members, 
+            groupsStructure, 
+            organization.meta.categories,
+            organization.meta.registrationPaymentConfiguration,
+        )
 
         const totalPrice = request.body.cart.price
         if (totalPrice !== clientSidePrice) {
@@ -290,7 +295,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             balanceItem.memberId = registration.memberId;
             balanceItem.userId = user.id
             balanceItem.organizationId = organization.id;
-            balanceItem.status = payment.status == PaymentStatus.Succeeded ? BalanceItemStatus.Paid : (registration.registeredAt ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
+            balanceItem.status = payment.status == PaymentStatus.Succeeded ? BalanceItemStatus.Paid : (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
             await balanceItem.save();
 
             // Create one balance item payment to pay it in one payment
@@ -320,7 +325,36 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (oldestMember) {
                 balanceItem.memberId = oldestMember.id;
             }
-            balanceItem.status = (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
+            balanceItem.status = payment.status == PaymentStatus.Succeeded ? BalanceItemStatus.Paid : (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
+            await balanceItem.save();
+
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment()
+            balanceItemPayment.balanceItemId = balanceItem.id;
+            balanceItemPayment.paymentId = payment.id;
+            balanceItemPayment.organizationId = organization.id;
+            balanceItemPayment.price = balanceItem.price;
+            await balanceItemPayment.save();
+
+            items.push(balanceItem)
+            itemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
+        }
+
+        if (request.body.cart.administrationFee) {
+            // Create balance item
+            const balanceItem = new BalanceItem();
+            balanceItem.price = request.body.cart.administrationFee
+            balanceItem.description = `Administratiekosten`
+            balanceItem.pricePaid = payment.status == PaymentStatus.Succeeded ? balanceItem.price : 0;
+            balanceItem.userId = user.id
+            balanceItem.organizationId = organization.id;
+
+            // Connect this to the oldest member
+            
+            if (oldestMember) {
+                balanceItem.memberId = oldestMember.id;
+            }
+            balanceItem.status = payment.status == PaymentStatus.Succeeded ? BalanceItemStatus.Paid : (payment.method == PaymentMethod.Transfer || payment.method == PaymentMethod.PointOfSale ? BalanceItemStatus.Pending : BalanceItemStatus.Hidden);
             await balanceItem.save();
 
             // Create one balance item payment to pay it in one payment
