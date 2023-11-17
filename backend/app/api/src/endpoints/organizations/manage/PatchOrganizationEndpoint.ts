@@ -75,6 +75,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
 
+                if (request.body.privateMeta.mollieProfile !== undefined) {
+                    organization.privateMeta.mollieProfile = patchObject(organization.privateMeta.mollieProfile, request.body.privateMeta.mollieProfile)
+                }
+
                 if (request.body.privateMeta.useTestPayments !== undefined) {
                     organization.privateMeta.useTestPayments = request.body.privateMeta.useTestPayments
                 }

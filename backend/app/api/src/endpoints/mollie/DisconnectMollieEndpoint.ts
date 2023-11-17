@@ -39,6 +39,8 @@ export class DisonnectMollieEndpoint extends Endpoint<Params, Query, Body, Respo
         const mollieToken = await MollieToken.getTokenFor(user.organization.id)
         await mollieToken?.revoke();
         user.organization.privateMeta.mollieOnboarding = null;
+        user.organization.privateMeta.mollieProfile = null;
+
         await user.organization.save()
 
         // TODO: disable all payment methods that use this method

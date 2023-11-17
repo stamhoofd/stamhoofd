@@ -161,6 +161,24 @@
                         <span>Account loskoppelen van Stamhoofd</span>
                     </button>
                 </p>
+
+                <STInputBox v-if="mollieProfiles.length > 1" title="Standaardprofiel" error-fields="mollieProfile" :error-box="errorBox" class="max">
+                    <STList>
+                        <STListItem v-for="profile in mollieProfiles" :key="profile.id" element-name="label" :selectable="true">
+                            <Radio slot="left" v-model="selectedMollieProfile" :value="profile.id" />
+                            <h3 class="style-title-list">
+                                {{ profile.name }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ profile.website }}
+                            </p>
+
+                            <span v-if="profile.status === 'verified'" slot="right" v-tooltip="'Geverifieerd'" class="icon success green" />
+                            <span v-else-if="profile.status === 'unverified'" slot="right" v-tooltip="'Wacht op verificatie'" class="icon clock gray" />
+                            <span v-else slot="right" v-tooltip="'Geblokkeerd'" class="icon canceled red" />
+                        </STListItem>
+                    </STList>
+                </STInputBox>
             </template>
         </template>
 
@@ -237,9 +255,9 @@ import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, Decoder, field, Patcha
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { CenteredMessage, Checkbox, ErrorBox, IBANInput, LoadingButton, Radio, RadioGroup, SaveView, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, TooltipDirective, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { BuckarooSettings, Country, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, StripeAccount, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
+import { BuckarooSettings, CheckMollieResponse, Country, MollieProfile, Organization, OrganizationMetaData, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, StripeAccount, TransferDescriptionType, TransferSettings, Version } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
 
@@ -261,6 +279,9 @@ import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue
         EditPaymentMethodsBox,
         Spinner
     },
+    directives: {
+        tooltip: TooltipDirective
+    }
 })
 export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     errorBox: ErrorBox | null = null
@@ -271,11 +292,25 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     loadingStripeAccounts = false
     creatingStripeAccount = false
     stripeAccounts: StripeAccount[] = []
+    mollieProfiles: MollieProfile[] = []
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    get selectedMollieProfile() {
+        return this.organization.privateMeta?.mollieProfile?.id ?? null
+    }
+
+    set selectedMollieProfile(id: string | null) {
+        const profile = this.mollieProfiles.find(p => p.id == id)
+        this.organizationPatch = this.organizationPatch.patch({
+            privateMeta: OrganizationPrivateMetaData.patch({
+                mollieProfile: profile ?? null
+            })
+        })
     }
 
     get isBelgium() {
@@ -649,6 +684,8 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             toast.hide()
             new Toast("Koppelen mislukt", "error red").show()
         }
+
+        this.updateMollie().catch(console.error);
     }
 
     lastAddedStripeAccount: string | null = null
@@ -673,8 +710,8 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 if (error) {
                     new Toast("Koppelen mislukt", "error red").show()
                 }
+                this.updateMollie().catch(console.error);
             }
-            this.updateMollie().catch(console.error);
         } else {
             if ((this.organization.privateMeta && this.organization.privateMeta.mollieOnboarding) || this.forceMollie) {
                 this.updateMollie().catch(console.error);
@@ -866,12 +903,13 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "POST",
                 path: "/mollie/check",
-                decoder: Organization as Decoder<Organization>,
+                decoder: CheckMollieResponse as Decoder<CheckMollieResponse>,
                 shouldRetry: false,
                 owner: this
             })
-           
-            SessionManager.currentSession!.setOrganization(response.data)
+
+            this.mollieProfiles = response.data.profiles
+            SessionManager.currentSession!.setOrganization(response.data.organization)
         } catch (e) {
             console.error(e)
             Toast.fromError(e).show()

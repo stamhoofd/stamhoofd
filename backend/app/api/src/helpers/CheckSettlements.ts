@@ -25,6 +25,11 @@ type MolliePaymentJSON = {
 let lastSettlementCheck: Date | null = null
 
 export async function checkAllStripePayouts(checkAll = false) {
+    if (STAMHOOFD.environment !== "production") {
+        console.log("Skip settlement check")
+        return
+    }
+    
     // Stripe payouts
     const stripeAccounts = await StripeAccount.all()
     for (const account of stripeAccounts) {
