@@ -412,6 +412,28 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     async addRegistration(user: User, member: Member & Record<"registrations", Registration[]> & Record<"users", User[]>, registrationStruct: RegistrationStruct, groups: Group[]) {
+        // Check if this member has this registration already.
+        // Note: we cannot use the relation here, because invalid ones or reserved ones are not loaded in there
+        const existings = await Registration.where({ 
+            memberId: member.id, 
+            groupId: registrationStruct.groupId,
+            cycle: registrationStruct.cycle
+        }, { limit: 1 })
+        const existing = existings.length > 0 ? existings[0] : null
+
+        // If the existing is invalid, delete it.
+        if (existing && !existing.registeredAt && !existing.waitingList) {
+            console.log('Deleting invalid registration', existing.id)
+            await existing.delete()
+        } else if (existing) {
+            throw new SimpleError({
+                code: "invalid_field",
+                message: "Registration already exists",
+                human: existing.waitingList ? "Dit lid staat al op de wachtlijst voor deze groep" : "Dit lid is al ingeschreven voor deze groep",
+                field: "groupId"
+            });
+        }
+        
         const registration = new Registration()
         registration.groupId = registrationStruct.groupId
         registration.cycle = registrationStruct.cycle
