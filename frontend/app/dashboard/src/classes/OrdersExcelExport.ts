@@ -109,6 +109,7 @@ export class OrdersExcelExport {
                 "E-mail",
                 "GSM-nummer",
                 ...answerNames,
+                "Notities",
                 "Aantal",
                 "Stukprijs",
                 "Prijs",
@@ -207,6 +208,7 @@ export class OrdersExcelExport {
                     showDetails ? order.data.customer.email : "",
                     showDetails ? order.data.customer.phone : "",
                     ...answers,
+                    showDetails ? order.data.comments : "",
                     {
                         value: item.amount,
                         format: '0'
@@ -291,6 +293,7 @@ export class OrdersExcelExport {
                 "E-mail",
                 "GSM-nummer",
                 ...answerNames,
+                "Notities",
                 "Afhaalmethode",
                 "Leveringsadres / afhaallocatie",
                 "Datum",
@@ -357,6 +360,7 @@ export class OrdersExcelExport {
                 order.data.customer.email,
                 order.data.customer.phone,
                 ...answers,
+                order.data.comments,
                 checkoutType,
                 address,
                 order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : "/",
