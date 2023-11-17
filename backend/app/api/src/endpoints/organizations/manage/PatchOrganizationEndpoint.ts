@@ -1,8 +1,9 @@
 import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Group, PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
+import { Group, Organization,PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
 import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 
@@ -67,7 +68,39 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (request.body.address) {
                 organization.address = organization.address.patch(request.body.address)
             }
-              
+
+            if (request.body.uri && request.body.uri !== organization.uri) {
+                const slugified = Formatter.slug(request.body.uri);
+                if (slugified.length > 100) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Field is too long",
+                        human: "De URI van de vereniging is te lang",
+                        field: "uri"
+                    })
+                }
+
+                if (slugified.length < 3) {
+                    throw new SimpleError({
+                        code: "invalid_field",
+                        message: "Field is too short",
+                        human: "De URI van de vereniging is te kort",
+                        field: "uri"
+                    })
+                }
+                const alreadyExists = await Organization.getByURI(slugified);
+
+                if (alreadyExists) {
+                    throw new SimpleError({
+                        code: "name_taken",
+                        message: "An organization with the same URI already exists",
+                        human: "Er bestaat al een vereniging met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",
+                        field: "uri",
+                    });
+                }
+
+                organization.uri = slugified
+            }
 
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails)
