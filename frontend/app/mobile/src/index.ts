@@ -3,19 +3,24 @@ require('@stamhoofd/assets/images/icons/icons.font');
 
 import { App as CApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Haptics, NotificationType } from '@capacitor/haptics';
 import { Keyboard } from '@capacitor/keyboard';
+import { Share } from '@capacitor/share';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
+import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
+import { RateApp } from 'capacitor-rate-app';
 import Vue from "vue";
-import VueMeta from 'vue-meta'
+import VueMeta from 'vue-meta';
 
-import { AppManager, SessionManager, Storage } from '../../../shared/networking';
-// Kick off the app
 import App from "../../dashboard/src/App.vue";
 import { CapacitorStorage } from './CapacitorStorage';
+import FileOpener from './FileOpenerPlugin';
 import QRScanner from './QRScannerPlugin';
+import { UpdateStatus } from './UpdateStatus';
 import { WrapperHTTPRequest } from './WrapperHTTPRequest';
 
 Vue.use(VueMeta)
@@ -131,16 +136,9 @@ I18nController.addUrlPrefix = false
 document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 VueGlobalHelper.setup()
 
-// Vue.prototype.$isMobile = true
+CapacitorUpdater.notifyAppReady().catch(console.error);
 
-const app = new Vue({
-    i18n,
-    render: (h) => h(App),
-}).$mount("#app");
-
-(window as any).app = app;
-
-CApp.addListener('appUrlOpen', (data: any) => {
+CApp.addListener('appUrlOpen', (data) => {
     console.log("Open app url location:", data)
     const url = new URL(data.url);
     window.location.href = url.pathname + url.search
@@ -166,8 +164,6 @@ AppManager.shared.hapticSuccess = () => {
 AppManager.shared.hapticTap = () => {
     Haptics.notification({ type: NotificationType.Success }).catch(console.error);
 }
-
-import { RateApp } from 'capacitor-rate-app';
 
 async function markReviewMoment() {
     // 1. Check if we are signed in.
@@ -234,12 +230,6 @@ window.addEventListener('statusTap',  () => {
     }
 });
 
-import { Directory,Filesystem } from '@capacitor/filesystem';
-import { Share } from '@capacitor/share';
-
-import FileOpener from './FileOpenerPlugin';
-
-
 // Download File
 AppManager.shared.downloadFile = async (data: any, filename: string) => {
     const {publicStorage} = await Filesystem.checkPermissions();
@@ -272,3 +262,50 @@ AppManager.shared.downloadFile = async (data: any, filename: string) => {
         throw e
     }
 }
+
+CApp.addListener('appStateChange', (state) => {
+    if (state.isActive && STAMHOOFD.environment !== 'staging') {
+        // (don't check on staging)
+        AppManager.shared.checkUpdates({
+            checkTimeout: 5 * 1000
+        }).catch(console.error)
+    }
+}).catch(console.error);
+
+CApp.getInfo().then((info) => {
+    AppManager.shared.setVersion({
+        version: info.version,
+        build: info.build,
+    })
+}).catch(console.error);
+
+let isCheckingUpdates = false
+AppManager.shared.checkUpdates = async (options) => {
+    if (isCheckingUpdates) {
+        console.log('Already checking updates. Skipped.')
+        return
+    }
+    isCheckingUpdates = true
+    const status = new UpdateStatus(options)
+    try {
+        await status.start()
+    } catch (e) {
+        console.error(e)
+    }
+    isCheckingUpdates = false
+};
+
+// Set the shared initial state if manually set
+Storage.keyValue.getItem('next_url_load').then((path) => {
+    if (path) {
+        Storage.keyValue.removeItem('next_url_load').catch(console.error)
+        UrlHelper.shared.setPath(path)
+    }
+}).catch(console.error)
+
+const app = new Vue({
+    i18n,
+    render: (h) => h(App),
+}).$mount("#app");
+
+(window as any).app = app;

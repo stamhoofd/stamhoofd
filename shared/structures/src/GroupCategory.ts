@@ -20,7 +20,7 @@ export class GroupCategoryPermissions extends AutoEncoder {
     /**
      * Permissions automatically for all groups in this category
      */
-    @field({decoder: PermissionsByRole, version: 203})
+    @field({decoder: PermissionsByRole, version: 203, optional: true})
     groupPermissions = PermissionsByRole.create({})
 
     /**
