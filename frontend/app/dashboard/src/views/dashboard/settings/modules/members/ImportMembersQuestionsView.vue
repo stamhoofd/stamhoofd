@@ -22,57 +22,59 @@
                     {{ membersWithoutNewRegistrations.length }} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.
                 </p>
 
-                <hr>
-                <h2>Inschrijvingstatus</h2>
+                <template v-if="membersWithNewRegistrations.length">
+                    <hr>
+                    <h2>Inschrijvingstatus</h2>
 
-                <STInputBox v-if="hasWaitingLists" title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errorBox" class="max">
-                    <RadioGroup>
-                        <Radio v-model="waitingList" :value="false">
-                            Nee
-                        </Radio>
-                        <Radio v-model="waitingList" :value="true">
-                            Ja, zet op wachtlijst
-                        </Radio>
-                    </RadioGroup>
-                </STInputBox>
-            
-                <template v-if="!waitingList">
-                    <STInputBox title="Moeten deze leden hun inschrijving voor de huidige periode nog bevestigen?" error-fields="needRegistration" :error-box="errorBox" class="max">
+                    <STInputBox v-if="hasWaitingLists" title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errorBox" class="max">
                         <RadioGroup>
-                            <Radio v-model="needRegistration" :value="false">
-                                Nee, ze zijn al ingeschreven
+                            <Radio v-model="waitingList" :value="false">
+                                Nee
                             </Radio>
-                            <Radio v-model="needRegistration" :value="true">
-                                Ja, ze moeten hun inschrijving nog verlengen en betalen
+                            <Radio v-model="waitingList" :value="true">
+                                Ja, zet op wachtlijst
                             </Radio>
                         </RadioGroup>
                     </STInputBox>
+                
+                    <template v-if="!waitingList">
+                        <STInputBox title="Moeten deze leden hun inschrijving voor de huidige periode nog bevestigen?" error-fields="needRegistration" :error-box="errorBox" class="max">
+                            <RadioGroup>
+                                <Radio v-model="needRegistration" :value="false">
+                                    Nee, ze zijn al ingeschreven
+                                </Radio>
+                                <Radio v-model="needRegistration" :value="true">
+                                    Ja, ze moeten hun inschrijving nog verlengen en betalen
+                                </Radio>
+                            </RadioGroup>
+                        </STInputBox>
 
-                    <p v-if="needRegistration === true" class="info-box">
-                        De leden zullen worden ingeschreven in de vorige inschrijvingsperiode. Ze zullen zelf hun inschrijving eventueel nog moeten verlengen via het ledenportaal, maar hun gegevens zullen daar al klaar staan. De vorige periode is ook altijd zichtbaar voor beheerders in Stamhoofd.
-                    </p>
+                        <p v-if="needRegistration === true" class="info-box">
+                            De leden zullen worden ingeschreven in de vorige inschrijvingsperiode. Ze zullen zelf hun inschrijving eventueel nog moeten verlengen via het ledenportaal, maar hun gegevens zullen daar al klaar staan. De vorige periode is ook altijd zichtbaar voor beheerders in Stamhoofd.
+                        </p>
 
-                    <STInputBox v-if="needsPaidStatus" :title="needRegistration ? 'Al betaald voor vorige inschrijvingsperiode?' : 'Hebben deze leden al betaald?'" error-fields="paid" :error-box="errorBox" class="max">
-                        <RadioGroup>
-                            <Radio v-model="paid" :value="true">
-                                Al betaald
-                            </Radio>
-                            <Radio v-model="paid" :value="false">
-                                Niet betaald
-                            </Radio>
-                            <Radio v-model="paid" :value="null">
-                                Sommigen wel, anderen niet
-                            </Radio>
-                        </RadioGroup>
-                    </STInputBox>
+                        <STInputBox v-if="needsPaidStatus" :title="needRegistration ? 'Al betaald voor vorige inschrijvingsperiode?' : 'Hebben deze leden al betaald?'" error-fields="paid" :error-box="errorBox" class="max">
+                            <RadioGroup>
+                                <Radio v-model="paid" :value="true">
+                                    Al betaald
+                                </Radio>
+                                <Radio v-model="paid" :value="false">
+                                    Niet betaald
+                                </Radio>
+                                <Radio v-model="paid" :value="null">
+                                    Sommigen wel, anderen niet
+                                </Radio>
+                            </RadioGroup>
+                        </STInputBox>
 
-                    <p v-if="needsPaidStatus && somePaid" class="warning-box">
-                        Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
-                    </p>
+                        <p v-if="needsPaidStatus && somePaid" class="warning-box">
+                            Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
+                        </p>
 
-                    <p v-if="needsPaidStatus && paid === null" class="warning-box">
-                        We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten. 
-                    </p>
+                        <p v-if="needsPaidStatus && paid === null" class="warning-box">
+                            We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten. 
+                        </p>
+                    </template>
                 </template>
 
                 <template v-if="needsGroupAssignment">
@@ -174,7 +176,7 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, Dropdown, ErrorBox, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, Validator } from "@stamhoofd/components";
-import { Gender, Group, Organization, OrganizationPatch, Registration } from "@stamhoofd/structures";
+import { Gender, Group, Organization, OrganizationPatch, Parent, ParentTypeHelper, Registration } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -219,7 +221,7 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
 
     mounted() {
         this.multipleGroups = this.calculateMultipleGroups()
-        console.log(this.members)
+        this.autoAssignMembers(this.members)
     }
 
     get organization() {
@@ -430,6 +432,24 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
         }).setDisplayStyle("popup"))
     }
 
+    getParentDescription(parent: Parent) {
+        const description: string[] = []
+        let type = ParentTypeHelper.getName(parent.type)
+        if (parent.name.trim()) {
+            description.push(type + ': ' + parent.name)
+        }
+        if (parent.phone) {
+            description.push(type + ' telefoonnummer: ' + parent.phone)
+        }
+        if (parent.email) {
+            description.push(type + ' e-mail: ' + parent.email)
+        }
+        if (parent.address) {
+            description.push(type + ' adres: ' + parent.address.toString())
+        }
+        return description;
+    }
+
     openResultView() {
         this.present(new ComponentWithProperties(ImportAutoAssignedView, {
             title: "Wijzigingen",
@@ -489,9 +509,33 @@ export default class ImportMembersQuestionsView extends Mixins(NavigationMixin) 
                     if (member.details.birthDay && (!member.equal.details.birthDay || Formatter.dateIso(member.equal.details.birthDay) !== Formatter.dateIso(member.details.birthDay))) {
                         description.push('Geboortedatum wijzigen naar ' + Formatter.date(member.details.birthDay, true))
                     }
-                    if (member.details.parents.length) {
-                        description.push('Gegevens ouders wijzigen/toevoegen')
+                    for (const parent of member.details.parents) {
+                        description.push(...this.getParentDescription(parent))
                     }
+                    for (const answer of member.details.recordAnswers) {
+                        description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue)
+                    }
+                } else {
+                    // Data changes
+                    if (member.details.name) {
+                        description.push('Naam: ' + member.details.name)
+                    }
+                    if (member.details.gender !== Gender.Other) {
+                        description.push('Geslacht: ' + member.details.gender)
+                    }
+                    if ( member.details.email) {
+                        description.push('E-mail: ' + member.details.email)
+                    }
+                    if (member.details.phone) {
+                        description.push('Telefoonnummer: ' + member.details.phone)
+                    }
+                    if (member.details.birthDay) {
+                        description.push('Geboortedatum: ' + Formatter.date(member.details.birthDay, true))
+                    }
+                    for (const parent of member.details.parents) {
+                        description.push(...this.getParentDescription(parent))
+                    }
+
                     for (const answer of member.details.recordAnswers) {
                         description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue)
                     }

@@ -228,23 +228,12 @@ export class FamilyManager {
      * Check for duplicate parents
      */
     removeDuplicates() {
-        const parents = new Map<string, Parent>()
         for (const member of this.members) {
             if (!member.details) {
                 continue
             }
 
-            const cleaned = new Map<string, Parent>()
-            for (const parent of member.details.parents) {
-                const other = parents.get(parent.name.toLowerCase())
-                if (other) {
-                    other.merge(parent)
-                } else {
-                    parents.set(parent.name.toLowerCase(), parent)
-                }
-                cleaned.set(parent.name.toLowerCase(), other ?? parent)
-            }
-            member.details.parents = [...cleaned.values()]
+            member.details.cleanData()
         }
     }
     
