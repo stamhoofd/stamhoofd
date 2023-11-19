@@ -658,16 +658,71 @@ export const crons = async () => {
     }, async () => {
         try {
             await checkSettlements()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkFailedBuckarooPayments()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkExpirationEmails()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkPostmarkBounces()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkBilling()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkReservedUntil()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkComplaints()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkReplies()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkBounces()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkDNS()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkWebshopDNS()
+        } catch (e) {
+            console.error(new StyledText(e).addClass('error'))
+        }
+
+        try {
             await checkPayments()
         } catch (e) {
             console.error(new StyledText(e).addClass('error'))
