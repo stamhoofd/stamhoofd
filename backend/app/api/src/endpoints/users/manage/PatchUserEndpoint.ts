@@ -37,7 +37,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id)
-        if (editUser?.organizationId !== user.organizationId) {
+        if (editUser?.organizationId !== user.organizationId || editUser.isApiUser) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang om deze gebruiker te wijzigen"

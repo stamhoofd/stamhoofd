@@ -2,6 +2,7 @@ import { column, Database, ManyToOneRelation, Model } from "@simonbackx/simple-d
 import { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import crypto from "crypto";
+import { RateLimiter } from "../helpers/RateLimiter";
 
 import { Organization, User, UserWithOrganization } from './';
 
@@ -19,6 +20,31 @@ async function randomBytes(size: number): Promise<Buffer> {
         });
     });
 }
+
+export const apiUserRateLimiter = new RateLimiter({
+    limits: [
+        {   
+            // Block heavy bursts (5req/s for 5s)
+            limit: 25,
+            duration: 5 * 1000
+        },
+        {   
+            // max 1req/s during 150s
+            limit: 150,
+            duration: 150 * 1000
+        },
+        {   
+            // 1000 requests per hour
+            limit: 1000,
+            duration: 60 * 1000 * 60
+        },
+        {   
+            // 2000 requests per day
+            limit: 2000,
+            duration: 24 * 60 * 1000 * 60
+        }
+    ]
+});
 
 export class Token extends Model {
     static table = "tokens";
@@ -129,6 +155,11 @@ export class Token extends Model {
             })
         }
 
+        // Rate limits for api users
+        if (token.user.isApiUser) {
+            apiUserRateLimiter.track(organization.id)
+        }
+
         return token as TokenWithOrganizationAndUser
     }
 
@@ -203,7 +234,7 @@ export class Token extends Model {
 
         const user = User.fromRow(rows[0]["user"]) || null;
 
-        if (!user) {
+        if (!user || user.isApiUser) {
             console.warn("Selected a token without a user!");
             return undefined;
         }
@@ -267,6 +298,22 @@ export class Token extends Model {
 
     static async createToken<U extends User>(user: U): Promise<(Token & { user: U })> {
         const token = await this.createUnsavedToken(user);
+        await token.save();
+        return token;
+    }
+
+    static async createApiToken<U extends User>(user: U): Promise<(Token & { user: U })> {
+        const token = await this.createUnsavedToken(user);
+        
+        // 5 year valid
+        token.accessTokenValidUntil = new Date();
+        token.accessTokenValidUntil.setTime(token.accessTokenValidUntil.getTime() + 1000 * 60 * 60 * 24 * 365 * 5);
+        token.accessTokenValidUntil.setMilliseconds(0);
+
+        token.refreshTokenValidUntil = new Date();
+        token.refreshTokenValidUntil.setTime(token.accessTokenValidUntil.getTime());
+        token.refreshTokenValidUntil.setMilliseconds(0);
+
         await token.save();
         return token;
     }

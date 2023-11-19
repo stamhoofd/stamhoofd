@@ -9,11 +9,30 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <hr>
-        <h2>Extra betaalproviders</h2>
+        <h2>Ontwikkelaars</h2>
+
+        <STList class="illustration-list">    
+            <STListItem :selectable="true" class="left-center" @click="openApiUsers(true)">
+                <img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg">
+                <h2 class="style-title-list">
+                    API-keys
+                </h2>
+                <p class="style-description">
+                    Maak API-keys aan om toegang te krijgen tot de Stamhoofd-API.
+                </p>
+                <span slot="right" class="icon arrow-right-small gray" />
+            </STListItem>
+        </STList>
+
+        <hr>
+        <h2>Geavanceerde instellingen</h2>
 
         <Checkbox v-if="!enableBuckaroo" key="mollie" v-model="forceMollie">
-            Mollie
+            Mollie (betaalprovider)
         </Checkbox>
+        <p class="style-description-small">
+            Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
+        </p>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
             <hr>
@@ -48,13 +67,14 @@
 import { AutoEncoder, AutoEncoderPatchType, PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { BuckarooSettings, Country, Organization, OrganizationPatch, OrganizationPrivateMetaData, PaymentMethod, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
+import ApiUsersView from '../admins/ApiUsersView.vue';
 
 @Component({
     components: {
@@ -74,6 +94,15 @@ export default class LabsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)
+    }
+
+    openApiUsers(animated = true) {
+        this.show({
+            components: [
+                new ComponentWithProperties(ApiUsersView, {})
+            ],
+            animated
+        })
     }
 
     get isBelgium() {

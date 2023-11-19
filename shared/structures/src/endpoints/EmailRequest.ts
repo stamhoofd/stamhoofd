@@ -1,4 +1,4 @@
-import { ArrayDecoder,AutoEncoder, BooleanDecoder, EmailDecoder,field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder,AutoEncoder, BooleanDecoder, EmailDecoder,field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 export class EmailInformation extends AutoEncoder {
@@ -41,6 +41,9 @@ export class Recipient extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = []
+
+    @field({ decoder: new RecordDecoder(StringDecoder, StringDecoder), version: 209, nullable: true })
+    headers: Record<string, string> | null = null
 
     /**
      * Set this to create a replacement called signInUrl, which will auto sign in/sign up the user

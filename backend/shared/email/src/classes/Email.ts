@@ -1,4 +1,4 @@
-import { DataValidator } from '@stamhoofd/utility';
+import { DataValidator, Formatter } from '@stamhoofd/utility';
 import nodemailer from "nodemailer"
 import Mail from 'nodemailer/lib/mailer';
 import { EmailAddress } from '../models/EmailAddress';
@@ -6,8 +6,13 @@ import htmlToText from 'html-to-text';
 import { sleep } from '@stamhoofd/utility';
 import { I18n } from "@stamhoofd/backend-i18n"
 
+export type EmailInterfaceRecipient = {
+    name?: string|null;
+    email: string;
+}
+
 export type EmailInterfaceBase = {
-    to: string;
+    to: string|EmailInterfaceRecipient[];
     bcc?: string;
     replyTo?: string;
     subject: string;
@@ -15,7 +20,8 @@ export type EmailInterfaceBase = {
     html?: string;
     attachments?: { filename: string; path?: string; href?: string; content?: string; contentType?: string }[];
     retryCount?: number;
-    type?: "transactional" | "broadcast"
+    type?: "transactional" | "broadcast",
+    headers?: Record<string, string>|null
 }
 
 export type EmailInterface = EmailInterfaceBase & {
@@ -110,10 +116,19 @@ class EmailStatic {
         }
     }
 
+    parseTo(to: string|EmailInterfaceRecipient[]): EmailInterfaceRecipient[] {
+        if (typeof to === "string") {
+            return this.parseEmailStr(to).map(email => ({ email }))
+        }
+
+        // Filter invalid email addresses
+        return to.filter(r => DataValidator.isEmailValid(r.email))
+    }
+
     /**
      * Get the raw email
      */
-    parseEmail(emailStr: string): string[] {
+    parseEmailStr(emailStr: string): string[] {
         let insideQuote = false
         let escaped = false
         let inAddr = false
@@ -203,17 +218,17 @@ class EmailStatic {
 
         // Check if this email is not marked as spam
         // Filter recipients if bounced or spam
-        const parsedEmails = this.parseEmail(data.to)
-        if (parsedEmails.length === 0) {
+        let recipients = this.parseTo(data.to)
+        if (recipients.length === 0) {
             // Invalid string
             console.warn("Invalid e-mail string: '"+data.to+"'. E-mail skipped")
             return
         }
 
         // Check spam and bounces
-        let matches = await EmailAddress.filterSendTo(parsedEmails)
+        recipients = await EmailAddress.filterSendTo(recipients)
 
-        if (matches.length === 0) {
+        if (recipients.length === 0) {
             // Invalid string
             console.warn("Filtered all emails due hard bounce or spam '"+data.to+"'. E-mail skipped")
             return
@@ -221,24 +236,29 @@ class EmailStatic {
 
         // Filter by environment
         if (STAMHOOFD.environment === 'staging') {
-            matches = matches.filter(mail => mail.endsWith("@stamhoofd.be"))
+            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be"))
         }
         if (STAMHOOFD.environment === 'development') {
-            matches = matches.filter(mail => mail.endsWith("@stamhoofd.be") || mail.endsWith("@bounce-testing.postmarkapp.com"))
+            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com"))
         }
 
-        if (matches.length === 0) {
+        if (recipients.length === 0) {
             // Invalid string
             console.warn("Filtered all emails due to environment filter '"+data.to+"'. E-mail skipped")
             return
         }
     
-        let to = data.to
-
-        if (matches.length !== parsedEmails.length) {
-            // Rebuild to (names are removed for now)
-            to = matches.join(", ")
-        }
+        // Rebuild to
+        const to = recipients.map((recipient) => {
+            if (!recipient.name) {
+                return recipient.email
+            }
+            const cleanedName = Formatter.emailSenderName(recipient.name)
+            if (cleanedName.length < 2) {
+                return recipient.email
+            }
+            return '"'+cleanedName+'" <'+recipient.email+'>'
+        }).join(", ")
 
         this.setupIfNeeded();
 
@@ -255,6 +275,11 @@ class EmailStatic {
         if (data.attachments) {
             mail.attachments = data.attachments;
         }
+
+        if (data.headers) {
+            mail.headers = data.headers;
+        }
+
         if (data.html) {
             mail.html = data.html;
 
@@ -269,7 +294,7 @@ class EmailStatic {
         try {
             const transporter = (data.type === "transactional") ? this.transactionalTransporter : this.transporter
             const info = await transporter.sendMail(mail);
-            console.log("Message sent:", info.messageId, data.type);
+            console.log("Message sent:", to, data.subject, info.messageId, data.type);
         } catch (e) {
             console.error("Failed to send e-mail:")
             console.error(e);
