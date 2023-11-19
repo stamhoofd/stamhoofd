@@ -83,6 +83,9 @@
                             <p v-if="item.price !== item.balanceItem.price" class="style-description-small">
                                 Slechts deel van het totaalbedrag, {{ formatPrice(item.price) }} / {{ formatPrice(item.balanceItem.price) }}
                             </p>
+                            <p v-if="item.balanceItem.status === 'Hidden'" class="style-tag error">
+                                Verwijderd
+                            </p>
                             <template slot="right">
                                 {{ formatPrice(item.price) }}
                             </template>

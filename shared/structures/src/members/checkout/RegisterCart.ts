@@ -7,6 +7,7 @@ import { GroupCategory } from "../../GroupCategory"
 // eslint bug marks types as "unused"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Organization } from "../../Organization"
+import { PaymentConfiguration } from "../../PaymentConfiguration"
 import { EncryptedMemberWithRegistrations } from "../EncryptedMemberWithRegistrations"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MemberWithRegistrations } from "../MemberWithRegistrations"
@@ -22,6 +23,7 @@ export class RegisterCart {
     items: RegisterItem[] = []
     balanceItems: BalanceItemCartItem[] = []
     freeContribution = 0
+    administrationFee = 0
 
     constructor(items: RegisterItem[] = []) {
         this.items = items
@@ -31,22 +33,30 @@ export class RegisterCart {
         this.items = []
         this.balanceItems = []
         this.freeContribution = 0
+        this.administrationFee = 0
     }
 
     convert(): IDRegisterCart {
         return IDRegisterCart.create({
             items: this.items.map(i => i.convert()),
             balanceItems: this.balanceItems,
-            freeContribution: this.freeContribution
+            freeContribution: this.freeContribution,
+            administrationFee: this.administrationFee
         })
     }
 
-    get price(): number {
+    get priceWithoutFees(): number {
         return this.items.reduce((total, item) => {
             return total + item.calculatedPrice
-        }, 0) + this.freeContribution + this.balanceItems.reduce((total, item) => {
+        }, 0) + this.balanceItems.reduce((total, item) => {
             return total + item.price
-        }, 0);
+        }, 0) 
+    }
+
+    get price(): number {
+        return this.priceWithoutFees 
+            + this.freeContribution 
+            + this.administrationFee;
     }
 
     get count(): number {
@@ -126,8 +136,14 @@ export class RegisterCart {
         errors.throwIfNotEmpty()
     }
 
-    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[]) {
-        RegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories)
+    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], paymentConfiguration: PaymentConfiguration) {
+        RegisterCartPriceCalculator.calculatePrices(
+            this.items, 
+            members, 
+            groups, 
+            categories
+        )
+        this.administrationFee = paymentConfiguration.administrationFee.calculate(this.priceWithoutFees)
     }
 }
 
@@ -144,14 +160,23 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 91 })
     freeContribution = 0
 
-    get price(): number {
+    @field({ decoder: IntegerDecoder, version: 208 })
+    administrationFee = 0;
+
+    get priceWithoutFees(): number {
         return this.items.reduce((total, item) => {
             return total + item.calculatedPrice
-        }, 0) + this.freeContribution + this.balanceItems.reduce((total, item) => {
+        }, 0) + this.balanceItems.reduce((total, item) => {
             return total + item.price
-        }, 0);
+        }, 0) 
     }
 
+    get price(): number {
+        return this.priceWithoutFees 
+            + this.freeContribution 
+            + this.administrationFee;
+    }
+    
     get count(): number {
         return this.items.length + this.balanceItems.length
     }
@@ -171,6 +196,7 @@ export class IDRegisterCart extends AutoEncoder {
         })
         cart.balanceItems = this.balanceItems
         cart.freeContribution = this.freeContribution
+        cart.administrationFee = this.administrationFee
 
         return cart
     }
@@ -204,7 +230,8 @@ export class IDRegisterCart extends AutoEncoder {
         errors.throwIfNotEmpty()
     }
 
-    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], forceDate?: Date) {
+    calculatePrices(members: UnknownMemberWithRegistrations[], groups: Group[], categories: GroupCategory[], paymentConfiguration: PaymentConfiguration, forceDate?: Date) {
         RegisterCartPriceCalculator.calculatePrices(this.items, members, groups, categories, forceDate)
+        this.administrationFee = paymentConfiguration.administrationFee.calculate(this.priceWithoutFees)
     }
 }

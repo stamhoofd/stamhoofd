@@ -72,7 +72,7 @@ export class UpdateStatus {
             path: checkPath,
             decoder: Release as Decoder<Release>,
             shouldRetry: false,
-            timeout: this.options.checkTimeout || 2 * 1000
+            timeout: this.options.checkTimeout || 3 * 1000
         })).data;
 
         if (!this.options.force && compareVersions(STAMHOOFD.VERSION, latest.version) <= 0) {

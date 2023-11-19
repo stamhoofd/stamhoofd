@@ -153,7 +153,12 @@ export class CheckoutManagerStatic {
             }
         } finally {
             try {
-                this.cart.calculatePrices(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories)
+                this.cart.calculatePrices(
+                    MemberManager.members ?? [], 
+                    OrganizationManager.organization.groups, 
+                    OrganizationManager.organization.meta.categories,
+                    OrganizationManager.organization.meta.registrationPaymentConfiguration
+                )
             } catch (e) {
                 // error in calculation!
                 console.error(e)

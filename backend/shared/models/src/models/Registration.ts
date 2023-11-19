@@ -240,6 +240,11 @@ export class Registration extends Model {
                     token: "groupName",
                     value: group.settings.name
                 }),
+                Replacement.create({
+                    token: "loginDetails",
+                    value: "",
+                    html: user.hasAccount() ? `<p class="description"><em>Je kan op het ledenportaal inloggen op <strong>${Formatter.escapeHtml(user.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken op <strong>${Formatter.escapeHtml(user.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
+                }),
             ]
         }));
     }
@@ -380,6 +385,11 @@ export class Registration extends Model {
                     Replacement.create({
                         token: "organizationName",
                         value: organization.name
+                    }),
+                    Replacement.create({
+                        token: "loginDetails",
+                        value: "",
+                        html: user.hasAccount() ? `<p class="description"><em>Je kan op het ledenportaal inloggen op <strong>${Formatter.escapeHtml(user.email)}</strong></em></p>` : `<p class="description"><em>Je kan op het ledenportaal een nieuw account aanmaken op <strong>${Formatter.escapeHtml(user.email)}</strong>, dan krijg je automatisch toegang tot alle bestaande gegevens.</em></p>`
                     })
                 ]
             })
