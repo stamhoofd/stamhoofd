@@ -109,7 +109,7 @@
             <hr>
             <h2>Online betalingen via Payconiq</h2>
             <p class="st-list-description">
-                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken.
+                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>
             </p>
 
             <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
@@ -192,9 +192,9 @@
                 Gebruik Buckaroo voor online betalingen
             </Checkbox>
 
-            <Checkbox v-model="forcePayconiq">
+            <!--<Checkbox v-model="forcePayconiq">
                 Payconiq koppeling toestaan
-            </Checkbox>
+            </Checkbox>-->
 
             <Checkbox :checked="getFeatureFlag('stripe')" @change="setFeatureFlag('stripe', !!$event)">
                 Stripe koppeling toestaan
@@ -479,7 +479,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get forcePayconiq() {
-        return this.getFeatureFlag('forcePayconiq')
+        return this.getFeatureFlag('forcePayconiq') || this.isBelgium
     }
 
     set forcePayconiq(forcePayconiq: boolean) {
