@@ -55,8 +55,8 @@ export class OrganizationPaymentMandate extends AutoEncoder {
     /**
      * The signature date of the mandate in YYYY-MM-DD format.
      */
-    @field({ decoder: StringDecoder })
-    signatureDate: string;
+    @field({ decoder: StringDecoder, nullable: true })
+    signatureDate: string|null = null;
 
     /**
      * The mandate’s date and time of creation, in ISO 8601 format.
