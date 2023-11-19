@@ -128,22 +128,22 @@ import { OrganizationManager } from '../../../classes/OrganizationManager';
 })
 export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    validator: Validator
+        validator: Validator
 
     @Prop({ default: null })
-    errorBox: ErrorBox | null
+        errorBox: ErrorBox | null
 
     /**
      * This array will get changed by emitting patch events that contain a patchablearray
      */
     @Prop({ default: () => [] })
-    prices!: GroupPrices[]
+        prices!: GroupPrices[]
 
     @Prop({ default: null })
-    group!: Group | null
+        group!: Group | null
 
     @Prop({ default: null })
-    patchedOrganization!: Organization | null
+        patchedOrganization!: Organization | null
 
     get enableFinancialSupport() {
         return (this.patchedOrganization ?? OrganizationManager.organization).meta.recordsConfiguration.financialSupport !== null
@@ -160,6 +160,19 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
             }
         }
         return false
+    }
+
+    mounted() {
+        // Remove wrongfully added duplicate prices
+        const groupPricesWithoutDate = this.prices.filter(p => p.startDate === null)
+        if (groupPricesWithoutDate.length >= 2) {
+            for (const group of groupPricesWithoutDate.slice(1)) {
+                this.removeGroup(group, true)
+            }
+        } else if (groupPricesWithoutDate.length == 0) {
+            // Add default price
+            this.addGroup()
+        }
     }
 
     formatPrice(price: number) {
@@ -211,8 +224,8 @@ export default class EditGroupPriceBox extends Mixins(NavigationMixin) {
         this.addPatch(patch)
     }
 
-    removeGroup(group: GroupPrices) {
-        if (group.startDate === null) {
+    removeGroup(group: GroupPrices, force = false) {
+        if (group.startDate === null && !force) {
             // Not allowed
             return
         }
