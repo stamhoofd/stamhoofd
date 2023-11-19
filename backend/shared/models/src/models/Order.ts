@@ -70,6 +70,16 @@ export class Order extends Model {
     static payment = new ManyToOneRelation(Payment, "payment");
     static organization = new ManyToOneRelation(Organization, "organization");
 
+    getTransferReplacements(): { [key: string]: string } {
+        return {
+            nr: this.number?.toString() ?? "",
+            email: this.data.customer.email ?? '',
+            phone: this.data.customer.phone ?? '',
+            name: this.data.customer.name ?? '',
+            naam: this.data.customer.name ?? '',
+        }
+    }
+
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
         // Country locales are disabled on webshops (always the same country). But we need to add the language if it isn't the same as the organization default language
         let locale = ""

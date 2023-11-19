@@ -495,6 +495,9 @@
     position: relative;
     width: max-content;
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    user-select: none;
     
     &:before {
         content: '';
@@ -875,6 +878,16 @@
     background: $color-background-shade;
     font-family: monospace;
     white-space: pre-wrap;
+}
+
+.style-inline-code {
+    font-family: monospace;
+    white-space: pre-wrap;
+    background: $color-background-shade;
+    padding: 2px;
+    border-radius: $border-radius;
+    margin: -2px 2px;
+    display: inline-block;
 }
 
 .title-suffix {

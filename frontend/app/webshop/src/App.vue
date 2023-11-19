@@ -70,6 +70,7 @@ export default class App extends Vue {
                     }
                     console.info("Using fixed prefix", UrlHelper.fixedPrefix)
                 }
+                const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
                 // Do we need to redirect?
                 if (response.data.webshop) {
@@ -80,8 +81,13 @@ export default class App extends Vue {
                             // Redirect
                             const prefix = url.pathname.replace(/^\/+|\/+$/g, '');
                             // Remove starting and trailing slash
+                            const u = UrlHelper.initial.getFullHref({ host: url.hostname, removePrefix: true, appendPrefix: prefix });
 
-                            window.location.href = UrlHelper.initial.getFullHref({ host: url.hostname, removePrefix: true, appendPrefix: prefix })
+                            if (isPrerender) {
+                                return new ComponentWithProperties(PrerenderRedirectView, { location: u })
+                            }
+
+                            window.location.href = u
                             return new ComponentWithProperties(LoadingView, {})
                         }
                     } catch (e) {
@@ -91,7 +97,7 @@ export default class App extends Vue {
 
                 I18nController.skipUrlPrefixForLocale = "nl-"+response.data.organization.address.country
                 if (response.data.webshop) {
-                    I18nController.forceCanonicalHostProtocolAndPrefix = "https://"+response.data.webshop.getCanonicalUrl(response.data.organization)
+                    I18nController.forceCanonicalHostProtocolAndPrefix = "https://"+response.data.webshop.getUrl(response.data.organization)
                 }
                 await I18nController.loadDefault("webshop", response.data.organization.address.country, "nl", response.data.organization.address.country)
 
@@ -113,7 +119,6 @@ export default class App extends Vue {
                 if (!response.data.webshop) {
                     if (response.data.webshops.length == 0) {
                         const marketingWebshops = "https://"+this.$t('shared.domains.marketing')+"/webshops"
-                        const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
                         if (isPrerender) {
                             return new ComponentWithProperties(PrerenderRedirectView, { location: marketingWebshops })
                         }
