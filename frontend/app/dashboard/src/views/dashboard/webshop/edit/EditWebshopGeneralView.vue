@@ -396,7 +396,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     }
 
     validate() {
-        if (this.webshop.meta.name.length === 0) {
+        if (this.webshop.meta.name.trim().length === 0) {
             throw new SimpleError({
                 code: "invalid_field",
                 message: "Name is empty",
