@@ -109,110 +109,146 @@
                         Opgelet: je zal deze bestelling nog moeten betalen {{ getLowerCaseName(order.payment.method) }}
                     </p>
 
-                    <STList>
+                    <STList class="info">
                         <STListItem class="right-description">
-                            Bestelnummer
+                            <h3 class="style-definition-label">
+                                Bestelnummer
+                            </h3>
 
-                            <template slot="right">
+                            <p class="style-definition-text">
                                 {{ order.number }}
-                            </template>
+                            </p>
                         </STListItem>
                         <STListItem class="right-description">
-                            Naam
+                            <h3 class="style-definition-label">
+                                Naam
+                            </h3>
 
-                            <template slot="right">
+                            <p class="style-definition-text">
                                 {{ order.data.customer.name }}
-                            </template>
+                            </p>
+                        </STListItem>
+                        <STListItem class="right-description">
+                            <h3 class="style-definition-label">
+                                E-mailadres
+                            </h3>
+
+                            <p class="style-definition-text">
+                                {{ order.data.customer.email }}
+                            </p>
                         </STListItem>
                         <STListItem v-if="order.payment" class="right-description right-stack" :selectable="order.payment.status != 'Succeeded'" @click="openTransferView">
-                            Betaalmethode
+                            <h3 class="style-definition-label">
+                                Betaalmethode
+                            </h3>
 
-                            <template slot="right">
+                            <p class="style-definition-text">
                                 <span>{{ getName(order.payment.method) }}</span>
 
                                 <span v-if="order.payment.status == 'Succeeded'" class="icon green success" />
                                 <span v-else-if="isTransfer" class="icon help" />
-                            </template>
+                            </p>
                         </STListItem>
                         <STListItem v-for="a in order.data.fieldAnswers" :key="a.field.id" class="right-description">
-                            {{ a.field.name }}
+                            <h3 class="style-definition-label">
+                                {{ a.field.name }}
+                            </h3>
 
-                            <template slot="right">
+                            <p class="style-definition-text">
                                 {{ a.answer || "/" }}
-                            </template>
+                            </p>
                         </STListItem>
                         <STListItem v-if="order.validAt" class="right-description">
-                            Geplaatst op
-                            <template slot="right">
+                            <h3 class="style-definition-label">
+                                Geplaatst op
+                            </h3>
+                            <p class="style-definition-text">
                                 {{ order.validAt | dateTime | capitalizeFirstLetter }}
-                            </template>
+                            </p>
                         </STListItem>
 
                         <STListItem class="right-description">
-                            Status
+                            <h3 class="style-definition-label">
+                                Status
+                            </h3>
 
-                            <span slot="right" :class="'style-tag '+statusColor">{{ statusName }}</span>
+                            <p class="style-definition-text">
+                                <span>{{ statusName }}</span>
+                                <span v-if="isCanceled" class="icon canceled" />
+                            </p>
                         </STListItem>
                                                 
                         <template v-if="order.data.checkoutMethod">
                             <STListItem v-if="order.data.checkoutMethod.name" class="right-description">
-                                <template v-if="order.data.checkoutMethod.type == 'Takeout'">
-                                    Afhaallocatie
-                                </template>
-                                <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
-                                    Locatie
-                                </template>
-                                <template v-else>
-                                    Leveringsmethode
-                                </template>
+                                <h3 class="style-definition-label">
+                                    <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                        Afhaallocatie
+                                    </template>
+                                    <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                        Locatie
+                                    </template>
+                                    <template v-else>
+                                        Leveringsmethode
+                                    </template>
+                                </h3>
 
-                                <template slot="right">
+                                <p class="style-definition-text">
                                     {{ order.data.checkoutMethod.name }}
-                                </template>
+                                </p>
                             </STListItem>
                             <STListItem v-if="order.data.checkoutMethod.address" class="right-description">
-                                Adres
+                                <h3 class="style-definition-label">
+                                    Adres
+                                </h3>
 
-                                <template slot="right">
+                                <p class="style-definition-text">
                                     {{ order.data.checkoutMethod.address }}
-                                </template>
+                                </p>
                             </STListItem>
                             <STListItem v-if="order.data.address" class="right-description">
-                                Leveringsadres
+                                <h3 class="style-definition-label">
+                                    Leveringsadres
+                                </h3>
 
-                                <template slot="right">
+                                <p class="style-definition-text">
                                     {{ order.data.address }}
-                                </template>
+                                </p>
                             </STListItem>
                             <STListItem v-if="order.data.timeSlot" class="right-description">
-                                <template v-if="order.data.checkoutMethod.type == 'Takeout'">
-                                    Wanneer afhalen?
-                                </template>
-                                <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
-                                    Wanneer?
-                                </template>
-                                <template v-else>
-                                    Wanneer leveren?
-                                </template>
+                                <h3 class="style-definition-label">
+                                    <template v-if="order.data.checkoutMethod.type == 'Takeout'">
+                                        Wanneer afhalen?
+                                    </template>
+                                    <template v-else-if="order.data.checkoutMethod.type == 'OnSite'">
+                                        Wanneer?
+                                    </template>
+                                    <template v-else>
+                                        Wanneer leveren?
+                                    </template>
+                                </h3>
 
-                                <template slot="right">
+                                <p class="style-definition-text">
                                     {{ order.data.timeSlot.date | date | capitalizeFirstLetter }}<br>{{ order.data.timeSlot.startTime | minutes }} - {{ order.data.timeSlot.endTime | minutes }}
-                                </template>
+                                </p>
                             </STListItem>
                         </template>
                         <STListItem v-if="order.data.deliveryPrice > 0" class="right-description">
-                            Leveringskost
+                            <h3 class="style-definition-label">
+                                Leveringskost
+                            </h3>
 
-                            <template slot="right">
+                            <p class="style-definition-text">
                                 {{ order.data.deliveryPrice | price }}
-                            </template>
+                            </p>
                         </STListItem>
-                        <STListItem class="right-description">
-                            Totaal
+                        <STListItem v-if="order.data.totalPrice || !webshop.isAllFree" class="right-description">
+                            <h3 class="style-definition-label">
+                                Totaal
+                            </h3>
 
-                            <template slot="right">
+                            <p class="style-definition-text">
                                 {{ order.data.totalPrice | price }}
-                            </template>
+                            </p>
                         </STListItem>
                     </STList>
 
@@ -251,7 +287,7 @@
 
                                 <footer>
                                     <p class="price">
-                                        {{ cartItem.amount }} x {{ cartItem.getUnitPrice(order.data.cart) | price }}
+                                        {{ cartItem.amount }} x {{ formatFreePrice(cartItem.getUnitPrice(order.data.cart)) }}
                                     </p>
                                 </footer>
 
@@ -403,6 +439,13 @@ export default class OrderView extends Mixins(NavigationMixin){
 
     get recordAnswers() {
         return this.order?.data.recordAnswers ?? []
+    }
+
+    formatFreePrice(price: number) {
+        if (price === 0) {
+            return ''
+        }
+        return Formatter.price(price)
     }
 
     share() {

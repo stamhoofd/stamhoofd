@@ -54,12 +54,6 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-        priceFree: (p: number) => {
-            if (p === 0) {
-                return "Gratis"
-            }
-            return Formatter.price(p);
-        },
         dateTime: (d: Date) => Formatter.dateTime(d, true)
     }
 })
@@ -87,6 +81,9 @@ export default class ProductBox extends Mixins(NavigationMixin){
         const priceRanges = Formatter.uniqueArray(this.product.prices.map(p => p.price))
         if (priceRanges.length == 1) {
             if (priceRanges[0] === 0) {
+                if (this.webshop.isAllFree) {
+                    return "";
+                }
                 return "Gratis"
             }
             return Formatter.price(priceRanges[0])

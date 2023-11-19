@@ -1,7 +1,7 @@
 <template>
     <div class="st-view cart-view">
         <STNavigationBar :title="title" :dismiss="canDismiss">
-            <span v-if="cart.items.length > 0" slot="left" class="style-tag">{{ cart.price | price }}</span>
+            <span v-if="cart.items.length > 0 && cart.price" slot="left" class="style-tag">{{ cart.price | price }}</span>
         </STNavigationBar>
         <main>
             <h1>{{ title }}</h1>
@@ -24,7 +24,7 @@
                             <template v-if="cartItem.product.allowMultiple">
                                 {{ cartItem.amount }} x
                             </template> 
-                            {{ cartItem.getUnitPrice(cart) | price }}
+                            {{ formatFreePrice(cartItem.getUnitPrice(cart)) }}
                         </p>
                         <div @click.stop>
                             <button class="button icon trash gray" type="button" @click="deleteItem(cartItem)" />
@@ -47,7 +47,7 @@
         </main>
 
         <STToolbar v-if="cart.items.length > 0">
-            <span slot="left">Totaal: {{ cart.price | price }}</span>
+            <span v-if="cart.price" slot="left">Totaal: {{ cart.price | price }}</span>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goToCheckout">
                     <span class="icon flag" />
@@ -84,7 +84,6 @@ import { CheckoutStepsManager } from './CheckoutStepsManager';
     },
     filters: {
         price: Formatter.price.bind(Formatter),
-        priceChange: Formatter.priceChange.bind(Formatter)
     }
 })
 export default class CartView extends Mixins(NavigationMixin){
@@ -113,6 +112,13 @@ export default class CartView extends Mixins(NavigationMixin){
             this.errorBox = new ErrorBox(e)
         }
         this.loading = false
+    }
+
+    formatFreePrice(price: number) {
+        if (price === 0) {
+            return ''
+        }
+        return Formatter.price(price)
     }
 
     imageSrc(cartItem: CartItem) {

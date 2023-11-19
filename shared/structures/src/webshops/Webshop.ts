@@ -159,6 +159,28 @@ export class Webshop extends AutoEncoder {
         return this.meta.hasTickets
     }
 
+    /**
+     * Whether we need to show the text 'Free' in webshops (only if we have at least one non-free product)
+     */
+    get isAllFree() {
+        for (const product of this.products) {
+            for (const price of product.prices) {
+                if (price.price) {
+                    return false
+                }
+            }
+
+            for (const menu of product.optionMenus) {
+                for (const option of menu.options) {
+                    if (option.price) {
+                        return false
+                    }
+                }
+            }
+        }
+        return true
+    }
+
     get canEnableCart() {
         if (this.products.length === 1) {
             const product = this.products[0]
