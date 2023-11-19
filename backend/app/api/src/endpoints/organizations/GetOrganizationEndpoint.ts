@@ -1,7 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { KeychainItem, Organization } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { KeychainedResponse, KeychainItem as KeychainItemStruct, Organization as OrganizationStruct  } from "@stamhoofd/structures";
+import { Organization, Token } from '@stamhoofd/models';
+import { KeychainedResponse, Organization as OrganizationStruct } from "@stamhoofd/structures";
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined
