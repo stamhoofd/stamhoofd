@@ -203,19 +203,22 @@ export class OrganizationMetaData extends AutoEncoder {
 
     // Everything below should move to registrations meta data
 
-    @field({ decoder: IntegerDecoder })
+    /**
+     * @deprecated
+     */
+    @field({ decoder: IntegerDecoder, optional: true })
     expectedMemberCount = 0
 
     @field({ decoder: new EnumDecoder(OrganizationGenderType) })
     genderType: OrganizationGenderType = OrganizationGenderType.Mixed
 
-    @field({ decoder: DateDecoder })
-    defaultStartDate: Date
+    @field({ decoder: DateDecoder, optional: true })
+    defaultStartDate: Date = new Date()
 
-    @field({ decoder: DateDecoder })
-    defaultEndDate: Date
+    @field({ decoder: DateDecoder, optional: true })
+    defaultEndDate: Date = new Date()
 
-    @field({ decoder: new ArrayDecoder(GroupPrices) })
+    @field({ decoder: new ArrayDecoder(GroupPrices), optional: true })
     defaultPrices: GroupPrices[] = []
 
     /**

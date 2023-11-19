@@ -55,14 +55,14 @@ export class Organization extends AutoEncoder {
     /**
      * @deprecated
      */
-    @field({ decoder: StringDecoder })
+    @field({ decoder: StringDecoder, optional: true })
     publicKey = '';
 
     /**
      * All the available groups are listed here. They are only 'active' and visible when inside a category. Please remove them here if they are inactive.
      * Deleting a group will also trigger database deletion.
      */
-    @field({ decoder: new ArrayDecoder(Group), version: 2, upgrade: () => [] })
+    @field({ decoder: new ArrayDecoder(Group), version: 2, upgrade: () => [], optional: true })
     groups: Group[] = []
 
     /**

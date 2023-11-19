@@ -226,7 +226,7 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
      * @deprecated
      * Moved to public meta data. Do not use.
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 86 })
+    @field({ decoder: StringDecoder, nullable: true, version: 86, optional: true })
     VATNumber: string | null = null
 
     getPaymentProviderFor(method: PaymentMethod, stripeAccountMeta?: StripeMetaData | null): PaymentProvider | null  {
