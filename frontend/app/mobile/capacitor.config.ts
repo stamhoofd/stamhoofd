@@ -9,7 +9,6 @@ const config: CapacitorConfig = {
     webDir: 'dist',
     bundledWebRuntime: false,
     loggingBehavior: "none",
-    hideLogs: true,
     plugins: {
         Keyboard: {
             resize: KeyboardResize.None,
