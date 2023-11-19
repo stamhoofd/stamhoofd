@@ -8,9 +8,16 @@
             </h1>
             <p>We zijn niet 100% zeker dat deze leden uit Stamhoofd en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Stamhoofd) overschrijven als je ze aanvinkt.</p>
         
+            <button v-if="!isCheckedAll" class="button text" type="button" @click="checkAll">
+                Alles aanvinken
+            </button>
+            <button v-else class="button text" type="button" @click="uncheckAll">
+                Alles uitvinken
+            </button>
+
             <STList>
                 <STListItem v-for="(match, index) in members" :key="index" element-name="label" :selectable="true">
-                    <div slot="left">
+                    <div>
                         <h2 class="style-title-list">
                             {{ match.details.name }}
                         </h2>
@@ -19,7 +26,7 @@
                         </p>
                     </div>
 
-                    <div>
+                    <div slot="right">
                         <h2 class="style-title-list">
                             {{ match.probablyEqual.details.name }}
                         </h2>
@@ -28,7 +35,7 @@
                         </p>
                     </div>
 
-                    <Checkbox slot="right" :checked="getVerified(match)" @change="setVerified(match, $event)" />
+                    <Checkbox slot="left" :checked="getVerified(match)" @change="setVerified(match, $event)" />
                 </STListItem>
             </STList>
         </main>
@@ -80,6 +87,27 @@ export default class ImportVerifyProbablyEqualView extends Mixins(NavigationMixi
 
     getVerified(member: ImportingMember) {
         return !!member.equal
+    }
+
+    get isCheckedAll() {
+        for (const member of this.members) {
+            if (!this.getVerified(member)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    checkAll() {
+        for (const member of this.members) {
+            this.setVerified(member, true)
+        }
+    }
+
+    uncheckAll() {
+        for (const member of this.members) {
+            this.setVerified(member, false)
+        }
     }
 
     setVerified(member: ImportingMember, value: boolean) {

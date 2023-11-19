@@ -29,6 +29,12 @@ export class Parent extends AutoEncoder {
     address: Address | null = null;
 
     get name() {
+        if (!this.firstName) {
+            return this.lastName;
+        }
+        if (!this.lastName) {
+            return this.firstName;
+        }
         return this.firstName + " " + this.lastName;
     }
 
@@ -55,7 +61,11 @@ export class Parent extends AutoEncoder {
         }
 
         if (this.email) {
-            this.email = this.email.toLowerCase()
+            this.email = this.email.toLowerCase().trim()
+        }
+
+        if (this.phone) {
+            this.phone = Formatter.removeDuplicateSpaces(this.phone.trim())
         }
 
         this.firstName = Formatter.capitalizeFirstLetter(Formatter.removeDuplicateSpaces(this.firstName.trim()))
@@ -87,6 +97,17 @@ export class Parent extends AutoEncoder {
 
         if (other.phone) {
             this.phone = other.phone
+        }
+
+        if (other.type) {
+            if (other.type === ParentType.Parent1 || other.type === ParentType.Parent2) {
+                // Ignore if current type is also not one of those
+                if (this.type === ParentType.Parent1 || this.type === ParentType.Parent2) {
+                    this.type = other.type
+                }
+            } else {
+                this.type = other.type
+            }
         }
     }
 }
