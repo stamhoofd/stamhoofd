@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 
 import { STInvoice } from "../billing/STInvoice";
 
@@ -12,9 +12,18 @@ function isInvoiceComplete(invoice: STInvoice, payoutExport: StripePayoutExport)
     return totalPayout === invoice.meta.priceWithVAT
 }
 
+export enum StripePayoutItemType {
+    Invoice = "Invoice",
+    StripeFees = "StripeFees",
+    StripeReserved = "StripeReserved"
+}
+
 export class StripePayoutItem extends AutoEncoder {
     @field({ decoder: StringDecoder})
     name = ""
+
+    @field({ decoder: new EnumDecoder(StripePayoutItemType) })
+    type = StripePayoutItemType.Invoice
 
     @field({ decoder: IntegerDecoder })
     amount = 0
@@ -56,7 +65,7 @@ export class StripePayoutBreakdown extends AutoEncoder {
 
     isComplete(payoutExport: StripePayoutExport) {
         for (const item of this.items) {
-            if (item.name === "Stripe Factuur") {
+            if (item.type !== StripePayoutItemType.Invoice) {
                 continue;
             }
 
@@ -103,18 +112,22 @@ export class StripePayoutExport extends AutoEncoder {
     }
 
     get totalStripeFees() {
-        return this.completePayouts.reduce((total, payout) => total + payout.items.filter(i => i.name === "Stripe Factuur").reduce((total, item) => total - item.amount, 0), 0)
+        return this.completePayouts.reduce((total, payout) => total + payout.items.filter(i => i.type === StripePayoutItemType.StripeFees).reduce((total, item) => total - item.amount, 0), 0)
+    }
+
+    get totalStripeReserved() {
+        return this.completePayouts.reduce((total, payout) => total + payout.items.filter(i => i.type === StripePayoutItemType.StripeReserved).reduce((total, item) => total - item.amount, 0), 0)
     }
 
     get totalInvoices() {
-        return this.completePayouts.reduce((total, payout) => total + payout.items.filter(i => i.name !== "Stripe Factuur").reduce((total, item) => total + item.amount, 0), 0)
+        return this.completePayouts.reduce((total, payout) => total + payout.items.filter(i => i.type === StripePayoutItemType.Invoice).reduce((total, item) => total + item.amount, 0), 0)
     }
 
     get totalVAT() {
         let VAT = 0;
         for (const payout of this.completePayouts) {
             for (const item of payout.items) {
-                if (item.name === "Stripe Factuur") {
+                if (item.type !== StripePayoutItemType.Invoice) {
                     continue;
                 }
 
