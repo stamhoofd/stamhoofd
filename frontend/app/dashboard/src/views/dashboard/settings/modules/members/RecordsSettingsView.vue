@@ -89,7 +89,7 @@
         <h2>Vragenlijsten tijdens inschrijven</h2>
 
         <p>
-            Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het inschrijven. Met filters kan je ervoor zorgen dat bepaalde vragenlijsten enkel gevraagd worden voor bepaalde leden.
+            Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het inschrijven. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/vragenlijsten-instellen/'" class="inline-link" target="_blank">Meer info</a>
         </p>
 
         <STList v-model="categories" :draggable="true">
@@ -124,13 +124,14 @@
 <script lang="ts">
 import { AutoEncoder, AutoEncoderPatchType, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, PropertyFilterView, SaveView, STErrorsDefault, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { AskRequirement, MemberDetails, MemberDetailsWithGroups, Organization, OrganizationMetaData, OrganizationPatch, OrganizationRecordsConfiguration, PropertyFilter, RecordAnswer, RecordCategory, RecordEditorSettings, Version } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../../classes/OrganizationManager";
+import EditRecordCategoryQuestionsView from './records/EditRecordCategoryQuestionsView.vue';
 import EditRecordCategoryView from './records/EditRecordCategoryView.vue';
 import RecordCategoryRow from "./records/RecordCategoryRow.vue";
 
@@ -238,14 +239,36 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
     addCategory() {
         const category = RecordCategory.create({})
 
-        this.present(new ComponentWithProperties(EditRecordCategoryView, {
-            category,
-            isNew: true,
-            filterDefinitions: this.filterDefinitions,
-            saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
-                this.addCategoriesPatch(patch)
-            }
-        }).setDisplayStyle("popup"))
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(EditRecordCategoryView, {
+                        category,
+                        isNew: true,
+                        filterDefinitions: this.filterDefinitions,
+                        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>, component: NavigationMixin) => {
+                            this.addCategoriesPatch(patch)
+                            component.show({
+                                components: [
+                                    new ComponentWithProperties(EditRecordCategoryQuestionsView, {
+                                        categoryId: category.id,
+                                        rootCategories: this.categories,
+                                        settings: this.editorSettings,
+                                        isNew: false,
+                                        saveHandler: (patch: PatchableArrayAutoEncoder<RecordCategory>) => {
+                                            this.addCategoriesPatch(patch)
+                                        }
+                                    })
+                                ],
+                                replace: 1,
+                                force: true
+                            })
+                        }
+                    })
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
     }
     
     getEnableFilterConfiguration(property: string) {

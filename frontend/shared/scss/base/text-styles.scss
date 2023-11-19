@@ -122,6 +122,11 @@
             margin-left: 5px;
         }
     }
+
+    +p:not([class]),
+    +p.style-description {
+        @extend .style-description-block;
+    }
 }
 
 .style-title-2-larger {
@@ -450,7 +455,7 @@
 .style-button-bar {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: 15px;
 
     align-items: center;
 }
