@@ -103,7 +103,18 @@ export class CheckoutManagerStatic {
         }
     }
 
+    fetchBalancePromise: Promise<void>|null = null
+
     async fetchBalance() {
+        if (this.fetchBalancePromise) {
+            return this.fetchBalancePromise
+        }
+        this.fetchBalancePromise = this._fetchBalance()
+        await this.fetchBalancePromise
+        this.fetchBalancePromise = null
+    }
+
+    async _fetchBalance() {
         const response = await SessionManager.currentSession!.authenticatedServer.request({
             method: 'GET',
             path: '/balance',
@@ -112,7 +123,14 @@ export class CheckoutManagerStatic {
         this.balanceItems = response.data
     }
 
+    lastFullRefetch = new Date() // On load
+
+    isLastFullRefetchOld(ageInSeconds: number = 10 * 60) {
+        return (new Date().getTime() - this.lastFullRefetch.getTime()) / 1000 > ageInSeconds
+    }
+
     async recalculateCart(refetch = false) {
+        console.log("Recalculate cart", refetch)
         try {
             // Reload groups
             if (refetch) {
@@ -122,6 +140,10 @@ export class CheckoutManagerStatic {
             if (refetch || this.balanceItems === null) {
                 await this.fetchBalance()
             }
+
+            if (refetch) (
+                this.lastFullRefetch = new Date()
+            )
 
             // Revalidate
             this.cart.validate(MemberManager.members ?? [], OrganizationManager.organization.groups, OrganizationManager.organization.meta.categories, this.balanceItems!)

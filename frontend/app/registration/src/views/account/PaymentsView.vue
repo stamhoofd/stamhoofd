@@ -7,6 +7,8 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
+            <LoadingView v-if="loading" />
+
             <p v-if="payments.length === 0 && !loading" class="info-box">
                 Er zijn momenteel nog geen afrekeningen beschikbaar voor jouw account
             </p>
@@ -112,7 +114,7 @@
 <script lang="ts">
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { ErrorBox, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { ErrorBox, LoadingView,STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { MemberBalanceItem, Payment, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -131,7 +133,8 @@ import PaymentView from "./PaymentView.vue";
         STListItem,
         STErrorsDefault,
         STNavigationBar,
-        STToolbar
+        STToolbar,
+        LoadingView
     },
     filters: {
         price: Formatter.price

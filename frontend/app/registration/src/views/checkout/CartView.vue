@@ -277,7 +277,10 @@ export default class CartView extends Mixins(NavigationMixin){
 
     async recalculate() {
         try {
-            await CheckoutManager.recalculateCart(true)
+            await CheckoutManager.recalculateCart(
+                // Refresh on every open of the cart, but not if last full refresh was less than 10 seconds ago
+                CheckoutManager.isLastFullRefetchOld(10)
+            )
             this.errorBox = null
         } catch (e) {
             console.error(e)

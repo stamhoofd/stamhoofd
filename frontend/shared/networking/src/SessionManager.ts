@@ -10,10 +10,10 @@ import { Storage } from './Storage';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
-    organizations: Organization[] = []
+        organizations: Organization[] = []
 
     @field({ decoder: StringDecoder, nullable: true })
-    lastOrganizationId: string | null = null
+        lastOrganizationId: string | null = null
 }
 
 type AuthenticationStateListener = (changed: "userPrivateKey" | "user" | "organization" | "token" | "session") => void
