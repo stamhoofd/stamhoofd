@@ -551,13 +551,26 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         }
 
         try {
+            const metaPatch = OrganizationMetaData.patch({})
+
+            for (const category of this.organization.meta.categories) {
+                if (category.groupIds.includes(this.group.id)) {
+                    const catPatch = GroupCategory.patch({id: category.id})
+                    catPatch.groupIds.addDelete(this.group.id)
+                    metaPatch.categories.addPatch(catPatch)
+                }
+            }
+
             const patch = Organization.patch({
-                id: OrganizationManager.organization.id
+                id: OrganizationManager.organization.id,
+                meta: metaPatch
             })
             patch.groups.addPatch(Group.patch({
                 id: this.group.id,
                 status: GroupStatus.Archived
             }))
+
+           
             await OrganizationManager.patch(patch)
 
             // Force update because the patch won't get the group in the response
@@ -574,8 +587,19 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         }
 
         try {
+            const metaPatch = OrganizationMetaData.patch({})
+
+            for (const category of this.organization.meta.categories) {
+                if (category.groupIds.includes(this.group.id)) {
+                    const catPatch = GroupCategory.patch({id: category.id})
+                    catPatch.groupIds.addDelete(this.group.id)
+                    metaPatch.categories.addPatch(catPatch)
+                }
+            }
+
             const patch = Organization.patch({
-                id: OrganizationManager.organization.id
+                id: OrganizationManager.organization.id,
+                meta: metaPatch
             })
             patch.groups.addDelete(this.group.id)
             await OrganizationManager.patch(patch)
@@ -616,13 +640,22 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
             return
         }
 
-
         const wasArchive = this.isArchive
 
         try {
             const metaPatch = OrganizationMetaData.patch({})
             const catPatch = GroupCategory.patch({id: cat.id})
-            catPatch.groupIds.addPut(group.id)
+
+            if (cat.groupIds.filter(id => id == group.id).length > 1) {
+                // Not fixable, we need to set the ids manually
+                const cleaned = cat.groupIds.filter(id => id != group.id)
+                cleaned.push(group.id)
+                catPatch.groupIds = cleaned as any
+            } else {
+                // We need to delete it to fix issues if it is still there
+                catPatch.groupIds.addDelete(group.id)
+                catPatch.groupIds.addPut(group.id)
+            }
 
             metaPatch.categories.addPatch(catPatch)
 

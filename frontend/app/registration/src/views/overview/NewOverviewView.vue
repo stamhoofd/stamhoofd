@@ -29,8 +29,11 @@
                         Welkom op het ledenportaal van {{ organization.name }}.
                     </p>
 
-                    <p v-if="!isAcceptingNewMembers && members.length == 0" class="warning-box">
-                        Er zijn geen leden verbonden met dit account. Je kan op dit moment geen nieuwe leden inschrijven. Kijk eventueel na of je met het juiste e-mailadres bent ingelogd als je een bestaand lid wilt wijzigen of inschrijven.
+                    <p v-if="!isAcceptingNewMembers && members.length == 0 && !isAcceptingExistingMembers" class="warning-box">
+                        Je kan op dit moment geen nieuwe leden inschrijven.
+                    </p>
+                    <p v-else-if="!isAcceptingNewMembers && members.length == 0" class="warning-box">
+                        Je kan op dit moment geen nieuwe leden inschrijven. Kijk eventueel na of je met het juiste e-mailadres bent ingelogd als je een bestaand lid wilt wijzigen of inschrijven.
                     </p>
 
                     <template v-if="members.length == 0 && isAcceptingNewMembers">
@@ -244,6 +247,10 @@ export default class NewOverviewView extends Mixins(NavigationMixin){
 
     get isAcceptingNewMembers() {
         return this.organization.isAcceptingNewMembers(!!SessionManager.currentSession?.user?.permissions)
+    }
+
+    get isAcceptingExistingMembers() {
+        return this.organization.isAcceptingExistingMembers(!!SessionManager.currentSession?.user?.permissions)
     }
 
     get documents() {
