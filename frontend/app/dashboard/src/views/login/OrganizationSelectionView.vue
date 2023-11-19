@@ -3,7 +3,7 @@
         <STGradientBackground />
 
         <div class="st-view background transparent">
-            <STNavigationBar :large="true" class="transparent">
+            <STNavigationBar v-if="!isNative" :large="true" class="transparent">
                 <template slot="left">
                     <a alt="Stamhoofd" :href="'https://'+$t('shared.domains.marketing')+''" rel="noopener" class="logo-container">
                         <Logo class="responsive" />
@@ -22,6 +22,8 @@
                     </a>
                 </template>
             </STNavigationBar>
+            <STNavigationBar v-else title="Beheer jouw vereniging" class="transparent" />
+
             <main class="limit-width">
                 <div class="organization-selection-view" :class="{native: isNative}">
                     <h1>
@@ -38,7 +40,10 @@
                         <input ref="input" v-model="query" class="input" placeholder="Zoek op naam of postcode" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" spellcheck="false" autocapitalize="off" @input="query = $event.target.value" @keydown.down.prevent="selectResult(0)">
                     </form>
 
-                    <Spinner v-if="loading" class="gray center" />
+                    <div v-if="showDevelopment" class="version-box">
+                        <VersionFooter />
+                    </div>
+                    <Spinner v-else-if="loading" class="gray center" />
                     <template v-else>
                         <button v-for="(organization, index) in filteredResults" :key="organization.id" ref="results" type="button" class="search-result" @keydown.down.prevent="selectResult(index + 1)" @keydown.up.prevent="selectResult(index - 1)" @click="loginOrganization(organization.id)">
                             <OrganizationAvatar :organization="organization" />
@@ -52,11 +57,11 @@
                         </button>
                     </template>
 
-                    <p v-if="!loading && filteredResults.length == 0 && query" class="info-box">
+                    <p v-if="!loading && filteredResults.length == 0 && query && !showDevelopment" class="info-box">
                         Geen verenigingen gevonden. Probeer te zoeken op postcode of naam. Is jouw vereniging nog niet aangesloten? Maak dan eerst een vereniging aan.
                     </p>
 
-                    <footer>
+                    <footer v-if="!showDevelopment">
                         <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="gotoSignup">
                             <span class="icon add" />
                             <span>Mijn vereniging aansluiten</span>
@@ -78,11 +83,12 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, CenteredMessage, Logo, OrganizationAvatar, Spinner, STGradientBackground,STNavigationBar, Toast } from '@stamhoofd/components';
-import { AppManager, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../classes/OrganizationManager';
+import VersionFooter from '../dashboard/settings/VersionFooter.vue';
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -113,7 +119,8 @@ const throttle = (func, limit) => {
         STNavigationBar,
         Logo,
         OrganizationAvatar,
-        STGradientBackground
+        STGradientBackground,
+        VersionFooter
     },
     metaInfo() {
         return {
@@ -147,6 +154,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
         // update
         this.startUpdateResults();
+    }
+
+    get showDevelopment() {
+        return this.q.toLocaleLowerCase().trim() === 'stamhoofd dev'
     }
 
     help() {
@@ -201,6 +212,11 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
             } catch (e) {
                 console.error(e)
             }
+        }
+
+        if (parts.length >= 2 && parts[0] == 'login') {
+            const id = parts[1]
+            this.loginOrganization(id, false).catch(console.error);
         }
 
         if ((parts.length == 2 && parts[0] == 'auth' && parts[1] == 'nolt')) {
@@ -264,7 +280,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
     lastQuery = ""
 
     updateResults() {
-        if (this.query.length == 0) {
+        if (this.query.length == 0 || this.showDevelopment) {
             this.results = []
             this.loading = false
             return
@@ -310,14 +326,28 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         }
     }
 
-    async loginOrganization(organizationId: string) {
+    async loginOrganization(organizationId: string, animated = true) {
         if (this.loadingSession) {
             return
         }
         this.loadingSession = organizationId
+
+        if (animated == true && organizationId === "34541097-44dd-4c68-885e-de4f42abae4c") {
+            await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
+            await AppManager.shared.checkUpdates({
+                // Always load the staging build
+                customText: 'Bezig met laden...',
+                visibleDownload: true,
+                installAutomatically: true,
+                force: STAMHOOFD.environment !== 'staging',
+                channel: 'https://files.stamhoofd.be/releases/app/staging/latest.json',
+                checkTimeout: 15 * 1000
+            })
+            await Storage.keyValue.removeItem('next_url_load')
+        }
         
         try {
-            await OrganizationManager.switchOrganization(this, organizationId)
+            await OrganizationManager.switchOrganization(this, organizationId, animated)
         } catch (e) {
             Toast.fromError(e).show()
         }
@@ -348,6 +378,10 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
 
     &.native {
         padding-top: 0;
+    }
+
+    .version-box {
+        padding: 15px 0;
     }
 
     > h1 {

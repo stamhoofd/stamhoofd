@@ -8,7 +8,6 @@ const config: CapacitorConfig = {
     appId: 'com.stamhoofd.stamhoofd',
     appName: 'Stamhoofd',
     webDir: 'dist',
-    bundledWebRuntime: false,
     loggingBehavior: "none",
     plugins: {
         Keyboard: {
@@ -16,6 +15,9 @@ const config: CapacitorConfig = {
         },
         PushNotifications: {
             presentationOptions: ["badge", "sound", "alert"]
+        },
+        CapacitorUpdater: {
+            "autoUpdate": false,
         }
     },
     server: {

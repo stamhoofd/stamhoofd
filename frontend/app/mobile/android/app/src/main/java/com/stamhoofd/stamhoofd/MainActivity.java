@@ -8,6 +8,7 @@ import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 
 public class MainActivity extends BridgeActivity {
 
@@ -25,6 +26,8 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(FileOpenerPlugin.class);
         super.onCreate(savedInstanceState);
+
+        //WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
     }
 
     @Override

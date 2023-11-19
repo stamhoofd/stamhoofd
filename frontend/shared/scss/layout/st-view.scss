@@ -115,6 +115,12 @@ body.modern.web-iOS {
             scroll-padding-bottom: calc(30px + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
         }
 
+        &.flex {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
         &.limit-width {
             display: flex;
             flex-direction: column;

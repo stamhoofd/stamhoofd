@@ -37,7 +37,7 @@
         "@babel/runtime": "^7.15.4",
         "@simonbackx/simple-encoding": "^2.8.2",
         "@simonbackx/simple-errors": "^1.4.0",
-        "@simonbackx/simple-networking": "^1.14.2",
+        "@simonbackx/simple-networking": "1.15.0",
         "@simonbackx/vue-app-navigation": "^1.24.1",
         "@zxcvbn-ts/core": "^0.3.0",
         "@zxcvbn-ts/language-common": "^0.1.2",

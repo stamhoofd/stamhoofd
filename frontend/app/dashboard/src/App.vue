@@ -10,7 +10,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, SplitViewController } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, AuthenticatedView, CenteredMessage, CenteredMessageView, ForgotPasswordResetView, ModalStackEventBus, PromiseView, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { LoginHelper, NetworkManager, Session, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, NetworkManager, Session, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { Country, EmailAddressSettings, Token } from '@stamhoofd/structures';
 import { Component, Vue } from "vue-property-decorator";
 
@@ -170,6 +170,12 @@ export default class App extends Vue {
                 ]
             })
         })
+
+        AppManager.shared.checkUpdates({
+            visibleCheck: 'spinner',
+            visibleDownload: true,
+            installAutomatically: true
+        }).catch(console.error)
     }
 
     async unsubscribe(id: string, token: string, type: 'all' | 'marketing') {

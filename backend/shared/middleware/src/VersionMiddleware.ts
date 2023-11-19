@@ -1,5 +1,6 @@
 import { EncodedResponse, Request, RequestMiddleware, ResponseMiddleware } from "@simonbackx/simple-endpoints";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
+import { Version } from "@stamhoofd/structures";
 
 export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware {
     minimumVersion: number | undefined
@@ -73,5 +74,6 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         if (platform === "web") {
             response.headers["X-Platform-Latest-Version"] = this.latestVersions.web
         }
+        response.headers["X-Version"] = Math.min(Version, request.getVersion())
     }
 }
