@@ -369,7 +369,7 @@ export class GroupSettings extends AutoEncoder {
     getMemberCount({cycle, waitingList}: {cycle?: number, waitingList?: boolean}) {
         let data: GroupSettings|CycleInformation|undefined = this;
 
-        if (cycle) {
+        if (cycle !== undefined) {
             data = this.cycleSettings.get(cycle)
         }
 
