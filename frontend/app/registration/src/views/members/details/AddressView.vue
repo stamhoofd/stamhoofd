@@ -1,16 +1,17 @@
 <template>
-    <SaveView :save-text="'Opslaan'" title="Adres" @save="save">
+    <SaveView :save-text="'Opslaan'" title="Adres" :loading="loading" @save="save">
         <h1>
             Adres bewerken
         </h1>
-
+        
+        <STErrorsDefault :error-box="errorBox" />
         <AddressInput v-model="editAddress" title="Adres" :validator="validator" :required="true" />
     </SaveView>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, Dropdown, EmailInput, PhoneInput, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
+import { AddressInput, Dropdown, EmailInput, ErrorBox, PhoneInput, SaveView, STErrorsDefault, STInputBox, Validator } from "@stamhoofd/components";
 import { Address } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -29,12 +30,17 @@ import { MemberManager } from '../../../classes/MemberManager';
 })
 export default class AddressView extends Mixins(NavigationMixin) {
     @Prop({ required: true})
-    address!: Address
+        address!: Address
+    errorBox: ErrorBox | null = null
 
     editAddress = Address.create(this.address)
     validator = new Validator()
+    loading = false
 
     MemberManager = MemberManager
+    
+    @Prop({ required: true })
+        handler: (parent: Address, component: AddressView) => Promise<void>|undefined;
 
 
     modifyAddress({ from, to }: { from: Address, to: Address }) {
@@ -42,14 +48,26 @@ export default class AddressView extends Mixins(NavigationMixin) {
     }
 
     async save() {
+        if (this.loading) {
+            return;
+        }
+
+        this.loading = true;
         const valid = await this.validator.validate()
 
         if (!valid) {
+            this.loading = false;
             return;
         }
 
         MemberManager.updateAddress(this.address, this.editAddress)
-        this.dismiss({force: true})
+
+        try {
+            await this.handler(this.editAddress, this)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.loading = false;
     }
 }
 </script>

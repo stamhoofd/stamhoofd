@@ -1,5 +1,5 @@
 <template>
-    <SaveView :save-text="!parent ? 'Toevoegen' : 'Opslaan'" title="Ouder" @save="goNext">
+    <SaveView :save-text="!parent ? 'Toevoegen' : 'Opslaan'" title="Ouder" :loading="loading" @save="goNext">
         <h1 v-if="!parent">
             Ouder toevoegen
         </h1>
@@ -63,13 +63,15 @@ import { MemberManager } from '../../../classes/MemberManager';
 })
 export default class ParentView extends Mixins(NavigationMixin) {
     @Prop({ default: null })
-    memberDetails: MemberDetails | null
+        memberDetails: MemberDetails | null
 
     @Prop({ default: null })
-    parent: Parent | null
+        parent: Parent | null
 
     @Prop({ required: true })
-    handler: (parent: Parent, component: ParentView) => void;
+        handler: (parent: Parent, component: ParentView) => Promise<void>|undefined;
+
+    loading = false
 
     firstName = ""
     lastName = ""
@@ -127,6 +129,10 @@ export default class ParentView extends Mixins(NavigationMixin) {
     }
 
     async goNext() {
+        if (this.loading) {
+            return;
+        }
+
         const errors = new SimpleErrors()
         if (this.firstName.length < 2) {
             errors.addError(new SimpleError({
@@ -143,18 +149,28 @@ export default class ParentView extends Mixins(NavigationMixin) {
             }))
         }
 
-        const valid = await this.validator.validate()
+        this.loading = true
+        try {
+            const valid = await this.validator.validate()
 
-        if (errors.errors.length > 0) {
-            this.errorBox = new ErrorBox(errors)
-            return;
-        } 
+            if (errors.errors.length > 0) {
+                this.loading = false
+                this.errorBox = new ErrorBox(errors)
+                return;
+            } 
 
-        if (!valid) {
-            this.errorBox = null
+            if (!valid) {
+                this.loading = false
+                this.errorBox = null
+                return;
+            }
+
+        } catch (e) {
+            this.loading = false
+            this.errorBox = new ErrorBox(e)
             return;
         }
-
+       
         if (this.parent) {
             this.parent.firstName = this.firstName
             this.parent.lastName = this.lastName
@@ -177,7 +193,12 @@ export default class ParentView extends Mixins(NavigationMixin) {
             })
         }
         
-        this.handler(this.parent, this)
+        try {
+            await this.handler(this.parent, this)
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.loading = false
     }
 }
 </script>
