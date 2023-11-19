@@ -144,6 +144,15 @@ export class OrganizationOverview extends AutoEncoder {
         const name = Formatter.slug(this.name)
         const orgParts = name.split(/[ -]/);
 
+        if (q.includes('@')) {
+            if (this.emails.some(e => e.email.toLocaleLowerCase() == q.toLocaleLowerCase())) {
+                return true;
+            }
+            if (this.admins.some(a => a.email.toLocaleLowerCase() == q.toLocaleLowerCase())) {
+                return true;
+            }
+        }
+
         for (const [index, part] of parts.entries()) {
             if (part.length > 1 || index >= parts.length - 1) {
                 if (index < parts.length - 1) {
