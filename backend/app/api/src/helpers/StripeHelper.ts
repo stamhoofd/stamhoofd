@@ -125,7 +125,7 @@ export class StripeHelper {
             redirectUrl: string, 
             cancelUrl: string, 
             customer: {
-                name?: string, 
+                name: string, 
                 email: string, 
             },
             statementDescriptor: string,
@@ -173,7 +173,7 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact',
                 billing_details: {
-                    name: customer.name && customer.name.length > 2 ? customer.name : undefined,
+                    name: customer.name && customer.name.length > 2 ? customer.name : 'Onbekend',
                     email: customer.email
                 },
             })
