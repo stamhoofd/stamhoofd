@@ -99,7 +99,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
              * In development mode, we allow some secret usernames to create fake data
              */
             if (STAMHOOFD.environment == "development" || STAMHOOFD.environment == "staging") {
-                if (member.details.firstName == "create" && parseInt(member.details.lastName) > 0) {
+                if (member.details.firstName.toLocaleLowerCase() == "create" && parseInt(member.details.lastName) > 0) {
                     const count = parseInt(member.details.lastName);
                     let group = groups[0];
 

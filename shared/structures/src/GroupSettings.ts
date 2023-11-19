@@ -182,7 +182,7 @@ export class GroupSettings extends AutoEncoder {
         nullable: true, 
         version: 77
     })
-    registeredMembers: number | null = null
+    registeredMembers: number | null = 0
 
     /**
      * Amount of members that is reserved (e.g in payment process, or a member on the waiting list that is invited)
@@ -192,7 +192,7 @@ export class GroupSettings extends AutoEncoder {
         nullable: true, 
         version: 139
     })
-    reservedMembers: number | null = null
+    reservedMembers: number | null = 0
 
     /**
      * Amount of members on the waiting list
