@@ -67,13 +67,20 @@ export class MemberWithRegistrations extends EncryptedMemberWithRegistrations {
         return m
     }
 
-    filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, canRegister?: boolean}) {
+    filterRegistrations(filters: {groups?: Group[] | null, waitingList?: boolean, cycleOffset?: number, cycle?: number, canRegister?: boolean}) {
         return this.registrations.filter(r => {
-            const group = (filters.groups ?? this.allGroups).find(g => g.id === r.groupId)
+            let cycle = filters.cycle
+            if (filters.cycle === undefined) {
+                const group = (filters.groups ?? this.allGroups).find(g => g.id === r.groupId)
+                if (group) {
+                    cycle = group.cycle - (filters.cycleOffset ?? 0)
+                }
+            }
+
             if (
-                group 
+                cycle !== undefined 
                 && (filters.waitingList === undefined || r.waitingList === filters.waitingList) 
-                && r.cycle === group.cycle - (filters.cycleOffset ?? 0)
+                && r.cycle === cycle
             ) {
                 if (filters.canRegister !== undefined && r.waitingList) {
                     return r.canRegister === filters.canRegister
