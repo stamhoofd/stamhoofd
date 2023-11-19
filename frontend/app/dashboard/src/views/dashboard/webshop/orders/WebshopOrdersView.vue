@@ -311,37 +311,43 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             )
         }
 
-        // Show counts
-        cols.push(
-            new Column<PrivateOrderWithTickets, number>({
-                name: "Aantal", 
-                enabled: false,
-                getValue: (order) => {
-                    return order.data.cart.items.reduce((acc, item) => {
-                        return acc + item.amount
-                    }, 0)
-                },
-                format: (stat) => {
-                    if (!stat) {
-                        return 'Geen'
-                    }
-                    return stat.toString()
-                },
-                compare: (a, b) => Sorter.byNumberValue(b, a),
-                getStyle: (stat) => {
-                    if (stat === 0) {
-                        return "gray"
-                    }
-
-                    return ""
-                },
-                minimumWidth: 100,
-                recommendedWidth: this.hasSingleTickets ? 150 : 100,
-                index: 1
-            })
-        )
-
         if (!this.preview.meta.cartEnabled) {
+            cols.push(
+                new Column<PrivateOrderWithTickets, string>({
+                    name: "Artikel", 
+                    enabled: false,
+                    grow: true,
+                    getValue: (order) => {
+                        if (order.data.cart.items.length > 1) {
+                            return "Meerdere artikels"
+                        }
+
+                        const item = order.data.cart.items[0]
+                        if (!item) {
+                            return "";
+                        }
+                        return item.product.name
+                    },
+                    format: (stat) => {
+                        if (!stat) {
+                            return 'Geen'
+                        }
+                        return stat.toString()
+                    },
+                    compare: (a, b) => Sorter.byStringValue(b, a),
+                    getStyle: (stat) => {
+                        if (!stat || stat === "Meerdere artikels") {
+                            return "gray"
+                        }
+
+                        return ""
+                    },
+                    minimumWidth: 150,
+                    recommendedWidth: 200,
+                    index: 1
+                })
+            )
+
             cols.push(
                 new Column<PrivateOrderWithTickets, string>({
                     name: "Beschrijving", 
@@ -378,6 +384,36 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
                 })
             )
         }
+
+        // Show counts
+        cols.push(
+            new Column<PrivateOrderWithTickets, number>({
+                name: "Aantal", 
+                enabled: false,
+                getValue: (order) => {
+                    return order.data.cart.items.reduce((acc, item) => {
+                        return acc + item.amount
+                    }, 0)
+                },
+                format: (stat) => {
+                    if (!stat) {
+                        return 'Geen'
+                    }
+                    return stat.toString()
+                },
+                compare: (a, b) => Sorter.byNumberValue(b, a),
+                getStyle: (stat) => {
+                    if (stat === 0) {
+                        return "gray"
+                    }
+
+                    return ""
+                },
+                minimumWidth: 100,
+                recommendedWidth: this.hasSingleTickets ? 150 : 100,
+                index: 1
+            })
+        )
       
         return cols
     })()
