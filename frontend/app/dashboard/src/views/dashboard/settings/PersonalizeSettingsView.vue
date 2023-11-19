@@ -25,7 +25,7 @@
         </div>
 
         <Checkbox v-model="expandLogo">
-            Logo groter weergeven
+            Logo groter weergeven (afgeraden)
         </Checkbox>
         <p class="st-list-description">
             Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten. Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.

@@ -39,7 +39,7 @@
             </div>
 
             <Checkbox v-model="expandLogo">
-                Logo groter weergeven (meestal beter om dit uit te laten)
+                Logo groter weergeven (afgeraden)
             </Checkbox>
         </div>
     </div>

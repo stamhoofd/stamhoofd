@@ -256,6 +256,8 @@ body.modern.web-iOS {
 
             // Limit width and center
             margin: 0px auto;
+            width: 100%;
+            box-sizing: border-box;
             max-width: 800px;
             max-width: var(--box-width, 800px);
 
