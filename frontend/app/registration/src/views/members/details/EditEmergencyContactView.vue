@@ -1,5 +1,5 @@
 <template>
-    <SaveView title="Noodcontact" :loading="loading" :save-text="saveText" :cancel-text="null" @save="goNext">
+    <SaveView title="Noodcontact" :loading="loading" :save-text="saveText" @save="goNext">
         <h1 v-if="details.parents.length > 0">
             Reserve noodcontactpersoon
         </h1>
@@ -64,22 +64,11 @@
             </div>
         </div>
 
-
+        <hr v-if="isOptional && details.emergencyContacts.length > 0">
         <button v-if="isOptional && details.emergencyContacts.length > 0" class="button text" type="button" @click="skipStep">
             <span class="icon trash" />
             <span>Noodcontact verwijderen</span>
         </button>
-
-        <!--<STToolbar>
-            <button v-if="isOptional && details.emergencyContacts.length == 0" slot="right" class="button secundary" @click="skipStep">
-                Overslaan
-            </button>
-            <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" @click="goNext">
-                    {{ nextText }}
-                </button>
-            </LoadingButton>
-        </STToolbar>-->
     </SaveView>
 </template>
 
@@ -106,22 +95,22 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     loading = false
 
     @Prop({ required: true })
-    isNew: boolean
+        isNew: boolean
 
     @Prop({ required: true })
-    nextText: string
+        nextText: string
 
     @Prop({ required: true })
-    details: MemberDetails
+        details: MemberDetails
 
     @Prop({ required: false })
-    member?: MemberWithRegistrations
+        member?: MemberWithRegistrations
 
     @Prop({ required: true })
-    items: RegisterItem[]
+        items: RegisterItem[]
 
     @Prop({ required: true })
-    saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
+        saveHandler: (details: MemberDetails, component: NavigationMixin) => Promise<void>
 
     name = ""
     title = ""
@@ -131,7 +120,7 @@ export default class EditEmergencyContactView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     @Prop({ required: true })
-    originalDetails: MemberDetails
+        originalDetails: MemberDetails
 
     getFilterDefinitionsForProperty(property: string): FilterDefinition[] {
         if (['parents', 'emergencyContacts'].includes(property)) {

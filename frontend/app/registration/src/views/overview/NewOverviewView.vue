@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="loadingBalance" />
-    <div v-else class="st-view boxed">
+    <div v-else class="st-view box-shade">
         <STNavigationBar :large="true">
             <template slot="left">
                 <OrganizationLogo :organization="organization" />
@@ -18,8 +18,8 @@
             </template>
         </STNavigationBar>
 
-        <div class="box">
-            <div class="st-view">
+        <main class="with-legal">
+            <div class="box">
                 <main>
                     <h1>Ledenportaal</h1>
                     <p v-if="members.length == 0">
@@ -188,14 +188,16 @@
                     </template>
                 </main>
             </div>
-        </div>
+
+            <LegalFooter :organization="organization" />
+        </main>
     </div>
 </template>
 
 <script lang="ts">
 import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { CenteredMessage, LegalFooter,LoadingView, OrganizationLogo, PromiseView, Spinner, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { downloadDocument } from "@stamhoofd/document-helper"
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { Document, DocumentStatus, MemberWithRegistrations } from "@stamhoofd/structures";
@@ -223,7 +225,8 @@ import ChooseMemberView from "./register-flow/ChooseMemberView.vue";
         STListItem,
         LoadingView,
         STToolbar,
-        Spinner
+        Spinner,
+        LegalFooter
     }
 })
 export default class NewOverviewView extends Mixins(NavigationMixin){

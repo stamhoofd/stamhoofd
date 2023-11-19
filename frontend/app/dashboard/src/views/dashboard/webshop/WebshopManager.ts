@@ -207,6 +207,10 @@ export class WebshopManager {
         })
     }
 
+    deleteDatabase() {
+        window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
+    }
+
     async getDatabase(): Promise<IDBDatabase> {
         if (this.database) {
             return this.database
@@ -236,7 +240,7 @@ export class WebshopManager {
                 
                 // Try to delete this database if something goes wrong
                 //if (STAMHOOFD.environment == "development") {
-                window.indexedDB.deleteDatabase('webshop-'+this.preview.id);
+                this.deleteDatabase();
                 //}
 
                 reject(new SimpleError({
@@ -333,6 +337,7 @@ export class WebshopManager {
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
+                this.deleteDatabase();
                 reject(event)
             };
 
@@ -486,6 +491,7 @@ export class WebshopManager {
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
+                this.deleteDatabase();
                 reject(event)
             };
 

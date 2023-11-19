@@ -117,7 +117,7 @@ export default class App extends Vue {
                         if (isPrerender) {
                             return new ComponentWithProperties(PrerenderRedirectView, { location: marketingWebshops })
                         }
-                        window.location.href = marketingWebshops
+                        //window.location.href = marketingWebshops
                         return new ComponentWithProperties(InvalidWebshopView, {})
                     }
                     return new ComponentWithProperties(NavigationController, { 
@@ -178,7 +178,7 @@ export default class App extends Vue {
                         return new ComponentWithProperties(PrerenderRedirectView, { location: marketingWebshops })
                     }
 
-                    window.location.href = marketingWebshops
+                    //window.location.href = marketingWebshops
                 }
                 return new ComponentWithProperties(InvalidWebshopView, {})
             }

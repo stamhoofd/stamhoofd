@@ -1,5 +1,5 @@
 <template>
-    <section class="st-view boxed choose-webshop-view">
+    <section class="st-view box-shade choose-webshop-view">
         <STNavigationBar :large="true">
             <template slot="left">
                 <OrganizationLogo :organization="organization" />
@@ -13,9 +13,9 @@
             </template>
         </STNavigationBar>
 
-        <div class="box">
-            <div class="st-view">
-                <main v-if="webshops.length > 0">
+        <main class="with-legal">
+            <div v-if="webshops.length > 0" class="box">
+                <main>
                     <h1>Onze webshops</h1>
 
                     <STList>
@@ -31,41 +31,24 @@
                         </STListItem>
                     </STList>
                 </main>
-                <main v-else>
+            </div>
+            <div v-else class="box">
+                <main>
                     <h1>Onze webshops</h1>
                     <p class="info-box">
                         We organiseren momenteel helaas geen verkopen. Kom later nog eens terug.
                     </p>
                 </main>
             </div>
-        </div>
 
-        <div class="legal-footer">
-            <hr class="style-hr">
-            <div>
-                <aside>
-                    {{ organization.meta.companyName || organization.name }}{{ organization.meta.VATNumber || organization.meta.companyNumber ? (", "+(organization.meta.VATNumber || organization.meta.companyNumber)) : "" }}
-                    <template v-if="organization.website">
-                        -
-                    </template>
-                    <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                        Website
-                    </a>
-
-                    <br>
-                    {{ organization.meta.companyAddress || organization.address }}
-                </aside>
-                <div>
-                    <a :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshops via <Logo /></a>
-                </div>
-            </div>
-        </div>
+            <LegalFooter :organization="organization" :webshop="webshops[0]" />
+        </main>
     </section>
 </template>
 
 <script lang="ts">
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Logo,OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { LegalFooter,OrganizationLogo, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Organization, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -77,7 +60,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         STList,
         STListItem,
         OrganizationLogo,
-        Logo
+        LegalFooter
     },
     filters: {
         price: Formatter.price.bind(Formatter),

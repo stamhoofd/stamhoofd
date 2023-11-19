@@ -1,6 +1,6 @@
 <template>
     <div class="st-view detailed-ticket-view">
-        <STNavigationBar :title="name" :pop="canPop" :dismiss="canDismiss" :sticky="false" :large="logo">
+        <STNavigationBar :title="name" :pop="canPop" :dismiss="canDismiss && allowDismiss" :sticky="false" :large="logo">
             <OrganizationLogo v-if="logo" slot="left" :organization="organization" />
             <button v-if="canShare" slot="right" class="button icon share navigation" type="button" @click="share" />
         </STNavigationBar>
@@ -8,7 +8,7 @@
             <figure class="qr-box">
                 <div>
                     <img v-if="QRCodeUrl" :src="QRCodeUrl" :class="{ scanned: !!ticket.scannedAt}" class="peak-brightness" width="370" height="370">
-                    <div v-else class="placeholder" />
+                    <div class="placeholder" />
                 </div>
             </figure>
             <p class="event-name">
@@ -78,6 +78,9 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
 
     @Prop({ required: false, default: null })
         order: Order | null
+
+    @Prop({ default: true })
+        allowDismiss: boolean
 
     QRCodeUrl: string | null = null
 
@@ -154,6 +157,9 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
         })
     }
 
+    shouldNavigateAway() {
+        return this.allowDismiss
+    }
 }
 </script>
 
@@ -215,10 +221,11 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
     }
 
     figure {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         padding-bottom: var(--st-horizontal-padding, 30px);
+
+        > div {
+            position: relative;
+        }
 
         body.dark & {
             padding-bottom: 20px;
@@ -239,8 +246,15 @@ export default class DetailedTicketView extends Mixins(NavigationMixin){
             //max-height: calc(100dvh - 200px);
         }
 
+        img {
+            position: absolute;
+        }
+
         .placeholder {
+            width: 100%;
             padding-bottom: 100%;
+            padding-bottom: min(370px, 100%);
+            max-width: 370px;
         }
 
         > span {

@@ -564,6 +564,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
                     answers: group.fieldAnswers,
                     markReviewed: true,
                     dataPermission: true, 
+                    hasNextStep: index < this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories.length - 1,
                     filterDefinitions: [],
                     saveHandler: (fieldAnswers: RecordAnswer[], component: NavigationMixin) => {
                         const g = group.patch({
@@ -654,6 +655,7 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
             answers: group.fieldAnswers,
             markReviewed: true,
             dataPermission: true,
+            hasNextStep: index < this.patchedDocument.privateSettings.templateDefinition.groupFieldCategories.length - 1,
             filterDefinitions: [],
             saveHandler: (fieldAnswers: RecordAnswer[], component: NavigationMixin) => {
                 const g = group.patch({

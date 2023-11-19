@@ -58,50 +58,7 @@
                 </template>
             </div>
 
-            <div class="legal-footer">
-                <hr class="style-hr">
-                <div>
-                    <aside>
-                        {{ organization.meta.companyName || organization.name }}{{ organization.meta.VATNumber || organization.meta.companyNumber ? (", "+(organization.meta.VATNumber || organization.meta.companyNumber)) : "" }}
-                        <template v-if="organization.website">
-                            -
-                        </template>
-                        <a v-if="organization.website" :href="organization.website" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                            Website
-                        </a>
-                        
-                        <template v-for="policy in policies">
-                            -
-                            <a :key="policy.id" :href="policy.calculatedUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                                {{ policy.name }}
-                            </a>
-                        </template>
-
-                        <template v-if="privacyUrl">
-                            -
-                        </template>
-
-                        <a v-if="privacyUrl" :href="privacyUrl" class="inline-link secundary" rel="nofollow noreferrer noopener" target="_blank">
-                            Privacyvoorwaarden
-                        </a>
-
-                        <template v-if="isLoggedIn">
-                            -
-                        </template>
-
-                        <button v-if="isLoggedIn" class="inline-link secundary" type="button" @click="logout">
-                            Uitloggen
-                        </button>
-
-                        <br>
-                        {{ organization.meta.companyAddress || organization.address }}
-                    </aside>
-                    <div>
-                        <a v-if="hasTickets" :href="'https://'+$t('shared.domains.marketing')+'/ticketverkoop'">Ticketverkoop via <Logo /></a>
-                        <a v-else :href="'https://'+$t('shared.domains.marketing')+'/webshops'">Webshop via <Logo /></a>
-                    </div>
-                </div>
-            </div>
+            <LegalFooter :organization="organization" :webshop="webshop" />
         </main>
     </section>
 </template>
@@ -111,7 +68,7 @@
 
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LoadingView, Logo, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { CategoryBox, CenteredMessage, Checkbox, GlobalEventBus, LegalFooter,LoadingView, OrganizationLogo, PaymentPendingView, ProductGrid, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { CartItem, LoginProviderType, Payment, PaymentStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -136,8 +93,8 @@ import TicketView from "./orders/TicketView.vue";
         CategoryBox,
         ProductGrid,
         OrganizationLogo,
-        Logo,
-        FullPageProduct
+        FullPageProduct,
+        LegalFooter
     },
     filters: {
         price: Formatter.price.bind(Formatter),
@@ -236,25 +193,8 @@ export default class WebshopView extends Mixins(NavigationMixin){
         return this.webshop.meta.ticketType === WebshopTicketType.Tickets
     }
 
-    get policies() {
-        return this.webshop.meta.policies
-    }
-
     get webshopLayout() {
         return this.webshop.meta.layout
-    }
-
-    get privacyUrl() {
-        if (this.webshop.meta.policies.length > 0) {
-            return null
-        }
-        if (WebshopManager.organization.meta.privacyPolicyUrl) {
-            return WebshopManager.organization.meta.privacyPolicyUrl
-        }
-        if (WebshopManager.organization.meta.privacyPolicyFile) {
-            return WebshopManager.organization.meta.privacyPolicyFile.getPublicPath()
-        }
-        return null
     }
 
     get cart() {

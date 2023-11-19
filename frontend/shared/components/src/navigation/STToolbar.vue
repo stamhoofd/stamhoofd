@@ -20,7 +20,7 @@ export default class STToolbar extends Vue {
      * Set sticky to false if a user is required to scroll down before completing a flow (this removes the unneeded CTA in the middle of the flow).
      */
     @Prop({ default: true })
-    sticky!: boolean
+        sticky!: boolean
 }
 </script>
 
@@ -36,6 +36,12 @@ export default class STToolbar extends Vue {
     bottom: 0;
     overflow: hidden;
     pointer-events: none; // fix browser bug not able to click through
+
+    // If embedded inside of a box: add negative margins around
+    .box > & {
+        margin-left: calc(-1 * var(--st-horizontal-padding, 20px));
+        margin-right: calc(-1 * var(--st-horizontal-padding, 20px));
+    }
 
     &.sticky {
         position: sticky;

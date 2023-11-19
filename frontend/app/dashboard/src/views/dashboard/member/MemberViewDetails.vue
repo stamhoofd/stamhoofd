@@ -342,10 +342,10 @@ import MemberView from './MemberView.vue';
 })
 export default class MemberViewDetails extends Mixins(NavigationMixin) {
     @Prop()
-    member!: MemberWithRegistrations;
+        member!: MemberWithRegistrations;
 
     @Prop()
-    familyManager!: FamilyManager;
+        familyManager!: FamilyManager;
 
     loadingComplete = false
 
@@ -460,6 +460,7 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
             category,
             answers: this.member.details.recordAnswers,
             markReviewed: false,
+            hasNextStep: false,
             dataPermission: this.member.details.dataPermissions?.value ?? false,
             filterDefinitions: MemberDetailsWithGroups.getFilterDefinitions(OrganizationManager.organization, {member: this.member}),
             filterValueForAnswers: (answers) => {

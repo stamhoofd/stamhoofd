@@ -105,7 +105,9 @@ export class MemberManagerStatic extends MemberManagerBase {
 
         MemberManager.setMembers(response.data)
         this.loadDocuments().catch(console.error)
-        return this.members?.find(m => m.id == member.id) ?? null
+
+        // Search same id, or return newly created member with different id (duplicate member detection)
+        return this.members?.find(m => m.id == member.id) ?? this.members?.find(m => m.details.firstName === member.details.firstName && m.details.lastName === member.details.lastName) ?? null
     }
 
     /**

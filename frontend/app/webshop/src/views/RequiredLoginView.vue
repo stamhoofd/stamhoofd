@@ -1,6 +1,6 @@
 <template>
     <LoadingView v-if="loading" />
-    <section v-else class="st-view boxed choose-webshop-view">
+    <section v-else class="st-view box-shade">
         <STNavigationBar :large="true">
             <template slot="left">
                 <OrganizationLogo :organization="organization" />
@@ -14,8 +14,8 @@
             </template>
         </STNavigationBar>
 
-        <div class="box">
-            <div class="st-view">
+        <main>
+            <div class="box">
                 <main>
                     <h1>Inloggen</h1>
                     <p>
@@ -29,7 +29,7 @@
                     </p>
                 </main>
             </div>
-        </div>
+        </main>
     </section>
 </template>
 

@@ -2,17 +2,37 @@
 @use '../base/text-styles';
 
 .legal-footer {
-    margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     @extend .style-description-small;
-    padding: 30px 15px 15px 15px;
     margin-top: auto;
     line-height: 1.6;
+    padding: 0 15px 20px 15px;
+
+    .st-view > main > & {
+        margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+        margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
+        margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
+        margin-top: auto;
+    }
+
+    .st-view > main.with-legal > & {
+        // Safari messes up negative margins in flex containers
+        margin: 0;
+        margin-top: auto;
+        padding: 15px 0 0 0;
+    }
+    
+
+    &.shade {
+        background: $color-background-shade;
+        --color-current-background: #{$color-background-shade};
+        --color-current-background-shade: #{$color-background-shade-darker};
+    }
 
      >div {
          display: flex;
          flex-direction: row;
          justify-content: space-between;
-         align-items: flex-start;
+         align-items: center;
          flex-wrap: wrap-reverse;
 
         .stamhoofd-logo-container {
