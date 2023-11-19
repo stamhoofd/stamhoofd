@@ -9,6 +9,14 @@
 
             <BillingWarningBox />
 
+            <p v-if="stripeWarning" class="error-box">
+                {{ stripeWarning }}<br>Hulp nodig? Neem contact met ons op.
+
+                <a :href="'mailto:'+$t('shared.emails.general')" class="button text">
+                    E-mail
+                </a>
+            </p>
+
             <p v-if="false" class="info-box icon help with-button">
                 Hulp nodig? Neem contact met ons op via {{ $t('shared.emails.general') }}
 
@@ -316,11 +324,12 @@
 </template>
 
 <script lang="ts">
+import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
-import { AppManager, UrlHelper } from '@stamhoofd/networking';
-import { PaymentMethod } from "@stamhoofd/structures";
+import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { PaymentMethod, StripeAccount } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
@@ -360,6 +369,8 @@ import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.v
 })
 export default class SettingsView extends Mixins(NavigationMixin) {
     temp_organization = OrganizationManager.organization
+    loadingStripeAccounts = false;
+    stripeAccounts: StripeAccount[] = []
 
     get organization() {
         return OrganizationManager.organization
@@ -371,6 +382,54 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     getFeatureFlag(flag: string) {
         return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
+    }
+
+    get stripeWarning() {
+        return this.stripeAccounts.flatMap(a => a.warning ? [a.warning] : []).join("\n")
+    }
+
+    async loadStripeAccounts(recheckStripeAccount: string | null) {
+        try {
+            this.loadingStripeAccounts = true
+            if (recheckStripeAccount) {
+                try {
+                    await SessionManager.currentSession!.authenticatedServer.request({
+                        method: "POST",
+                        path: "/stripe/accounts/" + encodeURIComponent(recheckStripeAccount),
+                        decoder: StripeAccount as Decoder<StripeAccount>,
+                        owner: this
+                    })
+                } catch (e) {
+                    console.error(e)
+                }
+            }
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "GET",
+                path: "/stripe/accounts",
+                decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
+                owner: this
+            })
+            this.stripeAccounts = response.data
+
+            if (!recheckStripeAccount) {
+                for (const account of this.stripeAccounts) {
+                    try {
+                        const response = await SessionManager.currentSession!.authenticatedServer.request({
+                            method: "POST",
+                            path: "/stripe/accounts/" + encodeURIComponent(account.id),
+                            decoder: StripeAccount as Decoder<StripeAccount>,
+                            owner: this
+                        })
+                        account.set(response.data)
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+        this.loadingStripeAccounts = false
     }
 
     openReferrals(animated = true) {
@@ -749,6 +808,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                     })
                 ]})
         }
+
+        this.loadStripeAccounts(null).catch(console.error);
     }
 
     beforeDestroy() {

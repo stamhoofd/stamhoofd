@@ -11,7 +11,7 @@ type Body = undefined;
 type Query = undefined
 type ResponseBody = StripeAccountStruct
 
-export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {    
+export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {    
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method != "POST") {
             return [false];

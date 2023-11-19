@@ -224,6 +224,10 @@
             </div>
 
             <EditPaymentMethodsBox v-if="enableBuckaroo" :methods="buckarooPaymentMethods" :organization="organization" :show-prices="false" :choices="buckarooAvailableMethods" @patch="patchBuckarooPaymentMethods" />
+
+            <hr>
+
+            <code v-for="account of stripeAccounts" :key="'code-'+account.id" class="style-code" v-text="formatJson(account.meta.blob)" />
         </template>
     </SaveView>
 </template>
@@ -302,6 +306,10 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 })
             })
         })
+    }
+
+    formatJson(blob: any) {
+        return JSON.stringify(blob, null, 2)
     }
 
     get enableMemberModule() {
@@ -708,6 +716,22 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
                 owner: this
             })
             this.stripeAccounts = response.data
+
+            if (!recheckStripeAccount) {
+                for (const account of this.stripeAccounts) {
+                    try {
+                        const response = await SessionManager.currentSession!.authenticatedServer.request({
+                            method: "POST",
+                            path: "/stripe/accounts/" + encodeURIComponent(account.id),
+                            decoder: StripeAccount as Decoder<StripeAccount>,
+                            owner: this
+                        })
+                        account.set(response.data)
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+            }
         } catch (e) {
             console.error(e)
         }
@@ -715,6 +739,10 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     async createStripeAccount() {
+        if (this.isBelgium && (!await CenteredMessage.confirm('Waarschuwing!', 'Ja, gelezen', 'Selecteer de juiste bedrijfsvorm in Stripe. Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen, en spaart dus veel problemen uit. Lees ook zeker de documentatie.'))) {
+            return;
+        }
+
         let tab: Window | null = null;
         try {
             tab = tab ?? (AppManager.shared.isNative ? null : window.open('about:blank'));

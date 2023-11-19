@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, RecordDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, RecordDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 
 import { PaymentMethod, PaymentMethodHelper } from "./PaymentMethod";
@@ -40,8 +40,17 @@ export class StripeCompany extends AutoEncoder {
 }
 
 export class StripeMetaData extends AutoEncoder {
+    @field({ decoder: StringDecoder, optional: true })
+    type: 'express' | 'standard' = 'express'
+
+    @field({ decoder: AnyDecoder, optional: true, nullable: true })
+    blob: any | null = null
+
     @field({ decoder: StripeBusinessProfile, optional: true })
     business_profile = StripeBusinessProfile.create({})
+
+    @field({ decoder: StringDecoder, optional: true, nullable: true })
+    business_type: 'individual' | 'company' | 'non_profit' | 'government_entity' | null = null
 
     @field({ decoder: StripeCompany, optional: true, nullable: true })
     company: StripeCompany | null = null
