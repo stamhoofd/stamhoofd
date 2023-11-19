@@ -12,6 +12,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-e
 import { QueueHandler } from "@stamhoofd/queues";
 import { Organization } from "./Organization";
 import { field } from "@simonbackx/simple-encoding";
+import { BalanceItem } from "./BalanceItem";
 
 export class DocumentTemplate extends Model {
     static table = "document_templates";
@@ -73,6 +74,12 @@ export class DocumentTemplate extends Model {
         let missingData = false
 
         const group = await Group.getByID(registration.groupId)
+        const {items, payments, balanceItemPayments} = await BalanceItem.getForRegistration(registration.id)
+
+        const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : [])
+        
+        // We take the minimum date here, because there is a highter change of later paymetns to be for other things than the registration itself
+        const paidAt = paidAtDates.length ? new Date(Math.min(...paidAtDates)) : null
 
         // Some fields are supported by default in linked fields
         const defaultData = {
@@ -108,6 +115,14 @@ export class DocumentTemplate extends Model {
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({}), // settings will be overwritten
                     value: registration.pricePaid
+                }),
+            "registration.paidAt": 
+                RecordDateAnswer.create({
+                    settings: RecordSettings.create({
+                        id: "registration.paidAt",
+                        type: RecordType.Date,
+                    }), // settings will be overwritten
+                    dateValue: paidAt
                 }),
             "member.firstName": RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
