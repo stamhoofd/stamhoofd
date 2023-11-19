@@ -41,7 +41,66 @@
                             Jouw tegoed wordt automatisch in mindering gebracht op je volgende factuur.
                         </p>
                     </div>
-                </div>                
+                </div>
+
+                <template v-if="companyName">
+                    <hr>
+                    <h2>Facturatiegegevens</h2>
+                    <p v-if="hasFullAccess">
+                        Deze gegevens worden gebruikt voor toekomstige automatische facturen. <button type="button" class="inline-link" @click="openGeneralSettings">
+                            Wijzigen
+                        </button> 
+                    </p>
+                    <p v-else>
+                        Deze gegevens worden gebruikt voor toekomstige automatische facturen. Vraag een hoofdbeheerder van je vereniging om deze gegevens te wijzigen indien nodig.
+                    </p>
+
+                    <STList class="info">
+                        <STListItem>
+                            <h3 v-if="companyNumber || VATNumber" class="style-definition-label">
+                                Bedrijfsnaam
+                            </h3>
+                            <h3 v-else class="style-definition-label">
+                                Vereniging
+                            </h3>
+                            <p class="style-definition-text">
+                                {{ companyName }}
+                            </p>
+                        </STListItem>
+                        <STListItem v-if="companyAddress">
+                            <h3 class="style-definition-label">
+                                Adres
+                            </h3>
+                            <p class="style-definition-text">
+                                {{ companyAddress.toString() | capitalizeFirstLetter }}
+                            </p>
+                        </STListItem>
+                        <STListItem v-if="VATNumber">
+                            <h3 class="style-definition-label">
+                                BTW-nummer
+                            </h3>
+                            <p class="style-definition-text">
+                                {{ VATNumber }}
+                            </p>
+                        </STListItem>
+                        <STListItem v-else-if="companyNumber">
+                            <h3 class="style-definition-label">
+                                {{ $t('shared.inputs.companyNumber.label') }}
+                            </h3>
+                            <p class="style-definition-text">
+                                {{ companyNumber }}
+                            </p>
+                        </STListItem>
+                        <STListItem v-else>
+                            <h3 class="style-definition-label">
+                                {{ $t('shared.inputs.companyNumber.label') }}
+                            </h3>
+                            <p class="style-definition-text">
+                                {{ $t('dashboard.settings.billing.unincorporatedAssociationDescription') }}
+                            </p>
+                        </STListItem>
+                    </STList>
+                </template>
 
                 <hr>
                 <h2>Facturen</h2>
@@ -70,12 +129,13 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { STBillingStatus, STInvoice } from "@stamhoofd/structures";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { STBillingStatus, STCredit, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import GeneralSettingsView from "../GeneralSettingsView.vue";
 import CreditsView from "./CreditsView.vue";
 import InvoiceDetailsView from "./InvoiceDetailsView.vue";
 
@@ -94,7 +154,8 @@ import InvoiceDetailsView from "./InvoiceDetailsView.vue";
     },
     filters: {
         price: Formatter.price,
-        date: Formatter.date.bind(Formatter)
+        date: Formatter.date.bind(Formatter),
+        capitalizeFirstLetter: Formatter.capitalizeFirstLetter.bind(Formatter)
     }
 })
 export default class BillingSettingsView extends Mixins(NavigationMixin) {
@@ -106,18 +167,39 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        UrlHelper.setUrl("/settings/billing");
+        UrlHelper.setUrl("/finances/billing");
         this.reload().catch(e => {
             console.error(e)
         })
     }
 
+    get organization() {
+        return OrganizationManager.organization
+    }
+
+    get companyName() {
+        return this.organization.meta.companyName
+    }
+
+    get companyAddress() {
+        return this.organization.meta.companyAddress || this.organization.address
+    }
+
+    get VATNumber() {
+        return this.organization.meta.VATNumber
+    }
+
+    get companyNumber() {
+        return this.organization.meta.companyNumber
+    }
 
     async reload() {
         this.loadingStatus = true
 
         try {
-            this.status = await OrganizationManager.loadBillingStatus()
+            this.status = await OrganizationManager.loadBillingStatus({
+                owner: this
+            })
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }
@@ -126,17 +208,7 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     get balance() {
-        return this.status?.credits.slice().reverse().reduce((t, c) => {
-            if (c.expireAt !== null && c.expireAt < new Date()) {
-                return t
-            }
-            
-            const l = t + c.change
-            if (l < 0) {
-                return 0
-            }
-            return l
-        }, 0) ?? 0
+        return this.status ? STCredit.getBalance(this.status.credits) : 0
     }
 
     downloadInvoice(invoice: STInvoice) {
@@ -156,6 +228,9 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     showCreditsHistory() {
+        if (!this.status) {
+            return
+        }
         this.present(new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(CreditsView, {
                 status: this.status
@@ -172,6 +247,27 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
                 invoice: this.status?.pendingInvoice
             })
         }).setDisplayStyle("popup"))
+    }
+
+    get hasFullAccess() {
+        return SessionManager.currentSession?.user?.permissions?.hasFullAccess() ?? false
+    }
+
+    openGeneralSettings() {
+        if (!this.hasFullAccess) {
+            return
+        }
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(GeneralSettingsView, {
+                        organization: this.organization
+                    })
+                })
+            ],
+            modalDisplayStyle: "popup",
+            animated: true
+        })
     }
 }
 </script>

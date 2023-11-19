@@ -1,8 +1,8 @@
 
-import { AnyDecoder,AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent, Token } from '@stamhoofd/models';
+import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
 
 import { StripeHelper } from '../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../payments/ExchangePaymentEndpoint';
@@ -73,7 +73,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 console.log(event);
                 const account = request.body.data.object;
                 if (account && account.id) {
-                    const id = account.id;
+                    const id = account.id as string;
                     const [model] = await StripeAccount.where({accountId: id}, {limit: 1});
                     if (model) {
                         model.setMetaFromStripeAccount(account)

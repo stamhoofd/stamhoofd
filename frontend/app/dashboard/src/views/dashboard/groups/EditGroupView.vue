@@ -316,7 +316,7 @@
 
         <template v-if="tab == 'permissions'">
             <h2>Toegangsbeheer</h2>
-            <p>Kies welke beheerdersgroepen toegang hebben tot deze inschrijvingsgroep. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle groepen. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de inschrijvingsgroep.</p>
+            <p>Kies welke functies toegang hebben tot deze inschrijvingsgroep. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle groepen. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de inschrijvingsgroep.</p>
             <STErrorsDefault :error-box="errorBox" />
 
             <STList v-if="roles.length > 0">
@@ -324,7 +324,7 @@
             </STList>
 
             <p v-else class="info-box">
-                Er zijn nog geen beheerdersgroepen aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan beheerdersgroepen aanmaken bij instellingen > beheerders.
+                Er zijn nog geen functies aangemaakt in deze vereniging. Enkel hoofdbeheerders kunnen deze groep voorlopig bekijken en bewerken. Je kan functies aanmaken bij instellingen > beheerders.
             </p>
         </template>
     </SaveView>

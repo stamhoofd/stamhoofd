@@ -48,7 +48,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async getToken(code: string) {
-        const toast = new Toast("Inloggen...", "spinner").setWithOffset().setHide(null).show()
+        const toast = new Toast("Inloggen...", "spinner").setHide(null).show()
 
         try {
             const response: RequestResult<any> = await this.loginServer.request({
@@ -74,11 +74,11 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
             // Maybe: redirect_uri
             toast.hide()
-            new Toast("Ingelogd bij groepsadministratie", "success green").setWithOffset().show()
+            new Toast("Ingelogd bij groepsadministratie", "success green").show()
         } catch (e) {
             console.error(e)
             toast.hide()
-            new Toast("Inloggen mislukt", "error red").setWithOffset().show()
+            new Toast("Inloggen mislukt", "error red").show()
         }
     }
 
@@ -304,7 +304,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // Start! :D
         const allMembers = await MemberManager.loadMembers([], false)
 
-        if (this.dryRun) {
+        if (this.dryRun && allMembers.length > 1) {
             // Add some fake data
             matchedMembers.push({
                 stamhoofd: allMembers[0],
@@ -706,10 +706,9 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const parts =  UrlHelper.shared.getParts()
         const parsedHash =  UrlHelper.shared.getHashParams()
         const urlParams =  UrlHelper.shared.getSearchParams()
+        UrlHelper.shared.clear()
 
         if (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv') {
-            UrlHelper.shared.clear()
-
             // Support for both fragment and query string codes.
             const code = urlParams.get('code') ?? parsedHash.get("code");
             const state = urlParams.get('state') ?? parsedHash.get("state");

@@ -1,10 +1,10 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Kies welke beheerdersgroepen toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe beheerdersgroepen aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
+        <p>Kies welke functies toegang hebben tot deze webshop. Vraag aan de hoofdbeheerders om nieuwe functies aan te maken indien nodig. Hoofdbeheerders hebben altijd toegang tot alle webshops. Enkel beheerders met 'volledige toegang' kunnen instellingen wijzigen van de webshop.</p>
 
         <p v-if="roles.length == 0" class="error-box">
-            Je hebt nog geen beheerdersgroepen aangemaakt. Maak eerst beheerders aan en deel ze op in beheerdersgroepen via de instellingen (enkel voor hoofdbeheerders). Daarna kan je de toegang hier verdelen.
+            Je hebt nog geen functies aangemaakt. Maak eerst beheerders aan en deel ze op in functies via de instellingen (enkel voor hoofdbeheerders). Daarna kan je de toegang hier verdelen.
         </p>
 
         <STErrorsDefault :error-box="errorBox" />

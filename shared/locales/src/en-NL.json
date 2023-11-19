@@ -3,6 +3,9 @@
     "inputs": {
       "iban": {
         "placeholder": "E.g. NL21 INGB 3115 4044 17"
+      },
+      "companyNumber": {
+        "label": "KvK number"
       }
     },
     "domains": {

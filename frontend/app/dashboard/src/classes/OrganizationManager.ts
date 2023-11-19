@@ -94,11 +94,13 @@ export class OrganizationManagerStatic {
         await SessionManager.addOrganizationToStorage(this.organization)
     }
 
-    async loadBillingStatus() {
+    async loadBillingStatus({owner, shouldRetry}: {owner?: any, shouldRetry?: boolean}) {
         return (await SessionManager.currentSession!.authenticatedServer.request({
             method: "GET",
             path: "/billing/status",
-            decoder: STBillingStatus as Decoder<STBillingStatus>
+            decoder: STBillingStatus as Decoder<STBillingStatus>,
+            owner,
+            shouldRetry
         })).data
     }
 

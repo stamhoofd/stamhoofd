@@ -138,7 +138,7 @@
                             Beschrijving, locatie en foto's
                         </h2>
                         <p class="style-description">
-                            Wijzig de informatie die zichtbaar is op de inschrijvingspagina.
+                            Wijzig de informatie die zichtbaar is op het ledenportaal.
                         </p>
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>

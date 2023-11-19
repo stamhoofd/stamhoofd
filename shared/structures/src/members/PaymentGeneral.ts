@@ -1,4 +1,4 @@
-import { ArrayDecoder, field, StringDecoder } from '@simonbackx/simple-encoding'
+import { ArrayDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding'
 import { Formatter } from '@stamhoofd/utility'
 
 import { BalanceItemPaymentDetailed } from '../BalanceItem'
@@ -19,6 +19,18 @@ export class PaymentGeneral extends Payment {
      */
     @field({ decoder: Settlement, nullable: true })
     settlement: Settlement | null = null
+
+    /**
+     * Only set for administrators with the correct permissions
+     */
+    @field({ decoder: IntegerDecoder, version: 196 })
+    transferFee = 0
+
+     /**
+     * Only set for administrators with the correct permissions
+     */
+    @field({ decoder: StringDecoder, nullable: true, version: 198 })
+    stripeAccountId: string|null = null
 
     get registrations() {
         const registrations = this.balanceItemPayments.flatMap(p => p.balanceItem.registration ? [p.balanceItem.registration] : [])

@@ -4,48 +4,21 @@
 
         <main>
             <h1>
-                Jouw pakketten
+                Pakketten aankopen
             </h1>
-
-            <p>
-                Onderaan kan je nieuwe pakketten activeren. Alle bedragen zijn excl. BTW, tenzij anders vermeld.
-            </p>
             
             <STErrorsDefault :error-box="errorBox" />
 
             <Spinner v-if="loadingStatus" />
             <template v-else>
-                <STList v-if="status && status.packages.length > 0">
-                    <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" class="right-stack " @click="openPackageDetails(pack)">
-                        <img v-if="getPackageIcon(pack)" slot="left" :src="getPackageIcon(pack)">
-
-                        <h3 class="style-title-list">
-                            {{ pack.meta.name }}
-                        </h3>
-                        <p v-if="pack.validUntil" class="style-description">
-                            Geldig tot {{ pack.validUntil | date }}
-                        </p>
-
-                        <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray">
-                            Verleng nu
-                        </button>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-                </STList>
-
-                <p v-if="status && status.packages.length == 0" class="info-box">
-                    Je hebt momenteel nog geen pakketten geactiveerd
-                </p>
-
-                <hr>
-                <h2>Nieuwe functies activeren</h2>
-
                 <p v-if="availablePackages.length === 0" class="info-box">
-                    Je hebt momenteel alle functies in gebruik. Geweldig! Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
+                    <span>Geweldig! Je hebt gebruikt momenteel alle functies. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.</span>
                 </p>
 
                 <template v-else>
-                    <p>Selecteer de functies die je wilt activeren en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>. Neem gerust contact op via {{ $t('shared.emails.general') }} als je bijkomende vragen zou hebben.</p>
+                    <p class="style-description-block">
+                        Selecteer alle functies die je wilt aankopen en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
+                    </p>
 
                     <STList>
                         <STListItem v-for="pack of availablePackages" :key="pack.bundle" element-name="label" :selectable="true">
@@ -63,6 +36,31 @@
                         </STListItem>
                     </STList>
                 </template>
+
+                <hr>
+                <h2>Huidige pakketten</h2>
+
+                <STList v-if="status && status.packages.length > 0">
+                    <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" class="right-stack " @click="openPackageDetails(pack)">
+                        <img v-if="getPackageIcon(pack)" slot="left" :src="getPackageIcon(pack)">
+
+                        <h3 class="style-title-list">
+                            {{ pack.meta.name }}
+                        </h3>
+                        <p v-if="pack.validUntil" class="style-description">
+                            Geldig tot {{ pack.validUntil | date }}
+                        </p>
+
+                        <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
+                            Verleng nu
+                        </button>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                </STList>
+
+                <p v-if="status && status.packages.length == 0" class="info-box">
+                    Je hebt momenteel nog geen pakketten geactiveerd
+                </p>
             </template>
         </main>
 
@@ -160,7 +158,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     loading = false
 
     mounted() {
-        UrlHelper.setUrl("/settings/packages");
+        UrlHelper.setUrl("/finances/packages");
         this.reload().catch(e => {
             console.error(e)
         })
@@ -227,7 +225,9 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
         this.loadingStatus = true
 
         try {
-            this.status = await OrganizationManager.loadBillingStatus()
+            this.status = await OrganizationManager.loadBillingStatus({
+                owner: this
+            })
         } catch (e) {
             this.errorBox = new ErrorBox(e)
         }

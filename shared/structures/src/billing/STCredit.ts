@@ -22,4 +22,18 @@ export class STCredit extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true })
     expireAt: Date | null = null
+
+    static getBalance(credits: STCredit[]) {
+        return credits.slice().reverse().reduce((t, c) => {
+            if (c.expireAt !== null && c.expireAt < new Date()) {
+                return t
+            }
+            
+            const l = t + c.change
+            if (l < 0) {
+                return 0
+            }
+            return l
+        }, 0) ?? 0
+    }
 }

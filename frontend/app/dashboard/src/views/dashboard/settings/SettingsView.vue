@@ -46,7 +46,7 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openPersonalize(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/paint.svg">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/palette.svg">
                     <h2 class="style-title-list">
                         Personaliseren
                     </h2>
@@ -119,7 +119,7 @@
                     <STListItem :selectable="true" class="left-center right-stack" @click="manageRegistrationPage(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/laptop.svg">
                         <h2 class="style-title-list">
-                            Jouw inschrijvingspagina
+                            Link naar ledenportaal
                         </h2>
                         <p class="style-description">
                             Via deze weg kunnen leden zelf online inschrijven
@@ -235,6 +235,20 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem v-if="isSGV" :selectable="true" class="left-center right-stack" @click="openSyncScoutsEnGidsen(true)">
+                        <img slot="left" src="~@stamhoofd/assets/images/illustrations/sync-scouts.svg">
+                        <h2 class="style-title-list">
+                            Synchroniseer met de groepsadministratie
+                        </h2>
+                        <p class="style-description">
+                            Neem alle gegevens uit Stamhoofd over in de groepsadministratie
+                        </p>
+
+                        <template slot="right">
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -259,12 +273,12 @@
 
             <template v-if="!areSalesDisabled">
                 <hr>
-                <h2>Stamhoofd administratie</h2>
+                <h2>Stamhoofd</h2>
                 <STList class="illustration-list">    
                     <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
                         <h2 class="style-title-list">
-                            Jouw pakketten
+                            Pakketten aankopen
                         </h2>
                         <p class="style-description">
                             Wijzig je pakketten of activeer nieuwe functies
@@ -274,7 +288,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
+                    <STListItem v-if="false" :selectable="true" class="left-center" @click="openBilling(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
                         <h2 class="style-title-list">
                             Facturen en betalingen
@@ -328,11 +342,12 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PaymentMethod, StripeAccount } from "@stamhoofd/structures";
+import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import AdminsView from '../admins/AdminsView.vue';
+import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import { buildManageGroupsComponent } from './buildManageGroupsComponent';
 import EmailSettingsView from './EmailSettingsView.vue';
 import GeneralSettingsView from './GeneralSettingsView.vue';
@@ -344,7 +359,6 @@ import RecordsSettingsView from './modules/members/RecordsSettingsView.vue';
 import ModuleSettingsBox from './ModuleSettingsBox.vue';
 import BillingSettingsView from './packages/BillingSettingsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
-import InvoicePaymentStatusView from './packages/InvoicePaymentStatusView.vue';
 import PackageSettingsView from './packages/PackageSettingsView.vue';
 import PaymentSettingsView from './PaymentSettingsView.vue';
 import PersonalizeSettingsView from './PersonalizeSettingsView.vue';
@@ -373,6 +387,10 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
+    }
+
+    get isSGV() {
+        return this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen
     }
 
     get areSalesDisabled() {
@@ -572,6 +590,32 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         })
     }
 
+    openPayments(animated = true) {
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(ConfigurePaymentExportView, {})
+                })
+            ]
+        })
+    }
+
+    openSyncScoutsEnGidsen(animated = true) {
+        this.present({
+            animated,
+            adjustHistory: animated,
+            modalDisplayStyle: "popup",
+            components: [
+                new ComponentWithProperties(NavigationController, { 
+                    root: AsyncComponent(() => import(/* webpackChunkName: "SGVGroepsadministratieView" */ "./SGVGroepsadministratieView.vue"))
+                })
+            ]
+        })
+    }
+
     openBilling(animated = true) {
         this.present({
             animated,
@@ -710,7 +754,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
     mounted() {
         const parts = UrlHelper.shared.getParts()
-        const params = UrlHelper.shared.getSearchParams()
 
         // First set current url already, to fix back
         UrlHelper.setUrl("/settings")
@@ -720,6 +763,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             // Open mollie settings
             this.openPayment(false)
             return
+        }
+
+        if ((parts.length >= 1 && parts[0] == 'scouts-en-gidsen-vlaanderen') || (parts.length == 2 && parts[0] == 'oauth' && parts[1] == 'sgv')) {
+            this.openSyncScoutsEnGidsen(false)
+            return; // (don't clear)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
@@ -774,10 +822,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             this.openPackages(false)
         }
 
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'billing') {
-            this.openBilling(false)
-        }
-
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'referrals') {
             this.openReferrals(false)
         }
@@ -792,20 +836,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'data-permission') {
             this.manageDataPermission(false)
-        }
-
-        if (parts.length == 3 && parts[0] == 'settings' && parts[1] == 'billing' && parts[2] == 'payment') {
-            this.present({
-                animated: false,
-                adjustHistory: false,
-                modalDisplayStyle: "popup",
-                components: [
-                    new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(InvoicePaymentStatusView, {
-                            paymentId: params.get("id")
-                        })
-                    })
-                ]})
         }
 
         this.loadStripeAccounts(null).catch(console.error);

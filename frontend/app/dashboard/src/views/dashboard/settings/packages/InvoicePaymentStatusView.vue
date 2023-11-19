@@ -15,7 +15,7 @@
 
         <STToolbar v-if="payment && (payment.status == 'Failed')">
             <LoadingButton slot="right" :loading="loading">
-                <button class="button primary" @click="retry">
+                <button class="button primary" type="button" @click="retry">
                     <span>Opnieuw proberen</span>
                 </button>
             </LoadingButton>
@@ -25,13 +25,11 @@
 
 <script lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadingButton, LoadingView, Spinner, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { PaymentMethod, PaymentStatus, STInvoice } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
-
-import PackageSettingsView from './PackageSettingsView.vue';
 
 @Component({
     components: {
@@ -64,12 +62,7 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
     }
 
     retry() {
-        this.show({
-            components: [new ComponentWithProperties(PackageSettingsView)],
-            replace: 1,
-            reverse: true,
-            force: true
-        })
+        this.dismiss({ force: true })
     }
 
     onSuccess() {

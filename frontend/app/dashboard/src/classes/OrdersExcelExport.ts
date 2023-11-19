@@ -4,16 +4,7 @@ import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelpe
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
-type RowValue = (string | number | Date | {value: string | number | Date, format: null | string});
-
-function transformRowValues(row: RowValue[][]): (string | number | Date)[][] {
-    return row.map(r => r.map(c => {
-        if (typeof c === "object" && !(c instanceof Date)) {
-            return c.value
-        }
-        return c
-    }))
-}
+import { ExcelHelper, RowValue } from './ExcelHelper';
 
 export class OrdersExcelExport {
 
@@ -108,36 +99,9 @@ export class OrdersExcelExport {
             }
         }
 
-        return this.buildWorksheet(wsData, {
+        return ExcelHelper.buildWorksheet(wsData, {
             defaultColumnWidth: 13
         })
-
-        /*this.deleteEmptyColumns(wsData)
-
-        const ws = XLSX.utils.aoa_to_sheet(wsData, { cellStyles: true });
-        this.wrapColumn(5 + answerNames.length, ws)
-
-        // Set column width
-        ws['!cols'] = []
-        for (const column of wsData[0]) {
-            if (column.toLowerCase().startsWith("naam")) {
-                ws['!cols'].push({width: 20});
-            } else if (column.toLowerCase().includes("naam")) {
-                ws['!cols'].push({width: 13});
-            } else if (column.toLowerCase().includes("e-mail")) {
-                ws['!cols'].push({width: 25});
-            } else if (column.toLowerCase().includes("adres")) {
-                ws['!cols'].push({width: 30});
-            } else if (column.toLowerCase().includes("gsm")) {
-                ws['!cols'].push({width: 16});
-            } else if (column.toLowerCase().includes("product")) {
-                ws['!cols'].push({width: 40});
-            } else {
-                ws['!cols'].push({width: 13});
-            }
-        }
-
-        return ws*/
     }
 
     /**
@@ -185,7 +149,7 @@ export class OrdersExcelExport {
                 "Betaalmethode",
                 "Betaald",
                 "Status",
-                ...(shouldIncludeSettements ? ["Mollie uitbetalingsdatum", "Uitbetalingsmededeling"] : [])
+                ...(shouldIncludeSettements ? ["Uitbetalingsdatum", "Uitbetalingsmededeling"] : [])
             ],
         ];
 
@@ -252,7 +216,7 @@ export class OrdersExcelExport {
             ]);
         }
 
-        return this.buildWorksheet(wsData, {
+        return ExcelHelper.buildWorksheet(wsData, {
             keepLastColumns: shouldIncludeSettements ? 2 : 0,
             defaultColumnWidth: 13
         })
@@ -266,30 +230,35 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
+                "ID",
                 "Mededeling",
                 "Datum",
                 "Totaal uitbetaald",
-                "Totaal van deze bestellingen"
+                "Totaal van deze bestellingen",
+                "Transactiekosten (incl. BTW)"
             ],
         ];
 
-        const counter: Map<string, { reference: string, settledAt: Date, amount: number; total: number}> = new Map()
+        const counter: Map<string, { id: string, reference: string, settledAt: Date, amount: number; total: number; fees: number}> = new Map()
 
         for (const order of orders) {
             if (order.payment?.settlement) {
                 const settlement = order.payment.settlement
                 
-                const existing = counter.get(settlement.reference)
+                const existing = counter.get(settlement.id)
                 if (existing) {
                     existing.settledAt = settlement.settledAt
                     existing.total = settlement.amount
                     existing.amount += order.payment.price
+                    existing.fees += settlement.fee
                 } else {
-                    counter.set(settlement.reference, {
+                    counter.set(settlement.id, {
+                        id: settlement.id,
                         reference: settlement.reference,
                         settledAt: settlement.settledAt,
                         amount: order.payment.price,
-                        total: settlement.amount
+                        total: settlement.amount,
+                        fees: settlement.fee
                     })
                 }
             }
@@ -302,6 +271,7 @@ export class OrdersExcelExport {
         for (const item of arr) {
           
             wsData.push([
+                item.id,
                 item.reference,
                 Formatter.capitalizeFirstLetter(Formatter.dateWithDay(item.settledAt)),
                 {
@@ -311,11 +281,15 @@ export class OrdersExcelExport {
                 {
                     value: item.amount / 100,
                     format: "€0.00"
+                },
+                {
+                    value: item.fees / 100,
+                    format: "€0.00"
                 }
             ]);
         }
 
-        return this.buildWorksheet(wsData, {
+        return ExcelHelper.buildWorksheet(wsData, {
             defaultColumnWidth: 20
         })
     }
@@ -364,125 +338,9 @@ export class OrdersExcelExport {
             ]);
         }
 
-        return this.buildWorksheet(wsData, {
+        return ExcelHelper.buildWorksheet(wsData, {
             defaultColumnWidth: 13
         })
-    }
-
-    static buildWorksheet(wsData: RowValue[][], options: {keepLastColumns?: number, defaultColumnWidth?: number}) {
-        // Delete after
-        this.deleteEmptyColumns(wsData, options?.keepLastColumns)
-
-        const ws = XLSX.utils.aoa_to_sheet(transformRowValues(wsData), { cellStyles: true, cellDates: true });
-
-        // Format columns based on format option in wsData
-        if (wsData[1]) {
-            for (const [index, col] of wsData[1].entries()) {
-                if (typeof col !== "object" || (col instanceof Date)) {
-                    continue
-                }
-                if (col.format) {
-                    this.formatColumn(index, col.format, ws)
-                }
-            }
-        }
-
-        // Set column width
-        ws['!cols'] = []
-        for (const column of wsData[0]) {
-            if (typeof column != "string") {
-                continue
-            }
-            if (column.toLowerCase().includes("totaal") || column.toLowerCase().includes("datum")) {
-                ws['!cols'].push({width: 25});
-            } else if (column.toLowerCase().startsWith("naam")) {
-                ws['!cols'].push({width: 20});
-            } else if (column.toLowerCase().includes("naam")) {
-                ws['!cols'].push({width: 13});
-            } else if (column.toLowerCase().includes("e-mail")) {
-                ws['!cols'].push({width: 25});
-            } else if (column.toLowerCase().includes("adres")) {
-                ws['!cols'].push({width: 30});
-            } else if (column.toLowerCase().includes("gsm")) {
-                ws['!cols'].push({width: 16});
-            } else if (column.toLowerCase().includes("product")) {
-                ws['!cols'].push({width: 40});
-            } else if (column.toLowerCase().includes("uitbetaling")) {
-                ws['!cols'].push({width: 25});
-            } else {
-                ws['!cols'].push({width: options?.defaultColumnWidth ?? 13});
-            }
-        }
-
-        return ws
-    }
-
-    static formatColumn(colNum: number, fmt: string, worksheet: any) {
-        const range = XLSX.utils.decode_range(worksheet['!ref']);
-        for(let i = range.s.r + 1; i <= range.e.r; ++i) {
-            /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */
-            const ref = XLSX.utils.encode_cell({r:i, c:colNum});
-            /* if the particular row did not contain data for the column, the cell will not be generated */
-            if(!worksheet[ref]) continue;
-            /* `.t == "n"` for number cells */
-            if(worksheet[ref].t != 'n' && worksheet[ref].t != 'd') continue;
-            /* assign the `.z` number format */
-            worksheet[ref].z = fmt;
-            delete worksheet[ref].w;
-        }
-    }
-
-    static wrapColumn(colNum: number, worksheet: any) {
-        const range = XLSX.utils.decode_range(worksheet['!ref']);
-        for(let i = range.s.r + 1; i <= range.e.r; ++i) {
-            /* find the data cell (range.s.r + 1 skips the header row of the worksheet) */
-            const ref = XLSX.utils.encode_cell({r:i, c:colNum});
-            /* if the particular row did not contain data for the column, the cell will not be generated */
-            if(!worksheet[ref]) continue;
-            worksheet[ref].s = { alignment: { wrapText: true } }
-        }
-    }
-
-    static deleteEmptyColumns(wsData: RowValue[][], skipLast = 0) {
-        // Delete empty columns
-        for (let index = wsData[0].length - 1 - skipLast; index >= 0; index--) {
-            let empty = true
-            for (const row of wsData.slice(1)) {
-                let value = row[index]
-
-                if (typeof value === 'object' && !(value instanceof Date)) {
-                    if (value == null) {
-                        continue;
-                    }
-                    value = value.value
-                }
-
-                if (value instanceof Date) {
-                    empty = false
-                    break
-                }
-
-                if (typeof value !== "string") {
-                    
-                    if (value == 0) {
-                        // If all zero: empty
-                        continue;
-                    }
-                    empty = false
-                    break
-                }
-                if (value.length == 0 || value == "/") {
-                    continue;
-                }
-                empty = false
-                break
-            }
-            if (empty) {
-                for (const row of wsData) {
-                    row.splice(index, 1)
-                } 
-            }
-        }
     }
 
     static export(orders: PrivateOrder[]) {
@@ -491,7 +349,7 @@ export class OrdersExcelExport {
         let shouldIncludeSettements = false
 
         for (const order of orders) {
-            if (((order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard) && (order.payment?.provider === PaymentProvider.Mollie)) || order.payment?.settlement) {
+            if (((order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard) && (order.payment?.provider === PaymentProvider.Mollie || order.payment?.provider === PaymentProvider.Stripe)) || order.payment?.settlement) {
                 shouldIncludeSettements = true
             }
         }
@@ -502,7 +360,7 @@ export class OrdersExcelExport {
         XLSX.utils.book_append_sheet(wb, this.createProducts(orders), "Producten");
 
         if (shouldIncludeSettements) {
-            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Mollie uitbetalingen");
+            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Uitbetalingen");
         }
 
         if (AppManager.shared.downloadFile) {

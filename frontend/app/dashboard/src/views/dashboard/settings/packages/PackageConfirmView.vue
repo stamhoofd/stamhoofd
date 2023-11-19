@@ -1,10 +1,10 @@
 <template>
     <div class="st-view background package-confirm-view">
-        <STNavigationBar title="Pakketten activeren" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Betalen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1>
-                Nieuwe pakketten activeren
+            <h1 class="style-navigation-title">
+                Betalen
             </h1>
 
             <STErrorsDefault :error-box="errorBox" />
@@ -55,6 +55,15 @@
                     <VATNumberInput v-if="hasVATNumber" v-model="VATNumber" title="BTW-nummer" placeholder="Jullie BTW-nummer" :country="country" :validator="validator" :required="true" />
                 </div>
             </div>
+
+            <hr>
+            <h2>Algemene voorwaarden</h2>
+
+            <STInputBox :error-box="errorBox" error-fields="terms" class="max">
+                <Checkbox v-model="terms">
+                    Ik ga akkoord met de <a :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank" class="inline-link">algemene voorwaarden</a>
+                </Checkbox>
+            </STInputBox>
 
             <hr>
             <h2>Overzicht</h2>
@@ -110,31 +119,14 @@
                 </div>
             </template>
 
-
             <template v-if="hasPerMember">
                 <hr>
                 <h2>Wijzigingen aantal leden en automatische betalingen</h2>
                 
                 <p>
-                    Aangezien één van de pakketten op basis van het aantal leden is, en dat aantal kan wijzigen tijdens de looptijd van jouw pakket wordt dit als volgt afgehandeld:
-                </p>
-
-                <p class="style-description-block">
-                    Wanneer het aantal leden dat tergelijkertijd is ingeschreven op een bepaald moment hoger wordt dan het reeds betaald aantal ingeschreven leden, zullen er automatisch extra plaatsen aangekocht worden. Dat bedrag wordt opgeslagen als 'openstaand bedrag' en zal later via domiciliëring/automatische incasso of kredietkaart afgerekend worden. Het bedrag dat per lid wordt aangerekend is afhankelijk van het aantal resterende dagen van het pakket. De eerste 3 maanden betaal je sowieso de volledige prijs per lid, daarna zal het bedrag per nieuw lid stelselmatig afnemen tot 0, op de vervaldag van het pakket. Als het aantal leden dat is ingeschreven daalt, zal je geen terugbetaling ontvangen, maar als het aantal leden daarna weer stijgt tot het oorspronkelijke aangekocht aantal plaatsen hoef je niet meer te betalen.
-                </p>
-
-                <p class="style-description-block">
-                    Het kan zijn dat we de facturatie en het inhouden van een bedrag uitstellen omdat het bedrag te laag is. Dit doen we om de administratieve overlast voor iedereen te beperken. Je kan het aantal facturen ook beperken door op voorhand al je leden in Stamhoofd te importeren (op die manier komen er later minder leden bij en blijft dat bedrag te laag om af te rekenen). Je kan op elk moment het openstaande bedrag raadplegen via de instellingen van Stamhoofd (bij facturen).
+                    Aangezien één van de pakketten op basis van het aantal leden is, en dat aantal kan wijzigen tijdens de looptijd van jouw pakket wordt dit als volgt afgehandeld. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/hoe-worden-extra-leden-gefactureerd/'" class="inline-link" target="_blank">Meer info</a>
                 </p>
             </template>
-            <template v-else>
-                <hr>
-                <h2>Algemene voorwaarden</h2>
-            </template>
-
-            <Checkbox v-model="terms">
-                Ik ga akkoord met de <a :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank" class="inline-link">algemene voorwaarden</a>
-            </Checkbox>
 
             <hr>
 
@@ -151,7 +143,8 @@
             <template slot="right">
                 <LoadingButton :loading="loading">
                     <button class="button primary" type="button" @click="checkout">
-                        Afrekenen
+                        <span class="icon card" />
+                        <span>Betalen</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -463,7 +456,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 throw new SimpleError({
                     code: "terms_required",
                     message: "The terms should be accepted",
-                    human: "Je moet de algemene voorwaarden accepteren voor je een pakket kan activeren",
+                    human: "Je moet de algemene voorwaarden accepteren voor je een betaling kan doen",
                     field: "terms"
                 })
             }

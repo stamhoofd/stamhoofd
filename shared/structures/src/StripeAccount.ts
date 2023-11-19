@@ -79,6 +79,9 @@ export class StripeMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true })
     bank_account_bank_name = ""
 
+    @field({ decoder: StringDecoder, optional: true })
+    bank_account_name = ""
+
     get paymentMethods(): PaymentMethod[] {
         if (!this.charges_enabled) {
             return []
