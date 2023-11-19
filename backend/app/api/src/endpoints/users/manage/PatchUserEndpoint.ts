@@ -73,6 +73,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             // password changes
             await editUser.changePassword(request.body.password)
             await PasswordToken.clearFor(editUser.id)
+            await Token.clearFor(editUser.id, token.accessToken)
         }
 
         await editUser.save();
