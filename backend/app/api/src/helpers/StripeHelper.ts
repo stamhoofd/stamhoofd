@@ -173,7 +173,7 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact',
                 billing_details: {
-                    name: customer.name,
+                    name: customer.name && customer.name.length > 2 ? customer.name : undefined,
                     email: customer.email
                 },
             })
