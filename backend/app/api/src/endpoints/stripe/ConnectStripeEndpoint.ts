@@ -38,7 +38,9 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         const models = await StripeAccount.where({ organizationId: user.organizationId, status: "active" })
-        if (models.length > 0 && !user.organization.privateMeta.featureFlags.includes('stripe-multiple')) {
+
+        const canCreateMultipleStripeAccounts = models.every(a => (a.meta.charges_enabled && a.meta.payouts_enabled) || (a.meta.details_submitted))
+        if (models.length > 0 && !canCreateMultipleStripeAccounts) {
             throw new SimpleError({
                 code: "already_connected",
                 message: "Je hebt al een Stripe account gekoppeld"
@@ -64,11 +66,11 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
                     country: user.organization.address.country
                 },
             },*/
-            business_profile: {
-                mcc: '8398', // charitable_and_social_service_organizations_fundraising <-> 8641 civic_social_fraternal_associations
-                name: user.organization.name,
-                url: user.organization.website ?? undefined,
-            },
+            // business_profile: {
+            //     mcc: '8398', // charitable_and_social_service_organizations_fundraising <-> 8641 civic_social_fraternal_associations
+            //     //name: user.organization.name,
+            //     //url: user.organization.website ?? undefined,
+            // },
             capabilities: {
                 card_payments: { requested: true },
                 transfers: { requested: true },

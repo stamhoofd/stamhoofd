@@ -1,10 +1,10 @@
 <template>
     <div class="st-view cart-view">
-        <STNavigationBar :title="title" :dismiss="canDismiss">
-            <span v-if="cart.items.length > 0 && cart.price" slot="left" class="style-tag">{{ cart.price | price }}</span>
-        </STNavigationBar>
-        <main>
-            <h1>{{ title }}</h1>
+        <STNavigationBar :title="title" :dismiss="canDismiss" />
+        <main class="flex">
+            <h1 class="style-navigation-title">
+                {{ title }}
+            </h1>
 
             <p v-if="cart.items.length == 0" class="info-box">
                 Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.
@@ -27,8 +27,8 @@
                             {{ formatFreePrice(cartItem.getUnitPrice(cart)) }}
                         </p>
                         <div @click.stop>
-                            <button class="button icon trash gray" type="button" @click="deleteItem(cartItem)" />
-                            <StepperInput v-if="maximumRemainingFor(cartItem) > 1" v-model="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="cartItem.calculateUnitPrice(cart)" @click.native.stop />
+                            <button class="button icon trash" type="button" @click="deleteItem(cartItem)" />
+                            <StepperInput v-if="maximumRemainingFor(cartItem) > 1" :value="cartItem.amount" :min="1" :max="maximumRemainingFor(cartItem)" @input="setCartItemAmount(cartItem, $event)" @click.native.stop />
                         </div>
                     </footer>
 
@@ -38,16 +38,43 @@
                 </STListItem>
             </STList>
 
+
             <p>
                 <button type="button" class="button text" @click="pop">
                     <span class="icon add" />
                     <span>Nog iets toevoegen</span>
                 </button>
             </p>
+            <div v-if="cart.items.length > 0 && (checkout.administrationFee || !webshop.isAllFree)" class="pricing-box">
+                <STList>
+                    <STListItem v-if="checkout.administrationFee">
+                        Subtotaal
+
+                        <template slot="right">
+                            {{ cart.price | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="checkout.administrationFee">
+                        Administratiekosten
+
+                        <template slot="right">
+                            {{ checkout.administrationFee | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Totaal
+
+                        <template slot="right">
+                            {{ (cart.price + checkout.administrationFee) | price }}
+                        </template> 
+                    </STListItem>
+                </STList>
+            </div>
         </main>
 
         <STToolbar v-if="cart.items.length > 0">
-            <span v-if="cart.price" slot="left">Totaal: {{ cart.price | price }}</span>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goToCheckout">
                     <span class="icon flag" />
@@ -97,6 +124,14 @@ export default class CartView extends Mixins(NavigationMixin){
         return this.CheckoutManager.cart
     }
 
+    get checkout() {
+        return this.CheckoutManager.checkout
+    }
+
+    get webshop() {
+        return WebshopManager.webshop
+    }
+
     async goToCheckout() { 
         if (this.loading) {
             return
@@ -131,6 +166,12 @@ export default class CartView extends Mixins(NavigationMixin){
 
     deleteItem(cartItem: CartItem) {
         CheckoutManager.cart.removeItem(cartItem)
+        CheckoutManager.saveCart()
+    }
+
+    setCartItemAmount(cartItem: CartItem, amount: number) {
+        cartItem.amount = amount
+        cartItem.calculateUnitPrice(this.cart)
         CheckoutManager.saveCart()
     }
 

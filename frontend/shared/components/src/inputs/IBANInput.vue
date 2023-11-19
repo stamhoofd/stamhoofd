@@ -16,25 +16,25 @@ import { Component, Prop,Vue, Watch } from "vue-property-decorator";
 })
 export default class IBANInput extends Vue {
     @Prop({ default: "" }) 
-    title: string;
+        title: string;
 
     @Prop({ default: null }) 
-    validator: Validator | null
+        validator: Validator | null
     
     ibanRaw = "";
     valid = true;
 
     @Prop({ default: null })
-    value!: string | null
+        value!: string | null
 
     @Prop({ default: true })
-    required!: boolean
+        required!: boolean
 
     @Prop({ default: null })
-    placeholder!: string | null
+        placeholder!: string | null
 
     @Prop({ default: "email" })
-    autocomplete!: string
+        autocomplete!: string
 
     errorBox: ErrorBox | null = null
 
@@ -75,11 +75,20 @@ export default class IBANInput extends Vue {
         const iban = ibantools.electronicFormatIBAN(this.ibanRaw); // 'NL91ABNA0517164300'
         
         if (iban === null || !ibantools.isValidIBAN(iban)) {
-            this.errorBox = new ErrorBox(new SimpleError({
-                "code": "invalid_field",
-                "message": "Ongeldig rekeningnummer: "+this.ibanRaw,
-                "field": "iban"
-            }))
+            if (this.ibanRaw.length == 0) {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    "code": "invalid_field",
+                    "message": "Vul een rekeningnummer in",
+                    "field": "iban"
+                }))
+            } else {
+                this.errorBox = new ErrorBox(new SimpleError({
+                    "code": "invalid_field",
+                    "message": "Ongeldig rekeningnummer: "+this.ibanRaw,
+                    "field": "iban"
+                }))
+            }
+            
             return false
 
         } else {

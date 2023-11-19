@@ -5,23 +5,25 @@
         </h1>
         
         <STErrorsDefault :error-box="errorBox" />
-      
-        <div class="split-inputs">
-            <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errorBox">
-                <AgeInput v-model="minAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
-            </STInputBox>
 
-            <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errorBox">
-                <AgeInput v-model="maxAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
-            </STInputBox>
-        </div>
-        <p class="st-list-description">
-            *Hoe oud het lid wordt in het kalenderjaar van de startdatum van deze groep (dus leeftijd op 31/12/{{ startYear }}).<template v-if="isBelgium">
-                Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
-            </template>
-        </p>
+        <template v-if="isPropertyEnabled('birthDay')">
+            <div class="split-inputs">
+                <STInputBox title="Minimum leeftijd* (optioneel)" error-fields="settings.minAge" :error-box="errorBox">
+                    <AgeInput v-model="minAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
+                </STInputBox>
 
-        <STInputBox title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox" class="max">
+                <STInputBox title="Maximum leeftijd* (optioneel)" error-fields="settings.maxAge" :error-box="errorBox">
+                    <AgeInput v-model="maxAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
+                </STInputBox>
+            </div>
+            <p class="st-list-description">
+                *Hoe oud het lid wordt in het kalenderjaar van de startdatum van deze groep (dus leeftijd op 31/12/{{ startYear }}).<template v-if="isBelgium">
+                    Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
+                </template>
+            </p>
+        </template>
+
+        <STInputBox v-if="isPropertyEnabled('gender')" title="Jongens en meisjes" error-fields="genderType" :error-box="errorBox" class="max">
             <RadioGroup>
                 <Radio v-for="_genderType in genderTypes" :key="_genderType.value" v-model="genderType" :value="_genderType.value">
                     {{ _genderType.name }}
@@ -161,6 +163,10 @@ export default class EditGroupRestrictionsView extends Mixins(EditGroupMixin) {
 
     get isBelgium() {
         return this.organization.address.country == Country.Belgium
+    }
+
+    isPropertyEnabled(name: "emailAddress" | "birthDay" | "phone" | "address" | "gender") {
+        return !!OrganizationManager.organization.meta.recordsConfiguration[name]
     }
 
     getGroupName(id: string) {

@@ -132,7 +132,7 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class PaymentView extends Mixins(NavigationMixin) {
     @Prop()
-    initialPayment!: Payment;
+        initialPayment!: Payment;
 
     payment: PaymentGeneral | null = null
     errorBox: ErrorBox | null = null
@@ -186,25 +186,3 @@ export default class PaymentView extends Mixins(NavigationMixin) {
     }
 }
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
-
-.payment-view {
-    .pricing-box {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: flex-end;
-
-        > * {
-            flex-basis: 250px;
-        }
-
-        .middle {
-            font-weight: 600;
-        }
-    }
-}
-</style>

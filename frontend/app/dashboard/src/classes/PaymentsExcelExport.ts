@@ -182,6 +182,21 @@ export class PaymentsExcelExport {
                         ]);
                     }
 
+                    // Delivery cost
+                    if (balanceItem.order.data.administrationFee) {
+                        wsData.push([
+                            payment.id,
+                            balanceItem.description,
+                            1,
+                            'Administratiekosten',
+                            '',
+                            {
+                                value: (balanceItem.order.data.administrationFee ?? 0) / 100,
+                                format: "€0.00"
+                            }
+                        ]);
+                    }
+
                     // Check difference in price from payments, and add a correction for it
                     const totalOrderPrice = balanceItem.order.data.totalPrice
                     const difference = item.price - totalOrderPrice

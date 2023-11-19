@@ -18,13 +18,13 @@ import { Component, Mixins,Prop } from "vue-property-decorator";
 })
 export default class Dropdown extends Mixins(NavigationMixin) {
     @Prop({})
-    value: any
+        value: any
 
     @Prop({ default: undefined })
-    autocomplete?: string
+        autocomplete?: string
 
     @Prop({ default: undefined })
-    name?: string
+        name?: string
 
     get mappedValue() {
         return this.value

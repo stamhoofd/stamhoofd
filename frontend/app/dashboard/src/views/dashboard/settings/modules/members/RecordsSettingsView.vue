@@ -12,6 +12,10 @@
 
         <p>Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten, en eventueel bepaalde gegevens optioneel maken (altijd of bijvoorbeeld op basis van de leeftijd).</p>
 
+        <p v-if="!getEnableFilterConfiguration('emailAddress') && !getEnableFilterConfiguration('parents')" class="error-box">
+            Je moet minstens het e-mailadres van een lid of de gegevens van ouders verzamelen. Je kan niet beide uitschakelen.
+        </p>
+
         <STList>
             <STListItem>
                 <Checkbox slot="left" :checked="getEnableFilterConfiguration('phone')" @change="setEnableFilterConfiguration('phone', $event)" />
@@ -326,6 +330,10 @@ export default class RecordsSettingsView extends Mixins(NavigationMixin) {
             valid = true
         }
         valid = valid && await this.validator.validate()
+
+        if (!this.getEnableFilterConfiguration('emailAddress') && !this.getEnableFilterConfiguration('parents')) {
+            valid = false;
+        }
 
         if (!valid) {
             return;

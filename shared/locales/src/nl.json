@@ -29,7 +29,8 @@
     "exampleData": {
       "phone": "+32 470 12 34 56",
       "email": "voorbeeld@gmail.com",
-      "name": "Jan Janssens"
+      "name": "Jan Janssens",
+      "names": "Lies en Jan Janssens"
     }
   },
   "backend": {},

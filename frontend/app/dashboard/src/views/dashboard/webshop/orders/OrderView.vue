@@ -234,7 +234,23 @@
                         {{ a.answer || "/" }}
                     </p>
                 </STListItem>
+
+                <STListItem v-if="order.data.comments" :selectable="true" @click="editComments()">
+                    <h3 class="style-definition-label">
+                        Notities
+                    </h3>
+
+                    <p class="style-definition-text pre-wrap" v-text="order.data.comments" />
+                    <span v-if="hasWrite" slot="right" class="icon edit" />
+                </STListItem>
             </STList>
+
+            <div v-if="!order.data.comments && hasWrite" class="container">
+                <button class="button text" type="button" @click="editComments()">
+                    <span class="icon edit" />
+                    <span>Notities</span>
+                </button>
+            </div>
 
             <div v-for="category in recordCategories" :key="'category-'+category.id" class="container">
                 <hr>
@@ -244,24 +260,6 @@
                 <RecordCategoryAnswersBox :category="category" :answers="recordAnswers" :data-permission="true" />
             </div>
 
-            <div v-if="order.data.comments" class="container">
-                <hr>
-                <h2 class="style-with-button">
-                    <div>Notities</div>
-                    <div v-if="hasWrite">
-                        <button type="button" class="button icon edit gray" @click="editComments()" />
-                    </div>
-                </h2>
-
-                <p class="pre-wrap" v-text="order.data.comments" />
-            </div>
-            <div v-else-if="hasWrite" class="container">
-                <hr>
-                <button class="button text selected" type="button" @click="editComments()">
-                    <span class="icon add" />
-                    <span>Notities toevoegen</span>
-                </button>
-            </div>
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
                 <hr>
@@ -295,6 +293,43 @@
                     </figure>
                 </STListItem>
             </STList>
+
+            <div class="pricing-box">
+                <STList>
+                    <STListItem v-if="order.data.administrationFee">
+                        Subtotaal
+
+                        <template slot="right">
+                            {{ order.data.cart.price | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="order.data.deliveryPrice">
+                        Leveringskost
+
+                        <template slot="right">
+                            {{ order.data.deliveryPrice | price }}
+                        </template>
+                    </STListItem>
+
+
+                    <STListItem v-if="order.data.administrationFee">
+                        Administratiekosten
+
+                        <template slot="right">
+                            {{ order.data.administrationFee | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Totaal
+
+                        <template slot="right">
+                            {{ order.data.totalPrice | price }}
+                        </template> 
+                    </STListItem>
+                </STList>
+            </div>
         </main>
     </div>
 </template>
@@ -745,11 +780,6 @@ export default class OrderView extends Mixins(NavigationMixin){
             height: 100px;
             border-radius: $border-radius;
         }
-    }
-
-    .pre-wrap {
-        @extend .style-description;
-        white-space: pre-wrap;
     }
 }
 </style>

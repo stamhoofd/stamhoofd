@@ -9,8 +9,8 @@
 
             <BillingWarningBox />
 
-            <p v-if="stripeWarning" class="error-box">
-                {{ stripeWarning }}
+            <p v-for="(stripeWarning, index) of stripeWarnings" :key="'stripe-warning-'+index" :class="stripeWarning.type + '-box'">
+                {{ stripeWarning.text }}
 
                 <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/documenten-stripe-afgekeurd/'" target="_blank" class="button text">
                     Meer info
@@ -385,8 +385,8 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         return this.organization.privateMeta?.featureFlags.includes(flag) ?? false
     }
 
-    get stripeWarning() {
-        return this.stripeAccounts.flatMap(a => a.warning ? [a.warning] : []).join("\n")
+    get stripeWarnings() {
+        return this.stripeAccounts.flatMap(a => a.warning ? [a.warning] : [])
     }
 
     async loadStripeAccounts(recheckStripeAccount: string | null) {

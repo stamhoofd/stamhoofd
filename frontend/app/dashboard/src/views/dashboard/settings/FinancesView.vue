@@ -12,10 +12,10 @@
                 <STListItem v-if="hasFinanceAccess" :selectable="true" class="left-center" @click="openPayments(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/calculator.svg">
                     <h2 class="style-title-list">
-                        Cijfers exporteren
+                        Betalingen exporteren
                     </h2>
                     <p class="style-description">
-                        Raadpleeg en exporteer alle betalingen die via Stamhoofd verliepen.
+                        Alle betalingen, transactiekosten en uitbetalingen die via Stamhoofd verliepen.
                     </p>
                     <template slot="right">
                         <span class="icon arrow-right-small gray" />
