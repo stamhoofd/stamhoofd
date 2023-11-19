@@ -1,6 +1,6 @@
 import XLSX from "xlsx";
 
-export type RowValue = (string | number | Date | {value: string | number | Date, format: null | string});
+export type RowValue = (string | number | Date | {value: string | number | Date, format?: null | string, width?: number});
 
 function transformRowValues(row: RowValue[][]): (string | number | Date)[][] {
     return row.map(r => r.map(c => {
@@ -34,7 +34,10 @@ export class ExcelHelper {
         // Set column width
         ws['!cols'] = []
         for (const column of wsData[0]) {
-            if (typeof column != "string") {
+            if (typeof column !== "string") {
+                if (typeof column === "object" && !(column instanceof Date) && column.width) {
+                    ws['!cols'].push({width: column.width});
+                }
                 continue
             }
             if (column.toLowerCase().includes("totaal") || column.toLowerCase().includes("datum")) {

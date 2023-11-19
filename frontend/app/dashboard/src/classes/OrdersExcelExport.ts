@@ -1,10 +1,23 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PaymentProvider,PrivateOrder, ProductType } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PaymentProvider,PrivateOrder, ProductType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
 import { ExcelHelper, RowValue } from './ExcelHelper';
+
+function cartItemGroupingString(item: CartItem) {
+    let name = item.product.name
+
+    if (item.product.prices.length > 1) {
+        name += " - " + item.productPrice.name
+    }
+    for (const option of item.options) {
+        name += " - " + option.option.name
+    }
+
+    return name
+}
 
 export class OrdersExcelExport {
 
@@ -99,7 +112,7 @@ export class OrdersExcelExport {
                 "Aantal",
                 "Stukprijs",
                 "Prijs",
-                "Product",
+                "Artikel",
                 ...optionNames,
 
                 // Duplicates
@@ -250,6 +263,23 @@ export class OrdersExcelExport {
                 }
             }
         }
+
+        const itemColumns = new Map<string, number>()
+        const itemNames: RowValue[] = []
+
+        // Columns for products
+        for (const order of orders) {
+            for (const item of order.data.cart.items) {
+                const group = cartItemGroupingString(item)
+                if (!itemColumns.has(group)) {
+                    itemColumns.set(group, itemColumns.size)
+                    itemNames.push({
+                        value: group,
+                        width: group.length
+                    })
+                }
+            }
+        }
         
         // Columns
         const wsData: RowValue[][] = [
@@ -271,7 +301,8 @@ export class OrdersExcelExport {
                 "Betaalmethode",
                 "Betaald",
                 "Status",
-                ...(shouldIncludeSettements ? ["Uitbetalingsdatum", "Uitbetalingsmededeling"] : [])
+                ...(shouldIncludeSettements ? ["Uitbetalingsdatum", "Uitbetalingsmededeling"] : []),
+                ...itemNames
             ],
         ];
 
@@ -299,6 +330,16 @@ export class OrdersExcelExport {
                 const index = answerColumns.get(a.settings.id)
                 if (index !== undefined) {
                     answers[index] = a.excelValue
+                }
+            }
+
+            const itemAmounts: RowValue[] = itemNames.map(a => "")
+
+            for (const item of order.data.cart.items) {
+                const group = cartItemGroupingString(item)
+                const index = itemColumns.get(group)
+                if (index !== undefined) {
+                    itemAmounts[index] = item.amount
                 }
             }
 
@@ -338,12 +379,12 @@ export class OrdersExcelExport {
                 ...(shouldIncludeSettements ? 
                     (order.payment?.settlement ? [Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.payment.settlement.settledAt)), order.payment.settlement.reference] : ["/", "/"])
                     : []
-                )
+                ),
+                ...itemAmounts
             ]);
         }
 
         return ExcelHelper.buildWorksheet(wsData, {
-            keepLastColumns: shouldIncludeSettements ? 2 : 0,
             defaultColumnWidth: 13
         })
     }
@@ -428,7 +469,7 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                "Product",
+                "Artikel",
                 "Variant",
                 "Aantal"
             ],
@@ -481,9 +522,9 @@ export class OrdersExcelExport {
         }
         
         /* Add the worksheet to the workbook */
-        XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), "Bestellingen + producten");
-        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), "Bestellingen");
-        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), "Producten");
+        XLSX.utils.book_append_sheet(wb, this.createOrderLines(orders), "Artikel per lijn");
+        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), "Bestelling per lijn");
+        XLSX.utils.book_append_sheet(wb, this.createProducts(orders), "Totalen");
 
         if (shouldIncludeSettements) {
             XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Uitbetalingen");
