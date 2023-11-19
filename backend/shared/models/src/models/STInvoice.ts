@@ -345,12 +345,12 @@ export class STInvoice extends Model {
     /**
      * WARNGING: only call this method in the correct queue!
      */
-    async markFailed(payment: Payment) {
+    async markFailed(payment: Payment, markFailed = true) {
         console.log("Mark invoice as failed", this.id)
 
         const packages = await this.getPackages()
 
-        if (payment.method === PaymentMethod.DirectDebit || payment.method === PaymentMethod.Transfer) {
+        if (markFailed && (payment.method === PaymentMethod.DirectDebit || payment.method === PaymentMethod.Transfer)) {
             // Only mark failed payments for background payments
             for (const pack of packages) {
                 console.log("Marking package with failed payment "+pack.id)
@@ -409,7 +409,7 @@ export class STInvoice extends Model {
             }
         }
 
-        if (this.organizationId && payment.method === PaymentMethod.DirectDebit) {
+        if (markFailed && this.organizationId && payment.method === PaymentMethod.DirectDebit) {
             const organization = await Organization.getByID(this.organizationId)
             if (organization) {
                 const invoicingTo = await organization.getInvoicingToEmails()
@@ -426,7 +426,7 @@ export class STInvoice extends Model {
             }
         }
 
-        if (this.organizationId && payment.method === PaymentMethod.Transfer) {
+        if (markFailed && this.organizationId && payment.method === PaymentMethod.Transfer) {
             const organization = await Organization.getByID(this.organizationId)
             if (organization) {
                 const invoicingTo = await organization.getInvoicingToEmails()
