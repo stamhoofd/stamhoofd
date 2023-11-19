@@ -227,8 +227,8 @@ export class Group extends Model {
             [this.id, this.cycle, new Date()]
         )
 
-        // Loop cycle 0 until current (excluding current)
-        for (let cycle = 0; cycle < this.cycle; cycle++) {
+        // Loop cycle -1 until current (excluding current)
+        for (let cycle = -1; cycle < this.cycle; cycle++) {
             if (!this.settings.cycleSettings.has(cycle)) {
                 this.settings.cycleSettings.set(cycle, CycleInformation.create({
                     registeredMembers: 0,
