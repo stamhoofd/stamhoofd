@@ -34,7 +34,7 @@ export class SessionManagerStatic {
         // to prevent fetching the organization to refetch the missing keychain items
         await Keychain.load()
 
-        const id = (await this.getSessionStorage()).lastOrganizationId
+        const id = (await this.getSessionStorage(false)).lastOrganizationId
         if (id) {
             const session = await this.getSessionForOrganization(id)
             if (session && session.canGetCompleted()) {
@@ -70,15 +70,15 @@ export class SessionManagerStatic {
 
         // Not important async block: we don't need to wait for a save here
         (async () => {
-            const storage = await this.getSessionStorage()
+            const storage = await this.getSessionStorage(false)
             storage.lastOrganizationId = null
             this.saveSessionStorage(storage)
         })().catch(console.error)
     }
 
     async addOrganizationToStorage(organization: Organization, options: {updateOnly?: boolean} = {}) {
-        const storage = await this.getSessionStorage()
-        const index = storage.organizations.map(o => o.id).indexOf(organization.id)
+        const storage = await this.getSessionStorage(false)
+        const index = storage.organizations.findIndex(o => o.id === organization.id)
 
         if (index !== -1) {
             storage.organizations.splice(index, 1)
@@ -92,7 +92,7 @@ export class SessionManagerStatic {
     }
 
     async removeOrganizationFromStorage(organizationId: string) {
-        const storage = await this.getSessionStorage()
+        const storage = await this.getSessionStorage(false)
         const index = storage.organizations.map(o => o.id).indexOf(organizationId)
 
         // TODO: improve this a lot
@@ -188,7 +188,7 @@ export class SessionManagerStatic {
             }
         }
 
-        const storage = await this.getSessionStorage()
+        const storage = await this.getSessionStorage(false)
         storage.lastOrganizationId = session.organizationId
         this.saveSessionStorage(storage)
 
@@ -234,7 +234,7 @@ export class SessionManagerStatic {
         }
     }
 
-    saveSessionStorage(storage: SessionStorage) {
+    saveSessionStorage(storage: SessionStorage, retryWithLess = true) {
         try {
             this.cachedStorage = storage
 
@@ -242,14 +242,20 @@ export class SessionManagerStatic {
             Storage.keyValue.setItem('organizations', JSON.stringify(new VersionBox(storage).encode({ version: Version }))).catch(console.error)
         } catch (e) {
             console.error(e)
+
+            // Possible out of storage: delete one organization and try again
+            if (retryWithLess && storage.organizations.length > 1) {
+                storage.organizations.pop()
+                this.saveSessionStorage(storage, false)
+            }
         }
     }
 
-    async getSessionStorage(): Promise<SessionStorage> {
-        if (this.cachedStorage) {
+    async getSessionStorage(allowCache = true): Promise<SessionStorage> {
+        if (this.cachedStorage && allowCache) {
             return this.cachedStorage
         }
-        // Loop thru organizations
+        // Loop through organizations
         try {
             const json = await Storage.keyValue.getItem('organizations')
             if (json) {
@@ -271,7 +277,7 @@ export class SessionManagerStatic {
     }
 
     async availableSessions(): Promise<Session[]> {
-        const sessionStorage = await this.getSessionStorage()
+        const sessionStorage = await this.getSessionStorage(false)
         const sessions: Session[] = []
 
         for (const o of sessionStorage.organizations) {
