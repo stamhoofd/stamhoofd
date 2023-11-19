@@ -11,99 +11,85 @@
         <template v-if="isBuckarooActive">
             <hr>
             <h2>
-                Online betalingen activeren
+                Online betalingen via Buckaroo
             </h2>
 
             <p v-if="isBuckarooActive" class="success-box">
                 Online betalingen zijn geactiveerd voor de volgende betaalmethodes: {{ buckarooPaymentMethodsString }}
             </p>
-
-            <p v-if="!isBuckarooActive" class="st-list-description">
-                {{ $t('dashboard.settings.paymentMethods.buckaroo.description') }}
-            </p>
-
-            <p v-if="!isBuckarooActive">
-                <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/aansluiten-bij-betaalprovider/'" target="_blank">
-                    <span>Aansluiten</span>
-                    <span class="icon arrow-right" />
-                </a>
-            </p>
         </template>
 
-        <template v-if="!isBuckarooActive">
+        <hr>
+        <h2>
+            Online betalingen via Stripe
+        </h2>
+        <p class="info-box">
+            Lees eerst onze gids voor je begint, je zal het je anders beklagen! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt. 
+        </p>
+
+        <div class="style-button-bar">
+            <a class="button primary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
+                <span>Lees de gids</span>
+                <span class="icon arrow-right" />
+            </a>
+
+            <LoadingButton v-if="stripeAccounts.length === 0 || creatingStripeAccount || getFeatureFlag('stripe-multiple')" :loading="creatingStripeAccount">
+                <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
+                    <span v-if="stripeAccounts.length > 0" class="icon add" />
+                    <span v-if="stripeAccounts.length > 0">Extra account (€5,00/rekening éénmalig)</span>
+                    <span v-else>Aansluiten bij Stripe</span>
+                </button>
+            </LoadingButton>
+        </div>
+        
+        <Spinner v-if="loadingStripeAccounts && stripeAccounts.length === 0" />
+        <div v-for="account in stripeAccounts" :key="account.id" class="container">
             <hr>
             <h2>
-                Online betalingen via Stripe
+                Stripe account <code>{{ account.accountId }}</code>
             </h2>
-
-            <p class="info-box">
-                Lees eerst onze gids voor je begint, je zal het je anders beklagen! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt. 
+            <p v-if="account.meta.bank_account_last4" class="style-description-small">
+                Gekoppeld aan jouw bankrekening die eindigt op {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
+            </p>
+            <p v-if="account.meta.company" class="style-description-small">
+                Op naam van {{ account.meta.business_profile.name }} / {{ account.meta.company.name }}
+            </p>
+            <p v-else-if="account.meta.business_profile.name" class="style-description-small">
+                Op naam van {{ account.meta.business_profile.name }}
             </p>
 
-            <div class="style-button-bar">
-                <a class="button primary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
-                    <span>Lees de gids</span>
-                    <span class="icon arrow-right" />
-                </a>
+            <p v-if="account.warning" class="warning-box">
+                {{ account.warning }}
+            </p>
 
-                <LoadingButton v-if="stripeAccounts.length === 0 || creatingStripeAccount || getFeatureFlag('stripe-multiple')" :loading="creatingStripeAccount">
-                    <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
-                        <span v-if="stripeAccounts.length > 0" class="icon add" />
-                        <span v-if="stripeAccounts.length > 0">Extra account</span>
-                        <span v-else>Aansluiten bij Stripe</span>
-                    </button>
-                </LoadingButton>
-            </div>
+            <p v-if="!account.meta.charges_enabled" class="info-box">
+                Je hebt jouw Stripe account nog niet vervolledigd. Je kan nog geen betalingen ontvangen.
+            </p>
+
+            <p v-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="info-box">
+                Je kan al betalingen ontvangen via Stripe, maar uitbetalingen zijn nog niet geactiveerd. Kijk na of je nog gegevens moet aanvullen om wettelijk in orde te zijn om uitbetalingen te ontvangen.
+            </p>
+
+            <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled" class="success-box">
+                Betalingen en uitbetalingen via Stripe zijn geactiveerd. Hou in de gaten als je in de toekomst nog extra gegevens moet aanvullen.
+            </p>
             
-            <Spinner v-if="loadingStripeAccounts && stripeAccounts.length === 0" />
-            <div v-for="account in stripeAccounts" :key="account.id" class="container">
-                <hr>
-                <h2>
-                    Stripe account <code>{{ account.accountId }}</code>
-                </h2>
-                <p v-if="account.meta.bank_account_last4" class="style-description-small">
-                    Gekoppeld aan jouw bankrekening die eindigt op {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
-                </p>
-                <p v-if="account.meta.company" class="style-description-small">
-                    Op naam van {{ account.meta.business_profile.name }} / {{ account.meta.company.name }}
-                </p>
-                <p v-else-if="account.meta.business_profile.name" class="style-description-small">
-                    Op naam van {{ account.meta.business_profile.name }}
-                </p>
+            <div class="style-button-bar">
+                <button v-if="!account.meta.charges_enabled || !account.meta.payouts_enabled" type="button" class="button primary" :disabled="creatingStripeAccount" @click="openStripeAccountLink(account.id)">
+                    <span>Vervolledig gegevens</span>
+                    <span class="icon arrow-right" />
+                </button>
 
-                <p v-if="account.warning" class="warning-box">
-                    {{ account.warning }}
-                </p>
+                <button v-else type="button" class="button secundary" :disabled="creatingStripeAccount" @click="loginStripeAccount(account.id)">
+                    <span>Open Stripe Dashboard</span>
+                </button>
 
-                <p v-if="!account.meta.charges_enabled" class="info-box">
-                    Je hebt jouw Stripe account nog niet vervolledigd. Je kan nog geen betalingen ontvangen.
-                </p>
-
-                <p v-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="info-box">
-                    Je kan al betalingen ontvangen via Stripe, maar uitbetalingen zijn nog niet geactiveerd. Kijk na of je nog gegevens moet aanvullen om wettelijk in orde te zijn om uitbetalingen te ontvangen.
-                </p>
-
-                <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled" class="success-box">
-                    Betalingen en uitbetalingen via Stripe zijn geactiveerd. Hou in de gaten als je in de toekomst nog extra gegevens moet aanvullen.
-                </p>
-                
-                <div class="style-button-bar">
-                    <button v-if="!account.meta.charges_enabled || !account.meta.payouts_enabled" type="button" class="button primary" :disabled="creatingStripeAccount" @click="openStripeAccountLink(account.id)">
-                        <span>Vervolledig gegevens</span>
-                        <span class="icon arrow-right" />
-                    </button>
-
-                    <button v-else type="button" class="button secundary" :disabled="creatingStripeAccount" @click="loginStripeAccount(account.id)">
-                        <span>Open Stripe Dashboard</span>
-                    </button>
-
-                    <button v-if="isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
-                        <span class="icon trash" />
-                        <span>Verwijder</span>
-                    </button>
-                </div>
+                <button v-if="isStamhoofd" class="button text red" type="button" @click="deleteStripeAccount(account.id)">
+                    <span class="icon trash" />
+                    <span>Verwijder</span>
+                </button>
             </div>
-        </template>
+        </div>
 
         <template v-if="payconiqApiKey || forcePayconiq">
             <hr>
