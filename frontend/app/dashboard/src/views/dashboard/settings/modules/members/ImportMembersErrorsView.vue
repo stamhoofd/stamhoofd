@@ -20,7 +20,7 @@
                         <td>
                             {{ error.message }}
                         </td>
-                        <td>
+                        <td class="nowrap">
                             {{ error.cellPath }}
                         </td>
                     </tr>
@@ -34,7 +34,7 @@
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="saving">
-                    <button class="button primary" @click="pop">
+                    <button class="button primary" type="button" @click="pop">
                         Nieuw bestand uploaden
                     </button>
                 </LoadingButton>
@@ -73,7 +73,7 @@ export default class ImportMembersErrorsView extends Mixins(NavigationMixin) {
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
     @Prop({ required: true })
-    errors: ImportError[]
+        errors: ImportError[]
 
     get organization() {
         return OrganizationManager.organization.patch(this.organizationPatch)

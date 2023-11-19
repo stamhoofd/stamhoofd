@@ -26,7 +26,7 @@ export class EmailColumnMatcher extends SharedMatcher implements ColumnMatcher {
             }
         }
         
-        const possibleMatch = ["mail"]
+        const possibleMatch = [this.category == MatcherCategory.Member ? 'mail lid' : "mail"]
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {

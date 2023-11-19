@@ -1,0 +1,94 @@
+<template>
+    <div class="st-view">
+        <STNavigationBar title="Lijken op elkaar" :dismiss="canDismiss" :pop="canPop" />
+
+        <main>
+            <h1>
+                Vink de rijen aan als het om dezelfde personen gaat
+            </h1>
+            <p>We zijn niet 100% zeker dat deze leden uit Stamhoofd en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Stamhoofd) overschrijven als je ze aanvinkt.</p>
+        
+            <STList>
+                <STListItem v-for="(match, index) in members" :key="index" element-name="label" :selectable="true">
+                    <div slot="left">
+                        <h2 class="style-title-list">
+                            {{ match.details.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ match.details.birthDayFormatted || "/" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <h2 class="style-title-list">
+                            {{ match.probablyEqual.details.name }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ match.probablyEqual.details.birthDayFormatted || "/" }}
+                        </p>
+                    </div>
+
+                    <Checkbox slot="right" :checked="getVerified(match)" @change="setVerified(match, $event)" />
+                </STListItem>
+            </STList>
+        </main>
+
+        <STToolbar>
+            <template slot="right">
+                <button class="button primary" type="button" @click="goNext">
+                    Verder
+                </button>
+            </template>
+        </STToolbar>
+    </div>
+</template>
+
+<script lang="ts">
+import { NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, Checkbox, LoadingButton, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { Formatter } from '@stamhoofd/utility';
+import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import { ImportingMember } from "../../../../../classes/import/ImportingMember";
+
+@Component({
+    components: {
+        STNavigationBar,
+        STToolbar,
+        STInputBox,
+        STList,
+        STListItem,
+        STErrorsDefault,
+        Checkbox,
+        BackButton,
+        LoadingButton
+    },
+    filters: {
+        date: Formatter.date.bind(Formatter)
+    }
+})
+export default class ImportVerifyProbablyEqualView extends Mixins(NavigationMixin) {
+    @Prop({ required: true })
+        onVerified: (component: NavigationMixin) => void
+    
+    @Prop({ required: true })
+        members: ImportingMember[]
+    
+    goNext() {
+        this.onVerified(this)
+    }
+
+    getVerified(member: ImportingMember) {
+        return !!member.equal
+    }
+
+    setVerified(member: ImportingMember, value: boolean) {
+        if (value) {
+            member.equal = member.probablyEqual
+        } else {
+            member.equal = null
+        }
+    }
+}
+
+</script>

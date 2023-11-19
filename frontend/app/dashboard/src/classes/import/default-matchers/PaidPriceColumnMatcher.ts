@@ -5,18 +5,18 @@ import { ColumnMatcher } from "../ColumnMatcher";
 import { ImportingMember } from "../ImportingMember";
 import { MatcherCategory } from "../MatcherCategory";
 
-export class PaymentPriceColumnMatcher implements ColumnMatcher {
-    id = "PaymentPriceColumnMatcher"
+export class PaidPriceColumnMatcher implements ColumnMatcher {
+    id = "PaidPriceColumnMatcher"
     category: MatcherCategory = MatcherCategory.Payment
 
     getName(): string {
-        return "Bedrag (al dan niet betaald)"
+        return "Bedrag dat betaald werd"
     }
 
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase()
 
-        const possibleMatch = ["lidgeld", "price"]
+        const possibleMatch = ["betaald"]
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
@@ -38,15 +38,12 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
 
     apply(cell: XLSX.CellObject | undefined, member: ImportingMember) {
         if (!cell) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "Deze cel is leeg"
-            })
+            member.registration.paidPrice = 0
+            return
         }
 
-        // Check if string value
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        const value = ((cell.w ?? cell.v)+"").toLowerCase().replace(/[€$\s,]+/g, "").trim().trim()
+        const value = ((cell.w ?? cell.v)+"").toLowerCase().replace(/[€$\s,]+/g, "").trim()
         const b = parseFloat(value)
         
         if (isNaN(b)) {
@@ -56,13 +53,6 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
             })
         }
 
-        if (Math.floor(b*100) !== b*100 ) {
-            throw new SimpleError({
-                code: "invalid_type",
-                message: "'"+ value +"' bevat te veel cijfers na de komma",
-            })
-        }
-
-        member.registration.price = Math.floor(b * 100)
+        member.registration.paidPrice = Math.floor(b * 100)
     }
 }
