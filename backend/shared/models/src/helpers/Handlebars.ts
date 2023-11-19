@@ -18,6 +18,11 @@ Handlebars.registerHelper('formatDate', (a, options) => {
     return Formatter.dateNumber(a, true)
 });
 
+Handlebars.registerHelper('or', (...args) => {
+    args.pop();
+    return !!args.find(a => !!a)
+});
+
 /**
  * Filter string for a given type
  */

@@ -164,8 +164,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     await balanceItem.save()
                     await payment.save()
                 } else {
-                    const redirectUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)
                     const cancelUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)+"&cancel=true"
+                    const redirectUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)
                     const exchangeUrl = 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
 
                     if (payment.provider === PaymentProvider.Stripe) {

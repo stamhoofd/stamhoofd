@@ -43,30 +43,50 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
 })
 export default class PayconiqBannerView extends Mixins(NavigationMixin){
     @Prop({})
-    paymentUrl: string;
+        paymentUrl: string;
 
     @Prop({ required: true })
-    initialPayment!: Payment
+        initialPayment!: Payment
 
     payment: Payment = this.initialPayment
 
     @Prop({ required: true })
-    server: Server
+        server: Server
 
     @Prop({ required: true })
-    finishedHandler: (payment: Payment | null) => void
+        finishedHandler: (payment: Payment | null) => void
 
     pollCount = 0
     timer: any = null
 
     loading = false
+    canceling = false
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 3000);
     }
 
     close() {
+        // Try to cancel the payment in the background
+        this.cancel();
         this.dismiss();
+    }
+
+    cancel() {
+        if (this.canceling) {
+            return;
+        }
+        this.canceling = true;
+        const paymentId = this.payment.id
+        this.server
+            .request({
+                method: "POST",
+                path: "/payments/" +paymentId,
+                query: {
+                    cancel: true
+                },
+                decoder: Payment as Decoder<Payment>,
+            }).catch(console.error)
     }
 
     async shouldNavigateAway() {

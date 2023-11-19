@@ -48,7 +48,7 @@ export class GetDocumentTemplteXMLEndpoint extends Endpoint<Params, Query, Body,
         }
 
         // Update documents
-        const xml = await template.getRenderedXml();
+        const xml = await template.getRenderedXml(user.organization);
         if (!xml) {
             throw new SimpleError({
                 code: "failed_generating",

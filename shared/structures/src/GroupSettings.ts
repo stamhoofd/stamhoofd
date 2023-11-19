@@ -384,6 +384,34 @@ export class GroupSettings extends AutoEncoder {
         return data.registeredMembers;
     }
 
+    getStartDate({cycle}: {cycle?: number}) {
+        let data: GroupSettings|CycleInformation|undefined = this;
+
+        if (cycle !== undefined) {
+            data = this.cycleSettings.get(cycle)
+        }
+
+        if (!data) {
+            return null;
+        }
+
+        return data.startDate;
+    }
+
+    getEndDate({cycle}: {cycle?: number}) {
+        let data: GroupSettings|CycleInformation|undefined = this;
+
+        if (cycle !== undefined) {
+            data = this.cycleSettings.get(cycle)
+        }
+
+        if (!data) {
+            return null;
+        }
+
+        return data.endDate;
+    }
+
     getShortCode(maxLength: number) {
         return Formatter.firstLetters(this.name, maxLength)
     }

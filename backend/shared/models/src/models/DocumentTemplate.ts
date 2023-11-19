@@ -1,6 +1,6 @@
 
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
-import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, MemberWithRegistrations, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
+import { DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, MemberWithRegistrations, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 import { Document } from "./Document";
@@ -10,6 +10,8 @@ import { Registration } from "./Registration";
 import { render } from "../helpers/Handlebars";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { QueueHandler } from "@stamhoofd/queues";
+import { Organization } from "./Organization";
+import { field } from "@simonbackx/simple-encoding";
 
 export class DocumentTemplate extends Model {
     static table = "document_templates";
@@ -66,14 +68,37 @@ export class DocumentTemplate extends Model {
     /**
      * Returns the default answers for a given registration
      */
-    buildAnswers(registration: RegistrationWithMember): {fieldAnswers: RecordAnswer[], missingData: boolean} {
+    async buildAnswers(registration: RegistrationWithMember): Promise<{fieldAnswers: RecordAnswer[], missingData: boolean}> {
         const fieldAnswers: RecordAnswer[] = []
         let missingData = false
+
+        const group = await Group.getByID(registration.groupId)
 
         // Some fields are supported by default in linked fields
         const defaultData = {
             //"registration.startDate": registration.group.settings.startDate,
-            //"registration.endDate": registration.group.settings.endDate,
+            //"registration.endDate": registration.group.settings.endDate,   
+            "group.name": RecordTextAnswer.create({
+                settings: RecordSettings.create({
+                    id: "group.name",
+                    type: RecordType.Text,
+                }), // settings will be overwritten
+                value: group?.settings?.name ?? ""
+            }),    
+            "registration.startDate": RecordDateAnswer.create({
+                settings: RecordSettings.create({
+                    id: "registration.startDate",
+                    type: RecordType.Date,
+                }), // settings will be overwritten
+                dateValue: group?.settings?.getStartDate({cycle: registration.cycle === group.cycle ? undefined : registration.cycle}) ?? null
+            }),
+            "registration.endDate": RecordDateAnswer.create({
+                settings: RecordSettings.create({
+                    id: "registration.endDate",
+                    type: RecordType.Date,
+                }), // settings will be overwritten
+                dateValue: group?.settings?.getEndDate({cycle: registration.cycle === group.cycle ? undefined : registration.cycle}) ?? null
+            }),
             "registration.price": 
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({}), // settings will be overwritten
@@ -196,6 +221,13 @@ export class DocumentTemplate extends Model {
             fieldAnswers.push(anwer)
         }
 
+        // Add other default data
+        for (const key in defaultData) {
+            if (defaultData[key] && defaultData[key].settings.id === key && !fieldAnswers.find(a => a.settings.id === key)) {
+                fieldAnswers.push(defaultData[key])
+            }
+        }
+
         // Verify answers
         if (!missingData) {
             for (const answer of fieldAnswers) {
@@ -227,7 +259,7 @@ export class DocumentTemplate extends Model {
     }
 
     private async generateForRegistration(registration: RegistrationWithMember) {
-        const {fieldAnswers, missingData} = this.buildAnswers(registration)
+        const {fieldAnswers, missingData} = await this.buildAnswers(registration)
         const existingDocuments = await Document.where({ templateId: this.id, registrationId: registration.id }, {limit: 1})
 
         if (!this.checkIncluded(registration, fieldAnswers)) {
@@ -397,7 +429,7 @@ export class DocumentTemplate extends Model {
         });
     }
 
-    private async buildContext() {
+    private async buildContext(organization: Organization) {
         // Convert the field answers in a simplified javascript object
         const documents = (await this.buildAll({generateNumbers: true})).filter(d => d.status === DocumentStatus.Published && !!d.number).sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0))
 
@@ -417,7 +449,7 @@ export class DocumentTemplate extends Model {
         const data = {
             "id": this.id,
             "created_at": this.createdAt,
-            "documents": documents.map(d => d.buildContext()),
+            "documents": documents.map(d => d.buildContext(organization)),
         };
 
         for (const field of this.settings.fieldAnswers) {
@@ -443,13 +475,13 @@ export class DocumentTemplate extends Model {
         return data;
     }
 
-    async getRenderedXml() {
+    async getRenderedXml(organization: Organization) {
         if (!this.privateSettings.templateDefinition.xmlExport) {
             return null;
         }
         
         try {
-            const context = await this.buildContext()
+            const context = await this.buildContext(organization)
             const renderedHtml = render(this.privateSettings.templateDefinition.xmlExport, context);
             return renderedHtml;
         } catch (e) {
@@ -480,7 +512,7 @@ export class DocumentTemplate extends Model {
     }
 
     async updateDocumentFor(document: Document, registration: RegistrationWithMember) {
-        const {fieldAnswers} = this.buildAnswers(registration)
+        const {fieldAnswers} = await this.buildAnswers(registration)
         const existingAnswers = document.data.fieldAnswers
 
         const newAnswers: RecordAnswer[] = existingAnswers.slice()

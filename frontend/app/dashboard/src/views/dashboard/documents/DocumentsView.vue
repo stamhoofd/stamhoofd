@@ -86,6 +86,7 @@ export default class DocumentsView extends Mixins(NavigationMixin) {
     getColumns(): Column<Document, any>[] {
         const cols: Column<Document, any>[] = [
             new Column<Document, string>({
+                enabled: false,
                 name: "Volgnummer", 
                 getValue: (v) => v.id, 
                 compare: (a, b) => Sorter.byStringValue(a, b),
