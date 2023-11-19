@@ -207,7 +207,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
                             })
                         }
-                        const profileId = await token.getProfileId(webshop.getHost())
+                        const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(webshop.getHost())
                         if (!profileId) {
                             throw new SimpleError({
                                 code: "",

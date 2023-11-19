@@ -3,12 +3,12 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors'
 import { MollieToken } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
-import { Organization as OrganizationStruct  } from "@stamhoofd/structures";
+import { CheckMollieResponse, Organization as OrganizationStruct  } from "@stamhoofd/structures";
 
 type Params = Record<string, never>;
 type Body = undefined
 type Query = undefined
-type ResponseBody = OrganizationStruct
+type ResponseBody = OrganizationStruct|CheckMollieResponse
 
 export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {    
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -41,16 +41,44 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!mollie) {
             const organization = user.organization
             organization.privateMeta.mollieOnboarding = null
+            organization.privateMeta.mollieProfile = null
             await organization.save()
 
-            return new Response(await user.getOrganizatonStructure(organization));
+            if (request.request.getVersion() < 200) {
+                return new Response(await user.getOrganizatonStructure(organization));
+            }
+
+            return new Response(CheckMollieResponse.create({
+                organization: await user.getOrganizatonStructure(organization),
+                profiles: []
+            }));
         }
+        const profiles = await mollie.getProfiles();
 
         const status = await mollie.getOnboardingStatus();
         const organization = user.organization
         organization.privateMeta.mollieOnboarding = status;
+
+        // Check profile is still valid
+        if (organization.privateMeta.mollieProfile) {
+            const s = organization.privateMeta.mollieProfile.id
+            const profile = profiles.find(p => p.id === s)
+            if (!profile) {
+                organization.privateMeta.mollieProfile = null
+            } else {
+                organization.privateMeta.mollieProfile = profile
+            }
+        }
+
         await organization.save()
 
-        return new Response(await user.getOrganizatonStructure(organization));
+        if (request.request.getVersion() < 200) {
+            return new Response(await user.getOrganizatonStructure(organization));
+        }
+
+        return new Response(CheckMollieResponse.create({
+            organization: await user.getOrganizatonStructure(organization),
+            profiles
+        }));
     }
 }
