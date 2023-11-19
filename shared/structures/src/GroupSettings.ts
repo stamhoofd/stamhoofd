@@ -24,7 +24,7 @@ export class CycleInformation extends AutoEncoder {
         decoder: IntegerDecoder, 
         nullable: true
     })
-    registeredMembers: number | null = null
+    registeredMembers: number | null = 0
 
     /**
      * Amount of members that is reserved (e.g in payment process, or a member on the waiting list that is invited)
@@ -34,7 +34,7 @@ export class CycleInformation extends AutoEncoder {
         nullable: true, 
         version: 139
     })
-    reservedMembers: number | null = null
+    reservedMembers: number | null = 0
 
     /**
      * Amount of members on the waiting list
@@ -44,7 +44,7 @@ export class CycleInformation extends AutoEncoder {
         nullable: true, 
         version: 139
     })
-    waitingListSize: number | null = null
+    waitingListSize: number | null = 0
 
     get dateRangeDescription() {
         if (!this.endDate) {

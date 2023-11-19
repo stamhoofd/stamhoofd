@@ -223,7 +223,7 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
     get tree() {
         return this.organization.getCategoryTree({
             permissions: OrganizationManager.user.permissions ?? Permissions.create({}),
-            smartCombine: true
+            smartCombine: false
         })
     }
 

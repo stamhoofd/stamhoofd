@@ -51,9 +51,11 @@ export class STPackageBundleHelper {
     static isStackable(bundle: STPackageBundle, pack: STPackage): boolean {
         switch(bundle) {
             case STPackageBundle.TrialMembers: {
+                // Not allowed to start a trial even if pack is expired
                 return false
             }
             case STPackageBundle.TrialWebshops: {
+                // Not allowed to start a trial again if pack is expired
                 return false
             }
         }

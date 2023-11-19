@@ -81,14 +81,7 @@ export default class ArchivedGroupsView extends Mixins(NavigationMixin) {
 
     async load() {
         try {
-            const response = await SessionManager.currentSession!.authenticatedServer.request({
-                method: "GET",
-                path: "/organization/archived-groups",
-                decoder: new ArrayDecoder(Group as Decoder<Group>),
-                owner: this
-            })
-
-            this.groups = response.data.sort((a, b) => b.settings.endDate.getTime() - a.settings.endDate.getTime())
+            this.groups = await OrganizationManager.loadArchivedGroups({owner: this})
         } catch (e) {
             Toast.fromError(e).show()
         }

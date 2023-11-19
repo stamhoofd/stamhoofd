@@ -213,6 +213,41 @@ export class STPackageStatus extends AutoEncoder {
         return true
     }
 
+    /**
+     * Purchased the package, the package is not yet removed, but it is expired or not paid after 4 weeks following a failed payment
+     */
+    get wasActive() {
+        if (this.isActive) {
+            return false;
+        }
+        
+        const d = new Date()
+
+        /// Active if it starts within 10 seconds (fixes time differences between server and clients)
+        if (this.startDate && this.startDate > new Date(d.getTime() + 10 * 1000)) {
+            return false
+        }
+
+        if (this.removeAt && this.removeAt < d) {
+            return false
+        }
+
+        if (this.validUntil && this.validUntil < d) {
+            // Passed!
+            return true
+        }
+
+        // Deactivate module if payment failed, and not reactivated after 4 weeks
+        const expire = new Date()
+        expire.setDate(expire.getDate() - 28)
+        if (this.firstFailedPayment && this.firstFailedPayment < expire) {
+            // did not pay!
+            return true
+        }
+
+        return false
+    }
+
     get deactivateDate(): Date | null {
         const dates: Date[] = []
         if (this.removeAt !== null) {

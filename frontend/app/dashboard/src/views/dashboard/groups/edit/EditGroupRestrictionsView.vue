@@ -122,11 +122,9 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
 import { AgeInput, Checkbox, DateSelection, PriceInput, Radio, RadioGroup, SaveView, SegmentedControl, Slider, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, UploadButton } from "@stamhoofd/components";
-import { Country, Group, GroupGenderType, GroupPrices, GroupPrivateSettings, GroupSettings, Image, Organization, PermissionLevel, PermissionRole, PermissionsByRole, ResolutionFit, ResolutionRequest, WaitingListType } from '@stamhoofd/structures';
-import { StringCompare } from '@stamhoofd/utility';
+import { Country, GroupGenderType, GroupSettings } from '@stamhoofd/structures';
 import { Component, Mixins } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
@@ -181,6 +179,7 @@ export default class EditGroupRestrictionsView extends Mixins(EditGroupMixin) {
     editRequireGroups() {
         this.present(new ComponentWithProperties(SelectGroupsView, {
             initialGroupIds: this.patchedGroup.settings.requireGroupIds,
+            allowArchived: false,
             callback: (groupIds: string[]) => {
                 const diff = GroupSettings.patch({})
                 for (const id of groupIds) {
@@ -209,6 +208,8 @@ export default class EditGroupRestrictionsView extends Mixins(EditGroupMixin) {
     editRequirePreviousGroups() {
         this.present(new ComponentWithProperties(SelectGroupsView, {
             initialGroupIds: this.patchedGroup.settings.requirePreviousGroupIds,
+            cycleOffset: 1,
+            allowArchived: false,
             callback: (groupIds: string[]) => {
                 const diff = GroupSettings.patch({})
                 for (const id of groupIds) {
@@ -237,6 +238,8 @@ export default class EditGroupRestrictionsView extends Mixins(EditGroupMixin) {
     editPreventPreviousGroups() {
         this.present(new ComponentWithProperties(SelectGroupsView, {
             initialGroupIds: this.patchedGroup.settings.preventPreviousGroupIds,
+            cycleOffset: 1,
+            allowArchived: false,
             callback: (groupIds: string[]) => {
                 const diff = GroupSettings.patch({})
                 for (const id of groupIds) {
