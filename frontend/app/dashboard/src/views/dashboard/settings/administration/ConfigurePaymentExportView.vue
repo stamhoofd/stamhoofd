@@ -543,18 +543,3 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
     }
 }
 </script>
-
-<style lang="scss">
-    .suggestion-box {
-        padding: 10px 0;
-
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 5px;
-
-        > * {
-            white-space: nowrap;
-        }
-    }
-</style>

@@ -81,12 +81,12 @@ export class Formatter {
     /**
      * januari 2020
      */
-    static dateWithoutDay(date: Date): string {
+    static dateWithoutDay(date: Date, options?: {timezone?: string}): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return "?"
         }
-        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        const datetime = DateTime.fromJSDate(date).setZone(options?.timezone ?? this.timezone);
         const year = datetime.year;
         return this.month(datetime.month) + " "+year
     }

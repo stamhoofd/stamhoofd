@@ -18,7 +18,7 @@ export type EmailInterfaceBase = {
     subject: string;
     text?: string;
     html?: string;
-    attachments?: { filename: string; path?: string; href?: string; content?: string; contentType?: string }[];
+    attachments?: { filename: string; path?: string; href?: string; content?: string|Buffer; contentType?: string }[];
     retryCount?: number;
     type?: "transactional" | "broadcast",
     headers?: Record<string, string>|null
