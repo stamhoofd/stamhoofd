@@ -185,7 +185,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     async setManagedFilter() {
         // alleen leden met functies downloaden waarvoor Stamhoofd verantwoordelijk is
-        const mapping = buildGroupMapping(OrganizationManager.organization.groups, this.functies)
+        const mapping = buildGroupMapping(null, [], OrganizationManager.organization.groups, this.functies)
         
         await this.authenticatedServer.request({
             method: "PATCH",
@@ -576,7 +576,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             })
 
             const lidData = response.data;
-            const patch = schrappen( lidData, OrganizationManager.organization.groups, this.functies)
+            const patch = schrappen(lidData, OrganizationManager.organization.groups, this.functies)
 
             await sleep(250);
 
