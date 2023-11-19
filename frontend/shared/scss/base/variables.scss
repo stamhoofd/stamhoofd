@@ -14,7 +14,7 @@ $font-weight-default: var(--font-weight-default, 500);
 // On desktop, medium is same as default
 $font-weight-medium: var(--font-weight-medium, 500);
 $font-weight-semibold: var(--font-weight-semibold, 600);
-$font-weight-bold: var(--font-weight-bold, 600);
+$font-weight-bold: var(--font-weight-bold, 700);
 
 @media (max-width: 400px) {
     :root {
@@ -84,11 +84,11 @@ $dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-
 // -------- Dark (black) -------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-dark-original: #1D2129;// #000716;
+$color-dark-original: #1e1e1e;// #000716;
 $color-dark: var(--color-dark, $color-dark-original);
 $dark-theme-color-dark: hsl(0deg, 0%, 90%);
 
-$color-dark-light-original: #3e4146;
+$color-dark-light-original: #4d4d4d;
 
 $color-dark-light: var(--color-dark-light, $color-dark-light-original);
 $dark-theme-color-dark-light: hsl(0deg, 0%, 80%);
