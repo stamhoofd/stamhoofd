@@ -85,7 +85,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Dropdown, ErrorBox, FillRecordCategoryView, MultiSelectInput, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { AppManager, SessionManager } from "@stamhoofd/networking";
-import { RecordAnswer, RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
+import { Country, RecordAnswer, RecordAnswerDecoder, RecordWarning, RecordWarningType, ResolutionRequest } from "@stamhoofd/structures";
 import { ResolutionFit } from "@stamhoofd/structures";
 import { ChoicesFilterMode, RecordAddressAnswer, RecordTextAnswer } from "@stamhoofd/structures";
 import { FilterGroupEncoded, GroupFilterMode, PropertyFilter, Version } from "@stamhoofd/structures";
@@ -505,12 +505,24 @@ export default class EditDocumentTemplateView extends Mixins(NavigationMixin) {
         })
     }
 
+    get isBelgium() {
+        return this.organization.address.country === Country.Belgium
+    }
+
     get availableTypes() {
+        if (this.isBelgium) {
+            return [
+                {
+                    value: fiscal.type,
+                    definition: fiscal
+                },
+                {
+                    value: participation.type,
+                    definition: participation
+                }
+            ]
+        }
         return [
-            {
-                value: fiscal.type,
-                definition: fiscal
-            },
             {
                 value: participation.type,
                 definition: participation
