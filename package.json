@@ -19,7 +19,7 @@
     "scripts": {
         "dev": "concurrently -r 'yarn build:shared:watch' 'lerna run dev --stream --parallel'",
         "app:release": "cd devops && yarn build-code -s app && cd ../frontend/app/mobile && yarn ios && yarn android",
-        "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext ts --exec yarn build:shared",
+        "build:shared:watch": "npx nodemon --quiet --watch shared --watch backend/shared --ignore './shared/*/dist/' --ignore './shared/*/esm/dist/' --ignore './backend/shared/*/dist/' --ext .ts,.json --exec yarn build:shared",
         "build": "cd shared/locales && yarn build && cd ../structures && yarn build && cd ../utility && yarn build && cd ../crypto && yarn build && cd ../..",
         "build:full": "cd shared/locales && yarn build:full && cd ../structures && yarn build:full && cd ../utility && yarn build:full && cd ../crypto && yarn build:full && cd ../..",
         "build:frontend": "yarn build && cd frontend/app/registration && yarn build:production && cd ../dashboard && yarn build:production && cd ../registration && yarn build:production",

@@ -5,7 +5,48 @@
         <main>
             <h1>Waarvoor wil je {{ member.firstName }} inschrijven?</h1>
 
-            <div v-for="category of categories" :key="category.id" class="container">
+            <p v-if="categories.length == 0" class="error-box">
+                {{ member.firstName }} kan je op dit moment niet meer inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
+            </p>
+
+            <div v-if="categories.length == 0 && member.activeRegistrations.length > 0" class="container member-view-details">
+                <hr>
+                <h2>
+                    Al ingeschreven voor
+                </h2>
+
+                <STList>
+                    <STListItem v-for="registration in member.activeRegistrations" :key="registration.id" class="left-center">
+                        <figure v-if="imageSrc(registration)" slot="left" class="registration-image">
+                            <img :src="imageSrc(registration)">
+                            <div>
+                                <span v-if="!registration.waitingList" class="icon green success" />
+                                <span v-else class="icon gray clock" />
+                            </div>
+                        </figure>
+                        <figure v-else slot="left" class="registration-image">
+                            <figure>
+                                <span>{{ getGroup(registration.groupId).settings.getShortCode(2) }}</span>
+                            </figure>
+                            <div>
+                                <span v-if="!registration.waitingList" class="icon green success" />
+                                <span v-else class="icon gray clock" />
+                            </div>
+                        </figure>
+                        <h3 class="style-title-list">
+                            {{ getGroup(registration.groupId).settings.name }}
+                        </h3>
+                        <p v-if="!registration.waitingList" class="style-description-small">
+                            Ingeschreven op {{ registration.registeredAt | dateTime }}
+                        </p>
+                        <p v-else class="style-description-small">
+                            Op wachtlijst sinds {{ registration.createdAt | dateTime }}
+                        </p>
+                    </STListItem>
+                </STList>
+            </div>
+
+            <div v-for="category of visibleCategories" :key="category.id" class="container">
                 <hr>
                 <h2>
                     {{ category.settings.name }}
@@ -16,13 +57,10 @@
                 </STList>
             </div>
 
-            <p v-if="categories.length == 0" class="error-box">
-                {{ member.firstName }} kan je op dit moment niet meer inschrijven. Dit kan het geval zijn als: de inschrijvingen gesloten zijn, als dit lid in geen enkele groep 'past' (bv. leeftijd) of als dit lid al is ingeschreven.
-            </p>
-
             <hr v-if="hasMore">
             <button v-if="hasMore" class="button text" type="button" @click="showAll">
-                Toon alles
+                <span class="icon ul" />
+                <span>Toon alles</span>
             </button>
         </main>
     </div>
@@ -30,9 +68,9 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton,Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { BackButton, Checkbox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { MemberWithRegistrations } from '@stamhoofd/structures';
+import { MemberWithRegistrations, Registration } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { CheckoutManager } from "../../classes/CheckoutManager";
@@ -54,10 +92,29 @@ import GroupsView from "./GroupsView.vue";
 })
 export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    member!: MemberWithRegistrations
+        member!: MemberWithRegistrations
 
     CheckoutManager = CheckoutManager
     MemberManager = MemberManager
+    showMore = false
+
+    mounted() {
+        if (this.categories.length === 0) {
+            this.showMore = true
+        }
+    }
+
+    getGroup(groupId: string) {
+        return OrganizationManager.organization.groups.find(g => g.id === groupId)
+    }
+
+    imageSrc(registration: Registration) {
+        const group = this.getGroup(registration.groupId)
+        if (!group) {
+            return null
+        }
+        return (group.settings.squarePhoto ?? group.settings.coverPhoto)?.getPathForSize(100, 100)
+    }
 
     get tree() {
         return OrganizationManager.organization.getCategoryTree({
@@ -71,12 +128,31 @@ export default class MemberChooseGroupsView extends Mixins(NavigationMixin){
         })
     }
 
+    get fullTree() {
+        return OrganizationManager.organization.getCategoryTree({maxDepth: 1, admin: !!SessionManager.currentSession!.user!.permissions, smartCombine: true})
+    }
+
     get categories() {
         return this.tree.categories
     }
 
+    get fullCategories() {
+        return this.fullTree.categories
+    }
+
+    get visibleCategories() {
+        if (this.showMore) {
+            return this.fullCategories
+        }
+        return this.categories
+    }
+
     get hasMore() {
-        return this.tree.getAllGroups().length !== OrganizationManager.organization.getGroupsForPermissions(SessionManager.currentSession?.user?.permissions).length
+        return !this.showMore && this.tree.getAllGroups().length !== OrganizationManager.organization.getGroupsForPermissions(SessionManager.currentSession?.user?.permissions).length
+    }
+
+    get hasLess() {
+        return this.showMore && this.categories.length !== 0
     }
 
     showAll() {

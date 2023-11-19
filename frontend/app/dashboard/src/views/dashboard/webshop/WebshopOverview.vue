@@ -14,7 +14,7 @@
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
             <STList class="illustration-list">    
-                <STListItem :selectable="true" class="left-center" @click="openOrders(true)">
+                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openOrders(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg">
                     <h2 class="style-title-list">
                         Bestellingen
@@ -25,7 +25,7 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem v-if="hasTickets && hasWritePermissions" :selectable="true" class="left-center" @click="openTickets(true)">
+                <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" @click="openTickets(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/scanner.svg">
                     <h2 class="style-title-list">
                         Scan tickets
@@ -36,7 +36,7 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" @click="openStatistics(true)">
+                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openStatistics(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/diagram.svg">
                     <h2 class="style-title-list">
                         Statistieken
@@ -296,12 +296,11 @@
 </template>
 
 <script lang="ts">
-import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { getPermissionLevelNumber, PermissionLevel, PrivateWebshop, Product, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import { PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -369,14 +368,28 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         if (!OrganizationManager.user.permissions) {
             return false
         }
-        return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
+        return this.preview.privateMeta.permissions.hasFullAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     get hasWritePermissions() {
         if (!OrganizationManager.user.permissions) {
             return false
         }
-        return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.preview.privateMeta.permissions.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
+    }
+
+    get hasReadPermissions() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        return this.preview.privateMeta.permissions.hasReadAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
+    }
+
+    get hasScanPermissions() {
+        if (!OrganizationManager.user.permissions) {
+            return false
+        }
+        return this.hasWritePermissions || this.preview.privateMeta.scanPermissions.hasWriteAccess(OrganizationManager.user.permissions, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     get isTicketsOnly() {
@@ -505,6 +518,7 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         // Set url
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.preview.meta.name))
         document.title = "Stamhoofd - " + this.preview.meta.name
+        this.refreshOnReturn()
 
         if (parts.length == 3 && parts[0] == 'webshops' && parts[2] == 'orders') {
             this.openOrders(false)
@@ -671,6 +685,17 @@ export default class WebshopOverview extends Mixins(NavigationMixin) {
         // Clear all pending requests
         Request.cancelAll(this)
         this.webshopManager.close()
+        document.removeEventListener("visibilitychange", this.doRefresh)
+    }
+
+    refreshOnReturn() {
+        document.addEventListener("visibilitychange", this.doRefresh);
+    }
+
+    doRefresh() {
+        if (document.visibilityState === 'visible') {
+            this.webshopManager.backgroundReloadWebshop()
+        }
     }
 }
 </script>

@@ -1,18 +1,22 @@
 <template>
-    <div id="documents-view" class="st-view background">
+    <LoadingView v-if="loading" />
+    <div v-else id="documents-view" class="st-view background">
         <STNavigationBar title="Documenten" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1 class="style-navigation-title">
                 Documenten
             </h1>
+
+            <p v-if="disableActivities" class="error-box">
+                Deze functie is niet beschikbaar omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.
+            </p>
+
             <p class="style-description">
                 Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.
             </p>
 
-            <Spinner v-if="loading" />
-
-            <STList v-else-if="templates.length">
+            <STList>
                 <STListItem v-for="template of templates" :key="template.id" :selectable="true" class="right-stack" @click="openTemplate(template)">
                     <h2 class="style-title-list">
                         {{ template.settings.name }}
@@ -26,7 +30,7 @@
                 </STListItem>
             </STList>
 
-            <p>
+            <p class="style-button-bar">
                 <button type="button" class="button text" @click="addDocument">
                     <span class="icon add" />
                     <span class="text">Nieuw document</span>
@@ -40,12 +44,13 @@
 import { ArrayDecoder, Decoder } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { Spinner,STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { LoadingView,STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
 import { DocumentTemplatePrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins } from "vue-property-decorator";
 
+import { OrganizationManager } from "../../../classes/OrganizationManager";
 import DocumentTemplateOverview from "./DocumentTemplateOverview.vue";
 import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";
 
@@ -54,7 +59,7 @@ import EditDocumentTemplateView from "./EditDocumentTemplateView.vue";
         STNavigationBar,
         STList,
         STListItem,
-        Spinner
+        LoadingView
     },
     directives: {
         tooltip: TooltipDirective
@@ -69,6 +74,10 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
         UrlHelper.setUrl("/documents")
         document.title = "Stamhoofd - Documenten"
         this.loadTemplates().catch(console.error)
+    }
+
+    get organization() {
+        return OrganizationManager.organization
     }
 
     activated() {
@@ -100,7 +109,16 @@ export default class DocumentTemplatesView extends Mixins(NavigationMixin) {
         this.loading = false
     }
 
+    get disableActivities() {
+        return this.organization.meta.packages.disableActivities
+    }
+
     addDocument() {
+        if (this.organization.meta.packages.disableActivities) {
+            new Toast("Je kan geen documenten aanmaken in de gratis versie van Stamhoofd", 'error red').show()
+            return
+        }
+
         this.present({
             components: [
                 new ComponentWithProperties(EditDocumentTemplateView, {

@@ -26,7 +26,7 @@ export enum STPackageType {
 export class STPackageTypeHelper {
     static getName(type: STPackageType): string {
         switch (type) {
-            case STPackageType.LegacyMembers: return "Ledenadministratie zonder activiteiten";
+            case STPackageType.LegacyMembers: return "Ledenadministratie (oud gratis pakket)";
             case STPackageType.Members: {
                 return "Ledenadministratie, per lid";
             }

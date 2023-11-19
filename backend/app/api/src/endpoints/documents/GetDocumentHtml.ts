@@ -37,7 +37,7 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
             })
         }
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             // Get members
             const members = !document.memberId ? [] : (await Member.getMembersWithRegistrationForUser(user))
             if (!document.memberId || !members.find(m => m.id == document.memberId)) {

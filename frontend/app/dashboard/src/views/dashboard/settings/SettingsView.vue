@@ -84,9 +84,9 @@
                 </STListItem>
 
                 <STListItem :selectable="true" class="left-center" @click="openPrivacy(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/shield.svg">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     <h2 class="style-title-list">
-                        Privacy
+                        Privacyvoorwaarden
                     </h2>
                     <p class="style-description">
                         Stel je privacyvoorwaarden in
@@ -770,6 +770,13 @@ export default class SettingsView extends Mixins(NavigationMixin) {
             return; // (don't clear)
         }
 
+
+        if (parts.length >= 2 && parts[0] == 'settings' && parts[1] == 'admins') {
+            // Open mollie settings
+            this.openAdmins(false)
+            return; // (don't clear)
+        }
+
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'general') {
             // Open mollie settings
             this.openGeneral(false)
@@ -801,11 +808,6 @@ export default class SettingsView extends Mixins(NavigationMixin) {
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'personalize') {
             // Open mollie settings
             this.openPersonalize(false)
-        }
-
-        if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'admins') {
-            // Open mollie settings
-            this.openAdmins(false)
         }
 
         if (parts.length == 2 && parts[0] == 'settings' && parts[1] == 'sso') {

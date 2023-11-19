@@ -1,16 +1,5 @@
 <template>
-    <article class="product-box" :class="{ selected: count > 0, ticket: (product.type == 'Ticket' || product.type == 'Voucher')}" @click="onClicked">
-        <svg width="100%" height="100%" class="maskingSvg">
-            <defs>
-                <mask :id="'ProductBoxMask-'+product.id">
-                    <rect x="0" y="0" width="100%" height="100%" fill="white" rx="5px" style="width: 100%; height: 100%; display: block;" />
-                    <circle cx="0" cy="50%" r="15px" fill="black" />
-                </mask>
-            </defs>
-
-            <rect x="0" y="0" width="100%" height="100%" fill="white" :mask="'url(#ProductBoxMask-'+product.id+')'" class="svg-background" />
-        </svg>
-
+    <article class="product-box" :class="{ selected: count > 0}" @click="onClicked">
         <div class="left" />
         <div class="content">
             <div>
@@ -38,6 +27,7 @@
                 <img :src="imageSrc" :width="imgWidth" :height="imgHeight" :alt="product.name">
             </figure>
             <figure v-else>
+                <span v-if="product.type == 'Ticket' || product.type == 'Voucher'" class="icon ticket gray" />
                 <span class="icon arrow-right-small gray" />
             </figure>
             <hr>
@@ -48,7 +38,7 @@
 
 <script lang="ts">
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CartItemView, Checkbox,LoadingView, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components"
+import { CartItemView, Checkbox, LoadingView, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { Cart, CartItem, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
@@ -263,6 +253,7 @@ export default class ProductBox extends Mixins(NavigationMixin){
             > h3 {
                 padding-top: 5px;
                 @extend .style-title-3;
+                line-height: 1.3;
                 padding-right: 30px;
                 position: relative;
                 transition: transform 0.2s;

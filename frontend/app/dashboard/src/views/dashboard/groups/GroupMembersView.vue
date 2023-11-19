@@ -17,12 +17,11 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, GlobalEventBus, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, getPermissionLevelNumber, Group, GroupCategoryTree, GroupStatus, MemberWithRegistrations, Organization, PermissionLevel, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
+import { ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, Group, GroupCategoryTree, MemberWithRegistrations, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordTextAnswer, RecordType, StringFilterDefinition } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -30,8 +29,6 @@ import { MemberChangeEvent, MemberManager } from "../../../classes/MemberManager
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import EditMemberView from "../member/edit/EditMemberView.vue";
 import MemberView from "../member/MemberView.vue";
-import EditGroupGeneralView from "./edit/EditGroupGeneralView.vue";
-import EditCategoryGroupsView from "./EditCategoryGroupsView.vue";
 import { MemberActionBuilder } from "./MemberActionBuilder";
 
 @Component({
@@ -125,14 +122,10 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         if (this.category) {
-            return this.category.groups.reduce((sum, group) => {
-                return sum + (
-                    group.getMemberCount({
-                        waitingList: this.waitingList,
-                        cycleOffset: this.cycleOffset
-                    }) ?? 30
-                )
-            }, 0);
+            return this.category.getMemberCount({
+                waitingList: this.waitingList,
+                cycleOffset: this.cycleOffset
+            }) ?? 30;
         }
 
         return 30
@@ -296,7 +289,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             cols.push(
                 new Column<MemberWithRegistrations, Group[]>({
                     id: 'category',
-                    name: this.waitingList ? 'Wachtlijst' : this.category.settings.name, 
+                    name: this.waitingList ? 'Wachtlijst' : (this.category.settings.name || 'Groep'), 
                     getValue: (member) => {
                         if (!this.category) {
                             return [];
@@ -389,7 +382,11 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return this.cycleOffset+" inschrijvingsperiodes geleden"
         }
 
-        return this.waitingList ? "Wachtlijst" : (this.group ? 'Leden' : (this.category ? this.category.settings.name : "Alle leden"))
+        return this.waitingList ? "Wachtlijst" : (this.group ? 'Leden' : (this.category && !this.isRoot ? this.category.settings.name : "Alle leden"))
+    }
+
+    get isRoot() {
+        return this.category && this.category.id === this.organization.meta.rootCategoryId
     }
 
     get backHint() {
@@ -430,7 +427,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
 
         for (const group of this.groups) {
-            if (!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
+            if (!group.privateSettings || !group.hasWriteAccess(OrganizationManager.user.permissions, this.organization)) {
                 return false
             }
         }
@@ -444,7 +441,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
         }
         
         for (const group of this.groups) {
-            if (!group.privateSettings || getPermissionLevelNumber(group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Full)) {
+            if (!group.privateSettings || !group.hasFullAccess(OrganizationManager.user.permissions, this.organization)) {
                 return false
             }
         }
@@ -637,7 +634,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return [this.group]
         }
         if (this.category) {
-            return this.category.groups
+            return this.category.getAllGroups()
         }
         return []
     }
@@ -647,7 +644,7 @@ export default class GroupMembersView extends Mixins(NavigationMixin) {
             return [this.group.id]
         }
         if (this.category) {
-            return this.category.groups.map(g => g.id) // needed because of permission check + existing check!
+            return this.category.getAllGroups().map(g => g.id) // needed because of permission check + existing check!
         }
         return []
     }

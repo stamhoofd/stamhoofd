@@ -10,7 +10,7 @@ import { PromiseResult } from 'aws-sdk/lib/request';
 import { v4 as uuidv4 } from "uuid";
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { Group, StripeAccount, Webshop } from "./";
+import { Group, StripeAccount, UserWithOrganization, Webshop } from "./";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -275,7 +275,7 @@ export class Organization extends Model {
         return struct
     }
 
-    async getPrivateStructure(permissions: Permissions): Promise<OrganizationStruct> {
+    async getPrivateStructure(user?: UserWithOrganization): Promise<OrganizationStruct> {
         const Group = (await import("./Group")).Group
         const groups = await Group.getAll(this.id)
         const webshops = await Webshop.where({ organizationId: this.id }, { select: Webshop.selectColumnsWithout(undefined, "products", "categories")})
@@ -288,10 +288,10 @@ export class Organization extends Model {
             registerDomain: this.registerDomain,
             uri: this.uri,
             website: this.website,
-            groups: groups.map(g => g.getPrivateStructure(permissions)).sort(GroupStruct.defaultSort),
+            groups: groups.map(g => g.getPrivateStructure(user)).sort(GroupStruct.defaultSort),
             privateMeta: this.privateMeta,
             webshops: webshops.flatMap(w => {
-                if (w.privateMeta.permissions.getPermissionLevel(permissions) === PermissionLevel.None) {
+                if (user && (!w.privateMeta.permissions.userHasAccess(user, PermissionLevel.Read) && !w.privateMeta.scanPermissions.userHasAccess(user, PermissionLevel.Read))) {
                     return []
                 }
                 return [WebshopPreview.create(w)]
@@ -631,7 +631,7 @@ export class Organization extends Model {
         // Circular reference fix
         const User = (await import('./User')).User;
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
-        const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
+        const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess(this.privateMeta.roles))
 
         return filtered
     }
@@ -656,7 +656,7 @@ export class Organization extends Model {
         // Circular reference fix
         const User = (await import('./User')).User;
         const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
-        const filtered = admins.filter(a => a.permissions && a.permissions.hasFullAccess())
+        const filtered = admins.filter(a => a.permissions && (a.permissions.hasFullAccess(this.privateMeta.roles) || a.permissions.hasFinanceAccess(this.privateMeta.roles)))
 
         if (filtered.length > 0) {
             return filtered.map(f => f.getEmailTo() ).join(", ")

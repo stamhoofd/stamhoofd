@@ -1,56 +1,38 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar title="Toegang tot webshops aanpassen" :dismiss="canDismiss" :pop="canPop" />
+    <SaveView :loading="saving" :disabled="!hasChanges" title="Webshoptoegang" @save="save">
+        <h1>
+            Toegang tot webshops aanpassen
+        </h1>
 
-        <main>
-            <h1>
-                Toegang tot webshops aanpassen
-            </h1>
+        <STErrorsDefault :error-box="errorBox" />
+            
+        <p v-if="webshops.length === 0" class="info-box">
+            Je hebt momenteel nog geen webshops aangemaakt
+        </p>
 
-            <STErrorsDefault :error-box="errorBox" />
-                
-            <STList>
-                <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" @patch="addPatch" />
-            </STList>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <STList>
+            <WebshopPermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patchedRole" :organization="patchedOrganization" :webshop="webshop" type="webshop" @patch="addPatch" />
+        </STList>
+    </SaveView>
 </template>
 
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STList, STListItem, Validator } from "@stamhoofd/components";
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 import WebshopPermissionRow from './WebshopPermissionRow.vue';
 
 @Component({
     components: {
-        Checkbox,
-        STNavigationBar,
-        STToolbar,
         STList,
         STListItem,
-        Spinner,
-        BackButton,
-        STInputBox,
         STErrorsDefault,
-        LoadingButton,
+        SaveView,
         WebshopPermissionRow
     }
 })
@@ -60,10 +42,10 @@ export default class EditRoleWebshopsView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-    role: PermissionRoleDetailed
+        role: PermissionRoleDetailed
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
@@ -71,7 +53,7 @@ export default class EditRoleWebshopsView extends Mixins(NavigationMixin) {
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
     get patchedOrganization() {
         return this.organization.patch(this.patchOrganization)
@@ -93,22 +75,24 @@ export default class EditRoleWebshopsView extends Mixins(NavigationMixin) {
         return this.patchedOrganization.webshops
     }
 
-    save() {
-        this.saveHandler(this.patchOrganization)
-        this.pop({ force: true })
+    async save() {
+        this.saving = true;
+        try {
+            await this.saveHandler(this.patchOrganization)
+            this.pop({ force: true })
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.saving = false;
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
-        return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
+    get hasChanges() {
+        return patchContainsChanges(this.patchOrganization, OrganizationManager.organization, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
-            return true
+        if (!this.hasChanges) {
+            return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }

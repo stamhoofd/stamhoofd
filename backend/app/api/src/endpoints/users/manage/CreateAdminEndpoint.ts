@@ -30,7 +30,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Het is nog niet mogelijk om beheerders te maken als gewone gebruiker"

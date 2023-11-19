@@ -29,7 +29,7 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je moet hoofdbeheerder zijn om mollie te kunnen connecteren"
@@ -45,11 +45,11 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await organization.save()
 
             if (request.request.getVersion() < 200) {
-                return new Response(await user.getOrganizatonStructure(organization));
+                return new Response(await user.getOrganizationStructure());
             }
 
             return new Response(CheckMollieResponse.create({
-                organization: await user.getOrganizatonStructure(organization),
+                organization: await user.getOrganizationStructure(),
                 profiles: []
             }));
         }
@@ -73,11 +73,11 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await organization.save()
 
         if (request.request.getVersion() < 200) {
-            return new Response(await user.getOrganizatonStructure(organization));
+            return new Response(await user.getOrganizationStructure());
         }
 
         return new Response(CheckMollieResponse.create({
-            organization: await user.getOrganizatonStructure(organization),
+            organization: await user.getOrganizationStructure(),
             profiles
         }));
     }

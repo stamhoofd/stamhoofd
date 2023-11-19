@@ -29,10 +29,8 @@
                 </STList>
             </template>
 
-            <a class="info-box icon file-pdf selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
+            <a class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
                 Download de checklist voor het scannen van tickets
-
-                <span class="button icon gray download" />
             </a>
         </main>
 
@@ -70,7 +68,7 @@ import TicketScannerView from "./TicketScannerView.vue";
 })
 export default class TicketScannerSetupView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    webshopManager!: WebshopManager
+        webshopManager!: WebshopManager
 
     disabledProducts: Product[] = []
     isChecking = true

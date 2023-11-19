@@ -4,11 +4,7 @@
 .st-menu {
     --st-vertical-padding: 25px;
 
-    @media (min-width: 400px) {
-        --st-horizontal-padding: 20px;
-    }
-
-    @media (min-width: 801px) {
+    @media (min-width: 300px) {
         --st-horizontal-padding: 20px;
     }
 
@@ -48,35 +44,8 @@
     }
 
     .grouped {
-        //padding: 5px 0;
-
         &.footer {
             margin-top: auto;
-        }
-
-
-        .group-title {
-            //color: $color-gray-1;
-            /*font-size: 16px;
-            //text-transform: uppercase;
-            
-            font-weight: $font-weight-semibold;
-            letter-spacing: -0.2px;
-            min-height: 24px;
-            padding-bottom: 5px;
-
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            width: 100%; // Required for button elements
-
-            > button, > span:not(:first-child) {
-                margin-left: auto;
-
-                &.icon.arrow-right-small {
-                    margin-right: -9px;
-                }
-            }*/
         }
     }
 
@@ -87,21 +56,16 @@
         overflow-x: clip; // Same as above, but prevent scrolling
     }
 
-    > main hr {
+    > main hr, > main .container hr {
         height: $border-width-thin;
         background: $color-gray-3;
         border: 0;
         outline: 0;
-        margin: 15px -25px;
+        margin: 15px calc(-1 * var(--st-horizontal-padding, 40px));
 
         &.first {
             margin-top: 10px;
         }
-    }
-
-    >main>.grouped>hr {
-        height: 0;;
-        //margin: 10px 0;
     }
 
     .menu-button {
@@ -132,11 +96,12 @@
         margin: 0px -15px;
         border-radius: $border-radius;
 
-        &, &:active, &:visited, &:link {
-            text-decoration: none;
+        @media (max-width: 500px) {
+            height: 45px;
         }
 
-        &.group-title {
+        &, &:active, &:visited, &:link {
+            text-decoration: none;
         }
 
         &.sub-button {
@@ -144,13 +109,14 @@
             //width: calc(100% - 10px);
             font-size: 14px;
             color: $color-dark-light;
+            margin-left: calc(-1 * var(--st-horizontal-padding, 40px));
+            padding-left: var(--st-horizontal-padding, 40px);
+
+            margin-right: calc(-1 * var(--st-horizontal-padding, 40px));
+            padding-right: var(--st-horizontal-padding, 40px);
+            border-radius: 0;
             //font-weight: $font-weight-medium;
             //letter-spacing: 0px;
-        }
-
-        > .icon:first-child {
-            padding-right: 18px;
-            flex-shrink: 0;
         }
 
         > .image {
@@ -168,10 +134,36 @@
             }
         }
 
-        > figure:first-child {
-            margin-right: 10px;
+        > .icon {
             flex-shrink: 0;
-            --block-width: 30px;
+        }
+
+        > .icon.correct-offset.small {
+            margin-left: -5px;
+        }
+
+        >.icon:first-child {
+            padding-right: 18px;
+        }
+
+        .right-icon {
+            &:last-child {
+                margin-right: -5px;
+            }
+        }
+
+        > figure:first-child {
+            margin-right: 16px;
+            flex-shrink: 0;
+            --block-width: 26px;
+
+            .logo {
+                border-radius: 4px;
+            }
+
+            >.icon {
+                margin-right: 2px;
+            }
         }
 
         > span {
@@ -225,6 +217,10 @@
 
             &:active, &.active {
                 background-color: $color-gray-3;
+
+                &.cta {
+                    background-color: $color-primary-light;
+                }
             }
         }
 

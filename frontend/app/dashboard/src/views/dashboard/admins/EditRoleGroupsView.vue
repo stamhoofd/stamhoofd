@@ -1,61 +1,40 @@
 <template>
-    <div class="st-view">
-        <STNavigationBar title="Toegang tot inschrijvingsgroepen aanpassen" :dismiss="canDismiss" :pop="canPop" />
+    <SaveView :loading="saving" :disabled="!hasChanges" title="Toegang" @save="save">
+        <h1>
+            Toegang tot inschrijvingsgroepen aanpassen
+        </h1>
 
-        <main>
-            <h1>
-                Toegang tot inschrijvingsgroepen aanpassen
-            </h1>
+        <STErrorsDefault :error-box="errorBox" />
 
-            <STErrorsDefault :error-box="errorBox" />
+        <div v-for="category in tree.categories" :key="category.id" class="container">
+            <hr>
+            <h2>{{ category.settings.name }}</h2>
 
-            <div v-for="category in tree.categories" :key="category.id" class="container">
-                <hr>
-                <h2>{{ category.settings.name }}</h2>
-
-                <STList v-if="category.groups.length > 0">
-                    <GroupPermissionRow v-for="group in category.groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
-                </STList>
-            </div>
-        </main>
-
-        <STToolbar>
-            <template slot="right">
-                <button class="button secundary" @click="cancel">
-                    Annuleren
-                </button>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" @click="save">
-                        Opslaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+            <STList v-if="category.groups.length > 0">
+                <GroupPermissionRow v-for="group in category.groups" :key="group.id" :role="patchedRole" :organization="patchedOrganization" :group="group" @patch="addPatch" />
+            </STList>
+        </div>
+    </SaveView>
 </template>
 
 
 <script lang="ts">
 import { AutoEncoderPatchType, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { CenteredMessage, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
 import { Organization, PermissionRoleDetailed, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
+import { OrganizationManager } from '../../../classes/OrganizationManager';
 import GroupPermissionRow from './GroupPermissionRow.vue';
 
 @Component({
     components: {
-        Checkbox,
-        STNavigationBar,
-        STToolbar,
+        SaveView,
         STList,
         STListItem,
-        Spinner,
-        BackButton,
         STInputBox,
         STErrorsDefault,
-        LoadingButton,
         GroupPermissionRow
     }
 })
@@ -65,10 +44,10 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
     saving = false
 
     @Prop({ required: true })
-    role: PermissionRoleDetailed
+        role: PermissionRoleDetailed
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
     
     patchOrganization: AutoEncoderPatchType<Organization> = Organization.patch({})
 
@@ -76,7 +55,7 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
      * Pass all the changes we made back when we save this category
      */
     @Prop({ required: true })
-    saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
+        saveHandler: ((patch: AutoEncoderPatchType<Organization>) => Promise<void>);
 
     get patchedOrganization() {
         return this.organization.patch(this.patchOrganization)
@@ -99,22 +78,24 @@ export default class EditRoleGroupsView extends Mixins(NavigationMixin) {
         return this.patchedOrganization.getCategoryTreeWithDepth(1)
     }
 
-    save() {
-        this.saveHandler(this.patchOrganization)
-        this.pop({ force: true })
+    async save() {
+        this.saving = true;
+        try {
+            await this.saveHandler(this.patchOrganization)
+            this.pop({ force: true })
+        } catch (e) {
+            this.errorBox = new ErrorBox(e)
+        }
+        this.saving = false;
     }
 
-    cancel() {
-        this.pop()
-    }
-
-    isChanged() {
-        return patchContainsChanges(this.patchOrganization, this.organization, { version: Version })
+    get hasChanges() {
+        return patchContainsChanges(this.patchOrganization, OrganizationManager.organization, { version: Version })
     }
 
     async shouldNavigateAway() {
-        if (!this.isChanged()) {
-            return true
+        if (!this.hasChanges) {
+            return true;
         }
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }

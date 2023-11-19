@@ -345,7 +345,7 @@
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox, ColorHelper, LongPressDirective, RecordCategoryAnswersBox, Spinner, STList, STListItem, STNavigationBar, STToolbar, TableActionsContextMenu } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { getPermissionLevelNumber, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
+import { OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, RecordCategory, RecordWarning, TicketPrivate } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -446,7 +446,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         if (!p) {
             return false
         }
-        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     get hasPaymentsWrite() {
@@ -457,7 +457,7 @@ export default class ValidTicketView extends Mixins(NavigationMixin) {
         if (p.canManagePayments(OrganizationManager.organization.privateMeta?.roles ?? [])) {
             return true
         }
-        return getPermissionLevelNumber(this.webshop.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.webshop.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])
     }
 
     openPayment() {

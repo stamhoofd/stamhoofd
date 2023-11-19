@@ -1,10 +1,8 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Ticket } from '@stamhoofd/models';
-import { Token } from '@stamhoofd/models';
-import { Webshop } from '@stamhoofd/models';
-import { getPermissionLevelNumber, PermissionLevel, TicketPrivate } from "@stamhoofd/structures";
+import { Ticket, Token, Webshop } from '@stamhoofd/models';
+import { PermissionLevel, TicketPrivate } from "@stamhoofd/structures";
 
 type Params = { id: string };
 type Query = undefined;
@@ -43,13 +41,15 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
             })
         }
 
-        if (!token.user.permissions || getPermissionLevelNumber(webshop.privateMeta.permissions.getPermissionLevel(token.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
-            throw new SimpleError({
-                code: "permission_denied",
-                message: "No permissions for this webshop",
-                human: "Je hebt geen toegang om tickets te scannen in deze webshop",
-                statusCode: 403
-            })
+        if (!webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Write)) {
+            if (!webshop.privateMeta.scanPermissions.userHasAccess(token.user, PermissionLevel.Write)) {
+                throw new SimpleError({
+                    code: "permission_denied",
+                    message: "No permissions for this webshop",
+                    human: "Je hebt geen toegang om tickets te scannen in deze webshop",
+                    statusCode: 403
+                })
+            }
         }
 
         const tickets: Ticket[] = []

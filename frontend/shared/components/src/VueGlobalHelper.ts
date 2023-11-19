@@ -1,6 +1,9 @@
 import { Request } from "@simonbackx/simple-networking";
 import { AppManager } from "@stamhoofd/networking";
+import { Formatter } from "@stamhoofd/utility";
 import Vue from "vue";
+
+import { CopyableDirective, TooltipDirective } from "..";
 
 declare module "vue/types/vue" {
     interface Vue {
@@ -105,6 +108,15 @@ export class VueGlobalHelper {
         }
 
         Vue.mixin({
+            directives: {
+                tooltip: TooltipDirective,
+                copyable: CopyableDirective
+            },
+            filters: {
+                price: Formatter.price.bind(Formatter),
+                date: Formatter.date.bind(Formatter),
+                dateTime: Formatter.dateTime.bind(Formatter)
+            },
             beforeDestroy() {
                 // Clear all pending requests
                 Request.cancelAll(this)

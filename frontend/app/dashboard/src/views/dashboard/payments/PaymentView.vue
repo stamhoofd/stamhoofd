@@ -257,8 +257,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CopyableDirective, ErrorBox, GlobalEventBus, Spinner, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { calculateVATPercentage, PermissionLevel } from "@stamhoofd/structures";
-import { ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
+import { calculateVATPercentage, ParentTypeHelper, Payment, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -315,7 +314,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
             return false
         }
 
-        if (user.permissions.canManagePayments(organization.privateMeta?.roles ?? []) || user.permissions.hasFullAccess()) {
+        if (user.permissions.canManagePayments(organization.privateMeta?.roles ?? []) || user.permissions.hasFullAccess(organization.privateMeta?.roles ?? [])) {
             return true;
         }
 
@@ -325,7 +324,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
 
         for (const order of this.payment.orders) {
             const webshop = organization?.webshops.find(w => w.id === order.webshopId)
-            if (webshop && webshop.privateMeta.permissions.hasAccess(user.permissions, PermissionLevel.Write)) {
+            if (webshop && webshop.privateMeta.permissions.hasWriteAccess(user.permissions, organization.privateMeta?.roles ?? [])) {
                 return true
             }
         }
@@ -333,7 +332,7 @@ export default class PaymentView extends Mixins(NavigationMixin) {
         for (const registration of this.payment.registrations) {
             const group = organization?.groups.find(w => w.id === registration.groupId)
 
-            if (group && group.privateSettings?.permissions.hasAccess(user.permissions, PermissionLevel.Write)) {
+            if (group && group.privateSettings?.permissions.hasWriteAccess(user.permissions, organization.privateMeta?.roles ?? [])) {
                 return true
             }
         }

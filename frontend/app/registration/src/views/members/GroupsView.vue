@@ -3,7 +3,7 @@
         <STNavigationBar title="Alles" :pop="canPop" :dismiss="canDismiss" />
 
         <main>
-            <h1>Alles</h1>
+            <h1>Overzicht</h1>
 
             <div v-for="category of categories" :key="category.id" class="container">
                 <hr>
@@ -44,7 +44,7 @@ export default class GroupsView extends Mixins(NavigationMixin){
     MemberManager = MemberManager
 
     @Prop({ required: false })
-    member!: MemberWithRegistrations
+        member!: MemberWithRegistrations
 
     get organization() {
         return OrganizationManager.organization

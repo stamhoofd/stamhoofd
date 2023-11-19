@@ -5,7 +5,7 @@
             <figure v-if="imageSrc" class="registration-image">
                 <img :src="imageSrc">
                 <div>
-                    <span v-if="waitingList" class="icon gray clock" />
+                    <span v-if="waitingList" class="icon gray clock small" />
                 </div>
             </figure>
             <figure v-else class="registration-image">
@@ -13,7 +13,7 @@
                     <span>{{ group.settings.getShortCode(2) }}</span>
                 </figure>
                 <div>
-                    <span v-if="waitingList" class="icon gray clock" />
+                    <span v-if="waitingList" class="icon gray clock small" />
                 </div>
             </figure>
         </template>
@@ -59,13 +59,13 @@ import GroupView from "../views/groups/GroupView.vue";
 })
 export default class MemberBox extends Mixins(NavigationMixin){
     @Prop({ required: true })
-    group: Group
+        group: Group
 
     @Prop({ required: true })
-    member: MemberWithRegistrations
+        member: MemberWithRegistrations
 
     @Prop({ default: "member" })
-    type: "group" | "member"
+        type: "group" | "member"
 
     CheckoutManager = CheckoutManager
     Cart = CheckoutManager.cart

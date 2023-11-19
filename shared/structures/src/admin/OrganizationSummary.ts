@@ -132,7 +132,7 @@ export class OrganizationOverview extends AutoEncoder {
     features: string[] = []
 
     get fullAccessAdmins() {
-        return this.admins.filter(a => a.permissions && a.permissions.hasFullAccess())
+        return this.admins.filter(a => a.permissions && a.permissions.hasFullAccess([]))
     }
 
     matchQuery(q: string) {

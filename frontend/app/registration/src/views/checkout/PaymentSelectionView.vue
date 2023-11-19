@@ -4,7 +4,7 @@
         <main v-if="needsPay">
             <h1>Kies een betaalmethode</h1>
             <p>
-                Te betalen: 
+                <span>Te betalen: </span>
                 <span class="style-tag">{{ cart.price | price }}</span>
             </p>
 
@@ -23,7 +23,7 @@
             <span slot="left">Totaal: {{ cart.price | price }}</span>
             <LoadingButton slot="right" :loading="loading">
                 <button class="button primary" type="button" @click="goNext">
-                    <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Inschrijving bevestigen</span>
+                    <span v-if="needsPay && (selectedPaymentMethod == 'Transfer' || selectedPaymentMethod == 'PointOfSale')">Bevestigen</span>
                     <span v-else-if="needsPay">Betalen</span>
                     <span v-else>Bevestigen</span>
                     <span class="icon arrow-right" />

@@ -3,12 +3,16 @@
         <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1 class="style-navigation-title with-icons">
+            <h1 class="style-navigation-title with-icons button" @click="openCategorySelector">
                 <span>{{ title }}</span>
                 
-                <span v-if="isArchive" key="archive" class="icon archive" />
-                <span v-else-if="isOpen" key="open" v-tooltip="'Inschrijven is mogelijk via het ledenportaal'" class="icon dot green" />
-                <span v-else key="closed" v-tooltip="'Inschrijvingen zijn gesloten'" class="icon dot red" />
+                <span v-if="!isPublic" v-tooltip="'Deze groep staat in een categorie die enkel zichtbaar is voor beheerders'" class="icon lock small" />
+                <template v-else>
+                    <span v-if="isArchive" key="archive" class="icon archive" />
+                    <span v-else-if="isOpen" key="open" v-tooltip="'Inschrijven is mogelijk via het ledenportaal'" class="icon dot green" />
+                    <span v-else key="closed" v-tooltip="'Inschrijvingen zijn gesloten'" class="icon dot red" />
+                </template>
+                <span v-if="parentCategories.length" class="button icon arrow-swap" />
             </h1>
 
             <BillingWarningBox filter-types="members" class="data-table-prefix" />
@@ -17,7 +21,7 @@
                 <STListItem :selectable="true" class="left-center" @click="openMembers(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
                     <h2 v-if="group.cycle > 0" class="style-title-list">
-                        Huidige leden
+                        Inschrijvingen
                     </h2>
                     <h2 v-else class="style-title-list">
                         Inschrijvingen
@@ -29,6 +33,18 @@
                         Bekijk, beheer, exporteer, e-mail of SMS leden.
                     </p>
                     <span v-if="group.getMemberCount() !== null" slot="right" class="style-description-small">{{ group.getMemberCount() }}</span>
+                    <span slot="right" class="icon arrow-right-small gray" />
+                </STListItem>
+
+                <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingListWithoutMax" :selectable="true" class="left-center" @click="openWaitingList(true)">
+                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/clock.svg">
+                    <h2 class="style-title-list">
+                        Wachtlijst
+                    </h2>
+                    <p class="style-description">
+                        Bekijk leden op de wachtlijst.
+                    </p>
+                    <span v-if="group.settings.waitingListSize !== null" slot="right" class="style-description-small">{{ group.settings.waitingListSize }}</span>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
@@ -48,22 +64,10 @@
                     <span v-if="group.getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ group.getMemberCount({cycleOffset: offset}) }}</span>
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
-
-                <STListItem v-if="(group.settings.waitingListSize && group.settings.waitingListSize > 0) || group.settings.canHaveWaitingList" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                    <img slot="left" src="~@stamhoofd/assets/images/illustrations/clock.svg">
-                    <h2 class="style-title-list">
-                        Wachtlijst
-                    </h2>
-                    <p class="style-description">
-                        Bekijk leden op de wachtlijst.
-                    </p>
-                    <span v-if="group.settings.waitingListSize !== null" slot="right" class="style-description-small">{{ group.settings.waitingListSize }}</span>
-                    <span slot="right" class="icon arrow-right-small gray" />
-                </STListItem>
             </STList>
 
             <button v-if="hasMoreCycleOffsets && !showAllCycleOffsets" type="button" class="button text" @click="doShowAllCycleOffsets">
-                <span>Toon meer</span>
+                <span>Toon vorige periodes</span>
             </button>
 
             <template v-if="hasFullPermissions">
@@ -268,12 +272,13 @@ import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, CenteredMessage, ContextMenu, ContextMenuItem, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
-import { getPermissionLevelNumber, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData, PermissionLevel } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, Organization, OrganizationMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
+import CategoryView from './CategoryView.vue';
 import EditGroupEmailsView from './edit/EditGroupEmailsView.vue';
 import EditGroupGeneralView from './edit/EditGroupGeneralView.vue';
 import EditGroupPageView from './edit/EditGroupPageView.vue';
@@ -310,12 +315,16 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         return OrganizationManager.user.email.endsWith("@stamhoofd.be") || OrganizationManager.user.email.endsWith("@stamhoofd.nl")
     }
 
+    get isPublic() {
+        return this.group.isPublic(this.organization.availableCategories)
+    }
+
     get hasMembers() {
         return !!this.group.settings.registeredMembers
     }
     
     get hasMoreCycleOffsets() {
-        return this.cycleOffsets.length > 1
+        return this.cycleOffsets.length > 0
     }
 
     get cycleOffsets() {
@@ -330,7 +339,7 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         if (this.showAllCycleOffsets) {
             return this.cycleOffsets
         }
-        return this.cycleOffsets.slice(0, 1)
+        return []
     }
 
     get organization() {
@@ -350,27 +359,11 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
     }
 
     get hasFullPermissions() {
-        if (!OrganizationManager.user.permissions) {
-            return false
-        }
-        
-        if (!this.group.privateSettings || getPermissionLevelNumber(this.group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Full)) {
-            return false
-        }
-        
-        return true
+        return this.group.hasFullAccess(OrganizationManager.user.permissions, this.organization)
     }
 
     get hasWritePermissions() {
-        if (!OrganizationManager.user.permissions) {
-            return false
-        }
-
-        if (!this.group.privateSettings || getPermissionLevelNumber(this.group.privateSettings.permissions.getPermissionLevel(OrganizationManager.user.permissions)) < getPermissionLevelNumber(PermissionLevel.Write)) {
-            return false
-        }
-        
-        return true
+        return this.group.hasWriteAccess(OrganizationManager.user.permissions, this.organization)
     }
    
     openMembers(animated = true, cycleOffset = 0) {
@@ -475,6 +468,52 @@ export default class GroupOverview extends Mixins(NavigationMixin) {
         if (parts.length == 3 && parts[0] == 'groups' && parts[2] == 'waiting-list') {
             this.openWaitingList(false)
         }
+    }
+
+    get parentCategories() {
+        return [
+            ...(this.organization.meta.rootCategory ? [this.organization.meta.rootCategory] : []),
+            ...this.group.getParentCategories(this.organization.availableCategories),
+        ]
+    }
+
+    openCategorySelector(event) {
+        const actions: ContextMenuItem[] = [];
+
+        for (const parent of this.parentCategories) {
+            actions.unshift(new ContextMenuItem({
+                name: parent.id === this.organization.meta.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
+                icon: 'category',
+                action: () => {
+                    this.swapCategory(parent)
+                    return true;
+                }
+            }));
+        }
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: this.title,
+                    icon: 'group',
+                    disabled: true,
+                    action: () => {
+                        return true;
+                    }
+                }),
+                ...actions
+            ]
+        ])
+        menu.show({ clickEvent: event, xPlacement: "right", yPlacement: "bottom" }).catch(console.error)
+    }
+
+    swapCategory(category: GroupCategory) {
+        this.show({
+            components: [new ComponentWithProperties(CategoryView, {
+                category
+            })],
+            replace: this.navigationController?.components?.length ?? 1,
+            animated: false
+        })
     }
 
     beforeDestroy() {

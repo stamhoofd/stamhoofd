@@ -3,7 +3,7 @@
         <LoadingButton :loading="uploading">
             <slot>
                 <div class="button text only-icon-smartphone">
-                    <span class="icon camera-line" />
+                    <span class="icon camera" />
                     <span>{{ text || "Uploaden" }}</span>
                 </div>
             </slot>

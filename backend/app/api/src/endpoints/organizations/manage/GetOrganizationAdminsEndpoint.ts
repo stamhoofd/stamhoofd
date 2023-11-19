@@ -25,7 +25,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang tot dit onderdeel"

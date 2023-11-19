@@ -12,7 +12,7 @@ import { Request } from "@simonbackx/simple-networking";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Column, TableAction, TableView, Toast } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from "@stamhoofd/networking";
-import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, getPermissionLevelNumber, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopOrdersQuery, WebshopTicketType,WebshopTimeSlot } from '@stamhoofd/structures';
+import { CheckoutMethod, CheckoutMethodType, ChoicesFilterChoice, ChoicesFilterDefinition, ChoicesFilterMode, DateFilterDefinition, Filter, FilterDefinition, NumberFilterDefinition, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopOrdersQuery, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -507,7 +507,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
         if (!p) {
             return false
         }
-        return getPermissionLevelNumber(this.preview.privateMeta.permissions.getPermissionLevel(p)) >= getPermissionLevelNumber(PermissionLevel.Write)
+        return this.preview.privateMeta.permissions.hasWriteAccess(p, OrganizationManager.organization.privateMeta?.roles ?? [])    
     }
 
     beforeDestroy() {
@@ -620,7 +620,10 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
             }
             
             // Do we still have some missing patches that are not yet synced with the server?
-            this.webshopManager.trySavePatches().catch(console.error)
+            this.webshopManager.trySavePatches().catch((e) => {
+                console.error(e)
+                Toast.fromError(e).show()
+            })
         }
 
         this.isLoadingOrders = false
@@ -637,10 +640,7 @@ export default class WebshopOrdersView extends Mixins(NavigationMixin) {
     }
 
     get hasFullPermissions() {
-        if (!OrganizationManager.user.permissions) {
-            return false
-        }
-        return this.preview.privateMeta.permissions.getPermissionLevel(OrganizationManager.user.permissions) === PermissionLevel.Full
+        return this.preview.privateMeta.permissions.hasFullAccess(OrganizationManager.user.permissions, this.organization.privateMeta?.roles ?? [])
     }
 
     reload() {

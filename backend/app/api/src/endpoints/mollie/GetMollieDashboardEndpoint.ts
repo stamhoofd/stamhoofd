@@ -27,7 +27,7 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je moet hoofdbeheerder zijn om mollie te kunnen connecteren"

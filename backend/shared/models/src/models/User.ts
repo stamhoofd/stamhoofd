@@ -113,6 +113,18 @@ export class User extends Model {
 
     static organization = new ManyToOneRelation(Organization, "organization");
 
+    hasReadAccess(this: UserWithOrganization): this is { permissions: Permissions } {
+        return this.permissions?.hasReadAccess(this.organization.privateMeta.roles) ?? false
+    }
+
+    hasWriteAccess(this: UserWithOrganization): this is { permissions: Permissions } {
+        return this.permissions?.hasWriteAccess(this.organization.privateMeta.roles) ?? false
+    }
+
+    hasFullAccess(this: UserWithOrganization): this is { permissions: Permissions } {
+        return this.permissions?.hasFullAccess(this.organization.privateMeta.roles) ?? false
+    }
+
     static async checkOldPassword(email: string, password: string, keyConstants: KeyConstants, publicAuthSignKey: string): Promise<boolean> {
         return await QueueHandler.schedule('check-old-password', async () => {
             return new Promise((resolve) => {
@@ -445,11 +457,12 @@ export class User extends Model {
         this.authEncryptionKeyConstants = null;
     }
 
-    async getOrganizatonStructure(organization: Organization): Promise<OrganizationStruct> {
+    async getOrganizationStructure(this: UserWithOrganization): Promise<OrganizationStruct> {
+        const organization = this.organization
         if (organization.id != this.organizationId) {
             throw new Error("Unexpected permission failure")
         }
-        return this.permissions ? await organization.getPrivateStructure(this.permissions) : await organization.getStructure()
+        return this.permissions ? await organization.getPrivateStructure(this) : await organization.getStructure()
     }
 
     getStructure() {

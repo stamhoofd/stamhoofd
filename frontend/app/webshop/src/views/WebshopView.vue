@@ -31,10 +31,6 @@
                     <div v-if="webshop.meta.description.html" class="description style-wysiwyg" v-html="webshop.meta.description.html" />
                     <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
-                    <p v-if="isTrial" class="error-box">
-                        Dit is een demo webshop
-                    </p>
-
                     <p v-if="showOpenAt" class="info-box">
                         Bestellen kan vanaf {{ webshop.meta.openAt | dateTime }}
                     </p>
@@ -50,7 +46,7 @@
                 </header>
 
                 <template v-if="!closed || showOpenAt">
-                    <FullPageProduct v-if="products.length === 1" :product="products[0]" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
+                    <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
                     <div v-else class="products">
                         <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :cart="cart" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
                         <ProductGrid v-if="categories.length == 0" :products="products" :webshop="webshop" :cart="cart" :save-handler="onAddItem" />
@@ -494,6 +490,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
     .webshop-layout {
         max-width: 800px;
         margin: 0 auto;
+        padding-bottom: 100px;
 
         .full-product-box {
             background: $color-background;
@@ -523,7 +520,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         }
 
         &.Default {
-            > .products {
+            > .products hr {
                 --st-horizontal-padding: 0px;
             }
         }
@@ -578,7 +575,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
         padding-bottom: 30px;
 
         h1 {
-            @extend .style-huge-title-1;
+            @extend .style-title-semihuge;
             padding-bottom: 10px;
         }
 

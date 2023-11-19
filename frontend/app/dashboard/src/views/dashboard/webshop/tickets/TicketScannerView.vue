@@ -106,10 +106,10 @@ function beep(duration, frequency, volume, type, callback) {
 })
 export default class TicketScannerView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    webshopManager!: WebshopManager
+        webshopManager!: WebshopManager
 
     @Prop({ required: true })
-    disabledProducts: Product[]
+        disabledProducts: Product[]
 
     checkingTicket = false
 
@@ -221,7 +221,10 @@ export default class TicketScannerView extends Mixins(NavigationMixin) {
             this.hadNetworkError = false
 
             // Do we still have some missing patches that are not yet synced with the server?
-            this.webshopManager.trySavePatches().catch(console.error)
+            this.webshopManager.trySavePatches().catch((e) => {
+                console.error(e)
+                Toast.fromError(e).show()
+            })
         } catch (e) {
             if (Request.isNetworkError(e)) {
                 this.hadNetworkError = true

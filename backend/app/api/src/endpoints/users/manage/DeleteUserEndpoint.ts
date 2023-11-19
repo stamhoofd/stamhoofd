@@ -24,7 +24,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if ((!user.permissions || !user.permissions.hasFullAccess()) || user.id == request.params.id) {
+        if ((!user.permissions || !user.hasFullAccess()) || user.id == request.params.id) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je hebt geen toegang om deze gebruiker te verwijderen"

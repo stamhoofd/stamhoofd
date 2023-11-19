@@ -9,7 +9,7 @@
         </p>
 
         <div v-if="selectGroup" slot="right">
-            <button class="button text" @click.stop.prevent="chooseGroupPermission(group, $event)">
+            <button class="button text" type="button" @click.stop.prevent="chooseGroupPermission(group, $event)">
                 <span>{{ getLevelText(getGroupPermission(group)) }}</span>
                 <span class="icon arrow-down-small" />
             </button>
@@ -36,16 +36,16 @@ import GroupPermissionContextMenu from './GroupPermissionContextMenu.vue';
 })
 export default class GroupPermissionRow extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    group: Group
+        group: Group
 
     @Prop({ required: true })
-    role: PermissionRoleDetailed
+        role: PermissionRoleDetailed
 
     @Prop({ required: true })
-    organization: Organization
+        organization: Organization
 
     @Prop({ default: false })
-    showRole!: boolean
+        showRole!: boolean
    
     addRolePatch(patch: AutoEncoderPatchType<PermissionRoleDetailed>) {
         const privateMeta = OrganizationPrivateMetaData.patch({})
@@ -178,8 +178,8 @@ export default class GroupPermissionRow extends Mixins(NavigationMixin) {
     getLevelText(level: "none" | "write" | "read" | "full"): string {
         switch(level) {
             case "none": return "Geen toegang";
-            case "write": return "Bekijken en bewerken";
-            case "read": return "Bekijken";
+            case "write": return "Bewerken";
+            case "read": return "Lezen";
             case "full": return "Volledige toegang";
         }
     }

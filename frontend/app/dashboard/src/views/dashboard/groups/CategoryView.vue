@@ -1,38 +1,54 @@
 <template>
-    <div class="st-view background">
+    <div class="st-view background category-view">
         <STNavigationBar :title="title" :dismiss="canDismiss" :pop="canPop">
             <template slot="right">
-                <button v-if="canEdit" class="button text" type="button" @click="editMe">
-                    <span class="icon settings" />
-                    <span>Instellingen</span>
-                </button>
+                <button v-if="canEdit" class="navigation button icon settings" type="button" @click="editMe" />
             </template>
         </STNavigationBar>
 
         <main>
-            <h1>
+            <h1 class="style-navigation-title with-icons" :class="{button: !!parentCategories.length}" @click="openCategorySelector">
                 {{ title }}
+                <span v-if="!isPublic" v-tooltip="'Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.'" class="icon lock small" />
+                <span v-if="parentCategories.length" class="button icon arrow-swap" />
             </h1>
 
             <p v-if="organization.isCategoryDeactivated(category)" class="error-box">
-                Deze categorie is niet zichtbaar voor leden omdat het activiteiten pakket niet is geactiveerd. Er kan dan maar één categorie in gebruik zijn. Via instellingen kunnen hoofdbeheerders pakketten activeren.
-            </p>
-
-            <p v-else-if="!category.settings.public" class="warning-box icon lock">
-                Deze categorie is enkel zichtbaar voor beheerders (leden die geen beheerder zijn kunnen zichtzelf niet inschrijven). Je kan dit aanpassen bij de instellingen van deze categorie.
+                Deze categorie is niet zichtbaar voor leden omdat jouw vereniging nog het oude gratis ledenadministratie pakket gebruikt. Er kan dan maar één categorie in gebruik zijn. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.
             </p>
           
             <STErrorsDefault :error-box="errorBox" />
 
             <template v-if="categories.length > 0">
                 <STList>
+                    <STListItem v-if="categories.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
+                        <span slot="left" class="icon group" />
+
+                        <h2 class="style-title-list bolder">
+                            Alle leden
+                        </h2>
+                        <p class="style-description-small">
+                            Bekijk alle leden samen
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem v-if="categories.length > 1 && hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
+                        <span slot="left" class="icon clock" />
+
+                        <h2 class="style-title-list bolder">
+                            Gemeenschappelijke wachtlijsten
+                        </h2>
+                        <p class="style-description-small">
+                            Bekijk alle wachtlijsten samen
+                        </p>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
                     <STListItem v-for="category in categories" :key="category.id" :selectable="true" @click="openCategory(category)">
                         <template slot="left">
                             <span v-if="category.categories.length" class="icon category" />
-                            <span v-else class="icon layered">
-                                <span class="icon group-layer-1" />
-                                <span class="icon group-layer-2 gray" />
-                            </span>
+                            <span v-else class="icon category" />
                         </template>
 
                         {{ category.settings.name }}
@@ -46,12 +62,32 @@
 
             <template v-else-if="groups.length > 0">
                 <STList>
+                    <STListItem v-if="groups.length > 1" :selectable="true" class="left-center" @click="openAll(true)">
+                        <span slot="left" class="icon group" />
+
+                        <h2 class="style-title-list bolder">
+                            Alle leden
+                        </h2>
+                        <span v-if="getMemberCount() !== null" slot="right" class="style-description-small">{{ getMemberCount() }}</span>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+
+                    <STListItem v-if="hasMultipleWaitingLists" :selectable="true" class="left-center" @click="openWaitingList(true)">
+                        <span slot="left" class="icon clock" />
+
+                        <h2 class="style-title-list bolder">
+                            Gemeenschappelijke wachtlijsten
+                        </h2>
+                        <span v-if="getMemberCount({waitingList: true}) !== null" slot="right" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
+                        <span slot="right" class="icon arrow-right-small gray" />
+                    </STListItem>
+                    
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
                         <GroupAvatar slot="left" :group="group" />
                         <h3 class="style-title-list">
                             {{ group.settings.name }}
                         </h3>
-                        <p class="style-description-small">
+                        <p v-if="false" class="style-description-small">
                             {{ group.settings.dateRangeDescription }}
                         </p>
 
@@ -62,31 +98,17 @@
                     </STListItem>
                 </STList>
 
-                <p v-if="canCreate">
+                <p v-if="canCreate" class="style-button-bar">
                     <button class="button text" type="button" @click="createGroup">
                         <span class="icon add" />
-                        <span>Nieuwe groep toevoegen</span>
+                        <span>Inschrijvingsgroep</span>
                     </button>
                 </p>
 
-                <template v-if="groups.length > 1">
+                <template v-if="groups.length > 1 && cycleOffsets.length > 0">
                     <hr>
-                    <h2>Alle leden</h2>
-
+                    <h2>Vorige periodes</h2>
                     <STList class="illustration-list">
-                        <STListItem :selectable="true" class="left-center" @click="openAll(true)">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
-
-                            <h2 class="style-title-list">
-                                Inschrijvingen ({{ category.settings.name }})
-                            </h2>
-                            <p class="style-description">
-                                Bekijk, beheer, exporteer, e-mail of SMS alle leden samen.
-                            </p>
-                            <span v-if="getMemberCount() !== null" slot="right" class="style-description-small">{{ getMemberCount() }}</span>
-                            <span slot="right" class="icon arrow-right-small gray" />
-                        </STListItem>
-
                         <STListItem v-for="offset in cycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openAll(true, offset)">
                             <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
                             <h2 v-if="offset === 1" class="style-title-list">
@@ -103,18 +125,6 @@
                             <span v-if="getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span>
                             <span slot="right" class="icon arrow-right-small gray" />
                         </STListItem>
-
-                        <STListItem v-if="(getMemberCount({waitingList: true}) !== 0) || canHaveWaitingList" :selectable="true" class="left-center" @click="openWaitingList(true)">
-                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/clock.svg">
-                            <h2 class="style-title-list">
-                                Wachtlijst
-                            </h2>
-                            <p class="style-description">
-                                Bekijk leden op de wachtlijst.
-                            </p>
-                            <span v-if="getMemberCount({waitingList: true}) !== null" slot="right" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
-                            <span slot="right" class="icon arrow-right-small gray" />
-                        </STListItem>
                     </STList>
                 </template>
             </template>
@@ -129,7 +139,7 @@
             <p v-if="categories.length == 0 && groups.length == 0 && canCreate">
                 <button class="button text" type="button" @click="createGroup">
                     <span class="icon add" />
-                    <span>Nieuwe groep toevoegen</span>
+                    <span>Nieuwe groep</span>
                 </button>
             </p>
         </main>
@@ -139,7 +149,7 @@
 <script lang="ts">
 import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, ErrorBox, GroupAvatar, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
+import { BackButton, ContextMenu, ContextMenuItem, ErrorBox, GroupAvatar, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { UrlHelper } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -174,6 +184,60 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     mounted() {
         UrlHelper.setUrl("/category/"+Formatter.slug(this.category.settings.name))    
         document.title = "Stamhoofd - "+ this.category.settings.name
+    }
+
+    get parentCategories() {
+        return [
+            ...(!this.isRoot && this.organization.meta.rootCategory ? [this.organization.meta.rootCategory] : []),
+            ...this.category.getParentCategories(this.organization.availableCategories),
+        ]
+    }
+
+    get isPublic() {
+        return this.tree.isPublic(this.organization.availableCategories)
+    }
+
+    openCategorySelector(event) {
+        if (this.parentCategories.length === 0) {
+            return
+        }
+
+        const actions: ContextMenuItem[] = [];
+
+        for (const parent of this.parentCategories) {
+            actions.unshift(new ContextMenuItem({
+                name: parent.id === this.organization.meta.rootCategoryId ? 'Alle inschrijvingsgroepen' : parent.settings.name,
+                icon: 'category',
+                action: () => {
+                    this.swapCategory(parent)
+                    return true;
+                }
+            }));
+        }
+        const menu = new ContextMenu([
+            [
+                new ContextMenuItem({
+                    name: this.title,
+                    icon: 'category',
+                    disabled: true,
+                    action: () => {
+                        return true;
+                    }
+                }),
+                ...actions
+            ]
+        ])
+        menu.show({ clickEvent: event, xPlacement: "right", yPlacement: "bottom" }).catch(console.error)
+    }
+
+    swapCategory(category: GroupCategory) {
+        this.show({
+            components: [new ComponentWithProperties(CategoryView, {
+                category
+            })],
+            replace: this.navigationController?.components?.length ?? 1,
+            animated: false
+        })
     }
 
     get cycleOffsets() {
@@ -213,36 +277,24 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     getMemberCount({cycleOffset, waitingList}: {cycleOffset?: number, waitingList?: boolean} = {}) {
-        if (this.groups.length == 0) {
-            return null
-        }
-
-        let count = 0
-        for (const group of this.groups) {
-            const c = group.getMemberCount({cycleOffset, waitingList});
-            if (c === null) {
-                if (cycleOffset && group.cycle < cycleOffset) {
-                    // This group did not have active registrations at the time
-                    continue
-                }
-                return null
-            }
-            count += c
-        }
-        return count
+        return this.tree.getMemberCount({cycleOffset, waitingList})
     }
 
-    get canHaveWaitingList() {
-        for (const group of this.groups) {
-            if (group.settings.canHaveWaitingList) {
-                return true
+    get hasMultipleWaitingLists() {
+        let c = 0;
+        for (const group of this.tree.getAllGroups()) {
+            if (group.settings.canHaveWaitingListWithoutMax || group.getMemberCount({waitingList: true}) !== 0) {
+                c += 1;
+                if (c > 1) {
+                    return true
+                }
             }
         }
         return false
     }
 
     get tree() {
-        return GroupCategoryTree.build(this.reactiveCategory, this.organization.meta.categories, this.organization.groups, OrganizationManager.user.permissions)
+        return GroupCategoryTree.build(this.reactiveCategory, this.organization, {permissions: OrganizationManager.user.permissions})
     }
 
     get organization() {
@@ -254,7 +306,7 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get title() {
-        return this.isRoot ? 'Inschrijvingsgroepen' : this.name+''
+        return this.isRoot ? 'Alle inschrijvingsgroepen' : this.name+''
     }
 
     get name() {
@@ -262,11 +314,11 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     }
 
     get canEdit() {
-        return OrganizationManager.user.permissions ? this.category.canEdit(OrganizationManager.user.permissions) : false
+        return OrganizationManager.user.permissions ? this.category.canEdit(OrganizationManager.user.permissions, this.organization.privateMeta?.roles ?? []) : false
     }
 
     get canCreate() {
-        return OrganizationManager.user.permissions ? this.category.canCreate(OrganizationManager.user.permissions, this.organization.meta.categories) : false
+        return OrganizationManager.user.permissions ? this.category.canCreate(OrganizationManager.user.permissions, this.organization.meta.categories, this.organization.privateMeta?.roles ?? []) : false
     }
 
     get groups() {
@@ -361,3 +413,9 @@ export default class CategoryView extends Mixins(NavigationMixin) {
     
 }
 </script>
+
+<style lang="scss">
+    .category-view {
+        --block-width: 24px;
+    }
+</style>

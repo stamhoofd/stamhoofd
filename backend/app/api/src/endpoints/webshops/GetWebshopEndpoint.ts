@@ -39,7 +39,15 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         
         errors.throwIfNotEmpty()
 
-        if (token && token.user.permissions && token.user.organizationId == webshop.organizationId && webshop.privateMeta.permissions.getPermissionLevel(token.user.permissions) !== PermissionLevel.None) {
+        if (
+            token 
+            && token.user.permissions 
+            && token.user.organizationId == webshop.organizationId 
+            && (
+                webshop.privateMeta.permissions.userHasAccess(token.user, PermissionLevel.Read)
+                || webshop.privateMeta.scanPermissions.userHasAccess(token.user, PermissionLevel.Read)
+            )
+        ) {
             return new Response(PrivateWebshop.create(webshop));
         }
         return new Response(WebshopStruct.create(webshop));

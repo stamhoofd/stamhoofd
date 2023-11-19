@@ -29,7 +29,7 @@ export class DisonnectMollieEndpoint extends Endpoint<Params, Query, Body, Respo
         const token = await Token.authenticate(request);
         const user = token.user
 
-        if (!user.permissions || !user.permissions.hasFullAccess()) {
+        if (!user.hasFullAccess()) {
             throw new SimpleError({
                 code: "permission_denied",
                 message: "Je moet hoofdbeheerder zijn om mollie te kunnen ontkoppelen"
@@ -45,6 +45,6 @@ export class DisonnectMollieEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // TODO: disable all payment methods that use this method
         
-        return new Response(await user.getOrganizatonStructure(user.organization));
+        return new Response(await user.getOrganizationStructure());
     }
 }

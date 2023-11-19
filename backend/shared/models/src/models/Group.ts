@@ -1,8 +1,8 @@
 import { column, Database, Model, OneToManyRelation } from '@simonbackx/simple-database';
-import { CycleInformation, Group as GroupStruct, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationMetaData, Permissions } from '@stamhoofd/structures';
+import { CycleInformation, Group as GroupStruct, GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationMetaData, PermissionLevel, Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from "uuid";
 
-import { Member, MemberWithRegistrations, Payment, Registration, User } from './';
+import { Member, MemberWithRegistrations, Payment, Registration, User, UserWithOrganization } from './';
 
 if (Member === undefined) {
     throw new Error("Import Member is undefined")
@@ -87,6 +87,47 @@ export class Group extends Model {
     }
 
     /**
+     * Returns all parent and grandparents of this group
+     */
+    getParentCategories(all: GroupCategory[], recursive = true): GroupCategory[] {
+        const map = new Map<string, GroupCategory>()
+        
+        const parents = all.filter(g => g.groupIds.includes(this.id))
+        for (const parent of parents) {
+            map.set(parent.id, parent)
+
+            if (recursive) {
+                const hisParents = parent.getParentCategories(all)
+                for (const pp of hisParents) {
+                    map.set(pp.id, pp)
+                }
+            }
+        }
+
+        return [...map.values()]
+    }
+
+    hasAccess(user: UserWithOrganization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (!user.permissions || user.organizationId != this.organizationId) {
+            return false
+        }
+
+        if (this.privateSettings.permissions.userHasAccess(user, permissionLevel)) {
+            return true;
+        }
+
+        // Check parent categories
+        const parentCategories = this.getParentCategories(user.organization.meta.categories)
+        for (const category of parentCategories) {
+            if (category.settings.permissions.groupPermissions.userHasAccess(user, permissionLevel)) {
+                return true
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Fetch all members with their corresponding (valid) registrations, users
      */
     async getMembersWithRegistration(waitingList = false, cycleOffset = 0): Promise<MemberWithRegistrations[]> {
@@ -150,9 +191,9 @@ export class Group extends Model {
         return GroupStruct.create(Object.assign({}, this, { privateSettings: null }))
     }
 
-    getPrivateStructure(permissions?: Permissions) {
+    getPrivateStructure(user?: UserWithOrganization) {
         const struct = GroupStruct.create(this)
-        if (permissions && !struct.canViewMembers(permissions)) {
+        if (user && !this.hasAccess(user)) {
             struct.privateSettings = null
         }
         return struct

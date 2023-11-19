@@ -2,7 +2,7 @@ import { column, Database, ManyToManyRelation, ManyToOneRelation, Model, OneToMa
 import { EncryptedMemberWithRegistrations, Member as MemberStruct, MemberDetails, RegistrationWithMember as RegistrationWithMemberStruct, User as UserStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from "uuid";
-import { Payment, Registration, User } from './';
+import { Payment, Registration, User, UserWithOrganization } from './';
 export type MemberWithUsers = Member & { users: User[] }
 export type MemberWithRegistrations = MemberWithUsers & { registrations: Registration[] }
 
@@ -356,11 +356,11 @@ export class Member extends Model {
         })
     }
 
-    hasReadAccess(this: MemberWithRegistrations, user: User, groups: import('./Group').Group[], needAll = false) {
+    hasReadAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false) {
         if (!user.permissions) {
             return false
         }
-        if (user.permissions.hasReadAccess()) {
+        if (user.permissions.hasReadAccess(user.organization.privateMeta.roles)) {
             return true;
         }
 
@@ -382,12 +382,12 @@ export class Member extends Model {
         return false;
     }
 
-    async hasWriteAccess(this: MemberWithRegistrations, user: User, groups: import('./Group').Group[], needAll = false, checkFamily = false) {
+    async hasWriteAccess(this: MemberWithRegistrations, user: UserWithOrganization, groups: import('./Group').Group[], needAll = false, checkFamily = false) {
         if (!user.permissions) {
             return false
         }
 
-        if (user.permissions.hasWriteAccess()) {
+        if (user.permissions.hasWriteAccess(user.organization.privateMeta.roles)) {
             return true;
         }
 
