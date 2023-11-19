@@ -18,7 +18,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             return [true, params as Params];
         }
 
-        const params2 = Endpoint.parseParameters(request.url, "/api-users/@id", { id: String });
+        const params2 = Endpoint.parseParameters(request.url, "/api-keys/@id", { id: String });
 
         if (params2) {
             return [true, params2 as Params];

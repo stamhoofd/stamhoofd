@@ -108,7 +108,7 @@ export default class ApiUsersView extends Mixins(NavigationMixin) {
         try {
             const response = await SessionManager.currentSession!.authenticatedServer.request({
                 method: "GET",
-                path: "/api-users",
+                path: "/api-keys",
                 decoder: new ArrayDecoder(ApiUser as Decoder<ApiUser>),
                 owner: this
             })
