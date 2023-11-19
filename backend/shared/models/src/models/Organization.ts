@@ -359,24 +359,30 @@ export class Organization extends Model {
             }
         }
         
-       const { allValid, hasAllNonTXT } = await validateDNSRecords(organization.privateMeta.dnsRecords)
+       const { allValid } = await validateDNSRecords(organization.privateMeta.dnsRecords)
 
-        if (hasAllNonTXT) {
-            // We can setup the register domain if needed
-            if (organization.privateMeta.pendingRegisterDomain !== null) {
-                organization.registerDomain = organization.privateMeta.pendingRegisterDomain
-                organization.privateMeta.pendingRegisterDomain = null;
+       if (organization.registerDomain ?? organization.privateMeta.pendingRegisterDomain) {
+            const registerDomainRecord = (organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain)+"."
+            const records = organization.privateMeta.dnsRecords.filter(r => r.name === registerDomainRecord)
+            const areRegisterDomainRecordsValid = records.length === 0 || records.every(r => r.status === DNSRecordStatus.Valid)
 
-                console.log("Did set register domain for "+this.id+" to "+organization.registerDomain)
-            }
-        } else {
-            // Clear register domain
-            if (organization.registerDomain) {
-                // We need to clear it, to prevent sending e-mails with invalid links
-                organization.privateMeta.pendingRegisterDomain = organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain
-                organization.registerDomain = null
+            if (areRegisterDomainRecordsValid) {
+                // We can setup the register domain if needed
+                if (organization.privateMeta.pendingRegisterDomain !== null) {
+                    organization.registerDomain = organization.privateMeta.pendingRegisterDomain
+                    organization.privateMeta.pendingRegisterDomain = null;
 
-                console.log("Cleared register domain for "+this.id+" because of invalid non txt records")
+                    console.log("Did set register domain for "+this.id+" to "+organization.registerDomain)
+                }
+            } else {
+                // Clear register domain
+                if (organization.registerDomain) {
+                    // We need to clear it, to prevent sending e-mails with invalid links
+                    organization.privateMeta.pendingRegisterDomain = organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain
+                    organization.registerDomain = null
+
+                    console.log("Cleared register domain for "+this.id+" because of invalid non txt records")
+                }
             }
         }
 
