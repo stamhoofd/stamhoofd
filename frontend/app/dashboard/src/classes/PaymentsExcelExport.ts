@@ -217,7 +217,7 @@ export class PaymentsExcelExport {
                     continue;
                 }
 
-                if (balanceItem.registration) {
+                if (balanceItem.member) {
                     const memberName = balanceItem.member?.name ?? 'Onbekend lid'
 
                     // Add item
