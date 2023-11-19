@@ -341,7 +341,7 @@ export class MemberDetails extends AutoEncoder {
      */
     updateParent(parent: Parent) {
         for (const [index, _parent] of this.parents.entries()) {
-            if (_parent.id == parent.id) {
+            if (_parent.id == parent.id || _parent.isEqual(parent)) {
                 this.parents[index] = parent
             }
         }

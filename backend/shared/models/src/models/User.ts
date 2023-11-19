@@ -130,6 +130,52 @@ export class User extends Model {
         return null;
     }
 
+    async merge(other: User) {
+        if (other.hasAccount()) {
+            // We are going to merge accounts!
+            if (this.permissions && other.permissions) {
+                this.permissions.add(other.permissions);
+            } else {
+                if (!this.permissions && other.permissions) {
+                    this.permissions = other.permissions;
+                }
+            }
+            await this.save();
+
+            if (other.firstName && !this.firstName) {
+                this.firstName = other.firstName;
+            }
+
+            if (other.lastName && !this.lastName) {
+                this.lastName = other.lastName;
+            }
+        }
+
+        const Member = (await import("./Member")).Member
+
+        // Delete placeholder account, but migrate members first
+        const members = await Member.getMembersWithRegistrationForUser(other)
+
+        if (members.length > 0) {
+            console.log("Moving members from user "+other.id+" to "+this.id)
+            await Member.users.reverse("members").link(this, members)
+        }
+
+        // Update balance items
+        const query = "UPDATE balance_items SET userId = ? WHERE userId = ?"
+        await Database.update(query, [this.id, other.id])
+
+        // Update payments
+        const query2 = "UPDATE payments SET userId = ? WHERE userId = ?"
+        await Database.update(query2, [this.id, other.id])
+
+        // Update orders
+        const query3 = "UPDATE webshop_orders SET userId = ? WHERE userId = ?"
+        await Database.update(query3, [this.id, other.id])
+
+        await other.delete()
+    }
+
     hasReadAccess(this: UserWithOrganization): this is { permissions: Permissions } {
         return this.permissions?.hasReadAccess(this.organization.privateMeta.roles) ?? false
     }
