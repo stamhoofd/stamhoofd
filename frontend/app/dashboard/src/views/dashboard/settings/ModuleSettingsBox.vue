@@ -162,15 +162,17 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         if (enable && !this.enableWebshopModule) {
             this.checkout(STPackageBundle.TrialWebshops, "Je kan nu webshops uittesten").then(async () => {
                 // Create new webshop view
-                this.present(
-                    (
-                        await LoadComponent(
-                            () => import(/* webpackChunkName: "EditWebshopGeneralView" */ '../webshop/edit/EditWebshopGeneralView.vue'),
-                            {},
-                            { instant: true }
-                        )
-                    ).setDisplayStyle("popup")
-                )
+                if (this.organization.webshops.length === 0) {
+                    this.present(
+                        (
+                            await LoadComponent(
+                                () => import(/* webpackChunkName: "EditWebshopGeneralView" */ '../webshop/edit/EditWebshopGeneralView.vue'),
+                                {},
+                                { instant: true }
+                            )
+                        ).setDisplayStyle("popup")
+                    )
+                }
             }).catch(console.error)
         } else {
             if (!enable && this.enableWebshopModule) {

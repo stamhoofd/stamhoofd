@@ -104,7 +104,8 @@
                         :class="{ selected: currentlySelected == 'webshop-'+webshop.id }"
                         @click="openWebshop(webshop)"
                     >
-                        <span class="icon basket" />
+                        <span v-if="webshop.meta.hasTickets" class="icon ticket" />
+                        <span v-else class="icon basket" />
                         <span>{{ webshop.meta.name }}</span>
 
                         <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon" />
