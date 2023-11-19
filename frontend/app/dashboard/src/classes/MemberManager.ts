@@ -531,9 +531,11 @@ export class MemberManagerStatic extends MemberManagerBase {
             const patchMember = EncryptedMemberWithRegistrations.patch({ id: member.id })
 
             for (const registration of member.filterRegistrations({groups, cycleOffset, waitingList: false})) {
+                const group = member.allGroups.find(g => g.id === registration.groupId)
                 patchMember.registrations.addPatch(Registration.patch({
                     id: registration.id,
-                    waitingList: true
+                    waitingList: true,
+                    cycle: group?.cycle ?? undefined
                 }))
 
                 sizeUpdater.add({
@@ -544,7 +546,7 @@ export class MemberManagerStatic extends MemberManagerBase {
                 sizeUpdater.add({
                     groupId: registration.groupId, 
                     waitingList: true,
-                    cycle: registration.cycle
+                    cycle: group?.cycle ?? registration.cycle
                 }, 1)
             }
             

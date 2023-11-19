@@ -34,15 +34,6 @@
 
             <template v-else-if="groups.length > 0">
                 <STList>
-                    <STListItem v-if="groups.length > 1" :selectable="true" @click="openAll()">
-                        <span slot="left" class="icon group" />
-                        Alle leden
-
-                        <template slot="right">
-                            <span v-if="totalCount !== null" class="style-description-small">{{ totalCount }}</span>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
                     <STListItem v-for="group in groups" :key="group.id" :selectable="true" @click="openGroup(group)">
                         <GroupAvatar slot="left" :group="group" />
                         <h3 class="style-title-list">
@@ -53,11 +44,67 @@
                         </p>
 
                         <template slot="right">
-                            <span v-if="group.settings.registeredMembers !== null" class="style-description-small">{{ group.settings.registeredMembers }}</span>
+                            <span v-if="group.getMemberCount() !== null" class="style-description-small">{{ group.getMemberCount() }}</span>
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
                 </STList>
+
+                <p v-if="canCreate">
+                    <button class="button text" type="button" @click="createGroup">
+                        <span class="icon add" />
+                        <span>Nieuwe groep toevoegen</span>
+                    </button>
+                </p>
+
+                <template v-if="groups.length > 1">
+                    <hr>
+                    <h2>Alle leden</h2>
+
+                    <STList class="illustration-list">
+                        <STListItem :selectable="true" class="left-center" @click="openAll(true)">
+                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg">
+
+                            <h2 class="style-title-list">
+                                Inschrijvingen ({{ category.settings.name }})
+                            </h2>
+                            <p class="style-description">
+                                Bekijk, beheer, exporteer, e-mail of SMS alle leden samen.
+                            </p>
+                            <span v-if="getMemberCount() !== null" slot="right" class="style-description-small">{{ getMemberCount() }}</span>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+
+                        <STListItem v-for="offset in cycleOffsets" :key="'offset-' + offset" :selectable="true" class="left-center" @click="openAll(true, offset)">
+                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/package-members.svg">
+                            <h2 v-if="offset === 1" class="style-title-list">
+                                Vorige inschrijvingsperiode
+                            </h2>
+                            <h2 v-else class="style-title-list">
+                                {{ offset }} inschrijvingsperiodes geleden
+                            </h2>
+
+                            <p class="style-description">
+                                {{ getTimeRangeOffset(offset) }}
+                            </p>
+
+                            <span v-if="getMemberCount({cycleOffset: offset}) !== null" slot="right" class="style-description-small">{{ getMemberCount({cycleOffset: offset}) }}</span>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+
+                        <STListItem v-if="(getMemberCount({waitingList: true}) !== 0) || canHaveWaitingList" :selectable="true" class="left-center" @click="openWaitingList(true)">
+                            <img slot="left" src="~@stamhoofd/assets/images/illustrations/clock.svg">
+                            <h2 class="style-title-list">
+                                Wachtlijst
+                            </h2>
+                            <p class="style-description">
+                                Bekijk leden op de wachtlijst.
+                            </p>
+                            <span v-if="getMemberCount({waitingList: true}) !== null" slot="right" class="style-description-small">{{ getMemberCount({waitingList: true}) }}</span>
+                            <span slot="right" class="icon arrow-right-small gray" />
+                        </STListItem>
+                    </STList>
+                </template>
             </template>
 
             <p v-if="categories.length == 0 && groups.length == 0 && canCreate" class="info-box">
@@ -67,7 +114,7 @@
                 Deze inschrijvingscategorie is leeg. Vraag een hoofdbeheerder om groepen aan te maken.
             </p>
 
-            <p v-if="categories.length == 0 && canCreate">
+            <p v-if="categories.length == 0 && groups.length == 0 && canCreate">
                 <button class="button text" type="button" @click="createGroup">
                     <span class="icon add" />
                     <span>Nieuwe groep toevoegen</span>
@@ -117,6 +164,34 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         document.title = "Stamhoofd - "+ this.category.settings.name
     }
 
+    get cycleOffsets() {
+        const l = Math.max(...this.groups.map(g => g.cycle));
+        const arr = new Array(l)
+        for (let i = 0; i < l; i++) {
+            arr[i] = i+1
+        }
+
+        // Remove last ones if no members in it
+        for (let i = l - 1; i >= 0; i--) {
+            if (this.getMemberCount({cycleOffset: i + 1}) === 0) {
+                arr.pop()
+            } else {
+                break
+            }
+        }
+        return arr;
+    }
+
+    getTimeRangeOffset(offset: number) {
+        for (const group of this.groups) {
+            const str = group.getTimeRangeOffset(offset)
+            if (str) {
+                return str
+            }
+        }
+        return null
+    }
+
     get reactiveCategory() {
         const c = this.organization.meta.categories.find(c => c.id === this.category.id)
         if (c) {
@@ -125,19 +200,33 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         return this.category
     }
 
-    get totalCount() {
+    getMemberCount({cycleOffset, waitingList}: {cycleOffset?: number, waitingList?: boolean} = {}) {
         if (this.groups.length == 0) {
             return null
         }
 
         let count = 0
         for (const group of this.groups) {
-            if (group.settings.registeredMembers === null) {
+            const c = group.getMemberCount({cycleOffset, waitingList});
+            if (c === null) {
+                if (cycleOffset && group.cycle < cycleOffset) {
+                    // This group did not have active registrations at the time
+                    continue
+                }
                 return null
             }
-            count += group.settings.registeredMembers
+            count += c
         }
         return count
+    }
+
+    get canHaveWaitingList() {
+        for (const group of this.groups) {
+            if (group.settings.canHaveWaitingList) {
+                return true
+            }
+        }
+        return false
     }
 
     get tree() {
@@ -188,10 +277,28 @@ export default class CategoryView extends Mixins(NavigationMixin) {
         }))
     }
 
-    openAll() {
-        this.show(new ComponentWithProperties(GroupMembersView, {
-            category: this.tree
-        }))
+    openAll(animated = true, cycleOffset?: number) {
+        this.show({
+            components: [
+                new ComponentWithProperties(GroupMembersView, {
+                    category: this.tree,
+                    initialCycleOffset: cycleOffset
+                })
+            ],
+            animated
+        })
+    }
+
+    openWaitingList(animated = true) {
+        this.show({
+            components: [
+                new ComponentWithProperties(GroupMembersView, {
+                    category: this.tree,
+                    waitingList: true
+                })
+            ],
+            animated
+        })
     }
 
     createGroup() {
